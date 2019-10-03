@@ -1,0 +1,2 @@
+include pygame_gui/data/*.txt
+include pygame_gui/data/*.ttf
