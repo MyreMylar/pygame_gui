@@ -16,10 +16,11 @@ class UIManager:
     Before doing anything else with pygame_gui create a UIManager and remember to update it every frame.
     """
 
-    def __init__(self, theme_path: str, window_resolution: Tuple[int, int]):
+    def __init__(self, window_resolution: Tuple[int, int], theme_path: str = None):
         self.window_resolution = window_resolution
         self.ui_theme = UIAppearanceTheme()
-        self.ui_theme.load_theme(os.path.abspath(theme_path))
+        if theme_path is not None:
+            self.ui_theme.load_theme(os.path.abspath(theme_path))
         self.ui_group = pygame.sprite.LayeredUpdates()
 
         self.select_focused_element = None
