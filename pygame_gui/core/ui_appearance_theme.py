@@ -155,10 +155,11 @@ class UIAppearanceTheme:
     def get_image(self, object_id, element_ids, image_id):
         """
         Will return None if no image is specified. There are UI elements that have an optional image display.
+
         :param image_id: The id used in the element's code to identify the particular image location we are looking
-                         for an image for.
+        for an image for.
         :param object_id: An ID for the particular instance of this element being created.
-        :param element_id: An list of IDs for all elements of this particular type in the theme.
+        :param element_ids: An list of IDs for all elements of this particular type in the theme.
         :return None or pygame.Surface:
         """
 

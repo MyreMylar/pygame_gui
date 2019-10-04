@@ -38,7 +38,7 @@ Quick Links
 .. toctree::
    :maxdepth: 2
 
-   code
+   modules
 
 
 Indices and tables

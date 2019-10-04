@@ -425,19 +425,19 @@ class UITextBox(UIElement):
         self.link_hover_chunks = []  # container for any link chunks we have
         self.clicked_link_targets = []
 
-        ''' The text_wrap_area is the part of the text box that we try to keep the text inside of so that none
-         of it overlaps. Essentially we start with the containing box, subtract the border,
-          then subtract the padding, then if necessary subtract the width of the scroll bar'''
         text_wrap_rect = [self.rect[0] + self.padding[0] + self.border_width,
                           self.rect[1] + self.padding[1] + self.border_width,
                           self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2),
                           self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2)]
+        ''' The text_wrap_area is the part of the text box that we try to keep the text inside of so that none 
+        of it overlaps. Essentially we start with the containing box, subtract the border,  then subtract the 
+        padding, then if necessary subtract the width of the scroll bar'''
 
         self.text_wrap_rect = text_wrap_rect
         if self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
 
-        self.parse_html_into_style_data()  # This gives us the height of the text at the current 'width' of the text_wrap_area
+        self.parse_html_into_style_data()  # This gives us the height of the text at the 'width' of the text_wrap_area
         if self.formatted_text_block is not None:
             if self.wrap_to_height or self.rect[3] == -1:
                 final_text_area_size = self.formatted_text_block.final_dimensions
