@@ -7,6 +7,20 @@ from ..core.ui_font_dictionary import UIFontDictionary
 
 class UIAppearanceTheme:
     def __init__(self):
+        """
+        The Appearance Theme class handles all the data that styles and generally dictates the appearance of UI elements
+        across the whole UI.
+
+        The styling is split into four general areas:
+
+        - colours - spelled in the British English fashion with a 'u'.
+        - font - specifying a font to use for a UIElement where that is a relevant consideration.
+        - images - describing any images to be used in a UIElement.
+        - misc - covering all other types of data and stored as strings.
+
+        To change the theming for the UI you normally specify a theme file when creating the UIManager. For more
+        information on theme files see the specific documentation elsewhere.
+        """
 
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element
@@ -72,7 +86,6 @@ class UIAppearanceTheme:
         """
         Loads all fonts specified in our loaded theme.
 
-        :return:
         """
         self.font_dictionary.add_font_path(self.base_font_info['name'],
                                            self.base_font_info['regular_path'],
@@ -133,7 +146,6 @@ class UIAppearanceTheme:
         """
         Loads all images in our loaded theme.
 
-        :return:
         """
         for element_key in self.ui_element_image_paths.keys():
             image_paths_dict = self.ui_element_image_paths[element_key]
@@ -159,7 +171,7 @@ class UIAppearanceTheme:
         :param image_id: The id used in the element's code to identify the particular image location we are looking
         for an image for.
         :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: An list of IDs for all elements of this particular type in the theme.
+        :param element_ids: A list of IDs for all elements of this particular type in the theme.
         :return None or pygame.Surface:
         """
 
@@ -177,6 +189,13 @@ class UIAppearanceTheme:
         return None
 
     def get_font(self, object_id, element_ids):
+        """
+        Uses some data about a UIElement to get a font object.
+
+        :param object_id: An ID for the particular instance of this element being created.
+        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :return pygame.font.Font: A pygame font object.
+        """
         # set the default font as the final fall back
         font = self.font_dictionary.find_font(self.base_font_info['size'],
                                               self.base_font_info['name'],
@@ -196,6 +215,14 @@ class UIAppearanceTheme:
         return font
 
     def get_misc_data(self, object_id, element_ids, misc_data_id):
+        """
+        Uses data about a UI element and a specific ID to try and find a piece of miscellaneous theming data.
+
+        :param object_id: An ID for the particular instance of this element being created.
+        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
+        :return None or str: Returns a string if we find the data, otherwise returns None.
+        """
         if object_id is not None:
             if object_id in self.ui_element_misc_data:
                 if misc_data_id in self.ui_element_misc_data[object_id]:
@@ -210,6 +237,14 @@ class UIAppearanceTheme:
         return None
 
     def get_colour(self, object_id, element_ids, colour_id):
+        """
+        Uses data about a UI element and a specific ID to find a colour from our theme.
+
+        :param object_id: An ID for the particular instance of this element being created.
+        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param colour_id: The id for the specific colour we are looking for.
+        :return pygame.Color: A pygame colour.
+        """
         # first check for a unique theming for this specific object
         if object_id is not None:
             if object_id in self.ui_element_colours:
@@ -239,8 +274,14 @@ class UIAppearanceTheme:
         return best_fit_colour
 
     def load_theme(self, file_path):
+        """
+        Loads a theme file, and currently, all associated data like fonts and images required by the theme.
+
+        :param file_path: The path to the theme we want to load.
+
+        """
         with open(file_path, 'r') as theme_file:
-            theme_dict = json.load(theme_file)
+            theme_dict = json.load(os.path.abspath(theme_file))
 
             for element_name in theme_dict.keys():
                 if element_name == 'defaults':
