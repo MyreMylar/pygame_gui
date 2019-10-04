@@ -111,6 +111,7 @@ class UIManager:
         """
         From here all our UI elements are updated and it manages which element is currently 'hovered'; which means
         the mouse pointer is overlapping them.
+
         :param time_delta:
         """
         hover_handled = False
@@ -131,7 +132,7 @@ class UIManager:
         If you want to do something particularly unusual with drawing you may have to write your own UI manager.
 
         :param window_surface: The screen or window surface on which we are going to draw all of our UI Elements.
-        :return:
+
         """
         self.ui_group.draw(window_surface)
 
@@ -155,7 +156,7 @@ class UIManager:
         :param bold_path:
         :param italic_path:
         :param bold_italic_path:
-        :return:
+
         """
         self.get_theme().get_font_dictionary().add_font_path(font_name,
                                                              regular_path,
@@ -171,20 +172,20 @@ class UIManager:
         that use a lot of different fonts.
 
         To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default 'fira_code' font)
-        you must first set the file paths to those fonts with
+        you must first set the file paths to those fonts with a list of font descriptions in a dictionary form like so:
 
-        :param font_list: A list of font descriptions in a dictionary form like so -
-                          {'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}
+        code:`{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}`
 
-                          You can specify size either in pygame.Font point sizes with 'point_size',
-                          or in HTML style sizes with 'html_size'.
+        You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style sizes with
+        'html_size'. Style options are:
+        - 'regular'
+        - 'italic'
+        - 'bold'
+        - 'bold_italic'
 
-                          Style options are:
-                          'regular'
-                          'italic'
-                          'bold'
-                          'bold_italic'
-        :return:
+
+        :param font_list: A list of font descriptions in dictionary format as described above.
+
         """
         for font in font_list:
             name = 'fira_code'
@@ -214,7 +215,6 @@ class UIManager:
         Of course if you don't run the code path in which a particular font is used before calling this function
         then it won't be of much use, so take it's results under advisement rather than as gospel.
 
-        :return:
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
 
@@ -231,6 +231,7 @@ class UIManager:
         Set an element as the focused element.
 
         If the element is a scroll bar we also keep track of that.
+
         :param ui_element:
         """
         if self.select_focused_element is None:
@@ -243,7 +244,8 @@ class UIManager:
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar):
         """
         Clears the last scrollbar that we used.
-        :param vert_scrollbar:
+
+        :param vert_scrollbar: A scrollbar UIElement.
         """
         if vert_scrollbar is self.last_focused_vertical_scrollbar:
             self.last_focused_vertical_scrollbar = None
@@ -251,6 +253,7 @@ class UIManager:
     def get_last_focused_vert_scrollbar(self):
         """
         Gets the last scrollbar that we used.
-        :return:
+
+        :return: A UIElement.
         """
         return self.last_focused_vertical_scrollbar
