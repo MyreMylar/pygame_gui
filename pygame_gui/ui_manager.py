@@ -112,7 +112,7 @@ class UIManager:
         From here all our UI elements are updated and it manages which element is currently 'hovered'; which means
         the mouse pointer is overlapping them.
 
-        :param time_delta:
+        :param time_delta: The time passed since the last call to update, in seconds.
         """
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
@@ -140,22 +140,23 @@ class UIManager:
                        italic_path: str = None, bold_italic_path: str = None):
         """
         Add file paths for custom fonts you want to use in the UI. For each font name you add you can specify
-        font files for different styles. Fonts with designed styles render a lot better than making use of
-        pygame's bold and italic font warping effects so if you plan to use bold and italic text at small sizes
-        find fonts with these styles available as separate files.
+        font files for different styles. Fonts with designed styles tend to render a lot better than fonts that are
+        forced to make use of pygame's bold and italic styling effects, so if you plan to use bold and italic text
+        at small sizes - find fonts with these styles available as separate files.
 
-        The font name you specify here can be used in the blocks of HTML subset formatted text available in some of
-        the UI elements to use that font.
+        The font name you specify here can be used to choose the font in the blocks of HTML-subset formatted text,
+        available in some of the UI elements like the UITextBox.
 
         It is recommended that you also pre-load any fonts you use at an appropriate moment in your project
-        rather than letting the library dynamically load them when they are required, as this can cause UI elements
-        with loads of font usage to appear rather slowly.
+        rather than letting the library dynamically load them when they are required. That is because dynamic loading
+        of large font files can cause UI elements with a lot of font usage to appear rather slowly as they are waiting
+        for the fonts they need to load.
 
-        :param font_name:
-        :param regular_path:
-        :param bold_path:
-        :param italic_path:
-        :param bold_italic_path:
+        :param font_name: The name of the font that will be used to reference it elsewhere in the GUI.
+        :param regular_path: The path of the font file for this font with no styles applied.
+        :param bold_path: The path of the font file for this font with just bold style applied.
+        :param italic_path: The path of the font file for this font with just italic style applied.
+        :param bold_italic_path: The path of the font file for this font with bold & italic style applied.
 
         """
         self.get_theme().get_font_dictionary().add_font_path(font_name,
@@ -178,11 +179,11 @@ class UIManager:
 
         You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style sizes with
         'html_size'. Style options are:
+
         - 'regular'
         - 'italic'
         - 'bold'
         - 'bold_italic'
-
 
         :param font_list: A list of font descriptions in dictionary format as described above.
 
@@ -232,7 +233,7 @@ class UIManager:
 
         If the element is a scroll bar we also keep track of that.
 
-        :param ui_element:
+        :param ui_element: The element to focus on.
         """
         if self.select_focused_element is None:
             self.select_focused_element = ui_element
