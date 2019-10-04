@@ -17,14 +17,15 @@ import sys
 
 
 sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../../windows/'))
-sys.path.insert(0, os.path.abspath('../../elements/'))
-sys.path.insert(0, os.path.abspath('../../core/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/windows/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/elements/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/core/'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'pygame_gui'
+project = 'Pygame GUI'
 copyright = '2019, Dan Lawrence'
 author = 'Dan Lawrence'
 
@@ -82,7 +83,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
