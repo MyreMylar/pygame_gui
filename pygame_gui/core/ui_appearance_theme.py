@@ -80,6 +80,11 @@ class UIAppearanceTheme:
         self.ui_element_misc_data = {}
 
     def get_font_dictionary(self):
+        """
+        Lets us grab the Font dictionary, which is created by the theme object, so we can access it directly.
+
+        :return UIFontDictionary:
+        """
         return self.font_dictionary
 
     def load_fonts(self):
@@ -168,8 +173,7 @@ class UIAppearanceTheme:
         """
         Will return None if no image is specified. There are UI elements that have an optional image display.
 
-        :param image_id: The id used in the element's code to identify the particular image location we are looking
-        for an image for.
+        :param image_id: The id identifying the particular image spot in the UI we are looking for an image to add to.
         :param object_id: An ID for the particular instance of this element being created.
         :param element_ids: A list of IDs for all elements of this particular type in the theme.
         :return None or pygame.Surface:
