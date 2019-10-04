@@ -60,15 +60,6 @@ pygame\_gui.core.ui\_window\_stack module
    :undoc-members:
    :show-inheritance:
 
-pygame\_gui.core.utility module
--------------------------------
-
-.. automodule:: pygame_gui.core.utility
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
 Module contents
 ---------------
 
