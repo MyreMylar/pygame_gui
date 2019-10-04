@@ -6,21 +6,21 @@ from ..core.ui_font_dictionary import UIFontDictionary
 
 
 class UIAppearanceTheme:
+    """
+    The Appearance Theme class handles all the data that styles and generally dictates the appearance of UI elements
+    across the whole UI.
+
+    The styling is split into four general areas:
+
+    - colours - spelled in the British English fashion with a 'u'.
+    - font - specifying a font to use for a UIElement where that is a relevant consideration.
+    - images - describing any images to be used in a UIElement.
+    - misc - covering all other types of data and stored as strings.
+
+    To change the theming for the UI you normally specify a theme file when creating the UIManager. For more
+    information on theme files see the specific documentation elsewhere.
+    """
     def __init__(self):
-        """
-        The Appearance Theme class handles all the data that styles and generally dictates the appearance of UI elements
-        across the whole UI.
-
-        The styling is split into four general areas:
-
-        - colours - spelled in the British English fashion with a 'u'.
-        - font - specifying a font to use for a UIElement where that is a relevant consideration.
-        - images - describing any images to be used in a UIElement.
-        - misc - covering all other types of data and stored as strings.
-
-        To change the theming for the UI you normally specify a theme file when creating the UIManager. For more
-        information on theme files see the specific documentation elsewhere.
-        """
 
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element

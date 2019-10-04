@@ -2,22 +2,21 @@ import pygame
 
 
 class UIElement(pygame.sprite.Sprite):
+    """
+    A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element classes should
+    derive from this class.
+
+    :param relative_rect: A rectangle describing the size and position of the UI element, the position is relative to the element's container.
+    :param ui_manager:
+    :param ui_container:
+    :param starting_height:
+    :param layer_thickness:
+    :param object_id:
+    :param element_ids:
+    """
     def __init__(self, relative_rect, ui_manager, ui_container,
                  starting_height, layer_thickness, object_id=None, element_ids=None):
-        """
-        A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element classes should
-        derive from this class.
 
-        :param relative_rect: A rectangle describing the size and position of the UI element, the position is relative
-        to the element's container.
-
-        :param ui_manager:
-        :param ui_container:
-        :param starting_height:
-        :param layer_thickness:
-        :param object_id:
-        :param element_ids:
-        """
         self._layer = 0
         self.ui_manager = ui_manager
         super().__init__(self.ui_manager.get_sprite_group())

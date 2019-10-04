@@ -4,20 +4,21 @@ from ..core.ui_element import UIElement
 
 
 class UIContainer(UIElement):
+    """
+    A UI Container holds any number of other UI elements inside of a rectangle. When we move the UIContainer
+    all the UI elements contained within it can be moved as well.
+
+    This class helps us make UI Windows, but likely will have wider uses as well as the GUI system develops.
+
+    :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is inside of, if any.
+    :param ui_manager: The UIManager that manages this UIElement.
+    :param ui_container: The UIContainer that this UIElement is contained within.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
     def __init__(self, relative_rect, ui_manager,
                  ui_container=None, element_ids=None, object_id=None):
-        """
-        A UI Container holds any number of other UI elements inside of a rectangle. When we move the UIContainer
-        all the UI elements contained within it can be moved as well.
 
-        This class helps us make UI Windows, but likely will have wider uses as well as the GUI system develops.
-
-        :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is inside of, if any.
-        :param ui_manager: The UIManager that manages this UIElement.
-        :param ui_container: The UIContainer that this UIElement is contained within.
-        :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
-        :param object_id: A custom defined ID for fine tuning of theming.
-        """
         self._layer = 0
         self.ui_manager = ui_manager
         if element_ids is None:
@@ -100,7 +101,7 @@ class UIContainer(UIElement):
         Assuming we have correctly calculated the 'thickness' of this container, this method will return the 'highest'
         layer in the LayeredUpdates UI Group.
 
-        :return: An integer representing the current highest layer being used by this container.
+        :return int: An integer representing the current highest layer being used by this container.
         """
         return self._layer + self.layer_thickness
 
