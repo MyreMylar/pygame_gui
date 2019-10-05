@@ -8,14 +8,14 @@ class UIWorldSpaceHealthBar(UIElement):
     A UI that will display a sprite's 'health_capacity' and their 'current_health' in 'world space' above the sprite.
     This means that the health bar will move with the camera and the sprite itself.
     """
-    def __init__(self, relative_rect, sprite_to_monitor, ui_manager,
-                 ui_container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect, sprite_to_monitor, manager,
+                 container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['screen_space_health_bar']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('screen_space_health_bar')
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
                          element_ids=new_element_ids,

@@ -354,15 +354,15 @@ class UITextBox(UIElement):
         def error(self, message):
             pass
 
-    def __init__(self, html_text, containing_rect, ui_manager,
+    def __init__(self, html_text, containing_rect, manager,
                  wrap_to_height=False, layer_starting_height=1,
-                 ui_container=None, element_ids=None, object_id=None):
+                 container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['text_box']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('text_box')
-        super().__init__(containing_rect, ui_manager, ui_container,
+        super().__init__(containing_rect, manager, container,
                          starting_height=layer_starting_height,
                          layer_thickness=1,
                          element_ids=new_element_ids,

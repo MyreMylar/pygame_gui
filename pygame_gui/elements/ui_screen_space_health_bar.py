@@ -8,15 +8,15 @@ class UIScreenSpaceHealthBar(UIElement):
     A UI that will display health capacity and current health for a sprite in 'screen space'.
     That means it won't move with the camera. This is a good choice for a user/player sprite.
     """
-    def __init__(self, relative_rect, ui_manager, sprite_to_monitor=None,
-                 ui_container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect, manager, sprite_to_monitor=None,
+                 container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['screen_space_health_bar']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('screen_space_health_bar')
 
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
                          element_ids=new_element_ids,

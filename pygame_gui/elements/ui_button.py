@@ -4,15 +4,15 @@ from . import ui_tool_tip
 
 
 class UIButton(UIElement):
-    def __init__(self, relative_rect, text, ui_manager,
-                 ui_container=None, tool_tip_text=None, starting_height=1, object_id=None, element_ids=None):
+    def __init__(self, relative_rect, text, manager,
+                 container=None, tool_tip_text=None, starting_height=1, object_id=None, element_ids=None):
         """
         A basic button, a lot of the appearance of the button, including images to be displayed
 
         :param relative_rect:
         :param text:
-        :param ui_manager:
-        :param ui_container:
+        :param manager:
+        :param container:
         :param tool_tip_text:
         :param starting_height:
         :param object_id:
@@ -23,7 +23,7 @@ class UIButton(UIElement):
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('button')
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          object_id=object_id,
                          element_ids=new_element_ids,
                          starting_height=starting_height,

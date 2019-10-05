@@ -6,13 +6,13 @@ from ..core.ui_element import UIElement
 
 
 class UITextEntryLine(UIElement):
-    def __init__(self, relative_rect, ui_manager, ui_container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect, manager, container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['text_entry_line']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('text_entry_line')
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
                          element_ids=new_element_ids,
                          object_id=object_id)

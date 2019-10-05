@@ -159,15 +159,15 @@ class UIClosedDropDownState:
 
 
 class UIDropDownMenu(UIElement):
-    def __init__(self, options_list, starting_option, relative_rect, ui_manager,
-                 ui_container=None, element_ids=None, object_id=None):
+    def __init__(self, options_list, starting_option, relative_rect, manager,
+                 container=None, element_ids=None, object_id=None):
 
         if element_ids is None:
             new_element_ids = ['drop_down_menu']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('drop_down_menu')
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
                          object_id=object_id,
                          layer_thickness=1, starting_height=1)

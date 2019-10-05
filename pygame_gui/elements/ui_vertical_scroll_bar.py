@@ -5,14 +5,14 @@ from ..core.ui_element import UIElement
 
 
 class UIVerticalScrollBar(UIElement):
-    def __init__(self, relative_rect, visible_percentage, ui_manager,
-                 ui_container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect, visible_percentage, manager,
+                 container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['vertical_scroll_bar']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('vertical_scroll_bar')
-        super().__init__(relative_rect, ui_manager, ui_container,
+        super().__init__(relative_rect, manager, container,
                          layer_thickness=1, starting_height=1,
                          element_ids=new_element_ids, object_id=object_id)
 
@@ -26,7 +26,7 @@ class UIVerticalScrollBar(UIElement):
                                                          (self.relative_rect.width,
                                                           self.button_height)),
                                              '▲', self.ui_manager,
-                                             ui_container=self.ui_container,
+                                             container=self.ui_container,
                                              starting_height=2,
                                              element_ids=self.element_ids,
                                              object_id=self.object_id)
@@ -37,7 +37,7 @@ class UIVerticalScrollBar(UIElement):
                                                             (self.relative_rect.width,
                                                              self.button_height)),
                                                 '▼', self.ui_manager,
-                                                ui_container=self.ui_container,
+                                                container=self.ui_container,
                                                 starting_height=2,
                                                 element_ids=self.element_ids,
                                                 object_id=self.object_id)
@@ -54,7 +54,7 @@ class UIVerticalScrollBar(UIElement):
                                                              (self.relative_rect.width,
                                                               scroll_bar_height)),
                                                  '', self.ui_manager,
-                                                 ui_container=self.ui_container,
+                                                 container=self.ui_container,
                                                  starting_height=2,
                                                  element_ids=self.element_ids,
                                                  object_id=self.object_id)
@@ -168,7 +168,7 @@ class UIVerticalScrollBar(UIElement):
         self.sliding_button = ui_button.UIButton(pygame.Rect(self.sliding_rect_position,
                                                              (self.rect.width, scroll_bar_height)),
                                                  '', self.ui_manager,
-                                                 ui_container=self.ui_container,
+                                                 container=self.ui_container,
                                                  starting_height=2,
                                                  element_ids=self.element_ids,
                                                  object_id=self.object_id)
