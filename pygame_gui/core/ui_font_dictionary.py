@@ -4,7 +4,11 @@ import warnings
 
 
 class UIFontDictionary:
-    html_font_sizes = {
+    """
+    The font dictionary is used to store all the fonts that have been loaded into the UI system.
+
+    """
+    _html_font_sizes = {
         1: 8,
         1.5: 9,
         2: 10,
@@ -20,7 +24,7 @@ class UIFontDictionary:
         7: 48
     }
 
-    html_font_sizes_reverse_lookup = {
+    _html_font_sizes_reverse_lookup = {
         8: 1,
         9: 1.5,
         10: 2,
@@ -54,7 +58,17 @@ class UIFontDictionary:
 
         self.used_font_ids = ['fira_code_regular_14']
 
-    def find_font(self, font_size, font_name, bold=False, italic=False):
+    def find_font(self, font_size: int, font_name: str,
+                  bold: bool=False, italic: bool=False) -> pygame.font.Font:
+        """
+        Find a loaded font from the font dictionary.
+
+        :param font_size: The size of the font to find.
+        :param font_name: The name of the font to find.
+        :param bold: Whether the font is bold or not.
+        :param italic: Whether the font is italic or not.
+        :return pygame.font.Font: Returns either the font we asked for, or the default font.
+        """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
 
         if font_id not in self.used_font_ids:
@@ -125,5 +139,5 @@ class UIFontDictionary:
         if len(unused_font_ids) > 0:
             print('Unused font ids:')
             for font_id in unused_font_ids:
-                html_size = UIFontDictionary.html_font_sizes_reverse_lookup[int(font_id.split('_')[-1])]
+                html_size = UIFontDictionary._html_font_sizes_reverse_lookup[int(font_id.split('_')[-1])]
                 print(font_id + '(HTML size: ' + str(html_size) + ')')

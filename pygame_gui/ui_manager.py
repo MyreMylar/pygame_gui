@@ -201,7 +201,7 @@ class UIManager:
                 if 'italic' in font['style']:
                     italic = True
             if 'html_size' in font:
-                size = UIFontDictionary.html_font_sizes[font['html_size']]
+                size = UIFontDictionary._html_font_sizes[font['html_size']]
             elif 'point_size' in font:
                 size = font['point_size']
 
