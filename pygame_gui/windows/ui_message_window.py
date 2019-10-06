@@ -5,14 +5,14 @@ from ..core.ui_window import UIWindow
 
 
 class UIMessageWindow(UIWindow):
-    def __init__(self, message_window_rect, message_title, html_message, ui_manager,
+    def __init__(self, message_window_rect, message_title, html_message, manager,
                  element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['message_window']
         else:
             new_element_ids = element_ids.copy()
             new_element_ids.append('message_window')
-        super().__init__(message_window_rect, ui_manager, new_element_ids, object_id)
+        super().__init__(message_window_rect, manager, new_element_ids, object_id)
 
         self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_id, self.element_ids, 'dark_bg')
 
@@ -33,7 +33,7 @@ class UIMessageWindow(UIWindow):
         self.menu_bar = UIButton(relative_rect=pygame.Rect((0, 0),
                                                            ((self.rect.width - shadow_padding[0] * 2) - 20, 20)),
                                  text=message_title,
-                                 manager=ui_manager,
+                                 manager=manager,
                                  container=self.get_container(),
                                  object_id='#message_window_title_bar',
                                  element_ids=self.element_ids
@@ -47,7 +47,7 @@ class UIMessageWindow(UIWindow):
                                                                        0),
                                                                       (20, 20)),
                                             text='╳',
-                                            manager=ui_manager,
+                                            manager=manager,
                                             container=self.get_container(),
                                             element_ids=self.element_ids
                                             )
@@ -55,7 +55,7 @@ class UIMessageWindow(UIWindow):
         self.done_button = UIButton(relative_rect=pygame.Rect(((self.rect[2] / 2) + 45,
                                                                self.rect[3] - 30), (70, 20)),
                                     text="Dismiss",
-                                    manager=ui_manager,
+                                    manager=manager,
                                     container=self.get_container(),
                                     tool_tip_text="<font face=fira_code color=normal_text size=2>"
                                                   "Click to get rid of this message.</font>",
@@ -65,7 +65,7 @@ class UIMessageWindow(UIWindow):
         text_block_rect = pygame.Rect((0, 20),
                                       (self.rect.width - shadow_padding[0] * 2,
                                        self.rect.height - 50))
-        self.text_block = UITextBox(html_message, text_block_rect, manager=ui_manager,
+        self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self.get_container(),
                                     element_ids=self.element_ids)
 

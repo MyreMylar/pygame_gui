@@ -6,7 +6,6 @@ import warnings
 class UIFontDictionary:
     """
     The font dictionary is used to store all the fonts that have been loaded into the UI system.
-
     """
     _html_font_sizes = {
         1: 8,
@@ -61,7 +60,12 @@ class UIFontDictionary:
     def find_font(self, font_size: int, font_name: str,
                   bold: bool=False, italic: bool=False) -> pygame.font.Font:
         """
-        Find a loaded font from the font dictionary.
+        Find a loaded font from the font dictionary. Will load a font if it does not already exist and we have paths
+        to the needed files, however it will issue a warning after doing so because dynamic file loading is normally a
+        bad idea as you will get framerate hitches while the running program waits for the font to load.
+
+        Instead it's best to preload all your needed files at another time in your program when you have more control
+        over the user experience.
 
         :param font_size: The size of the font to find.
         :param font_name: The name of the font to find.
@@ -84,7 +88,16 @@ class UIFontDictionary:
             return self.loaded_fonts["default_font_regular_12"]
 
     @staticmethod
-    def create_font_id(font_size, font_name, bold, italic):
+    def create_font_id(font_size: int, font_name: str, bold: bool, italic: bool) -> str:
+        """
+        Create an id for a particularly styled and sized font from those characteristics.
+
+        :param font_size: The size of the font.
+        :param font_name: The name of the font.
+        :param bold: Whether the font is bold styled or not.
+        :param italic: Whether the font is italic styled or not.
+        :return str: The finished font id.
+        """
         if bold and italic:
             font_style_string = "bold_italic"
         elif bold and not italic:
@@ -96,7 +109,17 @@ class UIFontDictionary:
         font_id = font_name + "_" + font_style_string + "_" + str(font_size)
         return font_id
 
-    def preload_font(self, font_size, font_name, bold=False, italic=False):
+    def preload_font(self, font_size: int, font_name: str, bold: bool=False, italic: bool=False):
+        """
+        Lets us load a font at a particular size and style before we use it. While you can get away with relying on
+        dynamic font loading during development, it is better to eventually pre-load all your font data at a
+        controlled time, which is where this method comes in.
+
+        :param font_size: The size of the font to load.
+        :param font_name: The name of the font to load.
+        :param bold: Whether the font is bold styled or not.
+        :param italic: Whether the font is italic styled or not.
+        """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
         if font_id in self.loaded_fonts:  # font already loaded
             warnings.warn('Trying to pre-load font id: ' + font_id + ' that is already loaded', UserWarning)
@@ -119,7 +142,17 @@ class UIFontDictionary:
         else:
             raise UserWarning('Trying to pre-load font id:' + font_id + 'with no paths set')
 
-    def add_font_path(self, font_name, font_path, bold_path=None, italic_path=None, bold_italic_path=None):
+    def add_font_path(self, font_name: str, font_path: str, bold_path: str=None,
+                      italic_path: str=None, bold_italic_path: str=None):
+        """
+        Adds paths to different font files for a font name.
+
+        :param font_name: The name to assign to these font files.
+        :param font_path: The path to the font's file with no particular style.
+        :param bold_path: The path to the font's file with a bold style.
+        :param italic_path: The path to the font's file with an italic style.
+        :param bold_italic_path: The path to the font's file with a bold and an italic style.
+        """
         if font_name not in self.known_font_paths:
             if bold_path is None:
                 bold_path = font_path
@@ -130,7 +163,14 @@ class UIFontDictionary:
             self.known_font_paths[font_name] = [font_path, bold_path, italic_path, bold_italic_path]
 
     def print_unused_loaded_fonts(self):
+        """
+        Can be called to check if the UI is loading any fonts that we haven't used by the point this function is
+        called. If a font is truly unused then we can remove it from our loading and potentially speed up the overall
+        loading of the program.
 
+        This is not a foolproof check because this function could easily be called before we have explored all the code
+        paths in a project that may use fonts.
+        """
         unused_font_ids = []
         for key in self.loaded_fonts.keys():
             if key not in self.used_font_ids:

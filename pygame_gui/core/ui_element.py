@@ -1,4 +1,6 @@
 import pygame
+from typing import List, Union
+
 from . import ui_container
 from .. import ui_manager
 
@@ -18,8 +20,10 @@ class UIElement(pygame.sprite.Sprite):
     :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect: pygame.Rect, manager: ui_manager.UIManager, container: ui_container.UIContainer,
-                 starting_height: int, layer_thickness: int, object_id=None, element_ids=None):
+    def __init__(self, relative_rect: pygame.Rect, manager: ui_manager.UIManager,
+                 container: Union[ui_container.UIContainer, None],
+                 starting_height: int, layer_thickness: int,
+                 object_id: Union[str, None]=None, element_ids: Union[List[str], None]=None):
 
         self._layer = 0
         self.ui_manager = manager
@@ -158,7 +162,7 @@ class UIElement(pygame.sprite.Sprite):
         A stub to override. Gives UI Elements access to pygame events.
 
         :param event: The event to process.
-        :return bool: Should return
+        :return bool: Should return True if this element makes use fo this event.
         """
         if self is not None:
             return False
