@@ -6,7 +6,21 @@ from ..elements import ui_text_box
 
 
 class UITooltip(UIElement):
+    """
+    A tool tip is a floating block of text that gives additional information after a user hovers over an interactive
+    part of a GUI for a short time. In Pygame GUI the tooltip's text is style-able with HTML.
 
+    At the moment the tooltips are only available as an option on UIButton elements.
+
+    Tooltips also don't allow a container as they are designed to overlap normal UI boundaries and be contained only
+    within the 'root' window/container, which is synonymous with the pygame display surface.
+
+    :param html_text: Text styled with HTML, to be displayed on the tooltip.
+    :param hover_distance: Distance between the tooltip and the thing being hovered.
+    :param manager: The UIManager that manages this element.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
     def __init__(self, html_text, hover_distance, manager, element_ids=None, object_id=None):
         width = 170
         if element_ids is None:
@@ -41,14 +55,26 @@ class UITooltip(UIElement):
         self.image = self.ui_manager.get_shadow(self.rect.size)
 
     def kill(self):
+        """
+        Overrides the UIElement's default kill method to also kill the text block element that helps make up the
+        complete tool tip.
+        """
         self.text_block.kill()
         super().kill()
 
-    def find_valid_position(self, position):
+    def find_valid_position(self, position: pygame.math.Vector2) -> bool:
         """
         Finds a valid position for the tool tip inside the root container of the UI.
-        :param position:
-        :return:
+
+        The algorithm starts from the position of the target we are providing a tool tip for then it
+        tries to fit the rectangle for the tool tip onto the screen by moving it above, below, to the left and to the
+        right, until we find a position that fits the whole tooltip rectangle on the screen at once.
+
+        If we fail to manage this then the method will return False. Otherwise it returns True and set the position
+        of the tool tip to our valid position.
+
+        :param position: A 2D vector representing the position of the target this tool tip is for.
+        :return bool: returns True if we find a valid (visible) position and False if we do not.
         """
 
         window_rect = self.ui_manager.get_window_stack().get_root_window().get_container().rect

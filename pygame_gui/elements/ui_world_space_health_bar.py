@@ -13,6 +13,7 @@ class UIWorldSpaceHealthBar(UIElement):
 
     A sprite passed to this class must have the attributes 'health_capacity' and 'current_health'.
 
+    :param relative_rect: The rectangle that defines the size of the health bar.
     :param sprite_to_monitor: The sprite we are displaying the health of.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.

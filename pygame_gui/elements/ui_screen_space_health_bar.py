@@ -1,5 +1,8 @@
 import pygame
+from typing import List, Union
 
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 
 
@@ -7,9 +10,19 @@ class UIScreenSpaceHealthBar(UIElement):
     """
     A UI that will display health capacity and current health for a sprite in 'screen space'.
     That means it won't move with the camera. This is a good choice for a user/player sprite.
+
+    :param relative_rect: The rectangle that defines the size and position of the health bar.
+    :param manager: The UIManager that manages this element.
+    :param sprite_to_monitor: The sprite we are displaying the health of.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, manager, sprite_to_monitor=None,
-                 container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect: pygame.Rect,
+                 manager: ui_manager.UIManager,
+                 sprite_to_monitor: Union[pygame.sprite.Sprite, None]=None,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['screen_space_health_bar']
         else:
@@ -69,11 +82,11 @@ class UIScreenSpaceHealthBar(UIElement):
 
         self.redraw()
 
-    def set_sprite_to_monitor(self, sprite_to_monitor):
+    def set_sprite_to_monitor(self, sprite_to_monitor: pygame.sprite.Sprite):
         """
         Sprite to monitor the health of. Must have 'health_capacity' and 'current_health' attributes.
+
         :param sprite_to_monitor:
-        :return:
         """
         if not hasattr(sprite_to_monitor, 'health_capacity'):
             raise AttributeError
@@ -82,6 +95,10 @@ class UIScreenSpaceHealthBar(UIElement):
         self.sprite_to_monitor = sprite_to_monitor
 
     def redraw(self):
+        """
+        Redraws the health bar rectangles and text onto the underlying sprite's image surface.
+        Takes a little while so we only do it when the health has changed.
+        """
         self.image = pygame.Surface((self.rect.w, self.rect.h))
         self.image.fill(self.background_colour)
         self.image.set_alpha(175)
@@ -126,7 +143,13 @@ class UIScreenSpaceHealthBar(UIElement):
                         self.foreground_text.get_rect(centerx=self.rect.width/2,
                                                       centery=self.rect.height/2))
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Updates the health bar sprite's image with the latest health data from the
+        sprite we are monitoring. Only triggers a redraw if the health values have changed.
+
+        :param time_delta: time passed in seconds between one call to this method and the next.
+        """
         if self.alive():
             if self.sprite_to_monitor is not None:
                 if self.sprite_to_monitor.health_capacity != self.health_capacity or\

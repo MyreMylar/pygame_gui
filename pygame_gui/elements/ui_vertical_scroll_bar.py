@@ -1,12 +1,29 @@
 import pygame
+from typing import List, Union
 
+from .. import ui_manager
+from ..core import ui_container
 from ..elements import ui_button
 from ..core.ui_element import UIElement
 
 
 class UIVerticalScrollBar(UIElement):
-    def __init__(self, relative_rect, visible_percentage, manager,
-                 container=None, element_ids=None, object_id=None):
+    """
+    A vertical scroll bar allows users to position a smaller visible area within a vertically larger area.
+
+    :param relative_rect: The size and position of the scroll bar.
+    :param visible_percentage: The vertical percentage of the larger area that is visible, between 0.0 and 1.0.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, relative_rect: pygame.Rect,
+                 visible_percentage: float,
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+
         if element_ids is None:
             new_element_ids = ['vertical_scroll_bar']
         else:
@@ -42,7 +59,7 @@ class UIVerticalScrollBar(UIElement):
                                                 element_ids=self.element_ids,
                                                 object_id=self.object_id)
 
-        self.visible_percentage = visible_percentage
+        self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
         self.start_percentage = 0.0
 
         self.sliding_rect_position = pygame.math.Vector2(self.relative_rect.x,
@@ -73,14 +90,24 @@ class UIVerticalScrollBar(UIElement):
         self.scroll_wheel_up = False
         self.scroll_wheel_down = False
 
-    def check_has_moved_and_reset(self):
-        if self.has_moved_recently:
-            self.has_moved_recently = False
-            return True
-        else:
-            return False
+    def check_has_moved_recently(self) -> bool:
+        """
+        Returns True if the scroll bar was moved in the last call to the update function.
+
+        :return bool: True if we've recently moved the scroll bar, False otherwise.
+        """
+        return self.has_moved_recently
 
     def kill(self):
+        """
+        Overrides the kill() method of the UI element class to kill all the buttons in the scroll bar and
+        clear any of the parts of the scroll bar that are currently recorded as the 'last focused vertical scroll bar
+        element' on the ui manager.
+
+        NOTE: the 'last focused' state on the UI manager is used so that the mouse wheel will move whichever scrollbar
+        we last fiddled with even if we've been doing other stuff. This seems to be consistent with the most common
+        mousewheel/scrollbar interactions used elsewhere.
+        """
         self.ui_manager.clear_last_focused_from_vert_scrollbar(self)
         self.ui_manager.clear_last_focused_from_vert_scrollbar(self.sliding_button)
         self.ui_manager.clear_last_focused_from_vert_scrollbar(self.top_button)
@@ -91,11 +118,23 @@ class UIVerticalScrollBar(UIElement):
         self.sliding_button.kill()
 
     def select(self):
+        """
+        When we focus select the scroll bar as a whole for any reason we pass that status down to the 'bar' part of
+        the scroll bar.
+        """
         if self.sliding_button is not None:
             self.ui_manager.unselect_focus_element()
             self.ui_manager.select_focus_element(self.sliding_button)
 
-    def process_event(self, event):
+    def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Checks an event from pygame's event queue to see if the scroll bar needs to react to it. In this case
+        it is just mousewheel events, mainly because the buttons that make up the scroll bar will handle the required
+        mouse click events.
+
+        :param event: The event to process.
+        :return bool: Returns True if we've does something with the input event.
+        """
         processed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
         if (last_focused_scrollbar_element is self) or (
@@ -113,7 +152,18 @@ class UIVerticalScrollBar(UIElement):
 
         return processed_event
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Called once per update loop of our UI manager. Deals largely with moving the scroll bar and updating the
+        resulting 'start_percentage' variable that is then used by other 'scrollable' UI elements to control the point
+        they start drawing.
+
+        Reacts to presses of the up and down arrow buttons, movement of the mouse wheel and dragging of the scroll
+        bar itself.
+
+        :param time_delta: A float, roughly representing the time in seconds between calls to this method.
+        """
+        self.has_moved_recently = False
         if self.alive():
             moved_this_frame = False
             if (self.top_button.held or self.scroll_wheel_up) and self.scroll_position > self.top_limit:
@@ -160,6 +210,9 @@ class UIVerticalScrollBar(UIElement):
                     self.has_moved_recently = True
 
     def redraw_scrollbar(self):
+        """
+        Redraws the 'scrollbar' portion of the whole UI element. Called when we change the visible percentage.
+        """
         self.sliding_button.kill()
 
         self.scrollable_height = self.rect.height - (2 * self.button_height)
@@ -173,8 +226,15 @@ class UIVerticalScrollBar(UIElement):
                                                  element_ids=self.element_ids,
                                                  object_id=self.object_id)
 
-    def set_visible_percentage(self, percentage):
-        self.visible_percentage = percentage
+    def set_visible_percentage(self, percentage: float):
+        """
+        Sets the percentage of the total 'scrollable area' that is currently visible. This will affect the size of
+        the scrollbar and should be called if the vertical size of the 'scrollable area' or the vertical size of the
+        visible area change.
+
+        :param percentage: A float between 0.0 and 1.0 representing the percentage that is visible.
+        """
+        self.visible_percentage = max(0.0, min(1.0, percentage))
         if 1.0 - self.start_percentage < self.visible_percentage:
             self.start_percentage = 1.0 - self.visible_percentage
 

@@ -2,19 +2,17 @@ import pygame
 from typing import Union, List
 import re
 
-
 from ..core.utility import clipboard_paste, clipboard_copy
 from ..core.ui_element import UIElement
 
 
 class UITextEntryLine(UIElement):
 
-    _number_character_set = ['0','1','2','3','4','5','6','7','8','9']
+    _number_character_set = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
     # excluding these characters won't ensure that user entered text is a valid filename but they can help
     # reduce the problems that input will leave you with.
     _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
-
 
     def __init__(self, relative_rect, manager, container=None, element_ids=None, object_id=None):
         if element_ids is None:
@@ -436,4 +434,3 @@ class UITextEntryLine(UIElement):
 
         else:
             self.forbidden_characters = forbidden_characters.copy()
-
