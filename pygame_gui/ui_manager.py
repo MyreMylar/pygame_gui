@@ -20,7 +20,7 @@ class UIManager:
         self.window_resolution = window_resolution
         self.ui_theme = UIAppearanceTheme()
         if theme_path is not None:
-            self.ui_theme.load_theme(os.path.abspath(theme_path))
+            self.ui_theme.load_theme(theme_path)
         self.ui_group = pygame.sprite.LayeredUpdates()
 
         self.select_focused_element = None

@@ -277,15 +277,15 @@ class UIAppearanceTheme:
                 best_fit_colour = self.base_colours[key]
         return best_fit_colour
 
-    def load_theme(self, file_path):
+    def load_theme(self, file_path: str):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
 
         :param file_path: The path to the theme we want to load.
 
         """
-        with open(file_path, 'r') as theme_file:
-            theme_dict = json.load(os.path.abspath(theme_file))
+        with open(os.path.abspath(file_path), 'r') as theme_file:
+            theme_dict = json.load(theme_file)
 
             for element_name in theme_dict.keys():
                 if element_name == 'defaults':

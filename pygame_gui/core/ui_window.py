@@ -14,8 +14,8 @@ class UIWindow(pygame.sprite.Sprite):
     :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, rect: pygame.Rect, manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None]=None, object_id: Union[str, None]=None):
+    def __init__(self, rect: pygame.Rect, manager: 'ui_manager.UIManager',
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         self._layer = 0
         if element_ids is None:
             new_element_ids = ["window"]

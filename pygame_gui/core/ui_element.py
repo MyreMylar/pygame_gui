@@ -20,10 +20,10 @@ class UIElement(pygame.sprite.Sprite):
     :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect: pygame.Rect, manager: ui_manager.UIManager,
-                 container: Union[ui_container.UIContainer, None],
+    def __init__(self, relative_rect: pygame.Rect, manager: 'ui_manager.UIManager',
+                 container: Union['ui_container.UIContainer', None],
                  starting_height: int, layer_thickness: int,
-                 object_id: Union[str, None]=None, element_ids: Union[List[str], None]=None):
+                 object_id: Union[str, None] = None, element_ids: Union[List[str], None] = None):
 
         self._layer = 0
         self.ui_manager = manager
