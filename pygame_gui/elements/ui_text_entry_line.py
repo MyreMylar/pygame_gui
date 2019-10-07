@@ -420,7 +420,7 @@ class UITextEntryLine(UIElement):
         return index
 
     def set_allowed_characters(self, allowed_characters: Union[str, List[str]]):
-        if type(allowed_characters) is 'str':
+        if type(allowed_characters) is str:
             if allowed_characters == 'numbers':
                 self.allowed_characters = UITextEntryLine._number_character_set
 
@@ -428,7 +428,7 @@ class UITextEntryLine(UIElement):
             self.allowed_characters = allowed_characters.copy()
 
     def set_forbidden_characters(self, forbidden_characters: Union[str, List[str]]):
-        if type(forbidden_characters) is 'str':
+        if type(forbidden_characters) is str:
             if forbidden_characters == 'numbers':
                 self.forbidden_characters = UITextEntryLine._number_character_set
             elif forbidden_characters == 'forbidden_file_path':
