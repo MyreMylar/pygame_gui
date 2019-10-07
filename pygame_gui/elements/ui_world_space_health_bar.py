@@ -1,5 +1,8 @@
 import pygame
+from typing import List, Union
 
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 
 
@@ -7,9 +10,20 @@ class UIWorldSpaceHealthBar(UIElement):
     """
     A UI that will display a sprite's 'health_capacity' and their 'current_health' in 'world space' above the sprite.
     This means that the health bar will move with the camera and the sprite itself.
+
+    A sprite passed to this class must have the attributes 'health_capacity' and 'current_health'.
+
+    :param sprite_to_monitor: The sprite we are displaying the health of.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, sprite_to_monitor, manager,
-                 container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect: pygame.Rect,
+                 sprite_to_monitor: pygame.sprite.Sprite,
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer=None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['screen_space_health_bar']
         else:
@@ -66,7 +80,13 @@ class UIWorldSpaceHealthBar(UIElement):
                                                [int(self.capacity_width*self.health_percentage),
                                                 self.capacity_height])
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Updates the health bar sprite's image and rectangle with the latest health and position data from the
+        sprite we are monitoring
+
+        :param time_delta: time passed in seconds between one call to this method and the next.
+        """
         if self.alive():
             self.position = [self.sprite_to_monitor.screen_position[0] - self.sprite_to_monitor.rect.width / 2,
                              self.sprite_to_monitor.screen_position[1] - (

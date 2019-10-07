@@ -1,11 +1,21 @@
 import pygame
+from typing import Union, List
 import re
+
 
 from ..core.utility import clipboard_paste, clipboard_copy
 from ..core.ui_element import UIElement
 
 
 class UITextEntryLine(UIElement):
+
+    _number_character_set = ['0','1','2','3','4','5','6','7','8','9']
+
+    # excluding these characters won't ensure that user entered text is a valid filename but they can help
+    # reduce the problems that input will leave you with.
+    _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
+
+
     def __init__(self, relative_rect, manager, container=None, element_ids=None, object_id=None):
         if element_ids is None:
             new_element_ids = ['text_entry_line']
@@ -61,6 +71,10 @@ class UITextEntryLine(UIElement):
         self.cursor_on = False
         self.cursor_has_moved_recently = False
         self.double_click_started = False
+
+        # restrictions on text input
+        self.allowed_characters = None
+        self.forbidden_characters = None
 
         # setup for drawing
         self.text_surface = self.font.render(self.text, True, self.text_colour)
@@ -282,7 +296,13 @@ class UITextEntryLine(UIElement):
 
         if self.selected:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
+                if event.key == pygame.K_RETURN:
+                    entry_finished_event = pygame.event.Event(pygame.USEREVENT,
+                                                              {'user_type': 'ui_text_entry_finished',
+                                                               'text': self.text,
+                                                               'ui_object_id': self.object_id})
+                    pygame.event.post(entry_finished_event)
+                elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                     self.select_range = [0, len(self.text)]
                     self.edit_position = len(self.text)
                     self.cursor_has_moved_recently = True
@@ -364,17 +384,25 @@ class UITextEntryLine(UIElement):
                     character = event.unicode
                     char_metrics = self.font.metrics(character)
                     if len(char_metrics) > 0 and char_metrics[0] is not None:
-                        if abs(self.select_range[0] - self.select_range[1]) > 0:
-                            low_end = min(self.select_range[0], self.select_range[1])
-                            high_end = max(self.select_range[0], self.select_range[1])
-                            self.text = self.text[:low_end] + character + self.text[high_end:]
-                            self.edit_position = low_end + 1
-                            self.select_range = [0, 0]
-                        else:
-                            self.text = self.text[:self.edit_position] + character + self.text[self.edit_position:]
-                            self.edit_position += 1
-                        self.cursor_has_moved_recently = True
-                        processed_event = True
+                        valid_character = True
+                        if self.allowed_characters is not None:
+                            if character not in self.allowed_characters:
+                                valid_character = False
+                        if self.forbidden_characters is not None:
+                            if character in self.forbidden_characters:
+                                valid_character = False
+                        if valid_character:
+                            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                                low_end = min(self.select_range[0], self.select_range[1])
+                                high_end = max(self.select_range[0], self.select_range[1])
+                                self.text = self.text[:low_end] + character + self.text[high_end:]
+                                self.edit_position = low_end + 1
+                                self.select_range = [0, 0]
+                            else:
+                                self.text = self.text[:self.edit_position] + character + self.text[self.edit_position:]
+                                self.edit_position += 1
+                            self.cursor_has_moved_recently = True
+                            processed_event = True
         return processed_event
 
     def find_edit_position_from_pixel_pos(self, pixel_pos):
@@ -390,3 +418,22 @@ class UITextEntryLine(UIElement):
                 index += 1
             acc_pos += x_width
         return index
+
+    def set_allowed_characters(self, allowed_characters: Union[str, List[str]]):
+        if type(allowed_characters) is 'str':
+            if allowed_characters == 'numbers':
+                self.allowed_characters = UITextEntryLine._number_character_set
+
+        else:
+            self.allowed_characters = allowed_characters.copy()
+
+    def set_forbidden_characters(self, forbidden_characters: Union[str, List[str]]):
+        if type(forbidden_characters) is 'str':
+            if forbidden_characters == 'numbers':
+                self.forbidden_characters = UITextEntryLine._number_character_set
+            elif forbidden_characters == 'forbidden_file_path':
+                self.forbidden_characters = UITextEntryLine._forbidden_file_path_characters
+
+        else:
+            self.forbidden_characters = forbidden_characters.copy()
+

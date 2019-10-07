@@ -1,11 +1,27 @@
-from ..core.ui_element import UIElement
 import pygame
 import warnings
+from typing import List, Union
+
+from .. import ui_manager
+from ..core import ui_container
+from ..core.ui_element import UIElement
 
 
 class UILabel(UIElement):
-    def __init__(self, relative_rect, text, manager,
-                 container=None, element_ids=None, object_id=None):
+    """
+    A label lets us display a single line of text with a single font style. It's a quick to redraw and simple
+    alternative to the text box element.
+
+    :param relative_rect: The rectangle that contains and positions the label relative to it's container.
+    :param text: The text to display in the label.
+    :param manager: The UIManager that manages this label.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, relative_rect: pygame.Rect, text: str, manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer=None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['label']
         else:
@@ -19,11 +35,20 @@ class UILabel(UIElement):
         self.text = text
         self.redraw()
 
-    def set_text(self, text):
+    def set_text(self, text: str):
+        """
+        Changes the string displayed by the label element. Labels do not support HTML styling.
+
+        :param text: the text to set the label to.
+        """
         self.text = text
         self.redraw()
 
     def redraw(self):
+        """
+        Re-render the text to the label's underlying sprite image. This allows us to change what the displayed text is
+        or remake it with different theming (if the theming has changed).
+        """
         font = self.ui_theme.get_font(self.object_id, self.element_ids)
         text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_text')
         bg_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'dark_bg')

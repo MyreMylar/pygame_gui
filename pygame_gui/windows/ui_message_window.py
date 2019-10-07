@@ -1,12 +1,26 @@
 import pygame
+from typing import List, Union
+
 from ..elements.ui_button import UIButton
 from ..elements.ui_text_box import UITextBox
 from ..core.ui_window import UIWindow
+from .. import ui_manager
 
 
 class UIMessageWindow(UIWindow):
-    def __init__(self, message_window_rect, message_title, html_message, manager,
-                 element_ids=None, object_id=None):
+    """
+    A simple popup window for delivering text-only messages to users.
+
+    :param message_window_rect: The size and position of the window, includes the menu bar across the top.
+    :param message_title: The title of the message window.
+    :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
+    :param manager: The UIManager that manages this UIElement.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, message_window_rect: pygame.Rect, message_title: str,
+                 html_message: str, manager: ui_manager.UIManager,
+                 element_ids: Union[List[str], None]=None, object_id: Union[str, None]=None):
         if element_ids is None:
             new_element_ids = ['message_window']
         else:
@@ -69,7 +83,12 @@ class UIMessageWindow(UIWindow):
                                     container=self.get_container(),
                                     element_ids=self.element_ids)
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Called every update loop of our UI manager. Handles moving and closing the window.
+
+        :param time_delta: The time in seconds between calls to this function.
+        """
         if self.alive():
 
             if self.done_button.check_pressed_and_reset():
