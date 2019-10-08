@@ -1,23 +1,36 @@
 import pygame
+from typing import Union, List, Tuple
+
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 from . import ui_tool_tip
 
 
 class UIButton(UIElement):
-    def __init__(self, relative_rect, text, manager,
-                 container=None, tool_tip_text=None, starting_height=1, object_id=None, element_ids=None):
-        """
-        A basic button, a lot of the appearance of the button, including images to be displayed
+    """
+    A push button, a lot of the appearance of the button, including images to be displayed, is setup via the theme file.
+    This button is designed to be pressed, do something, and then reset - rather than to be toggled on or off.
 
-        :param relative_rect:
-        :param text:
-        :param manager:
-        :param container:
-        :param tool_tip_text:
-        :param starting_height:
-        :param object_id:
-        :param element_ids:
-        """
+    The button element is reused throughout the UI as part of other elements as it happens to be a very flexible
+    interactive element.
+
+    :param relative_rect: A rectangle describing the position (relative to its container) and dimensions.
+    :param text: Text for the button.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will appear on hover.
+    :param starting_height: The height in layers above it's container that this element will be placed.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, relative_rect: pygame.Rect,
+                 text: str,
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer = None,
+                 tool_tip_text: Union[str, None] = None,
+                 starting_height: int = 1,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['button']
         else:
@@ -59,6 +72,7 @@ class UIButton(UIElement):
         self.hovered = False
         self.held = False
         self.pressed = False
+        self.pressed_event = False
 
         self.is_selected = False
 
@@ -129,6 +143,9 @@ class UIButton(UIElement):
         self.redraw()
 
     def set_any_images_from_theme(self):
+        """
+        Grabs images for this button from the UI theme if any are set.
+        """
         normal_image = self.ui_theme.get_image(self.object_id, self.element_ids, 'normal_image')
         if normal_image is not None:
             self.normal_image = normal_image
@@ -150,20 +167,42 @@ class UIButton(UIElement):
             self.disabled_image = disabled_image
 
     def kill(self):
+        """
+        Overrides the standard sprite kill method to also kill any tooltips belonging to this button.
+        """
         if self.tool_tip is not None:
             self.tool_tip.kill()
         super().kill()
 
-    def hover_point(self, x, y):
+    def hover_point(self, x, y) -> bool:
+        """
+        Tests if a position should be considered 'hovering' the button. Normally this just means our mouse pointer
+        is inside the buttons rectangle, however if we are holding onto the button for a purpose(e.g. dragging a window
+        around by it's menu bar) the hover radius can be made to grow so we don't keep losing touch with whatever we are
+        moving.
+
+        :param x: horizontal pixel co-ordinate to test.
+        :param y: vertical pixel co-ordinate to test
+        :return bool: Returns True if we are hovering.
+        """
         if self.held:
             return self.in_hold_range((x, y))
         else:
             return self.rect.collidepoint(x, y)
 
-    def can_hover(self):
+    def can_hover(self) -> bool:
+        """
+        Tests whether we can trigger the hover state for this button, other states take priority over it.
+
+        :return bool: True if we are able to hover this button.
+        """
         return not self.is_selected and self.is_enabled and not self.held
 
     def on_hovered(self):
+        """
+        Called when we enter the hover state, it sets the colours and image of the button to the appropriate
+        values and redraws it.
+        """
         self.text_colour = self.colours['hovered_text']
         self.background_colour = self.colours['hovered_bg']
         self.current_image = self.hovered_image
@@ -171,6 +210,13 @@ class UIButton(UIElement):
         self.hover_time = 0.0
 
     def while_hovering(self, time_delta, mouse_pos):
+        """
+        Called while we are in the hover state. It will create a tool tip if we've been in the hover state for a while,
+        the text exists to create one and we haven't created one already.
+
+        :param time_delta: Time in seconds between calls to update.
+        :param mouse_pos: The current position of the mouse.
+        """
         if self.tool_tip is None and self.tool_tip_text is not None \
                 and self.hover_time > self.tool_tip_delay:
             self.tool_tip = ui_tool_tip.UITooltip(self.tool_tip_text,
@@ -181,6 +227,10 @@ class UIButton(UIElement):
         self.hover_time += time_delta
 
     def on_unhovered(self):
+        """
+        Called when we leave the hover state. Resets the colours and images to normal and kills any tooltip that was
+        created while we were hovering the button.
+        """
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
         self.current_image = self.normal_image
@@ -189,13 +239,28 @@ class UIButton(UIElement):
             self.tool_tip.kill()
             self.tool_tip = None
 
-    # def update(self, time_delta):
-    #     if self.alive():
-    #         mouse_x, mouse_y = pygame.mouse.get_pos()
-    #         if self.held and not self.in_hold_range((mouse_x, mouse_y)):
-    #             self.held = False
+    def update(self, time_delta):
+        """
+        Sets the pressed state for an update cycle if we've pressed this button recently.
 
-    def process_event(self, event):
+        :param time_delta: the time in seconds between one call to update and the next.
+        """
+        if self.alive():
+            # clear pressed state, we only want it to last one update cycle
+            self.pressed = False
+
+            if self.pressed_event:
+                # if a pressed event has occurred set the button to the pressed state for one update cycle.
+                self.pressed_event = False
+                self.pressed = True
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Handles interactions with the button.
+
+        :param event: The event to process.
+        :return bool: Returns True if we made use of this event.
+        """
         processed_event = False
         if self.is_enabled:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -217,9 +282,15 @@ class UIButton(UIElement):
                         if self.held:
                             self.held = False
                             self.set_inactive()
-                            self.pressed = True
                             self.ui_manager.unselect_focus_element()
                             processed_event = True
+                            self.pressed_event = True
+
+                            button_pressed_event = pygame.event.Event(pygame.USEREVENT,
+                                                                      {'user_type': 'ui_button_pressed',
+                                                                       'ui_element': self,
+                                                                       'ui_object_id': self.object_id})
+                            pygame.event.post(button_pressed_event)
 
                     if self.held:
                         self.held = False
@@ -230,6 +301,10 @@ class UIButton(UIElement):
         return processed_event
 
     def redraw(self):
+        """
+        Redraws the button from data onto the underlying sprite's image. Only need to call this if something has
+        changed with the button (e.g. changed state or the text on it has changed)
+        """
         self.image.fill(self.background_colour)
         if self.current_image is not None:
             image_rect = self.current_image.get_rect()
@@ -240,36 +315,56 @@ class UIButton(UIElement):
             self.text_surface = self.font.render(self.text, True, self.text_colour, self.background_colour)
         self.image.blit(self.text_surface, self.aligned_text_rect)
 
-    def check_pressed_and_reset(self):
-        if self.pressed:
-            self.pressed = False
-            return True
-        else:
-            return False
+    def check_pressed(self):
+        """
+        A direct way to check if this button has been pressed in the last update cycle.
+
+        :return: True if the button has been pressed.
+        """
+        return self.pressed
 
     def disable(self):
+        """
+        Disables the button so that it is no longer interactive.
+        """
         self.is_enabled = False
         self.text_colour = self.colours['disabled_text']
         self.background_colour = self.colours['disabled_bg']
         self.current_image = self.disabled_image
 
     def enable(self):
+        """
+        Re-enables the button so we can once again interact with it.
+        :return:
+        """
         self.is_enabled = True
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
         self.current_image = self.normal_image
 
     def set_active(self):
+        """
+        Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
+        state then redraws the button.
+        """
         self.text_colour = self.colours['active_text']
         self.background_colour = self.colours['active_bg']
         self.redraw()
 
     def set_inactive(self):
+        """
+        Called when we stop actively clicking on the button. Restores the colours to the default
+        state then redraws the button.
+        """
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
         self.redraw()
 
     def select(self):
+        """
+        Called when we select focus this element. Changes the colours and image to the appropriate ones for the new
+        state then redraws the button.
+        """
         self.is_selected = True
         self.text_colour = self.colours['selected_text']
         self.background_colour = self.colours['selected_bg']
@@ -277,25 +372,43 @@ class UIButton(UIElement):
         self.redraw()
 
     def unselect(self):
+        """
+        Called when we are no longer select focusing this element. Restores the colours and image to the default
+        state then redraws the button.
+        """
         self.is_selected = False
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
         self.current_image = self.normal_image
         self.redraw()
 
-    def set_text(self, text):
+    def set_text(self, text: str):
+        """
+        Sets the text on the button. The button will redraw.
+
+        :param text: The new text to set.
+        """
         self.text = text
         self.redraw()
 
-    def set_hold_range(self, xy_range):
+    def set_hold_range(self, xy_range: Tuple[int, int]):
+        """
+        Set x and y values, in pixels, around our button to use as the hold range for time when we want to drag a button
+        about but don't want it to slip out of our grasp too easily.
+
+        Imagine it as a large rectangle around our button, larger in all directions by whatever values we specify here.
+
+        :param xy_range: The x and y values used to create our larger 'holding' rectangle.
+        """
         self.hold_range = xy_range
 
-    def in_hold_range(self, position):
+    def in_hold_range(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
         """
         Imagines a potentially larger rectangle around our button in which range we still grip hold of our
         button when moving the mouse. Makes it easier to use scrollbars.
-        :param position:
-        :return :
+
+        :param position: The position we are testing.
+        :return bool: Returns True if our position is inside the hold range.
         """
         if self.rect.collidepoint(position[0], position[1]):
             return True

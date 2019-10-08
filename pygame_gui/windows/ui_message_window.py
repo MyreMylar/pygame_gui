@@ -91,7 +91,7 @@ class UIMessageWindow(UIWindow):
         """
         if self.alive():
 
-            if self.done_button.check_pressed_and_reset():
+            if self.done_button.check_pressed():
                 self.kill()
 
             if self.menu_bar.held:
@@ -117,7 +117,7 @@ class UIMessageWindow(UIWindow):
             else:
                 self.grabbed_window = False
 
-            if self.close_window_button.check_pressed_and_reset():
+            if self.close_window_button.check_pressed():
                 self.kill()
 
         super().update(time_delta)

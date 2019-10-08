@@ -1,13 +1,32 @@
 import pygame
 import warnings
+from typing import Union, List, Tuple
 
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 from ..elements.ui_button import UIButton
 
 
 class UIHorizontalSlider(UIElement):
-    def __init__(self, relative_rect, start_value, value_range, manager,
-                 container=None, object_id=None, element_ids=None):
+    """
+    A horizontal slider is intended to help users adjust values within a range, for example a volume control.
+
+    :param relative_rect: A rectangle describing the position and dimensions of the element.
+    :param start_value: The value to start the slider at.
+    :param value_range: The full range of values.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, relative_rect: pygame.Rect,
+                 start_value: Union[float, int],
+                 value_range: Tuple[Union[float, int], Union[float, int]],
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+
         if element_ids is None:
             new_element_ids = ['horizontal_slider']
         else:
@@ -67,12 +86,22 @@ class UIHorizontalSlider(UIElement):
         self.set_current_value(start_value)
 
     def kill(self):
+        """
+        Overrides the normal sprite kill() method to also kill the button elements that help make up the slider.
+
+        """
         self.left_button.kill()
         self.right_button.kill()
         self.sliding_button.kill()
         super().kill()
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Takes care of actually moving the slider based on interactions reported by the buttons or based on movement of
+        the mouse if we are gripping the slider itself.
+
+        :param time_delta: the time in seconds between calls to update.
+        """
         if self.alive():
             moved_this_frame = False
             if self.left_button.held and self.scroll_position > self.left_limit_position:
@@ -116,11 +145,22 @@ class UIHorizontalSlider(UIElement):
                 if not self.has_moved_recently:
                     self.has_moved_recently = True
 
-    def get_current_value(self):
+    def get_current_value(self) -> Union[float, int]:
+        """
+        Gets the current value the slider is set to.
+
+        :return: The current value recorded by the slider.
+        """
         self.has_moved_recently = False
         return self.current_value
 
-    def set_current_value(self, value):
+    def set_current_value(self, value: Union[float, int]):
+        """
+        Sets the value of the slider, which will move the position of the slider to match. Will issue a warning if the
+        value set is not in the value range.
+
+        :param value: The value to set.
+        """
         if self.value_range[0] <= value <= self.value_range[1]:
             self.current_value = float(value)
             value_range_size = (self.value_range[1] - self.value_range[0])

@@ -1,18 +1,28 @@
 import pygame
+from typing import Union, List
+
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 from ..elements.ui_button import UIButton
 
 
 class UIExpandedDropDownState:
+    """
+    The expanded state of the drop down  displays the currently chosen option, all the available options and a button
+    to close the menu and return to the closed state.
+
+    Picking an option will also close the menu.
+    """
     def __init__(self, drop_down_menu_ui, options_list, selected_option, base_position_rect,
-                 close_button_width, ui_manager, ui_container, element_ids, object_id):
+                 close_button_width, manager, container, element_ids, object_id):
         self.drop_down_menu_ui = drop_down_menu_ui
         self.should_transition = False
         self.options_list = options_list
         self.selected_option = selected_option
         self.base_position_rect = base_position_rect
-        self.ui_manager = ui_manager
-        self.ui_container = ui_container
+        self.ui_manager = manager
+        self.ui_container = container
         self.element_ids = element_ids
         self.object_id = object_id
 
@@ -26,6 +36,10 @@ class UIExpandedDropDownState:
         self.target_state = 'closed'
 
     def start(self):
+        """
+        Called each time we enter the expanded state. It creates the necessary elements, the selected option, all the
+        other available options and the close button.
+        """
         self.should_transition = False
         option_y_pos = self.base_position_rect.y
         self.selected_option_button = UIButton(pygame.Rect(self.base_position_rect.topleft,
@@ -80,6 +94,9 @@ class UIExpandedDropDownState:
             self.menu_buttons.append(new_button)
 
     def finish(self):
+        """
+        cleans everything up upon exiting the expanded menu state.
+        """
         for button in self.menu_buttons:
             button.kill()
 
@@ -89,25 +106,29 @@ class UIExpandedDropDownState:
         self.close_button.kill()
 
     def update(self):
-        if self.close_button.check_pressed_and_reset():
+        if self.close_button.check_pressed():
             self.should_transition = True
 
         for button in self.menu_buttons:
-            if button.check_pressed_and_reset():
+            if button.check_pressed():
                 self.drop_down_menu_ui.selected_option = button.text
                 self.should_transition = True
 
 
 class UIClosedDropDownState:
+    """
+    The closed state of the drop down just displays the currently chosen option and a button that will switch the menu
+    to the expanded state.
+    """
     def __init__(self, drop_down_menu_ui, selected_option, base_position_rect,
-                 open_button_width, ui_manager, ui_container, element_ids, object_id):
+                 open_button_width, manager, container, element_ids, object_id):
         self.drop_down_menu_ui = drop_down_menu_ui
         self.selected_option_button = None
         self.open_button = None
         self.selected_option = selected_option
         self.base_position_rect = base_position_rect
-        self.ui_manager = ui_manager
-        self.ui_container = ui_container
+        self.ui_manager = manager
+        self.ui_container = container
         self.element_ids = element_ids
         self.object_id = object_id
 
@@ -117,6 +138,10 @@ class UIClosedDropDownState:
         self.target_state = 'expanded'
 
     def start(self):
+        """
+        Called each time we enter the closed state. It creates the necessary elements, the selected option and the
+        open button.
+        """
         self.should_transition = False
         self.selected_option_button = UIButton(pygame.Rect((self.base_position_rect.x,
                                                             self.base_position_rect.y),
@@ -150,18 +175,41 @@ class UIClosedDropDownState:
                                     element_ids=self.element_ids)
 
     def finish(self):
+        """
+        Called when we leave the closed state. Kills the open button and the selected option button.
+        """
         self.selected_option_button.kill()
         self.open_button.kill()
 
     def update(self):
-        if self.open_button.check_pressed_and_reset():
+        if self.open_button.check_pressed():
             self.should_transition = True
 
 
 class UIDropDownMenu(UIElement):
-    def __init__(self, options_list, starting_option, relative_rect, manager,
-                 container=None, element_ids=None, object_id=None):
+    """
+    A drop down menu lets us choose one text option from a list. That list of options that can be expanded and hidden
+    at the press of a button. While the element is called a drop down it can also be made to 'climb up' by changing
+    the 'expand_direction' styling option to 'up' in the theme file.
 
+    The drop down is implemented through two states, one representing the 'closed' menu state and one for when it has
+    been 'expanded'.
+
+
+    :param options_list: The list of of options to choose from. They must be strings.
+    :param starting_option: The starting option, selected when the menu is first created.
+    :param relative_rect: The size and position of the element when not expanded.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
+    def __init__(self, options_list: List[str],
+                 starting_option: str,
+                 relative_rect: pygame.Rect,
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['drop_down_menu']
         else:
@@ -199,10 +247,20 @@ class UIDropDownMenu(UIElement):
         self.image = pygame.Surface((0, 0))
 
     def kill(self):
+        """
+        Overrides the standard sprite kill to also properly kill/finish the current state of the dropdown.
+        Depending on whether it is expanded or closed the drop down menu will have different elements to clean up.
+        """
         self.current_state.finish()
         super().kill()
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        The update here deals with transitioning between the two states of the drop down menu and then passes the
+        rest of the work onto whichever state is active.
+
+        :param time_delta: The time in second between calls to update.
+        """
         if self.alive():
             if self.current_state.should_transition:
                 self.current_state.finish()

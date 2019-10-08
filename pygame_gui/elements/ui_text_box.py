@@ -1,8 +1,10 @@
 import pygame
-import copy
 import warnings
 import html.parser
+from typing import Union, List
 
+from .. import ui_manager
+from ..core import ui_container
 from ..core.ui_element import UIElement
 from ..elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
@@ -134,8 +136,33 @@ class CharStyle:
 
 class UITextBox(UIElement):
     """
-    Class to handle a rectangle/box containing HTML formatted text.
-    Supports a limited subset of HTML tags e.g. <b>,<i>,<u>
+    A Text Box element lets us display word-wrapped, formatted text. If the text to display is longer than the height
+    of the box given then the element will automatically create a vertical scroll bar so that all the text can be seen.
+
+    Formatting the text is done via a subset of HTML tags. Currently supported tags are:
+
+    - <b></b> or <strong></strong> - to encase bold styled text.
+    - <i></i>, <em></em> or <var></var> - to encase italic styled text.
+    - <u></u> - to encase underlined text.
+    - <a href='id'></a> - to encase 'link' text that can be clicked on to generate events with the id given in href.
+    - <body bgcolor='#FFFFFF'></body> - to change the background colour of encased text.
+    - <br> - to start a new line.
+    - <font face='verdana' color='#000000' size=3.5></font> - To set the font, colour and size of encased text.
+
+    More may be added in the future if needed or frequently requested.
+
+    NOTE: if dimensions of the initial containing rect are set to -1 the text box will match the final dimension to
+    whatever the text rendering produces. This lets us make dynamically sized text boxes depending on their contents.
+
+
+    :param html_text: The HTML formatted text to display in this text box.
+    :param containing_rect: The 'visible area' rectangle, positioned relative to it's container.
+    :param manager: The UIManager that manages this element.
+    :param wrap_to_height: False by default, if set to True the box will increase in height to match the text within.
+    :param layer_starting_height: Sets the height, above it's container, to start placing the text box at.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
     """
 
     class TextStyleData:
@@ -354,9 +381,14 @@ class UITextBox(UIElement):
         def error(self, message):
             pass
 
-    def __init__(self, html_text, containing_rect, manager,
-                 wrap_to_height=False, layer_starting_height=1,
-                 container=None, element_ids=None, object_id=None):
+    def __init__(self, html_text: str,
+                 containing_rect: pygame.Rect,
+                 manager: ui_manager.UIManager,
+                 wrap_to_height: bool = False,
+                 layer_starting_height: int = 1,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+
         if element_ids is None:
             new_element_ids = ['text_box']
         else:
@@ -423,7 +455,6 @@ class UITextBox(UIElement):
         self.wrap_to_height = wrap_to_height
 
         self.link_hover_chunks = []  # container for any link chunks we have
-        self.clicked_link_targets = []
 
         text_wrap_rect = [self.rect[0] + self.padding[0] + self.border_width,
                           self.rect[1] + self.padding[1] + self.border_width,
@@ -494,7 +525,13 @@ class UITextBox(UIElement):
 
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Called once every update loop of the UI Manager. Used to react to scroll bar movement (if there is one),
+        update the text effect (if there is one) and check if we are hovering over any text links (if there are any).
+
+        :param time_delta: The time in seconds between calls to update. Useful for timing things.
+        """
         if self.alive():
             if self.scroll_bar is not None:
                 if self.scroll_bar.check_has_moved_recently():
@@ -545,6 +582,10 @@ class UITextBox(UIElement):
                     self.redraw_from_chunks()
 
     def update_containing_rect_position(self):
+        """
+        Sets the final screen position of this element based on the position of it's container and it's relative
+        position inside that container.
+        """
         self.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x,
                                  self.ui_container.rect.y + self.relative_rect.y),
                                 self.relative_rect.size)
@@ -555,6 +596,9 @@ class UITextBox(UIElement):
         #                              chunk.rect.size)
 
     def parse_html_into_style_data(self):
+        """
+        Parses HTML styled string text into a format more useful for styling pygame.font rendered text.
+        """
         parser = UITextBox.TextHTMLParser(self.ui_theme, self.element_ids, self.object_id)
         parser.push_style('body', {"bg_color": self.bg_color})
         parser.feed(self.html_text)
@@ -569,6 +613,10 @@ class UITextBox(UIElement):
                                               )
 
     def redraw_from_text_block(self):
+        """
+        Redraws the final parts of the text box element that don't include redrawing the actual text. Useful if we've
+        just moved the position of the text (say, with a scroll bar) without actually changing the text itself.
+        """
         if self.scroll_bar is not None:
             height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
         else:
@@ -583,32 +631,55 @@ class UITextBox(UIElement):
                         drawable_area)
 
     def redraw_from_chunks(self):
+        """
+        Redraws from slightly earlier in the process than 'redraw_from_text_block'. Useful if we have redrawn
+        individual chunks already (say, to change their style slightly after being hovered) and now want to update the
+        text block with those changes without doing a full redraw.
+
+        This won't work very well if redrawing a chunk changed it's dimensions.
+        """
         self.formatted_text_block.redraw_from_chunks(self.active_text_effect)
         self.redraw_from_text_block()
 
     def full_redraw(self):
+        """
+        Trigger a full redraw of the entire text box. Useful if we have messed with the text chunks in a more
+        fundamental fashion and need to reposition them (say, if some of them have gotten wider after being bolded).
+
+        NOTE: This doesn't reparse the text of our box. If you need to do that, just create a new text box.
+
+        """
         self.formatted_text_block.redraw(self.active_text_effect)
         self.redraw_from_text_block()
         self.link_hover_chunks = []
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect.topleft)
-
     def select(self):
+        """
+        Called when we focus select the text box (usually by clicking on it). In this case we just pass the focus over
+        to the box's scroll bar, if it has one, so that some input events will be directed that way.
+        """
         if self.scroll_bar is not None:
             self.scroll_bar.select()
 
-    def process_event(self, event):
+    def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Deals with input events. In this case we just handle clicks on any links in the text.
+
+        :param event: A pygame event to check for a reaction to.
+        :return bool: Returns True if we made use of this event.
+        """
         processed_event = False
         should_redraw_from_chunks = False
+        should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_x, mouse_y = event.pos
                 if self.rect.collidepoint(mouse_x, mouse_y):
                     processed_event = True
                     if self.scroll_bar is not None:
-                        height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+                        text_block_full_height = self.formatted_text_block.final_dimensions[1]
+                        height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
                     else:
                         height_adjustment = 0
                     base_x = self.rect[0] + self.padding[0] + self.border_width
@@ -622,7 +693,10 @@ class UITextBox(UIElement):
                             processed_event = True
                             if not chunk.is_selected:
                                 chunk.on_selected()
-                                should_redraw_from_chunks = True
+                                if chunk.metrics_changed_after_redraw:
+                                    should_full_redraw = True
+                                else:
+                                    should_redraw_from_chunks = True
 
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
@@ -642,36 +716,57 @@ class UITextBox(UIElement):
                         if self.rect.collidepoint(mouse_x, mouse_y):
                             processed_event = True
                             if chunk.is_selected:
-                                self.clicked_link_targets.append(chunk.link_href)
+                                link_clicked_event = pygame.event.Event(pygame.USEREVENT,
+                                                                        {'user_type': 'ui_text_box_link_clicked',
+                                                                         'link_target': chunk.link_href,
+                                                                         'ui_element': self,
+                                                                         'ui_object_id': self.object_id})
+                                pygame.event.post(link_clicked_event)
 
                     if chunk.is_selected:
                         chunk.on_unselected()
-                        should_redraw_from_chunks = True
+                        if chunk.metrics_changed_after_redraw:
+                            should_full_redraw = True
+                        else:
+                            should_redraw_from_chunks = True
 
         if should_redraw_from_chunks:
             self.redraw_from_chunks()
 
+        if should_full_redraw:
+            self.full_redraw()
+
         return processed_event
 
-    def get_clicked_link_targets_and_reset(self):
-        link_targets_return = copy.copy(self.clicked_link_targets)
+    def set_active_effect(self, effect_name: Union[str, None]):
+        """
+        Set an animation effect to run on the text box. The effect will start running immediately after this call.
 
-        self.clicked_link_targets = []
-        return link_targets_return
+        These effects are currently supported:
 
-    def set_active_effect(self, effect_name):
-        if effect_name == 'typing_appear':
-            effect = TypingAppearEffect(self.formatted_text_block.characters)
-            self.active_text_effect = effect
-            self.full_redraw()
-        elif effect_name == 'fade_in':
-            effect = FadeInEffect(self.formatted_text_block.characters)
-            self.active_text_effect = effect
-            self.redraw_from_chunks()
-        elif effect_name == 'fade_out':
-            effect = FadeOutEffect(self.formatted_text_block.characters)
-            self.active_text_effect = effect
-            self.redraw_from_chunks()
+        - 'typing_appear' - Will look as if the text is being typed in.
+        - 'fade in' - The text will fade in from the background colour (Only supported on Pygame 2)
+        - 'fade out' - The text will fade out to the background colour (only supported on Pygame 2)
+
+        :param effect_name: The name fo the t to set. If set to None instead it will cancel any active effect.
+        """
+        if effect_name is None:
+            self.active_text_effect = None
+        elif type(effect_name) is str:
+            if effect_name == 'typing_appear':
+                effect = TypingAppearEffect(self.formatted_text_block.characters)
+                self.active_text_effect = effect
+                self.full_redraw()
+            elif effect_name == 'fade_in':
+                effect = FadeInEffect(self.formatted_text_block.characters)
+                self.active_text_effect = effect
+                self.redraw_from_chunks()
+            elif effect_name == 'fade_out':
+                effect = FadeOutEffect(self.formatted_text_block.characters)
+                self.active_text_effect = effect
+                self.redraw_from_chunks()
+            else:
+                warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
 
 
 class StyledChunk:
@@ -725,6 +820,7 @@ class StyledChunk:
                 self.advance += metrics[i][4]
 
         self.rect = pygame.Rect(self.position, (self.width, self.height))
+        self.metrics_changed_after_redraw = False
 
         self.unset_underline_style()
 
@@ -742,6 +838,26 @@ class StyledChunk:
             self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
 
         self.font.set_underline(False)
+
+        new_metrics = self.font.metrics(self.chunk)
+        new_ascent = self.font.get_ascent()
+        new_width = self.font.size(self.chunk)[0]
+        new_height = self.font.size(self.chunk)[1]
+        new_advance = 0
+        for i in range(0, len(self.chunk)):
+            if len(new_metrics[i]) == 5:
+                new_advance += new_metrics[i][4]
+
+        if (new_ascent != self.ascent or new_width != self.width) or (
+                new_height != self.height or new_advance != self.advance):
+            self.metrics_changed_after_redraw = True
+            self.ascent = new_ascent
+            self.width = new_width
+            self.height = new_height
+            self.advance = new_advance
+            self.rect = pygame.Rect(self.position, (self.width, self.height))
+        else:
+            self.metrics_changed_after_redraw = False
 
     def on_hovered(self):
         if not self.is_selected:
@@ -1066,7 +1182,6 @@ class TextBlock:
         for text_line in self.lines:
             for chunk in text_line.chunks:
                 if self.block_sprite is not None:
-                    # need to adjust y start pos based on ascents
                     if final_alpha != 255:
                         self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
                     else:

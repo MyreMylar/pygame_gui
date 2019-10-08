@@ -1,12 +1,30 @@
 import pygame
-from typing import Union, List
 import re
+import warnings
+from typing import Union, List
 
+from .. import ui_manager
+from ..core import ui_container
 from ..core.utility import clipboard_paste, clipboard_copy
 from ..core.ui_element import UIElement
 
 
 class UITextEntryLine(UIElement):
+    """
+    A GUI element for text entry from a keyboard, on a single line. The element supports the standard
+    copy and paste keyboard shortcuts CTRL+V, CRTL+C & CTRL+X as well as CTRL+A.
+
+    There are methods that allow the entry element to restrict the characters that can be input into the text box
+
+    The height of the text entry line element will be determined by the font used rather than the standard method
+    for UIElements of just using the height of the input rectangle.
+
+    :param relative_rect: A rectangle describing the position and width of the text entry element.
+    :param manager: The UIManager that manages this element.
+    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param object_id: A custom defined ID for fine tuning of theming.
+    """
 
     _number_character_set = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -14,7 +32,10 @@ class UITextEntryLine(UIElement):
     # reduce the problems that input will leave you with.
     _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
 
-    def __init__(self, relative_rect, manager, container=None, element_ids=None, object_id=None):
+    def __init__(self, relative_rect: pygame.Rect,
+                 manager: ui_manager.UIManager,
+                 container: ui_container.UIContainer = None,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['text_entry_line']
         else:
@@ -73,6 +94,7 @@ class UITextEntryLine(UIElement):
         # restrictions on text input
         self.allowed_characters = None
         self.forbidden_characters = None
+        self.length_limit = None
 
         # setup for drawing
         self.text_surface = self.font.render(self.text, True, self.text_colour)
@@ -100,11 +122,43 @@ class UITextEntryLine(UIElement):
 
         self.redraw()
 
-    def set_text(self, text):
-        self.text = text
-        self.edit_position = len(self.text)
+    def set_text_length_limit(self, limit: int):
+        """
+        Allows a character limit to be set on the text entry element. By default there is no limit on the number
+        of characters that can be entered.
+
+        :param limit: The character limit as an integer.
+        """
+        self.length_limit = limit
+
+    def set_text(self, text: str):
+        """
+        Allows the text displayed in the text entry element to be set via code. Useful for setting an initial or
+        existing value that is able to be edited.
+
+        The string to set must be valid for the text entry element for this to work.
+
+        :param text: The text string to set.
+        """
+        if self.validate_text_string(text):
+            within_length_limit = True
+            if self.length_limit is not None:
+                if len(text) > self.length_limit:
+                    within_length_limit = False
+            if within_length_limit:
+                self.text = text
+                self.edit_position = len(self.text)
+                self.cursor_has_moved_recently = True
+            else:
+                warnings.warn("Tried to set text string that is too long on text entry element")
+        else:
+            warnings.warn("Tried to set text string with invalid characters on text entry element")
 
     def redraw(self):
+        """
+        Redraws the entire text entry element onto the underlying sprite image. Usually called when the displayed text
+        has been edited or changed in some fashion.
+        """
         self.text_image.fill(self.bg_colour)
         if self.select_range[0] != self.select_range[1]:
             low_end = min(self.select_range[0], self.select_range[1])
@@ -175,6 +229,10 @@ class UITextEntryLine(UIElement):
         self.redraw_cursor()
 
     def redraw_cursor(self):
+        """
+        Redraws only the blinking edit cursor. This allows us to blink the cursor on and off without spending time
+        redrawing all the text.
+        """
         self.image.blit(self.background_and_border, (0, 0))
         self.image.blit(self.text_image, (self.border_width, self.border_width))
         if self.cursor_on:
@@ -183,7 +241,14 @@ class UITextEntryLine(UIElement):
             self.cursor.x = cursor_size[0] + self.border_width + self.horiz_line_padding - self.start_text_offset
             pygame.draw.rect(self.image, self.text_colour, self.cursor)
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
+        """
+        Called every update loop of our UI Manager. Largely handles text drag selection and making sure our
+        edit cursor blinks on and off.
+
+        :param time_delta: The time in seconds between this update method call and the previous one.
+        :return:
+        """
         if self.alive():
             if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
                 self.double_click_select_time_acc += time_delta
@@ -219,17 +284,33 @@ class UITextEntryLine(UIElement):
                 self.cursor_blink_delay_after_moving_acc += time_delta
 
     def unselect(self):
+        """
+        Called when this element is no longer the current focus.
+        """
         self.selected = False
         pygame.key.set_repeat()
         self.select_range = [0, 0]
         self.redraw()
 
     def select(self):
+        """
+        Called when we 'select focus' on this element. In this case it sets up the keyboard to repeat held key presses,
+        useful for natural feeling keyboard input.
+        """
         self.selected = True
         pygame.key.set_repeat(500, 25)
         self.redraw()
 
-    def process_event(self, event):
+    def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Allows the text entry box to react to input events, which is it's primary function. The entry element reacts to
+        various types of mouse clicks (double click selecting words, drag select), keyboard combos (CRTL+C, CTRL+V,
+        CTRL+X, CTRL+A), individual editing keys (Backspace, Delete, Left & Right arrows) and other keys for inputting
+        letters, symbols and numbers.
+
+        :param event: The current event to consider reacting to.
+        :return bool: Returns True if we've done something with the input event.
+        """
         processed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -298,6 +379,7 @@ class UITextEntryLine(UIElement):
                     entry_finished_event = pygame.event.Event(pygame.USEREVENT,
                                                               {'user_type': 'ui_text_entry_finished',
                                                                'text': self.text,
+                                                               'ui_element': self,
                                                                'ui_object_id': self.object_id})
                     pygame.event.post(entry_finished_event)
                 elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
@@ -320,18 +402,31 @@ class UITextEntryLine(UIElement):
                         clipboard_copy(self.text[low_end:high_end])
                 elif event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
                     new_text = clipboard_paste()
-                    if abs(self.select_range[0] - self.select_range[1]) > 0:
-                        low_end = min(self.select_range[0], self.select_range[1])
-                        high_end = max(self.select_range[0], self.select_range[1])
-                        self.text = self.text[:low_end] + new_text + self.text[high_end:]
-                        self.edit_position = low_end + len(new_text)
-                        self.select_range = [0, 0]
-                        self.cursor_has_moved_recently = True
-                    elif len(new_text) > 0:
-                        self.text = self.text[:self.edit_position] + new_text + self.text[self.edit_position:]
-                        self.edit_position += len(new_text)
-                        self.cursor_has_moved_recently = True
-                    processed_event = True
+                    if self.validate_text_string(new_text):
+                        if abs(self.select_range[0] - self.select_range[1]) > 0:
+                            low_end = min(self.select_range[0], self.select_range[1])
+                            high_end = max(self.select_range[0], self.select_range[1])
+                            final_text = self.text[:low_end] + new_text + self.text[high_end:]
+                            within_length_limit = True
+                            if self.length_limit is not None:
+                                if len(final_text) > self.length_limit:
+                                    within_length_limit = False
+                            if within_length_limit:
+                                self.text = final_text
+                                self.edit_position = low_end + len(new_text)
+                                self.select_range = [0, 0]
+                                self.cursor_has_moved_recently = True
+                        elif len(new_text) > 0:
+                            final_text = self.text[:self.edit_position] + new_text + self.text[self.edit_position:]
+                            within_length_limit = True
+                            if self.length_limit is not None:
+                                if len(final_text) > self.length_limit:
+                                    within_length_limit = False
+                            if within_length_limit:
+                                self.text = final_text
+                                self.edit_position += len(new_text)
+                                self.cursor_has_moved_recently = True
+                        processed_event = True
                 elif event.key == pygame.K_BACKSPACE:
                     if abs(self.select_range[0] - self.select_range[1]) > 0:
                         low_end = min(self.select_range[0], self.select_range[1])
@@ -379,31 +474,44 @@ class UITextEntryLine(UIElement):
                         self.cursor_has_moved_recently = True
                     processed_event = True
                 else:
-                    character = event.unicode
-                    char_metrics = self.font.metrics(character)
-                    if len(char_metrics) > 0 and char_metrics[0] is not None:
-                        valid_character = True
-                        if self.allowed_characters is not None:
-                            if character not in self.allowed_characters:
-                                valid_character = False
-                        if self.forbidden_characters is not None:
-                            if character in self.forbidden_characters:
-                                valid_character = False
-                        if valid_character:
-                            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                                low_end = min(self.select_range[0], self.select_range[1])
-                                high_end = max(self.select_range[0], self.select_range[1])
-                                self.text = self.text[:low_end] + character + self.text[high_end:]
-                                self.edit_position = low_end + 1
-                                self.select_range = [0, 0]
-                            else:
-                                self.text = self.text[:self.edit_position] + character + self.text[self.edit_position:]
-                                self.edit_position += 1
-                            self.cursor_has_moved_recently = True
-                            processed_event = True
+                    within_length_limit = True
+                    if self.length_limit is not None:
+                        if len(self.text) >= self.length_limit:
+                            within_length_limit = False
+                    if within_length_limit:
+                        character = event.unicode
+                        char_metrics = self.font.metrics(character)
+                        if len(char_metrics) > 0 and char_metrics[0] is not None:
+                            valid_character = True
+                            if self.allowed_characters is not None:
+                                if character not in self.allowed_characters:
+                                    valid_character = False
+                            if self.forbidden_characters is not None:
+                                if character in self.forbidden_characters:
+                                    valid_character = False
+                            if valid_character:
+                                if abs(self.select_range[0] - self.select_range[1]) > 0:
+                                    low_end = min(self.select_range[0], self.select_range[1])
+                                    high_end = max(self.select_range[0], self.select_range[1])
+                                    self.text = self.text[:low_end] + character + self.text[high_end:]
+                                    self.edit_position = low_end + 1
+                                    self.select_range = [0, 0]
+                                else:
+                                    start_str = self.text[:self.edit_position]
+                                    end_str = self.text[self.edit_position:]
+                                    self.text = start_str + character + end_str
+                                    self.edit_position += 1
+                                self.cursor_has_moved_recently = True
+                                processed_event = True
         return processed_event
 
-    def find_edit_position_from_pixel_pos(self, pixel_pos):
+    def find_edit_position_from_pixel_pos(self, pixel_pos: int):
+        """
+        Locates the correct position to move the edit cursor to, when reacting to a mouse click inside the text entry
+        element.
+
+        :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling offscreen.
+        """
         start_pos = self.rect.x + self.border_width + self.horiz_line_padding
         acc_pos = start_pos
         index = 0
@@ -418,6 +526,15 @@ class UITextEntryLine(UIElement):
         return index
 
     def set_allowed_characters(self, allowed_characters: Union[str, List[str]]):
+        """
+        Sets a whitelist of characters that will be the only ones allowed in our text entry element.
+        We can either set the list directly, or request one of the already existing lists by a string
+        identifier. The currently supported lists for allowed characters are:
+
+        - 'numbers'
+
+        :param allowed_characters: The characters to allow, either in a list form or one of the supported string ids.
+        """
         if type(allowed_characters) is str:
             if allowed_characters == 'numbers':
                 self.allowed_characters = UITextEntryLine._number_character_set
@@ -426,6 +543,16 @@ class UITextEntryLine(UIElement):
             self.allowed_characters = allowed_characters.copy()
 
     def set_forbidden_characters(self, forbidden_characters: Union[str, List[str]]):
+        """
+        Sets a blacklist of characters that will be banned from our text entry element.
+        We can either set the list directly, or request one of the already existing lists by a string
+        identifier. The currently supported lists for forbidden characters are:
+
+        - 'numbers'
+        - 'forbidden_file_path'
+
+        :param forbidden_characters: The characters to forbid, either in a list form or one of the supported string ids.
+        """
         if type(forbidden_characters) is str:
             if forbidden_characters == 'numbers':
                 self.forbidden_characters = UITextEntryLine._number_character_set
@@ -434,3 +561,23 @@ class UITextEntryLine(UIElement):
 
         else:
             self.forbidden_characters = forbidden_characters.copy()
+
+    def validate_text_string(self, text_to_validate: str) -> bool:
+        """
+        Checks a string of text to see if any of it's characters don't meet the requirements of the allowed and
+        forbidden character sets.
+
+        :param text_to_validate: The text string to check.
+        """
+        is_valid = True
+        if self.forbidden_characters is not None:
+            for character in text_to_validate:
+                if character in self.forbidden_characters:
+                    is_valid = False
+
+        if is_valid and self.allowed_characters is not None:
+            for character in text_to_validate:
+                if character not in self.allowed_characters:
+                    is_valid = False
+
+        return is_valid

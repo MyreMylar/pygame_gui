@@ -1,6 +1,8 @@
 import pygame
 import pygame.gfxdraw
+from typing import List, Union
 
+from .. import ui_manager
 from ..core.ui_element import UIElement
 from ..elements import ui_text_box
 
@@ -16,12 +18,14 @@ class UITooltip(UIElement):
     within the 'root' window/container, which is synonymous with the pygame display surface.
 
     :param html_text: Text styled with HTML, to be displayed on the tooltip.
-    :param hover_distance: Distance between the tooltip and the thing being hovered.
+    :param hover_distance: Distance in pixels between the tooltip and the thing being hovered.
     :param manager: The UIManager that manages this element.
     :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, html_text, hover_distance, manager, element_ids=None, object_id=None):
+    def __init__(self, html_text: str, hover_distance: int,
+                 manager: ui_manager.UIManager,
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         width = 170
         if element_ids is None:
             new_element_ids = ['tool_tip']

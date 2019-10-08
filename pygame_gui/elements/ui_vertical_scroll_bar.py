@@ -133,7 +133,7 @@ class UIVerticalScrollBar(UIElement):
         mouse click events.
 
         :param event: The event to process.
-        :return bool: Returns True if we've does something with the input event.
+        :return bool: Returns True if we've done something with the input event.
         """
         processed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
