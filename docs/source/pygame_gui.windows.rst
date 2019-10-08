@@ -9,7 +9,7 @@ pygame\_gui.windows.ui\_message\_window module
 
 .. automodule:: pygame_gui.windows.ui_message_window
    :members:
-   :undoc-members:
+   :no-undoc-members:
    :show-inheritance:
 
 
@@ -18,5 +18,5 @@ Module contents
 
 .. automodule:: pygame_gui.windows
    :members:
-   :undoc-members:
+   :no-undoc-members:
    :show-inheritance:

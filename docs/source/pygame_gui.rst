@@ -18,7 +18,7 @@ pygame\_gui.ui\_manager module
 
 .. automodule:: pygame_gui.ui_manager
    :members:
-   :undoc-members:
+   :no-undoc-members:
    :show-inheritance:
 
 
@@ -27,5 +27,5 @@ Module contents
 
 .. automodule:: pygame_gui
    :members:
-   :undoc-members:
+   :no-undoc-members:
    :show-inheritance:

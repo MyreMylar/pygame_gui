@@ -28,7 +28,8 @@ Features
 Getting Started
 ---------------
 
-Try our getting started guide here. Or you could have a rifle through the
+
+Try our :ref:`quick-start` here. Or you could have a rifle through the
 `examples project <https://github.com/MyreMylar/pygame_gui_examples>`_ over on GitHub to see some of the stuff the
 library can do.
 

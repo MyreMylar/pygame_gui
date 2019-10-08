@@ -335,7 +335,6 @@ class UIButton(UIElement):
     def enable(self):
         """
         Re-enables the button so we can once again interact with it.
-        :return:
         """
         self.is_enabled = True
         self.text_colour = self.colours['normal_text']
