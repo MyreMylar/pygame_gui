@@ -20,7 +20,7 @@ class UIScreenSpaceHealthBar(UIElement):
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
-                 sprite_to_monitor: Union[pygame.sprite.Sprite, None]=None,
+                 sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: ui_container.UIContainer = None,
                  element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:

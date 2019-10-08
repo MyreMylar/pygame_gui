@@ -1,10 +1,9 @@
 import pygame
-import os
 from typing import Tuple, List, Dict, Union
+
 from .core.ui_appearance_theme import UIAppearanceTheme
 from .core.ui_window_stack import UIWindowStack
 from .core.ui_window import UIWindow
-from .core.ui_font_dictionary import UIFontDictionary
 from .core.ui_shadow import ShadowGenerator
 from .core.ui_element import UIElement
 
@@ -173,7 +172,8 @@ class UIManager:
         that use a lot of different fonts.
 
         To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default 'fira_code' font)
-        you must first set the file paths to those fonts with a list of font descriptions in a dictionary form like so:
+        you must first add the paths to the files for those fonts, then load the specific fonts with a list of font
+        descriptions in a dictionary form like so:
 
         code:`{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}`
 
@@ -184,6 +184,8 @@ class UIManager:
         - 'italic'
         - 'bold'
         - 'bold_italic'
+
+        The name parameter here must match the one you used when you added the file paths.
 
         :param font_list: A list of font descriptions in dictionary format as described above.
 
@@ -201,7 +203,7 @@ class UIManager:
                 if 'italic' in font['style']:
                     italic = True
             if 'html_size' in font:
-                size = UIFontDictionary._html_font_sizes[font['html_size']]
+                size = self.ui_theme.get_font_dictionary().convert_html_size_to_point_size(font['html_size'])
             elif 'point_size' in font:
                 size = font['point_size']
 

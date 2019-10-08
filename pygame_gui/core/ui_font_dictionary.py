@@ -58,7 +58,7 @@ class UIFontDictionary:
         self.used_font_ids = ['fira_code_regular_14']
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool=False, italic: bool=False) -> pygame.font.Font:
+                  bold: bool = False, italic: bool = False) -> pygame.font.Font:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist and we have paths
         to the needed files, however it will issue a warning after doing so because dynamic file loading is normally a
@@ -109,7 +109,7 @@ class UIFontDictionary:
         font_id = font_name + "_" + font_style_string + "_" + str(font_size)
         return font_id
 
-    def preload_font(self, font_size: int, font_name: str, bold: bool=False, italic: bool=False):
+    def preload_font(self, font_size: int, font_name: str, bold: bool = False, italic: bool = False):
         """
         Lets us load a font at a particular size and style before we use it. While you can get away with relying on
         dynamic font loading during development, it is better to eventually pre-load all your font data at a
@@ -142,8 +142,8 @@ class UIFontDictionary:
         else:
             raise UserWarning('Trying to pre-load font id:' + font_id + 'with no paths set')
 
-    def add_font_path(self, font_name: str, font_path: str, bold_path: str=None,
-                      italic_path: str=None, bold_italic_path: str=None):
+    def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,
+                      italic_path: str = None, bold_italic_path: str = None):
         """
         Adds paths to different font files for a font name.
 
@@ -160,7 +160,10 @@ class UIFontDictionary:
                 italic_path = font_path
             if bold_italic_path is None:
                 bold_italic_path = font_path
-            self.known_font_paths[font_name] = [font_path, bold_path, italic_path, bold_italic_path]
+            self.known_font_paths[font_name] = [os.path.normpath(font_path),
+                                                os.path.normpath(bold_path),
+                                                os.path.normpath(italic_path),
+                                                os.path.normpath(bold_italic_path)]
 
     def print_unused_loaded_fonts(self):
         """
@@ -181,3 +184,15 @@ class UIFontDictionary:
             for font_id in unused_font_ids:
                 html_size = UIFontDictionary._html_font_sizes_reverse_lookup[int(font_id.split('_')[-1])]
                 print(font_id + '(HTML size: ' + str(html_size) + ')')
+
+    def convert_html_size_to_point_size(self, html_size: float) -> int:
+        """
+        Takes in a HTML style font size and converts it into a point font size.
+
+        :param html_size:
+        :return int: A 'point' font size we can use with pygame.font
+        """
+        if html_size in UIFontDictionary._html_font_sizes:
+            return UIFontDictionary._html_font_sizes[html_size]
+        else:
+            return self.default_font_size

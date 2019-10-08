@@ -20,7 +20,7 @@ class UILabel(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, relative_rect: pygame.Rect, text: str, manager: ui_manager.UIManager,
-                 container: ui_container.UIContainer=None,
+                 container: ui_container.UIContainer = None,
                  element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['label']

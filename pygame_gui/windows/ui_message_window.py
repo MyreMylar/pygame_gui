@@ -20,7 +20,7 @@ class UIMessageWindow(UIWindow):
     """
     def __init__(self, message_window_rect: pygame.Rect, message_title: str,
                  html_message: str, manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None]=None, object_id: Union[str, None]=None):
+                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['message_window']
         else:

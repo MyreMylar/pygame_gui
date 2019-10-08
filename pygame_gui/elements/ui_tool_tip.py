@@ -1,6 +1,6 @@
 import pygame
 import pygame.gfxdraw
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from .. import ui_manager
 from ..core.ui_element import UIElement
@@ -23,7 +23,7 @@ class UITooltip(UIElement):
     :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, html_text: str, hover_distance: int,
+    def __init__(self, html_text: str, hover_distance: Tuple[int, int],
                  manager: ui_manager.UIManager,
                  element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         width = 170
