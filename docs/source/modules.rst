@@ -1,5 +1,5 @@
-pygame_gui
-==========
+API Reference
+=============
 
 .. toctree::
    :maxdepth: 4

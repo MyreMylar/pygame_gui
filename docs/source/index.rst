@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Pygame GUI Documentation
+Documentation - Home Page
 ===================================================
 
 Pygame GUI is a module to help you make graphical user interfaces in for games written in pygame. The module is firmly
@@ -34,12 +34,15 @@ Try our :ref:`quick-start` here. Or you could have a rifle through the
 library can do.
 
 
-Quick Links
------------
+Table of contents
+-----------------
 .. toctree::
    :maxdepth: 2
 
+   quick_start
+   theme_guide
    modules
+
 
 
 Indices and tables
