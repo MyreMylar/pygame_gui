@@ -303,8 +303,14 @@ class UIAppearanceTheme:
                             self.ui_element_font_infos[element_name] = {}
                             self.ui_element_font_infos[element_name]['name'] = font_dict['name']
                             self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
-                            self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
-                            self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                            if 'bold' in font_dict:
+                                self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
+                            else:
+                                self.ui_element_font_infos[element_name]['bold'] = False
+                            if 'italic' in font_dict:
+                                self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                            else:
+                                self.ui_element_font_infos[element_name]['italic'] = False
 
                             if 'regular_path' in font_dict:
                                 self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']

@@ -188,8 +188,8 @@ class UIClosedDropDownState:
 
 class UIDropDownMenu(UIElement):
     """
-    A drop down menu lets us choose one text option from a list. That list of options that can be expanded and hidden
-    at the press of a button. While the element is called a drop down it can also be made to 'climb up' by changing
+    A drop down menu lets us choose one text option from a list. That list of options can be expanded and hidden
+    at the press of a button. While the element is called a drop down, it can also be made to 'climb up' by changing
     the 'expand_direction' styling option to 'up' in the theme file.
 
     The drop down is implemented through two states, one representing the 'closed' menu state and one for when it has
