@@ -42,7 +42,7 @@ That should open an empty window upon being run. If it doesn't you may need to i
 Next, we need to make sure that we've installed the pygame_gui module. If you haven't, then the quickest way is to open
 a terminal or Command Prompt and type:
 
-.. code-block::
+.. code-block:: console
 
     pip install pygame_gui
 
