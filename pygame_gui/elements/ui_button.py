@@ -85,7 +85,10 @@ class UIButton(UIElement):
         else:
             self.tool_tip_delay = 1.0
 
-        self.text_surface = self.font.render(self.text, True, self.text_colour)
+        if len(self.text) > 0:
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
+        else:
+            self.text_surface = None
 
         self.image = pygame.Surface(self.rect.size)
 
@@ -98,19 +101,20 @@ class UIButton(UIElement):
             text_horiz_alignment_padding = int(text_horiz_alignment_padding)
 
         # this helps us draw the text aligned
-        if text_horiz_alignment == 'center':
-            self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.centerx - self.rect.x,
-                                                                centery=self.rect.centery - self.rect.y)
-        elif text_horiz_alignment == 'left':
-            self.aligned_text_rect = self.text_surface.get_rect(x=text_horiz_alignment_padding,
-                                                                centery=self.rect.centery - self.rect.y)
-        elif text_horiz_alignment == 'right':
-            x_pos = self.rect.width - text_horiz_alignment_padding - self.text_surface.get_width()
-            self.aligned_text_rect = self.text_surface.get_rect(x=x_pos,
-                                                                centery=self.rect.centery - self.rect.y)
-        else:
-            self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.centerx - self.rect.x,
-                                                                centery=self.rect.centery - self.rect.y)
+        if self.text_surface is not None:
+            if text_horiz_alignment == 'center':
+                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.centerx - self.rect.x,
+                                                                    centery=self.rect.centery - self.rect.y)
+            elif text_horiz_alignment == 'left':
+                self.aligned_text_rect = self.text_surface.get_rect(x=text_horiz_alignment_padding,
+                                                                    centery=self.rect.centery - self.rect.y)
+            elif text_horiz_alignment == 'right':
+                x_pos = self.rect.width - text_horiz_alignment_padding - self.text_surface.get_width()
+                self.aligned_text_rect = self.text_surface.get_rect(x=x_pos,
+                                                                    centery=self.rect.centery - self.rect.y)
+            else:
+                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.centerx - self.rect.x,
+                                                                    centery=self.rect.centery - self.rect.y)
 
         text_vert_alignment = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_vert_alignment')
         text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_id,
@@ -120,14 +124,15 @@ class UIButton(UIElement):
         else:
             text_vert_alignment_padding = int(text_vert_alignment_padding)
 
-        if text_vert_alignment == 'center':
-            self.aligned_text_rect.centery = int(self.rect.height/2)
-        elif text_vert_alignment == 'top':
-            self.aligned_text_rect.y = text_vert_alignment_padding
-        elif text_vert_alignment == 'bottom':
-            self.aligned_text_rect.y = self.rect.height - self.text_surface.get_height() - text_vert_alignment_padding
-        else:
-            self.aligned_text_rect.centery = int(self.rect.height/2)
+        if self.text_surface is not None:
+            if text_vert_alignment == 'center':
+                self.aligned_text_rect.centery = int(self.rect.height/2)
+            elif text_vert_alignment == 'top':
+                self.aligned_text_rect.y = text_vert_alignment_padding
+            elif text_vert_alignment == 'bottom':
+                self.aligned_text_rect.y = self.rect.height - self.text_surface.get_height() - text_vert_alignment_padding
+            else:
+                self.aligned_text_rect.centery = int(self.rect.height/2)
 
         # default range at which we 'let go' of a button
         self.hold_range = (0, 0)
@@ -310,10 +315,17 @@ class UIButton(UIElement):
             image_rect = self.current_image.get_rect()
             image_rect.center = (self.rect.width/2, self.rect.height/2)
             self.image.blit(self.current_image, image_rect)
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
+            if len(self.text) > 0:
+                self.text_surface = self.font.render(self.text, True, self.text_colour)
+            else:
+                self.text_surface = None
         else:
-            self.text_surface = self.font.render(self.text, True, self.text_colour, self.background_colour)
-        self.image.blit(self.text_surface, self.aligned_text_rect)
+            if len(self.text) > 0:
+                self.text_surface = self.font.render(self.text, True, self.text_colour, self.background_colour)
+            else:
+                self.text_surface = None
+        if self.text_surface is not None:
+            self.image.blit(self.text_surface, self.aligned_text_rect)
 
     def check_pressed(self):
         """
