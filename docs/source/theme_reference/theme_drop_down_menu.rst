@@ -22,7 +22,7 @@ drop down which are made of buttons - which is basically all of it.
 Example
 -------
 
-Here is an example of a drop down menu block in a JSON theme file using the parameters described above (and a couple from UIButton).
+Here is an example of a drop down menu block in a JSON theme file, using the parameters described above (and a couple from UIButton).
 
 .. code-block:: json
    :caption: drop_down_menu.json

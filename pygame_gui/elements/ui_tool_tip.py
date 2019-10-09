@@ -55,7 +55,7 @@ class UITooltip(UIElement):
         height = self.text_block.rect.height + (2 * self.vert_shadow_spacing)
 
         self.rect.height = height
-        # should load this image elsewhere in a real program
+        # Get a shadow from the shadow generator
         self.image = self.ui_manager.get_shadow(self.rect.size)
 
     def kill(self):

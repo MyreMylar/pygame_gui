@@ -23,15 +23,16 @@ Features
 
  - A window stack that will let you keep a bunch of moveable windows of 'stuff' around and correctly sorted.
 
- - As closely respecting of the pygame way of doing things as I could get away with.
+ - As closely respecting of the pygame way of doing things as possible.
 
 Getting Started
 ---------------
 
 
-Try our :ref:`quick-start` here. Or you could have a rifle through the
+Try our :ref:`quick-start` here if you are new to Pygame GUI. Check out the :ref:`theme-guide` if you want to learn how
+to style your GUI. Or you could have a rifle through the
 `examples project <https://github.com/MyreMylar/pygame_gui_examples>`_ over on GitHub to see some of the stuff the
-library can do.
+library can do in action.
 
 
 Table of contents

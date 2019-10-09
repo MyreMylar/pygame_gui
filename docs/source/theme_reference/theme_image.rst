@@ -1,4 +1,6 @@
 .. _theme-image:
 
-UIImage Theme Options
-=====================
+UIImage Theming Parameters
+==========================
+
+UIImage currently has no theming parameters at all. How sad.
