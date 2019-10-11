@@ -118,11 +118,11 @@ class UIAppearanceTheme:
             if 'regular_path' in font_info:
                 regular_path = font_info['regular_path']
 
-                if 'bold_path' in font_info['bold_path']:
+                if 'bold_path' in font_info:
                     bold_path = font_info['bold_path']
-                if 'italic_path' in font_info['italic_path']:
+                if 'italic_path' in font_info:
                     italic_path = font_info['italic_path']
-                if 'bold_italic_path' in font_info['bold_italic_path']:
+                if 'bold_italic_path' in font_info:
                     bold_italic_path = font_info['bold_italic_path']
 
                 self.font_dictionary.add_font_path(font_info['name'],
