@@ -110,9 +110,15 @@ class UIContainer(UIElement):
         Overrides the standard kill method of UI Elements (and pygame sprites beyond that) to also call the kill method
         on all contained UI Elements.
         """
+        self.clear()
+        super().kill()
+
+    def clear(self):
+        """
+        Removes and kills all the UI elements inside this container.
+        """
         while len(self.elements) > 0:
             self.elements.pop().kill()
-        super().kill()
 
     # noinspection PyUnusedLocal
     def check_hover(self, time_delta, hovered_higher_element):
