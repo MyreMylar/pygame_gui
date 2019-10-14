@@ -54,9 +54,8 @@ class UIWorldSpaceHealthBar(UIElement):
         self.horiz_padding = 2
         self.vert_padding = 2
 
-        self.position = [self.sprite_to_monitor.screen_position[0] - self.sprite_to_monitor.rect.width / 2,
-                         self.sprite_to_monitor.screen_position[1] - (
-                                 self.sprite_to_monitor.rect.height / 2) - self.hover_height]
+        self.position = [self.sprite_to_monitor.rect.x,
+                         self.sprite_to_monitor.rect.y - self.hover_height]
 
         self.rect.x = self.position[0]
         self.rect.y = self.position[1]
@@ -89,12 +88,11 @@ class UIWorldSpaceHealthBar(UIElement):
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
         if self.alive():
-            self.position = [self.sprite_to_monitor.screen_position[0] - self.sprite_to_monitor.rect.width / 2,
-                             self.sprite_to_monitor.screen_position[1] - (
-                                     self.sprite_to_monitor.rect.height / 2) - self.hover_height]
+            self.position = [self.sprite_to_monitor.rect.x,
+                             self.sprite_to_monitor.rect.y - self.hover_height]
 
             self.current_health = self.sprite_to_monitor.current_health
-            self.health_capacity = self.sprite_to_monitor.base_health
+            self.health_capacity = self.sprite_to_monitor.health_capacity
             self.health_percentage = self.current_health / self.health_capacity
             self.current_health_rect.width = int(self.capacity_width * self.health_percentage)
 
