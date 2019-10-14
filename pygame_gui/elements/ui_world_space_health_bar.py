@@ -26,10 +26,10 @@ class UIWorldSpaceHealthBar(UIElement):
                  container: ui_container.UIContainer = None,
                  element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
         if element_ids is None:
-            new_element_ids = ['screen_space_health_bar']
+            new_element_ids = ['world_space_health_bar']
         else:
             new_element_ids = element_ids.copy()
-            new_element_ids.append('screen_space_health_bar')
+            new_element_ids.append('world_space_health_bar')
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
@@ -46,13 +46,19 @@ class UIWorldSpaceHealthBar(UIElement):
             self.sprite_to_monitor = None
             raise AssertionError('Need sprite to monitor')
 
-        self.background_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_bg')
+        self.border_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')
         self.health_empty_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'unfilled_bar')
         self.health_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'filled_bar')
 
         self.hover_height = 10
-        self.horiz_padding = 2
-        self.vert_padding = 2
+        hover_height_param = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'hover_height')
+        if hover_height_param is not None:
+            self.hover_height = int(hover_height_param)
+
+        self.border_width = 1
+        border_width_param = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'border_width')
+        if border_width_param is not None:
+            self.border_width = int(border_width_param)
 
         self.position = [self.sprite_to_monitor.rect.x,
                          self.sprite_to_monitor.rect.y - self.hover_height]
@@ -60,23 +66,20 @@ class UIWorldSpaceHealthBar(UIElement):
         self.rect.x = self.position[0]
         self.rect.y = self.position[1]
 
-        self.background_surface = pygame.Surface((self.rect.w, self.rect.h)).convert()
-        self.background_surface.fill(self.background_colour)
+        self.image = pygame.Surface((self.rect.w, self.rect.h), flags=pygame.SRCALPHA)
 
-        self.image = pygame.Surface((self.rect.w, self.rect.h)).convert()
-
-        self.capacity_width = self.rect.width - (self.horiz_padding * 2)
-        self.capacity_height = self.rect.height - (self.vert_padding * 2)
-        self.health_capacity_rect = pygame.Rect([self.horiz_padding,
-                                                 self.vert_padding],
+        self.capacity_width = self.rect.width - (self.border_width * 2)
+        self.capacity_height = self.rect.height - (self.border_width * 2)
+        self.health_capacity_rect = pygame.Rect([self.border_width,
+                                                 self.border_width],
                                                 [self.capacity_width, self.capacity_height])
 
-        self.current_health = 50
-        self.health_capacity = 100
-        self.health_percentage = self.current_health / self.health_capacity
+        self.current_health = 0
+        self.health_capacity = 0
+        self.health_percentage = 0.0
 
-        self.current_health_rect = pygame.Rect([self.horiz_padding,
-                                                self.vert_padding],
+        self.current_health_rect = pygame.Rect([self.border_width,
+                                                self.border_width],
                                                [int(self.capacity_width*self.health_percentage),
                                                 self.capacity_height])
 
@@ -91,14 +94,17 @@ class UIWorldSpaceHealthBar(UIElement):
             self.position = [self.sprite_to_monitor.rect.x,
                              self.sprite_to_monitor.rect.y - self.hover_height]
 
-            self.current_health = self.sprite_to_monitor.current_health
-            self.health_capacity = self.sprite_to_monitor.health_capacity
-            self.health_percentage = self.current_health / self.health_capacity
-            self.current_health_rect.width = int(self.capacity_width * self.health_percentage)
-
-            self.image.blit(self.background_surface, (0, 0))
-            pygame.draw.rect(self.image, self.health_empty_colour, self.health_capacity_rect)
-            pygame.draw.rect(self.image, self.health_colour, self.current_health_rect)
-
             self.rect.x = self.position[0]
             self.rect.y = self.position[1]
+
+            if (self.current_health != self.sprite_to_monitor.current_health) or (
+                    self.health_capacity != self.sprite_to_monitor.health_capacity):
+
+                self.current_health = self.sprite_to_monitor.current_health
+                self.health_capacity = self.sprite_to_monitor.health_capacity
+                self.health_percentage = self.current_health / self.health_capacity
+                self.current_health_rect.width = int(self.capacity_width * self.health_percentage)
+
+                self.image.fill(self.border_colour)
+                self.image.fill(self.health_empty_colour, self.health_capacity_rect)
+                self.image.fill(self.health_colour, self.current_health_rect)
