@@ -81,7 +81,21 @@ class UIFontDictionary:
         if font_id in self.loaded_fonts:  # font already loaded
             return self.loaded_fonts[font_id]
         elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
-            warnings.warn('Finding font with id: ' + font_id + ' that is not already loaded', UserWarning)
+
+            style_string = "regular"
+            if bold and italic:
+                style_string = "bold_italic"
+            elif bold:
+                style_string = "bold"
+            elif italic:
+                style_string = "italic"
+
+            warning_string = ('Finding font with id: ' + font_id + " that is not already loaded.\n"
+                                                                   "Preload this font with {'name': "
+                                                                   "'" + font_name + "',"
+                                                                   " 'point_size': " + str(font_size) + ","
+                                                                   " 'style': '" + style_string + "'}")
+            warnings.warn(warning_string, UserWarning)
             self.preload_font(font_size, font_name, bold, italic)
             return self.loaded_fonts[font_id]
         else:
