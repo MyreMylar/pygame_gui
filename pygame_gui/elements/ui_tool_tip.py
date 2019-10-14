@@ -57,6 +57,7 @@ class UITooltip(UIElement):
         self.rect.height = height
         # Get a shadow from the shadow generator
         self.image = self.ui_manager.get_shadow(self.rect.size)
+        self.image.fill(pygame.Color(0,0,0,0), self.text_block.rect)
 
     def kill(self):
         """

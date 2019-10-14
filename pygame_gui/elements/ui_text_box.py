@@ -172,9 +172,10 @@ class UITextBox(UIElement):
             'font_size': 14
         }
 
-        def __init__(self):
+        def __init__(self, theme, element_ids, object_id):
             super().__init__()
 
+            self.ui_theme = theme
             self.len_text = 0
             self.element_stack = []
             self.style_stack = []
@@ -185,10 +186,16 @@ class UITextBox(UIElement):
             self.indexed_styles = {}
 
             self.char_style = CharStyle()
-            self.default_font_name = "fira_code"
-            self.default_font_size = 14
-            self.default_font_color = pygame.color.Color("#FFFFFFFF")
-            self.default_bg_color = pygame.color.Color("#000000")
+
+            font_info = self.ui_theme.get_font_info(object_id, element_ids)
+
+            self.default_font_name = font_info['name']
+            self.default_font_size = int(font_info['size'])
+            self.default_style['font_name'] = self.default_font_name
+            self.default_style['font_size'] = self.default_font_size
+
+            self.default_font_color = self.ui_theme.get_colour(object_id, element_ids, 'normal_text')
+            self.default_bg_color = self.ui_theme.get_colour(object_id, element_ids, 'dark_bg')
             self.font_name = self.default_font_name
             self.font_size = self.default_font_size
             self.font_color = self.default_font_color
@@ -312,10 +319,10 @@ class UITextBox(UIElement):
             7: 48
         }
 
-        def __init__(self, ui_theme, element_id, object_id):
-            super().__init__()
+        def __init__(self, ui_theme, element_ids, object_id):
+            super().__init__(ui_theme, element_ids, object_id)
             self.ui_theme = ui_theme
-            self.element_id = element_id
+            self.element_ids = element_ids
             self.object_id = object_id
 
         def handle_starttag(self, tag, attrs):
@@ -350,7 +357,7 @@ class UITextBox(UIElement):
                         style["font_color"] = pygame.color.Color(attributes['color'])
                     else:
                         style["font_color"] = self.ui_theme.get_colour(self.object_id,
-                                                                       self.element_id, attributes['color'])
+                                                                       self.element_ids, attributes['color'])
 
             elif element == 'body':
                 if 'bgcolor' in attributes:
@@ -501,14 +508,11 @@ class UITextBox(UIElement):
         # This section creates the border by blitting a smaller surface over the top of one containing the border
         # to make the final background surface - this would be the point to add transparency I guess
         self.background_surf = self.background_surf = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-        self.inner_background_surf = pygame.Surface((self.rect.size[0] - self.border_width * 2,
-                                                     self.rect.size[1] - self.border_width * 2), flags=pygame.SRCALPHA)
+
         self.background_surf.fill(self.border_color)
-        self.inner_background_surf.fill(self.bg_color)
-        self.background_surf.blit(self.inner_background_surf, (self.border_width, self.border_width))
-        if self.bg_color.a != 255:
-            self.background_surf.set_alpha(self.bg_color.a)
-            self.background_surf.convert_alpha()
+        self.background_surf.fill(self.bg_color, (self.border_width, self.border_width,
+                                                  self.rect.size[0] - self.border_width * 2,
+                                                  self.rect.size[1] - self.border_width * 2))
 
         if self.scroll_bar is not None:
             height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]

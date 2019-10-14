@@ -192,6 +192,27 @@ class UIAppearanceTheme:
 
         return None
 
+    def get_font_info(self, object_id, element_ids):
+        """
+        Uses some data about a UIElement to get font data as dictionary
+
+        :param object_id: An ID for the particular instance of this element being created.
+        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :return dictionary: Data about the font requested
+        """
+        font_info = self.base_font_info
+
+        if object_id is not None and object_id in self.ui_element_font_infos:
+            font_info = self.ui_element_font_infos[object_id]
+        else:
+            # then fall back on a font for this element type
+            for element_id in element_ids:
+                if element_id in self.ui_element_font_infos:
+                    font_info = self.ui_element_font_infos[element_id]
+                    break
+
+        return font_info
+
     def get_font(self, object_id, element_ids):
         """
         Uses some data about a UIElement to get a font object.
