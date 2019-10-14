@@ -64,6 +64,13 @@ class UILabel(UIElement):
         if shadow_size_param is not None:
             shadow_size = int(shadow_size_param)
 
+        shadow_offset = [0, 0]
+        shadow_offset_param = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_shadow_offset')
+        if shadow_offset_param is not None:
+            offset_string_list = shadow_size_param.split(',')
+            if len(offset_string_list) == 2:
+                shadow_offset = [int(offset_string_list[0]), int(offset_string_list[1])]
+
         text_size = font.size(self.text)
         if text_size[1] > self.rect.height or text_size[0] > self.rect.width:
             width_overlap = self.rect.width - text_size[0]
@@ -84,23 +91,26 @@ class UILabel(UIElement):
             shadow_text_render = font.render(self.text, True, text_shadow_colour)
 
             for y in range(-shadow_size, shadow_size+1):
-                shadow_text_render_rect = pygame.Rect((text_render_rect.x,
-                                                       text_render_rect.y + y), text_render_rect.size)
+                shadow_text_render_rect = pygame.Rect((text_render_rect.x + shadow_offset[0],
+                                                       text_render_rect.y + shadow_offset[1] + y),
+                                                      text_render_rect.size)
                 self.image.blit(shadow_text_render, shadow_text_render_rect)
 
             for x in range(-shadow_size, shadow_size+1):
-                shadow_text_render_rect = pygame.Rect((text_render_rect.x + x,
-                                                       text_render_rect.y), text_render_rect.size)
+                shadow_text_render_rect = pygame.Rect((text_render_rect.x + shadow_offset[0] + x,
+                                                       text_render_rect.y + shadow_offset[1]), text_render_rect.size)
                 self.image.blit(shadow_text_render, shadow_text_render_rect)
 
             for x_and_y in range(-shadow_size, shadow_size+1):
-                shadow_text_render_rect = pygame.Rect((text_render_rect.x + x_and_y,
-                                                       text_render_rect.y + x_and_y), text_render_rect.size)
+                shadow_text_render_rect = pygame.Rect((text_render_rect.x + shadow_offset[0] + x_and_y,
+                                                       text_render_rect.y + shadow_offset[1] + x_and_y),
+                                                      text_render_rect.size)
                 self.image.blit(shadow_text_render, shadow_text_render_rect)
 
             for x_and_y in range(-shadow_size, shadow_size+1):
-                shadow_text_render_rect = pygame.Rect((text_render_rect.x - x_and_y,
-                                                       text_render_rect.y + x_and_y), text_render_rect.size)
+                shadow_text_render_rect = pygame.Rect((text_render_rect.x + shadow_offset[0] - x_and_y,
+                                                       text_render_rect.y + shadow_offset[1] + x_and_y),
+                                                      text_render_rect.size)
                 self.image.blit(shadow_text_render, shadow_text_render_rect)
 
         self.image.blit(text_render, text_render_rect)
