@@ -106,18 +106,18 @@ class UITextEntryLine(UIElement):
         self.cursor = pygame.Rect((self.text_surface.get_rect().right + 2,
                                    self.vert_line_padding + self.border_width), (1, line_height))
 
-        self.background_and_border = pygame.Surface(self.rect.size)
+        self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.background_and_border.fill(self.border_colour)
         background_surface = pygame.Surface(((self.rect.width-(self.border_width * 2),
-                                              self.rect.height-(self.border_width * 2))))
+                                              self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
         background_surface.fill(self.bg_colour)
         self.background_and_border.blit(background_surface, (self.border_width, self.border_width))
 
         self.text_image = pygame.Surface(((self.rect.width-(self.border_width * 2),
-                                           self.rect.height-(self.border_width * 2))))
+                                           self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
         self.text_image.fill(self.bg_colour)
 
-        self.image = pygame.Surface(self.rect.size)
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.start_text_offset = 0
 
         self.redraw()
@@ -187,7 +187,8 @@ class UITextEntryLine(UIElement):
             text_height = select_area_surface.get_rect().height
             width_select = select_area_surface.get_rect().width
 
-            self.text_surface = pygame.Surface((width_pre + width_select + width_post, text_height))
+            self.text_surface = pygame.Surface((width_pre + width_select + width_post, text_height),
+                                               flags=pygame.SRCALPHA)
             self.text_surface.fill(self.bg_colour)
             if pre_select_area_surface is not None:
                 self.text_surface.blit(pre_select_area_surface, (0, 0))

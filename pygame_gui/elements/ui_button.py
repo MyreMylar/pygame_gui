@@ -90,7 +90,7 @@ class UIButton(UIElement):
         else:
             self.text_surface = None
 
-        self.image = pygame.Surface(self.rect.size)
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
         text_horiz_alignment = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_horiz_alignment')
         text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_id,

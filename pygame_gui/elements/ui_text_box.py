@@ -500,9 +500,9 @@ class UITextBox(UIElement):
 
         # This section creates the border by blitting a smaller surface over the top of one containing the border
         # to make the final background surface - this would be the point to add transparency I guess
-        self.background_surf = self.background_surf = pygame.Surface(self.rect.size)
+        self.background_surf = self.background_surf = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.inner_background_surf = pygame.Surface((self.rect.size[0] - self.border_width * 2,
-                                                     self.rect.size[1] - self.border_width * 2))
+                                                     self.rect.size[1] - self.border_width * 2), flags=pygame.SRCALPHA)
         self.background_surf.fill(self.border_color)
         self.inner_background_surf.fill(self.bg_color)
         self.background_surf.blit(self.inner_background_surf, (self.border_width, self.border_width))
@@ -516,7 +516,7 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size).convert_alpha()
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width,
@@ -538,7 +538,7 @@ class UITextBox(UIElement):
                     height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
                     drawable_area = pygame.Rect((0, height_adjustment),
                                                 (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-                    self.image = pygame.Surface(self.rect.size).convert_alpha()
+                    self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
                     self.image.fill(pygame.Color(0, 0, 0, 0))
                     self.image.blit(self.background_surf, (0, 0))
                     self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width,
@@ -623,7 +623,7 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size).convert_alpha()
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width,
@@ -1176,7 +1176,7 @@ class TextBlock:
         else:
             final_alpha = 255
 
-        self.block_sprite = pygame.Surface((self.width, self.height))
+        self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA)
         self.block_sprite.fill(self.bg_colour)
 
         for text_line in self.lines:

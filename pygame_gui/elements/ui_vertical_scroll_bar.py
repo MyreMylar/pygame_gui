@@ -135,6 +135,11 @@ class UIVerticalScrollBar(UIElement):
         :param event: The event to process.
         :return bool: Returns True if we've done something with the input event.
         """
+
+        # pygame.MOUSEWHEEL only defined after pygame 1.9
+        if 'pygame.MOUSEWHEEL' not in locals() and 'pygame.MOUSEWHEEL' not in globals():
+            pygame.MOUSEWHEEL = -1
+
         processed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
         if (last_focused_scrollbar_element is self) or (

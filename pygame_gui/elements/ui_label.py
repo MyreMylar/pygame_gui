@@ -67,7 +67,7 @@ class UILabel(UIElement):
         shadow_offset = [0, 0]
         shadow_offset_param = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_shadow_offset')
         if shadow_offset_param is not None:
-            offset_string_list = shadow_size_param.split(',')
+            offset_string_list = shadow_offset_param.split(',')
             if len(offset_string_list) == 2:
                 shadow_offset = [int(offset_string_list[0]), int(offset_string_list[1])]
 
@@ -84,7 +84,7 @@ class UILabel(UIElement):
         else:
             text_render = font.render(self.text, True, text_colour, bg_colour)
         text_render_rect = text_render.get_rect(centerx=self.rect.width/2, centery=self.rect.height/2)
-        self.image = pygame.Surface(self.rect.size).convert_alpha()
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.image.fill(bg_colour)
 
         if shadow_enabled:
