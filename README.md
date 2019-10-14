@@ -1,6 +1,8 @@
 # Pygame GUI
 A GUI system for pygame 2 (it may also work OK on earlier versions of pygame).
 
+![Goldblum](https://i.imgur.com/sUGLxDd.png)
+
 ## How to install
 
 1. Run this command in a command prompt:
