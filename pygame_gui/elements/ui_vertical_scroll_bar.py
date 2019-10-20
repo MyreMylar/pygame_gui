@@ -137,7 +137,9 @@ class UIVerticalScrollBar(UIElement):
         """
 
         # pygame.MOUSEWHEEL only defined after pygame 1.9
-        if 'pygame.MOUSEWHEEL' not in locals() and 'pygame.MOUSEWHEEL' not in globals():
+        try:
+            pygame.MOUSEWHEEL
+        except NameError:
             pygame.MOUSEWHEEL = -1
 
         processed_event = False
@@ -175,16 +177,17 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_wheel_up = False
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.top_limit)
-                self.sliding_button.rect.y = self.scroll_position + self.rect.y + self.button_height
-                self.sliding_button.relative_rect.y = self.scroll_position + self.relative_rect.y + self.button_height
+                self.sliding_button.set_position(pygame.Vector2(self.rect.x,
+                                                                self.scroll_position + self.rect.y + self.button_height))
                 moved_this_frame = True
             elif (self.bottom_button.held or self.scroll_wheel_down) and self.scroll_position < self.bottom_limit:
                 self.scroll_wheel_down = False
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
                                            self.bottom_limit - self.sliding_button.rect.height)
-                self.sliding_button.rect.y = self.scroll_position + self.rect.y + self.button_height
-                self.sliding_button.relative_rect.y = self.scroll_position + self.relative_rect.y + self.button_height
+                self.sliding_button.set_position(pygame.Vector2(self.rect.x,
+                                                                self.scroll_position + self.rect.y + self.button_height))
+
                 moved_this_frame = True
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -203,8 +206,8 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_position = min(max(self.scroll_position, self.top_limit),
                                            self.bottom_limit - self.sliding_button.rect.height)
 
-                self.sliding_button.rect.y = self.scroll_position + self.rect.y + self.button_height
-                self.sliding_button.relative_rect.y = self.scroll_position + self.relative_rect.y + self.button_height
+                self.sliding_button.set_position(pygame.Vector2(self.rect.x,
+                                                                self.scroll_position + self.rect.y + self.button_height))
                 moved_this_frame = True
             elif not self.sliding_button.held:
                 self.grabbed_slider = False
