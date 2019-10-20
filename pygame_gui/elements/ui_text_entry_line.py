@@ -108,16 +108,17 @@ class UITextEntryLine(UIElement):
 
         self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.background_and_border.fill(self.border_colour)
-        background_surface = pygame.Surface(((self.rect.width-(self.border_width * 2),
-                                              self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
-        background_surface.fill(self.bg_colour)
-        self.background_and_border.blit(background_surface, (self.border_width, self.border_width))
-
+        self.background_and_border.fill(self.bg_colour,
+                                        pygame.Rect((self.border_width,
+                                                     self.border_width),
+                                                    (self.rect.width - (self.border_width * 2),
+                                                     self.rect.height - (self.border_width * 2)
+                                                     )))
         self.text_image = pygame.Surface(((self.rect.width-(self.border_width * 2),
                                            self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
         self.text_image.fill(self.bg_colour)
 
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.image = self.background_and_border.copy()
         self.start_text_offset = 0
 
         self.redraw()
@@ -196,7 +197,7 @@ class UITextEntryLine(UIElement):
             if post_select_area_surface is not None:
                 self.text_surface.blit(post_select_area_surface, (width_pre+width_select, 0))
         else:
-            self.text_surface = self.font.render(self.text, True, self.text_colour, self.bg_colour)
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
 
         text_clip_width = self.rect.width - (self.horiz_line_padding * 2) - (self.border_width * 2)
         text_clip_height = self.rect.height - (self.vert_line_padding * 2) - (self.border_width * 2)
@@ -234,7 +235,7 @@ class UITextEntryLine(UIElement):
         Redraws only the blinking edit cursor. This allows us to blink the cursor on and off without spending time
         redrawing all the text.
         """
-        self.image.blit(self.background_and_border, (0, 0))
+        self.image = self.background_and_border.copy()
         self.image.blit(self.text_image, (self.border_width, self.border_width))
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
