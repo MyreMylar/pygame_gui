@@ -117,7 +117,7 @@ class UIExpandedDropDownState:
                 button_pressed_event = pygame.event.Event(pygame.USEREVENT,
                                                           {'user_type': 'ui_drop_down_menu_changed',
                                                            'text': button.text,
-                                                           'ui_element': self,
+                                                           'ui_element': self.drop_down_menu_ui,
                                                            'ui_object_id': self.object_id})
                 pygame.event.post(button_pressed_event)
 
