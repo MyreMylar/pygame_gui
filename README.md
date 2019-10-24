@@ -12,4 +12,4 @@ pip install pygame_gui
 
 ## Making use of the library
 
-There is documentation available [here](https://pygame-gui.readthedocs.io/en/latest/index.html), you can als0 try out the examples at the [pygame_gui_examples repository](https://github.com/MyreMylar/pygame_gui_examples).
+There is documentation available [here](https://pygame-gui.readthedocs.io/en/latest/index.html), you can also try out the examples at the [pygame_gui_examples repository](https://github.com/MyreMylar/pygame_gui_examples).
