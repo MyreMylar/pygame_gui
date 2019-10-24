@@ -56,7 +56,7 @@ Here is an example of a label block in a JSON theme file using the parameters de
             "colours":
             {
                 "dark_bg": "#25292e",
-                "normal_text": "#c5cbd8"
+                "normal_text": "#c5cbd8",
                 "text_shadow": "#505050"
             },
             "font":

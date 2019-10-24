@@ -19,8 +19,8 @@ Misc
 
 UIWorldSpaceHealthBar has the following miscellaneous parameters in a 'misc' block:
 
- -"**hover_height**" - The height in pixels that the health bar will appear over the sprite. Defaults to "10".
- -"**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
+ - "**hover_height**" - The height in pixels that the health bar will appear over the sprite. Defaults to "10".
+ - "**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
 
 Example
 -------

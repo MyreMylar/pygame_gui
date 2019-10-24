@@ -20,7 +20,7 @@ UIButton makes use of these colour parameters in a 'colours' block:
  - "**disabled_text**" - The colour of the button's text when the button has been disabled (so users cannot interact with it)
  - "**selected_text**" - The colour of the button's text when the button has select focus.
  - "**active_text**" - The colour of the button's text (if any) 'mid-click', you will mostly see it while dragging things around via buttons.
-
+ - "**border**" - The colour of the border around the button if it has one.
 Font
 -----
 
@@ -69,6 +69,8 @@ Misc
 
 UIButton accepts the following miscellaneous parameters in a 'misc' block:
 
+ - "**border_width**" - the width in pixels of the border around the button. Defaults to 0.
+ - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 0.
  - "**tool_tip_delay**" - time in seconds before a the buttons tool sip (if it has one) will appear. Default is "1.0".
  - "**text_horiz_alignment**" - Set to "left", "right" or "center". Controls the horizontal placement of the button text, if this button has any text. Default is "center".
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the button text, if this button has any text. Default is "center".
@@ -98,7 +100,8 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "hovered_text": "#FFFFFF",
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f",
-                "active_text": "#6d736f"
+                "active_text": "#6d736f",
+                "border": "#AAAAAA"
             },
             "font":
             {
@@ -133,6 +136,8 @@ Here is an example of a button block in a JSON theme file using all the paramete
             },
             "misc":
             {
+                "border_width": "1",
+                "shadow_width": "1",
                 "tool_tip_delay": "1.0",
                 "text_horiz_alignment": "left",
                 "text_vert_alignment": "top",
