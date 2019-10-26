@@ -389,7 +389,7 @@ class UITextEntryLine(UIElement):
                                                               {'user_type': 'ui_text_entry_finished',
                                                                'text': self.text,
                                                                'ui_element': self,
-                                                               'ui_object_id': self.object_ids})
+                                                               'ui_object_id': self.object_ids[-1]})
                     pygame.event.post(entry_finished_event)
                 elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                     self.select_range = [0, len(self.text)]

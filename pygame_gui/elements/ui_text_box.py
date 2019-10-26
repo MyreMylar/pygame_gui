@@ -729,7 +729,7 @@ class UITextBox(UIElement):
                                                                         {'user_type': 'ui_text_box_link_clicked',
                                                                          'link_target': chunk.link_href,
                                                                          'ui_element': self,
-                                                                         'ui_object_id': self.object_ids})
+                                                                         'ui_object_id': self.object_ids[-1]})
                                 pygame.event.post(link_clicked_event)
 
                     if chunk.is_selected:
