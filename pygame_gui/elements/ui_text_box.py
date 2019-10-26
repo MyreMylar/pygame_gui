@@ -815,10 +815,13 @@ class StyledChunk:
                 (self.link_normal_underline and not self.is_hovered):
             self.font.set_underline(True)
 
-        if self.bg_color.a != 255:
-            self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+        if len(self.chunk) > 0:
+            if self.bg_color.a != 255:
+                self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+            else:
+                self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
         else:
-            self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+            self.rendered_chunk = pygame.Surface((0, 0))
         metrics = self.font.metrics(self.chunk)
         self.ascent = self.font.get_ascent()
         self.width = self.font.size(self.chunk)[0]
@@ -841,10 +844,13 @@ class StyledChunk:
                 (self.link_normal_underline and not self.is_hovered):
             self.font.set_underline(True)
 
-        if self.bg_color.a != 255:
-            self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+        if len(self.chunk) > 0:
+            if self.bg_color.a != 255:
+                self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+            else:
+                self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
         else:
-            self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+            self.rendered_chunk = pygame.Surface((0, 0))
 
         self.font.set_underline(False)
 
