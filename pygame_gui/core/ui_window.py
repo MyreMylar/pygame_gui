@@ -11,25 +11,23 @@ class UIWindow(pygame.sprite.Sprite):
 
     :param rect: A rectangle that completely surrounds the window.
     :param manager: The UIManager that manages this UIElement.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
     def __init__(self, rect: pygame.Rect, manager: 'ui_manager.UIManager',
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 element_ids: List[str], object_ids: Union[List[Union[str, None]], None] = None):
         self._layer = 0
-        if element_ids is None:
-            new_element_ids = ["window"]
-        else:
-            new_element_ids = element_ids.copy()
-            new_element_ids.append("window")
         self.layer_thickness = 1
         self.ui_manager = manager
         super().__init__(self.ui_manager.get_sprite_group())
 
-        self.element_ids = new_element_ids
-        self.object_id = object_id
+        self.element_ids = element_ids.copy()
+        if object_ids is not None:
+            self.object_ids = object_ids.copy()
+        else:
+            self.object_ids = [None]
 
-        self.window_container = UIContainer(rect.copy(), manager, None, self.element_ids, self.object_id)
+        self.window_container = UIContainer(rect.copy(), manager, None, self, None)
 
         self.window_stack = self.ui_manager.get_window_stack()
         self.window_stack.add_new_window(self)

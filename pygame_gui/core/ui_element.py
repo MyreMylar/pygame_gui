@@ -17,13 +17,14 @@ class UIElement(pygame.sprite.Sprite):
     :param container: A container that this element is contained in.
     :param starting_height: Used to record how many layers above it's container this element should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
     def __init__(self, relative_rect: pygame.Rect, manager: 'ui_manager.UIManager',
                  container: Union['ui_container.UIContainer', None],
                  starting_height: int, layer_thickness: int,
-                 object_id: Union[str, None] = None, element_ids: Union[List[str], None] = None):
+                 object_ids: Union[List[Union[str, None]], None] = None,
+                 element_ids: Union[List[str], None] = None):
 
         self._layer = 0
         self.ui_manager = manager
@@ -31,7 +32,7 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect = relative_rect
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
-        self.object_id = object_id
+        self.object_ids = object_ids
         self.element_ids = element_ids
 
         self.layer_thickness = layer_thickness

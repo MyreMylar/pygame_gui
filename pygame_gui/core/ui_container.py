@@ -17,17 +17,23 @@ class UIContainer(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, relative_rect, manager,
-                 container=None, element_ids=None, object_id=None):
+                 container=None, parent_element=None, object_id=None):
 
         self._layer = 0
         self.ui_manager = manager
-        if element_ids is None:
-            new_element_ids = ['container']
-        else:
-            new_element_ids = element_ids.copy()
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('container')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['container']
+            new_object_ids = [object_id]
+
         super().__init__(relative_rect, manager, container,
-                         object_id=object_id,
+                         object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=1,
                          layer_thickness=1)

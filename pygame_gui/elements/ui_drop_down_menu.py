@@ -15,7 +15,7 @@ class UIExpandedDropDownState:
     Picking an option will also close the menu.
     """
     def __init__(self, drop_down_menu_ui, options_list, selected_option, base_position_rect,
-                 close_button_width, manager, container, element_ids, object_id):
+                 close_button_width, manager, container, element_ids, object_ids):
         self.drop_down_menu_ui = drop_down_menu_ui
         self.should_transition = False
         self.options_list = options_list
@@ -24,7 +24,7 @@ class UIExpandedDropDownState:
         self.ui_manager = manager
         self.ui_container = container
         self.element_ids = element_ids
-        self.object_id = object_id
+        self.object_ids = object_ids
 
         self.close_button_width = close_button_width
 
@@ -49,12 +49,11 @@ class UIExpandedDropDownState:
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
-                                               object_id=self.object_id,
-                                               element_ids=self.element_ids)
+                                               parent_element=self.drop_down_menu_ui)
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
 
-        expand_direction = self.ui_manager.get_theme().get_misc_data(self.object_id,
+        expand_direction = self.ui_manager.get_theme().get_misc_data(self.object_ids,
                                                                      self.element_ids, 'expand_direction')
         expand_button_symbol = '▼'
         select_button_dist_to_move = self.selected_option_button.rect.height
@@ -76,8 +75,7 @@ class UIExpandedDropDownState:
                                      self.ui_manager,
                                      self.ui_container,
                                      starting_height=2,
-                                     object_id=self.object_id,
-                                     element_ids=self.element_ids)
+                                     parent_element=self.drop_down_menu_ui)
 
         option_y_pos += select_button_dist_to_move
         for option in self.options_list:
@@ -88,8 +86,7 @@ class UIExpandedDropDownState:
                                   self.ui_manager,
                                   self.ui_container,
                                   starting_height=3,  # height allows options to overlap other UI elements
-                                  object_id=self.object_id,
-                                  element_ids=self.element_ids)
+                                  parent_element=self.drop_down_menu_ui)
             option_y_pos += option_button_dist_to_move
             self.menu_buttons.append(new_button)
 
@@ -114,12 +111,12 @@ class UIExpandedDropDownState:
                 self.drop_down_menu_ui.selected_option = button.text
                 self.should_transition = True
 
-                button_pressed_event = pygame.event.Event(pygame.USEREVENT,
-                                                          {'user_type': 'ui_drop_down_menu_changed',
-                                                           'text': button.text,
-                                                           'ui_element': self.drop_down_menu_ui,
-                                                           'ui_object_id': self.object_id})
-                pygame.event.post(button_pressed_event)
+                drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
+                                                             {'user_type': 'ui_drop_down_menu_changed',
+                                                              'text': button.text,
+                                                              'ui_element': self.drop_down_menu_ui,
+                                                              'ui_object_id': self.object_ids[-1]})
+                pygame.event.post(drop_down_changed_event)
 
 
 class UIClosedDropDownState:
@@ -128,7 +125,7 @@ class UIClosedDropDownState:
     to the expanded state.
     """
     def __init__(self, drop_down_menu_ui, selected_option, base_position_rect,
-                 open_button_width, manager, container, element_ids, object_id):
+                 open_button_width, manager, container, element_ids, object_ids):
         self.drop_down_menu_ui = drop_down_menu_ui
         self.selected_option_button = None
         self.open_button = None
@@ -137,7 +134,7 @@ class UIClosedDropDownState:
         self.ui_manager = manager
         self.ui_container = container
         self.element_ids = element_ids
-        self.object_id = object_id
+        self.object_ids = object_ids
 
         self.open_button_width = open_button_width
 
@@ -158,11 +155,10 @@ class UIClosedDropDownState:
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
-                                               object_id=self.object_id,
-                                               element_ids=self.element_ids)
+                                               parent_element=self.drop_down_menu_ui)
         open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
 
-        expand_direction = self.ui_manager.get_theme().get_misc_data(self.object_id,
+        expand_direction = self.ui_manager.get_theme().get_misc_data(self.object_ids,
                                                                      self.element_ids, 'expand_direction')
         expand_button_symbol = '▼'
         if expand_direction is not None:
@@ -178,8 +174,7 @@ class UIClosedDropDownState:
                                     self.ui_manager,
                                     self.ui_container,
                                     starting_height=2,
-                                    object_id=self.object_id,
-                                    element_ids=self.element_ids)
+                                    parent_element=self.drop_down_menu_ui)
 
     def finish(self):
         """
@@ -216,15 +211,21 @@ class UIDropDownMenu(UIElement):
                  relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['drop_down_menu']
-        else:
-            new_element_ids = element_ids.copy()
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None
+                 ):
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('drop_down_menu')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['drop_down_menu']
+            new_object_ids = [object_id]
         super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
-                         object_id=object_id,
+                         object_ids=new_object_ids,
                          layer_thickness=1, starting_height=1)
         self.options_list = options_list
         self.selected_option = starting_option
@@ -237,7 +238,7 @@ class UIDropDownMenu(UIElement):
                                                             self.ui_manager,
                                                             self.ui_container,
                                                             self.element_ids,
-                                                            self.object_id),
+                                                            self.object_ids),
                             'expanded': UIExpandedDropDownState(self,
                                                                 self.options_list,
                                                                 self.selected_option,
@@ -246,7 +247,7 @@ class UIDropDownMenu(UIElement):
                                                                 self.ui_manager,
                                                                 self.ui_container,
                                                                 self.element_ids,
-                                                                self.object_id
+                                                                self.object_ids
                                                                 )}
         self.current_state = self.menu_states['closed']
         self.current_state.start()

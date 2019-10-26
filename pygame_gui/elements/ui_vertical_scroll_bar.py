@@ -22,19 +22,26 @@ class UIVerticalScrollBar(UIElement):
                  visible_percentage: float,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
 
-        if element_ids is None:
-            new_element_ids = ['vertical_scroll_bar']
-        else:
-            new_element_ids = element_ids.copy()
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('vertical_scroll_bar')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['vertical_scroll_bar']
+            new_object_ids = [object_id]
+
         super().__init__(relative_rect, manager, container,
                          layer_thickness=1, starting_height=1,
-                         element_ids=new_element_ids, object_id=object_id)
+                         element_ids=new_element_ids,
+                         object_ids=new_object_ids)
 
         self.button_height = 20
-        self.background_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'dark_bg')
+        self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
 
         self.image = pygame.Surface((self.rect.width, self.rect.height))
         self.image.fill(self.background_colour)
@@ -45,8 +52,8 @@ class UIVerticalScrollBar(UIElement):
                                              '▲', self.ui_manager,
                                              container=self.ui_container,
                                              starting_height=2,
-                                             element_ids=self.element_ids,
-                                             object_id=self.object_id)
+                                             parent_element=self,
+                                             object_id="#top_button")
 
         bottom_button_y = self.relative_rect.y + self.relative_rect.height - self.button_height
         self.bottom_button = ui_button.UIButton(pygame.Rect((self.relative_rect.x,
@@ -56,8 +63,8 @@ class UIVerticalScrollBar(UIElement):
                                                 '▼', self.ui_manager,
                                                 container=self.ui_container,
                                                 starting_height=2,
-                                                element_ids=self.element_ids,
-                                                object_id=self.object_id)
+                                                parent_element=self,
+                                                object_id="#bottom_button")
 
         self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
         self.start_percentage = 0.0
@@ -73,8 +80,8 @@ class UIVerticalScrollBar(UIElement):
                                                  '', self.ui_manager,
                                                  container=self.ui_container,
                                                  starting_height=2,
-                                                 element_ids=self.element_ids,
-                                                 object_id=self.object_id)
+                                                 parent_element=self,
+                                                 object_id="#sliding_button")
 
         self.sliding_button.set_hold_range((100, self.relative_rect.height))
 
@@ -231,8 +238,8 @@ class UIVerticalScrollBar(UIElement):
                                                  '', self.ui_manager,
                                                  container=self.ui_container,
                                                  starting_height=2,
-                                                 element_ids=self.element_ids,
-                                                 object_id=self.object_id)
+                                                 parent_element=self,
+                                                 object_id="#sliding_button")
 
     def set_visible_percentage(self, percentage: float):
         """

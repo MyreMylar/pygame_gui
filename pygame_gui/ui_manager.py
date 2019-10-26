@@ -26,7 +26,7 @@ class UIManager:
         self.last_focused_vertical_scrollbar = None
 
         self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self)
+        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
         self.shadow_generator = ShadowGenerator()
 
@@ -70,7 +70,7 @@ class UIManager:
         """
         self.ui_window_stack.clear()
         self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self)
+        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
     def process_events(self, event: pygame.event.Event):
         """

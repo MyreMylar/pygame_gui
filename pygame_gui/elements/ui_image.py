@@ -20,16 +20,22 @@ class UIImage(UIElement):
     def __init__(self, relative_rect: pygame.Rect, image_surface: pygame.Surface,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
 
-        if element_ids is None:
-            new_element_ids = ['image']
-        else:
-            new_element_ids = element_ids.copy()
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('image')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['image']
+            new_object_ids = [object_id]
+
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         object_id=object_id,
+                         object_ids=new_object_ids,
                          element_ids=new_element_ids)
         self.image = image_surface

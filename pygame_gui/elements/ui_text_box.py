@@ -394,18 +394,24 @@ class UITextBox(UIElement):
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
 
-        if element_ids is None:
-            new_element_ids = ['text_box']
-        else:
-            new_element_ids = element_ids.copy()
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('text_box')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['text_box']
+            new_object_ids = [object_id]
+
         super().__init__(containing_rect, manager, container,
                          starting_height=layer_starting_height,
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id
+                         object_ids=new_object_ids
                          )
         self.html_text = html_text
         self.font_dict = self.ui_theme.get_font_dictionary()
@@ -413,21 +419,21 @@ class UITextBox(UIElement):
         self.active_text_effect = None
         self.scroll_bar = None
         self.scroll_bar_width = 15
-        self.bg_color = self.ui_theme.get_colour(self.object_id, self.element_ids, 'dark_bg')
-        self.border_color = self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')
+        self.bg_color = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        self.border_color = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
 
-        self.link_normal_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'link_text')
-        self.link_hover_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'link_hover')
-        self.link_selected_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'link_selected')
+        self.link_normal_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_text')
+        self.link_hover_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_hover')
+        self.link_selected_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_selected')
 
-        link_normal_underline_string = self.ui_theme.get_misc_data(self.object_id, self.element_ids,
+        link_normal_underline_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids,
                                                                    'link_normal_underline')
         if link_normal_underline_string is not None:
             self.link_normal_underline = bool(int(link_normal_underline_string))
         else:
             self.link_normal_underline = False
 
-        link_hover_underline_string = self.ui_theme.get_misc_data(self.object_id, self.element_ids,
+        link_hover_underline_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids,
                                                                   'link_hover_underline')
         if link_hover_underline_string is not None:
             self.link_hover_underline = bool(int(link_hover_underline_string))
@@ -446,14 +452,14 @@ class UITextBox(UIElement):
                                  self.ui_container.rect.y + containing_rect.y),
                                 containing_rect.size)
 
-        padding_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'padding')
+        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
         if padding_str is None:
             self.padding = (10, 10)
         else:
             padding_list = padding_str.split(',')
             self.padding = (int(padding_list[0]), int(padding_list[1]))
 
-        border_width_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'border_width')
+        border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
         if border_width_str is None:
             self.border_width = 0
         else:
@@ -500,8 +506,7 @@ class UITextBox(UIElement):
                                                       percentage_visible,
                                                       self.ui_manager,
                                                       self.ui_container,
-                                                      element_ids=self.element_ids,
-                                                      object_id=self.object_id)
+                                                      parent_element=self)
             else:
                 self.rect.size = [self.rect[2], self.rect[3]]
 
@@ -603,7 +608,7 @@ class UITextBox(UIElement):
         """
         Parses HTML styled string text into a format more useful for styling pygame.font rendered text.
         """
-        parser = UITextBox.TextHTMLParser(self.ui_theme, self.element_ids, self.object_id)
+        parser = UITextBox.TextHTMLParser(self.ui_theme, self.element_ids, self.object_ids)
         parser.push_style('body', {"bg_color": self.bg_color})
         parser.feed(self.html_text)
 
@@ -724,7 +729,7 @@ class UITextBox(UIElement):
                                                                         {'user_type': 'ui_text_box_link_clicked',
                                                                          'link_target': chunk.link_href,
                                                                          'ui_element': self,
-                                                                         'ui_object_id': self.object_id})
+                                                                         'ui_object_id': self.object_ids})
                                 pygame.event.post(link_clicked_event)
 
                     if chunk.is_selected:

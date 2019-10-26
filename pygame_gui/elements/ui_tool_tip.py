@@ -25,20 +25,27 @@ class UITooltip(UIElement):
     """
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
                  manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
         width = 170
-        if element_ids is None:
-            new_element_ids = ['tool_tip']
-        else:
-            new_element_ids = element_ids.copy()
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('tool_tip')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['tool_tip']
+            new_object_ids = [object_id]
+
         super().__init__(relative_rect=pygame.Rect((0, 0), (width, -1)),
                          manager=manager,
                          container=None,
                          starting_height=manager.get_sprite_group().get_top_layer(),
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id)
+                         object_ids=new_object_ids)
 
         self.horiz_shadow_spacing = 2
         self.vert_shadow_spacing = 2
@@ -49,8 +56,7 @@ class UITooltip(UIElement):
                                                             width - (2 * self.horiz_shadow_spacing), -1),
                                                 manager=self.ui_manager,
                                                 layer_starting_height=self._layer+1,
-                                                element_ids=self.element_ids,
-                                                object_id=self.object_id)
+                                                parent_element=self)
 
         height = self.text_block.rect.height + (2 * self.vert_shadow_spacing)
 

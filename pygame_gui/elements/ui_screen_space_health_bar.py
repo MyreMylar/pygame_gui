@@ -22,27 +22,33 @@ class UIScreenSpaceHealthBar(UIElement):
                  manager: ui_manager.UIManager,
                  sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['screen_space_health_bar']
-        else:
-            new_element_ids = element_ids.copy()
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('screen_space_health_bar')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['screen_space_health_bar']
+            new_object_ids = [object_id]
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id)
+                         object_ids=new_object_ids)
 
-        self.font = self.ui_theme.get_font(self.object_id, self.element_ids)
+        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
 
-        self.background_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')
-        self.bar_unfilled_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'unfilled_bar')
-        self.bar_filled_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'filled_bar')
-        self.text_shadow_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'text_shadow')
-        self.text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_text')
+        self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.bar_unfilled_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'unfilled_bar')
+        self.bar_filled_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'filled_bar')
+        self.text_shadow_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'text_shadow')
+        self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
 
         self.padding = (3, 3)
         self.border = (1, 1)

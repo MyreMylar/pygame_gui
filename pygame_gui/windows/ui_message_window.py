@@ -20,7 +20,8 @@ class UIMessageWindow(UIWindow):
     """
     def __init__(self, message_window_rect: pygame.Rect, message_title: str,
                  html_message: str, manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
+                 element_ids: Union[List[str], None] = None,
+                 object_id: Union[str, None] = None):
         if element_ids is None:
             new_element_ids = ['message_window']
         else:
@@ -28,7 +29,7 @@ class UIMessageWindow(UIWindow):
             new_element_ids.append('message_window')
         super().__init__(message_window_rect, manager, new_element_ids, object_id)
 
-        self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_id, self.element_ids, 'dark_bg')
+        self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'dark_bg')
 
         # create shadow
         shadow_padding = (2, 2)
@@ -49,8 +50,8 @@ class UIMessageWindow(UIWindow):
                                  text=message_title,
                                  manager=manager,
                                  container=self.get_container(),
-                                 object_id='#message_window_title_bar',
-                                 element_ids=self.element_ids
+                                 parent_element=self,
+                                 object_id='#message_window_title_bar'
                                  )
         self.menu_bar.set_hold_range((100, 100))
 
@@ -63,7 +64,7 @@ class UIMessageWindow(UIWindow):
                                             text='╳',
                                             manager=manager,
                                             container=self.get_container(),
-                                            element_ids=self.element_ids
+                                            parent_element=self
                                             )
 
         self.done_button = UIButton(relative_rect=pygame.Rect(((self.rect[2] / 2) + 45,
@@ -73,7 +74,7 @@ class UIMessageWindow(UIWindow):
                                     container=self.get_container(),
                                     tool_tip_text="<font face=fira_code color=normal_text size=2>"
                                                   "Click to get rid of this message.</font>",
-                                    element_ids=self.element_ids
+                                    parent_element=self
                                     )
 
         text_block_rect = pygame.Rect((0, 20),
@@ -81,7 +82,7 @@ class UIMessageWindow(UIWindow):
                                        self.rect.height - 50))
         self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self.get_container(),
-                                    element_ids=self.element_ids)
+                                    parent_element=self)
 
     def update(self, time_delta: float):
         """

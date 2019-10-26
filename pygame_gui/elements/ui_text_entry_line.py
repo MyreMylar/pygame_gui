@@ -35,37 +35,44 @@ class UITextEntryLine(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['text_entry_line']
-        else:
-            new_element_ids = element_ids.copy()
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('text_entry_line')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['text_entry_line']
+            new_object_ids = [object_id]
+
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id)
+                         object_ids=new_object_ids)
         self.selected = False
 
         # theme font
-        self.font = self.ui_theme.get_font(self.object_id, self.element_ids)
+        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
 
         # colours from theme
-        self.bg_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_bg')
-        self.text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_text')
-        self.selected_text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_text')
-        self.selected_bg_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')
+        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg')
+        self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
+        self.selected_text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text')
+        self.selected_bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
 
         # misc data from the theme
-        border_width_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'border_width')
+        border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
         if border_width_str is None:
             self.border_width = 1
         else:
             self.border_width = int(border_width_str)
         self.text = ""
 
-        padding_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'padding')
+        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
         if padding_str is None:
             self.horiz_line_padding = 4
             self.vert_line_padding = 2
@@ -382,7 +389,7 @@ class UITextEntryLine(UIElement):
                                                               {'user_type': 'ui_text_entry_finished',
                                                                'text': self.text,
                                                                'ui_element': self,
-                                                               'ui_object_id': self.object_id})
+                                                               'ui_object_id': self.object_ids})
                     pygame.event.post(entry_finished_event)
                 elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                     self.select_range = [0, len(self.text)]

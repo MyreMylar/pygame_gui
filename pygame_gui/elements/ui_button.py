@@ -30,19 +30,25 @@ class UIButton(UIElement):
                  container: ui_container.UIContainer = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['button']
-        else:
-            new_element_ids = element_ids.copy()
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
             new_element_ids.append('button')
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = ['button']
+            new_object_ids = [object_id]
         super().__init__(relative_rect, manager, container,
-                         object_id=object_id,
+                         object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=starting_height,
                          layer_thickness=1)
 
-        self.font = self.ui_theme.get_font(self.object_id, self.element_ids)
+        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
         self.text = text
 
         self.click_area_shape = self.rect.copy()
@@ -55,28 +61,28 @@ class UIButton(UIElement):
         # colours, we could grab these from a separate colour theme class that we use across pygame_gui elements,
         # much like a css file provides colours and styles to a group of HTML we pages
 
-        self.colours = {'normal_bg': self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_bg'),
-                        'hovered_bg': self.ui_theme.get_colour(self.object_id, self.element_ids, 'hovered_bg'),
-                        'disabled_bg': self.ui_theme.get_colour(self.object_id, self.element_ids, 'disabled_bg'),
-                        'selected_bg': self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_bg'),
-                        'active_bg': self.ui_theme.get_colour(self.object_id, self.element_ids, 'active_bg'),
-                        'normal_text': self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_text'),
-                        'hovered_text': self.ui_theme.get_colour(self.object_id, self.element_ids, 'hovered_text'),
-                        'disabled_text': self.ui_theme.get_colour(self.object_id, self.element_ids, 'disabled_text'),
-                        'selected_text': self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_text'),
-                        'active_text': self.ui_theme.get_colour(self.object_id, self.element_ids, 'active_text'),
-                        'border': self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')}
+        self.colours = {'normal_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg'),
+                        'hovered_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_bg'),
+                        'disabled_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_bg'),
+                        'selected_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg'),
+                        'active_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_bg'),
+                        'normal_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text'),
+                        'hovered_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_text'),
+                        'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
+                        'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
+                        'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
+                        'border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')}
 
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
 
         self.border_width = 0
-        border_width_string = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
         if border_width_string is not None:
             self.border_width = int(border_width_string)
 
         self.shadow_width = 0
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
         if shadow_width_string is not None:
             self.shadow_width = int(shadow_width_string)
 
@@ -98,7 +104,7 @@ class UIButton(UIElement):
         # time the hovering
         self.hover_time = 0.0
 
-        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'tool_tip_delay')
+        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'tool_tip_delay')
         if tool_tip_delay_string is not None:
             self.tool_tip_delay = float(tool_tip_delay_string)
         else:
@@ -111,8 +117,8 @@ class UIButton(UIElement):
 
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_horiz_alignment')
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_id,
+        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
+        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
                                                                    self.element_ids, 'text_horiz_alignment_padding')
         if text_horiz_alignment_padding is None:
             text_horiz_alignment_padding = 1
@@ -134,8 +140,8 @@ class UIButton(UIElement):
             else:
                 self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.width/2)
 
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'text_vert_alignment')
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_id,
+        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
+        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
                                                                   self.element_ids, 'text_vert_alignment_padding')
         if text_vert_alignment_padding is None:
             text_vert_alignment_padding = 1
@@ -170,7 +176,7 @@ class UIButton(UIElement):
         """
         Grabs images for this button from the UI theme if any are set.
         """
-        normal_image = self.ui_theme.get_image(self.object_id, self.element_ids, 'normal_image')
+        normal_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'normal_image')
         if normal_image is not None:
             self.normal_image = normal_image
             self.hovered_image = normal_image
@@ -178,15 +184,15 @@ class UIButton(UIElement):
             self.disabled_image = normal_image
             self.current_image = normal_image
 
-        hovered_image = self.ui_theme.get_image(self.object_id, self.element_ids, 'hovered_image')
+        hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'hovered_image')
         if hovered_image is not None:
             self.hovered_image = hovered_image
 
-        selected_image = self.ui_theme.get_image(self.object_id, self.element_ids, 'selected_image')
+        selected_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'selected_image')
         if selected_image is not None:
             self.selected_image = selected_image
 
-        disabled_image = self.ui_theme.get_image(self.object_id, self.element_ids, 'disabled_image')
+        disabled_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'disabled_image')
         if disabled_image is not None:
             self.disabled_image = disabled_image
 
@@ -349,7 +355,7 @@ class UIButton(UIElement):
                             button_pressed_event = pygame.event.Event(pygame.USEREVENT,
                                                                       {'user_type': 'ui_button_pressed',
                                                                        'ui_element': self,
-                                                                       'ui_object_id': self.object_id})
+                                                                       'ui_object_id': self.object_ids})
                             pygame.event.post(button_pressed_event)
 
                     if self.held:

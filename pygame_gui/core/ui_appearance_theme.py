@@ -169,56 +169,94 @@ class UIAppearanceTheme:
                     surface = image
                 self.ui_element_image_surfaces[element_key][path_key] = surface
 
-    def get_image(self, object_id, element_ids, image_id):
+    def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
+        if index < tree_size:
+            if object_ids is not None:
+                if index < len(object_ids):
+                    object_id = object_ids[index]
+                    if object_id is not None:
+                        next_node = {'id': object_id, 'parent': current_node}
+                        self.get_next_id_node(next_node, element_ids, object_ids, index + 1, tree_size, combined_ids)
+            element_id = element_ids[index]
+            next_node_2 = {'id': element_id, 'parent': current_node}
+            self.get_next_id_node(next_node_2, element_ids, object_ids, index + 1, tree_size, combined_ids)
+        else:
+            # unwind
+            gathered_ids = []
+            unwind_node = current_node
+            while unwind_node is not None:
+                gathered_ids.append(unwind_node['id'])
+                unwind_node = unwind_node['parent']
+            gathered_ids.reverse()
+            combined_id = gathered_ids[0]
+            for index in range(1, len(gathered_ids)):
+                combined_id += '.'
+                combined_id += gathered_ids[index]
+            combined_ids.append(combined_id)
+
+    def build_all_combined_ids(self, element_ids, object_ids):
+        """
+        Construct a combined element id from the elements ids.
+
+        :param element_ids: All the ids of elements this element is contained within.
+        :param object_ids: All the ids of objects this element is contained within.
+        :return: The combined id string in the database
+        """
+        combined_ids = []
+        if object_ids is not None:
+            if len(object_ids) != len(element_ids):
+                raise ValueError("Object ID hierarchy is not equal in length to Element ID hierarchy"
+                                 "Element IDs: " + str(element_ids) + "\n"
+                                 "Object IDs: " + str(object_ids) + "\n")
+        self.get_next_id_node(None, element_ids, object_ids, 0, len(element_ids), combined_ids)
+
+        return combined_ids
+
+    def get_image(self, object_ids, element_ids, image_id):
         """
         Will return None if no image is specified. There are UI elements that have an optional image display.
 
         :param image_id: The id identifying the particular image spot in the UI we are looking for an image to add to.
-        :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :return None or pygame.Surface:
         """
 
-        if object_id is not None:
-            if object_id in self.ui_element_image_surfaces:
-                if image_id in self.ui_element_image_surfaces[object_id]:
-                    return self.ui_element_image_surfaces[object_id][image_id]
+        combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
-        # then check for an element specific colour
-        for element_id in element_ids:
-            if element_id in self.ui_element_image_surfaces:
-                if image_id in self.ui_element_image_surfaces[element_id]:
-                    return self.ui_element_image_surfaces[element_id][image_id]
+        # then check for an element specific data
+        for combined_element_id in combined_element_ids:
+            if combined_element_id in self.ui_element_image_surfaces:
+                if image_id in self.ui_element_image_surfaces[combined_element_id]:
+                    return self.ui_element_image_surfaces[combined_element_id][image_id]
 
         return None
 
-    def get_font_info(self, object_id, element_ids):
+    def get_font_info(self, object_ids, element_ids):
         """
         Uses some data about a UIElement to get font data as dictionary
 
-        :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :return dictionary: Data about the font requested
         """
         font_info = self.base_font_info
 
-        if object_id is not None and object_id in self.ui_element_font_infos:
-            font_info = self.ui_element_font_infos[object_id]
-        else:
-            # then fall back on a font for this element type
-            for element_id in element_ids:
-                if element_id in self.ui_element_font_infos:
-                    font_info = self.ui_element_font_infos[element_id]
-                    break
+        # Check for a unique theming for this specific object
+        combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
+
+        for combined_element_id in combined_element_ids:
+            if combined_element_id in self.ui_element_font_infos:
+                return self.ui_element_font_infos[combined_element_id]
 
         return font_info
 
-    def get_font(self, object_id, element_ids):
+    def get_font(self, object_ids, element_ids):
         """
         Uses some data about a UIElement to get a font object.
 
-        :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :return pygame.font.Font: A pygame font object.
         """
         # set the default font as the final fall back
@@ -227,56 +265,60 @@ class UIAppearanceTheme:
                                               self.base_font_info['bold'],
                                               self.base_font_info['italic'])
 
-        # first check for a unique font for this specific object
-        if object_id is not None and object_id in self.ui_element_fonts:
-            font = self.ui_element_fonts[object_id]
-        else:
-            # then fall back on a font for this element type
-            for element_id in element_ids:
-                if element_id in self.ui_element_fonts:
-                    font = self.ui_element_fonts[element_id]
-                    break
+        # Check for a unique theming for this specific object
+        combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
+
+        for combined_element_id in combined_element_ids:
+            if combined_element_id in self.ui_element_fonts:
+                return self.ui_element_fonts[combined_element_id]
 
         return font
 
-    def get_misc_data(self, object_id, element_ids, misc_data_id):
+    def get_misc_data(self, object_ids, element_ids, misc_data_id):
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous theming data.
 
-        :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
         :return None or str: Returns a string if we find the data, otherwise returns None.
         """
-        if object_id is not None:
-            if object_id in self.ui_element_misc_data:
-                if misc_data_id in self.ui_element_misc_data[object_id]:
-                    return self.ui_element_misc_data[object_id][misc_data_id]
+        combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
-        # then check for an element specific colour
-        for element_id in element_ids:
-            if element_id in self.ui_element_misc_data:
-                if misc_data_id in self.ui_element_misc_data[element_id]:
-                    return self.ui_element_misc_data[element_id][misc_data_id]
+        # then check for an element specific data
+        for combined_element_id in combined_element_ids:
+            if combined_element_id in self.ui_element_misc_data:
+                if misc_data_id in self.ui_element_misc_data[combined_element_id]:
+                    return self.ui_element_misc_data[combined_element_id][misc_data_id]
 
         return None
 
-    def get_colour(self, object_id, element_ids, colour_id):
+    def get_colour(self, object_ids, element_ids, colour_id):
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
 
-        :param object_id: An ID for the particular instance of this element being created.
-        :param element_ids: A list of IDs for all elements of this particular type in the theme.
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param colour_id: The id for the specific colour we are looking for.
         :return pygame.Color: A pygame colour.
         """
         # first check for a unique theming for this specific object
-        if object_id is not None:
-            if object_id in self.ui_element_colours:
-                if colour_id in self.ui_element_colours[object_id]:
-                    return self.ui_element_colours[object_id][colour_id]
+        combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
-        # then check for an element specific colour
+        for combined_element_id in combined_element_ids:
+            if combined_element_id in self.ui_element_colours:
+                if colour_id in self.ui_element_colours[combined_element_id]:
+                    return self.ui_element_colours[combined_element_id][colour_id]
+
+        # if we don't have a specific colour for our individual element, try to inherit colours from higher
+        # in the hierarchy
+        if object_ids is not None:
+            for object_id in object_ids:
+                if object_id is not None:
+                    if object_id in self.ui_element_colours:
+                        if colour_id in self.ui_element_colours[object_id]:
+                            return self.ui_element_colours[object_id][colour_id]
+
         for element_id in element_ids:
             if element_id in self.ui_element_colours:
                 if colour_id in self.ui_element_colours[element_id]:
@@ -340,20 +382,23 @@ class UIAppearanceTheme:
                             if 'italic_path' in font_dict:
                                 self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
                             if 'bold_italic_path' in font_dict:
-                                self.ui_element_font_infos[element_name]['bold_italic_path'] = font_dict['bold_italic_path']
+                                bold_italic_path = font_dict['bold_italic_path']
+                                self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
 
                         if data_type == 'colours':
                             self.ui_element_colours[element_name] = {}
                             colours_dict = theme_dict[element_name][data_type]
                             for colour_key in colours_dict:
-                                self.ui_element_colours[element_name][colour_key] = pygame.Color(colours_dict[colour_key])
+                                pygame_colour = pygame.Color(colours_dict[colour_key])
+                                self.ui_element_colours[element_name][colour_key] = pygame_colour
 
                         elif data_type == 'images':
                             self.ui_element_image_paths[element_name] = {}
                             images_dict = theme_dict[element_name][data_type]
                             for image_key in images_dict:
                                 self.ui_element_image_paths[element_name][image_key] = {}
-                                self.ui_element_image_paths[element_name][image_key]['path'] = str(images_dict[image_key]['path'])
+                                image_path = str(images_dict[image_key]['path'])
+                                self.ui_element_image_paths[element_name][image_key]['path'] = image_path
                                 if 'sub_surface_rect' in images_dict[image_key]:
                                     rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
                                     x = int(rect_list[0].strip())
