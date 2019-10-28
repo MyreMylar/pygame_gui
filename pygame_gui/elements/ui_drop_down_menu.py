@@ -203,7 +203,7 @@ class UIDropDownMenu(UIElement):
     :param relative_rect: The size and position of the element when not expanded.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, options_list: List[str],
@@ -214,15 +214,10 @@ class UIDropDownMenu(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None
                  ):
-        if parent_element is not None:
-            new_element_ids = parent_element.element_ids.copy()
-            new_element_ids.append('drop_down_menu')
 
-            new_object_ids = parent_element.object_ids.copy()
-            new_object_ids.append(object_id)
-        else:
-            new_element_ids = ['drop_down_menu']
-            new_object_ids = [object_id]
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='drop_down_menu')
         super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,

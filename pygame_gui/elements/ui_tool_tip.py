@@ -20,7 +20,7 @@ class UITooltip(UIElement):
     :param html_text: Text styled with HTML, to be displayed on the tooltip.
     :param hover_distance: Distance in pixels between the tooltip and the thing being hovered.
     :param manager: The UIManager that manages this element.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
@@ -29,16 +29,9 @@ class UITooltip(UIElement):
                  object_id: Union[str, None] = None):
         width = 170
 
-        if parent_element is not None:
-            new_element_ids = parent_element.element_ids.copy()
-            new_element_ids.append('tool_tip')
-
-            new_object_ids = parent_element.object_ids.copy()
-            new_object_ids.append(object_id)
-        else:
-            new_element_ids = ['tool_tip']
-            new_object_ids = [object_id]
-
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='tool_tip')
         super().__init__(relative_rect=pygame.Rect((0, 0), (width, -1)),
                          manager=manager,
                          container=None,

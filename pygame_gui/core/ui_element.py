@@ -65,6 +65,33 @@ class UIElement(pygame.sprite.Sprite):
         self.hovered = False
         self.hover_time = 0.0
 
+    @staticmethod
+    def create_valid_ids(parent_element, object_id, element_id):
+        """
+        Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
+        containing full stops. These ID lists are used by the theming system to identify what theming parameters to
+        apply to which element.
+
+        :param parent_element: Element that this element 'belongs to' in theming. Elements inherit colours from parents.
+        :param object_id: An optional ID to help distinguish this element from other elements of the same class.
+        :param element_id: A string ID representing this element's class.
+        :return:
+        """
+        if object_id is not None and ('.' in object_id or ' ' in object_id):
+            raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
+            new_element_ids.append(element_id)
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = [element_id]
+            new_object_ids = [object_id]
+
+        return new_element_ids, new_object_ids
+
     def update_containing_rect_position(self):
         """
         Updates the position of this element based on the position of it's container. Usually called when the container

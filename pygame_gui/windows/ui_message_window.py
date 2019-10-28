@@ -15,19 +15,18 @@ class UIMessageWindow(UIWindow):
     :param message_title: The title of the message window.
     :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
     :param manager: The UIManager that manages this UIElement.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, message_window_rect: pygame.Rect, message_title: str,
-                 html_message: str, manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None] = None,
+    def __init__(self, message_window_rect: pygame.Rect,
+                 message_title: str,
+                 html_message: str,
+                 manager: ui_manager.UIManager,
                  object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['message_window']
-        else:
-            new_element_ids = element_ids.copy()
-            new_element_ids.append('message_window')
-        super().__init__(message_window_rect, manager, new_element_ids, object_id)
+
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=None,
+                                                                object_id=object_id,
+                                                                element_id='message_window')
+        super().__init__(message_window_rect, manager, new_element_ids, new_object_ids)
 
         self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'dark_bg')
 

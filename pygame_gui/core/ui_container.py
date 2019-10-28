@@ -13,7 +13,7 @@ class UIContainer(UIElement):
     :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is inside of, if any.
     :param manager: The UIManager that manages this UIElement.
     :param container: The UIContainer that this UIElement is contained within.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, relative_rect, manager,
@@ -22,15 +22,9 @@ class UIContainer(UIElement):
         self._layer = 0
         self.ui_manager = manager
 
-        if parent_element is not None:
-            new_element_ids = parent_element.element_ids.copy()
-            new_element_ids.append('container')
-
-            new_object_ids = parent_element.object_ids.copy()
-            new_object_ids.append(object_id)
-        else:
-            new_element_ids = ['container']
-            new_object_ids = [object_id]
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='container')
 
         super().__init__(relative_rect, manager, container,
                          object_ids=new_object_ids,

@@ -22,7 +22,7 @@ class UITextEntryLine(UIElement):
     :param relative_rect: A rectangle describing the position and width of the text entry element.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
 
@@ -38,16 +38,9 @@ class UITextEntryLine(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None):
 
-        if parent_element is not None:
-            new_element_ids = parent_element.element_ids.copy()
-            new_element_ids.append('text_entry_line')
-
-            new_object_ids = parent_element.object_ids.copy()
-            new_object_ids.append(object_id)
-        else:
-            new_element_ids = ['text_entry_line']
-            new_object_ids = [object_id]
-
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='text_entry_line')
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
                          element_ids=new_element_ids,
