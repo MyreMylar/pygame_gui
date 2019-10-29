@@ -30,5 +30,21 @@
       "border_width": "1",
       "shadow_width": "2"
     }
+  },
+  "horizontal_slider":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "2"
+    }
+  },
+  "horizontal_slider.#sliding_button":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "1"
+    }
   }
 }
