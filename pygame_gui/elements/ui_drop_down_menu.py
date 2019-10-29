@@ -231,9 +231,45 @@ class UIDropDownMenu(UIElement):
         self.selected_option = starting_option
         self.open_button_width = 20
 
+        self.border_width = 0
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            self.border_width = int(border_width_string)
+
+        self.shadow_width = 0
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
+        self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+
+        if self.shadow_width > 0:
+            self.image = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+
+        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                  (self.rect.width - (2 * self.shadow_width),
+                                   self.rect.height - (2 * self.shadow_width)))
+        if self.border_width > 0:
+            self.image.fill(self.border_colour,
+                            border_rect)
+
+        relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                self.border_width + self.shadow_width),
+                                               (border_rect.width - (2 * self.border_width),
+                                                border_rect.height - (2 * self.border_width)))
+
+        background_rect = pygame.Rect((relative_background_rect.x + relative_rect.x,
+                                       relative_background_rect.y + relative_rect.y),
+                                      relative_background_rect.size)
+        self.image.fill(self.background_colour,
+                        relative_background_rect)
+
         self.menu_states = {'closed': UIClosedDropDownState(self,
                                                             self.selected_option,
-                                                            self.relative_rect,
+                                                            background_rect,
                                                             self.open_button_width,
                                                             self.ui_manager,
                                                             self.ui_container,
@@ -242,7 +278,7 @@ class UIDropDownMenu(UIElement):
                             'expanded': UIExpandedDropDownState(self,
                                                                 self.options_list,
                                                                 self.selected_option,
-                                                                self.relative_rect,
+                                                                background_rect,
                                                                 self.open_button_width,
                                                                 self.ui_manager,
                                                                 self.ui_container,
@@ -251,8 +287,6 @@ class UIDropDownMenu(UIElement):
                                                                 )}
         self.current_state = self.menu_states['closed']
         self.current_state.start()
-
-        self.image = pygame.Surface((0, 0))
 
     def kill(self):
         """
