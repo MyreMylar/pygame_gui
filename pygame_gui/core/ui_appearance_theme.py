@@ -1,6 +1,7 @@
 import pygame
 import json
 import os
+from typing import Union
 
 from ..core.ui_font_dictionary import UIFontDictionary
 
@@ -78,6 +79,8 @@ class UIAppearanceTheme:
         # misc data that doesn't have a value defined in a theme will return None so elements should be prepared
         # to handle that with a default behaviour
         self.ui_element_misc_data = {}
+
+        self.load_theme(os.path.normpath(os.path.join(module_root_path, 'data/default_theme.json')))
 
     def get_font_dictionary(self):
         """
@@ -203,12 +206,13 @@ class UIAppearanceTheme:
         :return: The combined id string in the database
         """
         combined_ids = []
-        if object_ids is not None:
+        if object_ids is not None and element_ids is not None:
             if len(object_ids) != len(element_ids):
                 raise ValueError("Object ID hierarchy is not equal in length to Element ID hierarchy"
                                  "Element IDs: " + str(element_ids) + "\n"
                                  "Object IDs: " + str(object_ids) + "\n")
-        self.get_next_id_node(None, element_ids, object_ids, 0, len(element_ids), combined_ids)
+            if len(element_ids) != 0:
+                self.get_next_id_node(None, element_ids, object_ids, 0, len(element_ids), combined_ids)
 
         return combined_ids
 
@@ -319,10 +323,11 @@ class UIAppearanceTheme:
                         if colour_id in self.ui_element_colours[object_id]:
                             return self.ui_element_colours[object_id][colour_id]
 
-        for element_id in element_ids:
-            if element_id in self.ui_element_colours:
-                if colour_id in self.ui_element_colours[element_id]:
-                    return self.ui_element_colours[element_id][colour_id]
+        if element_ids is not None:
+            for element_id in element_ids:
+                if element_id in self.ui_element_colours:
+                    if colour_id in self.ui_element_colours[element_id]:
+                        return self.ui_element_colours[element_id][colour_id]
 
         # then fall back on default colour with same id
         if colour_id in self.base_colours:
@@ -340,7 +345,7 @@ class UIAppearanceTheme:
                 best_fit_colour = self.base_colours[key]
         return best_fit_colour
 
-    def load_theme(self, file_path: str):
+    def load_theme(self, file_path: Union[str, os.PathLike]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
 
@@ -363,7 +368,8 @@ class UIAppearanceTheme:
                     for data_type in theme_dict[element_name]:
                         if data_type == 'font':
                             font_dict = theme_dict[element_name][data_type]
-                            self.ui_element_font_infos[element_name] = {}
+                            if element_name not in self.ui_element_font_infos:
+                                self.ui_element_font_infos[element_name] = {}
                             self.ui_element_font_infos[element_name]['name'] = font_dict['name']
                             self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
                             if 'bold' in font_dict:
@@ -386,14 +392,16 @@ class UIAppearanceTheme:
                                 self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
 
                         if data_type == 'colours':
-                            self.ui_element_colours[element_name] = {}
+                            if element_name not in self.ui_element_colours:
+                                self.ui_element_colours[element_name] = {}
                             colours_dict = theme_dict[element_name][data_type]
                             for colour_key in colours_dict:
                                 pygame_colour = pygame.Color(colours_dict[colour_key])
                                 self.ui_element_colours[element_name][colour_key] = pygame_colour
 
                         elif data_type == 'images':
-                            self.ui_element_image_paths[element_name] = {}
+                            if element_name not in self.ui_element_image_paths:
+                                self.ui_element_image_paths[element_name] = {}
                             images_dict = theme_dict[element_name][data_type]
                             for image_key in images_dict:
                                 self.ui_element_image_paths[element_name][image_key] = {}
@@ -409,7 +417,8 @@ class UIAppearanceTheme:
                                     self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
 
                         elif data_type == 'misc':
-                            self.ui_element_misc_data[element_name] = {}
+                            if element_name not in self.ui_element_misc_data:
+                                self.ui_element_misc_data[element_name] = {}
                             misc_dict = theme_dict[element_name][data_type]
                             for misc_data_key in misc_dict:
                                 self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
