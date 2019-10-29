@@ -3,7 +3,7 @@
 GUI events
 ===========
 
-Some of the UI Elements produce pygame events when they are interacted with. These events all follow a common structure
+Some of the UI Elements produce a :py:class:`pygame.event.Event` when they are interacted with. These events all follow a common structure
 that looks something like this:
 
  - **'type'** : pygame.USEREVENT
