@@ -3,12 +3,12 @@
 UILabel Theming Parameters
 ==========================
 
-The UILabel theming block id is 'label'.
+The :class:`UILabel <.UILabel>` theming block id is 'label'.
 
 Colours
 -------
 
-UILabel makes use of these colour parameters in a 'colours' block:
+:class:`UILabel <.UILabel>` makes use of these colour parameters in a 'colours' block:
 
  - "**dark_bg**" - The background colour of the label text.
  - "**normal_text**" - The colour of the text itself.
@@ -17,7 +17,7 @@ UILabel makes use of these colour parameters in a 'colours' block:
 Font
 -----
 
-UILabel accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UILabel <.UILabel>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the label.
@@ -35,7 +35,7 @@ Only specify paths if this is the first use of this font name in the GUI:
 Misc
 -----
 
-UILabel has the following miscellaneous parameters in a 'misc' block:
+:class:`UILabel <.UILabel>` has the following miscellaneous parameters in a 'misc' block:
 
  - "**text_shadow**" - Set to "1" to enable, or "0" to disable a shadow/outline behind the text. Defaults to "0".
  - "**text_shadow_size**" - The increased size in pixels of the shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together.

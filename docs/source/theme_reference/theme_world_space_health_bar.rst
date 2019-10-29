@@ -3,12 +3,12 @@
 UIWorldSpaceHealthBar Theming Parameters
 =========================================
 
-The UIWorldSpaceHealthBar theming block id is 'world_space_health_bar'.
+The :class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` theming block id is 'world_space_health_bar'.
 
 Colours
 -------
 
-UIWorldSpaceHealthBar makes use of these colour parameters in a 'colours' block:
+:class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
 
  - "**border**" - The colour of the health bar's border if it has one.
  - "**filled_bar**" - The colour of the actual bar itself, of the portion of it that is still full.
@@ -17,7 +17,7 @@ UIWorldSpaceHealthBar makes use of these colour parameters in a 'colours' block:
 Misc
 -----
 
-UIWorldSpaceHealthBar has the following miscellaneous parameters in a 'misc' block:
+:class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` has the following miscellaneous parameters in a 'misc' block:
 
  - "**hover_height**" - The height in pixels that the health bar will appear over the sprite. Defaults to "10".
  - "**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.

@@ -3,12 +3,12 @@
 UITextEntryLine Theming Parameters
 ===================================
 
-The UITextEntryLine theming block id is 'text_entry_line'.
+The :class:`UITextEntryLine <.UITextEntryLine>` theming block id is 'text_entry_line'.
 
 Colours
 -------
 
-UITextEntryLine makes use of these colour parameters in a 'colours' block:
+:class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block:
 
  - "**normal_bg**" -  The default colour of the background to the entry line element.
  - "**selected_bg**" - The colour the background changes to when the text above it is selected.
@@ -19,7 +19,7 @@ UITextEntryLine makes use of these colour parameters in a 'colours' block:
 Font
 -----
 
-UITextEntryLine accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UITextEntryLine <.UITextEntryLine>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the text entry line.
@@ -36,7 +36,7 @@ Only specify paths if this is the first use of this font name in the GUI:
 Misc
 ----
 
-UITextEntryLine accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UITextEntryLine <.UITextEntryLine>` accepts the following miscellaneous parameters in a 'misc' block:
 
 - "**border_width**" -  the width of the border around the element in pixels. Defaults to "1".
 - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".

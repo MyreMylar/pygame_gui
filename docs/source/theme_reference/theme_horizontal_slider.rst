@@ -3,21 +3,26 @@
 UIHorizontalSlider Theming Parameters
 =====================================
 
-The UIHorizontalSlider theming block id is 'horizontal_slider'.
+The :class:`UIHorizontalSlider <.UIHorizontalSlider>` theming block id is 'horizontal_slider'.
 
 Colours
 -------
 
-UIHorizontalSlider makes use of these colour parameters in a 'colours' block:
+:class:`UIHorizontalSlider <.UIHorizontalSlider>` makes use of these colour parameters in a 'colours' block:
 
  - "**dark_bg**" - The background colour of the 'back' of the slider, the colour of the track that the sliding part moves along.
 
-Important Note
+Sub-elements
 --------------
 
-While the UIHorizontalSlider doesn't have many theming parameters all of it's own; because it is composed of multiple UIButton elements, it also inherits the
-:ref:`theme-button`. As such, you can include those parameters in your 'horizontal_slider' block as well and they will affect those parts of the
-slider which are made of buttons - which is most of it.
+You can reference all of the buttons that are sub elements of the slider with a theming block id of
+'horizontal_slider.button'. You can also reference the buttons individually by adding their object IDs:
+
+ - 'horizontal_slider.#left_button'
+ - 'horizontal_slider.#right_button'
+ - 'horizontal_slider.#sliding_button'
+
+There is more information on theming buttons at :ref:`theme-button`.
 
 Example
 -------
@@ -43,6 +48,20 @@ Here is an example of a horizontal slider block in a JSON theme file, using the 
                 "hovered_text": "#FFFFFF",
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f"
+            }
+        },
+        "horizontal_slider.button":
+        {
+            "misc":
+            {
+               "border_width": "1"
+            }
+        },
+        "horizontal_slider.#sliding_button":
+        {
+            "colours":
+            {
+               "normal_bg": "#FF0000"
             }
         }
     }

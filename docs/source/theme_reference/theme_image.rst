@@ -3,4 +3,4 @@
 UIImage Theming Parameters
 ==========================
 
-UIImage currently has no theming parameters at all. How sad.
+:class:`UIImage <.UIImage>` currently has no theming parameters at all. How sad.

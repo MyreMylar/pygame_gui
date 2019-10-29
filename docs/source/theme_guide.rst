@@ -48,11 +48,16 @@ within the colours block you can start to set individual colours by their IDs. I
     }
 
 To add theming for specific UI elements you then need to add additional blocks at the same level as the
-'defaults' block. These blocks can either be given an ID representing the type of element, or you can
-create a unique 'object' ID block, by convention prefixed with a '#', and then assign this unique ID to
-UI elements when you create them.
+'defaults' block. These blocks require an ID that references which elements that they apply to. IDs have a hierarchy
+allowing us to reference elements that are part of other elements. To address sub-elements we join them with a full stop
+For example, if we wanted to theme the vertical scroll bars that are part of a text box we could use
+'text_box.vertical_scroll_bar' as the theme ID.
 
-There are four general categories of theming which each have their own sub-blocks:
+The parts of a theming block ID can be made up either of their element IDs or an 'object ID' which is passed to the
+element when it is created. More specific theme IDs composed of more object IDs are preferred to ones of entirely
+element IDs where two or more IDs would apply to an element.
+
+There are four general categories of theming which each have their own sub-blocks under the theme block IDs:
 
     - 'colours'
     - 'font'

@@ -3,12 +3,15 @@
 UITooltip Theming Parameters
 =============================
 
-The UIToolTip theming block id is 'tool_tip'. But it currently supports no specific theming parameters of it's own.
+The :class:`UIToolTip <.UIToolTip>` theming block id is 'tool_tip'. But it currently supports no specific theming parameters of it's own.
 
-Important Note
+Sub-elements
 --------------
 
-The UIToolTip contains a UITextBox so the :ref:`theme-text-box` can also be included in your tool_tip block to style it.
+The :class:`UIToolTip <.UIToolTip>` contains a :class:`UITextBox <.UITextBox>` so you can use the block ID 'tool_tip.text_box' to start styling
+it.
+
+There is more information on theming the text box at :ref:`theme-text-box`.
 
 Example
 -------
@@ -20,7 +23,7 @@ Here is an example of a tool tip block in a JSON theme file, using parameters fr
    :linenos:
 
     {
-        "tool_tip":
+        "tool_tip.text_box":
         {
             "colours":
             {

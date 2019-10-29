@@ -3,12 +3,12 @@
 UIScreenSpaceHealthBar Theming Parameters
 =========================================
 
-The UIScreenSpaceHealthBar theming block id is 'screen_space_health_bar'.
+The :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` theming block id is 'screen_space_health_bar'.
 
 Colours
 -------
 
-UIScreenSpaceHealthBar makes use of these colour parameters in a 'colours' block:
+:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
 
  - "**normal_bg**" - The background colour of the health bar.
  - "**normal_text**" - The colour of the health bars's text.
@@ -20,7 +20,7 @@ UIScreenSpaceHealthBar makes use of these colour parameters in a 'colours' block
 Font
 -----
 
-UIScreenSpaceHealthBar accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the health bar.

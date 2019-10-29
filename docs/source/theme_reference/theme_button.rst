@@ -3,12 +3,12 @@
 UIButton Theming Parameters
 ===========================
 
-The UIButton theming block id is 'button'.
+The :class:`UIButton <.UIButton>` theming block id is 'button'.
 
 Colours
 -------
 
-UIButton makes use of these colour parameters in a 'colours' block:
+:class:`UIButton <.UIButton>` makes use of these colour parameters in a 'colours' block:
 
  - "**normal_bg**" - The background colour of the button in the default state.
  - "**hovered_bg**" - The background colour of the button when the mouse pointer is over it.
@@ -21,10 +21,11 @@ UIButton makes use of these colour parameters in a 'colours' block:
  - "**selected_text**" - The colour of the button's text when the button has select focus.
  - "**active_text**" - The colour of the button's text (if any) 'mid-click', you will mostly see it while dragging things around via buttons.
  - "**border**" - The colour of the border around the button if it has one.
+
 Font
 -----
 
-UIButton accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UIButton <.UIButton>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the button.
@@ -41,7 +42,7 @@ Only specify paths if this is the first use of this font name in the GUI:
 Images
 -------
 
-UIButton accepts images specified in the theme via an 'images' block. An 'images' block has these parameters:
+:class:`UIButton <.UIButton>` accepts images specified in the theme via an 'images' block. An 'images' block has these parameters:
 
  - "**normal_image**" - The image displayed in the buttons default state. It has the following block of sub-parameters:
 
@@ -67,7 +68,7 @@ UIButton accepts images specified in the theme via an 'images' block. An 'images
 Misc
 ----
 
-UIButton accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIButton <.UIButton>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**border_width**" - the width in pixels of the border around the button. Defaults to 0.
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 0.

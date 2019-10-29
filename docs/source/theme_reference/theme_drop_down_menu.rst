@@ -3,21 +3,26 @@
 UIDropDownMenu Theming Parameters
 =================================
 
-The UIDropDownMenu theming block id is 'drop_down_menu'.
+The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_menu'.
 
 Misc
 ----
 
-UIDropDownMenu accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIDropDownMenu <.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**expand_direction**" - Can be set to **'up'** or **'down'**. Defaults to 'down'. Changing this parameter will change the direction that the menu will expand away from the initial starting point.
 
-Important Note
+Sub-elements
 --------------
 
-While the UIDropDownMenu doesn't have many theming parameters all of it's own; because it is composed of multiple UIButton elements, it also inherits the
-:ref:`theme-button`. As such, you can include those parameters in your 'drop_down_menu' block as well and they will affect those parts of the
-drop down which are made of buttons - which is basically all of it.
+You can reference all of the buttons that are sub elements of the drop down menu with a theming block id of
+'drop_down_menu.button'. You can also reference the buttons individually by adding their object IDs:
+
+ - 'drop_down_menu.#expand_button'
+ - 'drop_down_menu.#selected_option'
+ - 'drop_down_menu.#option'
+
+There is more information on theming buttons at :ref:`theme-button`.
 
 Example
 -------
@@ -40,6 +45,13 @@ Here is an example of a drop down menu block in a JSON theme file, using the par
             {
                 "normal_bg": "#25292e",
                 "hovered_bg": "#35393e"
+            }
+        },
+        "drop_down_menu.#selected_option":
+        {
+            "misc":
+            {
+               "border_width": "1"
             }
         }
     }

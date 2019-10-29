@@ -59,20 +59,23 @@ class UIHorizontalSlider(UIElement):
                                                 (self.button_width, self.relative_rect.height)),
                                     '◀',
                                     self.ui_manager, self.ui_container, starting_height=2,
-                                    parent_element=self)
+                                    parent_element=self,
+                                    object_id='#left_button')
         self.right_button = UIButton(pygame.Rect((self.relative_rect.x + self.relative_rect.width - self.button_width,
                                                   self.relative_rect.y),
                                                  (self.button_width, self.relative_rect.height)),
                                      '▶',
                                      self.ui_manager, self.ui_container, starting_height=2,
-                                     parent_element=self)
+                                     parent_element=self,
+                                     object_id='#right_button')
 
         sliding_x_pos = self.relative_rect.x + self.relative_rect.width/2 - self.button_width/2
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos,
                                                     self.relative_rect.y),
                                                    (self.button_width, self.relative_rect.height)),
                                        '', self.ui_manager, self.ui_container, starting_height=2,
-                                       parent_element=self)
+                                       parent_element=self,
+                                       object_id='#sliding_button')
 
         self.sliding_button.set_hold_range((self.relative_rect.width, 100))
         self.grabbed_slider = False

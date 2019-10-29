@@ -49,7 +49,8 @@ class UIExpandedDropDownState:
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
-                                               parent_element=self.drop_down_menu_ui)
+                                               parent_element=self.drop_down_menu_ui,
+                                               object_id='#selected_option')
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
 
@@ -75,7 +76,8 @@ class UIExpandedDropDownState:
                                      self.ui_manager,
                                      self.ui_container,
                                      starting_height=2,
-                                     parent_element=self.drop_down_menu_ui)
+                                     parent_element=self.drop_down_menu_ui,
+                                     object_id='#expand_button')
 
         option_y_pos += select_button_dist_to_move
         for option in self.options_list:
@@ -86,7 +88,8 @@ class UIExpandedDropDownState:
                                   self.ui_manager,
                                   self.ui_container,
                                   starting_height=3,  # height allows options to overlap other UI elements
-                                  parent_element=self.drop_down_menu_ui)
+                                  parent_element=self.drop_down_menu_ui,
+                                  object_id='#option')
             option_y_pos += option_button_dist_to_move
             self.menu_buttons.append(new_button)
 
@@ -155,7 +158,8 @@ class UIClosedDropDownState:
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
-                                               parent_element=self.drop_down_menu_ui)
+                                               parent_element=self.drop_down_menu_ui,
+                                               object_id='#selected_option')
         open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
 
         expand_direction = self.ui_manager.get_theme().get_misc_data(self.object_ids,
@@ -174,7 +178,8 @@ class UIClosedDropDownState:
                                     self.ui_manager,
                                     self.ui_container,
                                     starting_height=2,
-                                    parent_element=self.drop_down_menu_ui)
+                                    parent_element=self.drop_down_menu_ui,
+                                    object_id='#expand_button')
 
     def finish(self):
         """

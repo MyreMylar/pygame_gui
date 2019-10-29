@@ -3,12 +3,12 @@
 UITextBox Theming Parameters
 ============================
 
-The UITextBox theming block id is 'text_box'.
+The :class:`UITextBox <.UITextBox>` theming block id is 'text_box'.
 
 Colours
 -------
 
-UITextBox makes use of these colour parameters in a 'colours' block:
+:class:`UITextBox <.UITextBox>` makes use of these colour parameters in a 'colours' block:
 
  - "**dark_bg**" -  The background colour of the text box element.
  - "**border**" - The colour of the border around the text box element.
@@ -19,18 +19,27 @@ UITextBox makes use of these colour parameters in a 'colours' block:
 Misc
 ----
 
-UITextBox accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UITextBox <.UITextBox>` accepts the following miscellaneous parameters in a 'misc' block:
 
 - "**border_width**" -  the width of the border around the element in pixels. Defaults to "1".
 - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
 - "**link_normal_underline**" - Set to either "1" or "0". Whether link text is normally underlined. Defaults to "0" (False).
 - "**link_hover_underline**" - Set to either "1" or "0". Whether link text is underlined when they are hovered over with the mouse. Defaults to "1" (True).
 
-Important Note
+Sub-elements
 --------------
 
-The UITextBox sometimes also contains a UIVerticalSlider, if the text to show is longer than the rectangle to display
-it, in this case the :ref:`theme-vertical-scroll-bar` can also be included in you text_box block to style it.
+The text box may also contain a :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` which you can reference with the block id
+'text_box.vertical_scroll_bar'. You can also reference all of the buttons that are sub elements of the
+scroll bar with a theming block id of 'text_box.vertical_scroll_bar.button'.
+
+You can further reference the individual buttons of the scroll bar by adding their object IDs:
+
+ - 'text_box.vertical_scroll_bar.#top_button'
+ - 'text_box.vertical_scroll_bar.#bottom_button'
+ - 'text_box.vertical_scroll_bar.#sliding_button'
+
+There is more information on theming the vertical scroll bar at :ref:`theme-vertical-scroll-bar`.
 
 Example
 -------
@@ -59,6 +68,20 @@ Here is an example of a text box block in a JSON theme file, using the parameter
                 "padding": "10,10",
                 "link_normal_underline": "0",
                 "link_hover_underline": "1"
+            }
+        },
+        "text_box.vertical_scroll_bar":
+        {
+            "colours":
+            {
+               "dark_bg": "#505068"
+            }
+        },
+        "text_box.vertical_scroll_bar.#sliding_button":
+        {
+            "misc":
+            {
+               "border_width": "1"
             }
         }
     }
