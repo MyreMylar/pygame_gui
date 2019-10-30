@@ -411,7 +411,7 @@ class UITextBox(UIElement):
 
         self.active_text_effect = None
         self.scroll_bar = None
-        self.scroll_bar_width = 15
+        self.scroll_bar_width = 20
         self.bg_color = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
         self.border_color = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
 

@@ -216,7 +216,6 @@ class UIClosedDropDownState:
 
         # First handle the background
         if self.drop_down_menu_ui.shadow_width > 0:
-            print('self.drop_down_menu_ui.rect.size', self.drop_down_menu_ui.rect.size)
             self.drop_down_menu_ui.image = self.ui_manager.get_shadow(self.drop_down_menu_ui.rect.size)
         else:
             self.drop_down_menu_ui.image = pygame.Surface(self.drop_down_menu_ui.rect.size, flags=pygame.SRCALPHA)

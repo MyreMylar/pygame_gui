@@ -63,7 +63,8 @@ class UIMessageWindow(UIWindow):
                                             text='╳',
                                             manager=manager,
                                             container=self.get_container(),
-                                            parent_element=self
+                                            parent_element=self,
+                                            object_id='#close_button'
                                             )
 
         self.done_button = UIButton(relative_rect=pygame.Rect(((self.rect[2] / 2) + 45,

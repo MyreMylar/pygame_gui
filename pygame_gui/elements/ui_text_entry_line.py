@@ -51,7 +51,7 @@ class UITextEntryLine(UIElement):
         self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
 
         # colours from theme
-        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg')
+        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
         self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
         self.selected_text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text')
         self.selected_bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg')
@@ -63,6 +63,12 @@ class UITextEntryLine(UIElement):
             self.border_width = 1
         else:
             self.border_width = int(border_width_str)
+
+        self.shadow_width = 1
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
         self.text = ""
 
         padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
@@ -100,22 +106,33 @@ class UITextEntryLine(UIElement):
         self.text_surface = self.font.render(self.text, True, self.text_colour)
         line_height = self.text_surface.get_rect().height
 
-        self.relative_rect.height = line_height + (2 * self.vert_line_padding) + (2 * self.border_width)
+        self.relative_rect.height = (line_height + (2 * self.vert_line_padding) +
+                                     (2 * self.border_width) + (2 * self.shadow_width))
         self.rect.height = self.relative_rect.height
 
         self.cursor = pygame.Rect((self.text_surface.get_rect().right + 2,
-                                   self.vert_line_padding + self.border_width), (1, line_height))
+                                   self.vert_line_padding + self.border_width + self.shadow_width),
+                                  (1, line_height))
 
-        self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-        self.background_and_border.fill(self.border_colour)
-        self.background_and_border.fill(self.bg_colour,
-                                        pygame.Rect((self.border_width,
-                                                     self.border_width),
-                                                    (self.rect.width - (self.border_width * 2),
-                                                     self.rect.height - (self.border_width * 2)
-                                                     )))
-        self.text_image = pygame.Surface(((self.rect.width-(self.border_width * 2),
-                                           self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
+        if self.shadow_width > 0:
+            self.background_and_border = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+
+        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                  (self.rect.width - (2 * self.shadow_width),
+                                   self.rect.height - (2 * self.shadow_width)))
+        self.background_and_border.fill(self.border_colour, border_rect)
+
+        background_and_border_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                  self.border_width + self.shadow_width),
+                                                 (self.rect.width - (self.border_width * 2) -
+                                                  (self.shadow_width * 2),
+                                                  self.rect.height - (self.border_width * 2) -
+                                                  (self.shadow_width * 2)))
+
+        self.background_and_border.fill(self.bg_colour, background_and_border_rect)
+        self.text_image = pygame.Surface(background_and_border_rect.size, flags=pygame.SRCALPHA)
         self.text_image.fill(self.bg_colour)
 
         self.image = self.background_and_border.copy()
@@ -199,8 +216,10 @@ class UITextEntryLine(UIElement):
         else:
             self.text_surface = self.font.render(self.text, True, self.text_colour)
 
-        text_clip_width = self.rect.width - (self.horiz_line_padding * 2) - (self.border_width * 2)
-        text_clip_height = self.rect.height - (self.vert_line_padding * 2) - (self.border_width * 2)
+        text_clip_width = (self.rect.width - (self.horiz_line_padding * 2) -
+                           (self.border_width * 2) - (self.shadow_width * 2))
+        text_clip_height = (self.rect.height - (self.vert_line_padding * 2) -
+                            (self.border_width * 2) - (self.shadow_width * 2))
         text_surface_clip = pygame.Rect((0,
                                          0),
                                         (text_clip_width,
@@ -236,11 +255,13 @@ class UITextEntryLine(UIElement):
         redrawing all the text.
         """
         self.image = self.background_and_border.copy()
-        self.image.blit(self.text_image, (self.border_width, self.border_width))
+        self.image.blit(self.text_image, (self.border_width + self.shadow_width,
+                                          self.border_width + self.shadow_width))
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
-            self.cursor.x = cursor_size[0] + self.border_width + self.horiz_line_padding - self.start_text_offset
+            self.cursor.x = (cursor_size[0] + self.border_width + self.shadow_width +
+                             self.horiz_line_padding - self.start_text_offset)
             pygame.draw.rect(self.image, self.text_colour, self.cursor)
 
     def update(self, time_delta: float):
@@ -514,7 +535,7 @@ class UITextEntryLine(UIElement):
 
         :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling offscreen.
         """
-        start_pos = self.rect.x + self.border_width + self.horiz_line_padding
+        start_pos = self.rect.x + self.border_width + self.shadow_width + self.horiz_line_padding
         acc_pos = start_pos
         index = 0
         for char in self.text:
