@@ -38,7 +38,7 @@ class UIScreenSpaceHealthBar(UIElement):
         self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
 
         self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
         self.bar_unfilled_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'unfilled_bar')
         self.bar_filled_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'filled_bar')
         self.text_shadow_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'text_shadow')

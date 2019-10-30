@@ -29,7 +29,7 @@ class UIMessageWindow(UIWindow):
         super().__init__(message_window_rect, manager, new_element_ids, new_object_ids)
 
         self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         self.border_width = 1
         border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
@@ -54,7 +54,7 @@ class UIMessageWindow(UIWindow):
                                            (background_rect_width, background_rect_height))
 
         if self.shadow_width > 0:
-            self.image = self.ui_manager.get_shadow(self.rect.size)
+            self.image = self.ui_manager.get_shadow(self.rect.size, self.shadow_width)
         else:
             self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
@@ -67,8 +67,12 @@ class UIMessageWindow(UIWindow):
         self.get_container().relative_rect.y = self.get_container().relative_rect.y + self.shadow_width
         self.get_container().update_containing_rect_position()
 
+        menu_bar_height = 20
+        close_button_width = 20
         self.menu_bar = UIButton(relative_rect=pygame.Rect((0, 0),
-                                                           ((self.rect.width - self.shadow_width * 2) - 20, 20)),
+                                                           ((self.rect.width -
+                                                             (self.shadow_width * 2)) - close_button_width,
+                                                            menu_bar_height)),
                                  text=message_title,
                                  manager=manager,
                                  container=self.get_container(),
@@ -80,29 +84,35 @@ class UIMessageWindow(UIWindow):
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
 
-        self.close_window_button = UIButton(relative_rect=pygame.Rect(((self.rect.width - self.shadow_width * 2) - 20,
+        self.close_window_button = UIButton(relative_rect=pygame.Rect(((self.rect.width - self.shadow_width * 2) -
+                                                                       close_button_width,
                                                                        0),
-                                                                      (20, 20)),
+                                                                      (close_button_width, menu_bar_height)),
                                             text='╳',
                                             manager=manager,
                                             container=self.get_container(),
                                             parent_element=self,
                                             object_id='#close_button'
                                             )
+        done_button_vertical_start = 30
+        done_button_vertical_space = 40
+        self.dismiss_button = UIButton(relative_rect=pygame.Rect(((self.rect.width / 2) + 45,
+                                                                  (border_rect_height -
+                                                                  done_button_vertical_start)),
+                                                                 (70, 20)),
+                                       text="Dismiss",
+                                       manager=manager,
+                                       container=self.get_container(),
+                                       tool_tip_text="<font face=fira_code color=normal_text size=2>"
+                                                     "Click to get rid of this message.</font>",
+                                       parent_element=self,
+                                       object_id='#dismiss_button'
+                                       )
 
-        self.done_button = UIButton(relative_rect=pygame.Rect(((self.rect[2] / 2) + 45,
-                                                               self.rect[3] - 30), (70, 20)),
-                                    text="Dismiss",
-                                    manager=manager,
-                                    container=self.get_container(),
-                                    tool_tip_text="<font face=fira_code color=normal_text size=2>"
-                                                  "Click to get rid of this message.</font>",
-                                    parent_element=self
-                                    )
-
-        text_block_rect = pygame.Rect((self.border_width, 20),
+        text_block_rect = pygame.Rect((self.border_width, menu_bar_height),
                                       (self.border_rect.width - self.border_width,
-                                       self.rect.height - 50))
+                                       (border_rect_height - menu_bar_height -
+                                        done_button_vertical_space)))
         self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self.get_container(),
                                     parent_element=self)
@@ -115,7 +125,7 @@ class UIMessageWindow(UIWindow):
         """
         if self.alive():
 
-            if self.done_button.check_pressed():
+            if self.dismiss_button.check_pressed():
                 self.kill()
 
             if self.menu_bar.held:

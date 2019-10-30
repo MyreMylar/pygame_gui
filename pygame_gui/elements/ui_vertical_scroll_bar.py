@@ -47,7 +47,7 @@ class UIVerticalScrollBar(UIElement):
             self.shadow_width = int(shadow_width_string)
 
         self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         if self.shadow_width > 0:
             self.image = self.ui_manager.get_shadow(self.rect.size)

@@ -11,9 +11,14 @@
       "dark_bg":"#21282d",
       "normal_text":"#bbbbbb",
       "hovered_text":"#bbbbbb",
+      "disabled_text":"#808080",
       "selected_text":"#bbbbbb",
       "active_text":"#bbbbbb",
-      "disabled_text":"#808080",
+      "normal_border":"#5c6062",
+      "hovered_border":"#73787b",
+      "disabled_border":"#35393e",
+      "selected_border":"#466890",
+      "active_border":"#466890",
       "link_text": "#6897bb",
       "link_hover": "#84bfed",
       "link_selected": "#84bfed",
@@ -79,6 +84,13 @@
       "shadow_width": "1"
     }
   },
+  "message_window":
+  {
+    "misc":
+    {
+      "shadow_width": "15"
+    }
+  },
   "message_window.text_box":
   {
     "colours":
@@ -114,6 +126,14 @@
     "misc":
     {
       "border_width": "1"
+    }
+  },
+  "message_window.#dismiss_button":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "2"
     }
   },
   "drop_down_menu":

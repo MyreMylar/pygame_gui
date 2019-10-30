@@ -46,7 +46,7 @@ class UIWorldSpaceHealthBar(UIElement):
             self.sprite_to_monitor = None
             raise AssertionError('Need sprite to monitor')
 
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
         self.health_empty_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'unfilled_bar')
         self.health_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'filled_bar')
 

@@ -66,10 +66,18 @@ class UIButton(UIElement):
                         'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
                         'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
                         'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
-                        'border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')}
+                        'normal_border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border'),
+                        'hovered_border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_border'),
+                        'disabled_border': self.ui_theme.get_colour(self.object_ids,
+                                                                    self.element_ids, 'disabled_border'),
+                        'selected_border': self.ui_theme.get_colour(self.object_ids,
+                                                                    self.element_ids, 'selected_border'),
+                        'active_border': self.ui_theme.get_colour(self.object_ids,
+                                                                  self.element_ids, 'active_border')}
 
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
+        self.border_colour = self.colours['normal_border']
 
         self.border_width = 0
         border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
@@ -230,6 +238,7 @@ class UIButton(UIElement):
         """
         self.text_colour = self.colours['hovered_text']
         self.background_colour = self.colours['hovered_bg']
+        self.border_colour = self.colours['hovered_border']
         self.current_image = self.hovered_image
         self.redraw()
         self.hover_time = 0.0
@@ -258,6 +267,7 @@ class UIButton(UIElement):
         """
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
+        self.border_colour = self.colours['normal_border']
         self.current_image = self.normal_image
         self.redraw()
         if self.tool_tip is not None:
@@ -370,7 +380,7 @@ class UIButton(UIElement):
             self.image = self.ui_manager.get_shadow(self.rect.size)
 
         if self.border_width > 0:
-            self.image.fill(self.colours['border'],
+            self.image.fill(self.border_colour,
                             pygame.Rect((self.shadow_width,
                                          self.shadow_width),
                                         (self.click_area_shape.width,
@@ -411,6 +421,7 @@ class UIButton(UIElement):
         self.is_enabled = False
         self.text_colour = self.colours['disabled_text']
         self.background_colour = self.colours['disabled_bg']
+        self.border_colour = self.colours['disabled_border']
         self.current_image = self.disabled_image
 
     def enable(self):
@@ -420,6 +431,7 @@ class UIButton(UIElement):
         self.is_enabled = True
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
+        self.border_colour = self.colours['normal_border']
         self.current_image = self.normal_image
 
     def set_active(self):
@@ -429,6 +441,7 @@ class UIButton(UIElement):
         """
         self.text_colour = self.colours['active_text']
         self.background_colour = self.colours['active_bg']
+        self.border_colour = self.colours['active_border']
         self.redraw()
 
     def set_inactive(self):
@@ -438,6 +451,7 @@ class UIButton(UIElement):
         """
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
+        self.border_colour = self.colours['normal_border']
         self.redraw()
 
     def select(self):
@@ -448,6 +462,7 @@ class UIButton(UIElement):
         self.is_selected = True
         self.text_colour = self.colours['selected_text']
         self.background_colour = self.colours['selected_bg']
+        self.border_colour = self.colours['selected_border']
         self.current_image = self.selected_image
         self.redraw()
 
@@ -459,6 +474,7 @@ class UIButton(UIElement):
         self.is_selected = False
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
+        self.border_colour = self.colours['normal_border']
         self.current_image = self.normal_image
         self.redraw()
 

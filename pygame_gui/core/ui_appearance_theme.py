@@ -36,11 +36,15 @@ class UIAppearanceTheme:
                              'selected_text': pygame.Color('#FFFFFF'),
                              'active_text': pygame.Color('#FFFFFF'),
                              'disabled_text': pygame.Color('#6d736f'),
+                             'normal_border': pygame.Color('#DDDDDD'),
+                             'hovered_border': pygame.Color('#EDEDED'),
+                             'disabled_border': pygame.Color('#909090'),
+                             'selected_border': pygame.Color('#294764'),
+                             'active_border': pygame.Color('#294764'),
                              'link_text': pygame.Color('#c5cbFF'),
                              'link_hover': pygame.Color('#a5abDF'),
                              'link_selected': pygame.Color('#DFabDF'),
                              'text_shadow': pygame.Color('#777777'),
-                             'border': pygame.Color('#DDDDDD'),
                              'filled_bar': pygame.Color("#f4251b"),
                              'unfilled_bar': pygame.Color("#CCCCCC")}
 

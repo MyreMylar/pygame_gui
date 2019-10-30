@@ -52,13 +52,15 @@ class UIManager:
         """
         return self.ui_window_stack
 
-    def get_shadow(self, size: Tuple[int, int]) -> pygame.Surface:
+    def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2) -> pygame.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
-        :param size:
-        :return:
+
+        :param size: The size of the object we are shadowing + it's shadow.
+        :param shadow_width: The width of the shadowed edge.
+        :return: A shadow.
         """
-        return self.shadow_generator.find_closest_shadow_scale_to_size(size)
+        return self.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width)
 
     def set_window_resolution(self, window_resolution):
         self.window_resolution = window_resolution

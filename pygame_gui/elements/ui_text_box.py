@@ -413,7 +413,7 @@ class UITextBox(UIElement):
         self.scroll_bar = None
         self.scroll_bar_width = 20
         self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         self.link_normal_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_text')
         self.link_hover_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_hover')

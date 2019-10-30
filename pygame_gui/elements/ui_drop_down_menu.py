@@ -330,7 +330,7 @@ class UIDropDownMenu(UIElement):
             self.shadow_width = int(shadow_width_string)
 
         self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
                                   (self.rect.width - (2 * self.shadow_width),

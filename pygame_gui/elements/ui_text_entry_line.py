@@ -55,7 +55,7 @@ class UITextEntryLine(UIElement):
         self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
         self.selected_text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text')
         self.selected_bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'border')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         # misc data from the theme
         border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
