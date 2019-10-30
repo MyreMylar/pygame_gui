@@ -29,23 +29,46 @@ class UIMessageWindow(UIWindow):
         super().__init__(message_window_rect, manager, new_element_ids, new_object_ids)
 
         self.bg_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        self.border_colour = self.ui_manager.get_theme().get_colour(self.object_ids, self.element_ids, 'border')
 
-        # create shadow
-        shadow_padding = (2, 2)
-        background_surface = pygame.Surface((self.rect.width - shadow_padding[0]*2,
-                                             self.rect.height - shadow_padding[1]*2))
-        background_surface.fill(self.bg_colour)
-        self.image = self.ui_manager.get_shadow(self.rect.size)
-        self.image.blit(background_surface, shadow_padding)
+        self.border_width = 1
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            self.border_width = int(border_width_string)
 
-        self.get_container().relative_rect.width = self.rect.width - shadow_padding[0] * 2
-        self.get_container().relative_rect.height = self.rect.height - shadow_padding[1] * 2
-        self.get_container().relative_rect.x = self.get_container().relative_rect.x + shadow_padding[0]
-        self.get_container().relative_rect.y = self.get_container().relative_rect.y + shadow_padding[1]
+        self.shadow_width = 1
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
+        border_rect_width = self.rect.width - (self.shadow_width * 2)
+        border_rect_height = self.rect.height - (self.shadow_width * 2)
+        self.border_rect = pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
+                                       (border_rect_width, border_rect_height))
+
+        background_rect_width = border_rect_width - (self.border_width * 2)
+        background_rect_height = border_rect_height - (self.border_width * 2)
+        self.background_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                            self.shadow_width + self.border_width),
+                                           (background_rect_width, background_rect_height))
+
+        if self.shadow_width > 0:
+            self.image = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+
+        self.image.fill(self.border_colour, self.border_rect)
+        self.image.fill(self.bg_colour, self.background_rect)
+
+        self.get_container().relative_rect.width = self.rect.width - self.shadow_width * 2
+        self.get_container().relative_rect.height = self.rect.height - self.shadow_width * 2
+        self.get_container().relative_rect.x = self.get_container().relative_rect.x + self.shadow_width
+        self.get_container().relative_rect.y = self.get_container().relative_rect.y + self.shadow_width
         self.get_container().update_containing_rect_position()
 
         self.menu_bar = UIButton(relative_rect=pygame.Rect((0, 0),
-                                                           ((self.rect.width - shadow_padding[0] * 2) - 20, 20)),
+                                                           ((self.rect.width - self.shadow_width * 2) - 20, 20)),
                                  text=message_title,
                                  manager=manager,
                                  container=self.get_container(),
@@ -57,7 +80,7 @@ class UIMessageWindow(UIWindow):
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
 
-        self.close_window_button = UIButton(relative_rect=pygame.Rect(((self.rect.width - shadow_padding[0] * 2) - 20,
+        self.close_window_button = UIButton(relative_rect=pygame.Rect(((self.rect.width - self.shadow_width * 2) - 20,
                                                                        0),
                                                                       (20, 20)),
                                             text='╳',
@@ -77,8 +100,8 @@ class UIMessageWindow(UIWindow):
                                     parent_element=self
                                     )
 
-        text_block_rect = pygame.Rect((0, 20),
-                                      (self.rect.width - shadow_padding[0] * 2,
+        text_block_rect = pygame.Rect((self.border_width, 20),
+                                      (self.border_rect.width - self.border_width,
                                        self.rect.height - 50))
         self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self.get_container(),

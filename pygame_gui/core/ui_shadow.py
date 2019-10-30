@@ -18,6 +18,7 @@ class ShadowGenerator:
         self.create_new_shadow(100, 100)
         self.create_new_shadow(50, 50)
         self.create_new_shadow(170, 50)
+        self.create_new_shadow(20, 6)
 
     def create_new_shadow(self, width: int, height: int):
         """
@@ -27,7 +28,7 @@ class ShadowGenerator:
         :param height: The height of the base shadow to create.
         """
         shadow_surface = pygame.Surface((width, height), pygame.SRCALPHA)
-        alpha_increment = 21
+        alpha_increment = 21 * (1 + max(0, int((14 - min(width, height))/4)))
         shadow_color = pygame.Color(0, 0, 0, alpha_increment)
         shadow_surface.fill(shadow_color)
 
@@ -41,18 +42,19 @@ class ShadowGenerator:
         pixel_array[shadow_width - 1, shadow_height - 1] = pygame.Color(0, 0, 0, 0)
         pixel_array.close()
         for i in range(0, 6):
-            shadow_width -= 2
-            shadow_height -= 2
-            shadow_color.a = alpha_increment
-            temp_surface = pygame.Surface((shadow_width, shadow_height), pygame.SRCALPHA)
-            temp_surface.fill(shadow_color)
-            pixel_array = pygame.PixelArray(temp_surface)
-            pixel_array[0, 0] = pygame.Color(0, 0, 0, 0)
-            pixel_array[shadow_width-1, 0] = pygame.Color(0, 0, 0, 0)
-            pixel_array[0, shadow_height-1] = pygame.Color(0, 0, 0, 0)
-            pixel_array[shadow_width-1, shadow_height-1] = pygame.Color(0, 0, 0, 0)
-            pixel_array.close()
-            shadow_surface.blit(temp_surface, (i+1, i+1))
+            if shadow_width > 2 and shadow_height > 2:
+                shadow_width -= 2
+                shadow_height -= 2
+                shadow_color.a = alpha_increment
+                temp_surface = pygame.Surface((shadow_width, shadow_height), pygame.SRCALPHA)
+                temp_surface.fill(shadow_color)
+                pixel_array = pygame.PixelArray(temp_surface)
+                pixel_array[0, 0] = pygame.Color(0, 0, 0, 0)
+                pixel_array[shadow_width-1, 0] = pygame.Color(0, 0, 0, 0)
+                pixel_array[0, shadow_height-1] = pygame.Color(0, 0, 0, 0)
+                pixel_array[shadow_width-1, shadow_height-1] = pygame.Color(0, 0, 0, 0)
+                pixel_array.close()
+                shadow_surface.blit(temp_surface, (i+1, i+1))
 
         self.created_shadows[str(width) + 'x' + str(height)] = shadow_surface
 

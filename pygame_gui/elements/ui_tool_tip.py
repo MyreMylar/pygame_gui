@@ -40,23 +40,16 @@ class UITooltip(UIElement):
                          element_ids=new_element_ids,
                          object_ids=new_object_ids)
 
-        self.horiz_shadow_spacing = 2
-        self.vert_shadow_spacing = 2
         self.hover_distance_from_target = hover_distance
         self.text_block = ui_text_box.UITextBox(html_text,
-                                                pygame.Rect(self.horiz_shadow_spacing,
-                                                            self.vert_shadow_spacing,
-                                                            width - (2 * self.horiz_shadow_spacing), -1),
+                                                pygame.Rect(0, 0, width, -1),
                                                 manager=self.ui_manager,
                                                 layer_starting_height=self._layer+1,
                                                 parent_element=self)
 
-        height = self.text_block.rect.height + (2 * self.vert_shadow_spacing)
-
-        self.rect.height = height
+        self.rect.height = self.text_block.rect.height
         # Get a shadow from the shadow generator
-        self.image = self.ui_manager.get_shadow(self.rect.size)
-        self.image.fill(pygame.Color(0,0,0,0), self.text_block.rect)
+        self.image = pygame.Surface((0, 0))
 
     def kill(self):
         """
@@ -87,8 +80,8 @@ class UITooltip(UIElement):
         self.rect.top = position.y + self.hover_distance_from_target[1]
 
         if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x + self.horiz_shadow_spacing
-            self.text_block.rect.y = self.rect.y + self.vert_shadow_spacing
+            self.text_block.rect.x = self.rect.x
+            self.text_block.rect.y = self.rect.y
             return True
         else:
             if self.rect.bottom > window_rect.bottom:
@@ -99,8 +92,8 @@ class UITooltip(UIElement):
                 self.rect.left = window_rect.left + self.hover_distance_from_target[0]
 
         if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x + self.horiz_shadow_spacing
-            self.text_block.rect.y = self.rect.y + self.vert_shadow_spacing
+            self.text_block.rect.x = self.rect.x
+            self.text_block.rect.y = self.rect.y
             return True
         else:
             return False

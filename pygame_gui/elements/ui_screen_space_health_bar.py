@@ -44,27 +44,34 @@ class UIScreenSpaceHealthBar(UIElement):
         self.text_shadow_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'text_shadow')
         self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
 
-        self.padding = (3, 3)
-        self.border = (1, 1)
+        self.border_width = 1
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            self.border_width = int(border_width_string)
 
-        border_rect_width = self.rect.width - (self.padding[0] * 2)
-        border_rect_height = self.rect.height - (self.padding[1] * 2)
-        self.border_rect = pygame.Rect((self.rect.x + self.padding[0],
-                                        self.rect.y + self.padding[1]),
+        self.shadow_width = 1
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
+        border_rect_width = self.rect.width - (self.shadow_width * 2)
+        border_rect_height = self.rect.height - (self.shadow_width * 2)
+        self.border_rect = pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
                                        (border_rect_width, border_rect_height))
 
-        self.capacity_width = self.rect.width - (self.padding[0] * 2) - self.border[0] * 2
-        self.capacity_height = self.rect.height - (self.padding[1] * 2) - self.border[1] * 2
-        self.capacity_rect = pygame.Rect((self.rect.x + self.padding[0] + self.border[0],
-                                          self.rect.y + self.padding[1] + self.border[1]),
+        self.capacity_width = self.rect.width - (self.shadow_width * 2) - self.border_width * 2
+        self.capacity_height = self.rect.height - (self.shadow_width * 2) - self.border_width * 2
+        self.capacity_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                          self.shadow_width + self.border_width),
                                          (self.capacity_width, self.capacity_height))
 
         self.current_health = 50
         self.health_capacity = 100
         self.health_percentage = self.current_health / self.health_capacity
 
-        self.current_health_rect = pygame.Rect((self.rect.x + self.padding[0] + self.border[0],
-                                                self.rect.y + self.padding[1] + self.border[1]),
+        self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                                self.shadow_width + self.border_width),
                                                (int(self.capacity_width * self.health_percentage),
                                                 self.capacity_height))
 
@@ -99,23 +106,14 @@ class UIScreenSpaceHealthBar(UIElement):
         Redraws the health bar rectangles and text onto the underlying sprite's image surface.
         Takes a little while so we only do it when the health has changed.
         """
-        self.image = pygame.Surface((self.rect.w, self.rect.h))
-        self.image.fill(self.background_colour)
-        self.image.set_alpha(175)
+        if self.shadow_width > 0:
+            self.image = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
-        border = pygame.Surface((self.border_rect.w, self.border_rect.h))
-        border.fill(self.border_colour)
-        self.image.blit(border, self.padding)
-
-        capacity = pygame.Surface((self.capacity_rect.w, self.capacity_rect.h))
-        capacity.fill(self.bar_unfilled_colour)
-        self.image.blit(capacity, (self.padding[0] + self.border[0],
-                                   self.padding[1] + self.border[1]))
-
-        current_health = pygame.Surface((self.current_health_rect.w, self.current_health_rect.h))
-        current_health.fill(self.bar_filled_colour)
-        self.image.blit(current_health, (self.padding[0] + self.border[0],
-                                         self.padding[1] + self.border[1]))
+        self.image.fill(self.border_colour, self.border_rect)
+        self.image.fill(self.bar_unfilled_colour, self.capacity_rect)
+        self.image.fill(self.bar_filled_colour, self.current_health_rect)
 
         self.background_text = self.font.render(
             str(self.current_health) + "/" + str(self.health_capacity),
@@ -158,8 +156,8 @@ class UIScreenSpaceHealthBar(UIElement):
                     self.health_capacity = self.sprite_to_monitor.health_capacity
                     self.health_percentage = self.current_health / self.health_capacity
 
-                    self.current_health_rect = pygame.Rect((self.rect.x + self.padding[0] + self.border[0],
-                                                            self.rect.y + self.padding[1] + self.border[1]),
+                    self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                                            self.shadow_width + self.border_width),
                                                            (int(self.capacity_width * self.health_percentage),
                                                             self.capacity_height))
                     self.redraw()

@@ -79,6 +79,13 @@
       "shadow_width": "1"
     }
   },
+  "message_window.text_box":
+  {
+    "colours":
+    {
+      "dark_bg": "#00000000"
+    }
+  },
   "message_window.text_box.vertical_scroll_bar":
   {
     "misc":
@@ -123,6 +130,14 @@
     {
       "border_width": "1",
       "shadow_width": "2"
+    }
+  },
+  "tool_tip.text_box":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "3"
     }
   }
 }

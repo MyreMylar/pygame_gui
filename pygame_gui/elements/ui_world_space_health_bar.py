@@ -60,6 +60,11 @@ class UIWorldSpaceHealthBar(UIElement):
         if border_width_param is not None:
             self.border_width = int(border_width_param)
 
+        self.shadow_width = 1
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
         self.position = [self.sprite_to_monitor.rect.x,
                          self.sprite_to_monitor.rect.y - self.hover_height]
 
@@ -68,20 +73,24 @@ class UIWorldSpaceHealthBar(UIElement):
 
         self.image = pygame.Surface((self.rect.w, self.rect.h), flags=pygame.SRCALPHA)
 
-        self.capacity_width = self.rect.width - (self.border_width * 2)
-        self.capacity_height = self.rect.height - (self.border_width * 2)
-        self.health_capacity_rect = pygame.Rect([self.border_width,
-                                                 self.border_width],
-                                                [self.capacity_width, self.capacity_height])
+        self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                       (self.rect.width - (self.shadow_width * 2),
+                                        self.rect.height - (self.shadow_width * 2)))
+
+        self.capacity_width = self.rect.width - (self.shadow_width * 2) - (self.border_width * 2)
+        self.capacity_height = self.rect.height - (self.shadow_width * 2) - (self.border_width * 2)
+        self.health_capacity_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                 self.border_width + self.shadow_width),
+                                                (self.capacity_width, self.capacity_height))
 
         self.current_health = 0
         self.health_capacity = 0
         self.health_percentage = 0.0
 
-        self.current_health_rect = pygame.Rect([self.border_width,
-                                                self.border_width],
-                                               [int(self.capacity_width*self.health_percentage),
-                                                self.capacity_height])
+        self.current_health_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                self.border_width + self.shadow_width),
+                                               (int(self.capacity_width*self.health_percentage),
+                                                self.capacity_height))
 
     def update(self, time_delta: float):
         """
@@ -105,6 +114,11 @@ class UIWorldSpaceHealthBar(UIElement):
                 self.health_percentage = self.current_health / self.health_capacity
                 self.current_health_rect.width = int(self.capacity_width * self.health_percentage)
 
-                self.image.fill(self.border_colour)
+                if self.shadow_width > 0:
+                    self.image = self.ui_manager.get_shadow(self.rect.size)
+                else:
+                    self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+
+                self.image.fill(self.border_colour, self.border_rect)
                 self.image.fill(self.health_empty_colour, self.health_capacity_rect)
                 self.image.fill(self.health_colour, self.current_health_rect)
