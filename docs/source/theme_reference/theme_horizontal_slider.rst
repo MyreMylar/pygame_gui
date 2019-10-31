@@ -11,6 +11,15 @@ Colours
 :class:`UIHorizontalSlider <.UIHorizontalSlider>` makes use of these colour parameters in a 'colours' block:
 
  - "**dark_bg**" - The background colour of the 'back' of the slider, the colour of the track that the sliding part moves along.
+ - "**normal_border**" - The border colour of the slider.
+
+Misc
+----
+
+:class:`UIHorizontalSlider <.UIHorizontalSlider>` accepts the following miscellaneous parameters in a 'misc' block:
+
+ - "**border_width**" - the width in pixels of the border around the slider. Defaults to 1.
+ - "**shadow_width**" - the width in pixels of the shadow behind the slider. Defaults to 1.
 
 Sub-elements
 --------------

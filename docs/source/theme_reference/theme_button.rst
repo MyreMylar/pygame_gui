@@ -20,7 +20,11 @@ Colours
  - "**disabled_text**" - The colour of the button's text when the button has been disabled (so users cannot interact with it)
  - "**selected_text**" - The colour of the button's text when the button has select focus.
  - "**active_text**" - The colour of the button's text (if any) 'mid-click', you will mostly see it while dragging things around via buttons.
- - "**border**" - The colour of the border around the button if it has one.
+ - "**normal_border**" - The colour of the border around the button (if it has one), in the default state.
+ - "**hovered_border**" - The colour of the border around the button (if it has one), in the hovered state.
+ - "**disabled_border**" - The colour of the border around the button (if it has one), in the disabled state.
+ - "**selected_border**" - The colour of the border around the button (if it has one), in the selected state.
+ - "**active_border**" - The colour of the border around the button (if it has one), in the active state.
 
 Font
 -----
@@ -102,7 +106,11 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f",
                 "active_text": "#6d736f",
-                "border": "#AAAAAA"
+                "normal_border": "#AAAAAA",
+                "hovered_border": "#B0B0B0",
+                "disabled_border": "#808080",
+                "selected_border": "#8080B0",
+                "active_border": "#8080B0"
             },
             "font":
             {

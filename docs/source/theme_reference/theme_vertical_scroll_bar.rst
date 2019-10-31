@@ -11,6 +11,15 @@ Colours
 :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block:
 
  - "**dark_bg**" - The background colour of the 'back' of the scroll bar, the colour of the track that the scroll bar moves along.
+ - "**normal_border**" - The colour of the border around the scroll bar.
+
+Misc
+----
+
+:class:`UIVerticalScrollBar <.UIVerticalScrollBar>` accepts the following miscellaneous parameters in a 'misc' block:
+
+ - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
+ - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
 
 Sub-elements
 --------------

@@ -5,12 +5,22 @@ UIDropDownMenu Theming Parameters
 
 The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_menu'.
 
+Colours
+-------
+
+:class:`UIDropDownMenu <.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block:
+
+ - "**dark_bg**" - The background colour of the drop down menu. Probably not visible.
+ - "**normal_border**" - The border colour of the drop down menu.
+
 Misc
 ----
 
 :class:`UIDropDownMenu <.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**expand_direction**" - Can be set to **'up'** or **'down'**. Defaults to 'down'. Changing this parameter will change the direction that the menu will expand away from the initial starting point.
+ - "**border_width**" - the width in pixels of the border around the drop down menu. Defaults to 1.
+ - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 1.
 
 Sub-elements
 --------------

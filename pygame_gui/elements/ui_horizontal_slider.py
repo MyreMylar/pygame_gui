@@ -41,12 +41,12 @@ class UIHorizontalSlider(UIElement):
         self.current_percentage = 0.5
         self.value_range = value_range
 
-        self.border_width = 0
+        self.border_width = 1
         border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
         if border_width_string is not None:
             self.border_width = int(border_width_string)
 
-        self.shadow_width = 0
+        self.shadow_width = 1
         shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
         if shadow_width_string is not None:
             self.shadow_width = int(shadow_width_string)

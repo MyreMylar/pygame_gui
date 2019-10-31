@@ -13,9 +13,18 @@ Colours
  - "**normal_bg**" - The background colour of the health bar.
  - "**normal_text**" - The colour of the health bars's text.
  - "**text_shadow**" - The colour of the shadow behind the text (so it stands out better).
- - "**border**" - The colour of the border around the health bar.
+ - "**normal_border**" - The colour of the border around the health bar.
  - "**filled_bar**" - The colour of the actual bar itself, of the portion of it that is still full.
  - "**unfilled_bar**" - The colour of an empty portion of the health bar.
+
+Misc
+----
+
+:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` accepts the following miscellaneous parameters in a 'misc' block:
+
+ - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
+ - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
+
 
 Font
 -----

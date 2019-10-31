@@ -14,7 +14,7 @@ Colours
  - "**selected_bg**" - The colour the background changes to when the text above it is selected.
  - "**normal_text**" - The default colour of text entered into the element.
  - "**selected_text**" - The colour of text when it has been selected.
- - "**border**" - The colour of the border around the text entry element.
+ - "**normal_border**" - The colour of the border around the text entry element.
 
 Font
 -----
@@ -38,7 +38,8 @@ Misc
 
 :class:`UITextEntryLine <.UITextEntryLine>` accepts the following miscellaneous parameters in a 'misc' block:
 
-- "**border_width**" -  the width of the border around the element in pixels. Defaults to "1".
+- "**border_width**" - the width of the border around the element in pixels. Defaults to "1".
+- "**shadow_width**" - the width of the shadow around the element in pixels. Defaults to "1".
 - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
 
 Example
@@ -75,6 +76,7 @@ Here is an example of a text entry line block in a JSON theme file using all the
             "misc":
             {
                 "border_width": "2",
+                "shadow_width": "2",
                 "padding": "6,4"
             }
         }

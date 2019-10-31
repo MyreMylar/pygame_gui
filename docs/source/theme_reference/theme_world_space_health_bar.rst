@@ -10,7 +10,7 @@ Colours
 
 :class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
 
- - "**border**" - The colour of the health bar's border if it has one.
+ - "**normal_border**" - The colour of the health bar's border if it has one.
  - "**filled_bar**" - The colour of the actual bar itself, of the portion of it that is still full.
  - "**unfilled_bar**" - The colour of an empty portion of the health bar.
 
@@ -21,6 +21,7 @@ Misc
 
  - "**hover_height**" - The height in pixels that the health bar will appear over the sprite. Defaults to "10".
  - "**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
+ - "**shadow_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
 
 Example
 -------

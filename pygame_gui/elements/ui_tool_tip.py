@@ -27,12 +27,11 @@ class UITooltip(UIElement):
                  manager: ui_manager.UIManager,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None):
-        width = 170
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='tool_tip')
-        super().__init__(relative_rect=pygame.Rect((0, 0), (width, -1)),
+        super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
                          container=None,
                          starting_height=manager.get_sprite_group().get_top_layer(),
@@ -40,13 +39,21 @@ class UITooltip(UIElement):
                          element_ids=new_element_ids,
                          object_ids=new_object_ids)
 
+        rect_width = 170
+        rect_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'rect_width')
+        if rect_width_string is not None:
+            rect_width = int(rect_width_string)
+
         self.hover_distance_from_target = hover_distance
         self.text_block = ui_text_box.UITextBox(html_text,
-                                                pygame.Rect(0, 0, width, -1),
+                                                pygame.Rect(0, 0, rect_width, -1),
                                                 manager=self.ui_manager,
                                                 layer_starting_height=self._layer+1,
                                                 parent_element=self)
 
+        self.relative_rect.height = self.text_block.rect.height
+        self.relative_rect.width = self.text_block.rect.width
+        self.rect.width = self.text_block.rect.width
         self.rect.height = self.text_block.rect.height
         # Get a shadow from the shadow generator
         self.image = pygame.Surface((0, 0))

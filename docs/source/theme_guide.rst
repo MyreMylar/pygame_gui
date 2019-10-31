@@ -40,7 +40,11 @@ within the colours block you can start to set individual colours by their IDs. I
                 "link_hover": "#2020FF",
                 "link_selected": "#551A8B",
                 "text_shadow": "#777777",
-                "border": "#DDDDDD",
+                "normal_border": "#DDDDDD",
+                "hovered_border": "#B0B0B0",
+                "disabled_border": "#808080",
+                "selected_border": "#8080B0",
+                "active_border": "#8080B0",
                 "filled_bar":"#f4251b",
                 "unfilled_bar":"#CCCCCC"
             }
@@ -88,7 +92,11 @@ Here's an example of adding a 'button' theme block to the JSON file above:
                 "link_hover": "#2020FF",
                 "link_selected": "#551A8B",
                 "text_shadow": "#777777",
-                "border": "#DDDDDD",
+                "normal_border": "#DDDDDD",
+                "hovered_border": "#B0B0B0",
+                "disabled_border": "#808080",
+                "selected_border": "#8080B0",
+                "active_border": "#8080B0",
                 "filled_bar":"#f4251b",
                 "unfilled_bar":"#CCCCCC"
             }
@@ -108,7 +116,12 @@ Here's an example of adding a 'button' theme block to the JSON file above:
                 "hovered_text":"#FFFFFF",
                 "selected_text":"#FFFFFF",
                 "disabled_text":"#6d736f",
-                "active_text":"#FFFFFF"
+                "active_text":"#FFFFFF",
+                "normal_border": "#DDDDDD",
+                "hovered_border": "#B0B0B0",
+                "disabled_border": "#808080",
+                "selected_border": "#8080B0",
+                "active_border": "#8080B0"
             },
 
             "misc":
