@@ -21,3 +21,5 @@ There is documentation available [here](https://pygame-gui.readthedocs.io/en/lat
 ![pygame_gui_example_2](https://user-images.githubusercontent.com/13382426/68039138-5cf6a100-fcc3-11e9-9620-0c5d86e58ade.png)
 
 ![pygame_gui_example_3](https://user-images.githubusercontent.com/13382426/68039142-5ec06480-fcc3-11e9-91f4-3e401f459886.png)
+
+![pygame_gui_example_4](https://user-images.githubusercontent.com/13382426/68041632-e52b7500-fcc8-11e9-8b72-4cf8817c5fa3.png)
