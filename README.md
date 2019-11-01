@@ -1,5 +1,10 @@
+
+
 # Pygame GUI
 A GUI system for pygame 2 (it may also work OK on earlier versions of pygame).
+
+[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui)
+
 
 ## How to install
 
