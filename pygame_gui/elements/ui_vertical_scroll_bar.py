@@ -172,7 +172,7 @@ class UIVerticalScrollBar(UIElement):
         # pygame.MOUSEWHEEL only defined after pygame 1.9
         try:
             pygame.MOUSEWHEEL
-        except NameError:
+        except AttributeError:
             pygame.MOUSEWHEEL = -1
 
         processed_event = False
