@@ -779,8 +779,8 @@ class UITextBox(UIElement):
         These effects are currently supported:
 
         - 'typing_appear' - Will look as if the text is being typed in.
-        - 'fade in' - The text will fade in from the background colour (Only supported on Pygame 2)
-        - 'fade out' - The text will fade out to the background colour (only supported on Pygame 2)
+        - 'fade_in' - The text will fade in from the background colour (Only supported on Pygame 2)
+        - 'fade_out' - The text will fade out to the background colour (only supported on Pygame 2)
 
         :param effect_name: The name fo the t to set. If set to None instead it will cancel any active effect.
         """
