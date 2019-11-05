@@ -1,5 +1,5 @@
 import pygame
-from typing import List, Union
+from typing import Union
 
 from ..elements.ui_button import UIButton
 from ..elements.ui_text_box import UITextBox

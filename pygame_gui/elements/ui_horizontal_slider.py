@@ -1,6 +1,6 @@
 import pygame
 import warnings
-from typing import Union, List, Tuple
+from typing import Union, Tuple
 
 from .. import ui_manager
 from ..core import ui_container

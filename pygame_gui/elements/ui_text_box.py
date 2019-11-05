@@ -1,7 +1,7 @@
 import pygame
 import warnings
 import html.parser
-from typing import Union, List
+from typing import Union
 
 from .. import ui_manager
 from ..core import ui_container

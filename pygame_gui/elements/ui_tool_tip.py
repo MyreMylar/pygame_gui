@@ -1,6 +1,6 @@
 import pygame
 import pygame.gfxdraw
-from typing import List, Union, Tuple
+from typing import Union, Tuple
 
 from .. import ui_manager
 from ..core.ui_element import UIElement

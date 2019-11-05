@@ -1,5 +1,5 @@
 import pygame
-from typing import Union, List, Tuple
+from typing import Union, Tuple
 
 from .. import ui_manager
 from ..core import ui_container
@@ -118,7 +118,8 @@ class UIButton(UIElement):
 
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
-        self.text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
+        self.text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
+                                                                self.element_ids, 'text_horiz_alignment')
         text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
                                                                    self.element_ids, 'text_horiz_alignment_padding')
         if text_horiz_alignment_padding is None:

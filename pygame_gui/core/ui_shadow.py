@@ -67,7 +67,7 @@ class ShadowGenerator:
     def find_closest_shadow_scale_to_size(self, size: Tuple[int, int],
                                           shadow_width: int = 2) -> Union[pygame.Surface, None]:
         """
-        This function searches throuhg our dictionary of created shadows, grabs the closest one to the size
+        This function searches through our dictionary of created shadows, grabs the closest one to the size
         we request and then scales that shadow to the exact size we need.
 
         :param size: The size of the element we are finding a shadow for.
