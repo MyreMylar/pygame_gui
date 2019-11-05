@@ -1,10 +1,10 @@
 import pygame
 from typing import Union
 
-from ..elements.ui_button import UIButton
-from ..elements.ui_text_box import UITextBox
-from ..core.ui_window import UIWindow
-from .. import ui_manager
+from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.core.ui_window import UIWindow
+from pygame_gui import ui_manager
 
 
 class UIMessageWindow(UIWindow):

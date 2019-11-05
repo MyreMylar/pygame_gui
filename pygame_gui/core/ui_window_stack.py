@@ -1,6 +1,6 @@
 from typing import Union
 
-from . import ui_window
+from pygame_gui.core import ui_window
 
 
 class UIWindowStack:

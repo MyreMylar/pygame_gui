@@ -1,9 +1,9 @@
 import pygame
 from typing import List, Union
 
-from ..core.ui_element import UIElement
-from ..core.ui_container import UIContainer
-from .. import ui_manager
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.ui_container import UIContainer
+from pygame_gui import ui_manager
 
 
 class UIWindow(UIElement):

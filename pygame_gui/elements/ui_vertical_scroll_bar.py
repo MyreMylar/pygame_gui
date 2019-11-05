@@ -1,10 +1,10 @@
 import pygame
 from typing import Union
 
-from .. import ui_manager
-from ..core import ui_container
-from ..elements import ui_button
-from ..core.ui_element import UIElement
+from pygame_gui import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui.elements import ui_button
+from pygame_gui.core.ui_element import UIElement
 
 
 class UIVerticalScrollBar(UIElement):

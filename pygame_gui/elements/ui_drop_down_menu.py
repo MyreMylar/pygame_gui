@@ -1,10 +1,10 @@
 import pygame
 from typing import Union, List
 
-from .. import ui_manager
-from ..core import ui_container
-from ..core.ui_element import UIElement
-from ..elements.ui_button import UIButton
+from pygame_gui import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UIExpandedDropDownState:

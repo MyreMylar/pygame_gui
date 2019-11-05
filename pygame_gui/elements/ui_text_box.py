@@ -3,10 +3,10 @@ import warnings
 import html.parser
 from typing import Union
 
-from .. import ui_manager
-from ..core import ui_container
-from ..core.ui_element import UIElement
-from ..elements.ui_vertical_scroll_bar import UIVerticalScrollBar
+from pygame_gui import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 
 class TextBoxEffect:

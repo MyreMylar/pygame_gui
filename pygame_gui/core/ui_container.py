@@ -1,6 +1,6 @@
 import pygame
 
-from ..core.ui_element import UIElement
+from pygame_gui.core.ui_element import UIElement
 
 
 class UIContainer(UIElement):

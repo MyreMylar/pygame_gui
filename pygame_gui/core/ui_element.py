@@ -1,8 +1,8 @@
 import pygame
 from typing import List, Union
 
-from . import ui_container
-from .. import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui import ui_manager
 
 
 class UIElement(pygame.sprite.Sprite):

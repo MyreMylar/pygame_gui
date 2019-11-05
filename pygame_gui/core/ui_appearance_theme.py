@@ -3,7 +3,7 @@ import json
 import os
 from typing import Union
 
-from ..core.ui_font_dictionary import UIFontDictionary
+from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 
 try:
     from os import PathLike  # for Python 3.6

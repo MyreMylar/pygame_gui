@@ -1,10 +1,10 @@
 import pygame
 from typing import Union, Tuple
 
-from .. import ui_manager
-from ..core import ui_container
-from ..core.ui_element import UIElement
-from . import ui_tool_tip
+from pygame_gui import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.elements import ui_tool_tip
 
 
 class UIButton(UIElement):

@@ -1,11 +1,11 @@
 import pygame
 from typing import Tuple, List, Dict, Union
 
-from .core.ui_appearance_theme import UIAppearanceTheme
-from .core.ui_window_stack import UIWindowStack
-from .core.ui_window import UIWindow
-from .core.ui_shadow import ShadowGenerator
-from .core.ui_element import UIElement
+from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
+from pygame_gui.core.ui_window_stack import UIWindowStack
+from pygame_gui.core.ui_window import UIWindow
+from pygame_gui.core.ui_shadow import ShadowGenerator
+from pygame_gui.core.ui_element import UIElement
 
 
 class UIManager:
