@@ -152,6 +152,12 @@ class UIButton(UIElement):
         self.redraw()
 
     def compute_aligned_text_rect(self):
+        # render
+        if len(self.text) > 0:
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
+        else:
+            self.text_surface = None
+
         self.aligned_text_rect = None
         if self.text_surface is not None:
             # horizontal
