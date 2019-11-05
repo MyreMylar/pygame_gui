@@ -5,6 +5,11 @@ from typing import Union
 
 from ..core.ui_font_dictionary import UIFontDictionary
 
+try:
+    from os import PathLike  # for Python 3.6
+except ImportError:
+    PathLike = None
+
 
 class UIAppearanceTheme:
     """
@@ -349,13 +354,16 @@ class UIAppearanceTheme:
                 best_fit_colour = self.base_colours[key]
         return best_fit_colour
 
-    def load_theme(self, file_path: Union[str, os.PathLike]):
+    def load_theme(self, file_path: Union[str, PathLike]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
 
         :param file_path: The path to the theme we want to load.
 
         """
+        if file_path is None:
+            raise ValueError('Theme path cannot be None')
+
         with open(os.path.abspath(file_path), 'r') as theme_file:
             theme_dict = json.load(theme_file)
 
