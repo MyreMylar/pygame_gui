@@ -1,10 +1,19 @@
 
 
 # Pygame GUI
-A GUI system for pygame 2 (it may also work OK on earlier versions of pygame).
+A GUI system for pygame 2 (it also works OK on pygame 1.9).
+
+ - [Documentation](https://pygame-gui.readthedocs.io/en/latest/index.html)
+ - [GitHub](https://github.com/MyreMylar/pygame_gui)
+ - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
+ - [PyPi](https://pypi.org/project/pygame-gui/)
 
 [![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui)
 
+## Requirements
+
+ - Python 3.5+
+ - Pygame
 
 ## How to install
 
