@@ -8,7 +8,8 @@ A GUI system for pygame 2 (it also works OK on pygame 1.9).
  - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
  - [PyPi](https://pypi.org/project/pygame-gui/)
 
-[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui)
+.. image:: https://badge.fury.io/py/pygame-gui.svg
+    :target: https://badge.fury.io/py/pygame-gui.svg
 
 ## Requirements
 
