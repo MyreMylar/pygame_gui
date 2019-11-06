@@ -41,8 +41,9 @@ class UILabel(UIElement):
 
         :param text: the text to set the label to.
         """
-        self.text = text
-        self.redraw()
+        if text != self.text:
+            self.text = text
+            self.redraw()
 
     def redraw(self):
         """
@@ -114,3 +115,6 @@ class UILabel(UIElement):
                 self.image.blit(shadow_text_render, shadow_text_render_rect)
 
         self.image.blit(text_render, text_render_rect)
+
+    def rebuild_from_theme_data(self):
+        self.redraw()

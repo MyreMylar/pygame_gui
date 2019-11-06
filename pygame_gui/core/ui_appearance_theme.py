@@ -1,6 +1,7 @@
 import pygame
 import json
 import os
+import warnings
 from typing import Union
 
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
@@ -89,6 +90,8 @@ class UIAppearanceTheme:
         # to handle that with a default behaviour
         self.ui_element_misc_data = {}
 
+        self._theme_file_last_modified = None
+        self._theme_file_path = None
         self.load_theme(os.path.normpath(os.path.join(module_root_path, 'data/default_theme.json')))
 
     def get_font_dictionary(self):
@@ -98,6 +101,28 @@ class UIAppearanceTheme:
         :return UIFontDictionary:
         """
         return self.font_dictionary
+
+    def check_need_to_reload(self):
+        """
+        Check if we need to reload our theme file because it's been modified. If so, trigger a reload and return True
+        so that the UIManager can trigger elements to redraw from the theme data.
+
+        :return bool: True if we need to reload elements because the theme data has changed.
+        """
+        stamp = os.stat(self._theme_file_path).st_mtime
+        if stamp != self._theme_file_last_modified:
+            self._theme_file_last_modified = stamp
+            self.reload_theming()
+            return True
+        else:
+            return False
+
+    def reload_theming(self):
+        """
+        We need to load our theme file see if anything expensive has changed, if so trigger it to reload/rebuild.
+
+        """
+        self.load_theme(self._theme_file_path)
 
     def load_fonts(self):
         """
@@ -166,20 +191,22 @@ class UIAppearanceTheme:
         """
         for element_key in self.ui_element_image_paths.keys():
             image_paths_dict = self.ui_element_image_paths[element_key]
-            self.ui_element_image_surfaces[element_key] = {}
+            if element_key not in self.ui_element_image_surfaces:
+                self.ui_element_image_surfaces[element_key] = {}
             for path_key in image_paths_dict:
-                path = image_paths_dict[path_key]['path']
-                if path in self.loaded_image_files:
-                    image = self.loaded_image_files[path]
-                else:
-                    image = pygame.image.load(path).convert_alpha()
-                    self.loaded_image_files[path] = image
+                if image_paths_dict[path_key]['changed']:
+                    path = image_paths_dict[path_key]['path']
+                    if path in self.loaded_image_files:
+                        image = self.loaded_image_files[path]
+                    else:
+                        image = pygame.image.load(path).convert_alpha()
+                        self.loaded_image_files[path] = image
 
-                if 'sub_surface_rect' in image_paths_dict[path_key]:
-                    surface = image.subsurface(image_paths_dict[path_key]['sub_surface_rect'])
-                else:
-                    surface = image
-                self.ui_element_image_surfaces[element_key][path_key] = surface
+                    if 'sub_surface_rect' in image_paths_dict[path_key]:
+                        surface = image.subsurface(image_paths_dict[path_key]['sub_surface_rect'])
+                    else:
+                        surface = image
+                    self.ui_element_image_surfaces[element_key][path_key] = surface
 
     def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
         if index < tree_size:
@@ -364,77 +391,97 @@ class UIAppearanceTheme:
         if file_path is None:
             raise ValueError('Theme path cannot be None')
 
+        self._theme_file_path = file_path
+        self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+        load_success = False
         with open(os.path.abspath(file_path), 'r') as theme_file:
-            theme_dict = json.load(theme_file)
+            try:
+                load_success = True
+                theme_dict = json.load(theme_file)
+            except json.decoder.JSONDecodeError:
+                warnings.warn("Failed to load current theme file, check syntax", UserWarning)
+                load_success = False
 
-            for element_name in theme_dict.keys():
-                if element_name == 'defaults':
-                    for data_type in theme_dict[element_name]:
-                        if data_type == 'colours':
-                            colours_dict = theme_dict[element_name][data_type]
-                            for colour_key in colours_dict:
-                                self.base_colours[colour_key] = pygame.Color(colours_dict[colour_key])
+            if load_success:
+                for element_name in theme_dict.keys():
+                    if element_name == 'defaults':
+                        for data_type in theme_dict[element_name]:
+                            if data_type == 'colours':
+                                colours_dict = theme_dict[element_name][data_type]
+                                for colour_key in colours_dict:
+                                    self.base_colours[colour_key] = pygame.Color(colours_dict[colour_key])
 
-                else:
+                    else:
 
-                    for data_type in theme_dict[element_name]:
-                        if data_type == 'font':
-                            font_dict = theme_dict[element_name][data_type]
-                            if element_name not in self.ui_element_font_infos:
-                                self.ui_element_font_infos[element_name] = {}
-                            self.ui_element_font_infos[element_name]['name'] = font_dict['name']
-                            self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
-                            if 'bold' in font_dict:
-                                self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
-                            else:
-                                self.ui_element_font_infos[element_name]['bold'] = False
-                            if 'italic' in font_dict:
-                                self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
-                            else:
-                                self.ui_element_font_infos[element_name]['italic'] = False
+                        for data_type in theme_dict[element_name]:
+                            if data_type == 'font':
+                                font_dict = theme_dict[element_name][data_type]
+                                if element_name not in self.ui_element_font_infos:
+                                    self.ui_element_font_infos[element_name] = {}
+                                self.ui_element_font_infos[element_name]['name'] = font_dict['name']
+                                self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
+                                if 'bold' in font_dict:
+                                    self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
+                                else:
+                                    self.ui_element_font_infos[element_name]['bold'] = False
+                                if 'italic' in font_dict:
+                                    self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                                else:
+                                    self.ui_element_font_infos[element_name]['italic'] = False
 
-                            if 'regular_path' in font_dict:
-                                self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']
-                            if 'bold_path' in font_dict:
-                                self.ui_element_font_infos[element_name]['bold_path'] = font_dict['bold_path']
-                            if 'italic_path' in font_dict:
-                                self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
-                            if 'bold_italic_path' in font_dict:
-                                bold_italic_path = font_dict['bold_italic_path']
-                                self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
+                                if 'regular_path' in font_dict:
+                                    self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']
+                                if 'bold_path' in font_dict:
+                                    self.ui_element_font_infos[element_name]['bold_path'] = font_dict['bold_path']
+                                if 'italic_path' in font_dict:
+                                    self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
+                                if 'bold_italic_path' in font_dict:
+                                    bold_italic_path = font_dict['bold_italic_path']
+                                    self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
 
-                        if data_type == 'colours':
-                            if element_name not in self.ui_element_colours:
-                                self.ui_element_colours[element_name] = {}
-                            colours_dict = theme_dict[element_name][data_type]
-                            for colour_key in colours_dict:
-                                pygame_colour = pygame.Color(colours_dict[colour_key])
-                                self.ui_element_colours[element_name][colour_key] = pygame_colour
+                            if data_type == 'colours':
+                                if element_name not in self.ui_element_colours:
+                                    self.ui_element_colours[element_name] = {}
+                                colours_dict = theme_dict[element_name][data_type]
+                                for colour_key in colours_dict:
+                                    pygame_colour = pygame.Color(colours_dict[colour_key])
+                                    self.ui_element_colours[element_name][colour_key] = pygame_colour
 
-                        elif data_type == 'images':
-                            if element_name not in self.ui_element_image_paths:
-                                self.ui_element_image_paths[element_name] = {}
-                            images_dict = theme_dict[element_name][data_type]
-                            for image_key in images_dict:
-                                self.ui_element_image_paths[element_name][image_key] = {}
-                                image_path = str(images_dict[image_key]['path'])
-                                self.ui_element_image_paths[element_name][image_key]['path'] = image_path
-                                if 'sub_surface_rect' in images_dict[image_key]:
-                                    rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
-                                    x = int(rect_list[0].strip())
-                                    y = int(rect_list[1].strip())
-                                    w = int(rect_list[2].strip())
-                                    h = int(rect_list[3].strip())
-                                    rect = pygame.Rect((x, y), (w, h))
-                                    self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+                            elif data_type == 'images':
+                                if element_name not in self.ui_element_image_paths:
+                                    self.ui_element_image_paths[element_name] = {}
+                                images_dict = theme_dict[element_name][data_type]
+                                for image_key in images_dict:
+                                    if image_key not in self.ui_element_image_paths[element_name]:
+                                        self.ui_element_image_paths[element_name][image_key] = {}
+                                        self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                    else:
+                                        self.ui_element_image_paths[element_name][image_key]['changed'] = False
+                                    image_path = str(images_dict[image_key]['path'])
+                                    if 'path' in self.ui_element_image_paths[element_name][image_key]:
+                                        if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
+                                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                    self.ui_element_image_paths[element_name][image_key]['path'] = image_path
+                                    if 'sub_surface_rect' in images_dict[image_key]:
+                                        rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
+                                        x = int(rect_list[0].strip())
+                                        y = int(rect_list[1].strip())
+                                        w = int(rect_list[2].strip())
+                                        h = int(rect_list[3].strip())
+                                        rect = pygame.Rect((x, y), (w, h))
+                                        if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
+                                            if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
+                                                self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                        self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
 
-                        elif data_type == 'misc':
-                            if element_name not in self.ui_element_misc_data:
-                                self.ui_element_misc_data[element_name] = {}
-                            misc_dict = theme_dict[element_name][data_type]
-                            for misc_data_key in misc_dict:
-                                self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
+                            elif data_type == 'misc':
+                                if element_name not in self.ui_element_misc_data:
+                                    self.ui_element_misc_data[element_name] = {}
+                                misc_dict = theme_dict[element_name][data_type]
+                                for misc_data_key in misc_dict:
+                                    self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
 
         # TODO: these should be triggered at an appropriate time in our project when lots of files are being loaded
-        self.load_fonts()
-        self.load_images()
+        if load_success:
+            self.load_fonts()  # save to trigger load with the same data as it won't do anything
+            self.load_images()
