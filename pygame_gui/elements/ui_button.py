@@ -5,6 +5,7 @@ from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements import ui_tool_tip
+from pygame_gui.core.ui_appearance_theme import ColourGradient
 
 
 class UIButton(UIElement):
@@ -56,24 +57,31 @@ class UIButton(UIElement):
         # colours, we could grab these from a separate colour theme class that we use across pygame_gui elements,
         # much like a css file provides colours and styles to a group of HTML we pages
 
-        self.colours = {'normal_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_bg'),
-                        'hovered_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_bg'),
-                        'disabled_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_bg'),
-                        'selected_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg'),
-                        'active_bg': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_bg'),
+        self.colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                          self.element_ids, 'normal_bg'),
+                        'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                           self.element_ids, 'hovered_bg'),
+                        'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                            self.element_ids, 'disabled_bg'),
+                        'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                            self.element_ids, 'selected_bg'),
+                        'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                          self.element_ids, 'active_bg'),
                         'normal_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text'),
                         'hovered_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_text'),
                         'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
                         'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
                         'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
-                        'normal_border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border'),
-                        'hovered_border': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_border'),
-                        'disabled_border': self.ui_theme.get_colour(self.object_ids,
-                                                                    self.element_ids, 'disabled_border'),
-                        'selected_border': self.ui_theme.get_colour(self.object_ids,
-                                                                    self.element_ids, 'selected_border'),
-                        'active_border': self.ui_theme.get_colour(self.object_ids,
-                                                                  self.element_ids, 'active_border')}
+                        'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                              self.element_ids, 'normal_border'),
+                        'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                               self.element_ids, 'hovered_border'),
+                        'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                                self.element_ids, 'disabled_border'),
+                        'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                                self.element_ids, 'selected_border'),
+                        'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                              self.element_ids, 'active_border')}
 
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
@@ -382,16 +390,31 @@ class UIButton(UIElement):
             self.image = self.ui_manager.get_shadow(self.rect.size)
 
         if self.border_width > 0:
-            self.image.fill(self.border_colour,
-                            pygame.Rect((self.shadow_width,
-                                         self.shadow_width),
-                                        (self.click_area_shape.width,
-                                         self.click_area_shape.height)))
-        self.image.fill(self.background_colour,
-                        pygame.Rect((self.border_width + self.shadow_width,
-                                     self.border_width + self.shadow_width),
-                                    (self.click_area_shape.width - (2 * self.border_width),
-                                     self.click_area_shape.height - (2 * self.border_width))))
+            border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                      (self.click_area_shape.width, self.click_area_shape.height))
+            if type(self.border_colour) == ColourGradient:
+                border_rect_shape_surface = pygame.Surface(border_rect.size)
+                border_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
+                gradient_surface = self.border_colour.apply_gradient_to_surface(border_rect_shape_surface)
+                self.image.blit(border_rect_shape_surface, border_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                self.image.blit(gradient_surface, border_rect)
+            else:
+                self.image.fill(self.border_colour, border_rect)
+
+        background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                       self.border_width + self.shadow_width),
+                                      (self.click_area_shape.width - (2 * self.border_width),
+                                       self.click_area_shape.height - (2 * self.border_width)))
+
+        if type(self.background_colour) == ColourGradient:
+            background_rect_shape_surface = pygame.Surface(background_rect.size)
+            background_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
+            gradient_surface = self.background_colour.apply_gradient_to_surface(background_rect_shape_surface)
+            self.image.blit(background_rect_shape_surface, background_rect, special_flags=pygame.BLEND_RGBA_SUB)
+            self.image.blit(gradient_surface, background_rect)
+        else:
+            self.image.fill(self.background_colour, background_rect)
+
         if self.current_image is not None:
             image_rect = self.current_image.get_rect()
             image_rect.center = (self.rect.width/2, self.rect.height/2)

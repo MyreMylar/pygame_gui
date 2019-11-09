@@ -2,6 +2,8 @@ import pygame
 import json
 import os
 import warnings
+from contextlib import contextmanager
+
 from typing import Union
 
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
@@ -109,7 +111,11 @@ class UIAppearanceTheme:
 
         :return bool: True if we need to reload elements because the theme data has changed.
         """
-        stamp = os.stat(self._theme_file_path).st_mtime
+        try:
+            stamp = os.stat(self._theme_file_path).st_mtime
+        except FileNotFoundError:
+            return False
+
         if stamp != self._theme_file_last_modified:
             self._theme_file_last_modified = stamp
             self.reload_theming()
@@ -342,6 +348,26 @@ class UIAppearanceTheme:
         :param colour_id: The id for the specific colour we are looking for.
         :return pygame.Color: A pygame colour.
         """
+        colour_or_gradient = self.get_colour_or_gradient(object_ids, element_ids, colour_id)
+        if type(colour_or_gradient) == ColourGradient:
+            gradient = colour_or_gradient
+            colour = gradient.colour_1
+        elif type(colour_or_gradient) == pygame.Color:
+            colour = colour_or_gradient
+        else:
+            colour = pygame.Color('#000000')
+        return colour
+
+    def get_colour_or_gradient(self, object_ids, element_ids, colour_id):
+        """
+        Uses data about a UI element and a specific ID to find a colour, or a gradient, from our theme.
+        Use this function if the UIElement can handle either type.
+
+        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
+        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param colour_id: The id for the specific colour we are looking for.
+        :return pygame.Color or ColourGradient: A colour or a gradient object.
+        """
         # first check for a unique theming for this specific object
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
@@ -381,6 +407,19 @@ class UIAppearanceTheme:
                 best_fit_colour = self.base_colours[key]
         return best_fit_colour
 
+    @staticmethod
+    @contextmanager
+    def opened_w_error(filename, mode="r"):
+        try:
+            f = open(filename, mode)
+        except IOError as err:
+            yield None, err
+        else:
+            try:
+                yield f, None
+            finally:
+                f.close()
+
     def load_theme(self, file_path: Union[str, PathLike]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
@@ -393,95 +432,190 @@ class UIAppearanceTheme:
 
         self._theme_file_path = file_path
         self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
-        load_success = False
-        with open(os.path.abspath(file_path), 'r') as theme_file:
-            try:
-                load_success = True
-                theme_dict = json.load(theme_file)
-            except json.decoder.JSONDecodeError:
-                warnings.warn("Failed to load current theme file, check syntax", UserWarning)
+
+        with self.opened_w_error(os.path.abspath(file_path), 'r') as (theme_file, error):
+            if error:
+                warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False
+            else:
+                try:
+                    load_success = True
+                    theme_dict = json.load(theme_file)
+                except json.decoder.JSONDecodeError:
+                    warnings.warn("Failed to load current theme file, check syntax", UserWarning)
+                    load_success = False
 
-            if load_success:
-                for element_name in theme_dict.keys():
-                    if element_name == 'defaults':
-                        for data_type in theme_dict[element_name]:
-                            if data_type == 'colours':
-                                colours_dict = theme_dict[element_name][data_type]
-                                for colour_key in colours_dict:
-                                    self.base_colours[colour_key] = pygame.Color(colours_dict[colour_key])
+                if load_success:
+                    for element_name in theme_dict.keys():
+                        if element_name == 'defaults':
+                            for data_type in theme_dict[element_name]:
+                                if data_type == 'colours':
+                                    colours_dict = theme_dict[element_name][data_type]
+                                    for colour_key in colours_dict:
+                                        self.base_colours[colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
 
-                    else:
+                        else:
 
-                        for data_type in theme_dict[element_name]:
-                            if data_type == 'font':
-                                font_dict = theme_dict[element_name][data_type]
-                                if element_name not in self.ui_element_font_infos:
-                                    self.ui_element_font_infos[element_name] = {}
-                                self.ui_element_font_infos[element_name]['name'] = font_dict['name']
-                                self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
-                                if 'bold' in font_dict:
-                                    self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
-                                else:
-                                    self.ui_element_font_infos[element_name]['bold'] = False
-                                if 'italic' in font_dict:
-                                    self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
-                                else:
-                                    self.ui_element_font_infos[element_name]['italic'] = False
-
-                                if 'regular_path' in font_dict:
-                                    self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']
-                                if 'bold_path' in font_dict:
-                                    self.ui_element_font_infos[element_name]['bold_path'] = font_dict['bold_path']
-                                if 'italic_path' in font_dict:
-                                    self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
-                                if 'bold_italic_path' in font_dict:
-                                    bold_italic_path = font_dict['bold_italic_path']
-                                    self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
-
-                            if data_type == 'colours':
-                                if element_name not in self.ui_element_colours:
-                                    self.ui_element_colours[element_name] = {}
-                                colours_dict = theme_dict[element_name][data_type]
-                                for colour_key in colours_dict:
-                                    pygame_colour = pygame.Color(colours_dict[colour_key])
-                                    self.ui_element_colours[element_name][colour_key] = pygame_colour
-
-                            elif data_type == 'images':
-                                if element_name not in self.ui_element_image_paths:
-                                    self.ui_element_image_paths[element_name] = {}
-                                images_dict = theme_dict[element_name][data_type]
-                                for image_key in images_dict:
-                                    if image_key not in self.ui_element_image_paths[element_name]:
-                                        self.ui_element_image_paths[element_name][image_key] = {}
-                                        self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                            for data_type in theme_dict[element_name]:
+                                if data_type == 'font':
+                                    font_dict = theme_dict[element_name][data_type]
+                                    if element_name not in self.ui_element_font_infos:
+                                        self.ui_element_font_infos[element_name] = {}
+                                    self.ui_element_font_infos[element_name]['name'] = font_dict['name']
+                                    self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
+                                    if 'bold' in font_dict:
+                                        self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
                                     else:
-                                        self.ui_element_image_paths[element_name][image_key]['changed'] = False
-                                    image_path = str(images_dict[image_key]['path'])
-                                    if 'path' in self.ui_element_image_paths[element_name][image_key]:
-                                        if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
-                                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                    self.ui_element_image_paths[element_name][image_key]['path'] = image_path
-                                    if 'sub_surface_rect' in images_dict[image_key]:
-                                        rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
-                                        x = int(rect_list[0].strip())
-                                        y = int(rect_list[1].strip())
-                                        w = int(rect_list[2].strip())
-                                        h = int(rect_list[3].strip())
-                                        rect = pygame.Rect((x, y), (w, h))
-                                        if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
-                                            if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
-                                                self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                        self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+                                        self.ui_element_font_infos[element_name]['bold'] = False
+                                    if 'italic' in font_dict:
+                                        self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                                    else:
+                                        self.ui_element_font_infos[element_name]['italic'] = False
 
-                            elif data_type == 'misc':
-                                if element_name not in self.ui_element_misc_data:
-                                    self.ui_element_misc_data[element_name] = {}
-                                misc_dict = theme_dict[element_name][data_type]
-                                for misc_data_key in misc_dict:
-                                    self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
+                                    if 'regular_path' in font_dict:
+                                        self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']
+                                    if 'bold_path' in font_dict:
+                                        self.ui_element_font_infos[element_name]['bold_path'] = font_dict['bold_path']
+                                    if 'italic_path' in font_dict:
+                                        self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
+                                    if 'bold_italic_path' in font_dict:
+                                        bold_italic_path = font_dict['bold_italic_path']
+                                        self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
+
+                                if data_type == 'colours':
+                                    if element_name not in self.ui_element_colours:
+                                        self.ui_element_colours[element_name] = {}
+                                    colours_dict = theme_dict[element_name][data_type]
+                                    for colour_key in colours_dict:
+                                        self.ui_element_colours[element_name][colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
+
+                                elif data_type == 'images':
+                                    if element_name not in self.ui_element_image_paths:
+                                        self.ui_element_image_paths[element_name] = {}
+                                    images_dict = theme_dict[element_name][data_type]
+                                    for image_key in images_dict:
+                                        if image_key not in self.ui_element_image_paths[element_name]:
+                                            self.ui_element_image_paths[element_name][image_key] = {}
+                                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                        else:
+                                            self.ui_element_image_paths[element_name][image_key]['changed'] = False
+                                        image_path = str(images_dict[image_key]['path'])
+                                        if 'path' in self.ui_element_image_paths[element_name][image_key]:
+                                            if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
+                                                self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                        self.ui_element_image_paths[element_name][image_key]['path'] = image_path
+                                        if 'sub_surface_rect' in images_dict[image_key]:
+                                            rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
+                                            x = int(rect_list[0].strip())
+                                            y = int(rect_list[1].strip())
+                                            w = int(rect_list[2].strip())
+                                            h = int(rect_list[3].strip())
+                                            rect = pygame.Rect((x, y), (w, h))
+                                            if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
+                                                if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
+                                                    self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                            self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+
+                                elif data_type == 'misc':
+                                    if element_name not in self.ui_element_misc_data:
+                                        self.ui_element_misc_data[element_name] = {}
+                                    misc_dict = theme_dict[element_name][data_type]
+                                    for misc_data_key in misc_dict:
+                                        self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
 
         # TODO: these should be triggered at an appropriate time in our project when lots of files are being loaded
         if load_success:
             self.load_fonts()  # save to trigger load with the same data as it won't do anything
             self.load_images()
+
+    @staticmethod
+    def load_colour_or_gradient_from_theme(theme_colours_dictionary, colour_id):
+        loaded_colour_or_gradient = None
+        string_data = theme_colours_dictionary[colour_id]
+        if ',' in string_data:
+            # expecting some type of gradient description in string data
+            string_data_list = string_data.split(',')
+            gradient_direction = None
+            try:
+                gradient_direction = int(string_data_list[-1])
+            except ValueError:
+                warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
+
+            if gradient_direction is not None and len(string_data_list) == 3:
+                # two colour gradient
+                try:
+                    colour_1 = pygame.Color(string_data_list[0])
+                    colour_2 = pygame.Color(string_data_list[1])
+                    loaded_colour_or_gradient = ColourGradient(gradient_direction, colour_1, colour_2)
+                except ValueError:
+                    warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
+            elif gradient_direction is not None and len(string_data_list) == 4:
+                # three colour gradient
+                try:
+                    colour_1 = pygame.Color(string_data_list[0])
+                    colour_2 = pygame.Color(string_data_list[1])
+                    colour_3 = pygame.Color(string_data_list[3])
+                    loaded_colour_or_gradient = ColourGradient(gradient_direction, colour_1, colour_2, colour_3)
+                except ValueError:
+                    warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
+            else:
+                warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
+        else:
+            # expecting a regular hex colour in string data
+            try:
+                loaded_colour_or_gradient = pygame.Color(string_data)
+            except ValueError:
+                warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
+
+        if loaded_colour_or_gradient is None:
+            # if the colour or gradient data is invalid, return a black default colour
+            loaded_colour_or_gradient = pygame.Color("#000000")
+
+        return loaded_colour_or_gradient
+
+
+class ColourGradient:
+    def __init__(self, angle_direction: int, colour_1: pygame.Color,
+                 colour_2: pygame.Color, colour_3: Union[pygame.Color, None] = None):
+        self.angle_direction = angle_direction
+        self.colour_1 = colour_1
+        self.colour_2 = colour_2
+        self.colour_3 = colour_3
+
+    def apply_gradient_to_surface(self, input_surface: pygame.Surface):
+        """
+        Applies this gradient to a specified input surface using multiplication and returns the resulting surface.
+        As a result this method works best when the input surface is a mostly white, stencil shape type surface.
+
+        :param input_surface:
+        :return:
+        """
+        final_surface = input_surface.copy()
+        size = input_surface.get_size()
+        longest_diagonal = int((size[0] ** 2 + size[1] ** 2) ** 0.5) + 1
+
+        # create the initial 'pixel coloured' surface with a pixel for each colour
+        if self.colour_3 is None:
+            colour_pixels_surf = pygame.Surface((2, 1), flags=pygame.SRCALPHA)
+            colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
+            colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
+        else:
+            colour_pixels_surf = pygame.Surface((3, 1), flags=pygame.SRCALPHA)
+            colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
+            colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
+            colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
+
+        # create a surface large enough to overlap the input surface at any rotation angle
+        gradient_surf = pygame.Surface((longest_diagonal, longest_diagonal), flags=pygame.SRCALPHA)
+
+        # scale the pixel surface to fill our new large, gradient surface
+        pygame.transform.smoothscale(colour_pixels_surf, (longest_diagonal, longest_diagonal), gradient_surf)
+
+        # rotate the gradient surface to the correct angle for our gradient
+        gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
+
+        gradient_placement_rect = gradient_surf.get_rect()
+        gradient_placement_rect.center = (size[0] / 2, size[1] / 2)
+
+        final_surface.blit(gradient_surf, gradient_placement_rect, special_flags=pygame.BLEND_RGBA_MULT)
+        return final_surface
