@@ -35,9 +35,10 @@ hovering over it.
    :linenos:
 
     for event in pygame.event.get():
-        if event.user_type == 'ui_button_pressed':
-            if event.ui_element == test_button:
-                print('Test button pressed')
+        if event.type == pygame.USEREVENT:
+            if event.user_type == 'ui_button_pressed':
+                if event.ui_element == test_button:
+                    print('Test button pressed')
 
 :class:`UITextEntryLine <.UITextEntryLine>` - ui_text_entry_finished
 ....................................................................
@@ -56,8 +57,9 @@ Fired when a user presses the enter key with a text entry element active for ent
    :linenos:
 
     for event in pygame.event.get():
-        if event.user_type == 'ui_text_entry_finished':
-            print("Entered text:", event.text)
+        if event.type == pygame.USEREVENT:
+            if event.user_type == 'ui_text_entry_finished':
+                print("Entered text:", event.text)
 
 :class:`UIDropDownMenu <.UIDropDownMenu>` - ui_drop_down_menu_changed
 .....................................................................
@@ -76,8 +78,9 @@ Fired when a user selects an option in a drop down menu.
    :linenos:
 
     for event in pygame.event.get():
-        if event.user_type == 'ui_drop_down_menu_changed':
-            print("Selected option:", event.text)
+        if event.type == pygame.USEREVENT:
+            if event.user_type == 'ui_drop_down_menu_changed':
+                print("Selected option:", event.text)
 
 :class:`UITextBox <.UITextBox>` - ui_text_box_link_clicked
 .....................................................................
@@ -96,5 +99,6 @@ Fired when a user clicks on a HTML link in a text box.
    :linenos:
 
     for event in pygame.event.get():
-        if event.user_type == 'ui_text_box_link_clicked':
-            print(event.link_target)
+        if event.type == pygame.USEREVENT:
+            if event.user_type == 'ui_text_box_link_clicked':
+                print(event.link_target)
