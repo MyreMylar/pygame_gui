@@ -8,7 +8,7 @@ A GUI system for pygame 2 (it also works OK on pygame 1.9).
  - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
  - [PyPi](https://pypi.org/project/pygame-gui/)
 
-[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui)
+[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.5+](https://img.shields.io/badge/python-3.5+-blue.svg)](https://www.python.org/downloads/release/python-350/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Requirements
 
@@ -23,6 +23,16 @@ pip install pygame_gui
 ```
 2. If all goes well you should see a message about game_gui being installed successfully and will be able to find pygame_gui in the list of installed packages for your python interpreter (PyCharm displays these as a nice list under File->Settings->Project:project_name->Project Interpreter). 
 3. Should you need to delete pygame_gui for any reason then PyCharm will also let you do that from the same Project Interpreter settings window using the red minus symbol button.
+
+## How to upgrade to the latest version
+
+Run this command in a command prompt:
+
+```
+pip install pygame_gui -U
+```
+
+Or, you may be able to use your IDE to update the library (PyCharm lets you update modules in it's interpreter settings).
 
 ## Making use of the library
 
