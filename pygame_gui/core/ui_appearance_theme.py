@@ -202,17 +202,22 @@ class UIAppearanceTheme:
             for path_key in image_paths_dict:
                 if image_paths_dict[path_key]['changed']:
                     path = image_paths_dict[path_key]['path']
+                    image = None
                     if path in self.loaded_image_files:
                         image = self.loaded_image_files[path]
                     else:
-                        image = pygame.image.load(path).convert_alpha()
-                        self.loaded_image_files[path] = image
+                        try:
+                            image = pygame.image.load(path).convert_alpha()
+                            self.loaded_image_files[path] = image
+                        except pygame.error:
+                            warnings.warn('Unable to load image at path: ' + path)
 
-                    if 'sub_surface_rect' in image_paths_dict[path_key]:
-                        surface = image.subsurface(image_paths_dict[path_key]['sub_surface_rect'])
-                    else:
-                        surface = image
-                    self.ui_element_image_surfaces[element_key][path_key] = surface
+                    if image is not None:
+                        if 'sub_surface_rect' in image_paths_dict[path_key]:
+                            surface = image.subsurface(image_paths_dict[path_key]['sub_surface_rect'])
+                        else:
+                            surface = image
+                        self.ui_element_image_surfaces[element_key][path_key] = surface
 
     def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
         if index < tree_size:
@@ -462,13 +467,24 @@ class UIAppearanceTheme:
                                     if element_name not in self.ui_element_font_infos:
                                         self.ui_element_font_infos[element_name] = {}
                                     self.ui_element_font_infos[element_name]['name'] = font_dict['name']
-                                    self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
+
+                                    try:
+                                        self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
+                                    except ValueError:
+                                        self.ui_element_font_infos[element_name]['size'] = self.font_dictionary.default_font_size
+
                                     if 'bold' in font_dict:
-                                        self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
+                                        try:
+                                            self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
+                                        except ValueError:
+                                            self.ui_element_font_infos[element_name]['bold'] = False
                                     else:
                                         self.ui_element_font_infos[element_name]['bold'] = False
                                     if 'italic' in font_dict:
-                                        self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                                        try:
+                                            self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
+                                        except ValueError:
+                                            self.ui_element_font_infos[element_name]['italic'] = False
                                     else:
                                         self.ui_element_font_infos[element_name]['italic'] = False
 
@@ -506,15 +522,22 @@ class UIAppearanceTheme:
                                         self.ui_element_image_paths[element_name][image_key]['path'] = image_path
                                         if 'sub_surface_rect' in images_dict[image_key]:
                                             rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
-                                            x = int(rect_list[0].strip())
-                                            y = int(rect_list[1].strip())
-                                            w = int(rect_list[2].strip())
-                                            h = int(rect_list[3].strip())
-                                            rect = pygame.Rect((x, y), (w, h))
-                                            if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
-                                                if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
-                                                    self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                            self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+                                            if len(rect_list) == 4:
+                                                try:
+                                                    x = int(rect_list[0].strip())
+                                                    y = int(rect_list[1].strip())
+                                                    w = int(rect_list[2].strip())
+                                                    h = int(rect_list[3].strip())
+                                                    rect = pygame.Rect((x, y), (w, h))
+                                                except ValueError or TypeError:
+                                                    rect = pygame.Rect((0, 0), (10, 10))
+                                                    warnings.warn("Unable to create subsurface rectangle from string: "
+                                                                  "" + images_dict[image_key]['sub_surface_rect'])
+
+                                                if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
+                                                    if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
+                                                        self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                                                self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
 
                                 elif data_type == 'misc':
                                     if element_name not in self.ui_element_misc_data:
@@ -581,6 +604,12 @@ class ColourGradient:
         self.colour_1 = colour_1
         self.colour_2 = colour_2
         self.colour_3 = colour_3
+
+    def __eq__(self, other):
+        return (self.colour_1 == other.colour_1 and
+                self.colour_2 == other.colour_2 and
+                self.colour_3 == other.colour_3 and
+                self.angle_direction == other.angle_direction)
 
     def apply_gradient_to_surface(self, input_surface: pygame.Surface):
         """

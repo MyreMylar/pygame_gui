@@ -44,109 +44,39 @@ class UIButton(UIElement):
                          starting_height=starting_height,
                          layer_thickness=1)
 
-        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
         self.text = text
 
-        self.click_area_shape = self.rect.copy()
+        self.click_area_shape = self.rect.copy()  # TODO replace this with functionality in DrawableShape
 
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
         self.ui_root_container = self.ui_manager.get_window_stack().get_root_window().get_container()
 
-        # colours, we could grab these from a separate colour theme class that we use across pygame_gui elements,
-        # much like a css file provides colours and styles to a group of HTML we pages
-
-        self.colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                          self.element_ids, 'normal_bg'),
-                        'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                           self.element_ids, 'hovered_bg'),
-                        'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                            self.element_ids, 'disabled_bg'),
-                        'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                            self.element_ids, 'selected_bg'),
-                        'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                          self.element_ids, 'active_bg'),
-                        'normal_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text'),
-                        'hovered_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_text'),
-                        'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
-                        'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
-                        'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
-                        'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                              self.element_ids, 'normal_border'),
-                        'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                               self.element_ids, 'hovered_border'),
-                        'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                                self.element_ids, 'disabled_border'),
-                        'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                                self.element_ids, 'selected_border'),
-                        'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                              self.element_ids, 'active_border')}
-
-        self.text_colour = self.colours['normal_text']
-        self.background_colour = self.colours['normal_bg']
-        self.border_colour = self.colours['normal_border']
-
-        self.border_width = 0
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
-        if border_width_string is not None:
-            self.border_width = int(border_width_string)
-
-        self.shadow_width = 0
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
-        if shadow_width_string is not None:
-            self.shadow_width = int(shadow_width_string)
-
-        if self.shadow_width > 0:
-            self.click_area_shape = pygame.Rect((self.rect.x + self.shadow_width,
-                                                 self.rect.y + self.shadow_width),
-                                                (self.rect.width - (2 * self.shadow_width),
-                                                 self.rect.height - (2 * self.shadow_width)))
-
-        # different states our button can be in, could use a state machine for this if you wanted
-        # could also add a 'selected' state like windows has.
-        self.hovered = False
+        # Some different states our button can be in, could use a state machine for this if we wanted.
         self.held = False
         self.pressed = False
-        self.pressed_event = False
-
         self.is_selected = False
+        self.pressed_event = False  # Used to check button pressed without going through pygame.Event system
 
         # time the hovering
         self.hover_time = 0.0
 
-        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'tool_tip_delay')
-        if tool_tip_delay_string is not None:
-            self.tool_tip_delay = float(tool_tip_delay_string)
-        else:
-            self.tool_tip_delay = 1.0
-
         self.text_surface = None
         self.aligned_text_rect = None
 
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.image = None
 
-        self.text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                                self.element_ids, 'text_horiz_alignment')
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids, 'text_horiz_alignment_padding')
-        if text_horiz_alignment_padding is None:
-            self.text_horiz_alignment_padding = 1
-        else:
-            self.text_horiz_alignment_padding = int(text_horiz_alignment_padding)
-
-        self.text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids, 'text_vert_alignment_padding')
-        if text_vert_alignment_padding is None:
-            self.text_vert_alignment_padding = 1
-        else:
-            self.text_vert_alignment_padding = int(text_vert_alignment_padding)
-
-        # this helps us draw the text aligned
-        self.compute_aligned_text_rect()
         # default range at which we 'let go' of a button
         self.hold_range = (0, 0)
+
+        # initialise theme parameters
+        self.colours = {}
+        self.text_colour = None
+        self.background_colour = None
+        self.border_colour = None
+
+        self.font = None
 
         self.normal_image = None
         self.hovered_image = None
@@ -154,9 +84,15 @@ class UIButton(UIElement):
         self.disabled_image = None
         self.current_image = None
 
-        self.set_any_images_from_theme()
+        self.tool_tip_delay = 1.0
+        self.border_width = 0
+        self.shadow_width = 0
+        self.text_horiz_alignment = 'center'
+        self.text_vert_alignment = 'center'
+        self.text_horiz_alignment_padding = 1
+        self.text_vert_alignment_padding = 1
 
-        self.redraw()
+        self.rebuild_from_changed_theme_data()
 
     def compute_aligned_text_rect(self):
         if len(self.text) > 0:
@@ -188,26 +124,37 @@ class UIButton(UIElement):
     def set_any_images_from_theme(self):
         """
         Grabs images for this button from the UI theme if any are set.
+
+        :return changed:
         """
+
+        changed = False
         normal_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'normal_image')
-        if normal_image is not None:
+        if normal_image is not None and normal_image != self.normal_image:
             self.normal_image = normal_image
             self.hovered_image = normal_image
             self.selected_image = normal_image
             self.disabled_image = normal_image
             self.current_image = normal_image
 
+            changed = True
+
         hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'hovered_image')
-        if hovered_image is not None:
+        if hovered_image is not None and hovered_image != self.hovered_image:
             self.hovered_image = hovered_image
+            changed = True
 
         selected_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'selected_image')
-        if selected_image is not None:
+        if selected_image is not None and selected_image != self.selected_image:
             self.selected_image = selected_image
+            changed = True
 
         disabled_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'disabled_image')
-        if disabled_image is not None:
+        if disabled_image is not None and disabled_image != self.disabled_image:
             self.disabled_image = disabled_image
+            changed = True
+
+        return changed
 
     def kill(self):
         """
@@ -388,6 +335,8 @@ class UIButton(UIElement):
         """
         if self.shadow_width > 0:
             self.image = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
         if self.border_width > 0:
             border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
@@ -542,3 +491,142 @@ class UIButton(UIElement):
                 return True
         else:
             return False
+
+    def rebuild_from_changed_theme_data(self):
+        any_changed = False
+
+        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        if font != self.font:
+            self.font = font
+            any_changed = True
+
+        colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                     self.element_ids, 'normal_bg'),
+                   'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                      self.element_ids, 'hovered_bg'),
+                   'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'disabled_bg'),
+                   'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'selected_bg'),
+                   'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                     self.element_ids, 'active_bg'),
+                   'normal_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text'),
+                   'hovered_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_text'),
+                   'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
+                   'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
+                   'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
+                   'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'normal_border'),
+                   'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                          self.element_ids, 'hovered_border'),
+                   'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                           self.element_ids, 'disabled_border'),
+                   'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                           self.element_ids, 'selected_border'),
+                   'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'active_border')}
+
+        if colours != self.colours:
+            self.colours = colours
+            any_changed = True
+
+        if self.set_any_images_from_theme():
+            any_changed = True
+
+        # misc
+        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'tool_tip_delay')
+        if tool_tip_delay_string is not None:
+            try:
+                tool_tip_delay = float(tool_tip_delay_string)
+            except ValueError:
+                tool_tip_delay = 1.0
+
+            if tool_tip_delay != self.tool_tip_delay:
+                self.tool_tip_delay = tool_tip_delay
+                any_changed = True
+
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = 0
+            if border_width != self.border_width:
+                self.border_width = border_width
+                any_changed = True
+
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if border_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = 0
+            if shadow_width != self.shadow_width:
+                self.shadow_width = shadow_width
+                any_changed = True
+
+        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
+        if text_horiz_alignment != self.text_horiz_alignment:
+            self.text_horiz_alignment = text_horiz_alignment
+            any_changed = True
+
+        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                   self.element_ids, 'text_horiz_alignment_padding')
+        if text_horiz_alignment_padding is not None:
+            try:
+                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
+            except ValueError:
+                text_horiz_alignment_padding = 1
+            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
+                self.text_horiz_alignment_padding = text_horiz_alignment_padding
+                any_changed = True
+
+        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
+        if text_vert_alignment != self.text_vert_alignment:
+            self.text_vert_alignment = text_vert_alignment
+            any_changed = True
+
+        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids, 'text_vert_alignment_padding')
+        if text_vert_alignment_padding is not None:
+            try:
+                text_vert_alignment_padding = int(text_vert_alignment_padding)
+            except ValueError:
+                text_vert_alignment_padding = 1
+            if text_vert_alignment_padding != self.text_vert_alignment_padding:
+                self.text_vert_alignment_padding = text_vert_alignment_padding
+                any_changed = True
+
+        if any_changed:
+            if not self.is_enabled:
+                self.text_colour = self.colours['disabled_text']
+                self.background_colour = self.colours['disabled_bg']
+                self.border_colour = self.colours['disabled_border']
+                self.current_image = self.disabled_image
+            elif self.hovered:
+                self.text_colour = self.colours['hovered_text']
+                self.background_colour = self.colours['hovered_bg']
+                self.border_colour = self.colours['hovered_border']
+                self.current_image = self.hovered_image
+            elif self.is_selected:
+                self.text_colour = self.colours['selected_text']
+                self.background_colour = self.colours['selected_bg']
+                self.border_colour = self.colours['selected_border']
+                self.current_image = self.selected_image
+            else:
+                self.text_colour = self.colours['normal_text']
+                self.background_colour = self.colours['normal_bg']
+                self.border_colour = self.colours['normal_border']
+                self.current_image = self.normal_image
+
+            if self.shadow_width > 0:
+                self.click_area_shape = pygame.Rect((self.rect.x + self.shadow_width,
+                                                     self.rect.y + self.shadow_width),
+                                                    (self.rect.width - (2 * self.shadow_width),
+                                                     self.rect.height - (2 * self.shadow_width)))
+            else:
+                self.click_area_shape = self.rect.copy()
+
+            # this helps us draw the text aligned
+            self.compute_aligned_text_rect()
+            self.redraw()

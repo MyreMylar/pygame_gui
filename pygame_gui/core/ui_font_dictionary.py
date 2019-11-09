@@ -139,20 +139,33 @@ class UIFontDictionary:
             warnings.warn('Trying to pre-load font id: ' + font_id + ' that is already loaded', UserWarning)
         elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
             if bold and italic:
-                new_font = pygame.font.Font(self.known_font_paths[font_name][3], font_size)
-                new_font.set_bold(True)
-                new_font.set_italic(True)
-                self.loaded_fonts[font_id] = new_font
+                try:
+                    new_font = pygame.font.Font(self.known_font_paths[font_name][3], font_size)
+                    new_font.set_bold(True)
+                    new_font.set_italic(True)
+                    self.loaded_fonts[font_id] = new_font
+                except FileNotFoundError:
+                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][3])
+
             elif bold and not italic:
-                new_font = pygame.font.Font(self.known_font_paths[font_name][1], font_size)
-                new_font.set_bold(True)
-                self.loaded_fonts[font_id] = new_font
+                try:
+                    new_font = pygame.font.Font(self.known_font_paths[font_name][1], font_size)
+                    new_font.set_bold(True)
+                    self.loaded_fonts[font_id] = new_font
+                except FileNotFoundError:
+                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][1])
             elif not bold and italic:
-                new_font = pygame.font.Font(self.known_font_paths[font_name][2], font_size)
-                new_font.set_italic(True)
-                self.loaded_fonts[font_id] = new_font
+                try:
+                    new_font = pygame.font.Font(self.known_font_paths[font_name][2], font_size)
+                    new_font.set_italic(True)
+                    self.loaded_fonts[font_id] = new_font
+                except FileNotFoundError:
+                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][2])
             else:
-                self.loaded_fonts[font_id] = pygame.font.Font(self.known_font_paths[font_name][0], font_size)
+                try:
+                    self.loaded_fonts[font_id] = pygame.font.Font(self.known_font_paths[font_name][0], font_size)
+                except FileNotFoundError:
+                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][0])
         else:
             raise UserWarning('Trying to pre-load font id:' + font_id + 'with no paths set')
 

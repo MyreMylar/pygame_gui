@@ -117,7 +117,7 @@ class UIManager:
         """
         if self.ui_theme.check_need_to_reload():
             for sprite in self.ui_group.sprites():
-                sprite.rebuild_from_theme_data()
+                sprite.rebuild_from_changed_theme_data()
 
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)

@@ -207,5 +207,5 @@ class UIElement(pygame.sprite.Sprite):
         """
         pass
 
-    def rebuild_from_theme_data(self):
+    def rebuild_from_changed_theme_data(self):
         pass
