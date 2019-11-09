@@ -5,7 +5,7 @@ from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements import ui_tool_tip
-from pygame_gui.core.ui_appearance_theme import ColourGradient
+from pygame_gui.core.drawable_shapes import DrawableShape, RectDrawableShape
 
 
 class UIButton(UIElement):
@@ -91,6 +91,8 @@ class UIButton(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
+
+        self.drawable_shape = None  # type: DrawableShape
 
         self.rebuild_from_changed_theme_data()
 
@@ -193,11 +195,12 @@ class UIButton(UIElement):
         Called when we enter the hover state, it sets the colours and image of the button to the appropriate
         values and redraws it.
         """
-        self.text_colour = self.colours['hovered_text']
-        self.background_colour = self.colours['hovered_bg']
-        self.border_colour = self.colours['hovered_border']
-        self.current_image = self.hovered_image
-        self.redraw()
+        # self.text_colour = self.colours['hovered_text']
+        # self.background_colour = self.colours['hovered_bg']
+        # self.border_colour = self.colours['hovered_border']
+        # self.current_image = self.hovered_image
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('hovered')
         self.hover_time = 0.0
 
     def while_hovering(self, time_delta, mouse_pos):
@@ -222,11 +225,12 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any tooltip that was
         created while we were hovering the button.
         """
-        self.text_colour = self.colours['normal_text']
-        self.background_colour = self.colours['normal_bg']
-        self.border_colour = self.colours['normal_border']
-        self.current_image = self.normal_image
-        self.redraw()
+        # self.text_colour = self.colours['normal_text']
+        # self.background_colour = self.colours['normal_bg']
+        # self.border_colour = self.colours['normal_border']
+        # self.current_image = self.normal_image
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('normal')
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
@@ -328,54 +332,86 @@ class UIButton(UIElement):
 
         return processed_event
 
-    def redraw(self):
-        """
-        Redraws the button from data onto the underlying sprite's image. Only need to call this if something has
-        changed with the button (e.g. changed state or the text on it has changed)
-        """
-        if self.shadow_width > 0:
-            self.image = self.ui_manager.get_shadow(self.rect.size)
-        else:
-            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+    def rebuild_shape(self):
+        theming_parameters = {'normal_bg': self.colours['normal_bg'],
+                              'normal_text': self.colours['normal_text'],
+                              'normal_border': self.colours['normal_border'],
+                              'normal_image': self.normal_image,
+                              'hovered_bg': self.colours['hovered_bg'],
+                              'hovered_text': self.colours['hovered_text'],
+                              'hovered_border': self.colours['hovered_border'],
+                              'hovered_image': self.hovered_image,
+                              'disabled_bg': self.colours['disabled_bg'],
+                              'disabled_text': self.colours['disabled_text'],
+                              'disabled_border': self.colours['disabled_border'],
+                              'disabled_image': self.disabled_image,
+                              'selected_bg': self.colours['selected_bg'],
+                              'selected_text': self.colours['selected_text'],
+                              'selected_border': self.colours['selected_border'],
+                              'selected_image': self.selected_image,
+                              'active_bg': self.colours['active_bg'],
+                              'active_border': self.colours['active_border'],
+                              'active_text': self.colours['active_text'],
+                              'active_image': self.selected_image,
+                              'border_width': self.border_width,
+                              'shadow_width': self.shadow_width,
+                              'font': self.font,
+                              'text': self.text,
+                              'aligned_text_rect': self.aligned_text_rect}
+        self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                ['normal', 'hovered', 'disabled',
+                                                 'selected', 'active'], self.ui_manager)
 
-        if self.border_width > 0:
-            border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                      (self.click_area_shape.width, self.click_area_shape.height))
-            if type(self.border_colour) == ColourGradient:
-                border_rect_shape_surface = pygame.Surface(border_rect.size)
-                border_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-                gradient_surface = self.border_colour.apply_gradient_to_surface(border_rect_shape_surface)
-                self.image.blit(border_rect_shape_surface, border_rect, special_flags=pygame.BLEND_RGBA_SUB)
-                self.image.blit(gradient_surface, border_rect)
-            else:
-                self.image.fill(self.border_colour, border_rect)
+        self.image = self.drawable_shape.get_surface('normal')
 
-        background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                       self.border_width + self.shadow_width),
-                                      (self.click_area_shape.width - (2 * self.border_width),
-                                       self.click_area_shape.height - (2 * self.border_width)))
-
-        if type(self.background_colour) == ColourGradient:
-            background_rect_shape_surface = pygame.Surface(background_rect.size)
-            background_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-            gradient_surface = self.background_colour.apply_gradient_to_surface(background_rect_shape_surface)
-            self.image.blit(background_rect_shape_surface, background_rect, special_flags=pygame.BLEND_RGBA_SUB)
-            self.image.blit(gradient_surface, background_rect)
-        else:
-            self.image.fill(self.background_colour, background_rect)
-
-        if self.current_image is not None:
-            image_rect = self.current_image.get_rect()
-            image_rect.center = (self.rect.width/2, self.rect.height/2)
-            self.image.blit(self.current_image, image_rect)
-
-        if len(self.text) > 0:
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
-        else:
-            self.text_surface = None
-
-        if self.text_surface is not None and self.aligned_text_rect is not None:
-            self.image.blit(self.text_surface, self.aligned_text_rect)
+    # def redraw(self):
+    #     """
+    #     Redraws the button from data onto the underlying sprite's image. Only need to call this if something has
+    #     changed with the button (e.g. changed state or the text on it has changed)
+    #     """
+    #     if self.shadow_width > 0:
+    #         self.image = self.ui_manager.get_shadow(self.rect.size)
+    #     else:
+    #         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+    #
+    #     if self.border_width > 0:
+    #         border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+    #                                   (self.click_area_shape.width, self.click_area_shape.height))
+    #         if type(self.border_colour) == ColourGradient:
+    #             border_rect_shape_surface = pygame.Surface(border_rect.size)
+    #             border_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
+    #             gradient_surface = self.border_colour.apply_gradient_to_surface(border_rect_shape_surface)
+    #             self.image.blit(border_rect_shape_surface, border_rect, special_flags=pygame.BLEND_RGBA_SUB)
+    #             self.image.blit(gradient_surface, border_rect)
+    #         else:
+    #             self.image.fill(self.border_colour, border_rect)
+    #
+    #     background_rect = pygame.Rect((self.border_width + self.shadow_width,
+    #                                    self.border_width + self.shadow_width),
+    #                                   (self.click_area_shape.width - (2 * self.border_width),
+    #                                    self.click_area_shape.height - (2 * self.border_width)))
+    #
+    #     if type(self.background_colour) == ColourGradient:
+    #         background_rect_shape_surface = pygame.Surface(background_rect.size)
+    #         background_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
+    #         gradient_surface = self.background_colour.apply_gradient_to_surface(background_rect_shape_surface)
+    #         self.image.blit(background_rect_shape_surface, background_rect, special_flags=pygame.BLEND_RGBA_SUB)
+    #         self.image.blit(gradient_surface, background_rect)
+    #     else:
+    #         self.image.fill(self.background_colour, background_rect)
+    #
+    #     if self.current_image is not None:
+    #         image_rect = self.current_image.get_rect()
+    #         image_rect.center = (self.rect.width/2, self.rect.height/2)
+    #         self.image.blit(self.current_image, image_rect)
+    #
+    #     if len(self.text) > 0:
+    #         self.text_surface = self.font.render(self.text, True, self.text_colour)
+    #     else:
+    #         self.text_surface = None
+    #
+    #     if self.text_surface is not None and self.aligned_text_rect is not None:
+    #         self.image.blit(self.text_surface, self.aligned_text_rect)
 
     def check_pressed(self):
         """
@@ -390,40 +426,44 @@ class UIButton(UIElement):
         Disables the button so that it is no longer interactive.
         """
         self.is_enabled = False
-        self.text_colour = self.colours['disabled_text']
-        self.background_colour = self.colours['disabled_bg']
-        self.border_colour = self.colours['disabled_border']
-        self.current_image = self.disabled_image
+        # self.text_colour = self.colours['disabled_text']
+        # self.background_colour = self.colours['disabled_bg']
+        # self.border_colour = self.colours['disabled_border']
+        # self.current_image = self.disabled_image
+        self.image = self.drawable_shape.get_surface('disabled')
 
     def enable(self):
         """
         Re-enables the button so we can once again interact with it.
         """
         self.is_enabled = True
-        self.text_colour = self.colours['normal_text']
-        self.background_colour = self.colours['normal_bg']
-        self.border_colour = self.colours['normal_border']
-        self.current_image = self.normal_image
+        # self.text_colour = self.colours['normal_text']
+        # self.background_colour = self.colours['normal_bg']
+        # self.border_colour = self.colours['normal_border']
+        # self.current_image = self.normal_image
+        self.image = self.drawable_shape.get_surface('normal')
 
     def set_active(self):
         """
         Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
         state then redraws the button.
         """
-        self.text_colour = self.colours['active_text']
-        self.background_colour = self.colours['active_bg']
-        self.border_colour = self.colours['active_border']
-        self.redraw()
+        # self.text_colour = self.colours['active_text']
+        # self.background_colour = self.colours['active_bg']
+        # self.border_colour = self.colours['active_border']
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('active')
 
     def set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
         """
-        self.text_colour = self.colours['normal_text']
-        self.background_colour = self.colours['normal_bg']
-        self.border_colour = self.colours['normal_border']
-        self.redraw()
+        # self.text_colour = self.colours['normal_text']
+        # self.background_colour = self.colours['normal_bg']
+        # self.border_colour = self.colours['normal_border']
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('normal')
 
     def select(self):
         """
@@ -431,11 +471,12 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = True
-        self.text_colour = self.colours['selected_text']
-        self.background_colour = self.colours['selected_bg']
-        self.border_colour = self.colours['selected_border']
-        self.current_image = self.selected_image
-        self.redraw()
+        # self.text_colour = self.colours['selected_text']
+        # self.background_colour = self.colours['selected_bg']
+        # self.border_colour = self.colours['selected_border']
+        # self.current_image = self.selected_image
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('selected')
 
     def unselect(self):
         """
@@ -443,11 +484,12 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = False
-        self.text_colour = self.colours['normal_text']
-        self.background_colour = self.colours['normal_bg']
-        self.border_colour = self.colours['normal_border']
-        self.current_image = self.normal_image
-        self.redraw()
+        # self.text_colour = self.colours['normal_text']
+        # self.background_colour = self.colours['normal_bg']
+        # self.border_colour = self.colours['normal_border']
+        # self.current_image = self.normal_image
+        # self.redraw()
+        self.image = self.drawable_shape.get_surface('normal')
 
     def set_text(self, text: str):
         """
@@ -459,7 +501,7 @@ class UIButton(UIElement):
             self.text = text
             # recompute aligned_text_rect before redraw
             self.compute_aligned_text_rect()
-            self.redraw()
+            self.drawable_shape.redraw_all_states()
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -629,4 +671,5 @@ class UIButton(UIElement):
 
             # this helps us draw the text aligned
             self.compute_aligned_text_rect()
-            self.redraw()
+            # self.redraw()
+            self.rebuild_shape()
