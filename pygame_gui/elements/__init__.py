@@ -9,3 +9,4 @@ from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
+from pygame_gui.elements.text import TextHTMLParser, FadeInEffect, FadeOutEffect, TypingAppearEffect

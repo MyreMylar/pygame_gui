@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from typing import Union
 
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
+from pygame_gui.core.ui_shadow import ShadowGenerator
 
 try:
     from os import PathLike  # for Python 3.6
@@ -62,6 +63,9 @@ class UIAppearanceTheme:
         # font dictionary that stores loaded fonts
         self.font_dictionary = UIFontDictionary()
 
+        # shadow generator
+        self.shadow_generator = ShadowGenerator()
+
         # the font to use if no other font is specified
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         self.base_font_info = {'name': 'fira_code',
@@ -107,7 +111,7 @@ class UIAppearanceTheme:
     def check_need_to_reload(self):
         """
         Check if we need to reload our theme file because it's been modified. If so, trigger a reload and return True
-        so that the UIManager can trigger elements to redraw from the theme data.
+        so that the UIManager can trigger elements to rebuild from the theme data.
 
         :return bool: True if we need to reload elements because the theme data has changed.
         """
@@ -218,6 +222,68 @@ class UIAppearanceTheme:
                         else:
                             surface = image
                         self.ui_element_image_surfaces[element_key][path_key] = surface
+
+    def preload_shadow_edges(self):
+        """
+        Looks through the theming data for any shadow edge combos we haven't loaded yet and tries to pre-load them.
+        This helps stop the UI from having to create the complicated parts of the shadows dynamically which can be
+        noticeably slow (e.g. waiting a second for a window to appear).
+
+        For this to work correctly the theme file shouldn't contain any 'invalid' data that is later clamped by the UI,
+        Plus, it is helpful if any rounded rectangles that set a corner radius also set a shadow width at the same time.
+        """
+        for misc_id in self.ui_element_misc_data:
+
+            shape = 'rectangle'
+            shadow_width = 2
+            shape_corner_radius = 2
+
+            if 'shape' in self.ui_element_misc_data[misc_id]:
+                shape = self.ui_element_misc_data[misc_id]['shape']
+
+            if 'shadow_width' in self.ui_element_misc_data[misc_id]:
+                try:
+                    shadow_width = int(self.ui_element_misc_data[misc_id]['shadow_width'])
+                except ValueError:
+                    shadow_width = 2
+                    warnings.warn(
+                        "Invalid value: " + self.ui_element_misc_data[misc_id]['shadow_width'] +
+                        " for shadow_width")
+
+            if 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
+                try:
+                    shape_corner_radius = int(self.ui_element_misc_data[misc_id]['shape_corner_radius'])
+                except ValueError:
+                    shape_corner_radius = 2
+                    warnings.warn(
+                        "Invalid value: " + self.ui_element_misc_data[misc_id]['shape_corner_radius'] +
+                        " for shape_corner_radius")
+
+            # we can preload shadow edges if we are dealing with a rectangular shadow
+            if (shape == 'rounded_rectangle' or shape == 'rectangle') and shadow_width > 0:
+                if 'shadow_width' in self.ui_element_misc_data[misc_id] and 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
+                    shadow_id = str(shadow_width) + 'x' + str(shape_corner_radius)
+                    if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(shadow_width, shape_corner_radius)
+                elif 'shadow_width' in self.ui_element_misc_data[misc_id] and 'shape_corner_radius' not in self.ui_element_misc_data[misc_id]:
+                    # have a shadow width but no idea on the corners, try most common -
+                    shadow_id_1 = str(shadow_width) + 'x' + str(2)
+                    if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(shadow_width, 2)
+                    shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
+                    if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
+                elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id] and 'shadow_width' not in self.ui_element_misc_data[misc_id]:
+                    # have a corner radius but no idea on the shadow width, try most common -
+                    shadow_id_1 = str(1) + 'x' + str(shape_corner_radius)
+                    if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(1, shape_corner_radius)
+                    shadow_id_2 = str(2) + 'x' + str(shape_corner_radius)
+                    if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(2, shape_corner_radius)
+                    shadow_id_3 = str(shape_corner_radius) + 'x' + str(shape_corner_radius)
+                    if shadow_id_3 not in self.shadow_generator.preloaded_shadow_corners:
+                        self.shadow_generator.create_shadow_corners(shape_corner_radius, shape_corner_radius)
 
     def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
         if index < tree_size:
@@ -550,6 +616,7 @@ class UIAppearanceTheme:
         if load_success:
             self.load_fonts()  # save to trigger load with the same data as it won't do anything
             self.load_images()
+            self.preload_shadow_edges()
 
     @staticmethod
     def load_colour_or_gradient_from_theme(theme_colours_dictionary, colour_id):
@@ -577,7 +644,7 @@ class UIAppearanceTheme:
                 try:
                     colour_1 = pygame.Color(string_data_list[0])
                     colour_2 = pygame.Color(string_data_list[1])
-                    colour_3 = pygame.Color(string_data_list[3])
+                    colour_3 = pygame.Color(string_data_list[2])
                     loaded_colour_or_gradient = ColourGradient(gradient_direction, colour_1, colour_2, colour_3)
                 except ValueError:
                     warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
@@ -606,45 +673,57 @@ class ColourGradient:
         self.colour_3 = colour_3
 
     def __eq__(self, other):
+        if type(other) != ColourGradient:
+            return False
         return (self.colour_1 == other.colour_1 and
                 self.colour_2 == other.colour_2 and
                 self.colour_3 == other.colour_3 and
                 self.angle_direction == other.angle_direction)
 
-    def apply_gradient_to_surface(self, input_surface: pygame.Surface):
+    def apply_gradient_to_surface(self, input_surface: pygame.Surface, rect=None):
         """
-        Applies this gradient to a specified input surface using multiplication and returns the resulting surface.
+        Applies this gradient to a specified input surface using blending multiplication.
         As a result this method works best when the input surface is a mostly white, stencil shape type surface.
 
         :param input_surface:
-        :return:
+        :param rect: The rectangle on the surface to apply the gradient to.
         """
-        final_surface = input_surface.copy()
-        size = input_surface.get_size()
-        longest_diagonal = int((size[0] ** 2 + size[1] ** 2) ** 0.5) + 1
+        input_surface_size = input_surface.get_size()
+        inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
+        gradient_size = inverse_rotated_input.get_rect().size
 
         # create the initial 'pixel coloured' surface with a pixel for each colour
         if self.colour_3 is None:
-            colour_pixels_surf = pygame.Surface((2, 1), flags=pygame.SRCALPHA)
+            pixel_width = 2
+            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
         else:
-            colour_pixels_surf = pygame.Surface((3, 1), flags=pygame.SRCALPHA)
+            pixel_width = 3
+            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
 
         # create a surface large enough to overlap the input surface at any rotation angle
-        gradient_surf = pygame.Surface((longest_diagonal, longest_diagonal), flags=pygame.SRCALPHA)
+        gradient_surf = pygame.Surface(gradient_size, flags=pygame.SRCALPHA)
 
         # scale the pixel surface to fill our new large, gradient surface
-        pygame.transform.smoothscale(colour_pixels_surf, (longest_diagonal, longest_diagonal), gradient_surf)
+        # pygame.transform.smoothscale Occasionally gives a 'Fatal Python error: PyEval_SaveThread: NULL tstate'
+        # which is apparently a threading issue with the GIL.
+        # pygame.transform.smoothscale(colour_pixels_surf, gradient_size, gradient_surf)
+        # Try this instead
+        scale = float(max(gradient_size[0] / pixel_width, gradient_size[1]))
+        zoomed_surf = pygame.transform.rotozoom(colour_pixels_surf, 0, scale)
+        pygame.transform.scale(zoomed_surf, gradient_size, gradient_surf)
 
         # rotate the gradient surface to the correct angle for our gradient
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
 
-        gradient_placement_rect = gradient_surf.get_rect()
-        gradient_placement_rect.center = (size[0] / 2, size[1] / 2)
+        if rect is not None:
+            input_surface.blit(gradient_surf, rect, special_flags=pygame.BLEND_RGBA_MULT)
+        else:
+            gradient_placement_rect = gradient_surf.get_rect()
+            gradient_placement_rect.center = (int(input_surface_size[0] / 2), int(input_surface_size[1] / 2))
 
-        final_surface.blit(gradient_surf, gradient_placement_rect, special_flags=pygame.BLEND_RGBA_MULT)
-        return final_surface
+            input_surface.blit(gradient_surf, gradient_placement_rect, special_flags=pygame.BLEND_RGBA_MULT)

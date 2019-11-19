@@ -1,137 +1,18 @@
 import pygame
 import warnings
-import html.parser
-from typing import Union
+import math
+
+from typing import Union, Tuple
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
-
-class TextBoxEffect:
-    def __init__(self, all_characters):
-        self.all_characters = all_characters
-
-    def should_full_redraw(self):
-        return False
-
-    def should_redraw_from_chunks(self):
-        return False
-
-    def update(self, time_delta):
-        pass
-
-    def get_end_text_pos(self):
-        return len(self.all_characters)
-
-    def get_final_alpha(self):
-        return 255
-
-
-class TypingAppearEffect(TextBoxEffect):
-    def __init__(self, all_characters):
-        super().__init__(all_characters)
-        self.text_progress = 0
-        self.time_per_letter = 0.05
-        self.time_per_letter_acc = 0.0
-        self.time_to_redraw = False
-
-    def update(self, time_delta):
-        if self.text_progress < len(self.all_characters):
-            if self.time_per_letter_acc < self.time_per_letter:
-                self.time_per_letter_acc += time_delta
-            else:
-                self.time_per_letter_acc = 0.0
-                self.text_progress += 1
-                self.time_to_redraw = True
-
-    def should_full_redraw(self):
-        if self.time_to_redraw:
-            self.time_to_redraw = False
-            return True
-        else:
-            return False
-
-    def get_end_text_pos(self):
-        return self.text_progress
-
-
-class FadeInEffect(TextBoxEffect):
-    def __init__(self, all_characters):
-        super().__init__(all_characters)
-        self.alpha_value = 0
-        self.time_per_alpha_change = 0.01
-        self.time_per_alpha_change_acc = 0.0
-        self.time_to_redraw = False
-
-    def update(self, time_delta):
-        if self.alpha_value < 255:
-            self.time_per_alpha_change_acc += time_delta
-
-            alpha_progress = int(self.time_per_alpha_change_acc / self.time_per_alpha_change)
-
-            if alpha_progress != self.alpha_value:
-                self.alpha_value = alpha_progress
-                if self.alpha_value > 255:
-                    self.alpha_value = 255
-                self.time_to_redraw = True
-
-    def should_redraw_from_chunks(self):
-        if self.time_to_redraw:
-            self.time_to_redraw = False
-            return True
-        else:
-            return False
-
-    def get_final_alpha(self):
-        return self.alpha_value
-
-
-class FadeOutEffect(TextBoxEffect):
-    def __init__(self, all_characters):
-        super().__init__(all_characters)
-        self.alpha_value = 255
-        self.time_per_alpha_change = 0.01
-        self.time_per_alpha_change_acc = 0.0
-        self.time_to_redraw = False
-
-    def update(self, time_delta):
-        if self.alpha_value > 0:
-            self.time_per_alpha_change_acc += time_delta
-
-            alpha_progress = 255 - int(self.time_per_alpha_change_acc / self.time_per_alpha_change)
-
-            if alpha_progress != self.alpha_value:
-                self.alpha_value = alpha_progress
-                if self.alpha_value < 0:
-                    self.alpha_value = 0
-                self.time_to_redraw = True
-
-    def should_redraw_from_chunks(self):
-        if self.time_to_redraw:
-            self.time_to_redraw = False
-            return True
-        else:
-            return False
-
-    def get_final_alpha(self):
-        return self.alpha_value
-
-
-class CharStyle:
-    def __init__(self, char_style=None):
-        if char_style is not None:
-            self.bold = char_style.bold
-            self.italic = char_style.italic
-            self.underline = char_style.underline
-        else:
-            self.bold = False
-            self.italic = False
-            self.underline = False
-
-    def __eq__(self, other):
-        return self.bold == other.bold and self.italic == other.italic and self.underline == other.underline
+from pygame_gui.elements.text.html_parser import TextHTMLParser
+from pygame_gui.elements.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.ui_appearance_theme import ColourGradient
 
 
 class UITextBox(UIElement):
@@ -156,7 +37,7 @@ class UITextBox(UIElement):
 
 
     :param html_text: The HTML formatted text to display in this text box.
-    :param containing_rect: The 'visible area' rectangle, positioned relative to it's container.
+    :param relative_rect: The 'visible area' rectangle, positioned relative to it's container.
     :param manager: The UIManager that manages this element.
     :param wrap_to_height: False by default, if set to True the box will increase in height to match the text within.
     :param layer_starting_height: Sets the height, above it's container, to start placing the text box at.
@@ -165,231 +46,8 @@ class UITextBox(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     """
 
-    class TextStyleData:
-
-        default_style = {
-            'font_name': 'fira_code',
-            'font_size': 14
-        }
-
-        def __init__(self, theme, element_ids, object_id):
-            super().__init__()
-
-            self.ui_theme = theme
-            self.len_text = 0
-            self.element_stack = []
-            self.style_stack = []
-            self.current_style = {}
-            self.next_style = {}
-            self.text_data = ""
-
-            self.indexed_styles = {}
-
-            self.char_style = CharStyle()
-
-            font_info = self.ui_theme.get_font_info(object_id, element_ids)
-
-            self.default_font_name = font_info['name']
-            self.default_font_size = int(font_info['size'])
-            self.default_style['font_name'] = self.default_font_name
-            self.default_style['font_size'] = self.default_font_size
-
-            self.default_font_color = self.ui_theme.get_colour(object_id, element_ids, 'normal_text')
-            self.default_bg_color = self.ui_theme.get_colour(object_id, element_ids, 'dark_bg')
-            self.font_name = self.default_font_name
-            self.font_size = self.default_font_size
-            self.font_color = self.default_font_color
-            self.bg_color = self.default_bg_color
-
-            self.is_link = False
-            self.link_href = ''
-
-            self.push_style('default_style', self.default_style)
-
-        def push_style(self, key, styles):
-            old_styles = {}
-            for name in styles.keys():
-                old_styles[name] = self.current_style.get(name)
-            self.style_stack.append((key, old_styles))
-            self.current_style.update(styles)
-            self.next_style.update(styles)
-
-        def pop_style(self, key):
-            # Don't do anything if key is not in stack
-            for match, _ in self.style_stack:
-                if key == match:
-                    break
-            else:
-                return
-
-            # Remove all innermost elements until key is closed.
-            while True:
-                match, old_styles = self.style_stack.pop()
-                self.next_style.update(old_styles)
-                self.current_style.update(old_styles)
-                if match == key:
-                    break
-
-        def add_text(self, text):
-            self.add_indexed_style(len(self.text_data))
-            self.text_data = self.text_data[:self.len_text] + text + self.text_data[self.len_text:]
-            self.len_text += len(text)
-
-        def add_indexed_style(self, index):
-            if 'bold' in self.current_style.keys():
-                self.char_style.bold = self.current_style['bold']
-                if self.char_style.bold is None:
-                    self.char_style.bold = False
-            else:
-                self.char_style.bold = False
-            if 'italic' in self.current_style.keys():
-                self.char_style.italic = self.current_style['italic']
-                if self.char_style.italic is None:
-                    self.char_style.italic = False
-            else:
-                self.char_style.italic = False
-            if 'underline' in self.current_style.keys():
-                self.char_style.underline = self.current_style['underline']
-                if self.char_style.underline is None:
-                    self.char_style.underline = False
-            else:
-                self.char_style.underline = False
-            if 'font_name' in self.current_style.keys():
-                self.font_name = self.current_style['font_name']
-                if self.font_name is None:
-                    self.font_name = self.default_font_name
-            else:
-                self.font_name = self.default_font_name
-            if 'font_size' in self.current_style.keys():
-                self.font_size = self.current_style['font_size']
-                if self.font_size is None:
-                    self.font_size = self.default_font_size
-            else:
-                self.font_size = self.default_font_size
-            if 'font_color' in self.current_style.keys():
-                self.font_color = self.current_style['font_color']
-                if self.font_color is None:
-                    self.font_color = self.default_font_color
-            else:
-                self.font_color = self.default_font_color
-            if 'bg_color' in self.current_style.keys():
-                self.bg_color = self.current_style['bg_color']
-                if self.bg_color is None:
-                    self.bg_color = self.default_bg_color
-            else:
-                self.bg_color = self.default_bg_color
-
-            if 'link' in self.current_style.keys():
-                self.is_link = self.current_style['link']
-                if self.is_link is None:
-                    self.is_link = False
-            else:
-                self.is_link = False
-
-            if 'link_href' in self.current_style.keys():
-                self.link_href = self.current_style['link_href']
-                if self.link_href is None:
-                    self.link_href = ''
-            else:
-                self.link_href = ''
-
-            self.indexed_styles[index] = TextLineContext(self.font_size,
-                                                         self.font_name,
-                                                         CharStyle(self.char_style),
-                                                         self.font_color,
-                                                         self.bg_color,
-                                                         self.is_link,
-                                                         self.link_href)
-
-    class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
-
-        font_sizes = {
-            1: 8,
-            1.5: 9,
-            2: 10,
-            2.5: 11,
-            3: 12,
-            3.5: 13,
-            4: 14,
-            4.5: 16,
-            5: 18,
-            5.5: 20,
-            6: 24,
-            6.5: 32,
-            7: 48
-        }
-
-        def __init__(self, ui_theme, element_ids, object_id):
-            super().__init__(ui_theme, element_ids, object_id)
-            self.ui_theme = ui_theme
-            self.element_ids = element_ids
-            self.object_id = object_id
-
-        def handle_starttag(self, tag, attrs):
-            element = tag.lower()
-
-            self.element_stack.append(element)
-
-            attributes = {}
-            for key, value in attrs:
-                attributes[key.lower()] = value
-
-            style = {}
-            if element in ('b', 'strong'):
-                style['bold'] = True
-            elif element == 'a':
-                style['link'] = True
-                if 'href' in attributes:
-                    style["link_href"] = attributes['href']
-            elif element in ('i', 'em', 'var'):
-                style['italic'] = True
-            elif element == 'u':
-                style['underline'] = True
-            elif element == 'font':
-                if 'face' in attributes:
-                    font_name = attributes['face']  # .split(',')
-                    style["font_name"] = font_name
-                if 'size' in attributes:
-                    font_size = self.font_sizes[float(attributes['size'])]
-                    style["font_size"] = font_size
-                if 'color' in attributes:
-                    if attributes['color'][0] == '#':
-                        style["font_color"] = pygame.color.Color(attributes['color'])
-                    else:
-                        style["font_color"] = self.ui_theme.get_colour(self.object_id,
-                                                                       self.element_ids, attributes['color'])
-
-            elif element == 'body':
-                if 'bgcolor' in attributes:
-                    style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
-            elif element == 'br':
-                self.add_text('\n')  # u'\u2028'
-            else:
-                warning_text = 'Unsupported HTML Tag <' + element + '>. Check documentation' \
-                                                                    ' for full range of supported tags.'
-                warnings.warn(warning_text, UserWarning)
-
-            self.push_style(element, style)
-
-        def handle_endtag(self, tag):
-            element = tag.lower()
-
-            if element not in self.element_stack:
-                return
-
-            self.pop_style(element)
-
-            while self.element_stack.pop() != element:
-                pass
-
-        def handle_data(self, data):
-            self.add_text(data)
-
-        def error(self, message):
-            pass
-
     def __init__(self, html_text: str,
-                 containing_rect: pygame.Rect,
+                 relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
@@ -400,7 +58,7 @@ class UITextBox(UIElement):
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='text_box')
-        super().__init__(containing_rect, manager, container,
+        super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
                          layer_thickness=1,
                          element_ids=new_element_ids,
@@ -409,72 +67,54 @@ class UITextBox(UIElement):
         self.html_text = html_text
         self.font_dict = self.ui_theme.get_font_dictionary()
 
+        self.wrap_to_height = wrap_to_height
+        self.link_hover_chunks = []  # container for any link chunks we have
+
         self.active_text_effect = None
         self.scroll_bar = None
         self.scroll_bar_width = 20
-        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
-        self.link_normal_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_text')
-        self.link_hover_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_hover')
-        self.link_selected_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'link_selected')
+        self.border_width = None
+        self.shadow_width = None
+        self.padding = None
+        self.background_colour = None
+        self.border_colour = None
 
-        link_normal_underline_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids,
-                                                                   'link_normal_underline')
-        if link_normal_underline_string is not None:
-            self.link_normal_underline = bool(int(link_normal_underline_string))
-        else:
-            self.link_normal_underline = False
+        self.link_normal_colour = None
+        self.link_hover_colour = None
+        self.link_selected_colour = None
+        self.link_normal_underline = False
+        self.link_hover_underline = True
+        self.link_style = None
 
-        link_hover_underline_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids,
-                                                                  'link_hover_underline')
-        if link_hover_underline_string is not None:
-            self.link_hover_underline = bool(int(link_hover_underline_string))
-        else:
-            self.link_hover_underline = True
-
-        self.link_style = {'link_text': self.link_normal_colour,
-                           'link_hover': self.link_hover_colour,
-                           'link_selected': self.link_selected_colour,
-                           'link_normal_underline': self.link_normal_underline,
-                           'link_hover_underline': self.link_hover_underline}
-
+        self.rounded_corner_offset = None
         self.formatted_text_block = None  # TextLine()
-        # if we pass in a rect, text will be wrapped to the rect width (and warn if longer than the height?)
-        self.rect = pygame.Rect((self.ui_container.rect.x + containing_rect.x,
-                                 self.ui_container.rect.y + containing_rect.y),
-                                containing_rect.size)
+        self.text_wrap_rect = None
+        self.background_surf = None
 
-        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
-        if padding_str is None:
-            self.padding = (10, 10)
-        else:
-            padding_list = padding_str.split(',')
-            self.padding = (int(padding_list[0]), int(padding_list[1]))
+        self.drawable_shape = None
+        self.shape_type = 'rectangle'
+        self.shape_corner_radius = None
 
-        self.border_width = 0
-        border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
-        if border_width_str is not None:
-            self.border_width = int(border_width_str)
+        self.rebuild_from_changed_theme_data()
 
-        self.shadow_width = 0
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
-        if shadow_width_string is not None:
-            self.shadow_width = int(shadow_width_string)
+    def rebuild(self):
+        """
+        Rebuild whatever needs building.
 
-        self.wrap_to_height = wrap_to_height
-
-        self.link_hover_chunks = []  # container for any link chunks we have
-
-        text_wrap_rect = [self.rect[0] + self.padding[0] + self.border_width + self.shadow_width,
-                          self.rect[1] + self.padding[1] + self.border_width + self.shadow_width,
-                          self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) - (self.shadow_width * 2),
-                          self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) - (self.shadow_width * 2)]
+        """
         ''' The text_wrap_area is the part of the text box that we try to keep the text inside of so that none 
-        of it overlaps. Essentially we start with the containing box, subtract the border,  then subtract the 
-        padding, then if necessary subtract the width of the scroll bar'''
-
-        self.text_wrap_rect = text_wrap_rect
+            of it overlaps. Essentially we start with the containing box, subtract the border,  then subtract 
+            the padding, then if necessary subtract the width of the scroll bar'''
+        self.rounded_corner_offset = int(self.shape_corner_radius - (math.sin(math.pi/4) * self.shape_corner_radius))
+        self.text_wrap_rect = [(self.rect[0] + self.padding[0] + self.border_width +
+                                self.shadow_width + self.rounded_corner_offset),
+                               (self.rect[1] + self.padding[1] + self.border_width +
+                                self.shadow_width + self.rounded_corner_offset),
+                               (self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) -
+                                (self.shadow_width * 2) - (2 * self.rounded_corner_offset)),
+                               (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
+                                (self.shadow_width * 2) - (2 * self.rounded_corner_offset))]
         if self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
 
@@ -483,29 +123,35 @@ class UITextBox(UIElement):
             if self.wrap_to_height or self.rect[3] == -1:
                 final_text_area_size = self.formatted_text_block.final_dimensions
                 self.rect.size = [(final_text_area_size[0] + (self.padding[0] * 2) +
-                                   (self.border_width * 2) + (self.shadow_width * 2)),
+                                   (self.border_width * 2) + (self.shadow_width * 2) + (2 * self.rounded_corner_offset)),
                                   (final_text_area_size[1] + (self.padding[1] * 2) +
-                                   (self.border_width * 2) + (self.shadow_width * 2))]
+                                   (self.border_width * 2) + (self.shadow_width * 2) + (2 * self.rounded_corner_offset))]
 
             elif self.formatted_text_block.final_dimensions[1] > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we have to display it.
                 # this also means we need to parse the text again.
-                text_rect_width = (self.rect[2] - (self.padding[0] * 2)
-                                   - (self.border_width * 2) - (self.shadow_width * 2) - self.scroll_bar_width)
-                self.text_wrap_rect = [self.rect[0] + self.padding[0] + self.border_width + self.shadow_width,
-                                       self.rect[1] + self.padding[1] + self.border_width + self.shadow_width,
+                text_rect_width = (self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) -
+                                   (self.shadow_width * 2) - self.rounded_corner_offset - self.scroll_bar_width)
+                self.text_wrap_rect = [(self.rect[0] + self.padding[0] + self.border_width +
+                                        self.shadow_width + self.rounded_corner_offset),
+                                       (self.rect[1] + self.padding[1] + self.border_width +
+                                        self.shadow_width + self.rounded_corner_offset),
                                        text_rect_width,
-                                       (self.rect[3] - (self.padding[1] * 2) -
-                                        (self.border_width * 2) - (self.shadow_width * 2))]
+                                       (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
+                                        (self.shadow_width * 2) - (2 * self.rounded_corner_offset))]
                 self.parse_html_into_style_data()
                 percentage_visible = self.text_wrap_rect[3] / self.formatted_text_block.final_dimensions[1]
                 scroll_bar_position = (self.relative_rect.right - self.border_width -
                                        - self.shadow_width - self.scroll_bar_width,
-                                       self.relative_rect.top + self.border_width + self.shadow_width)
+                                       self.relative_rect.top + self.border_width +
+                                       self.shadow_width)
+
+                if self.scroll_bar is not None:
+                    self.scroll_bar.kill()
                 self.scroll_bar = UIVerticalScrollBar(pygame.Rect(scroll_bar_position,
-                                                      (self.scroll_bar_width,
-                                                       self.rect.height - (2 * self.border_width) -
-                                                       (2 * self.shadow_width))),
+                                                                  (self.scroll_bar_width,
+                                                                   self.rect.height - (2 * self.border_width) -
+                                                                   (2 * self.shadow_width))),
                                                       percentage_visible,
                                                       self.ui_manager,
                                                       self.ui_container,
@@ -513,30 +159,20 @@ class UITextBox(UIElement):
             else:
                 self.rect.size = [self.rect[2], self.rect[3]]
 
-        # This section creates the border by blitting a smaller surface over the top of one containing the border
-        # to make the final background surface - this would be the point to add transparency I guess
-        if self.shadow_width > 0:
-            self.background_surf = self.ui_manager.get_shadow(self.rect.size)
-        else:
-            self.background_surf = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        theming_parameters = {'normal_bg': self.background_colour,
+                              'normal_border': self.border_colour,
+                              'border_width': self.border_width,
+                              'shadow_width': self.shadow_width,
+                              'shape_corner_radius': self.shape_corner_radius}
 
-        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                  (self.rect.width - (2 * self.shadow_width),
-                                   self.rect.height - (2 * self.shadow_width)))
-        if self.border_width > 0:
-            self.background_surf.fill(self.border_colour,
-                                      border_rect)
+        if self.shape_type == 'rectangle':
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                    ['normal'], self.ui_manager)
+        elif self.shape_type == 'rounded_rectangle':
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ['normal'], self.ui_manager)
 
-        relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                self.border_width + self.shadow_width),
-                                               (border_rect.width - (2 * self.border_width),
-                                                border_rect.height - (2 * self.border_width)))
-
-        # background_rect = pygame.Rect((relative_background_rect.x + relative_rect.x,
-        #                                relative_background_rect.y + relative_rect.y),
-        #                               relative_background_rect.size)
-        self.background_surf.fill(self.bg_colour,
-                                  relative_background_rect)
+        self.background_surf = self.drawable_shape.get_surface('normal')
 
         if self.scroll_bar is not None:
             height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
@@ -548,9 +184,9 @@ class UITextBox(UIElement):
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                 self.shadow_width,
+                                                                 self.shadow_width + self.rounded_corner_offset,
                                                                  self.padding[1] + self.border_width +
-                                                                 self.shadow_width),
+                                                                 self.shadow_width + self.rounded_corner_offset),
                         drawable_area)
 
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
@@ -572,9 +208,11 @@ class UITextBox(UIElement):
                     self.image.fill(pygame.Color(0, 0, 0, 0))
                     self.image.blit(self.background_surf, (0, 0))
                     self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                             self.shadow_width,
+                                                                             self.shadow_width +
+                                                                             self.rounded_corner_offset,
                                                                              self.padding[1] + self.border_width +
-                                                                             self.shadow_width),
+                                                                             self.shadow_width +
+                                                                             self.rounded_corner_offset),
                                     drawable_area)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -584,8 +222,10 @@ class UITextBox(UIElement):
                 height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
             else:
                 height_adjustment = 0
-            base_x = self.rect[0] + self.padding[0] + self.border_width + self.shadow_width
-            base_y = self.rect[1] + self.padding[1] + self.border_width + self.shadow_width - height_adjustment
+            base_x = (self.rect[0] + self.padding[0] + self.border_width +
+                      self.shadow_width + self.rounded_corner_offset)
+            base_y = (self.rect[1] + self.padding[1] + self.border_width +
+                      self.shadow_width + self.rounded_corner_offset - height_adjustment)
 
             for chunk in self.link_hover_chunks:
                 hovered_currently = False
@@ -627,12 +267,46 @@ class UITextBox(UIElement):
         #                               self.ui_container.rect.y + self.relative_rect.y + chunk.rect.y),
         #                              chunk.rect.size)
 
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        self.rect.x = self.ui_container.rect.x + position[0]
+        self.rect.y = self.ui_container.rect.y + position[1]
+        self.relative_rect.x = position[0]
+        self.relative_rect.y = position[1]
+
+        if self.scroll_bar is not None:
+            scroll_bar_position = (self.relative_rect.right - self.border_width -
+                                   - self.shadow_width - self.scroll_bar_width,
+                                   self.relative_rect.top + self.border_width +
+                                   self.shadow_width)
+            self.scroll_bar.set_relative_position(scroll_bar_position)
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        self.rect.x = position[0]
+        self.rect.y = position[1]
+        self.relative_rect.x = position[0] - self.ui_container.rect.x
+        self.relative_rect.y = position[1] - self.ui_container.rect.y
+
+        if self.scroll_bar is not None:
+            scroll_bar_position = (self.relative_rect.right - self.border_width -
+                                   - self.shadow_width - self.scroll_bar_width,
+                                   self.relative_rect.top + self.border_width +
+                                   self.shadow_width)
+            self.scroll_bar.set_relative_position(scroll_bar_position)
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        self.rect.width = dimensions[0]
+        self.rect.height = dimensions[1]
+        self.relative_rect.width = dimensions[0]
+        self.relative_rect.height = dimensions[1]
+
+        self.rebuild()
+
     def parse_html_into_style_data(self):
         """
         Parses HTML styled string text into a format more useful for styling pygame.font rendered text.
         """
-        parser = UITextBox.TextHTMLParser(self.ui_theme, self.element_ids, self.object_ids)
-        parser.push_style('body', {"bg_color": self.bg_colour})
+        parser = TextHTMLParser(self.ui_theme, self.element_ids, self.object_ids)
+        parser.push_style('body', {"bg_color": self.background_colour})
         parser.feed(self.html_text)
 
         self.formatted_text_block = TextBlock(parser.text_data,
@@ -640,7 +314,7 @@ class UITextBox(UIElement):
                                               parser.indexed_styles,
                                               self.font_dict,
                                               self.link_style,
-                                              self.bg_colour,
+                                              self.background_colour,
                                               self.wrap_to_height
                                               )
 
@@ -659,9 +333,9 @@ class UITextBox(UIElement):
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                 self.shadow_width,
+                                                                 self.shadow_width + self.rounded_corner_offset,
                                                                  self.padding[1] + self.border_width +
-                                                                 self.shadow_width),
+                                                                 self.shadow_width + self.rounded_corner_offset),
                         drawable_area)
 
     def redraw_from_chunks(self):
@@ -716,8 +390,10 @@ class UITextBox(UIElement):
                         height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
                     else:
                         height_adjustment = 0
-                    base_x = self.rect[0] + self.padding[0] + self.border_width + self.shadow_width
-                    base_y = self.rect[1] + self.padding[1] + self.border_width + self.shadow_width - height_adjustment
+                    base_x = (self.rect[0] + self.padding[0] + self.border_width +
+                              self.shadow_width + self.rounded_corner_offset)
+                    base_y = (self.rect[1] + self.padding[1] + self.border_width +
+                              self.shadow_width + self.rounded_corner_offset - height_adjustment)
                     for chunk in self.link_hover_chunks:
 
                         hover_rect = pygame.Rect((base_x + chunk.rect.x,
@@ -738,8 +414,10 @@ class UITextBox(UIElement):
                     height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
                 else:
                     height_adjustment = 0
-                base_x = self.rect[0] + self.padding[0] + self.border_width + self.shadow_width
-                base_y = self.rect[1] + self.padding[1] + self.border_width + self.shadow_width - height_adjustment
+                base_x = (self.rect[0] + self.padding[0] + self.border_width +
+                          self.shadow_width + self.rounded_corner_offset)
+                base_y = (self.rect[1] + self.padding[1] + self.border_width +
+                          self.shadow_width + self.rounded_corner_offset - height_adjustment)
                 mouse_x, mouse_y = event.pos
                 for chunk in self.link_hover_chunks:
 
@@ -802,6 +480,128 @@ class UITextBox(UIElement):
             else:
                 warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
 
+    def rebuild_from_changed_theme_data(self):
+        """
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
+        the theme data has changed.
+        """
+        has_any_changed = False
+
+        # misc parameters
+        shape_type = 'rectangle'
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
+        if shape_type_string is not None:
+            if shape_type_string in ['rectangle', 'rounded_rectangle']:
+                shape_type = shape_type_string
+        if shape_type != self.shape_type:
+            self.shape_type = shape_type
+            has_any_changed = True
+
+        corner_radius = 2
+        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                 self.element_ids, 'shape_corner_radius')
+        if shape_corner_radius_string is not None:
+            try:
+                corner_radius = int(shape_corner_radius_string)
+            except ValueError:
+                corner_radius = 2
+        if corner_radius != self.shape_corner_radius:
+            self.shape_corner_radius = corner_radius
+            has_any_changed = True
+
+        border_width = 0
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = 0
+
+        if border_width != self.border_width:
+            self.border_width = border_width
+            has_any_changed = True
+
+        shadow_width = 0
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = 0
+        if shadow_width != self.shadow_width:
+            self.shadow_width = shadow_width
+            has_any_changed = True
+
+        padding = (10, 10)
+        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
+        if padding_str is not None:
+            try:
+                padding = (int(padding_str.split(',')[0]), int(padding_str.split(',')[1]))
+            except ValueError:
+                padding = (10, 10)
+        if padding != self.padding:
+            self.padding = padding
+            has_any_changed = True
+
+        # colour parameters
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        if background_colour != self.background_colour:
+            self.background_colour = background_colour
+            has_any_changed = True
+
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        if border_colour != self.border_colour:
+            self.border_colour = border_colour
+            has_any_changed = True
+
+        # link styles
+        link_normal_underline = True
+        link_normal_underline_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                   self.element_ids, 'link_normal_underline')
+        if link_normal_underline_string is not None:
+            try:
+                link_normal_underline = bool(int(link_normal_underline_string))
+            except ValueError:
+                link_normal_underline = True
+        if link_normal_underline != self.link_normal_underline:
+            self.link_normal_underline = link_normal_underline
+
+        link_hover_underline = True
+        link_hover_underline_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids, 'link_hover_underline')
+        if link_hover_underline_string is not None:
+            try:
+                link_hover_underline = bool(int(link_hover_underline_string))
+            except ValueError:
+                link_hover_underline = True
+        if link_hover_underline != self.link_hover_underline:
+            self.link_hover_underline = link_hover_underline
+
+        link_normal_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'link_text')
+        if link_normal_colour != self.link_normal_colour:
+            self.link_normal_colour = link_normal_colour
+
+        link_hover_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'link_hover')
+        if link_hover_colour != self.link_hover_colour:
+            self.link_hover_colour = link_hover_colour
+
+        link_selected_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'link_selected')
+        if link_selected_colour != self.link_selected_colour:
+            self.link_selected_colour = link_selected_colour
+
+        link_style = {'link_text': self.link_normal_colour,
+                      'link_hover': self.link_hover_colour,
+                      'link_selected': self.link_selected_colour,
+                      'link_normal_underline': self.link_normal_underline,
+                      'link_hover_underline': self.link_hover_underline}
+
+        if link_style != self.link_style:
+            self.link_style = link_style
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+
 
 class StyledChunk:
     def __init__(self, font_size, font_name, chunk, style,
@@ -841,10 +641,18 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if self.bg_color.a != 255:
-                self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+            if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
+                if type(self.color) != ColourGradient:
+                    self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+                else:
+                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                    self.color.apply_gradient_to_surface(self.rendered_chunk)
             else:
-                self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                if type(self.color) != ColourGradient:
+                    self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                else:
+                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                    self.color.apply_gradient_to_surface(self.rendered_chunk)
         else:
             self.rendered_chunk = pygame.Surface((0, 0))
         metrics = self.font.metrics(self.chunk)
@@ -870,10 +678,18 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if self.bg_color.a != 255:
-                self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+            if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
+                if type(self.color) != ColourGradient:
+                    self.rendered_chunk = self.font.render(self.chunk, True, self.color)
+                else:
+                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                    self.color.apply_gradient_to_surface(self.rendered_chunk)
             else:
-                self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                if type(self.color) != ColourGradient:
+                    self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                else:
+                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                    self.color.apply_gradient_to_surface(self.rendered_chunk)
         else:
             self.rendered_chunk = pygame.Surface((0, 0))
 
@@ -920,38 +736,6 @@ class StyledChunk:
         self.color = self.normal_colour
         self.is_selected = False
         self.redraw()
-
-
-class TextLineContext:
-    """
-    A class that covers all the states of the text 'options' so we know what
-    to apply when rendering a letter.
-    """
-    def __init__(self, font_size, font_name, style, color, bg_color, is_link, link_href):
-        self.font_size = font_size
-        self.font_name = font_name
-        self.style = style
-        self.color = color
-        self.bg_color = bg_color
-        self.is_link = is_link
-        self.link_href = link_href
-
-    def __eq__(self, other):
-        font_size_eq = self.font_size == other.font_size
-        font_name_eq = self.font_name == other.font_name
-        font_style_eq = self.style == other.style
-        font_color_eq = self.color == other.color
-        font_bg_color_eq = self.bg_color == other.bg_color
-        link_eq = self.is_link == other.is_link
-        link_href_eq = self.link_href == other.link_href
-        if font_size_eq and font_name_eq and font_style_eq and\
-                font_color_eq and font_bg_color_eq and link_eq and link_href_eq:
-            return self.__dict__ == other.__dict__
-        else:
-            return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
 
 class TextBlock:
@@ -1071,9 +855,9 @@ class TextBlock:
                         if chunk_to_split[0][i] == ' ':
                             word_split_point = i
                             break
-                    if word_split_point == 0 and len(line) == 1 and chunk_length > self.width:
-                        # our chunk is one long word, so split the word instead of hunting for
-                        # a word split point
+                    if word_split_point == 0 and chunk_to_split_index == 0 and chunk_length > self.width:
+                        # our chunk is one word, at the start of the line, and the split point is in it, so split the
+                        # word instead of hunting for a word split point
                         if split_point > 0:
                             chunk_1 = [chunk_to_split[0][:split_point-1] + '-', chunk_to_split[1]]
                             chunk_2 = ["-" + chunk_to_split[0][split_point-1:].lstrip(' '), chunk_to_split[1]]
@@ -1217,7 +1001,12 @@ class TextBlock:
             final_alpha = 255
 
         self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA)
-        self.block_sprite.fill(self.bg_colour)
+
+        if type(self.bg_colour) == ColourGradient:
+            self.block_sprite.fill(pygame.Color("#FFFFFFFF"))
+            self.bg_colour.apply_gradient_to_surface(self.block_sprite)
+        else:
+            self.block_sprite.fill(self.bg_colour)
 
         for text_line in self.lines:
             for chunk in text_line.chunks:

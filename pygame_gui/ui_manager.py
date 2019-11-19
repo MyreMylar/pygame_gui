@@ -4,7 +4,6 @@ from typing import Tuple, List, Dict, Union
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_window import UIWindow
-from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.ui_element import UIElement
 
 
@@ -15,7 +14,7 @@ class UIManager:
     Before doing anything else with pygame_gui create a UIManager and remember to update it every frame.
     """
 
-    def __init__(self, window_resolution: Tuple[int, int], theme_path: str = None):
+    def __init__(self, window_resolution: Tuple[int, int], theme_path: str = None, enable_live_theme_updates=True):
         self.window_resolution = window_resolution
         self.ui_theme = UIAppearanceTheme()
         if theme_path is not None:
@@ -28,7 +27,9 @@ class UIManager:
         self.ui_window_stack = UIWindowStack(self.window_resolution)
         UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
-        self.shadow_generator = ShadowGenerator()
+        self.live_theme_updates = enable_live_theme_updates
+        self.theme_update_acc = 0.0
+        self.theme_update_check_interval = 1.0
 
     def get_theme(self) -> UIAppearanceTheme:
         """
@@ -52,15 +53,19 @@ class UIManager:
         """
         return self.ui_window_stack
 
-    def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2) -> pygame.Surface:
+    def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
+                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
+
         :param size: The size of the object we are shadowing + it's shadow.
         :param shadow_width: The width of the shadowed edge.
+        :param shape: The shape of the requested shadow
+        :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
         :return: A shadow.
         """
-        return self.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width)
+        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width, shape, corner_radius)
 
     def set_window_resolution(self, window_resolution):
         self.window_resolution = window_resolution
@@ -115,9 +120,14 @@ class UIManager:
 
         :param time_delta: The time passed since the last call to update, in seconds.
         """
-        if self.ui_theme.check_need_to_reload():
-            for sprite in self.ui_group.sprites():
-                sprite.rebuild_from_changed_theme_data()
+
+        if self.live_theme_updates:
+            self.theme_update_acc += time_delta
+            if self.theme_update_acc > self.theme_update_check_interval:
+                self.theme_update_acc = 0.0
+                if self.ui_theme.check_need_to_reload():
+                    for sprite in self.ui_group.sprites():
+                        sprite.rebuild_from_changed_theme_data()
 
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)

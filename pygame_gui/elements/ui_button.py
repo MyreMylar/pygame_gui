@@ -6,6 +6,7 @@ from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements import ui_tool_tip
 from pygame_gui.core.drawable_shapes import DrawableShape, RectDrawableShape
+from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
 
 
 class UIButton(UIElement):
@@ -46,8 +47,6 @@ class UIButton(UIElement):
 
         self.text = text
 
-        self.click_area_shape = self.rect.copy()  # TODO replace this with functionality in DrawableShape
-
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
@@ -72,9 +71,6 @@ class UIButton(UIElement):
 
         # initialise theme parameters
         self.colours = {}
-        self.text_colour = None
-        self.background_colour = None
-        self.border_colour = None
 
         self.font = None
 
@@ -82,7 +78,6 @@ class UIButton(UIElement):
         self.hovered_image = None
         self.selected_image = None
         self.disabled_image = None
-        self.current_image = None
 
         self.tool_tip_delay = 1.0
         self.border_width = 0
@@ -91,37 +86,12 @@ class UIButton(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
+        self.shape_type = 'rectangle'
+        self.shape_corner_radius = 2
 
-        self.drawable_shape = None  # type: DrawableShape
+        self.drawable_shape = None  # type: Union[DrawableShape, None]
 
         self.rebuild_from_changed_theme_data()
-
-    def compute_aligned_text_rect(self):
-        if len(self.text) > 0:
-            # first we need to create rectangle the size of the text, if there is any text to draw
-            self.aligned_text_rect = pygame.Rect((0, 0), self.font.size(self.text))
-
-            # horizontal
-            if self.text_horiz_alignment == 'center':
-                self.aligned_text_rect.centerx = self.rect.width/2
-            elif self.text_horiz_alignment == 'left':
-                self.aligned_text_rect.x = self.text_horiz_alignment_padding + self.shadow_width + self.border_width
-            elif self.text_horiz_alignment == 'right':
-                x_pos = (self.click_area_shape.width - self.text_horiz_alignment_padding - self.aligned_text_rect.width
-                         - self.shadow_width - self.border_width)
-                self.aligned_text_rect. x = x_pos
-            else:
-                self.aligned_text_rect.centerx = self.rect.width/2
-            # vertical
-            if self.text_vert_alignment == 'center':
-                self.aligned_text_rect.centery = int(self.rect.height/2)
-            elif self.text_vert_alignment == 'top':
-                self.aligned_text_rect.y = (self.text_vert_alignment_padding + self.shadow_width + self.border_width)
-            elif self.text_vert_alignment == 'bottom':
-                self.aligned_text_rect.y = (self.rect.height - self.aligned_text_rect.height
-                                            - self.text_vert_alignment_padding - self.shadow_width - self.border_width)
-            else:
-                self.aligned_text_rect.centery = int(self.rect.height/2)
 
     def set_any_images_from_theme(self):
         """
@@ -137,8 +107,6 @@ class UIButton(UIElement):
             self.hovered_image = normal_image
             self.selected_image = normal_image
             self.disabled_image = normal_image
-            self.current_image = normal_image
-
             changed = True
 
         hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'hovered_image')
@@ -180,7 +148,7 @@ class UIButton(UIElement):
         if self.held:
             return self.in_hold_range((x, y))
         else:
-            return self.click_area_shape.collidepoint(x, y)
+            return self.drawable_shape.collide_point((x, y))
 
     def can_hover(self) -> bool:
         """
@@ -195,11 +163,6 @@ class UIButton(UIElement):
         Called when we enter the hover state, it sets the colours and image of the button to the appropriate
         values and redraws it.
         """
-        # self.text_colour = self.colours['hovered_text']
-        # self.background_colour = self.colours['hovered_bg']
-        # self.border_colour = self.colours['hovered_border']
-        # self.current_image = self.hovered_image
-        # self.redraw()
         self.image = self.drawable_shape.get_surface('hovered')
         self.hover_time = 0.0
 
@@ -225,11 +188,6 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any tooltip that was
         created while we were hovering the button.
         """
-        # self.text_colour = self.colours['normal_text']
-        # self.background_colour = self.colours['normal_bg']
-        # self.border_colour = self.colours['normal_border']
-        # self.current_image = self.normal_image
-        # self.redraw()
         self.image = self.drawable_shape.get_surface('normal')
         if self.tool_tip is not None:
             self.tool_tip.kill()
@@ -250,24 +208,45 @@ class UIButton(UIElement):
                 self.pressed_event = False
                 self.pressed = True
 
-    def set_position(self, position: pygame.math.Vector2):
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the relative rect position of a button.
+
+        :param position: The new position to set.
+        """
+        self.rect.x = self.ui_container.rect.x + position[0]
+        self.rect.y = self.ui_container.rect.y + position[1]
+        self.relative_rect.x = position[0]
+        self.relative_rect.y = position[1]
+
+        self.drawable_shape.set_position(self.rect.topleft)
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the absolute rect position of a button.
 
         :param position: The new position to set.
         """
-        self.rect.x = position.x
-        self.rect.y = position.y
-        self.relative_rect.x = position.x - self.ui_container.rect.x
-        self.relative_rect.y = position.y - self.ui_container.rect.y
+        self.rect.x = position[0]
+        self.rect.y = position[1]
+        self.relative_rect.x = position[0] - self.ui_container.rect.x
+        self.relative_rect.y = position[1] - self.ui_container.rect.y
 
-        if self.shadow_width > 0:
-            self.click_area_shape = pygame.Rect((self.rect.x + self.shadow_width,
-                                                 self.rect.y + self.shadow_width),
-                                                (self.rect.width - (2 * self.shadow_width),
-                                                 self.rect.height - (2 * self.shadow_width)))
-        else:
-            self.click_area_shape = self.rect.copy()
+        self.drawable_shape.set_position(self.rect.topleft)
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the absolute rect position of a button.
+
+        :param dimensions: The new dimensions to set.
+        """
+        self.rect.width = dimensions[0]
+        self.rect.height = dimensions[1]
+        self.relative_rect.width = dimensions[0]
+        self.relative_rect.width = dimensions[1]
+
+        self.drawable_shape.set_dimensions(self.rect.size)
+        self.image = self.drawable_shape.get_surface('normal')
 
     def update_containing_rect_position(self):
         """
@@ -278,13 +257,7 @@ class UIButton(UIElement):
                                  self.ui_container.rect.y + self.relative_rect.y),
                                 self.relative_rect.size)
 
-        if self.shadow_width > 0:
-            self.click_area_shape = pygame.Rect((self.rect.x + self.shadow_width,
-                                                 self.rect.y + self.shadow_width),
-                                                (self.rect.width - (2 * self.shadow_width),
-                                                 self.rect.height - (2 * self.shadow_width)))
-        else:
-            self.click_area_shape = self.rect.copy()
+        self.drawable_shape.set_position(self.rect.topleft)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -297,8 +270,7 @@ class UIButton(UIElement):
         if self.is_enabled:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    mouse_x, mouse_y = event.pos
-                    if self.click_area_shape.collidepoint(mouse_x, mouse_y):
+                    if self.drawable_shape.collide_point(event.pos):
                         self.held = True
                         self.set_active()
                         processed_event = True
@@ -308,9 +280,7 @@ class UIButton(UIElement):
                             self.tool_tip = None
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    mouse_x, mouse_y = event.pos
-
-                    if self.click_area_shape.collidepoint(mouse_x, mouse_y):
+                    if self.drawable_shape.collide_point(event.pos):
                         if self.held:
                             self.held = False
                             self.set_inactive()
@@ -332,7 +302,242 @@ class UIButton(UIElement):
 
         return processed_event
 
+    def check_pressed(self):
+        """
+        A direct way to check if this button has been pressed in the last update cycle.
+
+        :return: True if the button has been pressed.
+        """
+        return self.pressed
+
+    def disable(self):
+        """
+        Disables the button so that it is no longer interactive.
+        """
+        self.is_enabled = False
+        self.image = self.drawable_shape.get_surface('disabled')
+
+    def enable(self):
+        """
+        Re-enables the button so we can once again interact with it.
+        """
+        self.is_enabled = True
+        self.image = self.drawable_shape.get_surface('normal')
+
+    def set_active(self):
+        """
+        Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
+        state then redraws the button.
+        """
+        self.image = self.drawable_shape.get_surface('active')
+
+    def set_inactive(self):
+        """
+        Called when we stop actively clicking on the button. Restores the colours to the default
+        state then redraws the button.
+        """
+        self.image = self.drawable_shape.get_surface('normal')
+
+    def select(self):
+        """
+        Called when we select focus this element. Changes the colours and image to the appropriate ones for the new
+        state then redraws the button.
+        """
+        self.is_selected = True
+        self.image = self.drawable_shape.get_surface('selected')
+
+    def unselect(self):
+        """
+        Called when we are no longer select focusing this element. Restores the colours and image to the default
+        state then redraws the button.
+        """
+        self.is_selected = False
+        self.image = self.drawable_shape.get_surface('normal')
+
+    def set_text(self, text: str):
+        """
+        Sets the text on the button. The button will rebuild.
+
+        :param text: The new text to set.
+        """
+        if text != self.text:
+            self.text = text
+            self.drawable_shape.theming['text'] = self.text
+            # recompute aligned_text_rect before rebuild
+            self.drawable_shape.compute_aligned_text_rect()
+            self.drawable_shape.redraw_all_states()
+            self.image = self.drawable_shape.get_surface('normal')
+
+    def set_hold_range(self, xy_range: Tuple[int, int]):
+        """
+        Set x and y values, in pixels, around our button to use as the hold range for time when we want to drag a button
+        about but don't want it to slip out of our grasp too easily.
+
+        Imagine it as a large rectangle around our button, larger in all directions by whatever values we specify here.
+
+        :param xy_range: The x and y values used to create our larger 'holding' rectangle.
+        """
+        self.hold_range = xy_range
+
+    def in_hold_range(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
+        """
+        Imagines a potentially larger rectangle around our button in which range we still grip hold of our
+        button when moving the mouse. Makes it easier to use scrollbars.
+
+        :param position: The position we are testing.
+        :return bool: Returns True if our position is inside the hold range.
+        """
+        if self.drawable_shape.collide_point(position):
+            return True
+        elif self.hold_range[0] > 0 or self.hold_range[1] > 0:
+            hold_rect = pygame.Rect((self.rect.x - self.hold_range[0],
+                                     self.rect.y - self.hold_range[1]),
+                                    (self.rect.width + (2 * self.hold_range[0]),
+                                     self.rect.height + (2 * self.hold_range[1])))
+            if hold_rect.collidepoint(position[0], position[1]):
+                return True
+        else:
+            return False
+
+    def rebuild_from_changed_theme_data(self):
+        """
+        Checks if any theming parameters have changed, and if so triggers a full rebuild of the button's drawable shape
+        """
+        has_any_changed = False
+
+        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        if font != self.font:
+            self.font = font
+            has_any_changed = True
+
+        colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                     self.element_ids, 'normal_bg'),
+                   'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                      self.element_ids, 'hovered_bg'),
+                   'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'disabled_bg'),
+                   'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'selected_bg'),
+                   'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                     self.element_ids, 'active_bg'),
+                   'normal_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'normal_text'),
+                   'hovered_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                        self.element_ids, 'hovered_text'),
+                   'disabled_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'disabled_text'),
+                   'selected_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'selected_text'),
+                   'active_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                       self.element_ids, 'active_text'),
+                   'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'normal_border'),
+                   'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                          self.element_ids, 'hovered_border'),
+                   'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                           self.element_ids, 'disabled_border'),
+                   'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                           self.element_ids, 'selected_border'),
+                   'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                         self.element_ids, 'active_border')}
+
+        if colours != self.colours:
+            self.colours = colours
+            has_any_changed = True
+
+        if self.set_any_images_from_theme():
+            has_any_changed = True
+
+        # misc
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
+        if shape_type_string is not None:
+            if shape_type_string in ['rectangle', 'ellipse', 'rounded_rectangle']:
+                if shape_type_string != self.shape_type:
+                    self.shape_type = shape_type_string
+                    has_any_changed = True
+
+        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                 self.element_ids, 'shape_corner_radius')
+        if shape_corner_radius_string is not None:
+            try:
+                corner_radius = int(shape_corner_radius_string)
+            except ValueError:
+                corner_radius = 2
+            if corner_radius != self.shape_corner_radius:
+                self.shape_corner_radius = corner_radius
+                has_any_changed = True
+
+        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'tool_tip_delay')
+        if tool_tip_delay_string is not None:
+            try:
+                tool_tip_delay = float(tool_tip_delay_string)
+            except ValueError:
+                tool_tip_delay = 1.0
+
+            if tool_tip_delay != self.tool_tip_delay:
+                self.tool_tip_delay = tool_tip_delay
+                has_any_changed = True
+
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = 0
+            if border_width != self.border_width:
+                self.border_width = border_width
+                has_any_changed = True
+
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = 0
+            if shadow_width != self.shadow_width:
+                self.shadow_width = shadow_width
+                has_any_changed = True
+
+        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
+        if text_horiz_alignment != self.text_horiz_alignment:
+            self.text_horiz_alignment = text_horiz_alignment
+            has_any_changed = True
+
+        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                   self.element_ids, 'text_horiz_alignment_padding')
+        if text_horiz_alignment_padding is not None:
+            try:
+                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
+            except ValueError:
+                text_horiz_alignment_padding = 1
+            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
+                self.text_horiz_alignment_padding = text_horiz_alignment_padding
+                has_any_changed = True
+
+        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
+        if text_vert_alignment != self.text_vert_alignment:
+            self.text_vert_alignment = text_vert_alignment
+            has_any_changed = True
+
+        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids, 'text_vert_alignment_padding')
+        if text_vert_alignment_padding is not None:
+            try:
+                text_vert_alignment_padding = int(text_vert_alignment_padding)
+            except ValueError:
+                text_vert_alignment_padding = 1
+            if text_vert_alignment_padding != self.text_vert_alignment_padding:
+                self.text_vert_alignment_padding = text_vert_alignment_padding
+                has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild_shape()
+
     def rebuild_shape(self):
+        """
+        A complete rebuild of the drawable shape used by this button.
+
+        """
         theming_parameters = {'normal_bg': self.colours['normal_bg'],
                               'normal_text': self.colours['normal_text'],
                               'normal_border': self.colours['normal_border'],
@@ -357,319 +562,23 @@ class UIButton(UIElement):
                               'shadow_width': self.shadow_width,
                               'font': self.font,
                               'text': self.text,
-                              'aligned_text_rect': self.aligned_text_rect}
-        self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                ['normal', 'hovered', 'disabled',
-                                                 'selected', 'active'], self.ui_manager)
+                              'text_horiz_alignment': self.text_horiz_alignment,
+                              'text_vert_alignment': self.text_vert_alignment,
+                              'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                              'text_vert_alignment_padding': self.text_vert_alignment_padding,
+                              'shape_corner_radius': self.shape_corner_radius}
+
+        if self.shape_type == 'rectangle':
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                    ['normal', 'hovered', 'disabled',
+                                                     'selected', 'active'], self.ui_manager)
+        elif self.shape_type == 'ellipse':
+            self.drawable_shape = EllipseDrawableShape(self.rect, theming_parameters,
+                                                       ['normal', 'hovered', 'disabled',
+                                                        'selected', 'active'], self.ui_manager)
+        elif self.shape_type == 'rounded_rectangle':
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ['normal', 'hovered', 'disabled',
+                                                         'selected', 'active'], self.ui_manager)
 
         self.image = self.drawable_shape.get_surface('normal')
-
-    # def redraw(self):
-    #     """
-    #     Redraws the button from data onto the underlying sprite's image. Only need to call this if something has
-    #     changed with the button (e.g. changed state or the text on it has changed)
-    #     """
-    #     if self.shadow_width > 0:
-    #         self.image = self.ui_manager.get_shadow(self.rect.size)
-    #     else:
-    #         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-    #
-    #     if self.border_width > 0:
-    #         border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-    #                                   (self.click_area_shape.width, self.click_area_shape.height))
-    #         if type(self.border_colour) == ColourGradient:
-    #             border_rect_shape_surface = pygame.Surface(border_rect.size)
-    #             border_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-    #             gradient_surface = self.border_colour.apply_gradient_to_surface(border_rect_shape_surface)
-    #             self.image.blit(border_rect_shape_surface, border_rect, special_flags=pygame.BLEND_RGBA_SUB)
-    #             self.image.blit(gradient_surface, border_rect)
-    #         else:
-    #             self.image.fill(self.border_colour, border_rect)
-    #
-    #     background_rect = pygame.Rect((self.border_width + self.shadow_width,
-    #                                    self.border_width + self.shadow_width),
-    #                                   (self.click_area_shape.width - (2 * self.border_width),
-    #                                    self.click_area_shape.height - (2 * self.border_width)))
-    #
-    #     if type(self.background_colour) == ColourGradient:
-    #         background_rect_shape_surface = pygame.Surface(background_rect.size)
-    #         background_rect_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-    #         gradient_surface = self.background_colour.apply_gradient_to_surface(background_rect_shape_surface)
-    #         self.image.blit(background_rect_shape_surface, background_rect, special_flags=pygame.BLEND_RGBA_SUB)
-    #         self.image.blit(gradient_surface, background_rect)
-    #     else:
-    #         self.image.fill(self.background_colour, background_rect)
-    #
-    #     if self.current_image is not None:
-    #         image_rect = self.current_image.get_rect()
-    #         image_rect.center = (self.rect.width/2, self.rect.height/2)
-    #         self.image.blit(self.current_image, image_rect)
-    #
-    #     if len(self.text) > 0:
-    #         self.text_surface = self.font.render(self.text, True, self.text_colour)
-    #     else:
-    #         self.text_surface = None
-    #
-    #     if self.text_surface is not None and self.aligned_text_rect is not None:
-    #         self.image.blit(self.text_surface, self.aligned_text_rect)
-
-    def check_pressed(self):
-        """
-        A direct way to check if this button has been pressed in the last update cycle.
-
-        :return: True if the button has been pressed.
-        """
-        return self.pressed
-
-    def disable(self):
-        """
-        Disables the button so that it is no longer interactive.
-        """
-        self.is_enabled = False
-        # self.text_colour = self.colours['disabled_text']
-        # self.background_colour = self.colours['disabled_bg']
-        # self.border_colour = self.colours['disabled_border']
-        # self.current_image = self.disabled_image
-        self.image = self.drawable_shape.get_surface('disabled')
-
-    def enable(self):
-        """
-        Re-enables the button so we can once again interact with it.
-        """
-        self.is_enabled = True
-        # self.text_colour = self.colours['normal_text']
-        # self.background_colour = self.colours['normal_bg']
-        # self.border_colour = self.colours['normal_border']
-        # self.current_image = self.normal_image
-        self.image = self.drawable_shape.get_surface('normal')
-
-    def set_active(self):
-        """
-        Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
-        state then redraws the button.
-        """
-        # self.text_colour = self.colours['active_text']
-        # self.background_colour = self.colours['active_bg']
-        # self.border_colour = self.colours['active_border']
-        # self.redraw()
-        self.image = self.drawable_shape.get_surface('active')
-
-    def set_inactive(self):
-        """
-        Called when we stop actively clicking on the button. Restores the colours to the default
-        state then redraws the button.
-        """
-        # self.text_colour = self.colours['normal_text']
-        # self.background_colour = self.colours['normal_bg']
-        # self.border_colour = self.colours['normal_border']
-        # self.redraw()
-        self.image = self.drawable_shape.get_surface('normal')
-
-    def select(self):
-        """
-        Called when we select focus this element. Changes the colours and image to the appropriate ones for the new
-        state then redraws the button.
-        """
-        self.is_selected = True
-        # self.text_colour = self.colours['selected_text']
-        # self.background_colour = self.colours['selected_bg']
-        # self.border_colour = self.colours['selected_border']
-        # self.current_image = self.selected_image
-        # self.redraw()
-        self.image = self.drawable_shape.get_surface('selected')
-
-    def unselect(self):
-        """
-        Called when we are no longer select focusing this element. Restores the colours and image to the default
-        state then redraws the button.
-        """
-        self.is_selected = False
-        # self.text_colour = self.colours['normal_text']
-        # self.background_colour = self.colours['normal_bg']
-        # self.border_colour = self.colours['normal_border']
-        # self.current_image = self.normal_image
-        # self.redraw()
-        self.image = self.drawable_shape.get_surface('normal')
-
-    def set_text(self, text: str):
-        """
-        Sets the text on the button. The button will redraw.
-
-        :param text: The new text to set.
-        """
-        if text != self.text:
-            self.text = text
-            # recompute aligned_text_rect before redraw
-            self.compute_aligned_text_rect()
-            self.drawable_shape.redraw_all_states()
-
-    def set_hold_range(self, xy_range: Tuple[int, int]):
-        """
-        Set x and y values, in pixels, around our button to use as the hold range for time when we want to drag a button
-        about but don't want it to slip out of our grasp too easily.
-
-        Imagine it as a large rectangle around our button, larger in all directions by whatever values we specify here.
-
-        :param xy_range: The x and y values used to create our larger 'holding' rectangle.
-        """
-        self.hold_range = xy_range
-
-    def in_hold_range(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
-        """
-        Imagines a potentially larger rectangle around our button in which range we still grip hold of our
-        button when moving the mouse. Makes it easier to use scrollbars.
-
-        :param position: The position we are testing.
-        :return bool: Returns True if our position is inside the hold range.
-        """
-        if self.click_area_shape.collidepoint(position[0], position[1]):
-            return True
-        elif self.hold_range[0] > 0 or self.hold_range[1] > 0:
-            hold_rect = pygame.Rect((self.rect.x - self.hold_range[0],
-                                     self.rect.y - self.hold_range[1]),
-                                    (self.rect.width + (2 * self.hold_range[0]),
-                                     self.rect.height + (2 * self.hold_range[1])))
-            if hold_rect.collidepoint(position[0], position[1]):
-                return True
-        else:
-            return False
-
-    def rebuild_from_changed_theme_data(self):
-        any_changed = False
-
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
-        if font != self.font:
-            self.font = font
-            any_changed = True
-
-        colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                     self.element_ids, 'normal_bg'),
-                   'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                      self.element_ids, 'hovered_bg'),
-                   'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids, 'disabled_bg'),
-                   'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids, 'selected_bg'),
-                   'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                     self.element_ids, 'active_bg'),
-                   'normal_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text'),
-                   'hovered_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'hovered_text'),
-                   'disabled_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'disabled_text'),
-                   'selected_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text'),
-                   'active_text': self.ui_theme.get_colour(self.object_ids, self.element_ids, 'active_text'),
-                   'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids, 'normal_border'),
-                   'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                          self.element_ids, 'hovered_border'),
-                   'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                           self.element_ids, 'disabled_border'),
-                   'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                           self.element_ids, 'selected_border'),
-                   'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids, 'active_border')}
-
-        if colours != self.colours:
-            self.colours = colours
-            any_changed = True
-
-        if self.set_any_images_from_theme():
-            any_changed = True
-
-        # misc
-        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'tool_tip_delay')
-        if tool_tip_delay_string is not None:
-            try:
-                tool_tip_delay = float(tool_tip_delay_string)
-            except ValueError:
-                tool_tip_delay = 1.0
-
-            if tool_tip_delay != self.tool_tip_delay:
-                self.tool_tip_delay = tool_tip_delay
-                any_changed = True
-
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 0
-            if border_width != self.border_width:
-                self.border_width = border_width
-                any_changed = True
-
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
-        if border_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 0
-            if shadow_width != self.shadow_width:
-                self.shadow_width = shadow_width
-                any_changed = True
-
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
-        if text_horiz_alignment != self.text_horiz_alignment:
-            self.text_horiz_alignment = text_horiz_alignment
-            any_changed = True
-
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids, 'text_horiz_alignment_padding')
-        if text_horiz_alignment_padding is not None:
-            try:
-                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
-            except ValueError:
-                text_horiz_alignment_padding = 1
-            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
-                self.text_horiz_alignment_padding = text_horiz_alignment_padding
-                any_changed = True
-
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
-        if text_vert_alignment != self.text_vert_alignment:
-            self.text_vert_alignment = text_vert_alignment
-            any_changed = True
-
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids, 'text_vert_alignment_padding')
-        if text_vert_alignment_padding is not None:
-            try:
-                text_vert_alignment_padding = int(text_vert_alignment_padding)
-            except ValueError:
-                text_vert_alignment_padding = 1
-            if text_vert_alignment_padding != self.text_vert_alignment_padding:
-                self.text_vert_alignment_padding = text_vert_alignment_padding
-                any_changed = True
-
-        if any_changed:
-            if not self.is_enabled:
-                self.text_colour = self.colours['disabled_text']
-                self.background_colour = self.colours['disabled_bg']
-                self.border_colour = self.colours['disabled_border']
-                self.current_image = self.disabled_image
-            elif self.hovered:
-                self.text_colour = self.colours['hovered_text']
-                self.background_colour = self.colours['hovered_bg']
-                self.border_colour = self.colours['hovered_border']
-                self.current_image = self.hovered_image
-            elif self.is_selected:
-                self.text_colour = self.colours['selected_text']
-                self.background_colour = self.colours['selected_bg']
-                self.border_colour = self.colours['selected_border']
-                self.current_image = self.selected_image
-            else:
-                self.text_colour = self.colours['normal_text']
-                self.background_colour = self.colours['normal_bg']
-                self.border_colour = self.colours['normal_border']
-                self.current_image = self.normal_image
-
-            if self.shadow_width > 0:
-                self.click_area_shape = pygame.Rect((self.rect.x + self.shadow_width,
-                                                     self.rect.y + self.shadow_width),
-                                                    (self.rect.width - (2 * self.shadow_width),
-                                                     self.rect.height - (2 * self.shadow_width)))
-            else:
-                self.click_area_shape = self.rect.copy()
-
-            # this helps us draw the text aligned
-            self.compute_aligned_text_rect()
-            # self.redraw()
-            self.rebuild_shape()

@@ -30,14 +30,16 @@ class UIWindow(UIElement):
         # need to create the container that holds the elements first if this is the root window
         # so we can bootstrap everything and effectively add the root window to it's own container.
         # It's a little bit weird.
+        starting_height = 1
         if len(element_ids) == 1 and element_ids[0] == 'root_window':
             self._layer = 0
             self.window_container = UIContainer(rect.copy(), manager, None, None, None)
             self.window_stack = manager.get_window_stack()
             self.window_stack.add_new_window(self)
+            starting_height = 0  # nothing to draw in the root window
 
         super().__init__(rect, manager, container=None,
-                         starting_height=1,
+                         starting_height=starting_height,
                          layer_thickness=1,
                          object_ids=new_object_ids,
                          element_ids=new_element_ids)
@@ -48,6 +50,7 @@ class UIWindow(UIElement):
             self.window_stack.add_new_window(self)
 
         self.image = self.image = pygame.Surface((0, 0))
+        self.bring_to_front_on_focused = True
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -56,8 +59,16 @@ class UIWindow(UIElement):
         :param event: The event to process.
         :return bool: Should return True if this element makes use fo this event.
         """
+        handled = False
         if self is not None:
-            return False
+            # by default we don't let mouse click events pass through windows to UI below them.
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 or event.button == 3:
+                    mouse_x, mouse_y = event.pos
+                    if self.rect.collidepoint(mouse_x, mouse_y):
+                        handled = True
+
+        return handled
 
     def check_clicked_inside(self, event: pygame.event.Event) -> bool:
         """
@@ -72,7 +83,8 @@ class UIWindow(UIElement):
             if event.button == 1:
                 mouse_x, mouse_y = event.pos
                 if self.rect.collidepoint(mouse_x, mouse_y):
-                    self.window_stack.move_window_to_front(self)
+                    if self.bring_to_front_on_focused:
+                        self.window_stack.move_window_to_front(self)
                     event_handled = True
         return event_handled
 

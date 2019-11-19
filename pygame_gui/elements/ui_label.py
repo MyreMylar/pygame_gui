@@ -5,11 +5,12 @@ from typing import Union
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.ui_appearance_theme import ColourGradient
 
 
 class UILabel(UIElement):
     """
-    A label lets us display a single line of text with a single font style. It's a quick to redraw and simple
+    A label lets us display a single line of text with a single font style. It's a quick to rebuild and simple
     alternative to the text box element.
 
     :param relative_rect: The rectangle that contains and positions the label relative to it's container.
@@ -55,9 +56,9 @@ class UILabel(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.redraw()
+            self.rebuild()
 
-    def redraw(self):
+    def rebuild(self):
         """
         Re-render the text to the label's underlying sprite image. This allows us to change what the displayed text is
         or remake it with different theming (if the theming has changed).
@@ -71,13 +72,28 @@ class UILabel(UIElement):
                                                                                                    height_overlap))
             warnings.warn(warn_text, UserWarning)
 
-        if self.bg_colour.a != 255 or self.shadow_enabled:
-            text_render = self.font.render(self.text, True, self.text_colour)
-        else:
-            text_render = self.font.render(self.text, True, self.text_colour, self.bg_colour)
-        text_render_rect = text_render.get_rect(centerx=self.rect.width/2, centery=self.rect.height/2)
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-        self.image.fill(self.bg_colour)
+
+        if type(self.bg_colour) != ColourGradient and type(self.text_colour) != ColourGradient:
+            self.image.fill(self.bg_colour)
+            if self.bg_colour.a != 255 or self.shadow_enabled:
+                text_render = self.font.render(self.text, True, self.text_colour)
+            else:
+                text_render = self.font.render(self.text, True, self.text_colour, self.bg_colour)
+        else:
+            if type(self.bg_colour) != ColourGradient:
+                self.image.fill(self.bg_colour)
+            else:
+                self.image.fill(pygame.Color('#FFFFFFFF'))
+                self.bg_colour.apply_gradient_to_surface(self.image)
+
+            if type(self.text_colour) != ColourGradient:
+                text_render = self.font.render(self.text, True, self.text_colour)
+            else:
+                text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+                self.text_colour.apply_gradient_to_surface(text_render)
+
+        text_render_rect = text_render.get_rect(centerx=self.rect.width / 2, centery=self.rect.height / 2)
 
         if self.shadow_enabled:
             shadow_text_render = self.font.render(self.text, True, self.text_shadow_colour)
@@ -116,12 +132,12 @@ class UILabel(UIElement):
             self.font = font
             any_changed = True
 
-        text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             any_changed = True
 
-        bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
         if bg_colour != self.bg_colour:
             self.bg_colour = bg_colour
             any_changed = True
@@ -164,4 +180,4 @@ class UILabel(UIElement):
                     any_changed = True
 
         if any_changed:
-            self.redraw()
+            self.rebuild()

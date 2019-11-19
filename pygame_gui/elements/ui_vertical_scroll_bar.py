@@ -1,10 +1,11 @@
 import pygame
-from typing import Union
+from typing import Union, Tuple
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.elements import ui_button
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
 class UIVerticalScrollBar(UIElement):
@@ -34,57 +35,52 @@ class UIVerticalScrollBar(UIElement):
                          object_ids=new_object_ids)
 
         self.button_height = 20
-        self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        self.scroll_position = 0.0
+        self.top_limit = 0.0
+        self.starting_grab_y_difference = 0
+        self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
+        self.start_percentage = 0.0
 
-        self.border_width = 0
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
-        if border_width_string is not None:
-            self.border_width = int(border_width_string)
+        self.grabbed_slider = False
+        self.has_moved_recently = False
+        self.scroll_wheel_up = False
+        self.scroll_wheel_down = False
 
-        self.shadow_width = 0
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
-        if shadow_width_string is not None:
-            self.shadow_width = int(shadow_width_string)
+        self.background_colour = None
+        self.border_colour = None
+        self.border_width = None
+        self.shadow_width = None
 
-        self.background_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
+        self.drawable_shape = None
+        self.shape_type = 'rectangle'
+        self.shape_corner_radius = None
 
-        if self.shadow_width > 0:
-            self.image = self.ui_manager.get_shadow(self.rect.size)
-        else:
-            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.background_rect = None
+        self.border_rect = None
+        self.relative_background_rect = None
 
-        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                  (self.rect.width - (2 * self.shadow_width),
-                                   self.rect.height - (2 * self.shadow_width)))
-        if self.border_width > 0:
-            self.image.fill(self.border_colour,
-                            border_rect)
+        self.scrollable_height = None  # type: Union[None, int, float]
+        self.bottom_limit = None
+        self.sliding_rect_position = None
 
-        relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                self.border_width + self.shadow_width),
-                                               (border_rect.width - (2 * self.border_width),
-                                                border_rect.height - (2 * self.border_width)))
+        self.top_button = None
+        self.bottom_button = None
+        self.sliding_button = None
 
-        background_rect = pygame.Rect((relative_background_rect.x + relative_rect.x,
-                                       relative_background_rect.y + relative_rect.y),
-                                      relative_background_rect.size)
-        self.image.fill(self.background_colour,
-                        relative_background_rect)
+        self.rebuild_from_changed_theme_data()
 
-        self.top_button = ui_button.UIButton(pygame.Rect(background_rect.topleft,
-                                                         (background_rect.width,
-                                                          self.button_height)),
+        self.top_button = ui_button.UIButton(pygame.Rect(self.background_rect.topleft,
+                                                         (self.background_rect.width, self.button_height)),
                                              '▲', self.ui_manager,
                                              container=self.ui_container,
                                              starting_height=2,
                                              parent_element=self,
                                              object_id="#top_button")
 
-        bottom_button_y = background_rect.y + background_rect.height - self.button_height
-        self.bottom_button = ui_button.UIButton(pygame.Rect((background_rect.x,
+        bottom_button_y = self.background_rect.y + self.background_rect.height - self.button_height
+        self.bottom_button = ui_button.UIButton(pygame.Rect((self.background_rect.x,
                                                              bottom_button_y),
-                                                            (background_rect.width,
+                                                            (self.background_rect.width,
                                                              self.button_height)),
                                                 '▼', self.ui_manager,
                                                 container=self.ui_container,
@@ -92,16 +88,9 @@ class UIVerticalScrollBar(UIElement):
                                                 parent_element=self,
                                                 object_id="#bottom_button")
 
-        self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
-        self.start_percentage = 0.0
-
-        self.sliding_rect_position = pygame.math.Vector2(background_rect.x,
-                                                         background_rect.y + self.button_height)
-
-        self.scrollable_height = background_rect.height - (2 * self.button_height)
         scroll_bar_height = int(self.scrollable_height * self.visible_percentage)
         self.sliding_button = ui_button.UIButton(pygame.Rect(self.sliding_rect_position,
-                                                             (background_rect.width,
+                                                             (self.background_rect.width,
                                                               scroll_bar_height)),
                                                  '', self.ui_manager,
                                                  container=self.ui_container,
@@ -109,19 +98,70 @@ class UIVerticalScrollBar(UIElement):
                                                  parent_element=self,
                                                  object_id="#sliding_button")
 
-        self.sliding_button.set_hold_range((100, background_rect.height))
+        self.sliding_button.set_hold_range((100, self.background_rect.height))
 
-        self.scroll_position = 0.0
-        self.top_limit = 0.0
+    def rebuild(self):
+        """
+        Rebuild anything that might need rebuilding.
+
+        """
+        self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                       (self.rect.width - (2 * self.shadow_width),
+                                        self.rect.height - (2 * self.shadow_width)))
+
+        self.relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                     self.border_width + self.shadow_width),
+                                                    (self.border_rect.width - (2 * self.border_width),
+                                                     self.border_rect.height - (2 * self.border_width)))
+
+        self.background_rect = pygame.Rect((self.relative_background_rect.x + self.relative_rect.x,
+                                            self.relative_background_rect.y + self.relative_rect.y),
+                                           self.relative_background_rect.size)
+
+        self.scrollable_height = self.background_rect.height - (2 * self.button_height)
         self.bottom_limit = self.scrollable_height
 
-        self.grabbed_slider = False
-        self.starting_grab_y_difference = 0
+        x_pos = self.relative_rect.x + self.shadow_width + self.border_width
+        y_pos = self.relative_rect.y + self.scroll_position + self.shadow_width + self.border_width + self.button_height
+        self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
-        self.has_moved_recently = False
+        theming_parameters = {'normal_bg': self.background_colour,
+                              'normal_border': self.border_colour,
+                              'border_width': self.border_width,
+                              'shadow_width': self.shadow_width,
+                              'shape_corner_radius': self.shape_corner_radius}
 
-        self.scroll_wheel_up = False
-        self.scroll_wheel_down = False
+        if self.shape_type == 'rectangle':
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                    ['normal'], self.ui_manager)
+        elif self.shape_type == 'rounded_rectangle':
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ['normal'], self.ui_manager)
+
+        self.image = self.drawable_shape.get_surface('normal')
+
+        if self.top_button is not None:
+            self.top_button.set_relative_position(self.background_rect.topleft),
+            self.top_button.set_dimensions((self.background_rect.width, self.button_height))
+
+        if self.bottom_button is not None:
+            bottom_button_y = self.background_rect.y + self.background_rect.height - self.button_height
+            self.bottom_button.set_relative_position((self.background_rect.x, bottom_button_y)),
+            self.bottom_button.set_dimensions((self.background_rect.width, self.button_height))
+
+        if self.sliding_button is not None:
+            scroll_bar_height = int(self.scrollable_height * self.visible_percentage)
+            self.sliding_button.set_relative_position(self.sliding_rect_position)
+            self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
+            self.sliding_button.set_hold_range((100, self.background_rect.height))
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        self.rect.x = position[0] + self.ui_container.rect.x
+        self.rect.y = position[1] + self.ui_container.rect.y
+        self.relative_rect.x = position[0]
+        self.relative_rect.y = position[1]
+
+        # we probably need to also set the positions of the buttons here
 
     def check_has_moved_recently(self) -> bool:
         """
@@ -291,3 +331,67 @@ class UIVerticalScrollBar(UIElement):
             self.start_percentage = 1.0 - self.visible_percentage
 
         self.redraw_scrollbar()
+
+    def rebuild_from_changed_theme_data(self):
+        """
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
+        the theme data has changed.
+        """
+        has_any_changed = False
+
+        shape_type = 'rectangle'
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
+        if shape_type_string is not None:
+            if shape_type_string in ['rectangle', 'rounded_rectangle']:
+                shape_type = shape_type_string
+        if shape_type != self.shape_type:
+            self.shape_type = shape_type
+            has_any_changed = True
+
+        corner_radius = 2
+        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                 self.element_ids, 'shape_corner_radius')
+        if shape_corner_radius_string is not None:
+            try:
+                corner_radius = int(shape_corner_radius_string)
+            except ValueError:
+                corner_radius = 2
+        if corner_radius != self.shape_corner_radius:
+            self.shape_corner_radius = corner_radius
+            has_any_changed = True
+
+        border_width = 1
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = 1
+
+        if border_width != self.border_width:
+            self.border_width = border_width
+            has_any_changed = True
+
+        shadow_width = 2
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = 2
+        if shadow_width != self.shadow_width:
+            self.shadow_width = shadow_width
+            has_any_changed = True
+
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        if background_colour != self.background_colour:
+            self.background_colour = background_colour
+            has_any_changed = True
+
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        if border_colour != self.border_colour:
+            self.border_colour = border_colour
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
