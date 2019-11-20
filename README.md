@@ -40,7 +40,7 @@ There is documentation available [here](https://pygame-gui.readthedocs.io/en/lat
 
 ## Screenshots of Pygame GUI
 
-![pygame_gui_example_1](https://user-images.githubusercontent.com/13382426/68039135-5bc57400-fcc3-11e9-88d6-d47c7c02e29d.png)
+![pygame_gui_example_1](https://user-images.githubusercontent.com/13382426/69264498-57ec8980-0bbf-11ea-9883-cac9c854615d.png)
 
 ![pygame_gui_example_2](https://user-images.githubusercontent.com/13382426/68039138-5cf6a100-fcc3-11e9-9620-0c5d86e58ade.png)
 
