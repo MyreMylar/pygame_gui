@@ -129,6 +129,8 @@ class UIManager:
                     for sprite in self.ui_group.sprites():
                         sprite.rebuild_from_changed_theme_data()
 
+        self.ui_theme.update_shape_cache()
+
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:

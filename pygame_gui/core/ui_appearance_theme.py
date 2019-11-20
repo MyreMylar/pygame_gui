@@ -66,6 +66,9 @@ class UIAppearanceTheme:
         # shadow generator
         self.shadow_generator = ShadowGenerator()
 
+        # shape cache
+        self.shape_cache = ShapeCache()
+
         # the font to use if no other font is specified
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         self.base_font_info = {'name': 'fira_code',
@@ -126,6 +129,9 @@ class UIAppearanceTheme:
             return True
         else:
             return False
+
+    def update_shape_cache(self):
+        self.shape_cache.update()
 
     def reload_theming(self):
         """
@@ -672,27 +678,6 @@ class ColourGradient:
         self.colour_2 = colour_2
         self.colour_3 = colour_3
 
-    def __eq__(self, other):
-        if type(other) != ColourGradient:
-            return False
-        return (self.colour_1 == other.colour_1 and
-                self.colour_2 == other.colour_2 and
-                self.colour_3 == other.colour_3 and
-                self.angle_direction == other.angle_direction)
-
-    def apply_gradient_to_surface(self, input_surface: pygame.Surface, rect=None):
-        """
-        Applies this gradient to a specified input surface using blending multiplication.
-        As a result this method works best when the input surface is a mostly white, stencil shape type surface.
-
-        :param input_surface:
-        :param rect: The rectangle on the surface to apply the gradient to.
-        """
-        input_surface_size = input_surface.get_size()
-        inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
-        gradient_size = inverse_rotated_input.get_rect().size
-
-        # create the initial 'pixel coloured' surface with a pixel for each colour
         if self.colour_3 is None:
             pixel_width = 2
             colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA)
@@ -705,19 +690,43 @@ class ColourGradient:
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
 
-        # create a surface large enough to overlap the input surface at any rotation angle
+        self.gradient_surface = pygame.transform.rotozoom(colour_pixels_surf, 0, 30)
+
+    def __eq__(self, other):
+        if type(other) != ColourGradient:
+            return False
+        return (self.colour_1 == other.colour_1 and
+                self.colour_2 == other.colour_2 and
+                self.colour_3 == other.colour_3 and
+                self.angle_direction == other.angle_direction)
+
+    def __str__(self):
+        result = (str(self.angle_direction) + '_' +
+                  str(self.colour_1.r) + '_' + str(self.colour_1.g) + '_' +
+                  str(self.colour_1.b) + '_' + str(self.colour_1.a) + '_' +
+                  str(self.colour_2.r) + '_' + str(self.colour_2.g) + '_' +
+                  str(self.colour_2.b) + '_' + str(self.colour_2.a))
+        if self.colour_3 is not None:
+            result += ('_' + str(self.colour_3.r) + '_' + str(self.colour_3.g) +
+                       '_' + str(self.colour_3.b) + '_' + str(self.colour_3.a))
+
+        return result
+
+    def apply_gradient_to_surface(self, input_surface: pygame.Surface, rect=None):
+        """
+        Applies this gradient to a specified input surface using blending multiplication.
+        As a result this method works best when the input surface is a mostly white, stencil shape type surface.
+
+        :param input_surface:
+        :param rect: The rectangle on the surface to apply the gradient to.
+        """
+        # scale the gradient up to the right size
+        input_surface_size = input_surface.get_size()
+        inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
+        gradient_size = inverse_rotated_input.get_rect().size
         gradient_surf = pygame.Surface(gradient_size, flags=pygame.SRCALPHA)
 
-        # scale the pixel surface to fill our new large, gradient surface
-        # pygame.transform.smoothscale Occasionally gives a 'Fatal Python error: PyEval_SaveThread: NULL tstate'
-        # which is apparently a threading issue with the GIL.
-        # pygame.transform.smoothscale(colour_pixels_surf, gradient_size, gradient_surf)
-        # Try this instead
-        scale = float(max(gradient_size[0] / pixel_width, gradient_size[1]))
-        zoomed_surf = pygame.transform.rotozoom(colour_pixels_surf, 0, scale)
-        pygame.transform.scale(zoomed_surf, gradient_size, gradient_surf)
-
-        # rotate the gradient surface to the correct angle for our gradient
+        pygame.transform.scale(self.gradient_surface, gradient_size, gradient_surf)
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
 
         if rect is not None:
@@ -727,3 +736,138 @@ class ColourGradient:
             gradient_placement_rect.center = (int(input_surface_size[0] / 2), int(input_surface_size[1] / 2))
 
             input_surface.blit(gradient_surf, gradient_placement_rect, special_flags=pygame.BLEND_RGBA_MULT)
+
+
+class ShapeCache:
+    def __init__(self):
+        self.cache_surface_size = (1024, 1024)
+        self.cache_surfaces = []
+        self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA)
+        self.current_surface.fill(pygame.Color('#00000000'))
+        self.cache_surfaces.append(self.current_surface)
+
+        self.free_space_rectangles = [pygame.Rect((0, 0), self.cache_surface_size)]
+
+        self.cache_long_term_lookup = {}
+        self.cache_short_term_lookup = {}
+
+    def add_surface_to_cache(self, surface, string_id):
+        self.cache_short_term_lookup[string_id] = surface.copy()
+
+    def update(self):
+        if any(self.cache_short_term_lookup):
+            string_id, surface = self.cache_short_term_lookup.popitem()
+            self.add_surface_to_long_term_cache(surface, string_id)
+
+    def add_surface_to_long_term_cache(self, surface, string_id):
+        surface_size = surface.get_size()
+        if surface_size > self.cache_surface_size:
+            warnings.warn('Unable to cache surfaces larger than ' + str(self.cache_surface_size))
+            return None
+        else:
+            found_rectangle_to_split = None
+            found_rectangle_cache = None
+
+            while found_rectangle_cache is None:
+                for free_rectangle in self.free_space_rectangles:
+                    if found_rectangle_cache is None and (free_rectangle.width >= surface_size[0] and
+                                                          free_rectangle.height >= surface_size[1]):
+                        # we fits, so we sits
+                        found_rectangle_to_split = free_rectangle
+                        found_rectangle_cache = pygame.Rect(free_rectangle.topleft, surface_size)
+                        self.current_surface.blit(surface, free_rectangle.topleft)
+                        self.cache_long_term_lookup[string_id] = self.current_surface.subsurface(found_rectangle_cache)
+                        break
+
+                if found_rectangle_to_split is not None and found_rectangle_cache is not None:
+                    self.split_rect(found_rectangle_to_split, found_rectangle_cache)
+                    # check if our new cached rect overlaps any others
+                    rects_to_split = []
+                    for rect in self.free_space_rectangles:
+                        if rect.colliderect(found_rectangle_cache):
+                            rects_to_split.append(rect)
+
+                    for split_rect in rects_to_split:
+                        self.split_rect(split_rect, found_rectangle_cache)
+
+                    # clean up rectangles entirely inside other rectangles
+                    rects_to_remove = []
+                    rectangles_to_check = [rectangle for rectangle in self.free_space_rectangles]
+                    for free_rectangle in self.free_space_rectangles:
+                        for check_rect in rectangles_to_check:
+                            if free_rectangle != check_rect:
+                                if check_rect.contains(free_rectangle):
+                                    rects_to_remove.append(free_rectangle)
+                    self.free_space_rectangles = [rect for rect in self.free_space_rectangles
+                                                  if rect not in rects_to_remove]
+
+                elif found_rectangle_to_split is None:
+                    # create a new cache surface
+                    self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA)
+                    self.current_surface.fill(pygame.Color('#00000000'))
+                    self.cache_surfaces.append(self.current_surface)
+                    self.free_space_rectangles = [pygame.Rect((0, 0), self.cache_surface_size)]
+
+            return True
+
+    def split_rect(self, found_rectangle_to_split, dividing_rect):
+        self.free_space_rectangles.remove(found_rectangle_to_split)
+
+        # create new rectangles
+        if (found_rectangle_to_split.right - dividing_rect.right) > 0:
+            rect_1 = pygame.Rect(dividing_rect.right,
+                                 found_rectangle_to_split.top,
+                                 found_rectangle_to_split.right - dividing_rect.right,
+                                 found_rectangle_to_split.height)
+            self.free_space_rectangles.append(rect_1)
+        if (found_rectangle_to_split.bottom - dividing_rect.bottom) > 0:
+            rect_2 = pygame.Rect(found_rectangle_to_split.left,
+                                 dividing_rect.bottom,
+                                 found_rectangle_to_split.width,
+                                 found_rectangle_to_split.bottom - dividing_rect.bottom)
+            self.free_space_rectangles.append(rect_2)
+        if (dividing_rect.top - found_rectangle_to_split.top) > 0:
+            rect_3 = pygame.Rect(found_rectangle_to_split.left,
+                                 found_rectangle_to_split.top,
+                                 found_rectangle_to_split.width,
+                                 dividing_rect.top - found_rectangle_to_split.top)
+            self.free_space_rectangles.append(rect_3)
+        if (dividing_rect.left - found_rectangle_to_split.left) > 0:
+            rect_4 = pygame.Rect(found_rectangle_to_split.left,
+                                 found_rectangle_to_split.top,
+                                 dividing_rect.left - found_rectangle_to_split.left,
+                                 found_rectangle_to_split.height)
+            self.free_space_rectangles.append(rect_4)
+
+    def find_surface_in_cache(self, lookup_id):
+        # check short term
+        if lookup_id in self.cache_short_term_lookup:
+            return self.cache_short_term_lookup[lookup_id]
+        # check long term
+        if lookup_id in self.cache_long_term_lookup:
+            return self.cache_long_term_lookup[lookup_id]
+        else:
+            return None
+
+    @staticmethod
+    def build_cache_id(shape, size, shadow_width, border_width, border_colour, bg_colour, corner_radius=None):
+
+        id_string = (shape + '_' + str(size[0]) + '_' + str(size[1]) + '_' +
+                     str(shadow_width) + '_' + str(border_width))
+
+        if corner_radius is not None:
+            id_string += '_' + str(corner_radius)
+
+        if type(border_colour) == ColourGradient:
+            id_string += '_' + str(border_colour)
+        else:
+            id_string += ('_' + str(border_colour.r) + '_' + str(border_colour.g) +
+                          '_' + str(border_colour.b) + '_' + str(border_colour.a))
+
+        if type(bg_colour) == ColourGradient:
+            id_string += '_' + str(bg_colour)
+        else:
+            id_string += ('_' + str(bg_colour.r) + '_' + str(bg_colour.g) +
+                          '_' + str(bg_colour.b) + '_' + str(bg_colour.a))
+
+        return id_string

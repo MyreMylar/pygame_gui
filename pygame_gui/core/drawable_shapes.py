@@ -1,10 +1,11 @@
 import math
 import warnings
+from collections import deque
 from typing import Dict, List, Union, Tuple
 
 import pygame
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.ui_appearance_theme import ColourGradient
+from pygame_gui.core.ui_appearance_theme import ColourGradient, ShapeCache
 from pygame.math import Vector2
 
 
@@ -14,6 +15,7 @@ class DrawableShape:
         self.theming = theming_parameters
         self.states = states
         self.ui_manager = manager
+        self.shape_cache = self.ui_manager.ui_theme.shape_cache
 
         self.aligned_text_rect = None
         self.click_area_shape = None
@@ -24,12 +26,26 @@ class DrawableShape:
                          'selected': None,
                          'active': None}  # type: Dict[str,Union[pygame.Surface, None]]
 
+        self.states_to_redraw_queue = deque([])
+
     def redraw_state(self, state_str):
         pass
 
-    def redraw_all_states(self):
-        for state in self.states:
+    def clean_up_temp_shapes(self):
+        pass
+
+    def update(self):
+        if len(self.states_to_redraw_queue) > 0:
+            state = self.states_to_redraw_queue.popleft()
             self.redraw_state(state)
+            if len(self.states_to_redraw_queue) == 0:
+                # last state so clean up
+                self.clean_up_temp_shapes()
+
+    def redraw_all_states(self):
+        self.states_to_redraw_queue = deque([state for state in self.states])
+        initial_state = self.states_to_redraw_queue.popleft()
+        self.redraw_state(initial_state)
 
     def compute_aligned_text_rect(self):
         """
@@ -68,7 +84,15 @@ class DrawableShape:
         pass
 
     def get_surface(self, surface_name):
-        return self.surfaces[surface_name]
+        if surface_name in self.surfaces:
+            if self.surfaces[surface_name] is not None:
+                return self.surfaces[surface_name]
+            elif self.surfaces['normal'] is not None:
+                return self.surfaces['normal']
+            else:
+                return pygame.Surface((0, 0))
+        else:
+            return pygame.Surface((0, 0))
 
     def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass
@@ -510,12 +534,23 @@ class RoundedRectangleShape(DrawableShape):
         self.aligned_text_rect = None
         self.base_surface = None
         self.corner_radius = None
+        self.temp_additive_shape = None
+        self.temp_subtractive_shape = None
+        self.temp_shadow_subtractive_shape = None
         self.full_rebuild_on_size_change()
+
+    def clean_up_temp_shapes(self):
+        self.temp_additive_shape = None
+        self.temp_subtractive_shape = None
+        self.temp_shadow_subtractive_shape = None
 
     def full_rebuild_on_size_change(self):
         # clamping border, shadow widths and corner radii so we can't form impossible shapes
         # having impossible values here will also mean the shadow pre-generating system fails leading to
         # slow down when creating elements
+        self.temp_additive_shape = None
+        self.temp_subtractive_shape = None
+        self.temp_shadow_subtractive_shape = None
         if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
                                               math.floor(self.containing_rect.height / 2)):
             old_width = self.theming['shadow_width']
@@ -675,131 +710,114 @@ class RoundedRectangleShape(DrawableShape):
         text_colour_state_str = state_str + '_text'
         image_state_str = state_str + '_image'
 
-        corner_radius = self.corner_radius
-        border_corner_radius = corner_radius
+        shape_id = self.shape_cache.build_cache_id('rounded_rectangle', self.containing_rect.size,
+                                                   self.theming['shadow_width'],
+                                                   self.theming['border_width'],
+                                                   self.theming[border_colour_state_str],
+                                                   self.theming[bg_colour_state_str], self.corner_radius)
 
-        self.surfaces[state_str] = self.base_surface.copy()
-
-        # Try one AA call method
-        aa = 4
-        self.border_rect = pygame.Rect((self.theming['shadow_width'] * aa,
-                                        self.theming['shadow_width'] * aa),
-                                       (self.click_area_shape.width * aa, self.click_area_shape.height * aa))
-
-        self.background_rect = pygame.Rect(((self.theming['border_width'] + self.theming['shadow_width']) * aa,
-                                            (self.theming['border_width'] + self.theming['shadow_width']) * aa),
-                                           (self.border_rect.width - (2 * self.theming['border_width'] * aa),
-                                            self.border_rect.height - (2 * self.theming['border_width'] * aa)))
-
-        dimension_scale = min(self.background_rect.width/self.border_rect.width,
-                              self.background_rect.height/self.border_rect.height)
-        bg_corner_radius = int(border_corner_radius * dimension_scale)
-
-        bab_surface = pygame.Surface((self.containing_rect.width * aa,
-                                      self.containing_rect.height * aa), flags=pygame.SRCALPHA)
-        bab_surface.fill(pygame.Color('#00000000'))
-        if self.theming['border_width'] > 0:
-            # If we have a border, draw it
-            # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
-            if type(self.theming[border_colour_state_str]) == ColourGradient:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
-                                                                    0, border_corner_radius, aa_amount=aa, clear=False)
-                self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
-                bab_surface.blit(shape_surface, self.border_rect)
-            else:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
-                                                                    0, border_corner_radius, aa_amount=aa, clear=False)
-                self.apply_colour_to_surface(self.theming[border_colour_state_str], shape_surface)
-                bab_surface.blit(shape_surface, self.border_rect)
-
-        # Next we draw the main background colour of the shape
-        # four paths here, 1. Drawing with a colour gradient 2. With a single colour.
-        # 3. Drawing bars with gradients. 4. Drawing bars with single colours.
-        if type(self.theming[bg_colour_state_str]) == ColourGradient:
-            shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
-                                                                0, bg_corner_radius, aa_amount=aa)
-
-            if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
-                bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
-                unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
-                                                 self.background_rect.height))
-
-                if type(self.theming['filled_bar']) == ColourGradient:
-                    self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
-                    self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
-                else:
-                    self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
-                    self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
-            else:
-                self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
-            bab_surface.blit(shape_surface, self.background_rect)
+        found_shape = self.shape_cache.find_surface_in_cache(shape_id)
+        if found_shape is not None:
+            self.surfaces[state_str] = found_shape.copy()
         else:
-            shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
-                                                                0, bg_corner_radius, aa_amount=aa)
-            if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
-                bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
-                unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
-                                                 self.background_rect.height))
+            corner_radius = self.corner_radius
+            border_corner_radius = corner_radius
 
-                if type(self.theming['filled_bar']) == ColourGradient:
-                    self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
-                    self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
+            self.surfaces[state_str] = self.base_surface.copy()
+
+            # Try one AA call method
+            aa = 4
+            self.border_rect = pygame.Rect((self.theming['shadow_width'] * aa,
+                                            self.theming['shadow_width'] * aa),
+                                           (self.click_area_shape.width * aa, self.click_area_shape.height * aa))
+
+            self.background_rect = pygame.Rect(((self.theming['border_width'] + self.theming['shadow_width']) * aa,
+                                                (self.theming['border_width'] + self.theming['shadow_width']) * aa),
+                                               (self.border_rect.width - (2 * self.theming['border_width'] * aa),
+                                                self.border_rect.height - (2 * self.theming['border_width'] * aa)))
+
+            dimension_scale = min(self.background_rect.width/self.border_rect.width,
+                                  self.background_rect.height/self.border_rect.height)
+            bg_corner_radius = int(border_corner_radius * dimension_scale)
+
+            bab_surface = pygame.Surface((self.containing_rect.width * aa,
+                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA)
+            bab_surface.fill(pygame.Color('#00000000'))
+            if self.theming['border_width'] > 0:
+                # If we have a border, draw it
+                # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
+                if type(self.theming[border_colour_state_str]) == ColourGradient:
+                    shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
+                                                                        0, border_corner_radius, aa_amount=aa, clear=False)
+                    self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
+                    bab_surface.blit(shape_surface, self.border_rect)
                 else:
-                    self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
-                    self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
+                    shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
+                                                                        0, border_corner_radius, aa_amount=aa, clear=False)
+                    self.apply_colour_to_surface(self.theming[border_colour_state_str], shape_surface)
+                    bab_surface.blit(shape_surface, self.border_rect)
+
+            # Next we draw the main background colour of the shape
+            # four paths here, 1. Drawing with a colour gradient 2. With a single colour.
+            # 3. Drawing bars with gradients. 4. Drawing bars with single colours.
+            if type(self.theming[bg_colour_state_str]) == ColourGradient:
+                shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
+                                                                    0, bg_corner_radius, aa_amount=aa)
+
+                if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
+                    bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
+                    unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
+                                                    (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
+                                                     self.background_rect.height))
+
+                    if type(self.theming['filled_bar']) == ColourGradient:
+                        self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
+                        self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
+                    else:
+                        self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
+                        self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
+                else:
+                    self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
+                bab_surface.blit(shape_surface, self.background_rect)
             else:
-                self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
-            bab_surface.blit(shape_surface, self.background_rect)
+                shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
+                                                                    0, bg_corner_radius, aa_amount=aa)
+                if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
+                    bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
+                    unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
+                                                    (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
+                                                     self.background_rect.height))
 
-        # apply AA to background
-        bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
+                    if type(self.theming['filled_bar']) == ColourGradient:
+                        self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
+                        self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
+                    else:
+                        self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
+                        self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
+                else:
+                    self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
+                bab_surface.blit(shape_surface, self.background_rect)
 
-        # cut a hole in shadow, then blit background into it
-        large_corner_radius = border_corner_radius * aa
-        sub_surface = pygame.Surface(((self.containing_rect.width - (2 * self.theming['shadow_width'])) * aa,
-                                      (self.containing_rect.height - (2 * self.theming['shadow_width'])) * aa),
-                                     flags=pygame.SRCALPHA)
-        pygame.draw.circle(sub_surface, pygame.Color('#FFFFFFFF'),
-                           (large_corner_radius, large_corner_radius), large_corner_radius)
-        sub_surface.fill(pygame.Color('#00000000'),
-                         pygame.Rect(large_corner_radius, 0,
-                                     sub_surface.get_width() - large_corner_radius,
-                                     sub_surface.get_height()))
-        sub_surface.fill(pygame.Color('#00000000'),
-                         pygame.Rect(0, large_corner_radius,
-                                     sub_surface.get_width(),
-                                     sub_surface.get_height() - large_corner_radius))
+            # clear space in shadow for background
+            if self.theming['shadow_width'] > 0:
+                # we want our shadow clear shape to be a little bigger than the background ideally at the curvy parts
+                large_sub = self.create_shadow_subtract_surface(self.border_rect.size, corner_radius * aa, aa)
+                small_sub = pygame.transform.smoothscale(large_sub, self.click_area_shape.size)
 
-        x_flip = pygame.transform.flip(sub_surface, True, False)
-        sub_surface.blit(x_flip, (0, 0))
-        y_flip = pygame.transform.flip(sub_surface, False, True)
-        sub_surface.blit(y_flip, (0, 0))
-
-        sub_surface.fill(pygame.Color("#FFFFFFFF"),
-                         pygame.Rect((large_corner_radius, 0),
-                                     (sub_surface.get_width() - (2 * large_corner_radius),
-                                      sub_surface.get_height())))
-        sub_surface.fill(pygame.Color("#FFFFFFFF"),
-                         pygame.Rect((0, large_corner_radius),
-                                     (sub_surface.get_width(),
-                                      sub_surface.get_height() - (2 * large_corner_radius))))
-
-        small_sub = pygame.transform.smoothscale(sub_surface,
-                                                 (self.containing_rect.width - (2 * self.theming['shadow_width']),
-                                                  self.containing_rect.height - (2 * self.theming['shadow_width'])))
-        self.surfaces[state_str].blit(small_sub, pygame.Rect((self.theming['shadow_width'],
+                if small_sub is not None:
+                    self.surfaces[state_str].blit(small_sub, (self.theming['shadow_width'],
                                                               self.theming['shadow_width']),
-                                                             sub_surface.get_size()),
-                                      special_flags=pygame.BLEND_RGBA_SUB)
+                                                  special_flags=pygame.BLEND_RGBA_SUB)
 
-        self.surfaces[state_str].blit(bab_surface, (0, 0))
+            # apply AA to background
+            bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
+            self.surfaces[state_str].blit(bab_surface, (0, 0))
+
+            self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
-    @staticmethod
-    def clear_and_create_shape_surface(surface, rect, overlap, corner_radius, aa_amount, clear=True) -> pygame.Surface:
+    def clear_and_create_shape_surface(self, surface, rect, overlap, corner_radius, aa_amount, clear=True) -> pygame.Surface:
         """
         Clear a space for a new shape surface on the main state surface for this state. The surface created will be
         plain white so that it can be easily multiplied with a colour surface.
@@ -821,29 +839,72 @@ class RoundedRectangleShape(DrawableShape):
         large_corner_radius = corner_radius * aa_amount
 
         # For the visible AA shape surface we only want to blend in the alpha channel
-        large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA)
-        large_shape_surface.fill(pygame.Color('#FFFFFF00'))
-
-        RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface)
+        if self.temp_additive_shape is None:
+            large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA)
+            large_shape_surface.fill(pygame.Color('#FFFFFF00'))  # was:
+            RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface)
+            self.temp_additive_shape = large_shape_surface.copy()
+        else:
+            large_shape_surface = pygame.transform.scale(self.temp_additive_shape, (rect.width, rect.height))
 
         if clear:
             # before we draw a shape we clear a space for it, to allow for transparency.
             # This works best if we leave a small overlap between the old background and the new shape
             subtract_rect = pygame.Rect(rect.x + (overlap * aa_amount),
                                         rect.y + (overlap * aa_amount),
-                                        rect.width - 2 * (overlap * aa_amount),
-                                        rect.height - 2 * (overlap * aa_amount))
-            # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height), flags=pygame.SRCALPHA)
-            large_sub_surface.fill(pygame.Color('#00000000'))
+                                        rect.width - (2 * overlap * aa_amount),
+                                        rect.height - (2 * overlap * aa_amount))
 
-            RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius, large_sub_surface)
+            if subtract_rect.width > 0 and subtract_rect.height > 0:
+                if self.temp_subtractive_shape is None:
+                    large_sub_surface = self.create_subtract_surface(subtract_rect.size,
+                                                                     large_corner_radius, aa_amount)
+                    self.temp_subtractive_shape = large_sub_surface
+                else:
+                    large_sub_surface = pygame.transform.scale(self.temp_subtractive_shape, subtract_rect.size)
 
-            surface.blit(large_sub_surface, subtract_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                if large_sub_surface is not None:
+                    surface.blit(large_sub_surface, subtract_rect, special_flags=pygame.BLEND_RGBA_SUB)
+
         return large_shape_surface
 
+    def create_subtract_surface(self, subtract_size, corner_radius, aa_amount):
+        if subtract_size[0] > 0 and subtract_size[1] > 0:
+            if self.temp_subtractive_shape is None:
+                # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
+                self.temp_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA)
+                self.temp_subtractive_shape.fill(pygame.Color('#00000000'))
+                RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radius,
+                                                                        self.temp_subtractive_shape,
+                                                                        clear_colour_string='#00000000',
+                                                                        corner_offset=int(aa_amount/2))
+                large_sub_surface = self.temp_subtractive_shape
+            else:
+                large_sub_surface = pygame.transform.scale(self.temp_subtractive_shape, subtract_size)
+
+            return large_sub_surface
+        return None
+
+    def create_shadow_subtract_surface(self, subtract_size, corner_radius, aa_amount):
+        if subtract_size[0] > 0 and subtract_size[1] > 0:
+            if self.temp_shadow_subtractive_shape is None:
+                # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
+                self.temp_shadow_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA)
+                self.temp_shadow_subtractive_shape.fill(pygame.Color('#00000000'))
+                RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radius,
+                                                                        self.temp_shadow_subtractive_shape,
+                                                                        clear_colour_string='#00000000',
+                                                                        corner_offset=int(-aa_amount/4))
+                large_sub_surface = self.temp_shadow_subtractive_shape
+            else:
+                large_sub_surface = pygame.transform.scale(self.temp_shadow_subtractive_shape, subtract_size)
+
+            return large_sub_surface
+        return None
+
     @staticmethod
-    def draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface):
+    def draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface,
+                                          clear_colour_string='#FFFFFF00', corner_offset=0):
         """
         TODO: We should be able to make this faster in Pygame 2 with the new rounded rectangle drawing functions.
 
@@ -852,7 +913,20 @@ class RoundedRectangleShape(DrawableShape):
         :return:
         """
         pygame.draw.circle(large_shape_surface, pygame.Color('#FFFFFFFF'),
-                           (large_corner_radius, large_corner_radius), large_corner_radius)
+                           (large_corner_radius + corner_offset,
+                            large_corner_radius + corner_offset), large_corner_radius)
+        if corner_offset > 0:
+            large_shape_surface.fill(pygame.Color(clear_colour_string),
+                                     pygame.Rect(0,
+                                                 int(large_shape_surface.get_height()/2),
+                                                 large_shape_surface.get_width(),
+                                                 int(large_shape_surface.get_height()/2)))
+            large_shape_surface.fill(pygame.Color(clear_colour_string),
+                                     pygame.Rect(int(large_shape_surface.get_width() / 2),
+                                                 0,
+                                                 int(large_shape_surface.get_width() / 2),
+                                                 large_shape_surface.get_height()))
+
         x_flip = pygame.transform.flip(large_shape_surface, True, False)
         large_shape_surface.blit(x_flip, (0, 0))
         y_flip = pygame.transform.flip(large_shape_surface, False, True)

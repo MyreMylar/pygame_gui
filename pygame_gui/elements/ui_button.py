@@ -208,6 +208,10 @@ class UIButton(UIElement):
                 self.pressed_event = False
                 self.pressed = True
 
+            # Need to update any shape with more than one state so it loads them all.
+            if self.drawable_shape is not None:
+                self.drawable_shape.update()
+
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the relative rect position of a button.
