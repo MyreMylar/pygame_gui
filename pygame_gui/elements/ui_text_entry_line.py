@@ -7,6 +7,8 @@ from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.ui_appearance_theme import ColourGradient
 
 
 class UITextEntryLine(UIElement):
@@ -47,37 +49,32 @@ class UITextEntryLine(UIElement):
                          object_ids=new_object_ids)
         self.selected = False
 
-        # theme font
-        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
-
-        # colours from theme
-        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
-        self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
-        self.selected_text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text')
-        self.selected_bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
-
-        # misc data from the theme
-        border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
-        if border_width_str is None:
-            self.border_width = 1
-        else:
-            self.border_width = int(border_width_str)
-
-        self.shadow_width = 1
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
-        if shadow_width_string is not None:
-            self.shadow_width = int(shadow_width_string)
-
         self.text = ""
 
-        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
-        if padding_str is None:
-            self.horiz_line_padding = 4
-            self.vert_line_padding = 2
-        else:
-            self.horiz_line_padding = int(padding_str.split(',')[0])
-            self.vert_line_padding = int(padding_str.split(',')[1])
+        # theme font
+        self.font = None
+
+        self.shadow_width = None
+        self.border_width = None
+        self.horiz_line_padding = None
+        self.vert_line_padding = None
+        self.text_surface = None
+        self.cursor = None
+        self.background_and_border = None
+        self.text_image_rect = None
+        self.text_image = None
+
+        # colours from theme
+        self.background_colour = None
+        self.text_colour = None
+        self.selected_text_colour = None
+        self.selected_bg_colour = None
+        self.border_colour = None
+        self.padding = None
+
+        self.drawable_shape = None
+        self.shape_type = 'rectangle'
+        self.shape_corner_radius = None
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache
@@ -89,6 +86,7 @@ class UITextEntryLine(UIElement):
         self.double_click_select_time = 0.4
         self.double_click_select_time_acc = 0.0
 
+        self.start_text_offset = 0
         self.edit_position = 0
         self.select_range = [0, 0]
         self.selection_in_progress = False
@@ -102,42 +100,55 @@ class UITextEntryLine(UIElement):
         self.forbidden_characters = None
         self.length_limit = None
 
-        # setup for drawing
-        self.text_surface = self.font.render(self.text, True, self.text_colour)
-        line_height = self.text_surface.get_rect().height
+        self.rebuild_from_changed_theme_data()
+
+    def rebuild(self):
+        """
+        Rebuild whatever needs building.
+
+        """
+        line_height = self.font.size(' ')[1]
 
         self.relative_rect.height = (line_height + (2 * self.vert_line_padding) +
                                      (2 * self.border_width) + (2 * self.shadow_width))
         self.rect.height = self.relative_rect.height
 
-        self.cursor = pygame.Rect((self.text_surface.get_rect().right + 2,
-                                   self.vert_line_padding + self.border_width + self.shadow_width),
-                                  (1, line_height))
+        self.text_image_rect = pygame.Rect((self.border_width + self.shadow_width + self.shape_corner_radius,
+                                            self.border_width + self.shadow_width),
+                                           (self.rect.width - (self.border_width * 2) - (self.shadow_width * 2) -
+                                            (2 * self.shape_corner_radius),
+                                            self.rect.height - (self.border_width * 2) - (self.shadow_width * 2)))
 
-        if self.shadow_width > 0:
-            self.background_and_border = self.ui_manager.get_shadow(self.rect.size)
+        theming_parameters = {'normal_bg': self.background_colour,
+                              'normal_border': self.border_colour,
+                              'border_width': self.border_width,
+                              'shadow_width': self.shadow_width,
+                              'shape_corner_radius': self.shape_corner_radius}
+
+        if self.shape_type == 'rectangle':
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                    ['normal'], self.ui_manager)
+        elif self.shape_type == 'rounded_rectangle':
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ['normal'], self.ui_manager)
+
+        self.background_and_border = self.drawable_shape.get_surface('normal')
+
+        self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA)
+        if type(self.background_colour) == ColourGradient:
+            self.text_image.fill(pygame.Color("#FFFFFFFF"))
+            self.background_colour.apply_gradient_to_surface(self.text_image)
         else:
-            self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-
-        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                  (self.rect.width - (2 * self.shadow_width),
-                                   self.rect.height - (2 * self.shadow_width)))
-        self.background_and_border.fill(self.border_colour, border_rect)
-
-        background_and_border_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                  self.border_width + self.shadow_width),
-                                                 (self.rect.width - (self.border_width * 2) -
-                                                  (self.shadow_width * 2),
-                                                  self.rect.height - (self.border_width * 2) -
-                                                  (self.shadow_width * 2)))
-
-        self.background_and_border.fill(self.bg_colour, background_and_border_rect)
-        self.text_image = pygame.Surface(background_and_border_rect.size, flags=pygame.SRCALPHA)
-        self.text_image.fill(self.bg_colour)
+            self.text_image.fill(self.background_colour)
 
         self.image = self.background_and_border.copy()
-        self.start_text_offset = 0
 
+        self.cursor = pygame.Rect((self.text_image_rect.x +
+                                   self.horiz_line_padding - self.start_text_offset,
+                                   self.text_image_rect.y +
+                                   self.vert_line_padding), (1, line_height))
+
+        # setup for drawing
         self.redraw()
 
     def set_text_length_limit(self, limit: int):
@@ -177,7 +188,11 @@ class UITextEntryLine(UIElement):
         Redraws the entire text entry element onto the underlying sprite image. Usually called when the displayed text
         has been edited or changed in some fashion.
         """
-        self.text_image.fill(self.bg_colour)
+        if type(self.background_colour) == ColourGradient:
+            self.text_image.fill(pygame.Color("#FFFFFFFF"))
+            self.background_colour.apply_gradient_to_surface(self.text_image)
+        else:
+            self.text_image.fill(self.background_colour)
         if self.select_range[0] != self.select_range[1]:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
@@ -189,15 +204,45 @@ class UITextEntryLine(UIElement):
             post_select_area_surface = None
 
             if len(pre_select_area_text) > 0:
-                pre_select_area_surface = self.font.render(pre_select_area_text, True, self.text_colour)
+                if type(self.text_colour) != ColourGradient:
+                    pre_select_area_surface = self.font.render(pre_select_area_text, True, self.text_colour)
+                else:
+                    pre_select_area_surface = self.font.render(pre_select_area_text, True, pygame.Color('#FFFFFFFF'))
+                    self.text_colour.apply_gradient_to_surface(pre_select_area_surface)
                 width_pre = pre_select_area_surface.get_rect().width
             else:
                 width_pre = 0
 
-            select_area_surface = self.font.render(select_area_text, True,
-                                                   self.selected_text_colour, self.selected_bg_colour)
+            if type(self.selected_bg_colour) == ColourGradient:
+                select_size = self.font.size(select_area_text)
+                select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA)
+                select_area_surface.fill(pygame.Color('#FFFFFFFF'))
+                self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
+                if type(self.selected_text_colour) != ColourGradient:
+                    alpha_text = self.font.render(select_area_text, True, self.selected_text_colour)
+                else:
+                    alpha_text = self.font.render(select_area_text, True, pygame.Color('#FFFFFFFF'))
+                    self.selected_text_colour.apply_gradient_to_surface(alpha_text)
+                select_area_surface.blit(alpha_text, (0, 0))
+            else:
+                if type(self.selected_text_colour) != ColourGradient:
+                    select_area_surface = self.font.render(select_area_text, True,
+                                                           self.selected_text_colour, self.selected_bg_colour)
+                else:
+                    select_size = self.font.size(select_area_text)
+                    select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA)
+                    select_area_surface.fill(self.selected_bg_colour)
+
+                    alpha_text = self.font.render(select_area_text, True, pygame.Color('#FFFFFFFF'))
+                    self.selected_text_colour.apply_gradient_to_surface(alpha_text)
+                    select_area_surface.blit(alpha_text, (0, 0))
+
             if len(post_select_area_text) > 0:
-                post_select_area_surface = self.font.render(post_select_area_text, True, self.text_colour)
+                if type(self.text_colour) != ColourGradient:
+                    post_select_area_surface = self.font.render(post_select_area_text, True, self.text_colour)
+                else:
+                    post_select_area_surface = self.font.render(post_select_area_text, True, pygame.Color('#FFFFFFFF'))
+                    self.text_colour.apply_gradient_to_surface(post_select_area_surface)
                 width_post = post_select_area_surface.get_rect().width
             else:
                 width_post = 0
@@ -207,16 +252,24 @@ class UITextEntryLine(UIElement):
 
             self.text_surface = pygame.Surface((width_pre + width_select + width_post, text_height),
                                                flags=pygame.SRCALPHA)
-            self.text_surface.fill(self.bg_colour)
+            if type(self.background_colour) == ColourGradient:
+                self.text_image.fill(pygame.Color("#FFFFFFFF"))
+                self.background_colour.apply_gradient_to_surface(self.text_image)
+            else:
+                self.text_image.fill(self.background_colour)
             if pre_select_area_surface is not None:
                 self.text_surface.blit(pre_select_area_surface, (0, 0))
             self.text_surface.blit(select_area_surface, (width_pre, 0))
             if post_select_area_surface is not None:
                 self.text_surface.blit(post_select_area_surface, (width_pre+width_select, 0))
         else:
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
+            if type(self.text_colour) != ColourGradient:
+                self.text_surface = self.font.render(self.text, True, self.text_colour)
+            else:
+                self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+                self.text_colour.apply_gradient_to_surface(self.text_surface)
 
-        text_clip_width = (self.rect.width - (self.horiz_line_padding * 2) -
+        text_clip_width = (self.rect.width - (self.horiz_line_padding * 2) - (self.shape_corner_radius * 2) -
                            (self.border_width * 2) - (self.shadow_width * 2))
         text_clip_height = (self.rect.height - (self.vert_line_padding * 2) -
                             (self.border_width * 2) - (self.shadow_width * 2))
@@ -255,14 +308,20 @@ class UITextEntryLine(UIElement):
         redrawing all the text.
         """
         self.image = self.background_and_border.copy()
-        self.image.blit(self.text_image, (self.border_width + self.shadow_width,
-                                          self.border_width + self.shadow_width))
+        self.image.blit(self.text_image, self.text_image_rect)
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
-            self.cursor.x = (cursor_size[0] + self.border_width + self.shadow_width +
+            self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
                              self.horiz_line_padding - self.start_text_offset)
-            pygame.draw.rect(self.image, self.text_colour, self.cursor)
+
+            if type(self.text_colour) != ColourGradient:
+                pygame.draw.rect(self.image, self.text_colour, self.cursor)
+            else:
+                cursor_surface = pygame.Surface(self.cursor.size)
+                cursor_surface.fill(pygame.Color('#FFFFFFFF'))
+                self.text_colour.apply_gradient_to_surface(cursor_surface)
+                self.image.blit(cursor_surface, self.cursor)
 
     def update(self, time_delta: float):
         """
@@ -535,7 +594,8 @@ class UITextEntryLine(UIElement):
 
         :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling offscreen.
         """
-        start_pos = self.rect.x + self.border_width + self.shadow_width + self.horiz_line_padding
+        start_pos = (self.rect.x + self.border_width + self.shadow_width +
+                     self.shape_corner_radius + self.horiz_line_padding)
         acc_pos = start_pos
         index = 0
         for char in self.text:
@@ -604,3 +664,104 @@ class UITextEntryLine(UIElement):
                     is_valid = False
 
         return is_valid
+
+    def rebuild_from_changed_theme_data(self):
+        """
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
+        the theme data has changed.
+        """
+        has_any_changed = False
+
+        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        if font != self.font:
+            self.font = font
+            has_any_changed = True
+
+        shape_type = 'rectangle'
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
+        if shape_type_string is not None:
+            if shape_type_string in ['rectangle', 'rounded_rectangle']:
+                shape_type = shape_type_string
+        if shape_type != self.shape_type:
+            self.shape_type = shape_type
+            has_any_changed = True
+
+        corner_radius = 2
+        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                 self.element_ids, 'shape_corner_radius')
+        if shape_corner_radius_string is not None:
+            try:
+                corner_radius = int(shape_corner_radius_string)
+            except ValueError:
+                corner_radius = 2
+        if corner_radius != self.shape_corner_radius:
+            self.shape_corner_radius = corner_radius
+            has_any_changed = True
+
+        border_width = 1
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = 1
+
+        if border_width != self.border_width:
+            self.border_width = border_width
+            has_any_changed = True
+
+        shadow_width = 2
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = 2
+        if shadow_width != self.shadow_width:
+            self.shadow_width = shadow_width
+            has_any_changed = True
+
+        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
+        if padding_str is None:
+            horiz_line_padding = 2
+            vert_line_padding = 2
+        else:
+            try:
+                horiz_line_padding = int(padding_str.split(',')[0])
+                vert_line_padding = int(padding_str.split(',')[1])
+            except ValueError:
+                horiz_line_padding = 2
+                vert_line_padding = 2
+
+        if horiz_line_padding != self.horiz_line_padding or vert_line_padding != self.vert_line_padding:
+            self.vert_line_padding = vert_line_padding
+            self.horiz_line_padding = horiz_line_padding
+            has_any_changed = True
+
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        if background_colour != self.background_colour:
+            self.background_colour = background_colour
+            has_any_changed = True
+
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        if border_colour != self.border_colour:
+            self.border_colour = border_colour
+            has_any_changed = True
+
+        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_text')
+        if text_colour != self.text_colour:
+            self.text_colour = text_colour
+            has_any_changed = True
+
+        selected_text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'selected_text')
+        if selected_text_colour != self.selected_text_colour:
+            self.selected_text_colour = selected_text_colour
+            has_any_changed = True
+
+        selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'selected_bg')
+        if selected_bg_colour != self.selected_bg_colour:
+            self.selected_bg_colour = selected_bg_colour
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()

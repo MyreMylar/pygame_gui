@@ -206,3 +206,6 @@ class UIElement(pygame.sprite.Sprite):
         A stub to override. Called when we stop select focusing this UI element.
         """
         pass
+
+    def rebuild_from_changed_theme_data(self):
+        pass

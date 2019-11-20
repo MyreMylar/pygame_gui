@@ -39,14 +39,14 @@ class UITooltip(UIElement):
                          element_ids=new_element_ids,
                          object_ids=new_object_ids)
 
-        rect_width = 170
-        rect_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'rect_width')
-        if rect_width_string is not None:
-            rect_width = int(rect_width_string)
-
+        self.text_block = None
+        self.rect_width = None
         self.hover_distance_from_target = hover_distance
+
+        self.rebuild_from_changed_theme_data()
+
         self.text_block = ui_text_box.UITextBox(html_text,
-                                                pygame.Rect(0, 0, rect_width, -1),
+                                                pygame.Rect(0, 0, self.rect_width, -1),
                                                 manager=self.ui_manager,
                                                 layer_starting_height=self._layer+1,
                                                 parent_element=self)
@@ -57,6 +57,19 @@ class UITooltip(UIElement):
         self.rect.height = self.text_block.rect.height
         # Get a shadow from the shadow generator
         self.image = pygame.Surface((0, 0))
+
+    def rebuild(self):
+        """
+        Rebuild anything that might need rebuilding.
+
+        """
+        if self.text_block is not None:
+            self.text_block.set_dimensions((self.rect_width, -1))
+
+            self.relative_rect.height = self.text_block.rect.height
+            self.relative_rect.width = self.text_block.rect.width
+            self.rect.width = self.text_block.rect.width
+            self.rect.height = self.text_block.rect.height
 
     def kill(self):
         """
@@ -104,3 +117,25 @@ class UITooltip(UIElement):
             return True
         else:
             return False
+
+    def rebuild_from_changed_theme_data(self):
+        """
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
+        the theme data has changed.
+        """
+        has_any_changed = False
+
+        rect_width = 170
+        rect_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'rect_width')
+        if rect_width_string is not None:
+            try:
+                rect_width = int(rect_width_string)
+            except ValueError:
+                rect_width = 170
+
+        if rect_width != self.rect_width:
+            self.rect_width = rect_width
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
