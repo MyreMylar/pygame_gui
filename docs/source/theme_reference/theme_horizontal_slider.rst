@@ -3,11 +3,10 @@
 UIHorizontalSlider Theming Parameters
 =====================================
 
-.. video:: _static/horizontal_slider.mp4
+.. video:: _static/html/horizontal_slider.mp4
    :width: 340
    :height: 64
-   :autoplay:
-   :nocontrols:
+
 
 The :class:`UIHorizontalSlider <.UIHorizontalSlider>` theming block id is 'horizontal_slider'.
 

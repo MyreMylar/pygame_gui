@@ -50,7 +50,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
     'sphinx_rtd_theme',
-    'sphinxcontrib.video',
+    'sphinxcontrib.youtube',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
