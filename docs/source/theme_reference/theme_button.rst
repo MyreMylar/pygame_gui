@@ -3,6 +3,13 @@
 UIButton Theming Parameters
 ===========================
 
+.. raw:: html
+
+    <video width="140" height="60" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/button.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UIButton <.UIButton>` theming block id is 'button'.
 
 Colours
