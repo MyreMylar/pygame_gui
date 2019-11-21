@@ -78,6 +78,7 @@ Table of contents
    quick_start
    theme_guide
    events
+   text_effects
    modules
 
 
