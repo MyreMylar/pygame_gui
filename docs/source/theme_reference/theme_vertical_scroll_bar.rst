@@ -8,16 +8,19 @@ The :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` theming block id is 'ver
 Colours
 -------
 
-:class:`UIVerticalScrollBar <.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block:
+:class:`UIVerticalScrollBar <.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block. All of these colours can
+also be a colour gradient:
 
- - "**dark_bg**" - The background colour of the 'back' of the scroll bar, the colour of the track that the scroll bar moves along.
- - "**normal_border**" - The colour of the border around the scroll bar.
+ - "**dark_bg**" - The background colour/gradient of the 'back' of the scroll bar, the colour of the track that the scroll bar moves along.
+ - "**normal_border**" - The colour/gradient of the border around the scroll bar.
 
 Misc
 ----
 
 :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` accepts the following miscellaneous parameters in a 'misc' block:
 
+ - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
 

@@ -8,20 +8,23 @@ The :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` theming block id i
 Colours
 -------
 
-:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
+:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block. Most of these colours can
+also be a colour gradient:
 
- - "**normal_bg**" - The background colour of the health bar.
- - "**normal_text**" - The colour of the health bars's text.
+ - "**normal_bg**" - The background colour/gradient of the health bar.
+ - "**normal_text**" - The colour/gradient of the health bars's text.
  - "**text_shadow**" - The colour of the shadow behind the text (so it stands out better).
- - "**normal_border**" - The colour of the border around the health bar.
- - "**filled_bar**" - The colour of the actual bar itself, of the portion of it that is still full.
- - "**unfilled_bar**" - The colour of an empty portion of the health bar.
+ - "**normal_border**" - The colour/gradient of the border around the health bar.
+ - "**filled_bar**" - The colour/gradient of the actual bar itself, of the portion of it that is still full.
+ - "**unfilled_bar**" - The colour/gradient of an empty portion of the health bar.
 
 Misc
 ----
 
 :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` accepts the following miscellaneous parameters in a 'misc' block:
 
+ - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
 

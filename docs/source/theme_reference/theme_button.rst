@@ -8,23 +8,24 @@ The :class:`UIButton <.UIButton>` theming block id is 'button'.
 Colours
 -------
 
-:class:`UIButton <.UIButton>` makes use of these colour parameters in a 'colours' block:
+:class:`UIButton <.UIButton>` makes use of these colour parameters in a 'colours' block. All of these colours can
+also be a colour gradient:
 
- - "**normal_bg**" - The background colour of the button in the default state.
- - "**hovered_bg**" - The background colour of the button when the mouse pointer is over it.
- - "**disabled_bg**" - The background colour of the button when the button has been disabled (so users cannot interact with it)
- - "**selected_bg**" - The background colour of the button when the button has select focus.
- - "**active_bg**" - The background colour of the button 'mid-click', you will mostly see it while dragging things around via buttons.
- - "**normal_text**" - The colour of the button's text in the default state.
- - "**hovered_text**" - The colour of the button's text when the mouse pointer is over it.
- - "**disabled_text**" - The colour of the button's text when the button has been disabled (so users cannot interact with it)
- - "**selected_text**" - The colour of the button's text when the button has select focus.
- - "**active_text**" - The colour of the button's text (if any) 'mid-click', you will mostly see it while dragging things around via buttons.
- - "**normal_border**" - The colour of the border around the button (if it has one), in the default state.
- - "**hovered_border**" - The colour of the border around the button (if it has one), in the hovered state.
- - "**disabled_border**" - The colour of the border around the button (if it has one), in the disabled state.
- - "**selected_border**" - The colour of the border around the button (if it has one), in the selected state.
- - "**active_border**" - The colour of the border around the button (if it has one), in the active state.
+ - "**normal_bg**" - The background colour/gradient of the button in the default state.
+ - "**hovered_bg**" - The background colour/gradient of the button when the mouse pointer is over it.
+ - "**disabled_bg**" - The background colour/gradient of the button when the button has been disabled (so users cannot interact with it)
+ - "**selected_bg**" - The background colour/gradient of the button when the button has select focus.
+ - "**active_bg**" - The background colour/gradient of the button 'mid-click', you will mostly see it while dragging things around via buttons.
+ - "**normal_text**" - The colour/gradient of the button's text in the default state.
+ - "**hovered_text**" - The colour/gradient of the button's text when the mouse pointer is over it.
+ - "**disabled_text**" - The colour/gradient of the button's text when the button has been disabled (so users cannot interact with it)
+ - "**selected_text**" - The colour/gradient of the button's text when the button has select focus.
+ - "**active_text**" - The colour/gradient of the button's text (if any) 'mid-click', you will mostly see it while dragging things around via buttons.
+ - "**normal_border**" - The colour/gradient of the border around the button (if it has one), in the default state.
+ - "**hovered_border**" - The colour/gradient of the border around the button (if it has one), in the hovered state.
+ - "**disabled_border**" - The colour/gradient of the border around the button (if it has one), in the disabled state.
+ - "**selected_border**" - The colour/gradient of the border around the button (if it has one), in the selected state.
+ - "**active_border**" - The colour/gradient of the border around the button (if it has one), in the active state.
 
 Font
 -----
@@ -74,6 +75,8 @@ Misc
 
 :class:`UIButton <.UIButton>` accepts the following miscellaneous parameters in a 'misc' block:
 
+ - "**shape**" - Can be one of 'rectangle', 'rounded_rectangle' or 'ellipse'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the button. Defaults to 0.
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 0.
  - "**tool_tip_delay**" - time in seconds before a the buttons tool sip (if it has one) will appear. Default is "1.0".

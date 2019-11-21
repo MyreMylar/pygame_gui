@@ -8,16 +8,19 @@ The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_men
 Colours
 -------
 
-:class:`UIDropDownMenu <.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block:
+:class:`UIDropDownMenu <.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block. All of these colours can
+also be a colour gradient:
 
- - "**dark_bg**" - The background colour of the drop down menu. Probably not visible.
- - "**normal_border**" - The border colour of the drop down menu.
+ - "**dark_bg**" - The background colour/gradient of the drop down menu. Probably not visible.
+ - "**normal_border**" - The border colour/gradient of the drop down menu.
 
 Misc
 ----
 
 :class:`UIDropDownMenu <.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
 
+ - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**expand_direction**" - Can be set to **'up'** or **'down'**. Defaults to 'down'. Changing this parameter will change the direction that the menu will expand away from the initial starting point.
  - "**border_width**" - the width in pixels of the border around the drop down menu. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 1.

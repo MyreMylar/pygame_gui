@@ -8,13 +8,14 @@ The :class:`UITextEntryLine <.UITextEntryLine>` theming block id is 'text_entry_
 Colours
 -------
 
-:class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block:
+:class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
+also be a colour gradient:
 
- - "**normal_bg**" -  The default colour of the background to the entry line element.
- - "**selected_bg**" - The colour the background changes to when the text above it is selected.
- - "**normal_text**" - The default colour of text entered into the element.
- - "**selected_text**" - The colour of text when it has been selected.
- - "**normal_border**" - The colour of the border around the text entry element.
+ - "**normal_bg**" -  The default colour/gradient of the background to the entry line element.
+ - "**selected_bg**" - The colour/gradient the background changes to when the text above it is selected.
+ - "**normal_text**" - The default colour/gradient of text entered into the element.
+ - "**selected_text**" - The colour/gradient of text when it has been selected.
+ - "**normal_border**" - The colour/gradient of the border around the text entry element.
 
 Font
 -----
@@ -38,9 +39,11 @@ Misc
 
 :class:`UITextEntryLine <.UITextEntryLine>` accepts the following miscellaneous parameters in a 'misc' block:
 
-- "**border_width**" - the width of the border around the element in pixels. Defaults to "1".
-- "**shadow_width**" - the width of the shadow around the element in pixels. Defaults to "1".
-- "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
+ - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
+ - "**border_width**" - the width of the border around the element in pixels. Defaults to "1".
+ - "**shadow_width**" - the width of the shadow around the element in pixels. Defaults to "1".
+ - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
 
 Example
 -------

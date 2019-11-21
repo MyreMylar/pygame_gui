@@ -11,6 +11,10 @@ format. To load one, simply pass the path to the theme file into the UIManager w
 
     manager = pygame_gui.UIManager((800, 600), 'theme.json')
 
+You can also theme your elements 'on the fly', while your pygame application is running. Just edit your theme file and
+save it, and you should see the UI update to reflect your changes. This is particularly helpful when trying to fiddle
+with colours, or visualise what the theming parameters do. You can also turn off live theming if you want to save a few
+CPU cycles by setting that option when you create your UI manager.
 
 The most basic theming you can do is to set the default colours for the UI, which are the colours used if no more
 element specific colour is specified in the theme.
@@ -50,6 +54,20 @@ within the colours block you can start to set individual colours by their IDs. I
             }
         }
     }
+
+Of course, colours are not just colours - they can also be gradients, which have a very similar syntax. Like so:
+
+.. code-block:: json
+   :caption: theme.json
+   :linenos:
+
+   "colours":
+   {
+      "normal_bg":"#45494e,#65696e,90"
+   }
+
+Where the first two (or three) parameters indicate the colours used in the gradient, separated by commas, and the last
+parameter indicates the direction of the gradient as an angle in degrees (from 0 to 360).
 
 To add theming for specific UI elements you then need to add additional blocks at the same level as the
 'defaults' block. These blocks require an ID that references which elements that they apply to. IDs have a hierarchy

@@ -8,24 +8,27 @@ The :class:`UITextBox <.UITextBox>` theming block id is 'text_box'.
 Colours
 -------
 
-:class:`UITextBox <.UITextBox>` makes use of these colour parameters in a 'colours' block:
+:class:`UITextBox <.UITextBox>` makes use of these colour parameters in a 'colours' block. All of these colours can
+also be a colour gradient:
 
- - "**dark_bg**" -  The background colour of the text box element.
- - "**normal_border**" - The colour of the border around the text box element.
- - "**link_text**" - The default colour of any links in the text.
- - "**link_hover**" - The colour of link text when we hover over it with the mouse.
- - "**link_selected**" - The colour of link text when they are clicked on with the mouse.
+ - "**dark_bg**" -  The background colour/gradient of the text box element.
+ - "**normal_border**" - The colour/gradient of the border around the text box element.
+ - "**link_text**" - The default colour/gradient of any links in the text.
+ - "**link_hover**" - The colour/gradient of link text when we hover over it with the mouse.
+ - "**link_selected**" - The colour/gradient of link text when they are clicked on with the mouse.
 
 Misc
 ----
 
 :class:`UITextBox <.UITextBox>` accepts the following miscellaneous parameters in a 'misc' block:
 
-- "**border_width**" - The width of the border around the element in pixels. Defaults to "0".
-- "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "0".
-- "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
-- "**link_normal_underline**" - Set to either "1" or "0". Whether link text is normally underlined. Defaults to "0" (False).
-- "**link_hover_underline**" - Set to either "1" or "0". Whether link text is underlined when they are hovered over with the mouse. Defaults to "1" (True).
+ - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
+ - "**border_width**" - The width of the border around the element in pixels. Defaults to "0".
+ - "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "0".
+ - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
+ - "**link_normal_underline**" - Set to either "1" or "0". Whether link text is normally underlined. Defaults to "0" (False).
+ - "**link_hover_underline**" - Set to either "1" or "0". Whether link text is underlined when they are hovered over with the mouse. Defaults to "1" (True).
 
 Sub-elements
 --------------

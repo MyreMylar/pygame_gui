@@ -31,9 +31,9 @@ copyright = '2019, Dan Lawrence'
 author = 'Dan Lawrence'
 
 # The short X.Y version
-version = '0.3.0'
+version = '0.4.0'
 # The full version, including alpha/beta/rc tags
-release = '0.3.0'
+release = '0.4.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -50,6 +50,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
     'sphinx_rtd_theme',
+    'sphinxcontrib.video',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
