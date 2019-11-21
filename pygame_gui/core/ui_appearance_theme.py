@@ -730,7 +730,9 @@ class ColourGradient:
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
 
         if rect is not None:
+            input_surface.set_clip(rect)
             input_surface.blit(gradient_surf, rect, special_flags=pygame.BLEND_RGBA_MULT)
+            input_surface.set_clip(None)
         else:
             gradient_placement_rect = gradient_surf.get_rect()
             gradient_placement_rect.center = (int(input_surface_size[0] / 2), int(input_surface_size[1] / 2))

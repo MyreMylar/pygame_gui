@@ -710,13 +710,16 @@ class RoundedRectangleShape(DrawableShape):
         text_colour_state_str = state_str + '_text'
         image_state_str = state_str + '_image'
 
-        shape_id = self.shape_cache.build_cache_id('rounded_rectangle', self.containing_rect.size,
-                                                   self.theming['shadow_width'],
-                                                   self.theming['border_width'],
-                                                   self.theming[border_colour_state_str],
-                                                   self.theming[bg_colour_state_str], self.corner_radius)
+        found_shape = None
+        shape_id = None
+        if 'filled_bar' not in self.theming and 'filled_bar_width' not in self.theming:
+            shape_id = self.shape_cache.build_cache_id('rounded_rectangle', self.containing_rect.size,
+                                                       self.theming['shadow_width'],
+                                                       self.theming['border_width'],
+                                                       self.theming[border_colour_state_str],
+                                                       self.theming[bg_colour_state_str], self.corner_radius)
 
-        found_shape = self.shape_cache.find_surface_in_cache(shape_id)
+            found_shape = self.shape_cache.find_surface_in_cache(shape_id)
         if found_shape is not None:
             self.surfaces[state_str] = found_shape.copy()
         else:
@@ -813,7 +816,8 @@ class RoundedRectangleShape(DrawableShape):
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
             self.surfaces[state_str].blit(bab_surface, (0, 0))
 
-            self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
+            if shape_id is not None:
+                self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
