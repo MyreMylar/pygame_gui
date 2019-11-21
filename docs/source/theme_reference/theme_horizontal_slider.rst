@@ -3,10 +3,12 @@
 UIHorizontalSlider Theming Parameters
 =====================================
 
-.. video:: _static/html/horizontal_slider.mp4
-   :width: 340
-   :height: 64
+.. raw:: html
 
+    <video width="340" height="64" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/horizontal_slider.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
 
 The :class:`UIHorizontalSlider <.UIHorizontalSlider>` theming block id is 'horizontal_slider'.
 

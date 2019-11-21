@@ -61,9 +61,14 @@ Of course, colours are not just colours - they can also be gradients, which have
    :caption: theme.json
    :linenos:
 
-   "colours":
    {
-      "normal_bg":"#45494e,#65696e,90"
+        "defaults":
+        {
+            "colours":
+            {
+               "normal_bg":"#45494e,#65696e,90"
+            }
+        }
    }
 
 Where the first two (or three) parameters indicate the colours used in the gradient, separated by commas, and the last
