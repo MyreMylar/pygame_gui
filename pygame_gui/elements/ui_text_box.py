@@ -142,7 +142,7 @@ class UITextBox(UIElement):
                 self.parse_html_into_style_data()
                 percentage_visible = self.text_wrap_rect[3] / self.formatted_text_block.final_dimensions[1]
                 scroll_bar_position = (self.relative_rect.right - self.border_width -
-                                       - self.shadow_width - self.scroll_bar_width,
+                                       self.shadow_width - self.scroll_bar_width,
                                        self.relative_rect.top + self.border_width +
                                        self.shadow_width)
 
@@ -275,7 +275,7 @@ class UITextBox(UIElement):
 
         if self.scroll_bar is not None:
             scroll_bar_position = (self.relative_rect.right - self.border_width -
-                                   - self.shadow_width - self.scroll_bar_width,
+                                   self.shadow_width - self.scroll_bar_width,
                                    self.relative_rect.top + self.border_width +
                                    self.shadow_width)
             self.scroll_bar.set_relative_position(scroll_bar_position)
@@ -288,7 +288,7 @@ class UITextBox(UIElement):
 
         if self.scroll_bar is not None:
             scroll_bar_position = (self.relative_rect.right - self.border_width -
-                                   - self.shadow_width - self.scroll_bar_width,
+                                   self.shadow_width - self.scroll_bar_width,
                                    self.relative_rect.top + self.border_width +
                                    self.shadow_width)
             self.scroll_bar.set_relative_position(scroll_bar_position)
