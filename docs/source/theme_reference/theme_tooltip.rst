@@ -3,6 +3,13 @@
 UITooltip Theming Parameters
 =============================
 
+.. raw:: html
+
+    <video width="220" height="120" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/tool_tip.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UIToolTip <.UIToolTip>` theming block id is 'tool_tip'.
 
 Misc
@@ -10,8 +17,7 @@ Misc
 
 :class:`UITooltip <.UITooltip>` accepts the following miscellaneous parameters in a 'misc' block:
 
- - "**rect_width**" - The width of the rectangle around the tool tip in pixels, including any shadows or borders.
-                      The height is determined dynamically.
+ - "**rect_width**" - The width of the rectangle around the tool tip in pixels, including any shadows or borders. The height is determined dynamically.
 
 
 Sub-elements

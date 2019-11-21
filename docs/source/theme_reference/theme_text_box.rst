@@ -3,6 +3,13 @@
 UITextBox Theming Parameters
 ============================
 
+.. raw:: html
+
+    <video width="220" height="220" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/text_box.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UITextBox <.UITextBox>` theming block id is 'text_box'.
 
 Colours

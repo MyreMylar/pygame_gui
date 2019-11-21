@@ -3,6 +3,13 @@
 UIScreenSpaceHealthBar Theming Parameters
 =========================================
 
+.. raw:: html
+
+    <video width="240" height="44" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/screen_space_health_bar.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` theming block id is 'screen_space_health_bar'.
 
 Colours
@@ -64,7 +71,7 @@ Here is an example of a screen space health bar block in a JSON theme file using
                 "normal_text": "#c5cbd8",
                 "text_shadow": "#777777",
                 "border": "#DDDDDD",
-                "filled_bar": "#f4251b",
+                "filled_bar": "#f4251b,#A4150b,180",
                 "unfilled_bar": "#CCCCCC"
             },
             "font":

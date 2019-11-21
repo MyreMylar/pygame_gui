@@ -3,6 +3,13 @@
 UIDropDownMenu Theming Parameters
 =================================
 
+.. raw:: html
+
+    <video width="240" height="100" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/drop_down_menu.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_menu'.
 
 Colours

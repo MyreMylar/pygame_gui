@@ -3,6 +3,13 @@
 UIVerticalScrollBar Theming Parameters
 =======================================
 
+.. raw:: html
+
+    <video width="44" height="240" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/vertical_scroll_bar.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` theming block id is 'vertical_scroll_bar'.
 
 Colours

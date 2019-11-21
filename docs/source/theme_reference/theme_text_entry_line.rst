@@ -3,6 +3,13 @@
 UITextEntryLine Theming Parameters
 ===================================
 
+.. raw:: html
+
+    <video width="240" height="44" nocontrols playsinline autoplay muted loop>
+        <source src="../_static/text_entry_line.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
 The :class:`UITextEntryLine <.UITextEntryLine>` theming block id is 'text_entry_line'.
 
 Colours
