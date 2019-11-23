@@ -1,6 +1,8 @@
 import pygame
 import json
 import os
+import io
+import base64
 import warnings
 from contextlib import contextmanager
 
@@ -8,6 +10,13 @@ from typing import Union
 
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
+
+# Only import the 'stringified' data if we can't find the actual default theme file
+# This is need for working PyInstaller build
+ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+THEME_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/default_theme.json'))
+if not os.path.exists(THEME_PATH):
+    from pygame_gui.core._string_data import default_theme
 
 try:
     from os import PathLike  # for Python 3.6
@@ -70,6 +79,8 @@ class UIAppearanceTheme:
         self.shape_cache = ShapeCache()
 
         # the font to use if no other font is specified
+        # these hardcoded paths should be OK for PyInstaller right now because they will never actually used while
+        # fira_code is the default pre-loaded font. May need to re-vist this later.
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         self.base_font_info = {'name': 'fira_code',
                                'size': 14,
@@ -101,7 +112,15 @@ class UIAppearanceTheme:
 
         self._theme_file_last_modified = None
         self._theme_file_path = None
-        self.load_theme(os.path.normpath(os.path.join(module_root_path, 'data/default_theme.json')))
+
+        # Only load  the 'stringified' data if we can't find the actual default theme file
+        # This is need for PyInstaller build
+        default_theme_file_path = os.path.normpath(os.path.join(module_root_path, 'data/default_theme.json'))
+        if os.path.exists(default_theme_file_path):
+            self.load_theme(default_theme_file_path)
+        else:
+            default_theme_file = io.BytesIO(base64.standard_b64decode(default_theme))
+            self.load_theme(default_theme_file)
 
     def get_font_dictionary(self):
         """
@@ -118,17 +137,18 @@ class UIAppearanceTheme:
 
         :return bool: True if we need to reload elements because the theme data has changed.
         """
-        try:
-            stamp = os.stat(self._theme_file_path).st_mtime
-        except FileNotFoundError:
-            return False
+        if self._theme_file_path is not None:
+            try:
+                stamp = os.stat(self._theme_file_path).st_mtime
+            except FileNotFoundError:
+                return False
 
-        if stamp != self._theme_file_last_modified:
-            self._theme_file_last_modified = stamp
-            self.reload_theming()
-            return True
-        else:
-            return False
+            if stamp != self._theme_file_last_modified:
+                self._theme_file_last_modified = stamp
+                self.reload_theming()
+                return True
+            else:
+                return False
 
     def update_shape_cache(self):
         self.shape_cache.update()
@@ -487,17 +507,24 @@ class UIAppearanceTheme:
     @staticmethod
     @contextmanager
     def opened_w_error(filename, mode="r"):
-        try:
-            f = open(filename, mode)
-        except IOError as err:
-            yield None, err
+        if type(filename) != io.BytesIO:
+            try:
+                f = open(filename, mode)
+            except IOError as err:
+                yield None, err
+            else:
+                try:
+                    yield f, None
+                finally:
+                    f.close()
         else:
+            f = filename
             try:
                 yield f, None
             finally:
                 f.close()
 
-    def load_theme(self, file_path: Union[str, PathLike]):
+    def load_theme(self, file_path: Union[str, PathLike, io.BytesIO]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
 
@@ -507,10 +534,14 @@ class UIAppearanceTheme:
         if file_path is None:
             raise ValueError('Theme path cannot be None')
 
-        self._theme_file_path = file_path
-        self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+        if type(file_path) != io.BytesIO:
+            self._theme_file_path = file_path
+            self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+            used_file_path = os.path.abspath(file_path)
+        else:
+            used_file_path = file_path
 
-        with self.opened_w_error(os.path.abspath(file_path), 'r') as (theme_file, error):
+        with self.opened_w_error(used_file_path, 'r') as (theme_file, error):
             if error:
                 warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False
