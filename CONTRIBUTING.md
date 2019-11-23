@@ -40,7 +40,7 @@ For running the tests you will need:
  ====================================================================
  
  1. Do the tests run?
- 2. Do the relevent examples at https://github.com/MyreMylar/pygame_gui_examples run & look OK?
+ 2. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
  3. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
  
  
