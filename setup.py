@@ -7,13 +7,13 @@ stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_s
 
 
 setup(name='pygame_gui',
-      version='0.3.0',
+      version='0.4.0',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. Features HTML-style text formatting, "
                        "theme files to control the look and a system to manage multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_030.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_040.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
