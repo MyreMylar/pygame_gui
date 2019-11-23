@@ -15,10 +15,14 @@ The :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` theming block id i
 Colours
 -------
 
+.. figure:: ../_static/screen_space_health_bar_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. The text shadow **cannot** be themed
+   with a colour gradient.
+
 :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block. Most of these colours can
 also be a colour gradient:
 
- - "**normal_bg**" - The background colour/gradient of the health bar.
  - "**normal_text**" - The colour/gradient of the health bars's text.
  - "**text_shadow**" - The colour of the shadow behind the text (so it stands out better).
  - "**normal_border**" - The colour/gradient of the border around the health bar.
@@ -67,7 +71,6 @@ Here is an example of a screen space health bar block in a JSON theme file using
         {
             "colours":
             {
-                "normal_bg": "#25292e",
                 "normal_text": "#c5cbd8",
                 "text_shadow": "#777777",
                 "border": "#DDDDDD",

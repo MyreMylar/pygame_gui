@@ -15,6 +15,11 @@ The :class:`UIHorizontalSlider <.UIHorizontalSlider>` theming block id is 'horiz
 Colours
 -------
 
+.. figure:: ../_static/horizontal_slider_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. The slider's buttons are themed in a
+   separate block.
+
 :class:`UIHorizontalSlider <.UIHorizontalSlider>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 

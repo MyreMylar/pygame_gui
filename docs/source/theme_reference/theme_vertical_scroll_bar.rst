@@ -15,6 +15,11 @@ The :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` theming block id is 'ver
 Colours
 -------
 
+.. figure:: ../_static/vertical_scroll_bar_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. The scroll bar's buttons are themed in a
+   separate block.
+
 :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 

@@ -15,6 +15,12 @@ The :class:`UIButton <.UIButton>` theming block id is 'button'.
 Colours
 -------
 
+.. figure:: ../_static/button_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. This correspondence is the same for the
+   parameters named for the different button states e.g. the parameter 'hovered_bg' themes the same area as 'normal_bg'
+   when the button is in the hovered state.
+
 :class:`UIButton <.UIButton>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 

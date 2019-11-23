@@ -15,6 +15,12 @@ The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_men
 Colours
 -------
 
+.. figure:: ../_static/drop_down_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. In the drop down menu it will only be
+   possible to see the 'dark_bg' themed regions when the buttons in the menu are themed to be transparent, or semi
+   transparent themselves.
+
 :class:`UIDropDownMenu <.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 

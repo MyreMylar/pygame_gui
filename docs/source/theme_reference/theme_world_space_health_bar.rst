@@ -8,6 +8,10 @@ The :class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` theming block id is 
 Colours
 -------
 
+.. figure:: ../_static/world_space_health_bar_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter.
+
 :class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
 
  - "**normal_border**" - The colour/gradient of the health bar's border if it has one.

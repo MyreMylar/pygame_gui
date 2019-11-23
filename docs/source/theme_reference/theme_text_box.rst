@@ -15,6 +15,12 @@ The :class:`UITextBox <.UITextBox>` theming block id is 'text_box'.
 Colours
 -------
 
+.. figure:: ../_static/text_box_colour_parameters.png
+
+   A diagram of which part of the element is themed by which colour parameter. This correspondence is the same for the
+   parameters named for the different link states e.g. the parameter 'link_hover' themes the same text as 'link_text'
+   when the link is in the hovered state.
+
 :class:`UITextBox <.UITextBox>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
