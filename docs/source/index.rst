@@ -42,7 +42,7 @@ source, navigating to the project's directory (the one with setup.py in it) and 
 
 .. code-block:: console
 
-    pip install . -U
+    python setup.py install
 
 
 Source code on GitHub
