@@ -258,7 +258,7 @@ class RectDrawableShape(DrawableShape):
         if self.theming['border_width'] > 0:
 
             if type(self.theming[border_colour_state_str]) == ColourGradient:
-                border_shape_surface = pygame.Surface(self.border_rect.size)
+                border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA)
                 border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.surfaces[state_str].blit(border_shape_surface,
                                               self.border_rect, special_flags=pygame.BLEND_RGBA_SUB)
@@ -268,7 +268,7 @@ class RectDrawableShape(DrawableShape):
                 self.surfaces[state_str].fill(self.theming[border_colour_state_str], self.border_rect)
 
         if type(self.theming[bg_colour_state_str]) == ColourGradient:
-            background_shape_surface = pygame.Surface(self.background_rect.size)
+            background_shape_surface = pygame.Surface(self.background_rect.size, flags=pygame.SRCALPHA)
             background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
             self.surfaces[state_str].blit(background_shape_surface,
                                           self.background_rect, special_flags=pygame.BLEND_RGBA_SUB)
@@ -281,7 +281,7 @@ class RectDrawableShape(DrawableShape):
             bar_rect = pygame.Rect(self.background_rect.topleft, (self.theming['filled_bar_width'],
                                                                   self.background_rect.height))
             if type(self.theming['filled_bar']) == ColourGradient:
-                bar_shape_surface = pygame.Surface(bar_rect.size)
+                bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA)
                 bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.surfaces[state_str].blit(bar_shape_surface, bar_rect, special_flags=pygame.BLEND_RGBA_SUB)
                 self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)

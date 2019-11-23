@@ -44,7 +44,6 @@ class UIScreenSpaceHealthBar(UIElement):
         self.font = None
         self.border_width = None
         self.shadow_width = None
-        self.background_colour = None
         self.border_colour = None
         self.bar_unfilled_colour = None
         self.bar_filled_colour = None
@@ -235,11 +234,6 @@ class UIScreenSpaceHealthBar(UIElement):
                 shadow_width = 2
         if shadow_width != self.shadow_width:
             self.shadow_width = shadow_width
-            has_any_changed = True
-
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_bg')
-        if background_colour != self.background_colour:
-            self.background_colour = background_colour
             has_any_changed = True
 
         border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
