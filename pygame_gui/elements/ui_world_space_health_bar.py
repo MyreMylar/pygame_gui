@@ -21,8 +21,15 @@ class UIWorldSpaceHealthBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
+
+    class ExampleHealthSprite(pygame.sprite.Sprite):
+        def __init__(self, *groups):
+            super().__init__(*groups)
+            self.current_health = 50
+            self.health_capacity = 100
+
     def __init__(self, relative_rect: pygame.Rect,
-                 sprite_to_monitor: pygame.sprite.Sprite,
+                 sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
@@ -229,3 +236,5 @@ class UIWorldSpaceHealthBar(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+

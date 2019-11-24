@@ -3,6 +3,7 @@ import subprocess
 import time
 import contextlib
 
+# noinspection SpellCheckingInspection
 """
 This code owes a lot to pyperclip by Al Sweigart al@inventwithpython.com.
 
@@ -44,15 +45,17 @@ if plat == 'WINDOWS':
     def __windows_paste():
         ctypes.windll.user32.GetClipboardData.argtypes = [UINT]
         ctypes.windll.user32.GetClipboardData.restype = HANDLE
-        CF_UNICODETEXT = 13
+        cf_unicode_text = 13
         with __windows_clipboard(None):
-            handle = ctypes.windll.user32.GetClipboardData(CF_UNICODETEXT)
+            handle = ctypes.windll.user32.GetClipboardData(cf_unicode_text)
             if not handle:
                 return ""
             return ctypes.c_wchar_p(handle).value
 
 
+    # noinspection PyUnresolvedReferences
     class CheckedCall(object):
+
         def __init__(self, f):
             super(CheckedCall, self).__setattr__("f", f)
 
@@ -101,8 +104,8 @@ if plat == 'WINDOWS':
         wcslen.argtypes = [c_wchar_p]
         wcslen.restype = UINT
 
-        GMEM_MOVEABLE = 0x0002
-        CF_UNICODETEXT = 13
+        gmem_moveable = 0x0002
+        cf_unicode_text = 13
 
         # weirdly this temporary window handle seems to work for pasting where the
         # normal pygame window handle does not
@@ -115,13 +118,13 @@ if plat == 'WINDOWS':
 
             if data:
                 count = wcslen(data) + 1
-                handle = safe_alloc(GMEM_MOVEABLE, count * sizeof(c_wchar))
+                handle = safe_alloc(gmem_moveable, count * sizeof(c_wchar))
                 locked_handle = safe_lock(handle)
 
                 ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(data), count * sizeof(c_wchar))
 
                 safe_unlock(handle)
-                safe_set_clipboard(CF_UNICODETEXT, handle)
+                safe_set_clipboard(cf_unicode_text, handle)
 
         safe_destroy_window(hwnd)
 elif plat == 'LINUX':

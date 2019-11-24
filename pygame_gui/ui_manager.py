@@ -65,7 +65,8 @@ class UIManager:
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
         :return: A shadow.
         """
-        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width, shape, corner_radius)
+        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width,
+                                                                                shape, corner_radius)
 
     def set_window_resolution(self, window_resolution):
         self.window_resolution = window_resolution

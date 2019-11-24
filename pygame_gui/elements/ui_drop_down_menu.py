@@ -410,7 +410,7 @@ class UIDropDownMenu(UIElement):
 
     def kill(self):
         """
-        Overrides the standard sprite kill to also properly kill/finish the current state of the dropdown.
+        Overrides the standard sprite kill to also properly kill/finish the current state of the drop down.
         Depending on whether it is expanded or closed the drop down menu will have different elements to clean up.
         """
         self.current_state.finish()

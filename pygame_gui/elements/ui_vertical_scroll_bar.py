@@ -252,7 +252,7 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_position = max(self.scroll_position, self.top_limit)
                 x_pos = self.rect.x + self.shadow_width + self.border_width
                 y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
                 moved_this_frame = True
             elif (self.bottom_button.held or self.scroll_wheel_down) and self.scroll_position < self.bottom_limit:
                 self.scroll_wheel_down = False
@@ -261,7 +261,7 @@ class UIVerticalScrollBar(UIElement):
                                            self.bottom_limit - self.sliding_button.rect.height)
                 x_pos = self.rect.x + self.shadow_width + self.border_width
                 y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
 
                 moved_this_frame = True
 
@@ -285,7 +285,7 @@ class UIVerticalScrollBar(UIElement):
 
                 x_pos = self.rect.x + self.shadow_width + self.border_width
                 y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
                 moved_this_frame = True
             elif not self.sliding_button.held:
                 self.grabbed_slider = False

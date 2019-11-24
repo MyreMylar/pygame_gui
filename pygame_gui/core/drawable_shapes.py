@@ -5,7 +5,7 @@ from typing import Dict, List, Union, Tuple
 
 import pygame
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.ui_appearance_theme import ColourGradient, ShapeCache
+from pygame_gui.core.ui_appearance_theme import ColourGradient
 from pygame.math import Vector2
 
 
@@ -57,7 +57,7 @@ class DrawableShape:
 
             # horizontal
             if self.theming['text_horiz_alignment'] == 'center':
-                self.aligned_text_rect.centerx = self.containing_rect.width / 2
+                self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
             elif self.theming['text_horiz_alignment'] == 'left':
                 self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
                                             self.theming['shadow_width'] + self.theming['border_width'])
@@ -66,7 +66,7 @@ class DrawableShape:
                          self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
                 self.aligned_text_rect.x = x_pos
             else:
-                self.aligned_text_rect.centerx = self.containing_rect.width / 2
+                self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
             # vertical
             if self.theming['text_vert_alignment'] == 'center':
                 self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
@@ -751,12 +751,14 @@ class RoundedRectangleShape(DrawableShape):
                 # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
-                                                                        0, border_corner_radius, aa_amount=aa, clear=False)
+                                                                        0, border_corner_radius,
+                                                                        aa_amount=aa, clear=False)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
                     bab_surface.blit(shape_surface, self.border_rect)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
-                                                                        0, border_corner_radius, aa_amount=aa, clear=False)
+                                                                        0, border_corner_radius,
+                                                                        aa_amount=aa, clear=False)
                     self.apply_colour_to_surface(self.theming[border_colour_state_str], shape_surface)
                     bab_surface.blit(shape_surface, self.border_rect)
 
@@ -770,7 +772,8 @@ class RoundedRectangleShape(DrawableShape):
                 if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
                     bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
                     unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                    (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
+                                                    (self.background_rect.width -
+                                                     (self.theming['filled_bar_width'] * aa),
                                                      self.background_rect.height))
 
                     if type(self.theming['filled_bar']) == ColourGradient:
@@ -788,14 +791,17 @@ class RoundedRectangleShape(DrawableShape):
                 if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
                     bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
                     unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                    (self.background_rect.width - (self.theming['filled_bar_width'] * aa),
+                                                    (self.background_rect.width -
+                                                     (self.theming['filled_bar_width'] * aa),
                                                      self.background_rect.height))
 
                     if type(self.theming['filled_bar']) == ColourGradient:
-                        self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
+                        self.apply_colour_to_surface(self.theming[bg_colour_state_str],
+                                                     shape_surface, unfilled_bar_rect)
                         self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
                     else:
-                        self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface, unfilled_bar_rect)
+                        self.apply_colour_to_surface(self.theming[bg_colour_state_str],
+                                                     shape_surface, unfilled_bar_rect)
                         self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
                 else:
                     self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
@@ -821,7 +827,8 @@ class RoundedRectangleShape(DrawableShape):
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
-    def clear_and_create_shape_surface(self, surface, rect, overlap, corner_radius, aa_amount, clear=True) -> pygame.Surface:
+    def clear_and_create_shape_surface(self, surface, rect, overlap,
+                                       corner_radius, aa_amount, clear=True) -> pygame.Surface:
         """
         Clear a space for a new shape surface on the main state surface for this state. The surface created will be
         plain white so that it can be easily multiplied with a colour surface.
@@ -914,7 +921,8 @@ class RoundedRectangleShape(DrawableShape):
 
         :param large_corner_radius: The radius of the corners.
         :param large_shape_surface: The surface to draw onto, the shape fills the surface.
-        :return:
+        :param clear_colour_string: The colour to clear the background to.
+        :param corner_offset: Offsets the corners, used to help avoid overlaps that look bad.
         """
         pygame.draw.circle(large_shape_surface, pygame.Color('#FFFFFFFF'),
                            (large_corner_radius + corner_offset,

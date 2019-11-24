@@ -123,9 +123,11 @@ class UITextBox(UIElement):
             if self.wrap_to_height or self.rect[3] == -1:
                 final_text_area_size = self.formatted_text_block.final_dimensions
                 self.rect.size = [(final_text_area_size[0] + (self.padding[0] * 2) +
-                                   (self.border_width * 2) + (self.shadow_width * 2) + (2 * self.rounded_corner_offset)),
+                                   (self.border_width * 2) + (self.shadow_width * 2) +
+                                   (2 * self.rounded_corner_offset)),
                                   (final_text_area_size[1] + (self.padding[1] * 2) +
-                                   (self.border_width * 2) + (self.shadow_width * 2) + (2 * self.rounded_corner_offset))]
+                                   (self.border_width * 2) + (self.shadow_width * 2) +
+                                   (2 * self.rounded_corner_offset))]
 
             elif self.formatted_text_block.final_dimensions[1] > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we have to display it.
@@ -352,9 +354,9 @@ class UITextBox(UIElement):
     def full_redraw(self):
         """
         Trigger a full redraw of the entire text box. Useful if we have messed with the text chunks in a more
-        fundamental fashion and need to reposition them (say, if some of them have gotten wider after being bolded).
+        fundamental fashion and need to reposition them (say, if some of them have gotten wider after being made bold).
 
-        NOTE: This doesn't reparse the text of our box. If you need to do that, just create a new text box.
+        NOTE: This doesn't re-parse the text of our box. If you need to do that, just create a new text box.
 
         """
         self.formatted_text_block.redraw(self.active_text_effect)

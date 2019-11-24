@@ -14,7 +14,7 @@ from pygame_gui.core.ui_appearance_theme import ColourGradient
 class UITextEntryLine(UIElement):
     """
     A GUI element for text entry from a keyboard, on a single line. The element supports the standard
-    copy and paste keyboard shortcuts CTRL+V, CRTL+C & CTRL+X as well as CTRL+A.
+    copy and paste keyboard shortcuts CTRL+V, CTRL+C & CTRL+X as well as CTRL+A.
 
     There are methods that allow the entry element to restrict the characters that can be input into the text box
 
@@ -386,7 +386,7 @@ class UITextEntryLine(UIElement):
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Allows the text entry box to react to input events, which is it's primary function. The entry element reacts to
-        various types of mouse clicks (double click selecting words, drag select), keyboard combos (CRTL+C, CTRL+V,
+        various types of mouse clicks (double click selecting words, drag select), keyboard combos (CTRL+C, CTRL+V,
         CTRL+X, CTRL+A), individual editing keys (Backspace, Delete, Left & Right arrows) and other keys for inputting
         letters, symbols and numbers.
 
@@ -592,7 +592,7 @@ class UITextEntryLine(UIElement):
         Locates the correct position to move the edit cursor to, when reacting to a mouse click inside the text entry
         element.
 
-        :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling offscreen.
+        :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling off-screen.
         """
         start_pos = (self.rect.x + self.border_width + self.shadow_width +
                      self.shape_corner_radius + self.horiz_line_padding)

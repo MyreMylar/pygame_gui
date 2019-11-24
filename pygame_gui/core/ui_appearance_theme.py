@@ -80,7 +80,7 @@ class UIAppearanceTheme:
 
         # the font to use if no other font is specified
         # these hardcoded paths should be OK for PyInstaller right now because they will never actually used while
-        # fira_code is the default pre-loaded font. May need to re-vist this later.
+        # fira_code is the default pre-loaded font. May need to re-visit this later.
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         self.base_font_info = {'name': 'fira_code',
                                'size': 14,
@@ -96,7 +96,7 @@ class UIAppearanceTheme:
                                                                                  'data/FiraMono-BoldItalic.ttf'))}
 
         # fonts for specific elements stored by element id
-        self.ui_element_font_infos = {}
+        self.ui_element_fonts_info = {}
         self.ui_element_fonts = {}
 
         # stores any images specified in themes that need loading at the appropriate time
@@ -182,8 +182,8 @@ class UIAppearanceTheme:
                                               self.base_font_info['bold'],
                                               self.base_font_info['italic'])
 
-        for element_key in self.ui_element_font_infos.keys():
-            font_info = self.ui_element_font_infos[element_key]
+        for element_key in self.ui_element_fonts_info.keys():
+            font_info = self.ui_element_fonts_info[element_key]
 
             bold_path = None
             italic_path = None
@@ -287,11 +287,13 @@ class UIAppearanceTheme:
 
             # we can preload shadow edges if we are dealing with a rectangular shadow
             if (shape == 'rounded_rectangle' or shape == 'rectangle') and shadow_width > 0:
-                if 'shadow_width' in self.ui_element_misc_data[misc_id] and 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
+                if ('shadow_width' in self.ui_element_misc_data[misc_id] and
+                        'shape_corner_radius' in self.ui_element_misc_data[misc_id]):
                     shadow_id = str(shadow_width) + 'x' + str(shape_corner_radius)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shape_corner_radius)
-                elif 'shadow_width' in self.ui_element_misc_data[misc_id] and 'shape_corner_radius' not in self.ui_element_misc_data[misc_id]:
+                elif ('shadow_width' in self.ui_element_misc_data[misc_id] and
+                      'shape_corner_radius' not in self.ui_element_misc_data[misc_id]):
                     # have a shadow width but no idea on the corners, try most common -
                     shadow_id_1 = str(shadow_width) + 'x' + str(2)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -299,7 +301,8 @@ class UIAppearanceTheme:
                     shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
-                elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id] and 'shadow_width' not in self.ui_element_misc_data[misc_id]:
+                elif ('shape_corner_radius' in self.ui_element_misc_data[misc_id] and
+                      'shadow_width' not in self.ui_element_misc_data[misc_id]):
                     # have a corner radius but no idea on the shadow width, try most common -
                     shadow_id_1 = str(1) + 'x' + str(shape_corner_radius)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -389,8 +392,8 @@ class UIAppearanceTheme:
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
         for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ui_element_font_infos:
-                return self.ui_element_font_infos[combined_element_id]
+            if combined_element_id in self.ui_element_fonts_info:
+                return self.ui_element_fonts_info[combined_element_id]
 
         return font_info
 
@@ -556,104 +559,115 @@ class UIAppearanceTheme:
                 if load_success:
                     for element_name in theme_dict.keys():
                         if element_name == 'defaults':
-                            for data_type in theme_dict[element_name]:
-                                if data_type == 'colours':
-                                    colours_dict = theme_dict[element_name][data_type]
-                                    for colour_key in colours_dict:
-                                        self.base_colours[colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
-
+                            self.load_colour_defaults_from_theme(element_name, theme_dict)
                         else:
-
                             for data_type in theme_dict[element_name]:
                                 if data_type == 'font':
-                                    font_dict = theme_dict[element_name][data_type]
-                                    if element_name not in self.ui_element_font_infos:
-                                        self.ui_element_font_infos[element_name] = {}
-                                    self.ui_element_font_infos[element_name]['name'] = font_dict['name']
-
-                                    try:
-                                        self.ui_element_font_infos[element_name]['size'] = int(font_dict['size'])
-                                    except ValueError:
-                                        self.ui_element_font_infos[element_name]['size'] = self.font_dictionary.default_font_size
-
-                                    if 'bold' in font_dict:
-                                        try:
-                                            self.ui_element_font_infos[element_name]['bold'] = bool(int(font_dict['bold']))
-                                        except ValueError:
-                                            self.ui_element_font_infos[element_name]['bold'] = False
-                                    else:
-                                        self.ui_element_font_infos[element_name]['bold'] = False
-                                    if 'italic' in font_dict:
-                                        try:
-                                            self.ui_element_font_infos[element_name]['italic'] = bool(int(font_dict['italic']))
-                                        except ValueError:
-                                            self.ui_element_font_infos[element_name]['italic'] = False
-                                    else:
-                                        self.ui_element_font_infos[element_name]['italic'] = False
-
-                                    if 'regular_path' in font_dict:
-                                        self.ui_element_font_infos[element_name]['regular_path'] = font_dict['regular_path']
-                                    if 'bold_path' in font_dict:
-                                        self.ui_element_font_infos[element_name]['bold_path'] = font_dict['bold_path']
-                                    if 'italic_path' in font_dict:
-                                        self.ui_element_font_infos[element_name]['italic_path'] = font_dict['italic_path']
-                                    if 'bold_italic_path' in font_dict:
-                                        bold_italic_path = font_dict['bold_italic_path']
-                                        self.ui_element_font_infos[element_name]['bold_italic_path'] = bold_italic_path
+                                    self.load_element_font_data_from_theme(data_type, element_name, theme_dict)
 
                                 if data_type == 'colours':
-                                    if element_name not in self.ui_element_colours:
-                                        self.ui_element_colours[element_name] = {}
-                                    colours_dict = theme_dict[element_name][data_type]
-                                    for colour_key in colours_dict:
-                                        self.ui_element_colours[element_name][colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
+                                    self.load_element_colour_data_from_theme(data_type, element_name, theme_dict)
 
                                 elif data_type == 'images':
-                                    if element_name not in self.ui_element_image_paths:
-                                        self.ui_element_image_paths[element_name] = {}
-                                    images_dict = theme_dict[element_name][data_type]
-                                    for image_key in images_dict:
-                                        if image_key not in self.ui_element_image_paths[element_name]:
-                                            self.ui_element_image_paths[element_name][image_key] = {}
-                                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                        else:
-                                            self.ui_element_image_paths[element_name][image_key]['changed'] = False
-                                        image_path = str(images_dict[image_key]['path'])
-                                        if 'path' in self.ui_element_image_paths[element_name][image_key]:
-                                            if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
-                                                self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                        self.ui_element_image_paths[element_name][image_key]['path'] = image_path
-                                        if 'sub_surface_rect' in images_dict[image_key]:
-                                            rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
-                                            if len(rect_list) == 4:
-                                                try:
-                                                    x = int(rect_list[0].strip())
-                                                    y = int(rect_list[1].strip())
-                                                    w = int(rect_list[2].strip())
-                                                    h = int(rect_list[3].strip())
-                                                    rect = pygame.Rect((x, y), (w, h))
-                                                except ValueError or TypeError:
-                                                    rect = pygame.Rect((0, 0), (10, 10))
-                                                    warnings.warn("Unable to create subsurface rectangle from string: "
-                                                                  "" + images_dict[image_key]['sub_surface_rect'])
-
-                                                if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
-                                                    if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
-                                                        self.ui_element_image_paths[element_name][image_key]['changed'] = True
-                                                self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+                                    self.load_element_image_data_from_theme(data_type, element_name, theme_dict)
 
                                 elif data_type == 'misc':
-                                    if element_name not in self.ui_element_misc_data:
-                                        self.ui_element_misc_data[element_name] = {}
-                                    misc_dict = theme_dict[element_name][data_type]
-                                    for misc_data_key in misc_dict:
-                                        self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
+                                    self.load_element_misc_data_from_theme(data_type, element_name, theme_dict)
 
         # TODO: these should be triggered at an appropriate time in our project when lots of files are being loaded
         if load_success:
             self.load_fonts()  # save to trigger load with the same data as it won't do anything
             self.load_images()
             self.preload_shadow_edges()
+
+    def load_element_misc_data_from_theme(self, data_type, element_name, theme_dict):
+        if element_name not in self.ui_element_misc_data:
+            self.ui_element_misc_data[element_name] = {}
+        misc_dict = theme_dict[element_name][data_type]
+        for misc_data_key in misc_dict:
+            self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
+
+    def load_element_image_data_from_theme(self, data_type, element_name, theme_dict):
+        if element_name not in self.ui_element_image_paths:
+            self.ui_element_image_paths[element_name] = {}
+        images_dict = theme_dict[element_name][data_type]
+        for image_key in images_dict:
+            if image_key not in self.ui_element_image_paths[element_name]:
+                self.ui_element_image_paths[element_name][image_key] = {}
+                self.ui_element_image_paths[element_name][image_key]['changed'] = True
+            else:
+                self.ui_element_image_paths[element_name][image_key]['changed'] = False
+            image_path = str(images_dict[image_key]['path'])
+            if 'path' in self.ui_element_image_paths[element_name][image_key]:
+                if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
+                    self.ui_element_image_paths[element_name][image_key]['changed'] = True
+            self.ui_element_image_paths[element_name][image_key]['path'] = image_path
+            if 'sub_surface_rect' in images_dict[image_key]:
+                rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
+                if len(rect_list) == 4:
+                    try:
+                        x = int(rect_list[0].strip())
+                        y = int(rect_list[1].strip())
+                        w = int(rect_list[2].strip())
+                        h = int(rect_list[3].strip())
+                        rect = pygame.Rect((x, y), (w, h))
+                    except ValueError or TypeError:
+                        rect = pygame.Rect((0, 0), (10, 10))
+                        warnings.warn("Unable to create subsurface rectangle from string: "
+                                      "" + images_dict[image_key]['sub_surface_rect'])
+
+                    if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
+                        if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
+                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                    self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
+
+    def load_element_colour_data_from_theme(self, data_type, element_name, theme_dict):
+        if element_name not in self.ui_element_colours:
+            self.ui_element_colours[element_name] = {}
+        colours_dict = theme_dict[element_name][data_type]
+        for colour_key in colours_dict:
+            self.ui_element_colours[element_name][colour_key] = self.load_colour_or_gradient_from_theme(colours_dict,
+                                                                                                        colour_key)
+
+    def load_element_font_data_from_theme(self, data_type, element_name, theme_dict):
+        font_dict = theme_dict[element_name][data_type]
+        if element_name not in self.ui_element_fonts_info:
+            self.ui_element_fonts_info[element_name] = {}
+        self.ui_element_fonts_info[element_name]['name'] = font_dict['name']
+        try:
+            self.ui_element_fonts_info[element_name]['size'] = int(font_dict['size'])
+        except ValueError:
+            self.ui_element_fonts_info[element_name]['size'] = self.font_dictionary.default_font_size
+        if 'bold' in font_dict:
+            try:
+                self.ui_element_fonts_info[element_name]['bold'] = bool(int(font_dict['bold']))
+            except ValueError:
+                self.ui_element_fonts_info[element_name]['bold'] = False
+        else:
+            self.ui_element_fonts_info[element_name]['bold'] = False
+        if 'italic' in font_dict:
+            try:
+                self.ui_element_fonts_info[element_name]['italic'] = bool(int(font_dict['italic']))
+            except ValueError:
+                self.ui_element_fonts_info[element_name]['italic'] = False
+        else:
+            self.ui_element_fonts_info[element_name]['italic'] = False
+        if 'regular_path' in font_dict:
+            self.ui_element_fonts_info[element_name]['regular_path'] = font_dict['regular_path']
+        if 'bold_path' in font_dict:
+            self.ui_element_fonts_info[element_name]['bold_path'] = font_dict['bold_path']
+        if 'italic_path' in font_dict:
+            self.ui_element_fonts_info[element_name]['italic_path'] = font_dict['italic_path']
+        if 'bold_italic_path' in font_dict:
+            bold_italic_path = font_dict['bold_italic_path']
+            self.ui_element_fonts_info[element_name]['bold_italic_path'] = bold_italic_path
+
+    def load_colour_defaults_from_theme(self, element_name, theme_dict):
+        for data_type in theme_dict[element_name]:
+            if data_type == 'colours':
+                colours_dict = theme_dict[element_name][data_type]
+                for colour_key in colours_dict:
+                    self.base_colours[colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
 
     @staticmethod
     def load_colour_or_gradient_from_theme(theme_colours_dictionary, colour_id):

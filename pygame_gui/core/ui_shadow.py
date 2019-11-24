@@ -138,7 +138,7 @@ class ShadowGenerator:
         return final_surface
 
     def create_new_rectangle_shadow_old(self, width: int, height: int,
-                                    shadow_width_param: int, corner_radius_param: int, aa_amount: int = 4):
+                                        shadow_width_param: int, corner_radius_param: int, aa_amount: int = 4):
         """
         Creates a rectangular shadow surface at the specified size and stores it for later use.
 
@@ -252,11 +252,11 @@ class ShadowGenerator:
         closest_key = None
         if shape == 'rectangle':
             for key in self.created_rectangle_shadows.keys():
-                dimension_strs = key.split('x')
-                width = int(dimension_strs[0])
-                height = int(dimension_strs[1])
-                corner_rad = int(dimension_strs[2])
-                shadow_size = int(dimension_strs[3])
+                dimension_strings = key.split('x')
+                width = int(dimension_strings[0])
+                height = int(dimension_strings[1])
+                corner_rad = int(dimension_strings[2])
+                shadow_size = int(dimension_strings[3])
 
                 key_aspect_ratio = float(width / height)
                 request_aspect_ratio = float(size[0] / size[1])
@@ -277,10 +277,10 @@ class ShadowGenerator:
 
         if shape == 'ellipse':
             for key in self.created_ellipse_shadows.keys():
-                dimension_strs = key.split('x')
-                width = int(dimension_strs[0])
-                height = int(dimension_strs[1])
-                shadow_size = int(dimension_strs[2])
+                dimension_strings = key.split('x')
+                width = int(dimension_strings[0])
+                height = int(dimension_strings[1])
+                shadow_size = int(dimension_strings[2])
 
                 width_diff = abs(width - size[0])
                 height_diff = abs(height - size[1])

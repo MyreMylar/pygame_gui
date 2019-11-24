@@ -1,7 +1,3 @@
-.. an_example_pypi_project documentation master file, created by
-   sphinx-quickstart on Sun Feb 17 20:02:02 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Documentation - Home Page
 ===================================================
@@ -17,7 +13,7 @@ Features
  - Theme-able UI elements/widgets - you can use JSON theme files to change the colours, fonts and other appearance
    related details of your UI without touching your code.
 
- - A subset of HTML is supported for drawing word-wrapped text. Have bolded words in the middle of a paragraph of text!
+ - A subset of HTML is supported for drawing word-wrapped text. Have bold styled words in the middle of a paragraph of text!
    Stick a link in there! Go absolutely hog wild, within the bounds of the defined subset of HTML the module supports.
 
  - Buttons, text entry, scroll bars and drop down menus all supported, with more on the way.
@@ -30,7 +26,7 @@ Features
 Installation
 ------------
 
-Install the latest release from pypi using pip with:
+Install the latest release from PyPi using pip with:
 
 .. code-block:: console
 

@@ -86,7 +86,7 @@ class UIFontDictionary:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist and we have paths
         to the needed files, however it will issue a warning after doing so because dynamic file loading is normally a
-        bad idea as you will get framerate hitches while the running program waits for the font to load.
+        bad idea as you will get frame rate hitches while the running program waits for the font to load.
 
         Instead it's best to preload all your needed files at another time in your program when you have more control
         over the user experience.

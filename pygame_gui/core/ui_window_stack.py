@@ -40,14 +40,14 @@ class UIWindowStack:
         :param window_to_remove: the window to remove.
         """
         if window_to_remove in self.stack:
-            popped_windows_to_readd = []
+            popped_windows_to_add_back = []
             window = self.stack.pop()
             while window != window_to_remove:
-                popped_windows_to_readd.append(window)
+                popped_windows_to_add_back.append(window)
                 window = self.stack.pop()
 
-            popped_windows_to_readd.reverse()
-            for old_window in popped_windows_to_readd:
+            popped_windows_to_add_back.reverse()
+            for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)
 
     def move_window_to_front(self, window_to_front: ui_window.UIWindow):
@@ -58,14 +58,14 @@ class UIWindowStack:
         :param window_to_front: the window to move to the front.
         """
         if window_to_front in self.stack:
-            popped_windows_to_readd = []
+            popped_windows_to_add_back = []
             window = self.stack.pop()
             while window != window_to_front:
-                popped_windows_to_readd.append(window)
+                popped_windows_to_add_back.append(window)
                 window = self.stack.pop()
 
-            popped_windows_to_readd.reverse()
-            for old_window in popped_windows_to_readd:
+            popped_windows_to_add_back.reverse()
+            for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)
 
             self.add_new_window(window_to_front)

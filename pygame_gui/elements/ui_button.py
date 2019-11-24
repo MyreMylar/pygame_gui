@@ -134,7 +134,7 @@ class UIButton(UIElement):
             self.tool_tip.kill()
         super().kill()
 
-    def hover_point(self, x, y) -> bool:
+    def hover_point(self, x: int, y: int) -> bool:
         """
         Tests if a position should be considered 'hovering' the button. Normally this just means our mouse pointer
         is inside the buttons rectangle, however if we are holding onto the button for a purpose(e.g. dragging a window

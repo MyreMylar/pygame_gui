@@ -74,7 +74,8 @@ class UIHorizontalSlider(UIElement):
                                     self.ui_manager, self.ui_container, starting_height=2,
                                     parent_element=self,
                                     object_id='#left_button')
-        self.right_button = UIButton(pygame.Rect((self.background_rect.x + self.background_rect.width - self.button_width,
+        self.right_button = UIButton(pygame.Rect((self.background_rect.x + self.background_rect.width -
+                                                  self.button_width,
                                                   self.background_rect.y),
                                                  (self.button_width, self.background_rect.height)),
                                      '▶',
@@ -140,8 +141,9 @@ class UIHorizontalSlider(UIElement):
             self.left_button.set_dimensions((self.button_width, self.background_rect.height))
 
         if self.right_button is not None:
-            self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width - self.button_width,
-                                            self.background_rect.y)),
+            self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width -
+                                                     self.button_width,
+                                                     self.background_rect.y)),
             self.right_button.set_dimensions((self.button_width, self.background_rect.height))
 
     def kill(self):
@@ -168,14 +170,14 @@ class UIHorizontalSlider(UIElement):
                 self.scroll_position = max(self.scroll_position, self.left_limit_position)
                 x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
                 y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
                 moved_this_frame = True
             elif self.right_button.held and self.scroll_position < self.right_limit_position:
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position, self.right_limit_position)
                 x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
                 y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
                 moved_this_frame = True
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -196,7 +198,7 @@ class UIHorizontalSlider(UIElement):
                                            self.right_limit_position)
                 x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
                 y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
 
                 moved_this_frame = True
             elif not self.sliding_button.held:
@@ -233,7 +235,7 @@ class UIHorizontalSlider(UIElement):
 
                 x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
                 y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.Vector2(x_pos, y_pos))
+                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
                 self.has_moved_recently = True
 
         else:
