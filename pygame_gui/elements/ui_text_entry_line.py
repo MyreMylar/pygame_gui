@@ -3,6 +3,7 @@ import re
 import warnings
 from typing import Union, List
 
+import pygame_gui
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
@@ -459,7 +460,7 @@ class UITextEntryLine(UIElement):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     entry_finished_event = pygame.event.Event(pygame.USEREVENT,
-                                                              {'user_type': 'ui_text_entry_finished',
+                                                              {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
                                                                'text': self.text,
                                                                'ui_element': self,
                                                                'ui_object_id': self.object_ids[-1]})

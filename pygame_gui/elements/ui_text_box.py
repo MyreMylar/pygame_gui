@@ -4,6 +4,7 @@ import math
 
 from typing import Union, Tuple
 
+import pygame_gui
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
@@ -106,7 +107,7 @@ class UITextBox(UIElement):
         ''' The text_wrap_area is the part of the text box that we try to keep the text inside of so that none 
             of it overlaps. Essentially we start with the containing box, subtract the border,  then subtract 
             the padding, then if necessary subtract the width of the scroll bar'''
-        self.rounded_corner_offset = int(self.shape_corner_radius - (math.sin(math.pi/4) * self.shape_corner_radius))
+        self.rounded_corner_offset = int(self.shape_corner_radius - (math.sin(math.pi / 4) * self.shape_corner_radius))
         self.text_wrap_rect = [(self.rect[0] + self.padding[0] + self.border_width +
                                 self.shadow_width + self.rounded_corner_offset),
                                (self.rect[1] + self.padding[1] + self.border_width +
@@ -431,7 +432,8 @@ class UITextBox(UIElement):
                             processed_event = True
                             if chunk.is_selected:
                                 link_clicked_event = pygame.event.Event(pygame.USEREVENT,
-                                                                        {'user_type': 'ui_text_box_link_clicked',
+                                                                        {'user_type':
+                                                                         pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
                                                                          'link_target': chunk.link_href,
                                                                          'ui_element': self,
                                                                          'ui_object_id': self.object_ids[-1]})
@@ -467,15 +469,15 @@ class UITextBox(UIElement):
         if effect_name is None:
             self.active_text_effect = None
         elif type(effect_name) is str:
-            if effect_name == 'typing_appear':
+            if effect_name == pygame_gui.TEXT_EFFECT_TYPING_APPEAR:
                 effect = TypingAppearEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.full_redraw()
-            elif effect_name == 'fade_in':
+            elif effect_name == pygame_gui.TEXT_EFFECT_FADE_IN:
                 effect = FadeInEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.redraw_from_chunks()
-            elif effect_name == 'fade_out':
+            elif effect_name == pygame_gui.TEXT_EFFECT_FADE_OUT:
                 effect = FadeOutEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.redraw_from_chunks()
@@ -638,7 +640,7 @@ class StyledChunk:
         self.is_hovered = False
         self.is_selected = False
 
-        if self.style.underline or (self.is_hovered and self.link_hover_underline) or\
+        if self.style.underline or (self.is_hovered and self.link_hover_underline) or \
                 (self.link_normal_underline and not self.is_hovered):
             self.font.set_underline(True)
 
@@ -741,7 +743,6 @@ class StyledChunk:
 
 
 class TextBlock:
-
     class TextLine:
         def __init__(self):
             self.chunks = []
@@ -861,8 +862,8 @@ class TextBlock:
                         # our chunk is one word, at the start of the line, and the split point is in it, so split the
                         # word instead of hunting for a word split point
                         if split_point > 0:
-                            chunk_1 = [chunk_to_split[0][:split_point-1] + '-', chunk_to_split[1]]
-                            chunk_2 = ["-" + chunk_to_split[0][split_point-1:].lstrip(' '), chunk_to_split[1]]
+                            chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
+                            chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
 
                             chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
                                                                     chunk_2[1].font_name,
@@ -920,7 +921,7 @@ class TextBlock:
                         for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
                             lines_of_chunks[line_index][1].pop()
 
-                        lines_of_chunks.insert(line_index+1, new_line)
+                        lines_of_chunks.insert(line_index + 1, new_line)
                 line_index += 1
 
         surface = None

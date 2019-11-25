@@ -1,6 +1,7 @@
 import pygame
 from typing import Union, List
 
+import pygame_gui
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
@@ -219,7 +220,7 @@ class UIExpandedDropDownState:
                 self.should_transition = True
 
                 drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
-                                                             {'user_type': 'ui_drop_down_menu_changed',
+                                                             {'user_type': pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
                                                               'text': button.text,
                                                               'ui_element': self.drop_down_menu_ui,
                                                               'ui_object_id': self.object_ids[-1]})

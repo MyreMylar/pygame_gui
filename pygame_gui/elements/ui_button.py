@@ -1,4 +1,5 @@
 import pygame
+import pygame_gui
 from typing import Union, Tuple
 
 from pygame_gui import ui_manager
@@ -293,7 +294,7 @@ class UIButton(UIElement):
                             self.pressed_event = True
 
                             button_pressed_event = pygame.event.Event(pygame.USEREVENT,
-                                                                      {'user_type': 'ui_button_pressed',
+                                                                      {'user_type': pygame_gui.UI_BUTTON_PRESSED,
                                                                        'ui_element': self,
                                                                        'ui_object_id': self.object_ids[-1]})
                             pygame.event.post(button_pressed_event)

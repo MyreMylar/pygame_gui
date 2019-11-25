@@ -3,3 +3,4 @@ from pygame_gui import core
 from pygame_gui import elements
 from pygame_gui import windows
 from pygame_gui.elements import text
+from pygame_gui._constants import *
