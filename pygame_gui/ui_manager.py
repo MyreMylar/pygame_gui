@@ -267,8 +267,8 @@ class UIManager:
             self.select_focused_element = ui_element
             self.select_focused_element.select()
 
-            if 'vertical_scroll_bar' in self.select_focused_element.element_ids:
-                self.last_focused_vertical_scrollbar = self.select_focused_element
+            if 'vertical_scroll_bar' in ui_element.element_ids:
+                self.last_focused_vertical_scrollbar = ui_element
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar):
         """

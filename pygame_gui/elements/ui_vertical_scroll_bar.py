@@ -89,7 +89,8 @@ class UIVerticalScrollBar(UIElement):
                                                 object_id="#bottom_button")
 
         scroll_bar_height = int(self.scrollable_height * self.visible_percentage)
-        self.sliding_button = ui_button.UIButton(pygame.Rect(self.sliding_rect_position,
+        self.sliding_button = ui_button.UIButton(pygame.Rect((int(self.sliding_rect_position[0]),
+                                                              int(self.sliding_rect_position[1])),
                                                              (self.background_rect.width,
                                                               scroll_bar_height)),
                                                  '', self.ui_manager,
