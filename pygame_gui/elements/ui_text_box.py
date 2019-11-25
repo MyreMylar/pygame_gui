@@ -607,7 +607,7 @@ class UITextBox(UIElement):
 
 class StyledChunk:
     def __init__(self, font_size, font_name, chunk, style,
-                 color, bg_color, is_link, link_href, link_style, position, font_dictionary):
+                 color, bg_color, is_link, link_href, link_style, position: Tuple[int, int], font_dictionary):
         self.style = style
         self.chunk = chunk
         self.font_size = font_size
@@ -929,13 +929,13 @@ class TextBlock:
         if self.height != -1 and self.width != -1:
             surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        position = [0.0, 0.0]
+        position = [0, 0]
         line_height_acc = 0
         max_line_length = 0
         for line in lines_of_chunks:
             line_chunks = []
             max_line_char_height = 0
-            max_line_ascent = 0.0
+            max_line_ascent = 0
             for chunk in line[1]:
                 new_chunk = StyledChunk(chunk[1].font_size,
                                         chunk[1].font_name,
@@ -946,7 +946,7 @@ class TextBlock:
                                         chunk[1].is_link,
                                         chunk[1].link_href,
                                         self.link_style,
-                                        position,
+                                        (position[0], position[1]),
                                         self.font_dict)
                 position[0] += new_chunk.advance
                 if new_chunk.height > max_line_char_height:
@@ -967,7 +967,7 @@ class TextBlock:
             text_line.max_line_ascent = max_line_ascent
             self.lines.append(text_line)
 
-            position[0] = 0.0
+            position[0] = 0
             position[1] += max_line_char_height
             line_height_acc += max_line_char_height
 

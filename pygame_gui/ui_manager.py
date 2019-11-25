@@ -116,8 +116,15 @@ class UIManager:
 
     def update(self, time_delta: float):
         """
-        From here all our UI elements are updated and it manages which element is currently 'hovered'; which means
-        the mouse pointer is overlapping them.
+        From here all our UI elements are updated and which element is currently 'hovered' is checked; which means
+        the mouse pointer is overlapping them. This is managed centrally so we aren't ever overlapping two elements at
+        once.
+
+        It also updates the shape cache to continue storing already created elements shapes in the long term cache, in
+        case we need them later.
+
+        Finally, if live theme updates are enabled, it checks to see if the theme file has been modified and triggers
+        all the UI elements to rebuild if it has.
 
         :param time_delta: The time passed since the last call to update, in seconds.
         """
