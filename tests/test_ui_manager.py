@@ -108,7 +108,13 @@ class TestUIManager:
         # manager.update(0.01)
 
         manager.draw_ui(test_surface)
-        comparison_surface = pygame.image.load(os.path.join('tests', 'comparison_images', 'test_draw_ui.png')).convert()
+        plat = platform.system().upper()
+        if plat == 'WINDOWS':
+            comparison_surface = pygame.image.load(
+                os.path.join('tests', 'comparison_images', 'test_ui_manager_draw_ui.png')).convert()
+        else:
+            comparison_surface = pygame.image.load(
+                os.path.join('tests', 'comparison_images', 'test_ui_manager_draw_ui_linux.png')).convert()
         test_pixel_array = pygame.PixelArray(test_surface)
         comparison_pixel_array = pygame.PixelArray(comparison_surface)
 
@@ -117,12 +123,8 @@ class TestUIManager:
         test_pixel_array.close()
         comparison_pixel_array.close()
 
-        plat = platform.system().upper()
-        if plat == 'WINDOWS':
-            mismatch_colour = pygame.Color(255, 255, 255, 255)
-        else:
-            mismatch_colour = pygame.Color(255, 255, 255, 255)
-        pixel_mismatch = False
+        mismatch_colour = pygame.Color(255, 255, 255, 255)
+
         for x in range(0, 150):
             for y in range(0, 30):
                 assert result_surface.unmap_rgb(result_pixel_array[x, y]) == mismatch_colour
