@@ -1,21 +1,14 @@
 import os
 import pygame
 import pytest
+
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
-
-@pytest.fixture(scope="module")
-def _init_pygame():
-    pygame.init()
-
-
-@pytest.fixture()
-def default_ui_manager():
-    return UIManager((800, 600))
+from tests.shared_fixtures import _init_pygame, default_ui_manager
 
 
 class TestUIManager:

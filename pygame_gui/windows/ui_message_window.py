@@ -79,7 +79,7 @@ class UIMessageWindow(UIWindow):
                                             object_id='#close_button'
                                             )
 
-        self.dismiss_button = UIButton(relative_rect=pygame.Rect(((self.rect.width / 2) + 45,
+        self.dismiss_button = UIButton(relative_rect=pygame.Rect((int(self.rect.width / 2) + 45,
                                                                   (self.border_rect.height -
                                                                    self.done_button_vertical_start)),
                                                                  (70, 20)),
