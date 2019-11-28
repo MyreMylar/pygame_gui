@@ -1,8 +1,10 @@
+import os
 import pygame
 import pytest
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 
+from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 
 
@@ -59,3 +61,36 @@ class TestUIMessageWindow:
                                          manager=default_ui_manager)
 
         message_window.rebuild()
+
+        assert message_window.image is not None
+
+    def test_rebuild_rounded_rectangle(self, _init_pygame, default_ui_manager):
+        message_window = UIMessageWindow(message_window_rect=pygame.Rect(100, 100, 200, 300),
+                                         message_title="Test Message",
+                                         html_message="This is a bold test of the message box functionality.",
+                                         manager=default_ui_manager)
+
+        message_window.shape_corner_radius = 15
+        message_window.shape_type = 'rounded_rectangle'
+        message_window.rebuild()
+
+        assert message_window.image is not None
+
+    def test_non_default_theme_build(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_message_window_non_default.json"))
+        message_window = UIMessageWindow(message_window_rect=pygame.Rect(100, 100, 200, 300),
+                                         message_title="Test Message",
+                                         html_message="This is a bold test of the message box functionality.",
+                                         manager=manager)
+
+        assert message_window.image is not None
+
+    @pytest.mark.filterwarnings("ignore:Invalid value")
+    def test_bad_values_theme_build(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_message_window_bad_values.json"))
+        message_window = UIMessageWindow(message_window_rect=pygame.Rect(100, 100, 200, 300),
+                                         message_title="Test Message",
+                                         html_message="This is a bold test of the message box functionality.",
+                                         manager=manager)
+
+        assert message_window.image is not None

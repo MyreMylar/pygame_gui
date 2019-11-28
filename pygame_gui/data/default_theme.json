@@ -88,7 +88,10 @@
   {
     "misc":
     {
-      "shadow_width": "15"
+      "shape": "rectangle",
+      "shape_corner_radius": "2",
+      "shadow_width": "15",
+      "border_width": "1"
     }
   },
   "message_window.text_box":

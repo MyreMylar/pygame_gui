@@ -1,0 +1,17 @@
+{
+    "message_window":
+    {
+        "colours":
+        {
+            "dark_bg":"#4850F2",
+            "normal_border": "#FF0045"
+        },
+        "misc":
+        {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "15.6",
+            "shadow_width": "10.5",
+            "border_width": "2.5"
+        }
+    }
+}
