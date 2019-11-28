@@ -1,4 +1,5 @@
 import os
+import platform
 import pygame
 import pytest
 
@@ -116,10 +117,15 @@ class TestUIManager:
         test_pixel_array.close()
         comparison_pixel_array.close()
 
+        plat = platform.system().upper()
+        if plat == 'WINDOWS':
+            mismatch_colour = (255, 255, 255, 255)
+        else:
+            mismatch_colour = (0, 0, 0, 255)
         pixel_mismatch = False
         for x in range(0, 150):
             for y in range(0, 30):
-                if result_pixel_array[x, y] != result_surface.map_rgb((255, 255, 255, 255)):
+                if result_pixel_array[x, y] != result_surface.map_rgb(mismatch_colour):
                     pixel_mismatch = True
                     break
 
