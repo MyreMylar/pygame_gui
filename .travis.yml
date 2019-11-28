@@ -2,7 +2,11 @@ language: python
 python:
   - 3.8
 
-install: python setup.py install
+install:
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install codecov
+  - python setup.py install
 
 env:
   global:
