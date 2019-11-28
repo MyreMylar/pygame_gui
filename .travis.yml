@@ -5,12 +5,11 @@ python:
 install: python setup.py install
 
 env:
-  - CODECOV_TOKEN="d34c6710-eed9-42ff-b9cd-15b0f18fefe2"
   global:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
-script: py.test --cov-report term --cov=pygame_gui
+script: pytest --cov-report term --cov=pygame_gui
 
 after_success:
     - codecov
