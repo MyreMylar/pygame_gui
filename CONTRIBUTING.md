@@ -31,6 +31,7 @@ For building the documentation you will need:
 For running the tests you will need:
 
  - pytest
+ - pytest-cov
  
  
  All should be pip installable.
@@ -40,6 +41,7 @@ For running the tests you will need:
  ====================================================================
  
  1. Do the tests run?
+ `pytest --cov-report term --cov=pygame_gui tests/`
  2. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
  3. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
  
