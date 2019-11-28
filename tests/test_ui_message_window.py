@@ -51,3 +51,11 @@ class TestUIMessageWindow:
         message_window.update(0.01)
 
         assert message_window.grabbed_window is True
+
+    def test_rebuild(self, _init_pygame, default_ui_manager):
+        message_window = UIMessageWindow(message_window_rect=pygame.Rect(100, 100, 200, 300),
+                                         message_title="Test Message",
+                                         html_message="This is a bold test of the message box functionality.",
+                                         manager=default_ui_manager)
+
+        message_window.rebuild()
