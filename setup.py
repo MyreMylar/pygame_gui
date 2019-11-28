@@ -1,9 +1,4 @@
 from setuptools import setup
-from stringify import stringify_py
-
-# will only run when calling: python setup.py install and not when running: pip install . -U
-# that is actually the behaviour we want.
-stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_string_data.py')
 
 
 setup(name='pygame_gui',
@@ -35,3 +30,9 @@ setup(name='pygame_gui',
           'Programming Language :: Python :: 3.8',
       ],
       )
+
+from stringify import stringify_py
+
+# will only run when calling: python setup.py install and not when running: pip install . -U
+# that is actually the behaviour we want.
+stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_string_data.py')
