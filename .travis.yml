@@ -13,7 +13,7 @@ env:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
-script: pytest --cov-report term --cov=pygame_gui
+script: pytest --cov-report=xml --cov=pygame_gui tests/
 
 after_success:
     - codecov
