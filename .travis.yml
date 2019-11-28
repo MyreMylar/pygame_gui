@@ -2,16 +2,19 @@ language: python
 python:
   - 3.8
 
+env:
+  - PYGAME_VERSION=1.9.6
+  - PYGAME_VERSION=2.0.0.dev6
+  global:
+    - SDL_VIDEODRIVER=dummy
+    - SDL_AUDIODRIVER=disk
+
 install:
   - pip install pytest
   - pip install pytest-cov
   - pip install codecov
-  - python setup.py install
-
-env:
-  global:
-    - SDL_VIDEODRIVER=dummy
-    - SDL_AUDIODRIVER=disk
+  - pip install -q pygame==$PYGAME_VERSION
+  - python setup.py -q install
 
 script: pytest --cov-report=xml --cov=pygame_gui tests/
 
