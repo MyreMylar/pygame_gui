@@ -11,3 +11,6 @@ env:
     - SDL_AUDIODRIVER=disk
 
 script: py.test --cov-report term --cov=pygame_gui
+
+after_success:
+    - codecov
