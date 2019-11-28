@@ -3,4 +3,10 @@ python:
   - 3.8
 
 install: python setup.py install
+
+env:
+  global:
+    - SDL_VIDEODRIVER=dummy
+    - SDL_AUDIODRIVER=disk
+    -
 script: pytest
