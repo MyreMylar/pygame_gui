@@ -80,7 +80,7 @@ class DrawableShape:
             else:
                 self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
 
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int]]):
+    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass
 
     def get_surface(self, surface_name):
@@ -214,7 +214,7 @@ class RectDrawableShape(DrawableShape):
         :param point: The point to test.
         :return: True if we are colliding.
         """
-        return bool(self.click_area_shape.collidepoint(point[0], point[1]))
+        return bool(self.click_area_shape.collidepoint(int(point[0]), int(point[1])))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """

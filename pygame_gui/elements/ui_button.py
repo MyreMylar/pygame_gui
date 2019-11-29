@@ -398,8 +398,10 @@ class UIButton(UIElement):
                                      self.rect.y - self.hold_range[1]),
                                     (self.rect.width + (2 * self.hold_range[0]),
                                      self.rect.height + (2 * self.hold_range[1])))
-            if hold_rect.collidepoint(position[0], position[1]):
+            if hold_rect.collidepoint(int(position[0]), int(position[1])):
                 return True
+            else:
+                return False
         else:
             return False
 

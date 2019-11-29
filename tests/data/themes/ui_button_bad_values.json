@@ -1,0 +1,61 @@
+{
+     "button":
+     {
+         "colours":
+         {
+             "normal_bg": "potato",
+             "hovered_bg": "potato",
+             "disabled_bg": "potato",
+             "selected_bg": "potato",
+             "active_bg": "potato",
+             "normal_text": "potato",
+             "hovered_text": "potato",
+             "selected_text": "potato",
+             "disabled_text": "potato",
+             "active_text": "potato",
+             "normal_border": "potato",
+             "hovered_border": "potato",
+             "disabled_border": "potato",
+             "selected_border": "potato",
+             "active_border": "potato"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "images":
+         {
+             "normal_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "0,0,32,32"
+             },
+             "hovered_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "32,0,32,32"
+             },
+             "selected_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "64,0,32,32"
+             },
+             "disabled_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "96,0,32,32"
+             }
+
+         },
+         "misc":
+         {
+             "border_width": "4.0",
+             "shadow_width": "4.0",
+             "tool_tip_delay": "dog",
+             "text_horiz_alignment": "parp",
+             "text_vert_alignment": "5.6",
+             "text_horiz_alignment_padding": "6.9",
+             "text_vert_alignment_padding": "7.2"
+         }
+     }
+ }
