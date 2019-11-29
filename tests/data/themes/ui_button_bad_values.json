@@ -50,6 +50,7 @@
          "misc":
          {
              "shape": "ellipse",
+             "shape_corner_radius": "pogs",
              "border_width": "4.0",
              "shadow_width": "4.0",
              "tool_tip_delay": "dog",
