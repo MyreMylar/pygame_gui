@@ -8,6 +8,7 @@ from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
+from pygame_gui.windows.ui_message_window import UIMessageWindow
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 
@@ -82,14 +83,20 @@ class TestUIManager:
         Fake a click button event on a button to check they are going through the ui event manager properly/
         """
         test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
+        UIMessageWindow(message_window_rect=pygame.Rect(500, 400, 200, 300),
+                        message_title="Test Message",
+                        html_message="This is a bold test of the message box functionality.",
+                        manager=default_ui_manager)
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (125, 115)}))
         assert test_button.is_selected
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, default_ui_manager: UIManager):
         """
         Test update does store button shapes in the long term cache
         """
         UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
+        default_ui_manager.theme_update_acc = 5.0
+        default_ui_manager.get_theme()._theme_file_last_modified = None
         starting_long_term_cache_size = len(default_ui_manager.ui_theme.shape_cache.cache_long_term_lookup)
         default_ui_manager.update(0.01)
         long_term_cache_size_after_update = len(default_ui_manager.ui_theme.shape_cache.cache_long_term_lookup)
@@ -141,6 +148,7 @@ class TestUIManager:
         """
         default_ui_manager.add_font_paths(font_name='roboto', regular_path='tests/data/Roboto-Regular.ttf')
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
+        default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
 
         UITextBox(html_text="<font face=roboto>Test font pre-loading</font>",
                   relative_rect=pygame.Rect(100, 100, 200, 100),
