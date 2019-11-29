@@ -245,10 +245,9 @@ class UIButton(UIElement):
 
         :param dimensions: The new dimensions to set.
         """
-        self.rect.width = dimensions[0]
-        self.rect.height = dimensions[1]
-        self.relative_rect.width = dimensions[0]
-        self.relative_rect.width = dimensions[1]
+        self.rect.width = int(dimensions[0])
+        self.rect.height = int(dimensions[1])
+        self.relative_rect.size = self.rect.size
 
         self.drawable_shape.set_dimensions(self.rect.size)
         self.image = self.drawable_shape.get_surface('normal')
