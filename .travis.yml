@@ -40,7 +40,6 @@ matrix:
       python: 3.8
       env: PYGAME_VERSION=2.0.0.dev6
 
-
 install:
   - python -m pip install pytest
   - python -m pip install pytest-cov
