@@ -49,6 +49,7 @@
          },
          "misc":
          {
+             "shape": "ellipse",
              "border_width": "4.0",
              "shadow_width": "4.0",
              "tool_tip_delay": "dog",

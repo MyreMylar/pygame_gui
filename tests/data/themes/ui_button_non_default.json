@@ -49,6 +49,8 @@
          },
          "misc":
          {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "10",
              "border_width": "4",
              "shadow_width": "4",
              "tool_tip_delay": "6.0",
