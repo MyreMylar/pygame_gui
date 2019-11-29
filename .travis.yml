@@ -10,6 +10,13 @@ matrix:
         - export PATH="/c/Python:/c/Python/Scripts:$PATH"
         - python --version
       env: PYGAME_VERSION=1.9.6
+    - os: windows
+      language: sh
+      before_install:
+        - choco install python3 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python --version
+      env: PYGAME_VERSION=2.0.0.dev6
     - os: linux
       python: 3.5
       env: PYGAME_VERSION=1.9.6
