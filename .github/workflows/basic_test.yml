@@ -1,4 +1,4 @@
-name: Basic test wormkflow
+name: Basic test
 on: [push]
 
 jobs:
