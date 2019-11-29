@@ -1,5 +1,4 @@
-name: Python package
-
+name: Run Tests 
 on: [push]
 
 jobs:
