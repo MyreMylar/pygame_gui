@@ -24,7 +24,7 @@ jobs:
         python -m pip install pytest
         python -m pip install pytest-cov
         python -m pip install codecov
-        python -m pip install -q pygame==pygame-version
+        python -m pip install -q pygame==${{ matrix.pygame-version }}
         python setup.py -q install
     - name: Test with pytest
       env:
