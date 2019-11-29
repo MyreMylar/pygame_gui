@@ -21,6 +21,11 @@ matrix:
         - pyenv rehash
         - pyenv local 3.7.1
         - python --version
+        - pip install pytest
+        - pip install pytest-cov
+        - pip install codecov
+        - pip install -q pygame==$PYGAME_VERSION
+        - python setup.py -q install
       env: PYGAME_VERSION=1.9.6
     - os: linux
       python: 3.5
