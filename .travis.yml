@@ -7,6 +7,7 @@ matrix:
       language: generic
       env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0.dev6
       before_install:
+        - brew update
         # Per the `pyenv homebrew recommendations <https://github.com/yyuu/pyenv/wiki#suggested-build-environment>`_.
         - brew install openssl readline
         # See https://docs.travis-ci.com/user/osx-ci-environment/#A-note-on-upgrading-packages.
