@@ -4,7 +4,7 @@ import pygame
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface
 
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.windows.ui_message_window import UIButton
+from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.core.ui_container import UIContainer
 
 

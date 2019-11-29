@@ -1,5 +1,6 @@
 import pygame
 import pygame.gfxdraw
+import warnings
 from typing import Union, Tuple
 
 from pygame_gui import ui_manager
@@ -96,26 +97,31 @@ class UITooltip(UIElement):
 
         window_rect = self.ui_manager.get_window_stack().get_root_window().get_container().rect
 
-        self.rect.centerx = int(position.x)
-        self.rect.top = int(position.y + self.hover_distance_from_target[1])
+        if window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
+            self.rect.centerx = int(position.x)
+            self.rect.top = int(position.y + self.hover_distance_from_target[1])
 
-        if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x
-            self.text_block.rect.y = self.rect.y
-            return True
-        else:
-            if self.rect.bottom > window_rect.bottom:
-                self.rect.bottom = int(position.y - self.hover_distance_from_target[1])
-            if self.rect.right > window_rect.right:
-                self.rect.right = window_rect.right - self.hover_distance_from_target[0]
-            if self.rect.left < window_rect.left:
-                self.rect.left = window_rect.left + self.hover_distance_from_target[0]
+            if window_rect.contains(self.rect):
+                self.text_block.rect.x = self.rect.x
+                self.text_block.rect.y = self.rect.y
+                return True
+            else:
+                if self.rect.bottom > window_rect.bottom:
+                    self.rect.bottom = int(position.y - self.hover_distance_from_target[1])
+                if self.rect.right > window_rect.right:
+                    self.rect.right = window_rect.right - self.hover_distance_from_target[0]
+                if self.rect.left < window_rect.left:
+                    self.rect.left = window_rect.left + self.hover_distance_from_target[0]
 
-        if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x
-            self.text_block.rect.y = self.rect.y
-            return True
+            if window_rect.contains(self.rect):
+                self.text_block.rect.x = self.rect.x
+                self.text_block.rect.y = self.rect.y
+                return True
+            else:
+                warnings.warn("Unable to fit tool tip on screen")
+                return False
         else:
+            warnings.warn("initial position for tool tip is off screen, unable to find valid position")
             return False
 
     def rebuild_from_changed_theme_data(self):
