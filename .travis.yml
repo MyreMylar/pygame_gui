@@ -1,23 +1,12 @@
 language: python
-python:
-  - 3.5
-  - 3.6
-  - 3.7
-  - 3.8
-
-os:
-  - linux
+sudo: false
 
 env:
-  jobs:
-    - PYGAME_VERSION=1.9.6
-    - PYGAME_VERSION=2.0.0.dev6
   global:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
-# No Travis version of 1.9.6 on Python 3.8 yet
-jobs:
+matrix:
   include:
     - os: osx
       osx_image: xcode7.3
@@ -25,6 +14,8 @@ jobs:
       env: PYGAME_VERSION=2.0.0.dev6
     - os: windows
       language: sh
+      python: 3.7
+      env: PYGAME_VERSION=1.9.6
       before_install:
         - git clone https://github.com/pyenv-win/pyenv-win.git $HOME/.pyenv
         - export PATH="$HOME/.pyenv/pyenv-win/bin:$HOME/.pyenv/pyenv-win/shims:$PATH"
@@ -32,10 +23,29 @@ jobs:
         - pyenv rehash
         - pyenv local 3.7.1
         - python --version
-  exclude:
-  - python: 3.8
-    os: linux
-    env: PYGAME_VERSION=1.9.6
+    - os: linux
+      python: 3.5
+      env: PYGAME_VERSION=1.9.6
+    - os: linux
+        python: 3.5
+        env: PYGAME_VERSION=2.0.0.dev6
+    - os: linux
+        python: 3.6
+        env: PYGAME_VERSION=1.9.6
+    - os: linux
+        python: 3.6
+        env: PYGAME_VERSION=2.0.0.dev6
+    - os: linux
+        python: 3.7
+        env: PYGAME_VERSION=1.9.6
+    - os: linux
+        python: 3.7
+        env: PYGAME_VERSION=2.0.0.dev6
+    # No Travis version of 1.9.6 on Python 3.8 yet
+    - os: linux
+        python: 3.8
+        env: PYGAME_VERSION=2.0.0.dev6
+
 
 install:
   - pip install pytest
