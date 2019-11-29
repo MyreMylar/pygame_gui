@@ -115,7 +115,7 @@ class UIAppearanceTheme:
 
         # Only load  the 'stringified' data if we can't find the actual default theme file
         # This is need for PyInstaller build
-        default_theme_file_path = os.path.normpath(os.path.join(module_root_path, 'data/default_theme.json'))
+        default_theme_file_path = os.path.normpath(os.path.join(module_root_path, 'data','default_theme.json'))
         if os.path.exists(default_theme_file_path):
             self.load_theme(default_theme_file_path)
         else:
@@ -237,10 +237,10 @@ class UIAppearanceTheme:
                         image = self.loaded_image_files[path]
                     else:
                         try:
-                            image = pygame.image.load(path).convert_alpha()
+                            image = pygame.image.load(os.path.normpath(path)).convert_alpha()
                             self.loaded_image_files[path] = image
                         except pygame.error:
-                            warnings.warn('Unable to load image at path: ' + path)
+                            warnings.warn('Unable to load image at path: ' + str(os.path.abspath(path)))
 
                     if image is not None:
                         if 'sub_surface_rect' in image_paths_dict[path_key]:

@@ -123,7 +123,7 @@ class DrawableShape:
         # Draw any themed images
         if image_state_str in self.theming and self.theming[image_state_str] is not None:
             image_rect = self.theming[image_state_str].get_rect()
-            image_rect.center = (self.containing_rect.width / 2, self.containing_rect.height / 2)
+            image_rect.center = (int(self.containing_rect.width / 2), int(self.containing_rect.height / 2))
             self.surfaces[state_str].blit(self.theming[image_state_str], image_rect)
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
@@ -214,7 +214,7 @@ class RectDrawableShape(DrawableShape):
         :param point: The point to test.
         :return: True if we are colliding.
         """
-        return self.click_area_shape.collidepoint(point[0], point[1])
+        return bool(self.click_area_shape.collidepoint(point[0], point[1]))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """

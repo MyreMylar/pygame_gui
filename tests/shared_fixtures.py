@@ -15,3 +15,10 @@ def _init_pygame():
 @pytest.fixture()
 def default_ui_manager():
     return UIManager((800, 600))
+
+
+@pytest.fixture()
+def default_display_surface():
+    display = pygame.display.set_mode((10, 10), depth=32)
+    yield display
+    pygame.display.quit()

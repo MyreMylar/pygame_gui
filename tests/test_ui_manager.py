@@ -130,6 +130,7 @@ class TestUIManager:
                 assert result_surface.unmap_rgb(result_pixel_array[x, y]) == no_mismatch_colour
 
         result_pixel_array.close()
+        pygame.display.quit()
 
     def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager):
         """

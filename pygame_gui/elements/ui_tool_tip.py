@@ -96,8 +96,8 @@ class UITooltip(UIElement):
 
         window_rect = self.ui_manager.get_window_stack().get_root_window().get_container().rect
 
-        self.rect.centerx = position.x
-        self.rect.top = position.y + self.hover_distance_from_target[1]
+        self.rect.centerx = int(position.x)
+        self.rect.top = int(position.y + self.hover_distance_from_target[1])
 
         if window_rect.contains(self.rect):
             self.text_block.rect.x = self.rect.x
@@ -105,7 +105,7 @@ class UITooltip(UIElement):
             return True
         else:
             if self.rect.bottom > window_rect.bottom:
-                self.rect.bottom = position.y - self.hover_distance_from_target[1]
+                self.rect.bottom = int(position.y - self.hover_distance_from_target[1])
             if self.rect.right > window_rect.right:
                 self.rect.right = window_rect.right - self.hover_distance_from_target[0]
             if self.rect.left < window_rect.left:
