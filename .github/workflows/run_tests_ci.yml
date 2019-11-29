@@ -27,8 +27,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov-report=xml --cov=pygame_gui tests/
-    - name: Upload to Code Cov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }} #required
-        file: ./coverage.xml #optional
