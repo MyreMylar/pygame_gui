@@ -23,8 +23,7 @@ matrix:
         - export PYENV_VERSION=$PYTHON
         - export PATH="/Users/travis/.pyenv/shims:${PATH}"
         - pyenv virtualenv py_venv
-        - pyenv virtualenv py_venv
-        - source py_venv/bin/activate
+        - source versions/py_venv/bin/activate
         # A manual check that the correct version of Python is running.
         - python --version
     - os: windows
