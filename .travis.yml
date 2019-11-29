@@ -5,7 +5,7 @@ matrix:
   include:
     - os: osx
       language: generic
-      env: PYTHON=3.7.5 PYGAME_VERSION=1.9.6
+      env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0.dev6
       before_install:
         - brew update
         # Per the `pyenv homebrew recommendations <https://github.com/yyuu/pyenv/wiki#suggested-build-environment>`_.
