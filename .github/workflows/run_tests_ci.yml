@@ -8,8 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
-        pygame-version: [1.9.6, 2.0.0.dev6]
+        python-version: [3.5, 3.6, 3.7]
 
     steps:
     - uses: actions/checkout@v1
@@ -23,7 +22,7 @@ jobs:
         python -m pip install pytest
         python -m pip install pytest-cov
         python -m pip install codecov
-        python -m pip install -q pygame==${{ matrix.pygame-version }}
+        python -m pip install -q pygame==1.9.6
         python setup.py -q install
     - name: Test with pytest
       run: |
