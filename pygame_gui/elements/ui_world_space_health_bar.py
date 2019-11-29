@@ -77,7 +77,7 @@ class UIWorldSpaceHealthBar(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
 
-        self.image = pygame.Surface((self.rect.w, self.rect.h), flags=pygame.SRCALPHA)
+        self.image = pygame.Surface((self.rect.w, self.rect.h), flags=pygame.SRCALPHA, depth=32)
 
         self.rebuild_from_changed_theme_data()
 

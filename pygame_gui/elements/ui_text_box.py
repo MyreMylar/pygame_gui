@@ -183,7 +183,7 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
@@ -207,7 +207,7 @@ class UITextBox(UIElement):
                     height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
                     drawable_area = pygame.Rect((0, height_adjustment),
                                                 (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-                    self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+                    self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
                     self.image.fill(pygame.Color(0, 0, 0, 0))
                     self.image.blit(self.background_surf, (0, 0))
                     self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
@@ -332,7 +332,7 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         self.image.fill(pygame.Color(0, 0, 0, 0))
         self.image.blit(self.background_surf, (0, 0))
         self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
@@ -928,7 +928,7 @@ class TextBlock:
         surface_width = self.width
         surface_height = self.height
         if self.height != -1 and self.width != -1:
-            surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA, depth=32)
 
         position = [0, 0]
         line_height_acc = 0
@@ -982,7 +982,7 @@ class TextBlock:
             else:
                 surface_height = self.height
 
-            surface = pygame.Surface((surface_width, surface_height), pygame.SRCALPHA)
+            surface = pygame.Surface((surface_width, surface_height), pygame.SRCALPHA, depth=32)
 
             for line in self.lines:
                 for chunk in line.chunks:
@@ -1003,7 +1003,7 @@ class TextBlock:
         else:
             final_alpha = 255
 
-        self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA)
+        self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA, depth=32)
 
         if type(self.bg_colour) == ColourGradient:
             self.block_sprite.fill(pygame.Color("#FFFFFFFF"))

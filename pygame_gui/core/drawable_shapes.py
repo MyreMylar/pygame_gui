@@ -111,11 +111,11 @@ class DrawableShape:
         :param rect: A rectangle to apply the colour inside of.
         """
         if rect is not None:
-            colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA)
+            colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
             colour_surface.fill(colour)
             shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
         else:
-            colour_surface = pygame.Surface(shape_surface.get_size(), flags=pygame.SRCALPHA)
+            colour_surface = pygame.Surface(shape_surface.get_size(), flags=pygame.SRCALPHA, depth=32)
             colour_surface.fill(colour)
             shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
@@ -193,7 +193,7 @@ class RectDrawableShape(DrawableShape):
             self.base_surface = self.ui_manager.get_shadow(self.containing_rect.size)
         else:
             self.click_area_shape = self.containing_rect.copy()
-            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA)
+            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
 
         self.compute_aligned_text_rect()
 
@@ -271,7 +271,7 @@ class RectDrawableShape(DrawableShape):
             if self.theming['border_width'] > 0:
 
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
-                    border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA)
+                    border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA, depth=32)
                     border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                     self.surfaces[state_str].blit(border_shape_surface,
                                                   self.border_rect, special_flags=pygame.BLEND_RGBA_SUB)
@@ -281,7 +281,7 @@ class RectDrawableShape(DrawableShape):
                     self.surfaces[state_str].fill(self.theming[border_colour_state_str], self.border_rect)
 
             if type(self.theming[bg_colour_state_str]) == ColourGradient:
-                background_shape_surface = pygame.Surface(self.background_rect.size, flags=pygame.SRCALPHA)
+                background_shape_surface = pygame.Surface(self.background_rect.size, flags=pygame.SRCALPHA, depth=32)
                 background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.surfaces[state_str].blit(background_shape_surface,
                                               self.background_rect, special_flags=pygame.BLEND_RGBA_SUB)
@@ -294,7 +294,7 @@ class RectDrawableShape(DrawableShape):
                 bar_rect = pygame.Rect(self.background_rect.topleft, (self.theming['filled_bar_width'],
                                                                       self.background_rect.height))
                 if type(self.theming['filled_bar']) == ColourGradient:
-                    bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA)
+                    bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA, depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                     self.surfaces[state_str].blit(bar_shape_surface, bar_rect, special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)
@@ -362,7 +362,7 @@ class EllipseDrawableShape(DrawableShape):
                                                            self.theming['shadow_width'], 'ellipse')
         else:
             self.click_area_shape = self.containing_rect.copy()
-            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA)
+            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
 
         self.compute_aligned_text_rect()
 
@@ -459,7 +459,7 @@ class EllipseDrawableShape(DrawableShape):
                                                 self.border_rect.height - (2 * self.theming['border_width'] * aa)))
 
             bab_surface = pygame.Surface((self.containing_rect.width * aa,
-                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA)
+                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.theming['border_width'] > 0:
                 # If we have a border, draw it
@@ -492,7 +492,7 @@ class EllipseDrawableShape(DrawableShape):
             # cut a hole in shadow, then blit background into it
             sub_surface = pygame.Surface(((self.containing_rect.width - (2 * self.theming['shadow_width'])) * aa,
                                           (self.containing_rect.height - (2 * self.theming['shadow_width'])) * aa),
-                                         flags=pygame.SRCALPHA)
+                                         flags=pygame.SRCALPHA, depth=32)
             sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(sub_surface, pygame.Color("#FFFFFFFF"), sub_surface.get_rect())
             small_sub = pygame.transform.smoothscale(sub_surface,
@@ -525,7 +525,7 @@ class EllipseDrawableShape(DrawableShape):
         """
 
         # For the visible AA shape surface we only want to blend in the alpha channel
-        large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA)
+        large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA, depth=32)
         large_shape_surface.fill(pygame.Color('#FFFFFF00'))
         pygame.draw.ellipse(large_shape_surface, pygame.Color("#FFFFFFFF"), large_shape_surface.get_rect())
 
@@ -537,7 +537,7 @@ class EllipseDrawableShape(DrawableShape):
                                         rect.width - 2 * (overlap * aa_amount),
                                         rect.height - 2 * (overlap * aa_amount))
             # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height), flags=pygame.SRCALPHA)
+            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height), flags=pygame.SRCALPHA, depth=32)
             large_sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(large_sub_surface, pygame.Color("#FFFFFFFF"), large_sub_surface.get_rect())
 
@@ -642,7 +642,7 @@ class RoundedRectangleShape(DrawableShape):
                 corner_radius = 0
             self.corner_radius = corner_radius
 
-            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA)
+            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
 
         self.compute_aligned_text_rect()
 
@@ -776,7 +776,7 @@ class RoundedRectangleShape(DrawableShape):
             bg_corner_radius = int(border_corner_radius * dimension_scale)
 
             bab_surface = pygame.Surface((self.containing_rect.width * aa,
-                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA)
+                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.theming['border_width'] > 0:
                 # If we have a border, draw it
@@ -883,7 +883,7 @@ class RoundedRectangleShape(DrawableShape):
 
         # For the visible AA shape surface we only want to blend in the alpha channel
         if self.temp_additive_shape is None:
-            large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA)
+            large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA, depth=32)
             large_shape_surface.fill(pygame.Color('#FFFFFF00'))  # was:
             RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface)
             self.temp_additive_shape = large_shape_surface.copy()
@@ -915,7 +915,7 @@ class RoundedRectangleShape(DrawableShape):
         if subtract_size[0] > 0 and subtract_size[1] > 0:
             if self.temp_subtractive_shape is None:
                 # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-                self.temp_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA)
+                self.temp_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA, depth=32)
                 self.temp_subtractive_shape.fill(pygame.Color('#00000000'))
                 RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radius,
                                                                         self.temp_subtractive_shape,
@@ -932,7 +932,7 @@ class RoundedRectangleShape(DrawableShape):
         if subtract_size[0] > 0 and subtract_size[1] > 0:
             if self.temp_shadow_subtractive_shape is None:
                 # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-                self.temp_shadow_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA)
+                self.temp_shadow_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA, depth=32)
                 self.temp_shadow_subtractive_shape.fill(pygame.Color('#00000000'))
                 RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radius,
                                                                         self.temp_shadow_subtractive_shape,

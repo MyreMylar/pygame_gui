@@ -72,7 +72,7 @@ class UILabel(UIElement):
                                                                                                    height_overlap))
             warnings.warn(warn_text, UserWarning)
 
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
 
         if type(self.bg_colour) != ColourGradient and type(self.text_colour) != ColourGradient:
             self.image.fill(self.bg_colour)

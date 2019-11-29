@@ -725,12 +725,12 @@ class ColourGradient:
 
         if self.colour_3 is None:
             pixel_width = 2
-            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA)
+            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA, depth=32)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
         else:
             pixel_width = 3
-            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA)
+            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA, depth=32)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
@@ -769,7 +769,7 @@ class ColourGradient:
         input_surface_size = input_surface.get_size()
         inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
         gradient_size = inverse_rotated_input.get_rect().size
-        gradient_surf = pygame.Surface(gradient_size, flags=pygame.SRCALPHA)
+        gradient_surf = pygame.Surface(gradient_size, flags=pygame.SRCALPHA, depth=32)
 
         pygame.transform.scale(self.gradient_surface, gradient_size, gradient_surf)
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
@@ -789,7 +789,7 @@ class ShapeCache:
     def __init__(self):
         self.cache_surface_size = (1024, 1024)
         self.cache_surfaces = []
-        self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA)
+        self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
         self.current_surface.fill(pygame.Color('#00000000'))
         self.cache_surfaces.append(self.current_surface)
 
@@ -850,7 +850,7 @@ class ShapeCache:
 
                 elif found_rectangle_to_split is None:
                     # create a new cache surface
-                    self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA)
+                    self.current_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
                     self.current_surface.fill(pygame.Color('#00000000'))
                     self.cache_surfaces.append(self.current_surface)
                     self.free_space_rectangles = [pygame.Rect((0, 0), self.cache_surface_size)]

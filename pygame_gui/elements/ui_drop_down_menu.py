@@ -86,7 +86,7 @@ class UIExpandedDropDownState:
                                                    2 * self.drop_down_menu_ui.shadow_width +
                                                    2 * self.drop_down_menu_ui.border_width))
 
-        self.drop_down_menu_ui.image = pygame.Surface(overall_background_rect.size, flags=pygame.SRCALPHA)
+        self.drop_down_menu_ui.image = pygame.Surface(overall_background_rect.size, flags=pygame.SRCALPHA, depth=32)
         self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'))
 
         theming_parameters = {'normal_bg': self.drop_down_menu_ui.background_colour,

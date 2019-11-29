@@ -135,7 +135,7 @@ class UITextEntryLine(UIElement):
 
         self.background_and_border = self.drawable_shape.get_surface('normal')
 
-        self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA)
+        self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA, depth=32)
         if type(self.background_colour) == ColourGradient:
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
             self.background_colour.apply_gradient_to_surface(self.text_image)
@@ -216,7 +216,7 @@ class UITextEntryLine(UIElement):
 
             if type(self.selected_bg_colour) == ColourGradient:
                 select_size = self.font.size(select_area_text)
-                select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA)
+                select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA, depth=32)
                 select_area_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
                 if type(self.selected_text_colour) != ColourGradient:
@@ -231,7 +231,7 @@ class UITextEntryLine(UIElement):
                                                            self.selected_text_colour, self.selected_bg_colour)
                 else:
                     select_size = self.font.size(select_area_text)
-                    select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA)
+                    select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA, depth=32)
                     select_area_surface.fill(self.selected_bg_colour)
 
                     alpha_text = self.font.render(select_area_text, True, pygame.Color('#FFFFFFFF'))
@@ -252,7 +252,7 @@ class UITextEntryLine(UIElement):
             width_select = select_area_surface.get_rect().width
 
             self.text_surface = pygame.Surface((width_pre + width_select + width_post, text_height),
-                                               flags=pygame.SRCALPHA)
+                                               flags=pygame.SRCALPHA, depth=32)
             if type(self.background_colour) == ColourGradient:
                 self.text_image.fill(pygame.Color("#FFFFFFFF"))
                 self.background_colour.apply_gradient_to_surface(self.text_image)
