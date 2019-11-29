@@ -13,6 +13,12 @@ env:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
+# No Travis version of 1.9.6 on Python 3.8 yet
+jobs:
+  exclude:
+  - python: 3.8
+    env: PYGAME_VERSION=1.9.6
+
 install:
   - pip install pytest
   - pip install pytest-cov
