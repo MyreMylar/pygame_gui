@@ -7,7 +7,6 @@ matrix:
       language: generic
       env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0.dev6
       before_install:
-        - brew update
         # Per the `pyenv homebrew recommendations <https://github.com/yyuu/pyenv/wiki#suggested-build-environment>`_.
         - brew install openssl readline
         # See https://docs.travis-ci.com/user/osx-ci-environment/#A-note-on-upgrading-packages.
@@ -22,6 +21,7 @@ matrix:
         # modify the Bash environment. ??? So, I hand-set the variables instead.
         - export PYENV_VERSION=$PYTHON
         - export PATH="/Users/travis/.pyenv/shims:${PATH}"
+        - pyenv virtualenv py_venv
         - pyenv virtualenv py_venv
         - source py_venv/bin/activate
         # A manual check that the correct version of Python is running.
@@ -76,7 +76,7 @@ env:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
-script: pytest --cov-report=xml --cov=pygame_gui tests/
+script: python -m pytest --cov-report=xml --cov=pygame_gui tests/
 
 after_success:
     - codecov
