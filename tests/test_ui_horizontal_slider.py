@@ -123,7 +123,7 @@ class TestUIVerticalScrollBar:
                                                      "themes", "ui_horizontal_slider_bad_values.json"))
 
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
+                                        start_value=51,
                                         value_range=(0, 100),
                                         manager=manager)
         assert scroll_bar.image is not None
