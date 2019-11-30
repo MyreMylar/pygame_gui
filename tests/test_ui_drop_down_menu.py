@@ -77,6 +77,12 @@ class TestUIDropDownMenu:
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
                               manager=manager)
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+        manager.ui_theme.ui_element_misc_data['drop_down_menu']['expand_direction'] = 'down'
+        menu.rebuild_from_changed_theme_data()
         assert menu.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
