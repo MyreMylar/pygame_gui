@@ -75,6 +75,7 @@ class TestUIVerticalScrollBar:
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                          visible_percentage=0.7,
                                          manager=default_ui_manager)
+        scroll_bar.start_percentage = 0.9
         scroll_bar.set_visible_percentage(0.2)
         assert scroll_bar.visible_percentage == 0.2
 
@@ -93,6 +94,15 @@ class TestUIVerticalScrollBar:
         scroll_bar.kill()
 
         assert scroll_bar.alive() is False and scroll_bar.sliding_button.alive() is False
+
+    def test_process_event(self, _init_pygame, default_ui_manager):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
+                                         visible_percentage=0.7,
+                                         manager=default_ui_manager)
+        scroll_bar.select()
+        assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': 0.5})) is True
+
+        assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5})) is True
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
