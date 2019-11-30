@@ -93,7 +93,8 @@ class UILabel(UIElement):
                 text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(text_render)
 
-        text_render_rect = text_render.get_rect(centerx=self.rect.width / 2, centery=self.rect.height / 2)
+        text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
+                                                centery=int(self.rect.height / 2))
 
         if self.shadow_enabled:
             shadow_text_render = self.font.render(self.text, True, self.text_shadow_colour)

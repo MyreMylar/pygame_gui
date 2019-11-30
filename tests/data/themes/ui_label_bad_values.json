@@ -1,0 +1,25 @@
+{
+    "label":
+    {
+        "colours":
+        {
+            "dark_bg": "#25fF2e,#FF00FF,90",
+            "normal_text": "cat",
+            "text_shadow": "5.0"
+        },
+        "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+        "misc":
+         {
+             "text_shadow": "potato",
+             "text_shadow_size": "4.0",
+             "text_shadow_offset": "fox"
+         }
+    }
+}
