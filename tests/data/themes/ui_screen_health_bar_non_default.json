@@ -1,0 +1,29 @@
+{
+    "screen_space_health_bar":
+    {
+        "colours":
+         {
+             "normal_text": "#000000,#FF0000AA,260",
+             "text_shadow": "#FFFFFF",
+             "border": "#AAAAAA,#FFFFFF,0",
+             "filled_bar": "#f4251b,#FF0000AA,90",
+             "unfilled_bar": "#CCCCCF"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "6",
+             "hover_height": "5",
+             "border_width": "0",
+             "shadow_width": "3"
+         }
+    }
+}

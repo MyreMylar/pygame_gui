@@ -1,0 +1,21 @@
+{
+    "screen_space_health_bar":
+    {
+        "colours":
+         {
+             "normal_text": "5.0",
+             "text_shadow": "grey",
+             "border": "black",
+             "filled_bar": "red",
+             "unfilled_bar": "slipper"
+         },
+         "misc":
+         {
+             "shape": "rounded_wrecktangle",
+             "shape_corner_radius": "6.0",
+             "hover_height": "5.0",
+             "border_width": "flip",
+             "shadow_width": "flop"
+         }
+    }
+}

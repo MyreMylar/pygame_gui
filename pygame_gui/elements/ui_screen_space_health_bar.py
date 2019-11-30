@@ -62,9 +62,9 @@ class UIScreenSpaceHealthBar(UIElement):
 
         if sprite_to_monitor is not None:
             if not hasattr(sprite_to_monitor, 'health_capacity'):
-                raise AttributeError
+                raise AttributeError('Sprite does not have health_capacity attribute')
             if not hasattr(sprite_to_monitor, 'current_health'):
-                raise AttributeError
+                raise AttributeError('Sprite does not have current_health attribute')
             self.sprite_to_monitor = sprite_to_monitor
         else:
             self.sprite_to_monitor = None
@@ -81,9 +81,9 @@ class UIScreenSpaceHealthBar(UIElement):
         :param sprite_to_monitor:
         """
         if not hasattr(sprite_to_monitor, 'health_capacity'):
-            raise AttributeError
+            raise AttributeError('Sprite does not have health_capacity attribute')
         if not hasattr(sprite_to_monitor, 'current_health'):
-            raise AttributeError
+            raise AttributeError('Sprite does not have current_health attribute')
         self.sprite_to_monitor = sprite_to_monitor
 
     def rebuild(self):
@@ -142,22 +142,22 @@ class UIScreenSpaceHealthBar(UIElement):
             self.text_colour.apply_gradient_to_surface(self.foreground_text)
 
         self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=self.rect.width/2,
-                                                      centery=self.rect.height/2 + 1))
+                        self.background_text.get_rect(centerx=int(self.rect.width/2),
+                                                      centery=int(self.rect.height/2) + 1))
         self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=self.rect.width/2,
-                                                      centery=self.rect.height/2 - 1))
+                        self.background_text.get_rect(centerx=int(self.rect.width/2),
+                                                      centery=int(self.rect.height/2) - 1))
 
         self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=self.rect.width/2 + 1,
-                                                      centery=self.rect.height/2))
+                        self.background_text.get_rect(centerx=int(self.rect.width/2) + 1,
+                                                      centery=int(self.rect.height/2)))
         self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=self.rect.width/2 - 1,
-                                                      centery=self.rect.height/2))
+                        self.background_text.get_rect(centerx=int(self.rect.width/2) - 1,
+                                                      centery=int(self.rect.height/2)))
 
         self.image.blit(self.foreground_text,
-                        self.foreground_text.get_rect(centerx=self.rect.width/2,
-                                                      centery=self.rect.height/2))
+                        self.foreground_text.get_rect(centerx=int(self.rect.width/2),
+                                                      centery=int(self.rect.height/2)))
 
     def update(self, time_delta: float):
         """
