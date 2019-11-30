@@ -1,0 +1,18 @@
+{
+    "drop_down_menu":
+    {
+        "colours":
+         {
+             "dark_bg": "#AAAAAA,#FFFFFF,0",
+             "normal_border": "#f4251b,#FF0000AA,90"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "6",
+             "expand_direction": "up",
+             "border_width": "0",
+             "shadow_width": "3"
+         }
+    }
+}

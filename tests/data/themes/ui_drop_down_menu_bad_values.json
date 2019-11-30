@@ -1,0 +1,18 @@
+{
+    "drop_down_menu":
+    {
+        "colours":
+         {
+             "dark_bg": "horse",
+             "normal_border": "splat"
+         },
+         "misc":
+         {
+             "shape": "surrounded_rectangle",
+             "shape_corner_radius": "&&&",
+             "expand_direction": "left",
+             "border_width": "0.6",
+             "shadow_width": "french"
+         }
+    }
+}

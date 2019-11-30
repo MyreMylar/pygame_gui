@@ -43,7 +43,7 @@ class TestUIVerticalScrollBar:
                                         manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
-        scroll_bar.get_current_value() # Clear has moved this turn
+        scroll_bar.get_current_value()  # Clear has moved this turn
         scroll_bar.left_button.held = True
         scroll_bar.update(0.3)
         scroll_bar.left_button.held = False
