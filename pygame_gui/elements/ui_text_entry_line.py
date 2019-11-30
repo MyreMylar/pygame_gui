@@ -161,6 +161,14 @@ class UITextEntryLine(UIElement):
         """
         self.length_limit = limit
 
+    def get_text(self) -> str:
+        """
+        Gets the text in the entry line element.
+
+        :return: A string .
+        """
+        return self.text
+
     def set_text(self, text: str):
         """
         Allows the text displayed in the text entry element to be set via code. Useful for setting an initial or

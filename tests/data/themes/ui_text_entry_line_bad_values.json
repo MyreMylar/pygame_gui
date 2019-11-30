@@ -1,0 +1,29 @@
+{
+     "text_entry_line":
+     {
+         "colours":
+         {
+             "dark_bg": "wild_hogs",
+             "selected_bg": "wild_hogs",
+             "normal_text": "wild_hogs",
+             "selected_text": "wild_hogs",
+             "normal_border": "wild_hogs"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "misc":
+         {
+             "shape": "wild_hogs",
+             "shape_corner_radius": "wild_hogs",
+             "border_width": "wild_hogs",
+             "shadow_width": "wild_hogs",
+             "padding": "wild_hogs"
+         }
+     }
+ }
