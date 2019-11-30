@@ -219,10 +219,7 @@ class UIButton(UIElement):
 
         :param position: The new position to set.
         """
-        self.relative_rect.x = int(position[0])
-        self.relative_rect.y = int(position[1])
-        self.rect.x = self.ui_container.rect.x + self.relative_rect.x
-        self.rect.y = self.ui_container.rect.y + self.relative_rect.y
+        super().set_relative_position(position)
 
         self.drawable_shape.set_position(self.rect.topleft)
 
@@ -232,11 +229,7 @@ class UIButton(UIElement):
 
         :param position: The new position to set.
         """
-        self.rect.x = int(position[0])
-        self.rect.y = int(position[1])
-        self.relative_rect.x = self.rect.x - self.ui_container.rect.x
-        self.relative_rect.y = self.rect.y - self.ui_container.rect.y
-
+        super().set_position(position)
         self.drawable_shape.set_position(self.rect.topleft)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):

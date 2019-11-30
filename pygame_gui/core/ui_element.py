@@ -1,5 +1,5 @@
 import pygame
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from pygame_gui.core import ui_container
 from pygame_gui import ui_manager
@@ -145,6 +145,28 @@ class UIElement(pygame.sprite.Sprite):
         elif self.hovered:
             self.hovered = False
         return hovered_higher_element
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the relative rect position of a button.
+
+        :param position: The new position to set.
+        """
+        self.relative_rect.x = int(position[0])
+        self.relative_rect.y = int(position[1])
+        self.rect.x = self.relative_rect.x + self.ui_container.rect.x
+        self.rect.y = self.relative_rect.y + self.ui_container.rect.y
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the absolute rect position of a button.
+
+        :param position: The new position to set.
+        """
+        self.rect.x = int(position[0])
+        self.rect.y = int(position[1])
+        self.relative_rect.x = self.rect.x - self.ui_container.rect.x
+        self.relative_rect.y = self.rect.y - self.ui_container.rect.y
 
     def on_hovered(self):
         """

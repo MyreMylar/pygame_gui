@@ -271,10 +271,7 @@ class UITextBox(UIElement):
         #                              chunk.rect.size)
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        self.rect.x = self.ui_container.rect.x + position[0]
-        self.rect.y = self.ui_container.rect.y + position[1]
-        self.relative_rect.x = position[0]
-        self.relative_rect.y = position[1]
+        super().set_relative_position(position)
 
         if self.scroll_bar is not None:
             scroll_bar_position = (self.relative_rect.right - self.border_width -
@@ -284,10 +281,7 @@ class UITextBox(UIElement):
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        self.rect.x = position[0]
-        self.rect.y = position[1]
-        self.relative_rect.x = position[0] - self.ui_container.rect.x
-        self.relative_rect.y = position[1] - self.ui_container.rect.y
+        super().set_position(position)
 
         if self.scroll_bar is not None:
             scroll_bar_position = (self.relative_rect.right - self.border_width -

@@ -156,14 +156,6 @@ class UIVerticalScrollBar(UIElement):
             self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
             self.sliding_button.set_hold_range((100, self.background_rect.height))
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        self.rect.x = position[0] + self.ui_container.rect.x
-        self.rect.y = position[1] + self.ui_container.rect.y
-        self.relative_rect.x = position[0]
-        self.relative_rect.y = position[1]
-
-        # we probably need to also set the positions of the buttons here
-
     def check_has_moved_recently(self) -> bool:
         """
         Returns True if the scroll bar was moved in the last call to the update function.
@@ -307,12 +299,12 @@ class UIVerticalScrollBar(UIElement):
         scroll_bar_height = int(self.scrollable_height * self.visible_percentage)
         self.sliding_rect_position.y = (self.rect.y + self.button_height +
                                         self.shadow_width + self.border_width +
-                                        (self.start_percentage * self.scrollable_height))
-        self.sliding_button = ui_button.UIButton(pygame.Rect(self.sliding_rect_position,
-                                                             (self.rect.width -
-                                                              (2 * self.border_width) -
-                                                              (2 * self.shadow_width),
-                                                              scroll_bar_height)),
+                                        int(self.start_percentage * self.scrollable_height))
+        self.sliding_button = ui_button.UIButton(pygame.Rect(int(self.sliding_rect_position[0]),
+                                                             int(self.sliding_rect_position[1]),
+                                                             (self.rect.width - (2 * self.border_width) -
+                                                              (2 * self.shadow_width)),
+                                                             scroll_bar_height),
                                                  '', self.ui_manager,
                                                  container=self.ui_container,
                                                  starting_height=2,

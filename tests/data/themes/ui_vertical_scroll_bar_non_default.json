@@ -1,0 +1,17 @@
+{
+    "vertical_scroll_bar":
+    {
+        "colours":
+         {
+             "border": "#AAAAAA,#FFFFFF,0",
+             "dark_bg": "#f4251b,#FF0000AA,90"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "6",
+             "border_width": "0",
+             "shadow_width": "3"
+         }
+    }
+}

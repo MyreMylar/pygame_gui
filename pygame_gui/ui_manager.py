@@ -87,6 +87,8 @@ class UIManager:
         One of the key things it controls is the currently 'focused' or 'selected' element of which there
         can be only one at a time.
 
+        TODO: Pass 'clicked inside' checks down to elements so we can properly test if clicks are inside shapes or not.
+
         :param event:  pygame.event.Event - the event to process.
         """
         event_handled = False
