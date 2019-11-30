@@ -3,8 +3,8 @@
     {
         "colours":
         {
-            "dark_bg": "#25fF2e,#FF00FF,90",
-            "normal_text": "#00000F,#FF00FF,120",
+            "dark_bg": "#25fF2eAA",
+            "normal_text": "#00000FAA",
             "text_shadow": "#FFFFFF"
         },
         "font":
@@ -17,9 +17,9 @@
          },
         "misc":
          {
-             "text_shadow": "1",
+             "text_shadow": "0",
              "text_shadow_size": "4",
-             "text_shadow_offset": "10,5"
+             "text_shadow_offset": "10.0,5.0"
          }
     }
 }
