@@ -83,7 +83,7 @@ class UIHorizontalSlider(UIElement):
                                      parent_element=self,
                                      object_id='#right_button')
 
-        sliding_x_pos = self.background_rect.x + self.background_rect.width/2 - self.button_width/2
+        sliding_x_pos = int(self.background_rect.x + self.background_rect.width/2 - self.button_width/2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos,
                                                     self.background_rect.y),
                                                    (self.button_width, self.background_rect.height)),
@@ -130,7 +130,7 @@ class UIHorizontalSlider(UIElement):
         self.scroll_position = self.scrollable_width / 2
 
         if self.sliding_button is not None:
-            sliding_x_pos = self.background_rect.x + self.background_rect.width / 2 - self.button_width / 2
+            sliding_x_pos = int(self.background_rect.x + self.background_rect.width / 2 - self.button_width / 2)
             self.sliding_button.set_relative_position((sliding_x_pos, self.background_rect.y))
             self.sliding_button.set_dimensions((self.button_width, self.background_rect.height))
             self.sliding_button.set_hold_range((self.background_rect.width, 100))

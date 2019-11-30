@@ -1,0 +1,17 @@
+{
+    "horizontal_slider":
+    {
+        "colours":
+         {
+             "border": "horse",
+             "dark_bg": "patrol"
+         },
+         "misc":
+         {
+             "shape": "grounded_drecktangle",
+             "shape_corner_radius": "cow",
+             "border_width": "0.0",
+             "shadow_width": "3.0"
+         }
+    }
+}
