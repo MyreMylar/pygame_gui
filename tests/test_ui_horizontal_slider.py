@@ -11,14 +11,14 @@ from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
 class TestUIVerticalScrollBar:
 
     def test_creation(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
         assert scroll_bar.image is not None
 
     def test_rebuild(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -26,7 +26,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.image is not None
 
     def test_check_has_moved_recently(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -37,7 +37,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.has_moved_recently is True
 
     def test_check_update_buttons(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -52,13 +52,13 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.has_moved_recently is True
 
     def test_check_update_sliding_bar(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
-        pygame.mouse.set_pos((15, 100))
+        pygame.mouse.set_pos((100, 15))
         scroll_bar.sliding_button.held = True
         scroll_bar.update(0.3)
 
@@ -70,7 +70,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.grabbed_slider is False
 
     def test_kill(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -81,7 +81,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.alive() is False and scroll_bar.sliding_button.alive() is False
 
     def test_get_current_value(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -89,7 +89,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.get_current_value() == 50
 
     def test_set_current_value_in_range(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -98,7 +98,7 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.get_current_value() == 75
 
     def test_set_current_value_out_of_range(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
@@ -110,7 +110,7 @@ class TestUIVerticalScrollBar:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_horizontal_slider_non_default.json"))
 
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=manager)
@@ -122,7 +122,7 @@ class TestUIVerticalScrollBar:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_horizontal_slider_bad_values.json"))
 
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 30, 150),
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=manager)
