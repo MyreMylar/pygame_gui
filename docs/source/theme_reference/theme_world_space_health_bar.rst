@@ -50,7 +50,7 @@ Here is an example of a world space health bar block in a JSON theme file using 
             "misc":
             {
                 "hover_height": "5",
-                "border_width": 0
+                "border_width": "0"
             }
         }
     }

@@ -1,0 +1,19 @@
+{
+    "world_space_health_bar":
+    {
+        "colours":
+         {
+             "border": "#AAAAAA,#FFFFFF,0",
+             "filled_bar": "#f4251b,#FF0000AA,90",
+             "unfilled_bar": "#CCCCCF"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "6",
+             "hover_height": "5",
+             "border_width": "0",
+             "shadow_width": "3"
+         }
+    }
+}

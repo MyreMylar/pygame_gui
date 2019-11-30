@@ -6,7 +6,6 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_label import UILabel
-from pygame_gui.core.ui_container import UIContainer
 
 
 class TestUILabel:

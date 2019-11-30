@@ -27,6 +27,7 @@ class UIWorldSpaceHealthBar(UIElement):
             super().__init__(*groups)
             self.current_health = 50
             self.health_capacity = 100
+            self.rect = pygame.Rect(0, 0, 32, 64)
 
     def __init__(self, relative_rect: pygame.Rect,
                  sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
@@ -77,7 +78,7 @@ class UIWorldSpaceHealthBar(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
 
-        self.image = pygame.Surface((self.rect.w, self.rect.h), flags=pygame.SRCALPHA, depth=32)
+        self.image = None
 
         self.rebuild_from_changed_theme_data()
 
