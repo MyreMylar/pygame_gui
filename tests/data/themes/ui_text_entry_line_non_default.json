@@ -4,9 +4,9 @@
          "colours":
          {
              "dark_bg": "#25f92e,#FFFFFF,90",
-             "selected_bg": "#25f92e",
-             "normal_text": "#cfcbd8",
-             "selected_text": "#F0FFFF",
+             "selected_bg": "#25f92e,#70A040,90",
+             "normal_text": "#cfcbd8,#70A040,90",
+             "selected_text": "#F0FFFF,#70A040,90",
              "normal_border": "#AA0AAA"
          },
          "font":

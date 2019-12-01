@@ -3,11 +3,11 @@
      {
          "colours":
          {
-             "dark_bg": "wild_hogs",
-             "selected_bg": "wild_hogs",
-             "normal_text": "wild_hogs",
-             "selected_text": "wild_hogs",
-             "normal_border": "wild_hogs"
+             "dark_bg": "#25f92e,#FFFFFF,90",
+             "selected_bg": "#25f92e,#70A040,90",
+             "normal_text": "#cfcbd8",
+             "selected_text": "#F0FFFF",
+             "normal_border": "#25f92e,#70A040,90"
          },
          "font":
          {
