@@ -90,10 +90,11 @@ env:
     - SDL_AUDIODRIVER=disk
 
 
-script: if [[ "$TRAVIS_OS_NAME" == "linux" ]];
-        then xvfb-run pytest;
-        else python -m pytest --cov-report=xml --cov=pygame_gui tests/
-        fi
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];
+    then xvfb-run pytest;
+    else python -m pytest --cov-report=xml --cov=pygame_gui tests/;
+    fi
 
 after_success:
     - codecov
