@@ -1,7 +1,25 @@
+import atexit
+import os
+import sys
 from setuptools import setup
+from setuptools.command.install import install
+from setuptools.command.develop import develop
 
 
-setup(name='pygame_gui',
+class DevelopOnlyInstall(develop):
+    def run(self):
+        def _post_install():
+            from stringify import stringify_py
+
+            stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_string_data.py')
+
+        atexit.register(_post_install)
+        develop.run(self)
+
+
+setup(
+      cmdclass={'develop': DevelopOnlyInstall},
+      name='pygame_gui',
       version='0.4.0',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. Features HTML-style text formatting, "
@@ -31,8 +49,4 @@ setup(name='pygame_gui',
       ],
       )
 
-from stringify import stringify_py
 
-# will only run when calling: python setup.py install and not when running: pip install . -U
-# that is actually the behaviour we want.
-stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_string_data.py')
