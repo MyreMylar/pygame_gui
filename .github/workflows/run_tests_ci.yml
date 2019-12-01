@@ -34,7 +34,7 @@ jobs:
         SDL_VIDEODRIVER: dummy
         SDL_AUDIODRIVER: disk
       run: |
-        xvfb pytest --cov-report=xml --cov=pygame_gui tests/
+        xvfb-run pytest --cov-report=xml --cov=pygame_gui tests/
     - name: Upload to Code Cov
       uses: codecov/codecov-action@v1
       with:
