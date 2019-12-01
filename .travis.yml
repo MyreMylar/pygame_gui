@@ -7,6 +7,7 @@ if: if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     apt:
       packages:
         - xclip
+        - xsel
         - xvfb
 
 jobs:
