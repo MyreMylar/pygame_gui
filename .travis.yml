@@ -1,7 +1,13 @@
 language: python
-
 os:
   - linux
+
+if: if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  addons:
+    apt:
+      packages:
+        - xclip
+        - xvfb
 
 jobs:
   include:
@@ -83,7 +89,11 @@ env:
     - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
-script: python -m pytest --cov-report=xml --cov=pygame_gui tests/
+
+script: if [[ "$TRAVIS_OS_NAME" == "linux" ]];
+        then xvfb-run pytest;
+        else python -m pytest --cov-report=xml --cov=pygame_gui tests/
+        fi
 
 after_success:
     - codecov
