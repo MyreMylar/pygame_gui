@@ -2,13 +2,12 @@ language: python
 os:
   - linux
 
-if: [[ "$TRAVIS_OS_NAME" == "linux" ]]
-  addons:
-    apt:
-      packages:
-        - xclip
-        - xsel
-        - xvfb
+addons:
+  apt:
+    packages:
+      - xclip
+      - xsel
+      - xvfb
 
 jobs:
   include:
