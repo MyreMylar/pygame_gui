@@ -130,13 +130,14 @@ if plat == 'WINDOWS':
 elif plat == 'LINUX':
 
     def __linux_copy(data: str):
-        process = subprocess.Popen(['xsel', '-bi'], stdin=subprocess.PIPE)
-        process.communicate(data.encode('utf-8'))
+        process = subprocess.Popen(['xsel', '-b', '-i'], stdin=subprocess.PIPE, close_fds=True)
+        process.communicate(input=data.encode('utf-8'))
 
 
     def __linux_paste():
-        return subprocess.check_output(
-            ['xsel', '-o'], env={'LANG': 'en_US.UTF-8'}).decode('utf-8')
+        process = subprocess.Popen(['xsel', '-b', '-o'], stdout=subprocess.PIPE, close_fds=True)
+        stdout, stderr = process.communicate()
+        return stdout.decode('utf-8')
 
 else:
     def __mac_copy(data: str):
