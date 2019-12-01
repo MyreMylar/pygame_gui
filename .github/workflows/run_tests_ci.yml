@@ -29,6 +29,7 @@ jobs:
         python setup.py -q install
         sudo apt-get install xvfb
         sudo apt-get install xclip
+        sudo apt-get install xsel
     - name: Test with pytest
       env:
         SDL_VIDEODRIVER: dummy
