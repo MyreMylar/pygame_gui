@@ -1,0 +1,31 @@
+{
+     "text_box":
+     {
+         "colours":
+         {
+             "dark_bg": "#25f92e,#FFFFFF,90",
+             "link_text": "#FF0000",
+             "link_hover": "#FFFF00",
+             "link_selected": "#FFFFFF",
+             "normal_border": "#AA0AAA"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "10",
+             "border_width": "4",
+             "shadow_width": "4",
+             "padding": "6,3",
+             "link_normal_underline": "0",
+             "link_hover_underline": "1"
+         }
+     }
+ }

@@ -1,0 +1,31 @@
+{
+     "text_box":
+     {
+         "colours":
+         {
+             "dark_bg": "horse",
+             "link_text": "horse",
+             "link_hover": "horse",
+             "link_selected": "horse",
+             "normal_border": "horse"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "misc":
+         {
+             "shape": "horse",
+             "shape_corner_radius": "horse",
+             "border_width": "horse",
+             "shadow_width": "horse",
+             "padding": "horse",
+             "link_normal_underline": "horse",
+             "link_hover_underline": "horse"
+         }
+     }
+ }
