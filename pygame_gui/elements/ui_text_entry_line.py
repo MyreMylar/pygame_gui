@@ -477,6 +477,7 @@ class UITextEntryLine(UIElement):
                     self.select_range = [0, len(self.text)]
                     self.edit_position = len(self.text)
                     self.cursor_has_moved_recently = True
+                    processed_event = True
                 elif event.key == pygame.K_x and event.mod & pygame.KMOD_CTRL:
                     if abs(self.select_range[0] - self.select_range[1]) > 0:
                         low_end = min(self.select_range[0], self.select_range[1])
@@ -486,11 +487,13 @@ class UITextEntryLine(UIElement):
                         self.edit_position = low_end
                         self.select_range = [0, 0]
                         self.cursor_has_moved_recently = True
+                        processed_event = True
                 elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL:
                     if abs(self.select_range[0] - self.select_range[1]) > 0:
                         low_end = min(self.select_range[0], self.select_range[1])
                         high_end = max(self.select_range[0], self.select_range[1])
                         clipboard_copy(self.text[low_end:high_end])
+                        processed_event = True
                 elif event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
                     new_text = clipboard_paste()
                     if self.validate_text_string(new_text):

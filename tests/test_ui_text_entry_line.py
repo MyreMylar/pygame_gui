@@ -7,6 +7,8 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 
+from pygame_gui.core.utility import clipboard_paste
+
 
 class TestUITextEntryLine:
 
@@ -58,8 +60,21 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=manager)
 
-        text_entry.set_text("GOLD")
-        text_entry.select_range = [0, 2]
+        text_entry.set_text("GOLDEN GOD")
+        text_entry.select_range = [4, 7]
+        text_entry.rebuild()
+
+        assert text_entry.image is not None
+
+    def test_set_text_rebuild_select_area_3(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default_2.json"))
+
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.set_text("GOLDEN GOD")
+        text_entry.select_range = [4, 7]
         text_entry.rebuild()
 
         assert text_entry.image is not None
@@ -107,8 +122,8 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_process_event_text_entered(self, _init_pygame: None, default_ui_manager: UIManager,
-                                        _display_surface_return_none: None):
+    def test_process_event_text_entered_success(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                _display_surface_return_none: None):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -123,7 +138,101 @@ class TestUITextEntryLine:
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_n, 'mod': 0,
                                                                      'unicode': 'n'}))
 
-        assert text_entry.get_text() == 'dan'
+        assert processed_key_event and text_entry.get_text() == 'dan'
+
+    def test_process_event_text_entered_too_long(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                 _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text_length_limit(3)
+        text_entry.select()
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_t, 'mod': 0,
+                                                                     'unicode': 't'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_e, 'mod': 0,
+                                                                     'unicode': 'e'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_s, 'mod': 0,
+                                                                     'unicode': 's'}))
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_s, 'mod': 0,
+                                                                           'unicode': 't'}))
+
+        assert processed_key_event is False and text_entry.get_text() == 'tes'
+
+    def test_process_event_text_ctrl_c(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+        text_entry.select_range = [0, 3]
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'c'}))
+
+        assert processed_key_event and clipboard_paste() == 'dan'
+
+    def test_process_event_text_ctrl_v(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+        text_entry.select_range = [0, 3]
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'c'}))
+        text_entry.select_range = [0, 0]
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'v'}))
+
+        assert processed_key_event and text_entry.get_text() == 'dandan'
+
+    def test_process_event_text_ctrl_a(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_a, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'a'}))
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,{'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                    'unicode': 'c'}))
+
+        text_entry.select_range = [0, 0]
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,{'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                    'unicode': 'v'}))
+
+        assert processed_key_event and text_entry.get_text() == 'dandan'
+
+    def test_process_event_text_ctrl_x(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_a, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'a'}))
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_x, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'x'}))
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'v'}))
+
+        assert processed_key_event and clipboard_paste() == 'dan'
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
