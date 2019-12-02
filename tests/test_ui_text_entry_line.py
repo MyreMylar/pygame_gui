@@ -368,6 +368,20 @@ class TestUITextEntryLine:
 
         assert (processed_down_event and processed_up_event and text_entry.select_range == [7, 14])
 
+    def test_process_event_mouse_button_double_click_in_empty_space(self, _init_pygame: None,
+                                                                    default_ui_manager: UIManager,
+                                                                    _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('                      dan')
+        processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                           {'button': 1, 'pos': (90, 15)}))
+        processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                         {'button': 1, 'pos': (90, 15)}))
+
+        assert (processed_down_event and processed_up_event and text_entry.select_range == [0, 1])
+
     def test_process_event_mouse_button_double_click_first_word(self, _init_pygame: None,
                                                                 default_ui_manager: UIManager,
                                                                 _display_surface_return_none: None):
@@ -582,14 +596,27 @@ class TestUITextEntryLine:
         with pytest.warns(UserWarning, match="Trying to set forbidden characters by type string, but no match"):
             text_entry.set_forbidden_characters('dan')
 
+    @pytest.mark.filterwarnings("ignore:Invalid value")
+    @pytest.mark.filterwarnings("ignore:Colour hex code")
     def test_redraw_selected_text(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
-                                                     "themes", "ui_text_entry_line_non_default.json"))
+                                                     "themes", "ui_text_entry_line_bad_values.json"))
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=manager)
 
         text_entry.set_text("Yellow su")
         text_entry.select_range = [3, 8]
+        self.start_text_offset = 500
+        text_entry.redraw()
+
+    def test_redraw_selected_text_different_them(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default_2.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.set_text("Yellow su")
+        text_entry.select_range = [3, 9]
         text_entry.redraw()
 
     def test_update(self,  _init_pygame):
@@ -599,6 +626,30 @@ class TestUITextEntryLine:
                                      manager=manager)
 
         text_entry.update(0.01)
+
+    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                     manager=manager)
+
+        text_entry.set_text('Wow testing is great so amazing')
+        text_entry.select()
+
+        processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                           {'button': 1, 'pos': (30, 15)}))
+        pygame.mouse.set_pos(70, 15)
+
+        text_entry.update(0.01)
+
+    def test_update_after_long_wait(self,  _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.update(0.01)
+        text_entry.update(5.0)
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
