@@ -366,7 +366,7 @@ class TestUITextEntryLine:
         processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                          {'button': 1, 'pos': (90, 15)}))
 
-        assert (processed_down_event and processed_up_event and text_entry.select_range == [3, 9])
+        assert (processed_down_event and processed_up_event and text_entry.select_range == [7, 14])
 
     def test_process_event_mouse_button_up_outside(self, _init_pygame: None, default_ui_manager: UIManager,
                                                    _display_surface_return_none: None):
@@ -376,10 +376,9 @@ class TestUITextEntryLine:
         text_entry.set_text('dan is amazing')
         processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                            {'button': 1, 'pos': (30, 15)}))
-        processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
-                                                                         {'button': 1, 'pos': (80, 50)}))
+        text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (80, 50)}))
 
-        assert (processed_down_event and processed_up_event and text_entry.select_range == [3, 9])
+        assert processed_down_event and text_entry.selection_in_progress is False
 
     def test_process_event_text_return(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
