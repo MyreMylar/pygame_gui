@@ -140,6 +140,52 @@ class TestUITextEntryLine:
 
         assert processed_key_event and text_entry.get_text() == 'dan'
 
+    def test_process_event_text_entered_forbidden(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                  _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.select()
+
+        text_entry.set_forbidden_characters(['d', 'a', 'n'])
+        # process a mouse button down event
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_d, 'mod': 0,
+                                                                           'unicode': 'd'}))
+
+        assert processed_key_event == False and text_entry.get_text() == ''
+
+    def test_process_event_text_entered_not_allowed(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                    _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.select()
+
+        text_entry.set_allowed_characters(['d', 'a', 'n'])
+        # process a mouse button down event
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_o, 'mod': 0,
+                                                                           'unicode': 'o'}))
+
+        assert processed_key_event is False and text_entry.get_text() == ''
+
+    def test_process_event_text_entered_with_select_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                    _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('Hours and hours of fun writing tests')
+        text_entry.select()
+        text_entry.select_range = [1, 9]
+
+        # process a mouse button down event
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_o, 'mod': 0,
+                                                                           'unicode': 'o'}))
+
+        assert processed_key_event is True and text_entry.get_text() == 'Ho hours of fun writing tests'
+
     def test_process_event_text_entered_too_long(self, _init_pygame: None, default_ui_manager: UIManager,
                                                  _display_surface_return_none: None):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -196,6 +242,24 @@ class TestUITextEntryLine:
                                                                            'unicode': 'v'}))
 
         assert processed_key_event and text_entry.get_text() == 'danan'
+
+    def test_process_event_text_ctrl_v_select_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                    _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+        text_entry.select_range = [1, 3]
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'c'}))
+        text_entry.select_range = [0, 3]
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'v'}))
+
+        assert processed_key_event and text_entry.get_text() == 'an'
 
     def test_process_event_text_ctrl_a(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
@@ -264,6 +328,60 @@ class TestUITextEntryLine:
 
         assert processed_key_event
 
+    def test_process_event_text_right(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT}))
+
+        assert processed_key_event
+
+    def test_process_event_text_left(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT}))
+
+        assert processed_key_event
+
+    def test_process_event_text_right_select_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+        text_entry.select_range = [0, 2]
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT}))
+
+        assert processed_key_event
+
+    def test_process_event_text_left_select_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                  _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+        text_entry.select_range = [0, 2]
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT}))
+
+        assert processed_key_event
+
     def test_set_allowed_characters_numbers(self, _init_pygame, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
@@ -277,7 +395,7 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.set_allowed_characters(['D','A','N'])
+        text_entry.set_allowed_characters(['D', 'A', 'N'])
         with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
             text_entry.set_text("HORSE")
             assert text_entry.get_text() == ""
@@ -288,6 +406,31 @@ class TestUITextEntryLine:
 
         with pytest.warns(UserWarning, match="Trying to set allowed characters by type string, but no match"):
             text_entry.set_allowed_characters('dan')
+
+    def test_set_forbidden_characters_file_path(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_forbidden_characters('forbidden_file_path')
+        with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
+            text_entry.set_text(">:<")
+            assert text_entry.get_text() == ""
+
+    def test_set_forbidden_characters_anything(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_forbidden_characters(['D', 'A', 'N'])
+        with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
+            text_entry.set_text("DAN")
+            assert text_entry.get_text() == ""
+
+    def test_set_forbidden_characters_invalid_id(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        with pytest.warns(UserWarning, match="Trying to set forbidden characters by type string, but no match"):
+            text_entry.set_forbidden_characters('dan')
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",

@@ -658,6 +658,9 @@ class UITextEntryLine(UIElement):
                 self.forbidden_characters = UITextEntryLine._number_character_set
             elif forbidden_characters == 'forbidden_file_path':
                 self.forbidden_characters = UITextEntryLine._forbidden_file_path_characters
+            else:
+                warnings.warn('Trying to set forbidden characters by type string, but no match: '
+                              'did you mean to use a list?')
 
         else:
             self.forbidden_characters = forbidden_characters.copy()
