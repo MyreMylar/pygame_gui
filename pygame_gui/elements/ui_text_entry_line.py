@@ -635,6 +635,9 @@ class UITextEntryLine(UIElement):
         if type(allowed_characters) is str:
             if allowed_characters == 'numbers':
                 self.allowed_characters = UITextEntryLine._number_character_set
+            else:
+                warnings.warn('Trying to set allowed characters by type string, but no match: '
+                              'did you mean to use a list?')
 
         else:
             self.allowed_characters = allowed_characters.copy()

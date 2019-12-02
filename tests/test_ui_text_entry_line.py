@@ -282,6 +282,13 @@ class TestUITextEntryLine:
             text_entry.set_text("HORSE")
             assert text_entry.get_text() == ""
 
+    def test_set_allowed_characters_invalid_id(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        with pytest.warns(UserWarning, match="Trying to set allowed characters by type string, but no match"):
+            text_entry.set_allowed_characters('dan')
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_entry_line_non_default.json"))
