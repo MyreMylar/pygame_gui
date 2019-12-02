@@ -209,12 +209,12 @@ class TestUITextEntryLine:
                                                                           {'key': pygame.K_a, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'a'}))
 
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,{'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
-                                                                    'unicode': 'c'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'c'}))
 
         text_entry.select_range = [0, 0]
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,{'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
-                                                                    'unicode': 'v'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'v'}))
 
         assert processed_key_event and text_entry.get_text() == 'dandan'
 
@@ -263,6 +263,24 @@ class TestUITextEntryLine:
                                                                           {'key': pygame.K_RETURN}))
 
         assert processed_key_event
+
+    def test_set_allowed_characters_numbers(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_allowed_characters('numbers')
+        with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
+            text_entry.set_text("one two three")
+            assert text_entry.get_text() == ""
+
+    def test_set_allowed_characters_anything(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_allowed_characters(['D','A','N'])
+        with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
+            text_entry.set_text("HORSE")
+            assert text_entry.get_text() == ""
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
