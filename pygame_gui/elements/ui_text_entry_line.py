@@ -458,6 +458,7 @@ class UITextEntryLine(UIElement):
                     processed_event = True
                     new_edit_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + mouse_x)
                     if new_edit_pos != self.edit_position:
+                        self.edit_position = new_edit_pos
                         self.cursor_has_moved_recently = True
                         self.select_range[1] = self.edit_position
                     self.selection_in_progress = False
@@ -473,6 +474,7 @@ class UITextEntryLine(UIElement):
                                                                'ui_element': self,
                                                                'ui_object_id': self.object_ids[-1]})
                     pygame.event.post(entry_finished_event)
+                    processed_event = True
                 elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                     self.select_range = [0, len(self.text)]
                     self.edit_position = len(self.text)

@@ -160,10 +160,12 @@ class TestUITextEntryLine:
 
         assert processed_key_event is False and text_entry.get_text() == 'tes'
 
-    def test_process_event_text_ctrl_c(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_process_event_text_ctrl_c(self, _init_pygame: None,
                                        _display_surface_return_none: None):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default_2.json"))
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                     manager=default_ui_manager)
+                                     manager=manager)
 
         text_entry.set_text('dan')
         text_entry.select()
@@ -172,6 +174,8 @@ class TestUITextEntryLine:
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'c'}))
+
+        text_entry.redraw_cursor()
 
         assert processed_key_event and clipboard_paste() == 'dan'
 
@@ -182,7 +186,7 @@ class TestUITextEntryLine:
 
         text_entry.set_text('dan')
         text_entry.select()
-        text_entry.select_range = [0, 3]
+        text_entry.select_range = [1, 3]
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
                                                                      'unicode': 'c'}))
@@ -191,7 +195,7 @@ class TestUITextEntryLine:
                                                                           {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'v'}))
 
-        assert processed_key_event and text_entry.get_text() == 'dandan'
+        assert processed_key_event and text_entry.get_text() == 'danan'
 
     def test_process_event_text_ctrl_a(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
@@ -233,6 +237,32 @@ class TestUITextEntryLine:
                                                                      'unicode': 'v'}))
 
         assert processed_key_event and clipboard_paste() == 'dan'
+
+    def test_process_event_mouse_buttons(self, _init_pygame: None, default_ui_manager: UIManager,
+                                         _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan is amazing')
+        processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                           {'button': 1, 'pos': (30, 15)}))
+        processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                                         {'button': 1, 'pos': (80, 15)}))
+
+        assert (processed_down_event and processed_up_event and text_entry.select_range == [3, 9])
+
+    def test_process_event_text_return(self, _init_pygame: None, default_ui_manager: UIManager,
+                                       _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.select()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RETURN}))
+
+        assert processed_key_event
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
