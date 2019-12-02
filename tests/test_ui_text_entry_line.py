@@ -651,6 +651,21 @@ class TestUITextEntryLine:
         text_entry.update(0.01)
         text_entry.update(5.0)
 
+    def test_update_cursor_blink(self,  _init_pygame, _display_surface_return_none: None):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.select()
+        text_entry.cursor_blink_delay_after_moving_acc = 10.0
+        text_entry.update(0.01)
+        text_entry.blink_cursor_time_acc = 10.0
+        text_entry.update(0.01)
+        text_entry.blink_cursor_time_acc = 10.0
+        text_entry.update(0.01)
+
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_entry_line_non_default.json"))
