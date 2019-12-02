@@ -220,7 +220,7 @@ class TestUITextEntryLine:
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'c'}))
-
+        text_entry.cursor_on = True
         text_entry.redraw_cursor()
 
         assert processed_key_event and clipboard_paste() == 'dan'
@@ -367,6 +367,20 @@ class TestUITextEntryLine:
                                                                          {'button': 1, 'pos': (90, 15)}))
 
         assert (processed_down_event and processed_up_event and text_entry.select_range == [7, 14])
+
+    def test_process_event_mouse_button_double_click_first_word(self, _init_pygame: None,
+                                                                default_ui_manager: UIManager,
+                                                                _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan is amazing')
+        processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                           {'button': 1, 'pos': (15, 15)}))
+        processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                         {'button': 1, 'pos': (15, 15)}))
+
+        assert (processed_down_event and processed_up_event and text_entry.select_range == [0, 3])
 
     def test_process_event_mouse_button_up_outside(self, _init_pygame: None, default_ui_manager: UIManager,
                                                    _display_surface_return_none: None):
@@ -567,6 +581,24 @@ class TestUITextEntryLine:
 
         with pytest.warns(UserWarning, match="Trying to set forbidden characters by type string, but no match"):
             text_entry.set_forbidden_characters('dan')
+
+    def test_redraw_selected_text(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.set_text("Yellow su")
+        text_entry.select_range = [3, 8]
+        text_entry.redraw()
+
+    def test_update(self,  _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+
+        text_entry.update(0.01)
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
