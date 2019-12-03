@@ -95,7 +95,7 @@ class TestUITextBox:
                                        'alalalala alalalalalal alal'
                                        'alalalala alala alalala ala'
                                        'alalalalal lalal alalalal al',
-                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             relative_rect=pygame.Rect(100, 100, 100, 100),
                              manager=default_ui_manager)
         text_box.set_position(pygame.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
