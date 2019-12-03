@@ -225,9 +225,9 @@ class UITextBox(UIElement):
                 height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
             else:
                 height_adjustment = 0
-            base_x = (self.rect[0] + self.padding[0] + self.border_width +
+            base_x = int(self.rect[0] + self.padding[0] + self.border_width +
                       self.shadow_width + self.rounded_corner_offset)
-            base_y = (self.rect[1] + self.padding[1] + self.border_width +
+            base_y = int(self.rect[1] + self.padding[1] + self.border_width +
                       self.shadow_width + self.rounded_corner_offset - height_adjustment)
 
             for chunk in self.link_hover_chunks:
@@ -813,6 +813,7 @@ class TextBlock:
         if len(chunk_line) > 0:
             lines_of_chunks.append([max_line_ascent, chunk_line])
 
+
         if self.width != -1:
             line_index = 0
             while line_index < len(lines_of_chunks):
@@ -855,36 +856,50 @@ class TextBlock:
                     if word_split_point == 0 and chunk_to_split_index == 0 and chunk_length > self.width:
                         # our chunk is one word, at the start of the line, and the split point is in it, so split the
                         # word instead of hunting for a word split point
-                        if split_point > 0:
+                        if split_point > 1:
+                            font = self.font_dict.find_font(chunk_to_split[1].font_size,
+                                                            chunk_to_split[1].font_name,
+                                                            chunk_to_split[1].style.bold,
+                                                            chunk_to_split[1].style.italic)
+
                             chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
                             chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
 
-                            chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
-                                                                    chunk_2[1].font_name,
-                                                                    chunk_2[1].style.bold,
-                                                                    chunk_2[1].style.italic)
-                            chunk_2_ascent = chunk_2_font.get_ascent()
+                            metrics = font.metrics(chunk_1[0])
+                            total_advance = 0
+                            for i in range(0, len(metrics)):
+                                total_advance += metrics[i][4]
+                            if total_advance < self.width:
+                                chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
+                                                                        chunk_2[1].font_name,
+                                                                        chunk_2[1].style.bold,
+                                                                        chunk_2[1].style.italic)
+                                chunk_2_ascent = chunk_2_font.get_ascent()
 
-                            lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
-                            new_line = [chunk_2_ascent, [chunk_2]]
+                                lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
+                                new_line = [chunk_2_ascent, [chunk_2]]
 
-                            chunk_length_of_line = len(lines_of_chunks[line_index][1])
-                            for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
-                                remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
-                                new_line[1].append(remaining_chunk)
+                                chunk_length_of_line = len(lines_of_chunks[line_index][1])
+                                for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                                    remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
+                                    new_line[1].append(remaining_chunk)
 
-                                remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
-                                                                                remaining_chunk[1].font_name,
-                                                                                remaining_chunk[1].style.bold,
-                                                                                remaining_chunk[1].style.italic)
-                                remaining_chunk_ascent = remaining_chunk_font.get_ascent()
-                                if remaining_chunk_ascent > new_line[0]:
-                                    new_line[0] = remaining_chunk_ascent
+                                    remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
+                                                                                    remaining_chunk[1].font_name,
+                                                                                    remaining_chunk[1].style.bold,
+                                                                                    remaining_chunk[1].style.italic)
+                                    remaining_chunk_ascent = remaining_chunk_font.get_ascent()
+                                    if remaining_chunk_ascent > new_line[0]:
+                                        new_line[0] = remaining_chunk_ascent
 
-                            for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
-                                lines_of_chunks[line_index][1].pop()
+                                for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                                    lines_of_chunks[line_index][1].pop()
 
-                            lines_of_chunks.insert(line_index + 1, new_line)
+                                lines_of_chunks.insert(line_index + 1, new_line)
+                            else:
+                                warnings.warn('Unable to split word into chunks because text box is too narrow')
+                        else:
+                            warnings.warn('Unable to split word into chunks because text box is too narrow')
 
                     else:
                         chunk_1 = [chunk_to_split[0][:word_split_point], chunk_to_split[1]]

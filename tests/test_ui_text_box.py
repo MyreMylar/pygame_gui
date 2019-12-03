@@ -19,7 +19,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         assert text_box.image is not None
 
-    def test_creation_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
@@ -31,7 +31,7 @@ class TestUITextBox:
                                           {'name': 'fira_code', 'html_size': 4, 'style': 'italic'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
-        text_box = UITextBox(html_text=
+        text_box = UITextBox(html_text=''
                              '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
                              'ipsum dolor sit amet</b></font>,'
                              ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
@@ -69,6 +69,62 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
 
+        text_box.rebuild()
+
+        assert text_box.image is not None
+
+    def test_create_too_narrow_textbox_for_font(self, _init_pygame: None, default_ui_manager: UIManager):
+        with pytest.warns(UserWarning, match="Unable to split word into chunks because text box is too narrow"):
+            text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                           'LLALAALALA ALALA ALAL ALA'
+                                           'LAALA ALALA ALALA AAaal aa'
+                                           'ALALAa laalal alalal alala'
+                                           'alalalala alalalalalal alal'
+                                           'alalalala alala alalala ala'
+                                           'alalalalal lalal alalalal al',
+                                 relative_rect=pygame.Rect(100, 100, 50, 50),
+                                 manager=default_ui_manager)
+
+        assert text_box.image is not None
+
+    def test_set_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala alala alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.set_position(pygame.Vector2(0.0, 0.0))
+        assert text_box.rect.topleft == (0, 0)
+
+    def test_set_relative_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala alala alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.set_relative_position(pygame.Vector2(0.0, 0.0))
+        assert text_box.rect.topleft == (0, 0)
+
+    def test_update_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.update(5.0)
         assert text_box.image is not None
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
