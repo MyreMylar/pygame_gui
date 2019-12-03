@@ -178,7 +178,7 @@ class UITextBox(UIElement):
         self.background_surf = self.drawable_shape.get_surface('normal')
 
         if self.scroll_bar is not None:
-            height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+            height_adjustment = int(self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1])
         else:
             height_adjustment = 0
 
