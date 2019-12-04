@@ -5,7 +5,7 @@ import math
 from typing import Union, Tuple
 
 import pygame_gui
-from pygame_gui import ui_manager
+from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
@@ -49,7 +49,7 @@ class UITextBox(UIElement):
 
     def __init__(self, html_text: str,
                  relative_rect: pygame.Rect,
-                 manager: ui_manager.UIManager,
+                 manager: UIManager,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
                  container: ui_container.UIContainer = None,
@@ -857,11 +857,6 @@ class TextBlock:
                         # our chunk is one word, at the start of the line, and the split point is in it, so split the
                         # word instead of hunting for a word split point
                         if split_point > 1:
-                            font = self.font_dict.find_font(chunk_to_split[1].font_size,
-                                                            chunk_to_split[1].font_name,
-                                                            chunk_to_split[1].style.bold,
-                                                            chunk_to_split[1].style.italic)
-
                             chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
                             chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
 

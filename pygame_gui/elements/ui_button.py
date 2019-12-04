@@ -2,7 +2,7 @@ import pygame
 import pygame_gui
 from typing import Union, Tuple
 
-from pygame_gui import ui_manager
+from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements import ui_tool_tip
@@ -29,7 +29,7 @@ class UIButton(UIElement):
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
-                 manager: ui_manager.UIManager,
+                 manager: UIManager,
                  container: ui_container.UIContainer = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,

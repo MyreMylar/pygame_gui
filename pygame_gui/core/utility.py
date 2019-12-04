@@ -14,7 +14,7 @@ minimal dependencies.
 plat = platform.system().upper()
 if plat == 'WINDOWS':
     import ctypes
-    from ctypes import c_size_t, sizeof, c_wchar_p, c_wchar
+    # from ctypes import c_size_t, sizeof, c_wchar_p, c_wchar
     from ctypes.wintypes import HGLOBAL, LPVOID, BOOL, UINT, HANDLE, HWND, DWORD, INT, HMENU, HINSTANCE, LPCSTR
 
 
@@ -85,7 +85,7 @@ if plat == 'WINDOWS':
         safe_empty.restype = BOOL
 
         safe_alloc = CheckedCall(ctypes.windll.kernel32.GlobalAlloc)
-        safe_alloc.argtypes = [UINT, c_size_t]
+        safe_alloc.argtypes = [UINT, ctypes.c_size_t]
         safe_alloc.restype = HGLOBAL
 
         safe_lock = CheckedCall(ctypes.windll.kernel32.GlobalLock)
@@ -101,7 +101,7 @@ if plat == 'WINDOWS':
         safe_set_clipboard.restype = HANDLE
 
         wcslen = msvcrt.wcslen
-        wcslen.argtypes = [c_wchar_p]
+        wcslen.argtypes = [ctypes.c_wchar_p]
         wcslen.restype = UINT
 
         gmem_moveable = 0x0002
@@ -118,10 +118,12 @@ if plat == 'WINDOWS':
 
             if data:
                 count = wcslen(data) + 1
-                handle = safe_alloc(gmem_moveable, count * sizeof(c_wchar))
+                handle = safe_alloc(gmem_moveable, count * ctypes.sizeof(ctypes.c_wchar))
                 locked_handle = safe_lock(handle)
 
-                ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(data), count * sizeof(c_wchar))
+                ctypes.memmove(ctypes.c_wchar_p(locked_handle),
+                               ctypes.c_wchar_p(data),
+                               count * ctypes.sizeof(ctypes.c_wchar))
 
                 safe_unlock(handle)
                 safe_set_clipboard(cf_unicode_text, handle)

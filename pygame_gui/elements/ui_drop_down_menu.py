@@ -2,7 +2,7 @@ import pygame
 from typing import Union, List
 
 import pygame_gui
-from pygame_gui import ui_manager
+from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements.ui_button import UIButton
@@ -351,7 +351,7 @@ class UIDropDownMenu(UIElement):
     def __init__(self, options_list: List[str],
                  starting_option: str,
                  relative_rect: pygame.Rect,
-                 manager: ui_manager.UIManager,
+                 manager: UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None
