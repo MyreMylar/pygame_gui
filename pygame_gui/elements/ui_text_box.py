@@ -785,6 +785,7 @@ class TextBlock:
         chunk_line = []
         start_style_key = 0
         keys = [key for key in list(self.indexed_styles.keys()) if key <= end_text_position]
+        keys.sort()
         keys.append(end_text_position)
         max_line_ascent = 0
         for end_style_key in keys:
@@ -812,7 +813,6 @@ class TextBlock:
 
         if len(chunk_line) > 0:
             lines_of_chunks.append([max_line_ascent, chunk_line])
-
 
         if self.width != -1:
             line_index = 0
