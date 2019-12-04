@@ -8,9 +8,9 @@ control how all of the text in the element is displayed.
 
 These effects are:
 
- - **Fade In.** (ID: 'fade_in')
- - **Fade Out.** (ID: 'fade_out')
- - **Typing Appear.** (ID: 'typing_appear')
+ - **Fade In.** (ID: pygame_gui.TEXT_EFFECT_FADE_IN)
+ - **Fade Out.** (ID: pygame_gui.TEXT_EFFECT_FADE_OUT)
+ - **Typing Appear.** (ID: pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
 
 
 Applying an effect
@@ -21,7 +21,7 @@ To apply an effect to a :class:`UITextBox <.UITextBox>` element call the set_act
 .. code-block:: python
    :linenos:
 
-    text_box.set_active_effect('fade_in')
+    text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
 
 The effect will start running immediately after calling this method. You can deactivate an active effect by calling:
 

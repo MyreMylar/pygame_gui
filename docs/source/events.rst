@@ -18,14 +18,14 @@ Event list
 
 A list of all the different events by element.
 
-:class:`UIButton <.UIButton>` - ui_button_pressed
+:class:`UIButton <.UIButton>` - UI_BUTTON_PRESSED
 .................................................
 
 Fired when a user presses a button by left clicking on it with a mouse, and releasing the mouse button while still
 hovering over it.
 
  - **'type'** : pygame.USEREVENT
- - **'user_type'** : 'ui_button_pressed'
+ - **'user_type'** : pygame_gui.UI_BUTTON_PRESSED
  - **'ui_element'** : The :class:`UIButton <.UIButton>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the button that fired this event.
 
@@ -36,17 +36,17 @@ hovering over it.
 
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:
-            if event.user_type == 'ui_button_pressed':
+            if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == test_button:
                     print('Test button pressed')
 
-:class:`UITextEntryLine <.UITextEntryLine>` - ui_text_entry_finished
+:class:`UITextEntryLine <.UITextEntryLine>` - UI_TEXT_ENTRY_FINISHED
 ....................................................................
 
 Fired when a user presses the enter key with a text entry element active for entry.
 
  - **'type'** : pygame.USEREVENT
- - **'user_type'** : 'ui_text_entry_finished',
+ - **'user_type'** : pygame_gui.UI_TEXT_ENTRY_FINISHED,
  - **'text'** : The user entered text in the text entry line.
  - **'ui_element'** : The :class:`UITextEntryLine <.UITextEntryLine>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the text entry line that fired this event.
@@ -58,16 +58,16 @@ Fired when a user presses the enter key with a text entry element active for ent
 
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:
-            if event.user_type == 'ui_text_entry_finished':
+            if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 print("Entered text:", event.text)
 
-:class:`UIDropDownMenu <.UIDropDownMenu>` - ui_drop_down_menu_changed
+:class:`UIDropDownMenu <.UIDropDownMenu>` - UI_DROP_DOWN_MENU_CHANGED
 .....................................................................
 
 Fired when a user selects an option in a drop down menu.
 
  - **'type'** : pygame.USEREVENT
- - **'user_type'** : 'ui_drop_down_menu_changed',
+ - **'user_type'** : pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
  - **'text'** : The text of the selected option.
  - **'ui_element'** : The :class:`UIDropDownMenu <.UIDropDownMenu>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the drop down menu that fired this event.
@@ -79,16 +79,16 @@ Fired when a user selects an option in a drop down menu.
 
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:
-            if event.user_type == 'ui_drop_down_menu_changed':
+            if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                 print("Selected option:", event.text)
 
-:class:`UITextBox <.UITextBox>` - ui_text_box_link_clicked
+:class:`UITextBox <.UITextBox>` - UI_TEXT_BOX_LINK_CLICKED
 .....................................................................
 
 Fired when a user clicks on a HTML link in a text box.
 
  - **'type'** : pygame.USEREVENT,
- - **'user_type'** : 'ui_text_box_link_clicked',
+ - **'user_type'** : pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
  - **'link_target'** : The 'href' parameter of the clicked link.
  - **'ui_element'** : The :class:`UITextBox <.UITextBox>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the text box that fired this event.
@@ -100,5 +100,5 @@ Fired when a user clicks on a HTML link in a text box.
 
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:
-            if event.user_type == 'ui_text_box_link_clicked':
+            if event.user_type == pygame_gui.UI_TEXT_BOX_LINK_CLICKED:
                 print(event.link_target)
