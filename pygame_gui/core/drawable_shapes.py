@@ -190,7 +190,12 @@ class RectDrawableShape(DrawableShape):
                                                  self.containing_rect.y + self.theming['shadow_width']),
                                                 (self.containing_rect.width - (2 * self.theming['shadow_width']),
                                                  self.containing_rect.height - (2 * self.theming['shadow_width'])))
-            self.base_surface = self.ui_manager.get_shadow(self.containing_rect.size)
+            shadow = self.ui_manager.get_shadow(self.containing_rect.size)
+            if shadow is not None:
+                self.base_surface = shadow
+            else:
+                warnings.warn("shape created too small to fit in selected shadow width and corner radius")
+                self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
         else:
             self.click_area_shape = self.containing_rect.copy()
             self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
@@ -627,11 +632,16 @@ class RoundedRectangleShape(DrawableShape):
                 warnings.warn('Clamping shape_corner_radius of: ' + str(old_radius) + ', to: ' + str(0))
             self.corner_radius = corner_radius
 
-            self.base_surface = self.ui_manager.get_shadow(self.containing_rect.size,
-                                                           self.theming['shadow_width'],
-                                                           'rectangle',
-                                                           corner_radius=(self.corner_radius +
-                                                                          self.theming['shadow_width']))
+            shadow = self.ui_manager.get_shadow(self.containing_rect.size,
+                                                self.theming['shadow_width'],
+                                                'rectangle',
+                                                corner_radius=(self.corner_radius +
+                                                               self.theming['shadow_width']))
+            if shadow is not None:
+                self.base_surface = shadow
+            else:
+                warnings.warn("shape created too small to fit in selected shadow width and corner radius")
+                self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
         else:
             self.click_area_shape = self.containing_rect.copy()
 
