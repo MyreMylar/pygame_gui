@@ -190,7 +190,9 @@ class RectDrawableShape(DrawableShape):
                                                  self.containing_rect.y + self.theming['shadow_width']),
                                                 (self.containing_rect.width - (2 * self.theming['shadow_width']),
                                                  self.containing_rect.height - (2 * self.theming['shadow_width'])))
-            shadow = self.ui_manager.get_shadow(self.containing_rect.size)
+            shadow = self.ui_manager.get_shadow(self.containing_rect.size,
+                                                shadow_width=self.theming['shadow_width'],
+                                                corner_radius=self.theming['shadow_width'])
             if shadow is not None:
                 self.base_surface = shadow
             else:
