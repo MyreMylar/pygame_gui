@@ -227,9 +227,9 @@ class UITextBox(UIElement):
             else:
                 height_adjustment = 0
             base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                      self.shadow_width + self.rounded_corner_offset)
+                         self.shadow_width + self.rounded_corner_offset)
             base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                      self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
 
             for chunk in self.link_hover_chunks:
                 hovered_currently = False
