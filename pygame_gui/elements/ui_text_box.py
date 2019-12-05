@@ -204,7 +204,8 @@ class UITextBox(UIElement):
         if self.alive():
             if self.scroll_bar is not None:
                 if self.scroll_bar.check_has_moved_recently():
-                    height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+                    height_adjustment = int(self.scroll_bar.start_percentage *
+                                            self.formatted_text_block.final_dimensions[1])
                     drawable_area = pygame.Rect((0, height_adjustment),
                                                 (self.text_wrap_rect[2], self.text_wrap_rect[3]))
                     self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)

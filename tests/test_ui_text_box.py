@@ -125,7 +125,19 @@ class TestUITextBox:
                                        'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
+        text_box.scroll_bar.has_moved_recently = True
         text_box.update(5.0)
+        assert text_box.image is not None
+
+    def test_update_without_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='<a href=None>lalaLA</a>',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+        pygame.mouse.set_pos(20, 15)
+        text_box.update(5.0)
+        pygame.mouse.set_pos(200, 200 )
+        text_box.update(5.0)
+
         assert text_box.image is not None
 
     def test_redraw_from_text_block_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
@@ -196,6 +208,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
+        text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
 
     def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager):
@@ -210,6 +223,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
+        text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeInEffect
 
     def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager):
@@ -224,6 +238,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
+        text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeOutEffect
 
     def test_set_active_effect_invalid(self, _init_pygame: None, default_ui_manager: UIManager):
@@ -239,6 +254,21 @@ class TestUITextBox:
                              manager=default_ui_manager)
         with pytest.warns(UserWarning, match="Unsupported effect name"):
             text_box.set_active_effect(pygame_gui.UI_BUTTON_PRESSED)
+
+    def test_set_active_effect_none(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+
+        text_box.set_active_effect(None)
+        assert text_box.active_text_effect is None
 
     def test_process_event_mouse_buttons(self, _init_pygame: None, default_ui_manager: UIManager,
                                          _display_surface_return_none: None):
