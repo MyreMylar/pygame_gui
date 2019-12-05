@@ -637,7 +637,7 @@ class TestUITextEntryLine:
         text_entry.select()
 
         text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (30, 15)}))
-        pygame.mouse.set_pos(70, 15)
+        default_ui_manager.mouse_position = (70, 15)
 
         text_entry.update(0.01)
 

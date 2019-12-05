@@ -219,7 +219,7 @@ class UITextBox(UIElement):
                                                                              self.rounded_corner_offset),
                                     drawable_area)
 
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             should_redraw_from_chunks = False
 
             if self.scroll_bar is not None:
@@ -380,8 +380,9 @@ class UITextBox(UIElement):
         should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                mouse_x, mouse_y = event.pos
-                if self.rect.collidepoint(mouse_x, mouse_y):
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.drawable_shape.collide_point(scaled_mouse_pos):
                     processed_event = True
                     if self.scroll_bar is not None:
                         text_block_full_height = self.formatted_text_block.final_dimensions[1]
@@ -397,7 +398,7 @@ class UITextBox(UIElement):
                         hover_rect = pygame.Rect((base_x + chunk.rect.x,
                                                   base_y + chunk.rect.y),
                                                  chunk.rect.size)
-                        if hover_rect.collidepoint(mouse_x, mouse_y):
+                        if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                             processed_event = True
                             if not chunk.is_selected:
                                 chunk.on_selected()
@@ -416,14 +417,15 @@ class UITextBox(UIElement):
                              self.shadow_width + self.rounded_corner_offset)
                 base_y = int(self.rect[1] + self.padding[1] + self.border_width +
                              self.shadow_width + self.rounded_corner_offset - height_adjustment)
-                mouse_x, mouse_y = event.pos
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 for chunk in self.link_hover_chunks:
 
                     hover_rect = pygame.Rect((base_x + chunk.rect.x,
                                               base_y + chunk.rect.y),
                                              chunk.rect.size)
-                    if hover_rect.collidepoint(mouse_x, mouse_y):
-                        if self.rect.collidepoint(mouse_x, mouse_y):
+                    if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                        if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                             processed_event = True
                             if chunk.is_selected:
                                 link_clicked_event = pygame.event.Event(pygame.USEREVENT,

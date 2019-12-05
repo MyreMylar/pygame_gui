@@ -56,16 +56,19 @@ class UIWindow(UIElement):
         """
         A stub to override. Gives UI Windows access to pygame events.
 
+        TODO: Check for drawable shape and use that instead of rect?
+
         :param event: The event to process.
-        :return bool: Should return True if this element makes use fo this event.
+        :return bool: Should return True if this element makes use of this event.
         """
         handled = False
         if self is not None:
             # by default we don't let mouse click events pass through windows to UI below them.
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 or event.button == 3:
-                    mouse_x, mouse_y = event.pos
-                    if self.rect.collidepoint(mouse_x, mouse_y):
+                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                    if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                         handled = True
 
         return handled
@@ -75,14 +78,17 @@ class UIWindow(UIElement):
         A quick event check outside of the normal event processing so that this window is brought to the front of the
         window stack if we click on any of the elements contained within it.
 
+        TODO: Check for drawable shape and use that instead of rect?
+
         :param event: The event to check.
         :return bool: returns True if the processed event represents a click inside this window
         """
         event_handled = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                mouse_x, mouse_y = event.pos
-                if self.rect.collidepoint(mouse_x, mouse_y):
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                     if self.bring_to_front_on_focused:
                         self.window_stack.move_window_to_front(self)
                     event_handled = True

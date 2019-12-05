@@ -31,6 +31,9 @@ class UIManager:
         self.theme_update_acc = 0.0
         self.theme_update_check_interval = 1.0
 
+        self.mouse_position = (0, 0)
+        self.mouse_pos_scale_factor = [1.0, 1.0]
+
     def get_theme(self) -> UIAppearanceTheme:
         """
         Gets the theme so the data in it can be accessed.
@@ -141,6 +144,7 @@ class UIManager:
 
         self.ui_theme.update_shape_cache()
 
+        self.update_mouse_position()
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
@@ -150,6 +154,21 @@ class UIManager:
                     hover_handled = True
 
         self.ui_group.update(time_delta)
+
+    def update_mouse_position(self):
+        """
+        Wrapping pygame mouse position so we can mess with it.
+        """
+        x, y = pygame.mouse.get_pos()
+
+        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * x),
+                               int(self.mouse_pos_scale_factor[1] * y))
+
+    def get_mouse_position(self) -> Tuple[int, int]:
+        """
+        Wrapping pygame mouse position so we can mess with it.
+        """
+        return self.mouse_position
 
     def draw_ui(self, window_surface: pygame.Surface):
         """

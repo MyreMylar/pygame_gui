@@ -134,9 +134,9 @@ class TestUITextBox:
         text_box = UITextBox(html_text='<a href=None>lalaLAlalala</a>',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
-        pygame.mouse.set_pos(20, 15)
+        default_ui_manager.mouse_position = (20, 15)
         text_box.update(5.0)
-        pygame.mouse.set_pos(200, 200)
+        default_ui_manager.mouse_position = (200, 200)
         text_box.update(5.0)
 
         assert text_box.image is not None

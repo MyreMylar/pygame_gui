@@ -267,7 +267,9 @@ class UIButton(UIElement):
         if self.is_enabled:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if self.drawable_shape.collide_point(event.pos):
+                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                    if self.drawable_shape.collide_point(scaled_mouse_pos):
                         self.held = True
                         self.set_active()
                         processed_event = True
@@ -277,7 +279,9 @@ class UIButton(UIElement):
                             self.tool_tip = None
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    if self.drawable_shape.collide_point(event.pos):
+                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                    if self.drawable_shape.collide_point(scaled_mouse_pos):
                         if self.held:
                             self.held = False
                             self.set_inactive()

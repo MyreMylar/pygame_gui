@@ -258,7 +258,7 @@ class UIVerticalScrollBar(UIElement):
 
                 moved_this_frame = True
 
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
 
                 if not self.grabbed_slider:

@@ -344,7 +344,7 @@ class UITextEntryLine(UIElement):
             if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
                 self.double_click_select_time_acc += time_delta
             if self.selection_in_progress:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
+                mouse_x, mouse_y = self.ui_manager.get_mouse_position()
                 select_end_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + mouse_x)
                 new_range = [self.select_range[0], select_end_pos]
 
@@ -405,8 +405,9 @@ class UITextEntryLine(UIElement):
         processed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                mouse_x, mouse_y = event.pos
-                if self.rect.collidepoint(mouse_x, mouse_y):
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.drawable_shape.collide_point(scaled_mouse_pos):
                     if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
                         self.double_click_started = False
                         pattern = re.compile(r"[\w']+")
@@ -443,7 +444,8 @@ class UITextEntryLine(UIElement):
                             self.cursor_has_moved_recently = True
                     else:
                         self.double_click_started = True
-                        self.edit_position = self.find_edit_position_from_pixel_pos(self.start_text_offset + mouse_x)
+                        self.edit_position = self.find_edit_position_from_pixel_pos(self.start_text_offset +
+                                                                                    scaled_mouse_pos[0])
                         self.select_range[0] = self.edit_position
                         self.select_range[1] = self.edit_position
                         self.cursor_has_moved_recently = True
@@ -453,10 +455,11 @@ class UITextEntryLine(UIElement):
                     processed_event = True
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                mouse_x, mouse_y = event.pos
-                if self.rect.collidepoint(mouse_x, mouse_y):
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.drawable_shape.collide_point(scaled_mouse_pos):
                     processed_event = True
-                    new_edit_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + mouse_x)
+                    new_edit_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + scaled_mouse_pos[0])
                     if new_edit_pos != self.edit_position:
                         self.edit_position = new_edit_pos
                         self.cursor_has_moved_recently = True

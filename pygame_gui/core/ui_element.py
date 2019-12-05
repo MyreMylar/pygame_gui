@@ -127,7 +127,7 @@ class UIElement(pygame.sprite.Sprite):
         :return bool: A boolean that is true if we have hovered a UI element, either just now or before this method.
         """
         if self.alive() and self.can_hover():
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
             if self.is_enabled and self.hover_point(mouse_x, mouse_y) and not hovered_higher_element:

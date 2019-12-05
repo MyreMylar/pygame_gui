@@ -59,7 +59,7 @@ class TestUIVerticalScrollBar:
                                         manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
-        pygame.mouse.set_pos((100, 15))
+        default_ui_manager.mouse_position = (100, 15)
         scroll_bar.sliding_button.held = True
         scroll_bar.update(0.3)
 

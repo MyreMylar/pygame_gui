@@ -163,7 +163,7 @@ class UIMessageWindow(UIWindow):
                 self.kill()
 
             if self.menu_bar.held:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
+                mouse_x, mouse_y = self.ui_manager.get_mouse_position()
                 if not self.grabbed_window:
                     self.window_stack.move_window_to_front(self)
                     self.grabbed_window = True
