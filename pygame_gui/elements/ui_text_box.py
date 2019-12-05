@@ -11,7 +11,7 @@ from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 from pygame_gui.elements.text.html_parser import TextHTMLParser
-from pygame_gui.elements.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.elements.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect, TextBoxEffect
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.core.ui_appearance_theme import ColourGradient
 
@@ -744,25 +744,22 @@ class TextBlock:
             self.max_line_char_height = 0
             self.max_line_ascent = 0
 
-    def __init__(self, text, rect_or_pos, indexed_styles, font_dict, link_style, bg_colour, wrap_to_height=False):
+    def __init__(self, text: str, rect: pygame.Rect, indexed_styles,
+                 font_dict, link_style, bg_colour, wrap_to_height=False):
         self.characters = text
-        if len(rect_or_pos) == 2:
-            self.position = rect_or_pos
-            self.width = -1
-            self.height = -1
+
+        self.position = (rect[0], rect[1])
+        self.width = rect[2]
+        if wrap_to_height:
+            self.height = rect[3]
         else:
-            self.position = (rect_or_pos[0], rect_or_pos[1])
-            self.width = rect_or_pos[2]
-            if wrap_to_height:
-                self.height = rect_or_pos[3]
-            else:
-                self.height = -1
+            self.height = -1
 
         self.indexed_styles = indexed_styles
         self.block_sprite = None
         self.font_dict = font_dict
 
-        self.final_dimensions = (rect_or_pos[2], rect_or_pos[3])
+        self.final_dimensions = (rect[2], rect[3])
 
         self.link_style = link_style
 
@@ -996,7 +993,7 @@ class TextBlock:
         self.width = surface_width
         self.height = surface_height
 
-    def redraw_from_chunks(self, text_effect):
+    def redraw_from_chunks(self, text_effect: TextBoxEffect):
         if text_effect:
             final_alpha = text_effect.get_final_alpha()
         else:
@@ -1024,6 +1021,3 @@ class TextBlock:
             for chunk in line.chunks:
                 if chunk.is_link:
                     hover_group.append(chunk)
-
-    def draw(self, surface):
-        surface.blit(self.block_sprite, self.position)

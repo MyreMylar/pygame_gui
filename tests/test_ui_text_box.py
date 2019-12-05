@@ -135,7 +135,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         pygame.mouse.set_pos(20, 15)
         text_box.update(5.0)
-        pygame.mouse.set_pos(200, 200 )
+        pygame.mouse.set_pos(200, 200)
         text_box.update(5.0)
 
         assert text_box.image is not None
@@ -149,6 +149,13 @@ class TestUITextBox:
                                        'alalalala <a href=none>alala<a/> '
                                        'alalala ala'
                                        'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.redraw_from_text_block()
+        assert text_box.image is not None
+
+    def test_redraw_from_text_block_no_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.redraw_from_text_block()
@@ -270,8 +277,8 @@ class TestUITextBox:
         text_box.set_active_effect(None)
         assert text_box.active_text_effect is None
 
-    def test_process_event_mouse_buttons(self, _init_pygame: None, default_ui_manager: UIManager,
-                                         _display_surface_return_none: None):
+    def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                        _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -285,8 +292,19 @@ class TestUITextBox:
 
         processed_down_event = text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                          {'button': 1, 'pos': (30, 15)}))
-        processed_up_event = text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
-                                                                       {'button': 1, 'pos': (80, 15)}))
+        text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (80, 15)}))
+
+        assert processed_down_event is True
+
+    def test_process_event_mouse_buttons_no_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
+                                                      _display_surface_return_none: None):
+        text_box = UITextBox(html_text='<a href=none>alalaadads<a/>',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        processed_down_event = text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                         {'button': 1, 'pos': (20, 15)}))
+        text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (20, 15)}))
 
         assert processed_down_event is True
 
@@ -300,6 +318,7 @@ class TestUITextBox:
                                        "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
+        text_box.redraw_from_chunks()
         assert text_box.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
