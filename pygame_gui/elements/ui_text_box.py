@@ -321,7 +321,7 @@ class UITextBox(UIElement):
         just moved the position of the text (say, with a scroll bar) without actually changing the text itself.
         """
         if self.scroll_bar is not None:
-            height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+            height_adjustment = int(self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1])
         else:
             height_adjustment = 0
 
@@ -387,10 +387,10 @@ class UITextBox(UIElement):
                         height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
                     else:
                         height_adjustment = 0
-                    base_x = (self.rect[0] + self.padding[0] + self.border_width +
-                              self.shadow_width + self.rounded_corner_offset)
-                    base_y = (self.rect[1] + self.padding[1] + self.border_width +
-                              self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                    base_x = int(self.rect[0] + self.padding[0] + self.border_width +
+                                 self.shadow_width + self.rounded_corner_offset)
+                    base_y = int(self.rect[1] + self.padding[1] + self.border_width +
+                                 self.shadow_width + self.rounded_corner_offset - height_adjustment)
                     for chunk in self.link_hover_chunks:
 
                         hover_rect = pygame.Rect((base_x + chunk.rect.x,
@@ -411,10 +411,10 @@ class UITextBox(UIElement):
                     height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
                 else:
                     height_adjustment = 0
-                base_x = (self.rect[0] + self.padding[0] + self.border_width +
-                          self.shadow_width + self.rounded_corner_offset)
-                base_y = (self.rect[1] + self.padding[1] + self.border_width +
-                          self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                base_x = int(self.rect[0] + self.padding[0] + self.border_width +
+                             self.shadow_width + self.rounded_corner_offset)
+                base_y = int(self.rect[1] + self.padding[1] + self.border_width +
+                             self.shadow_width + self.rounded_corner_offset - height_adjustment)
                 mouse_x, mouse_y = event.pos
                 for chunk in self.link_hover_chunks:
 

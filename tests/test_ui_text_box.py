@@ -1,6 +1,7 @@
 import os
 import pytest
 import pygame
+import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
@@ -126,6 +127,138 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.update(5.0)
         assert text_box.image is not None
+
+    def test_redraw_from_text_block_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.redraw_from_text_block()
+        assert text_box.image is not None
+
+    def test_redraw_from_chunks_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.redraw_from_chunks()
+        assert text_box.image is not None
+
+    def test_full_redraw_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.full_redraw()
+        assert text_box.image is not None
+
+    def test_select_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.select()
+        assert text_box.scroll_bar.sliding_button.is_selected is True
+
+    def test_set_active_effect_typing(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
+        assert type(text_box.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+
+    def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
+        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeInEffect
+
+    def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
+        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeOutEffect
+
+    def test_set_active_effect_invalid(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 150, 100),
+                             manager=default_ui_manager)
+        with pytest.warns(UserWarning, match="Unsupported effect name"):
+            text_box.set_active_effect(pygame_gui.UI_BUTTON_PRESSED)
+
+    def test_process_event_mouse_buttons(self, _init_pygame: None, default_ui_manager: UIManager,
+                                         _display_surface_return_none: None):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        processed_down_event = text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                         {'button': 1, 'pos': (30, 15)}))
+        processed_up_event = text_box.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                                       {'button': 1, 'pos': (80, 15)}))
+
+        assert processed_down_event is True
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",

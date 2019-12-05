@@ -606,7 +606,7 @@ class TestUITextEntryLine:
 
         text_entry.set_text("Yellow su")
         text_entry.select_range = [3, 8]
-        self.start_text_offset = 500
+        text_entry.start_text_offset = 500
         text_entry.redraw()
 
     def test_redraw_selected_text_different_them(self, _init_pygame):
@@ -636,8 +636,7 @@ class TestUITextEntryLine:
         text_entry.set_text('Wow testing is great so amazing')
         text_entry.select()
 
-        processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                           {'button': 1, 'pos': (30, 15)}))
+        text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (30, 15)}))
         pygame.mouse.set_pos(70, 15)
 
         text_entry.update(0.01)
@@ -664,7 +663,6 @@ class TestUITextEntryLine:
         text_entry.update(0.01)
         text_entry.blink_cursor_time_acc = 10.0
         text_entry.update(0.01)
-
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
