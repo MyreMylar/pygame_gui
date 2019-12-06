@@ -94,12 +94,15 @@ class TestUIManager:
         """
         Test update does store button shapes in the long term cache
         """
-        UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
         default_ui_manager.theme_update_acc = 5.0
         default_ui_manager.get_theme()._theme_file_last_modified = None
         starting_long_term_cache_size = len(default_ui_manager.ui_theme.shape_cache.cache_long_term_lookup)
         default_ui_manager.update(0.01)
         long_term_cache_size_after_update = len(default_ui_manager.ui_theme.shape_cache.cache_long_term_lookup)
+
+        button.select()
+        default_ui_manager.update(0.01)
 
         assert long_term_cache_size_after_update > starting_long_term_cache_size
 
