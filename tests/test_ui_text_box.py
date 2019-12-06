@@ -20,6 +20,16 @@ class TestUITextBox:
                              manager=default_ui_manager)
         assert text_box.image is not None
 
+    # def test_creation_grow_to_fit_width(self, _init_pygame: None, default_ui_manager: UIManager):
+    #     default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+    #                                       {"name": "fira_code", "size:": 14, "style": "italic"}])
+    #     text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+    #                                    "<i>styles</i>. Hey hey hey, what is this? More text padding this out a little."
+    #                                    "Well OK.",
+    #                          relative_rect=pygame.Rect(100, 100, -1, 50),
+    #                          manager=default_ui_manager)
+    #     assert text_box.image is not None
+
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
@@ -217,6 +227,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
+        text_box.active_text_effect.time_to_redraw = True
         text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
 
@@ -298,6 +309,9 @@ class TestUITextBox:
                                      manager=manager,
                                      object_id="#text_box_2")
         htm_text_block_2.set_active_effect('typing_appear')
+        htm_text_block_2.active_text_effect.time_to_redraw = True
+        htm_text_block_2.update(5.0)
+        htm_text_block_2.update(5.0)
         assert type(htm_text_block_2.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
 
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
@@ -343,6 +357,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
         text_box.redraw_from_chunks()
+        text_box.full_redraw()
         assert text_box.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
