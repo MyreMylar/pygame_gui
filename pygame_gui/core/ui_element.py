@@ -193,7 +193,7 @@ class UIElement(pygame.sprite.Sprite):
         :param y: The y (vertical) position of the point.
         :return bool: Returns True if we are hovering this element.
         """
-        return self.rect.collidepoint(x, y)
+        return bool(self.rect.collidepoint(x, y))
 
     def on_unhovered(self):
         """
