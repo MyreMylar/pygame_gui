@@ -7,7 +7,8 @@
              "link_text": "#FF0000",
              "link_hover": "#FFFF00",
              "link_selected": "#FFFFFF",
-             "normal_border": "#AA0AAA"
+             "normal_border": "#AA0AAA",
+             "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"
          },
          "font":
          {
@@ -27,5 +28,27 @@
              "link_normal_underline": "1",
              "link_hover_underline": "0"
          }
-     }
+     },
+
+    "#text_box_2":
+    {
+        "colours":
+        {
+            "dark_bg":"#EEEFEF",
+            "normal_border": "#884422",
+            "link_text":"#F080E0,#8080E0,0",
+            "link_hover":"#FF8FEF",
+            "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"
+        },
+
+        "misc":
+        {
+            "shape_corner_radius": "10",
+            "border_width": "6",
+            "padding": "5,5",
+            "link_normal_underline": "0",
+            "link_hover_underline": "0"
+
+        }
+    }
  }

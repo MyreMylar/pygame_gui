@@ -281,6 +281,25 @@ class TestUITextBox:
         text_box.set_active_effect(None)
         assert text_box.active_text_effect is None
 
+    def test_set_active_effect_with_word_split(self, _init_pygame: None):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_text_box_non_default.json"))
+        manager.preload_fonts([{"name": "fira_code", "point_size": 10, "style": "regular"},
+                               {'name': 'fira_code', 'point_size': 10, 'style': 'bold'},
+                               {"name": "fira_code", "point_size": 10, "style": "italic"},
+                               {"name": "fira_code", "point_size": 10, "style": "bold_italic"}])
+        htm_text_block_2 = UITextBox('<font face=fira_code size=2 color=#000000><b>Hey, What the heck!</b>'
+                                     '<br><br>'
+                                     'This is some <a href="test">text</a> in a different box, hooray for variety - '
+                                     'if you want then you should put a ring upon it. '
+                                     '<body bgcolor=#990000>What if we do a really long word?</body> '
+                                     '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp gosh</b></i></font>',
+                                     pygame.Rect((0, 0), (250, 200)),
+                                     manager=manager,
+                                     object_id="#text_box_2")
+        htm_text_block_2.set_active_effect('typing_appear')
+        assert type(htm_text_block_2.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
                                                         _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
@@ -318,7 +337,8 @@ class TestUITextBox:
 
         manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                {"name": "fira_code", "size:": 14, "style": "italic"}])
-        text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some text in a <b>bold box</b> using "
+        text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some <font color=regular_text>text</font> "
+                                       "in a <b>bold box</b> using "
                                        "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
