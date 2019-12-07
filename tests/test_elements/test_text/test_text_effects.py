@@ -21,8 +21,8 @@ class TestTextEffects:
 
     def test_create_fade_in_effect(self, _init_pygame):
         text_effect = FadeInEffect('test')
-        assert text_effect.should_full_redraw() is False
+        assert text_effect.should_redraw_from_chunks() is False
 
     def test_create_fade_out_effect(self, _init_pygame):
         text_effect = FadeOutEffect('test')
-        assert text_effect.should_full_redraw() is False
+        assert text_effect.should_redraw_from_chunks() is False
