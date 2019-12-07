@@ -124,7 +124,7 @@ class UIAppearanceTheme:
         if os.path.exists(default_theme_file_path):
             self.load_theme(default_theme_file_path)
         else:
-            default_theme_file = io.BytesIO(base64.standard_b64decode(default_theme))
+            default_theme_file = io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8"))
             self.load_theme(default_theme_file)
 
     def get_font_dictionary(self):
@@ -515,7 +515,7 @@ class UIAppearanceTheme:
     @staticmethod
     @contextmanager
     def opened_w_error(filename, mode="r"):
-        if type(filename) != io.BytesIO:
+        if type(filename) != io.StringIO:
             try:
                 f = open(filename, mode)
             except IOError as err:
@@ -532,14 +532,14 @@ class UIAppearanceTheme:
             finally:
                 f.close()
 
-    def load_theme(self, file_path: Union[str, PathLike, io.BytesIO]):
+    def load_theme(self, file_path: Union[str, PathLike, io.StringIO]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required by the theme.
 
         :param file_path: The path to the theme we want to load.
 
         """
-        if type(file_path) != io.BytesIO:
+        if type(file_path) != io.StringIO:
             self._theme_file_path = file_path
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
