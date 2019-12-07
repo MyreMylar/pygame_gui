@@ -1,0 +1,63 @@
+{
+     "button":
+     {
+         "colours":
+         {
+             "normal_bg": "#25f92e",
+             "hovered_bg": "#3f393e",
+             "disabled_bg": "#252f2e",
+             "selected_bg": "#25f92e",
+             "active_bg": "#1937f4",
+             "normal_text": "#cfcbd8",
+             "hovered_text": "#F0FFFF",
+             "selected_text": "#F0FFFF",
+             "disabled_text": "#60736f",
+             "active_text": "#6d706f",
+             "normal_border": "#AA0AAA",
+             "hovered_border": "#B000B0",
+             "disabled_border": "#F08080",
+             "selected_border": "#F080B0",
+             "active_border": "#80F0B0"
+         },
+         "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "images":
+         {
+             "normal_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "0,0,32,32"
+             },
+             "hovered_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "32,0,32,32"
+             },
+             "selected_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "64,0,32,32"
+             },
+             "disabled_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "96,0,32,32"
+             }
+
+         },
+         "misc":
+         {
+             "shape": "ellipse",
+             "shape_corner_radius": "10",
+             "border_width": "4",
+             "shadow_width": "4",
+             "tool_tip_delay": "6.0",
+             "text_horiz_alignment": "left",
+             "text_vert_alignment": "top",
+             "text_horiz_alignment_padding": "6",
+             "text_vert_alignment_padding": "7"
+         }
+     }
+ }

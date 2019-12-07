@@ -530,3 +530,13 @@ class TestUIButton:
         button.rebuild_shape()
 
         assert button.image is not None
+
+    def test_rebuild_shape_ellipse(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_button_non_default_2.json"))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=manager)
+        button.rebuild_shape()
+
+        assert button.image is not None
