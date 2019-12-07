@@ -13,7 +13,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.elements.text.html_parser import TextHTMLParser
 from pygame_gui.elements.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect, TextBoxEffect
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.core.ui_appearance_theme import ColourGradient
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class UITextBox(UIElement):

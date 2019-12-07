@@ -5,7 +5,7 @@ from typing import Dict, List, Union, Tuple
 
 import pygame
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.ui_appearance_theme import ColourGradient
+from pygame_gui.core.colour_gradient import ColourGradient
 from pygame.math import Vector2
 
 

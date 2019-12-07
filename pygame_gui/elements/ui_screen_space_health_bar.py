@@ -5,7 +5,7 @@ from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.core.ui_appearance_theme import ColourGradient
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class UIScreenSpaceHealthBar(UIElement):
