@@ -101,6 +101,7 @@ class TestUIManager:
         default_ui_manager.update(0.01)
         long_term_cache_size_after_update = len(default_ui_manager.ui_theme.shape_cache.cache_long_term_lookup)
 
+        button.hovered = True
         button.select()
         default_ui_manager.update(0.01)
 
