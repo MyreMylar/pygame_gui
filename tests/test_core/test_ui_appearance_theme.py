@@ -22,6 +22,20 @@ class TestUIAppearanceTheme:
         with pytest.warns(UserWarning, match="Invalid gradient"):
             theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
 
+    def test_load_theme_bad_font_data(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        with pytest.warns(UserWarning, match="Unable to create subsurface rectangle from string"):
+            theme.load_theme(os.path.join("tests", "data", "themes",
+                                          "appearance_theme_bad_font_data_test.json"))
+
+    def test_load_theme_twice(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        with pytest.warns(UserWarning, match="Unable to create subsurface rectangle from string"):
+            theme.load_theme(os.path.join("tests", "data", "themes",
+                                          "appearance_theme_bad_font_data_test.json"))
+            theme.load_theme(os.path.join("tests", "data", "themes",
+                                          "ui_button_non_default.json"))
+
     def test_load_theme_with_non_preloaded_font(self, _init_pygame,
                                                 _display_surface_return_none: None):
         theme = UIAppearanceTheme()

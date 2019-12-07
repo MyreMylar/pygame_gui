@@ -1,0 +1,21 @@
+{
+    "button":
+    {
+        "font":
+         {
+             "name": "roboto",
+             "size": "0.5",
+             "bold": "duck",
+             "italic": "duck",
+             "regular_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "images":
+         {
+             "normal_image":
+             {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "0,0,duck,32"
+             }
+         }
+    }
+}
