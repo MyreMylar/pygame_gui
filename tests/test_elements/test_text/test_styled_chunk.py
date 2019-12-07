@@ -65,3 +65,15 @@ class TestStyledChunk:
                             position=(0, 0), font_dictionary=dictionary)
         chunk.chunk = 'testy'
         chunk.redraw()
+
+    def test_redraw_empty_chunk(self, _init_pygame):
+        dictionary = UIFontDictionary()
+        style = CharStyle()
+        gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
+        chunk = StyledChunk(font_size=14, font_name='fira_code',
+                            chunk='text', style=style, color=pygame.Color('#FFFF00'),
+                            bg_color=gradient,
+                            is_link=False, link_href='test', link_style=CharStyle(),
+                            position=(0, 0), font_dictionary=dictionary)
+        chunk.chunk = ''
+        chunk.redraw()
