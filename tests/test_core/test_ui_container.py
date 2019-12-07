@@ -29,6 +29,7 @@ class TestUIContainer:
 
     def test_check_hover_when_not_able_to_hover(self, _init_pygame, default_ui_manager):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        container.hovered = True
         assert container.check_hover(0.5, True) is True  # already hovering
         container.hovered = True
         container.kill()
