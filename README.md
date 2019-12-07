@@ -8,7 +8,7 @@ A GUI system for pygame 2 (it also works OK on pygame 1.9).
  - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
  - [PyPi](https://pypi.org/project/pygame-gui/)
 
-[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.5+](https://img.shields.io/badge/python-3.5+-blue.svg)](https://www.python.org/downloads/release/python-350/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Master](https://travis-ci.com/MyreMylar/pygame_gui.svg?branch=master)](https://travis-ci.com/MyreMylar/pygame_gui) [![codecov](https://codecov.io/gh/MyreMylar/pygame_gui/branch/master/graph/badge.svg)](https://codecov.io/gh/MyreMylar/pygame_gui)
+[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.5+](https://img.shields.io/badge/python-3.5+-blue.svg)](https://www.python.org/downloads/release/python-350/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Master](https://travis-ci.com/MyreMylar/pygame_gui.svg?branch=master)](https://travis-ci.com/MyreMylar/pygame_gui) [![codecov](https://codecov.io/gh/MyreMylar/pygame_gui/branch/master/graph/badge.svg)](https://codecov.io/gh/MyreMylar/pygame_gui) [![Downloads](https://pepy.tech/badge/pygame-gui)](https://pepy.tech/project/pygame-gui)
 
 ## Requirements
 
