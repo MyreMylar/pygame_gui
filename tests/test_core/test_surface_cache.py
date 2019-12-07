@@ -33,5 +33,11 @@ class TestSurfaceCache:
                                              string_id="test_surface_6")
         cache.add_surface_to_long_term_cache(pygame.Surface((128, 128)),
                                              string_id="test_surface_7")
+        cache.add_surface_to_long_term_cache(pygame.Surface((640, 64)),
+                                             string_id="test_surface_8")
+        cache.add_surface_to_long_term_cache(pygame.Surface((640, 32)),
+                                             string_id="test_surface_9")
+        cache.add_surface_to_long_term_cache(pygame.Surface((784, 784)),
+                                             string_id="test_surface_10")
 
         assert type(cache.find_surface_in_cache("test_surface_1")) == pygame.Surface

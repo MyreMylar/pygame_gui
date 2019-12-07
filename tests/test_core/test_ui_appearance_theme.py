@@ -17,6 +17,16 @@ class TestUIAppearanceTheme:
         colour = theme.get_colour(object_ids=[''], element_ids=['text_box'], colour_id='dark_bg')
         assert colour == pygame.Color('#25f92e')
 
+    def test_load_theme_invalid_colour_gradients(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        with pytest.warns(UserWarning, match="Invalid gradient"):
+            theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
+
+    def test_load_theme_with_non_preloaded_font(self, _init_pygame,
+                                                _display_surface_return_none: None):
+        theme = UIAppearanceTheme()
+        theme.load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
+
     def test_check_need_to_reload_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme()
         theme._theme_file_path = "not_a_theme.json"
