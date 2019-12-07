@@ -18,12 +18,7 @@ class ShadowGenerator:
         self.created_ellipse_shadows = {}
         self.preloaded_shadow_corners = {}
 
-    def shadow_edges_and_corners_to_preload(self, list_of_corners, list_of_edges):
-        # corners = {corner_radius: 10, shadow_width: 10}
-        pass
-
     def create_shadow_corners(self, shadow_width_param, corner_radius_param, aa_amount=4):
-
         if shadow_width_param <= 0:
             shadow_width_param = 1
             warnings.warn("Tried to make shadow with width <= 0")
