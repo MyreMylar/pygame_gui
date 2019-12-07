@@ -246,11 +246,12 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
         elif element == 'body':
             if 'bgcolor' in attributes:
-                if attributes['bgcolor'][0] == '#':
-                    style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
-                else:
+                if ',' in attributes['bgcolor']:
                     style["bg_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
                                                                              self.element_ids, attributes['bg_color'])
+                else:
+                    style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
+
         elif element == 'br':
             self.add_text('\n')  # u'\u2028'
         else:

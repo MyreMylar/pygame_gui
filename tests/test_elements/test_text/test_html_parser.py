@@ -6,6 +6,7 @@ import pygame_gui
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.elements.text.html_parser import CharStyle, TextHTMLParser, TextLineContext, TextStyleData
+from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 
 
 class TestCharStyle:
@@ -32,3 +33,21 @@ class TestTextLineContext:
                                       is_link=True, link_href='None')
 
         assert text_line_1 == text_line_2
+
+
+class TestHtmlParser:
+    def test_creation(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        parser = TextHTMLParser(theme, [], [])
+        parser.feed('<b>text</b>')
+
+    def test_invalid_tag(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        parser = TextHTMLParser(theme, [], [])
+        with pytest.warns(UserWarning, match='Unsupported HTML Tag'):
+            parser.feed('<video>text</video>')
+
+    def test_body_gradient(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        parser = TextHTMLParser(theme, [], [])
+        parser.feed('<body bg_color=#FF0000,#FFFF00,0>text</body>')
