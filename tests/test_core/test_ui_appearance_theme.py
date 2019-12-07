@@ -19,7 +19,7 @@ class TestUIAppearanceTheme:
 
     def test_check_need_to_reload_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme()
-        theme.__theme_file_path = "not_a_theme.json"
+        theme._theme_file_path = "not_a_theme.json"
         assert theme.check_need_to_reload() is False
 
     def test_check_need_to_reload_is_false(self, _init_pygame):
@@ -37,3 +37,13 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme()
         with pytest.raises(ValueError, match="Object ID hierarchy is not equal in length to Element ID hierarchy"):
             theme.build_all_combined_ids(object_ids=['whut', 'the', 'heck'], element_ids=['button'])
+
+    def test_load_theme_bad_path(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        with pytest.warns(UserWarning, match='Failed to open theme file at path'):
+            theme.load_theme("blah.json")
+
+    def test_load_theme_bad_json_syntax(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        with pytest.warns(UserWarning, match='Failed to load current theme file, check syntax'):
+            theme.load_theme(os.path.join("tests", "data", "themes", "bad_syntax_theme.json"))

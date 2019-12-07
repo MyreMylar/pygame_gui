@@ -25,7 +25,10 @@
              "size": "14",
              "bold": "0",
              "italic": "0",
-             "regular_path": "tests/data/Roboto-Regular.ttf"
+             "regular_path": "tests/data/Roboto-Regular.ttf",
+             "bold_path": "tests/data/Roboto-Regular.ttf",
+             "italic_path": "tests/data/Roboto-Regular.ttf",
+             "bold_italic_path": "tests/data/Roboto-Regular.ttf"
          },
          "images":
          {

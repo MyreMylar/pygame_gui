@@ -534,12 +534,12 @@ class UIAppearanceTheme:
         :param file_path: The path to the theme we want to load.
 
         """
-        if file_path is None:
-            raise ValueError('Theme path cannot be None')
-
         if type(file_path) != io.BytesIO:
             self._theme_file_path = file_path
-            self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+            try:
+                self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+            except FileNotFoundError:
+                self._theme_file_last_modified = 0
             used_file_path = os.path.abspath(file_path)
         else:
             used_file_path = file_path

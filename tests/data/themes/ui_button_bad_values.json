@@ -3,7 +3,7 @@
      {
          "colours":
          {
-             "normal_bg": "potato",
+             "normal_bg": "#25fF2e,#FF00FF,0.2",
              "hovered_bg": "potato",
              "disabled_bg": "potato",
              "selected_bg": "potato",

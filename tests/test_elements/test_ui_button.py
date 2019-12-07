@@ -512,6 +512,7 @@ class TestUIButton:
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
+    @pytest.mark.filterwarnings("ignore:Invalid gradient")
     def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_button_bad_values.json"))
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),

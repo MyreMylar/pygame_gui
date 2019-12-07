@@ -8,7 +8,8 @@
              "link_hover": "#FFFF00",
              "link_selected": "#FFFFFF",
              "normal_border": "#AA0AAA",
-             "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"
+             "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90",
+             "normal_text": "#80F080"
          },
          "font":
          {
