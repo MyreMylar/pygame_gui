@@ -118,6 +118,9 @@ class UIAppearanceTheme:
         # Only load  the 'stringified' data if we can't find the actual default theme file
         # This is need for PyInstaller build
         default_theme_file_path = os.path.normpath(os.path.join(module_root_path, 'data', 'default_theme.json'))
+        self.load_default_theme_file(default_theme_file_path)
+
+    def load_default_theme_file(self, default_theme_file_path):
         if os.path.exists(default_theme_file_path):
             self.load_theme(default_theme_file_path)
         else:

@@ -23,8 +23,6 @@
          {
              "name": "roboto",
              "size": "14",
-             "bold": "0",
-             "italic": "0",
              "regular_path": "tests/data/Roboto-Regular.ttf"
          },
          "images":

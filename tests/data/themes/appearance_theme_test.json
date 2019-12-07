@@ -6,5 +6,20 @@
             "normal_bg": "#25f92e,clam,120",
             "hovered_bg": "#25f92e,clam,#25f92e,120"
         }
+    },
+
+    "#test_parent":
+    {
+        "colours":
+        {
+            "dark_bg": "#25f92e,#FF0000,120"
+        }
+    },
+    "#test_child":
+    {
+        "colours":
+        {
+            "normal_bg": "#25f92e,#FF0000,120"
+        }
     }
 }
