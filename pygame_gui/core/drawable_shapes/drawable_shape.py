@@ -60,7 +60,7 @@ class DrawableShape:
                 self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
                                             self.theming['shadow_width'] + self.theming['border_width'])
             elif self.theming['text_horiz_alignment'] == 'right':
-                x_pos = (self.click_area_shape.width - self.theming['text_horiz_alignment_padding'] -
+                x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
                          self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
                 self.aligned_text_rect.x = x_pos
             else:
