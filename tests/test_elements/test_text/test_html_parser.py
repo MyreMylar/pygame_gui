@@ -60,7 +60,7 @@ class TestHtmlParser:
         theme = UIAppearanceTheme()
         parser = TextHTMLParser(theme, [], [])
         with pytest.warns(UserWarning, match='Unsupported HTML Tag'):
-            parser.feed('<video>text</video>')
+            parser.feed('</font><video>text</video>')
 
     def test_body_gradient(self, _init_pygame):
         theme = UIAppearanceTheme()

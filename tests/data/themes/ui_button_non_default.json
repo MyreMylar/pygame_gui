@@ -8,7 +8,7 @@
              "disabled_bg": "#252f2e",
              "selected_bg": "#25f92e",
              "active_bg": "#1937f4",
-             "normal_text": "#cfcbd8",
+             "normal_text": "#cfcbd8,#F0FFFF,0",
              "hovered_text": "#F0FFFF",
              "selected_text": "#F0FFFF",
              "disabled_text": "#60736f",

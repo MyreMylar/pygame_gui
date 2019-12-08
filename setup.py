@@ -27,7 +27,7 @@ setup(
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
-      packages=['pygame_gui', 'pygame_gui.core', 'pygame_gui.elements',
+      packages=['pygame_gui', 'pygame_gui.core', 'pygame_gui.core.drawable_shapes', 'pygame_gui.elements',
                 'pygame_gui.elements.text', 'pygame_gui.windows'],
       zip_safe=False,
       python_requires='>=3.5',
