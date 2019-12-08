@@ -241,8 +241,8 @@ class RoundedRectangleShape(DrawableShape):
                                                (self.border_rect.width - (2 * self.theming['border_width'] * aa),
                                                 self.border_rect.height - (2 * self.theming['border_width'] * aa)))
 
-            dimension_scale = min(self.background_rect.width/self.border_rect.width,
-                                  self.background_rect.height/self.border_rect.height)
+            dimension_scale = min(self.background_rect.width/max(self.border_rect.width, 1),
+                                  self.background_rect.height/max(self.border_rect.height, 1))
             bg_corner_radius = int(border_corner_radius * dimension_scale)
 
             bab_surface = pygame.Surface((self.containing_rect.width * aa,
@@ -313,7 +313,10 @@ class RoundedRectangleShape(DrawableShape):
             if self.theming['shadow_width'] > 0:
                 # we want our shadow clear shape to be a little bigger than the background ideally at the curvy parts
                 large_sub = self.create_shadow_subtract_surface(self.border_rect.size, corner_radius * aa, aa)
-                small_sub = pygame.transform.smoothscale(large_sub, self.click_area_shape.size)
+                if large_sub is not None:
+                    small_sub = pygame.transform.smoothscale(large_sub, self.click_area_shape.size)
+                else:
+                    small_sub = None
 
                 if small_sub is not None:
                     self.surfaces[state_str].blit(small_sub, (self.theming['shadow_width'],
