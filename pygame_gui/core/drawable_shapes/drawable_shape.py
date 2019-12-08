@@ -25,6 +25,7 @@ class DrawableShape:
                          'active': None}  # type: Dict[str,Union[pygame.Surface, None]]
 
         self.states_to_redraw_queue = deque([])
+        self.need_to_clean_up = True
 
     def redraw_state(self, state_str):
         pass
@@ -36,9 +37,10 @@ class DrawableShape:
         if len(self.states_to_redraw_queue) > 0:
             state = self.states_to_redraw_queue.popleft()
             self.redraw_state(state)
-            if len(self.states_to_redraw_queue) == 0:
-                # last state so clean up
-                self.clean_up_temp_shapes()
+        if self.need_to_clean_up and len(self.states_to_redraw_queue) == 0:
+            # last state so clean up
+            self.clean_up_temp_shapes()
+            self.need_to_clean_up = False
 
     def redraw_all_states(self):
         self.states_to_redraw_queue = deque([state for state in self.states])
