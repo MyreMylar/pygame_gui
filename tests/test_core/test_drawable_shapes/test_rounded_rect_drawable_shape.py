@@ -38,7 +38,7 @@ class TestRoundedRectangleShape:
                                                           'shape_corner_radius': 2,
                                                           'text_horiz_alignment': 'center',
                                                           'text_vert_alignment': 'center'},
-                                      states=['normal'], manager=default_ui_manager)
+                                      states=['normal', 'hovered'], manager=default_ui_manager)
         shape.update()
         shape.update()
 
