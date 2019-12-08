@@ -23,7 +23,7 @@ class TestTextLineContext:
                         color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
                         is_link=True, link_href='None')
 
-    def test_comparison(self, _init_pygame):
+    def test_comparison_equal(self, _init_pygame):
         text_line_1 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
                                       color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
                                       is_link=True, link_href='None')
@@ -33,6 +33,21 @@ class TestTextLineContext:
                                       is_link=True, link_href='None')
 
         assert text_line_1 == text_line_2
+
+        text_line_2.font_size = 15
+
+        assert (text_line_1 == text_line_2) is False
+
+    def test_comparison_not_equal(self, _init_pygame):
+        text_line_1 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
+                                      color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
+                                      is_link=True, link_href='None')
+
+        text_line_2 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
+                                      color=pygame.Color('#FF0000'), bg_color=pygame.Color('#000000'),
+                                      is_link=False, link_href='gui')
+
+        assert text_line_1 != text_line_2
 
 
 class TestHtmlParser:
@@ -50,4 +65,9 @@ class TestHtmlParser:
     def test_body_gradient(self, _init_pygame):
         theme = UIAppearanceTheme()
         parser = TextHTMLParser(theme, [], [])
-        parser.feed('<body bg_color=#FF0000,#FFFF00,0>text</body>')
+        parser.feed('<body bgcolor=#FF0000,#FFFF00,0>text</body></body>')
+
+    def test_weird_html(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        parser = TextHTMLParser(theme, [], [])
+        parser.feed('<body bgcolor="" > <font size="" face="" >text</font></body>')

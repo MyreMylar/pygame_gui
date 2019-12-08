@@ -232,10 +232,16 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
             style['underline'] = True
         elif element == 'font':
             if 'face' in attributes:
-                font_name = attributes['face']  # .split(',')
+                if len(attributes['face']) > 0:
+                    font_name = attributes['face']
+                else:
+                    font_name = None
                 style["font_name"] = font_name
             if 'size' in attributes:
-                font_size = self.font_sizes[float(attributes['size'])]
+                if len(attributes['size']) > 0:
+                    font_size = self.font_sizes[float(attributes['size'])]
+                else:
+                    font_size = None
                 style["font_size"] = font_size
             if 'color' in attributes:
                 if attributes['color'][0] == '#':
@@ -243,14 +249,16 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
                 else:
                     style["font_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
                                                                                self.element_ids, attributes['color'])
-
         elif element == 'body':
             if 'bgcolor' in attributes:
-                if ',' in attributes['bgcolor']:
-                    style["bg_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
-                                                                             self.element_ids, attributes['bg_color'])
+                if len(attributes['bgcolor']) > 0:
+                    if ',' in attributes['bgcolor']:
+                        style["bg_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
+                                                                                self.element_ids, attributes['bgcolor'])
+                    else:
+                        style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
                 else:
-                    style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
+                    style["bg_color"] = None
 
         elif element == 'br':
             self.add_text('\n')  # u'\u2028'
@@ -274,6 +282,3 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
     def handle_data(self, data):
         self.add_text(data)
-
-    def error(self, message):
-        pass
