@@ -234,8 +234,8 @@ class EllipseDrawableShape(DrawableShape):
             # This works best if we leave a small overlap between the old background and the new shape
             subtract_rect = pygame.Rect(rect.x + (overlap * aa_amount),
                                         rect.y + (overlap * aa_amount),
-                                        rect.width - 2 * (overlap * aa_amount),
-                                        rect.height - 2 * (overlap * aa_amount))
+                                        max(0, rect.width - 2 * (overlap * aa_amount)),
+                                        max(0, rect.height - 2 * (overlap * aa_amount)))
             # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
             large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height), flags=pygame.SRCALPHA, depth=32)
             large_sub_surface.fill(pygame.Color('#00000000'))
