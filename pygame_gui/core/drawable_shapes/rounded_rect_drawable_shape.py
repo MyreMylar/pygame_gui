@@ -156,7 +156,7 @@ class RoundedRectangleShape(DrawableShape):
             # finally the circular corners.
             if center_rect.collidepoint(point[0], point[1]):
                 collided = True
-            elif edge_rect_left.collidepoint(point[0], point[1]) or edge_rect_right:
+            elif edge_rect_left.collidepoint(point[0], point[1]) or edge_rect_right.collidepoint(point[0], point[1]):
                 collided = True
             else:
                 point_vec = Vector2(point)
