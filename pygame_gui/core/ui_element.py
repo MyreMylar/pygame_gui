@@ -41,11 +41,7 @@ class UIElement(pygame.sprite.Sprite):
 
         if container is None:
             root_window = self.ui_manager.get_window_stack().get_root_window()
-            if root_window is not None:
-                container = root_window.get_container()
-            else:
-                container = self
-
+            container = root_window.get_container() if root_window is not None else self
         self.ui_container = container
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)

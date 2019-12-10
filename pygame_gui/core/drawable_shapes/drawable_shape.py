@@ -51,46 +51,40 @@ class DrawableShape:
         """
         Aligns the text drawing position correctly according to our theming options.
         """
-        if 'text' in self.theming and len(self.theming['text']) > 0:
-            # first we need to create rectangle the size of the text, if there is any text to draw
-            self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
+        if 'text' not in self.theming or len(self.theming['text']) <= 0:
+            return
+        # first we need to create rectangle the size of the text, if there is any text to draw
+        self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
 
-            # horizontal
-            if self.theming['text_horiz_alignment'] == 'center':
-                self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
-            elif self.theming['text_horiz_alignment'] == 'left':
-                self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
-                                            self.theming['shadow_width'] + self.theming['border_width'])
-            elif self.theming['text_horiz_alignment'] == 'right':
-                x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
-                         self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
-                self.aligned_text_rect.x = x_pos
-            else:
-                self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
-            # vertical
-            if self.theming['text_vert_alignment'] == 'center':
-                self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
-            elif self.theming['text_vert_alignment'] == 'top':
-                self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
-                                            self.theming['shadow_width'] + self.theming['border_width'])
-            elif self.theming['text_vert_alignment'] == 'bottom':
-                self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
-                                            - self.theming['text_vert_alignment_padding'] -
-                                            self.theming['shadow_width'] - self.theming['border_width'])
-            else:
-                self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
+        if (self.theming['text_horiz_alignment'] == 'center' or
+                not self.theming['text_horiz_alignment'] in ['left', 'right']):
+            self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
+        elif self.theming['text_horiz_alignment'] == 'left':
+            self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
+                                        self.theming['shadow_width'] + self.theming['border_width'])
+        else:
+            x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
+                     self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
+            self.aligned_text_rect.x = x_pos
+        if (self.theming['text_vert_alignment'] == 'center' or
+                not self.theming['text_vert_alignment'] in ['top', 'bottom']):
+            self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
+        elif self.theming['text_vert_alignment'] == 'top':
+            self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
+                                        self.theming['shadow_width'] + self.theming['border_width'])
+        else:
+            self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
+                                        - self.theming['text_vert_alignment_padding'] -
+                                        self.theming['shadow_width'] - self.theming['border_width'])
 
     def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass
 
     def get_surface(self, surface_name):
-        if surface_name in self.surfaces:
-            if self.surfaces[surface_name] is not None:
-                return self.surfaces[surface_name]
-            elif self.surfaces['normal'] is not None:
-                return self.surfaces['normal']
-            else:
-                return pygame.Surface((0, 0))
+        if surface_name in self.surfaces and self.surfaces[surface_name] is not None:
+            return self.surfaces[surface_name]
+        elif surface_name in self.surfaces and self.surfaces['normal'] is not None:
+            return self.surfaces['normal']
         else:
             return pygame.Surface((0, 0))
 

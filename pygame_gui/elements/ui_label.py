@@ -74,25 +74,25 @@ class UILabel(UIElement):
 
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
 
-        if type(self.bg_colour) != ColourGradient and type(self.text_colour) != ColourGradient:
+        if type(self.bg_colour) == ColourGradient:
+            self.image.fill(pygame.Color('#FFFFFFFF'))
+            self.bg_colour.apply_gradient_to_surface(self.image)
+            if type(self.text_colour) == ColourGradient:
+                text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+                self.text_colour.apply_gradient_to_surface(text_render)
+
+            else:
+                text_render = self.font.render(self.text, True, self.text_colour)
+        elif type(self.text_colour) == ColourGradient:
+            self.image.fill(self.bg_colour)
+            text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+            self.text_colour.apply_gradient_to_surface(text_render)
+        else:
             self.image.fill(self.bg_colour)
             if self.bg_colour.a != 255 or self.shadow_enabled:
                 text_render = self.font.render(self.text, True, self.text_colour)
             else:
                 text_render = self.font.render(self.text, True, self.text_colour, self.bg_colour)
-        else:
-            if type(self.bg_colour) != ColourGradient:
-                self.image.fill(self.bg_colour)
-            else:
-                self.image.fill(pygame.Color('#FFFFFFFF'))
-                self.bg_colour.apply_gradient_to_surface(self.image)
-
-            if type(self.text_colour) != ColourGradient:
-                text_render = self.font.render(self.text, True, self.text_colour)
-            else:
-                text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
-                self.text_colour.apply_gradient_to_surface(text_render)
-
         text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
                                                 centery=int(self.rect.height / 2))
 

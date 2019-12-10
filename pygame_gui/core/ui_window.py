@@ -21,11 +21,7 @@ class UIWindow(UIElement):
                  object_ids: Union[List[Union[str, None]], None] = None):
 
         new_element_ids = element_ids.copy()
-        if object_ids is not None:
-            new_object_ids = object_ids.copy()
-        else:
-            new_object_ids = [None]
-
+        new_object_ids = object_ids.copy() if object_ids is not None else [None]
         self.window_container = None
         # need to create the container that holds the elements first if this is the root window
         # so we can bootstrap everything and effectively add the root window to it's own container.
@@ -62,14 +58,11 @@ class UIWindow(UIElement):
         :return bool: Should return True if this element makes use of this event.
         """
         handled = False
-        if self is not None:
-            # by default we don't let mouse click events pass through windows to UI below them.
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 or event.button == 3:
-                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                    if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                        handled = True
+        if self is not None and event.type == pygame.MOUSEBUTTONDOWN and event.button in [1, 3]:
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                handled = True
 
         return handled
 
@@ -84,14 +77,13 @@ class UIWindow(UIElement):
         :return bool: returns True if the processed event represents a click inside this window
         """
         event_handled = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                    if self.bring_to_front_on_focused:
-                        self.window_stack.move_window_to_front(self)
-                    event_handled = True
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                if self.bring_to_front_on_focused:
+                    self.window_stack.move_window_to_front(self)
+                event_handled = True
         return event_handled
 
     def update(self, time_delta: float):

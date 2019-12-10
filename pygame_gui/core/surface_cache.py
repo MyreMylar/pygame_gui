@@ -37,8 +37,7 @@ class SurfaceCache:
 
             while found_rectangle_cache is None:
                 for free_rectangle in self.free_space_rectangles:
-                    if found_rectangle_cache is None and (free_rectangle.width >= surface_size[0] and
-                                                          free_rectangle.height >= surface_size[1]):
+                    if free_rectangle.width >= surface_size[0] and free_rectangle.height >= surface_size[1]:
                         # we fits, so we sits
                         found_rectangle_to_split = free_rectangle
                         found_rectangle_cache = pygame.Rect(free_rectangle.topleft, surface_size)
@@ -48,12 +47,7 @@ class SurfaceCache:
 
                 if found_rectangle_to_split is not None and found_rectangle_cache is not None:
                     self.split_rect(found_rectangle_to_split, found_rectangle_cache)
-                    # check if our new cached rect overlaps any others
-                    rects_to_split = []
-                    for rect in self.free_space_rectangles:
-                        if rect.colliderect(found_rectangle_cache):
-                            rects_to_split.append(rect)
-
+                    rects_to_split = [rect for rect in self.free_space_rectangles if rect.colliderect(found_rectangle_cache)]
                     for split_rect in rects_to_split:
                         self.split_rect(split_rect, found_rectangle_cache)
 
@@ -62,9 +56,8 @@ class SurfaceCache:
                     rectangles_to_check = [rectangle for rectangle in self.free_space_rectangles]
                     for free_rectangle in self.free_space_rectangles:
                         for check_rect in rectangles_to_check:
-                            if free_rectangle != check_rect:
-                                if check_rect.contains(free_rectangle):
-                                    rects_to_remove.append(free_rectangle)
+                            if free_rectangle != check_rect and check_rect.contains(free_rectangle):
+                                rects_to_remove.append(free_rectangle)
                     self.free_space_rectangles = [rect for rect in self.free_space_rectangles
                                                   if rect not in rects_to_remove]
 

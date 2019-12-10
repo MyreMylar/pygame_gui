@@ -45,8 +45,8 @@ if plat == 'WINDOWS':
     def __windows_paste():
         ctypes.windll.user32.GetClipboardData.argtypes = [UINT]
         ctypes.windll.user32.GetClipboardData.restype = HANDLE
-        cf_unicode_text = 13
         with __windows_clipboard(None):
+            cf_unicode_text = 13
             handle = ctypes.windll.user32.GetClipboardData(cf_unicode_text)
             if not handle:
                 return ""
@@ -60,9 +60,7 @@ if plat == 'WINDOWS':
             super(CheckedCall, self).__setattr__("f", f)
 
         def __call__(self, *args):
-            ret = self.f(*args)
-
-            return ret
+            return self.f(*args)
 
         def __setattr__(self, key, value):
             setattr(self.f, key, value)
@@ -105,8 +103,6 @@ if plat == 'WINDOWS':
         wcslen.restype = UINT
 
         gmem_moveable = 0x0002
-        cf_unicode_text = 13
-
         # weirdly this temporary window handle seems to work for pasting where the
         # normal pygame window handle does not
         hwnd = safe_create_window(0, b"STATIC", None, 0, 0, 0, 0, 0,
@@ -126,6 +122,8 @@ if plat == 'WINDOWS':
                                count * ctypes.sizeof(ctypes.c_wchar))
 
                 safe_unlock(handle)
+                cf_unicode_text = 13
+
                 safe_set_clipboard(cf_unicode_text, handle)
 
         safe_destroy_window(hwnd)

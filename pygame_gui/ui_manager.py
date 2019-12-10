@@ -99,25 +99,22 @@ class UIManager:
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
-            # a little bit of code to pop windows we start messing with to the front
             if not window_sorting_event_handled:
                 windows_in_layer = [window for window in sprites_in_layer if (
                         'window' in window.element_ids[-1]) and (self.ui_window_stack.get_root_window() is not window)]
                 for window in windows_in_layer:
-                    if not window_sorting_event_handled:
-                        window_sorting_event_handled = window.check_clicked_inside(event)
+                    window_sorting_event_handled = window.check_clicked_inside(event)
             if not event_handled:
                 for ui_element in sprites_in_layer:
-                    if not event_handled:
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if event.button == 1:
-                                mouse_x, mouse_y = event.pos
-                                if ui_element.rect.collidepoint(mouse_x, mouse_y):
-                                    if ui_element is not self.select_focused_element:
-                                        self.unselect_focus_element()
-                                        self.select_focus_element(ui_element)
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        mouse_x, mouse_y = event.pos
+                        if ui_element.rect.collidepoint(mouse_x, mouse_y) and ui_element is not self.select_focused_element:
+                            self.unselect_focus_element()
+                            self.select_focus_element(ui_element)
 
-                        event_handled = ui_element.process_event(event)
+                    event_handled = ui_element.process_event(event)
+                    if event_handled:
+                        break
 
     def update(self, time_delta: float):
         """

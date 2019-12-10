@@ -166,19 +166,18 @@ class UIScreenSpaceHealthBar(UIElement):
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
-        if self.alive():
-            if self.sprite_to_monitor is not None:
-                if self.sprite_to_monitor.health_capacity != self.health_capacity or\
-                        self.current_health != self.sprite_to_monitor.current_health:
-                    self.current_health = self.sprite_to_monitor.current_health
-                    self.health_capacity = self.sprite_to_monitor.health_capacity
-                    self.health_percentage = self.current_health / self.health_capacity
+        if (self.alive() and self.sprite_to_monitor is not None and
+                (self.sprite_to_monitor.health_capacity != self.health_capacity or
+                 self.current_health != self.sprite_to_monitor.current_health)):
+            self.current_health = self.sprite_to_monitor.current_health
+            self.health_capacity = self.sprite_to_monitor.health_capacity
+            self.health_percentage = self.current_health / self.health_capacity
 
-                    self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
-                                                            self.shadow_width + self.border_width),
-                                                           (int(self.capacity_width * self.health_percentage),
-                                                            self.capacity_height))
-                    self.redraw()
+            self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                                    self.shadow_width + self.border_width),
+                                                   (int(self.capacity_width * self.health_percentage),
+                                                    self.capacity_height))
+            self.redraw()
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -194,9 +193,8 @@ class UIScreenSpaceHealthBar(UIElement):
 
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'rounded_rectangle']:
-                shape_type = shape_type_string
+        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+            shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
             has_any_changed = True

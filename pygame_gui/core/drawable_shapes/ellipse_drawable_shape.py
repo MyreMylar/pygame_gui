@@ -162,30 +162,24 @@ class EllipseDrawableShape(DrawableShape):
                                           self.containing_rect.height * aa), flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.theming['border_width'] > 0:
-                # If we have a border, draw it
-                # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
                                                                         0, aa_amount=aa, clear=False)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
-                    bab_surface.blit(shape_surface, self.border_rect)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
                                                                         0, aa_amount=aa, clear=False)
                     self.apply_colour_to_surface(self.theming[border_colour_state_str], shape_surface)
-                    bab_surface.blit(shape_surface, self.border_rect)
 
-            # Next we draw the main background colour of the shape
-            # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
+                bab_surface.blit(shape_surface, self.border_rect)
             if type(self.theming[bg_colour_state_str]) == ColourGradient:
                 shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect, 1, aa_amount=aa)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
-                bab_surface.blit(shape_surface, self.background_rect)
             else:
                 shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect, 1, aa_amount=aa)
                 self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
-                bab_surface.blit(shape_surface, self.background_rect)
 
+            bab_surface.blit(shape_surface, self.background_rect)
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
@@ -237,7 +231,8 @@ class EllipseDrawableShape(DrawableShape):
                                         max(0, rect.width - 2 * (overlap * aa_amount)),
                                         max(0, rect.height - 2 * (overlap * aa_amount)))
             # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height), flags=pygame.SRCALPHA, depth=32)
+            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height),
+                                               flags=pygame.SRCALPHA, depth=32)
             large_sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(large_sub_surface, pygame.Color("#FFFFFFFF"), large_sub_surface.get_rect())
 

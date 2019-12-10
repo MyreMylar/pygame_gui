@@ -75,6 +75,7 @@ class RoundedRectangleShape(DrawableShape):
             self.theming['border_width'] = 0
             warnings.warn('Clamping border_width of: ' + str(old_width) + ', to: ' + str(0))
 
+        corner_radius = self.theming['shape_corner_radius']
         if self.theming['shadow_width'] > 0:
 
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.theming['shadow_width'],
@@ -82,7 +83,6 @@ class RoundedRectangleShape(DrawableShape):
                                                 (self.containing_rect.width - (2 * self.theming['shadow_width']),
                                                  self.containing_rect.height - (2 * self.theming['shadow_width'])))
 
-            corner_radius = self.theming['shape_corner_radius']
             old_radius = self.theming['shape_corner_radius']
             if corner_radius > min(self.click_area_shape.width / 2, self.click_area_shape.height / 2):
                 corner_radius = int(min(self.click_area_shape.width / 2, self.click_area_shape.height / 2))
@@ -105,7 +105,6 @@ class RoundedRectangleShape(DrawableShape):
         else:
             self.click_area_shape = self.containing_rect.copy()
 
-            corner_radius = self.theming['shape_corner_radius']
             if corner_radius > min(self.click_area_shape.width / 2, self.click_area_shape.height / 2):
                 corner_radius = int(min(self.click_area_shape.width / 2, self.click_area_shape.height / 2))
             if corner_radius < 0:

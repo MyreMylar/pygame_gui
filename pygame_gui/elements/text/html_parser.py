@@ -92,9 +92,7 @@ class TextStyleData:
         self.push_style('default_style', self.default_style)
 
     def push_style(self, key, styles):
-        old_styles = {}
-        for name in styles.keys():
-            old_styles[name] = self.current_style.get(name)
+        old_styles = {name: self.current_style.get(name) for name in styles.keys()}
         self.style_stack.append((key, old_styles))
         self.current_style.update(styles)
         self.next_style.update(styles)
@@ -215,10 +213,7 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
         self.element_stack.append(element)
 
-        attributes = {}
-        for key, value in attrs:
-            attributes[key.lower()] = value
-
+        attributes = {key.lower(): value for key, value in attrs}
         style = {}
         if element in ('b', 'strong'):
             style['bold'] = True
@@ -232,10 +227,7 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
             style['underline'] = True
         elif element == 'font':
             if 'face' in attributes:
-                if len(attributes['face']) > 0:
-                    font_name = attributes['face']
-                else:
-                    font_name = None
+                font_name = attributes['face'] if len(attributes['face']) > 0 else None
                 style["font_name"] = font_name
             if 'size' in attributes:
                 if len(attributes['size']) > 0:

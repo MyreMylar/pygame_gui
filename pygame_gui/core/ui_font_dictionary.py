@@ -143,14 +143,13 @@ class UIFontDictionary:
         """
         if bold and italic:
             font_style_string = "bold_italic"
-        elif bold and not italic:
+        elif bold:
             font_style_string = "bold"
-        elif not bold and italic:
+        elif italic:
             font_style_string = "italic"
         else:
             font_style_string = "regular"
-        font_id = font_name + "_" + font_style_string + "_" + str(font_size)
-        return font_id
+        return font_name + "_" + font_style_string + "_" + str(font_size)
 
     def preload_font(self, font_size: int, font_name: str, bold: bool = False, italic: bool = False):
         """
@@ -164,7 +163,7 @@ class UIFontDictionary:
         :param italic: Whether the font is italic styled or not.
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
-        if font_id in self.loaded_fonts:  # font already loaded
+        if font_id in self.loaded_fonts:    # font already loaded
             warnings.warn('Trying to pre-load font id: ' + font_id + ' that is already loaded', UserWarning)
         elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
             if bold and italic:
@@ -180,7 +179,7 @@ class UIFontDictionary:
                 except FileNotFoundError:
                     warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][3])
 
-            elif bold and not italic:
+            elif bold:
                 try:
                     if type(self.known_font_paths[font_name][1]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][1]))
@@ -191,7 +190,7 @@ class UIFontDictionary:
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
                     warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][1])
-            elif not bold and italic:
+            elif italic:
                 try:
                     if type(self.known_font_paths[font_name][2]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][2]))
@@ -247,11 +246,7 @@ class UIFontDictionary:
         This is not a foolproof check because this function could easily be called before we have explored all the code
         paths in a project that may use fonts.
         """
-        unused_font_ids = []
-        for key in self.loaded_fonts.keys():
-            if key not in self.used_font_ids:
-                unused_font_ids.append(key)
-
+        unused_font_ids = [key for key in self.loaded_fonts.keys() if key not in self.used_font_ids]
         if len(unused_font_ids) > 0:
             print('Unused font ids:')
             for font_id in unused_font_ids:

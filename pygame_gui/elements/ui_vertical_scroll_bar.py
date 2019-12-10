@@ -210,18 +210,17 @@ class UIVerticalScrollBar(UIElement):
 
         processed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
-        if (last_focused_scrollbar_element is self) or (
-                last_focused_scrollbar_element is self.sliding_button) or (
-                last_focused_scrollbar_element is self.top_button) or (
-            last_focused_scrollbar_element is self.bottom_button
-        ):
-            if event.type == pygame.MOUSEWHEEL:
-                if event.y > 0:
-                    self.scroll_wheel_up = True
-                    processed_event = True
-                elif event.y < 0:
-                    self.scroll_wheel_down = True
-                    processed_event = True
+        if ((last_focused_scrollbar_element is self) or (
+                    last_focused_scrollbar_element is self.sliding_button) or (
+                    last_focused_scrollbar_element is self.top_button) or (
+                last_focused_scrollbar_element is self.bottom_button
+            )) and event.type == pygame.MOUSEWHEEL:
+            if event.y > 0:
+                self.scroll_wheel_up = True
+                processed_event = True
+            elif event.y < 0:
+                self.scroll_wheel_down = True
+                processed_event = True
 
         return processed_event
 
@@ -334,9 +333,8 @@ class UIVerticalScrollBar(UIElement):
 
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'rounded_rectangle']:
-                shape_type = shape_type_string
+        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+            shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
             has_any_changed = True

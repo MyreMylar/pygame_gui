@@ -163,52 +163,53 @@ class UIHorizontalSlider(UIElement):
 
         :param time_delta: the time in seconds between calls to update.
         """
-        if self.alive():
-            moved_this_frame = False
-            if self.left_button.held and self.scroll_position > self.left_limit_position:
-                self.scroll_position -= (250.0 * time_delta)
-                self.scroll_position = max(self.scroll_position, self.left_limit_position)
-                x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
-                y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
-                moved_this_frame = True
-            elif self.right_button.held and self.scroll_position < self.right_limit_position:
-                self.scroll_position += (250.0 * time_delta)
-                self.scroll_position = min(self.scroll_position, self.right_limit_position)
-                x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
-                y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
-                moved_this_frame = True
+        if not self.alive():
+            return
+        moved_this_frame = False
+        if self.left_button.held and self.scroll_position > self.left_limit_position:
+            self.scroll_position -= (250.0 * time_delta)
+            self.scroll_position = max(self.scroll_position, self.left_limit_position)
+            x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
+            y_pos = self.rect.y + self.shadow_width + self.border_width
+            self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+            moved_this_frame = True
+        elif self.right_button.held and self.scroll_position < self.right_limit_position:
+            self.scroll_position += (250.0 * time_delta)
+            self.scroll_position = min(self.scroll_position, self.right_limit_position)
+            x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
+            y_pos = self.rect.y + self.shadow_width + self.border_width
+            self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+            moved_this_frame = True
 
-            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
-                if not self.grabbed_slider:
-                    self.grabbed_slider = True
-                    real_scroll_pos = (self.scroll_position + self.rect.x +
-                                       self.shadow_width + self.border_width + self.button_width)
-                    self.starting_grab_x_difference = mouse_x - real_scroll_pos
-
+        mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+        if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
+            if not self.grabbed_slider:
+                self.grabbed_slider = True
                 real_scroll_pos = (self.scroll_position + self.rect.x +
                                    self.shadow_width + self.border_width + self.button_width)
-                current_grab_difference = mouse_x - real_scroll_pos
-                adjustment_required = current_grab_difference - self.starting_grab_x_difference
-                self.scroll_position = self.scroll_position + adjustment_required
+                self.starting_grab_x_difference = mouse_x - real_scroll_pos
 
-                self.scroll_position = min(max(self.scroll_position, self.left_limit_position),
-                                           self.right_limit_position)
-                x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
-                y_pos = self.rect.y + self.shadow_width + self.border_width
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+            real_scroll_pos = (self.scroll_position + self.rect.x +
+                               self.shadow_width + self.border_width + self.button_width)
+            current_grab_difference = mouse_x - real_scroll_pos
+            adjustment_required = current_grab_difference - self.starting_grab_x_difference
+            self.scroll_position = self.scroll_position + adjustment_required
 
-                moved_this_frame = True
-            elif not self.sliding_button.held:
-                self.grabbed_slider = False
+            self.scroll_position = min(max(self.scroll_position, self.left_limit_position),
+                                       self.right_limit_position)
+            x_pos = self.scroll_position + self.rect.x + self.shadow_width + self.border_width + self.button_width
+            y_pos = self.rect.y + self.shadow_width + self.border_width
+            self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
 
-            if moved_this_frame:
-                self.current_value = self.value_range[0] + (
-                        (self.scroll_position / self.scrollable_width) * (self.value_range[1] - self.value_range[0]))
-                if not self.has_moved_recently:
-                    self.has_moved_recently = True
+            moved_this_frame = True
+        elif not self.sliding_button.held:
+            self.grabbed_slider = False
+
+        if moved_this_frame:
+            self.current_value = self.value_range[0] + (
+                    (self.scroll_position / self.scrollable_width) * (self.value_range[1] - self.value_range[0]))
+            if not self.has_moved_recently:
+                self.has_moved_recently = True
 
     def get_current_value(self) -> Union[float, int]:
         """
@@ -250,9 +251,8 @@ class UIHorizontalSlider(UIElement):
 
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'rounded_rectangle']:
-                shape_type = shape_type_string
+        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+            shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
             has_any_changed = True

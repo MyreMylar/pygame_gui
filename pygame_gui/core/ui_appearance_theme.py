@@ -41,6 +41,7 @@ class UIAppearanceTheme:
     To change the theming for the UI you normally specify a theme file when creating the UIManager. For more
     information on theme files see the specific documentation elsewhere.
     """
+
     def __init__(self):
 
         # the base colours are the default colours all UI elements use if they
@@ -290,15 +291,13 @@ class UIAppearanceTheme:
                         "Invalid value: " + self.ui_element_misc_data[misc_id]['shape_corner_radius'] +
                         " for shape_corner_radius")
 
-            # we can preload shadow edges if we are dealing with a rectangular shadow
-            if (shape == 'rounded_rectangle' or shape == 'rectangle') and shadow_width > 0:
+            if shape in ['rounded_rectangle', 'rectangle'] and shadow_width > 0:
                 if ('shadow_width' in self.ui_element_misc_data[misc_id] and
                         'shape_corner_radius' in self.ui_element_misc_data[misc_id]):
                     shadow_id = str(shadow_width) + 'x' + str(shape_corner_radius)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shape_corner_radius)
-                elif ('shadow_width' in self.ui_element_misc_data[misc_id] and
-                      'shape_corner_radius' not in self.ui_element_misc_data[misc_id]):
+                elif 'shadow_width' in self.ui_element_misc_data[misc_id]:
                     # have a shadow width but no idea on the corners, try most common -
                     shadow_id_1 = str(shadow_width) + 'x' + str(2)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -306,8 +305,7 @@ class UIAppearanceTheme:
                     shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
-                elif ('shape_corner_radius' in self.ui_element_misc_data[misc_id] and
-                      'shadow_width' not in self.ui_element_misc_data[misc_id]):
+                elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
                     # have a corner radius but no idea on the shadow width, try most common -
                     shadow_id_1 = str(1) + 'x' + str(shape_corner_radius)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -321,12 +319,11 @@ class UIAppearanceTheme:
 
     def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
         if index < tree_size:
-            if object_ids is not None:
-                if index < len(object_ids):
-                    object_id = object_ids[index]
-                    if object_id is not None:
-                        next_node = {'id': object_id, 'parent': current_node}
-                        self.get_next_id_node(next_node, element_ids, object_ids, index + 1, tree_size, combined_ids)
+            if object_ids is not None and index < len(object_ids):
+                object_id = object_ids[index]
+                if object_id is not None:
+                    next_node = {'id': object_id, 'parent': current_node}
+                    self.get_next_id_node(next_node, element_ids, object_ids, index + 1, tree_size, combined_ids)
             element_id = element_ids[index]
             next_node_2 = {'id': element_id, 'parent': current_node}
             self.get_next_id_node(next_node_2, element_ids, object_ids, index + 1, tree_size, combined_ids)
@@ -357,7 +354,7 @@ class UIAppearanceTheme:
             if len(object_ids) != len(element_ids):
                 raise ValueError("Object ID hierarchy is not equal in length to Element ID hierarchy"
                                  "Element IDs: " + str(element_ids) + "\n"
-                                 "Object IDs: " + str(object_ids) + "\n")
+                                                                      "Object IDs: " + str(object_ids) + "\n")
             if len(element_ids) != 0:
                 self.get_next_id_node(None, element_ids, object_ids, 0, len(element_ids), combined_ids)
 
@@ -375,11 +372,10 @@ class UIAppearanceTheme:
 
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
-        # then check for an element specific data
         for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ui_element_image_surfaces:
-                if image_id in self.ui_element_image_surfaces[combined_element_id]:
-                    return self.ui_element_image_surfaces[combined_element_id][image_id]
+            if (combined_element_id in self.ui_element_image_surfaces and
+                    image_id in self.ui_element_image_surfaces[combined_element_id]):
+                return self.ui_element_image_surfaces[combined_element_id][image_id]
 
         return None
 
@@ -436,11 +432,10 @@ class UIAppearanceTheme:
         """
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
-        # then check for an element specific data
         for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ui_element_misc_data:
-                if misc_data_id in self.ui_element_misc_data[combined_element_id]:
-                    return self.ui_element_misc_data[combined_element_id][misc_data_id]
+            if (combined_element_id in self.ui_element_misc_data and
+                    misc_data_id in self.ui_element_misc_data[combined_element_id]):
+                return self.ui_element_misc_data[combined_element_id][misc_data_id]
 
         return None
 
@@ -477,24 +472,20 @@ class UIAppearanceTheme:
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
         for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ui_element_colours:
-                if colour_id in self.ui_element_colours[combined_element_id]:
-                    return self.ui_element_colours[combined_element_id][colour_id]
+            if (combined_element_id in self.ui_element_colours and
+                    colour_id in self.ui_element_colours[combined_element_id]):
+                return self.ui_element_colours[combined_element_id][colour_id]
 
-        # if we don't have a specific colour for our individual element, try to inherit colours from higher
-        # in the hierarchy
         if object_ids is not None:
             for object_id in object_ids:
-                if object_id is not None:
-                    if object_id in self.ui_element_colours:
-                        if colour_id in self.ui_element_colours[object_id]:
-                            return self.ui_element_colours[object_id][colour_id]
+                if (object_id is not None and object_id in self.ui_element_colours and
+                        colour_id in self.ui_element_colours[object_id]):
+                    return self.ui_element_colours[object_id][colour_id]
 
         if element_ids is not None:
             for element_id in element_ids:
-                if element_id in self.ui_element_colours:
-                    if colour_id in self.ui_element_colours[element_id]:
-                        return self.ui_element_colours[element_id][colour_id]
+                if element_id in self.ui_element_colours and colour_id in self.ui_element_colours[element_id]:
+                    return self.ui_element_colours[element_id][colour_id]
 
         # then fall back on default colour with same id
         if colour_id in self.base_colours:
@@ -603,9 +594,9 @@ class UIAppearanceTheme:
             else:
                 self.ui_element_image_paths[element_name][image_key]['changed'] = False
             image_path = str(images_dict[image_key]['path'])
-            if 'path' in self.ui_element_image_paths[element_name][image_key]:
-                if image_path != self.ui_element_image_paths[element_name][image_key]['path']:
-                    self.ui_element_image_paths[element_name][image_key]['changed'] = True
+            if ('path' in self.ui_element_image_paths[element_name][image_key] and
+                    image_path != self.ui_element_image_paths[element_name][image_key]['path']):
+                self.ui_element_image_paths[element_name][image_key]['changed'] = True
             self.ui_element_image_paths[element_name][image_key]['path'] = image_path
             if 'sub_surface_rect' in images_dict[image_key]:
                 rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
@@ -621,9 +612,9 @@ class UIAppearanceTheme:
                         warnings.warn("Unable to create subsurface rectangle from string: "
                                       "" + images_dict[image_key]['sub_surface_rect'])
 
-                    if 'sub_surface_rect' in self.ui_element_image_paths[element_name][image_key]:
-                        if rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']:
-                            self.ui_element_image_paths[element_name][image_key]['changed'] = True
+                    if ('sub_surface_rect' in self.ui_element_image_paths[element_name][image_key] and
+                            rect != self.ui_element_image_paths[element_name][image_key]['sub_surface_rect']):
+                        self.ui_element_image_paths[element_name][image_key]['changed'] = True
                     self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
 
     def load_element_colour_data_from_theme(self, data_type, element_name, theme_dict):

@@ -42,18 +42,14 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
-                if type(self.color) != ColourGradient:
+            if type(self.color) != ColourGradient:
+                if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
-                    self.color.apply_gradient_to_surface(self.rendered_chunk)
-            else:
-                if type(self.color) != ColourGradient:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
-                else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
-                    self.color.apply_gradient_to_surface(self.rendered_chunk)
+            else:
+                self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                self.color.apply_gradient_to_surface(self.rendered_chunk)
         else:
             self.rendered_chunk = pygame.Surface((0, 0))
         metrics = self.font.metrics(self.chunk)
@@ -79,18 +75,14 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
-                if type(self.color) != ColourGradient:
+            if type(self.color) != ColourGradient:
+                if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
-                    self.color.apply_gradient_to_surface(self.rendered_chunk)
-            else:
-                if type(self.color) != ColourGradient:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
-                else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
-                    self.color.apply_gradient_to_surface(self.rendered_chunk)
+            else:
+                self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
+                self.color.apply_gradient_to_surface(self.rendered_chunk)
         else:
             self.rendered_chunk = pygame.Surface((0, 0))
 

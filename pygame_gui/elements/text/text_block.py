@@ -19,11 +19,7 @@ class TextBlock:
 
         self.position = (rect[0], rect[1])
         self.width = rect[2]
-        if wrap_to_height:
-            self.height = rect[3]
-        else:
-            self.height = -1
-
+        self.height = rect[3] if wrap_to_height else -1
         self.indexed_styles = indexed_styles
         self.block_sprite = None
         self.font_dict = font_dict
@@ -263,11 +259,7 @@ class TextBlock:
         self.height = surface_height
 
     def redraw_from_chunks(self, text_effect: TextBoxEffect):
-        if text_effect:
-            final_alpha = text_effect.get_final_alpha()
-        else:
-            final_alpha = 255
-
+        final_alpha = text_effect.get_final_alpha() if text_effect else 255
         self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA, depth=32)
 
         if type(self.bg_colour) == ColourGradient:
@@ -279,10 +271,7 @@ class TextBlock:
         for text_line in self.lines:
             for chunk in text_line.chunks:
                 if self.block_sprite is not None:
-                    if final_alpha != 255:
-                        self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
-                    else:
-                        self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
+                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
         self.block_sprite.set_alpha(final_alpha)
 
     def add_chunks_to_hover_group(self, hover_group):

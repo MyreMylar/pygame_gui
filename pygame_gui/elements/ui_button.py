@@ -265,41 +265,38 @@ class UIButton(UIElement):
         """
         processed_event = False
         if self.is_enabled:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                    if self.drawable_shape.collide_point(scaled_mouse_pos):
-                        self.held = True
-                        self.set_active()
-                        processed_event = True
-                        self.hover_time = 0.0
-                        if self.tool_tip is not None:
-                            self.tool_tip.kill()
-                            self.tool_tip = None
-            if event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
-                    scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                        int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                    if self.drawable_shape.collide_point(scaled_mouse_pos):
-                        if self.held:
-                            self.held = False
-                            self.set_inactive()
-                            self.ui_manager.unselect_focus_element()
-                            processed_event = True
-                            self.pressed_event = True
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.drawable_shape.collide_point(scaled_mouse_pos):
+                    self.held = True
+                    self.set_active()
+                    processed_event = True
+                    self.hover_time = 0.0
+                    if self.tool_tip is not None:
+                        self.tool_tip.kill()
+                        self.tool_tip = None
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+                if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
+                    self.held = False
+                    self.set_inactive()
+                    self.ui_manager.unselect_focus_element()
+                    processed_event = True
+                    self.pressed_event = True
 
-                            button_pressed_event = pygame.event.Event(pygame.USEREVENT,
-                                                                      {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                                                       'ui_element': self,
-                                                                       'ui_object_id': self.object_ids[-1]})
-                            pygame.event.post(button_pressed_event)
+                    button_pressed_event = pygame.event.Event(pygame.USEREVENT,
+                                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                                                               'ui_element': self,
+                                                               'ui_object_id': self.object_ids[-1]})
+                    pygame.event.post(button_pressed_event)
 
-                    if self.held:
-                        self.held = False
-                        self.set_inactive()
-                        self.select()
-                        processed_event = True
+                if self.held:
+                    self.held = False
+                    self.set_inactive()
+                    self.select()
+                    processed_event = True
 
         return processed_event
 
@@ -395,10 +392,7 @@ class UIButton(UIElement):
                                      self.rect.y - self.hold_range[1]),
                                     (self.rect.width + (2 * self.hold_range[0]),
                                      self.rect.height + (2 * self.hold_range[1])))
-            if hold_rect.collidepoint(int(position[0]), int(position[1])):
-                return True
-            else:
-                return False
+            return bool(hold_rect.collidepoint(int(position[0]), int(position[1])))
         else:
             return False
 
@@ -453,11 +447,10 @@ class UIButton(UIElement):
 
         # misc
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'ellipse', 'rounded_rectangle']:
-                if shape_type_string != self.shape_type:
-                    self.shape_type = shape_type_string
-                    has_any_changed = True
+        if (shape_type_string is not None and shape_type_string in ['rectangle', 'ellipse', 'rounded_rectangle'] and
+                shape_type_string != self.shape_type):
+            self.shape_type = shape_type_string
+            has_any_changed = True
 
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
                                                                  self.element_ids, 'shape_corner_radius')

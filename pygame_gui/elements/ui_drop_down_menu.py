@@ -439,9 +439,8 @@ class UIDropDownMenu(UIElement):
         expand_direction_string = self.ui_manager.get_theme().get_misc_data(self.object_ids,
                                                                             self.element_ids, 'expand_direction')
         expand_direction = 'down'
-        if expand_direction_string is not None:
-            if expand_direction_string in ['up', 'down']:
-                expand_direction = expand_direction_string
+        if expand_direction_string is not None and expand_direction_string in ['up', 'down']:
+            expand_direction = expand_direction_string
 
         if expand_direction != self.expand_direction:
             self.expand_direction = expand_direction
@@ -449,9 +448,8 @@ class UIDropDownMenu(UIElement):
 
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'rounded_rectangle']:
-                shape_type = shape_type_string
+        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+            shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
             has_any_changed = True

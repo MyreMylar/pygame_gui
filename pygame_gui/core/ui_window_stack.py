@@ -26,10 +26,7 @@ class UIWindowStack:
 
         :param window: The window to add.
         """
-        if len(self.stack) > 0:
-            new_layer = self.stack[-1].get_top_layer() + 1
-        else:
-            new_layer = 0
+        new_layer = self.stack[-1].get_top_layer() + 1 if len(self.stack) > 0 else 0
         window.change_window_layer(new_layer)
         self.stack.append(window)
 
@@ -57,18 +54,19 @@ class UIWindowStack:
 
         :param window_to_front: the window to move to the front.
         """
-        if window_to_front in self.stack:
-            popped_windows_to_add_back = []
+        if window_to_front not in self.stack:
+            return
+        popped_windows_to_add_back = []
+        window = self.stack.pop()
+        while window != window_to_front:
+            popped_windows_to_add_back.append(window)
             window = self.stack.pop()
-            while window != window_to_front:
-                popped_windows_to_add_back.append(window)
-                window = self.stack.pop()
 
-            popped_windows_to_add_back.reverse()
-            for old_window in popped_windows_to_add_back:
-                self.add_new_window(old_window)
+        popped_windows_to_add_back.reverse()
+        for old_window in popped_windows_to_add_back:
+            self.add_new_window(old_window)
 
-            self.add_new_window(window_to_front)
+        self.add_new_window(window_to_front)
 
     def get_root_window(self) -> Union[ui_window.UIWindow, None]:
         """
@@ -89,7 +87,4 @@ class UIWindowStack:
         :param window: The window to check.
         :return bool: returns True if this window is at the top of the stack.
         """
-        if window is self.stack[-1]:
-            return True
-        else:
-            return False
+        return window is self.stack[-1]

@@ -201,61 +201,60 @@ class UITextBox(UIElement):
 
         :param time_delta: The time in seconds between calls to update. Useful for timing things.
         """
-        if self.alive():
-            if self.scroll_bar is not None:
-                if self.scroll_bar.check_has_moved_recently():
-                    height_adjustment = int(self.scroll_bar.start_percentage *
-                                            self.formatted_text_block.final_dimensions[1])
-                    drawable_area = pygame.Rect((0, height_adjustment),
-                                                (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-                    self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-                    self.image.fill(pygame.Color(0, 0, 0, 0))
-                    self.image.blit(self.background_surf, (0, 0))
-                    self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                             self.shadow_width +
-                                                                             self.rounded_corner_offset,
-                                                                             self.padding[1] + self.border_width +
-                                                                             self.shadow_width +
-                                                                             self.rounded_corner_offset),
-                                    drawable_area)
+        if not self.alive():
+            return
+        if self.scroll_bar is not None and self.scroll_bar.check_has_moved_recently():
+            height_adjustment = int(self.scroll_bar.start_percentage *
+                                    self.formatted_text_block.final_dimensions[1])
+            drawable_area = pygame.Rect((0, height_adjustment),
+                                        (self.text_wrap_rect[2], self.text_wrap_rect[3]))
+            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+            self.image.fill(pygame.Color(0, 0, 0, 0))
+            self.image.blit(self.background_surf, (0, 0))
+            self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
+                                                                     self.shadow_width +
+                                                                     self.rounded_corner_offset,
+                                                                     self.padding[1] + self.border_width +
+                                                                     self.shadow_width +
+                                                                     self.rounded_corner_offset),
+                            drawable_area)
 
-            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            should_redraw_from_chunks = False
+        mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+        should_redraw_from_chunks = False
 
-            if self.scroll_bar is not None:
-                height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
-            else:
-                height_adjustment = 0
-            base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset)
-            base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
+        if self.scroll_bar is not None:
+            height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+        else:
+            height_adjustment = 0
+        base_x = int(self.rect[0] + self.padding[0] + self.border_width +
+                     self.shadow_width + self.rounded_corner_offset)
+        base_y = int(self.rect[1] + self.padding[1] + self.border_width +
+                     self.shadow_width + self.rounded_corner_offset - height_adjustment)
 
-            for chunk in self.link_hover_chunks:
-                hovered_currently = False
+        for chunk in self.link_hover_chunks:
+            hovered_currently = False
 
-                hover_rect = pygame.Rect((base_x + chunk.rect.x,
-                                          base_y + chunk.rect.y),
-                                         chunk.rect.size)
-                if hover_rect.collidepoint(mouse_x, mouse_y):
-                    if self.rect.collidepoint(mouse_x, mouse_y):
-                        hovered_currently = True
-                if chunk.is_hovered and not hovered_currently:
-                    chunk.on_unhovered()
-                    should_redraw_from_chunks = True
-                elif hovered_currently and not chunk.is_hovered:
-                    chunk.on_hovered()
-                    should_redraw_from_chunks = True
+            hover_rect = pygame.Rect((base_x + chunk.rect.x,
+                                      base_y + chunk.rect.y),
+                                     chunk.rect.size)
+            if hover_rect.collidepoint(mouse_x, mouse_y) and self.rect.collidepoint(mouse_x, mouse_y):
+                hovered_currently = True
+            if chunk.is_hovered and not hovered_currently:
+                chunk.on_unhovered()
+                should_redraw_from_chunks = True
+            elif hovered_currently and not chunk.is_hovered:
+                chunk.on_hovered()
+                should_redraw_from_chunks = True
 
-            if should_redraw_from_chunks:
+        if should_redraw_from_chunks:
+            self.redraw_from_chunks()
+
+        if self.active_text_effect is not None:
+            self.active_text_effect.update(time_delta)
+            if self.active_text_effect.should_full_redraw():
+                self.full_redraw()
+            if self.active_text_effect.should_redraw_from_chunks():
                 self.redraw_from_chunks()
-
-            if self.active_text_effect is not None:
-                self.active_text_effect.update(time_delta)
-                if self.active_text_effect.should_full_redraw():
-                    self.full_redraw()
-                if self.active_text_effect.should_redraw_from_chunks():
-                    self.redraw_from_chunks()
 
     def update_containing_rect_position(self):
         """
@@ -378,70 +377,67 @@ class UITextBox(UIElement):
         processed_event = False
         should_redraw_from_chunks = False
         should_full_redraw = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                if self.drawable_shape.collide_point(scaled_mouse_pos):
-                    processed_event = True
-                    if self.scroll_bar is not None:
-                        text_block_full_height = self.formatted_text_block.final_dimensions[1]
-                        height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
-                    else:
-                        height_adjustment = 0
-                    base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                                 self.shadow_width + self.rounded_corner_offset)
-                    base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                                 self.shadow_width + self.rounded_corner_offset - height_adjustment)
-                    for chunk in self.link_hover_chunks:
-
-                        hover_rect = pygame.Rect((base_x + chunk.rect.x,
-                                                  base_y + chunk.rect.y),
-                                                 chunk.rect.size)
-                        if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                            processed_event = True
-                            if not chunk.is_selected:
-                                chunk.on_selected()
-                                if chunk.metrics_changed_after_redraw:
-                                    should_full_redraw = True
-                                else:
-                                    should_redraw_from_chunks = True
-
-        if event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            if self.drawable_shape.collide_point(scaled_mouse_pos):
+                processed_event = True
                 if self.scroll_bar is not None:
-                    height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+                    text_block_full_height = self.formatted_text_block.final_dimensions[1]
+                    height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
                 else:
                     height_adjustment = 0
                 base_x = int(self.rect[0] + self.padding[0] + self.border_width +
                              self.shadow_width + self.rounded_corner_offset)
                 base_y = int(self.rect[1] + self.padding[1] + self.border_width +
                              self.shadow_width + self.rounded_corner_offset - height_adjustment)
-                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 for chunk in self.link_hover_chunks:
 
                     hover_rect = pygame.Rect((base_x + chunk.rect.x,
                                               base_y + chunk.rect.y),
                                              chunk.rect.size)
                     if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                        if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                            processed_event = True
-                            if chunk.is_selected:
-                                link_clicked_event = pygame.event.Event(pygame.USEREVENT,
-                                                                        {'user_type':
-                                                                         pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
-                                                                         'link_target': chunk.link_href,
-                                                                         'ui_element': self,
-                                                                         'ui_object_id': self.object_ids[-1]})
-                                pygame.event.post(link_clicked_event)
+                        processed_event = True
+                        if not chunk.is_selected:
+                            chunk.on_selected()
+                            if chunk.metrics_changed_after_redraw:
+                                should_full_redraw = True
+                            else:
+                                should_redraw_from_chunks = True
 
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.scroll_bar is not None:
+                height_adjustment = self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1]
+            else:
+                height_adjustment = 0
+            base_x = int(self.rect[0] + self.padding[0] + self.border_width +
+                         self.shadow_width + self.rounded_corner_offset)
+            base_y = int(self.rect[1] + self.padding[1] + self.border_width +
+                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            for chunk in self.link_hover_chunks:
+
+                hover_rect = pygame.Rect((base_x + chunk.rect.x,
+                                          base_y + chunk.rect.y),
+                                         chunk.rect.size)
+                if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                    processed_event = True
                     if chunk.is_selected:
-                        chunk.on_unselected()
-                        if chunk.metrics_changed_after_redraw:
-                            should_full_redraw = True
-                        else:
-                            should_redraw_from_chunks = True
+                        link_clicked_event = pygame.event.Event(pygame.USEREVENT,
+                                                                {'user_type':
+                                                                 pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
+                                                                 'link_target': chunk.link_href,
+                                                                 'ui_element': self,
+                                                                 'ui_object_id': self.object_ids[-1]})
+                        pygame.event.post(link_clicked_event)
+
+                if chunk.is_selected:
+                    chunk.on_unselected()
+                    if chunk.metrics_changed_after_redraw:
+                        should_full_redraw = True
+                    else:
+                        should_redraw_from_chunks = True
 
         if should_redraw_from_chunks:
             self.redraw_from_chunks()
@@ -491,9 +487,8 @@ class UITextBox(UIElement):
         # misc parameters
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None:
-            if shape_type_string in ['rectangle', 'rounded_rectangle']:
-                shape_type = shape_type_string
+        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+            shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
             has_any_changed = True
