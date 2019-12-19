@@ -250,9 +250,7 @@ class UIButton(UIElement):
         Updates the position of this element based on the position of it's container. Usually called when the container
         has moved.
         """
-        self.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x,
-                                 self.ui_container.rect.y + self.relative_rect.y),
-                                self.relative_rect.size)
+        super().update_containing_rect_position()
 
         self.drawable_shape.set_position(self.rect.topleft)
 

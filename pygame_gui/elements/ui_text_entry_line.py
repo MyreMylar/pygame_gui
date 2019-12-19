@@ -1,7 +1,7 @@
 import pygame
 import re
 import warnings
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import pygame_gui
 from pygame_gui.ui_manager import UIManager
@@ -151,6 +151,23 @@ class UITextEntryLine(UIElement):
 
         # setup for drawing
         self.redraw()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the absolute rect position of a text entry line.
+
+        :param position: The new position to set.
+        """
+        super().set_position(position)
+        self.drawable_shape.set_position(self.rect.topleft)
+
+    def update_containing_rect_position(self):
+        """
+        Updates the position of this element based on the position of it's container. Usually called when the container
+        has moved.
+        """
+        super().update_containing_rect_position()
+        self.drawable_shape.set_position(self.rect.topleft)
 
     def set_text_length_limit(self, limit: int):
         """
