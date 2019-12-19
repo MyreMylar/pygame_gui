@@ -99,6 +99,14 @@ class UITextBox(UIElement):
 
         self.rebuild_from_changed_theme_data()
 
+    def kill(self):
+        """
+        Overrides the standard sprite kill method to also kill any scroll bars belonging to this text box.
+        """
+        if self.scroll_bar is not None:
+            self.scroll_bar.kill()
+        super().kill()
+
     def rebuild(self):
         """
         Rebuild whatever needs building.
