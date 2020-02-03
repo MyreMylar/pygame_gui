@@ -96,3 +96,17 @@ class TestUIDropDownMenu:
                               relative_rect=pygame.Rect(100, 100, 200, 30),
                               manager=manager)
         assert menu.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+        menu.set_position((200, 200))
+
+        # try to click on the menu
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (250, 215)}))
+        # if we successfully clicked on the moved menu then this button should be True
+        assert menu.current_state.selected_option_button.held is True

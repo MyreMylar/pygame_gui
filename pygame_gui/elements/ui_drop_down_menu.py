@@ -1,5 +1,5 @@
 import pygame
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import pygame_gui
 from pygame_gui.ui_manager import UIManager
@@ -33,6 +33,8 @@ class UIExpandedDropDownState:
         self.rect_height_offset = 0
 
         self.close_button_width = close_button_width
+        self.select_button_dist_to_move = 0
+        self.option_button_dist_to_move = 0
 
         self.selected_option_button = None
         self.close_button = None
@@ -155,18 +157,18 @@ class UIExpandedDropDownState:
                                                object_id='#selected_option')
 
         expand_button_symbol = '▼'
-        select_button_dist_to_move = self.selected_option_button.rect.height
-        option_button_dist_to_move = self.base_position_rect.height
+        self.select_button_dist_to_move = self.selected_option_button.rect.height
+        self.option_button_dist_to_move = self.base_position_rect.height
 
         if self.expand_direction is not None:
             if self.expand_direction == 'up':
                 expand_button_symbol = '▲'
-                select_button_dist_to_move = -self.selected_option_button.rect.height
-                option_button_dist_to_move = -self.base_position_rect.height
+                self.select_button_dist_to_move = -self.selected_option_button.rect.height
+                self.option_button_dist_to_move = -self.base_position_rect.height
             elif self.expand_direction == 'down':
                 expand_button_symbol = '▼'
-                select_button_dist_to_move = self.selected_option_button.rect.height
-                option_button_dist_to_move = self.base_position_rect.height
+                self.select_button_dist_to_move = self.selected_option_button.rect.height
+                self.option_button_dist_to_move = self.base_position_rect.height
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
 
@@ -179,7 +181,7 @@ class UIExpandedDropDownState:
                                      parent_element=self.drop_down_menu_ui,
                                      object_id='#expand_button')
 
-        option_y_pos += select_button_dist_to_move
+        option_y_pos += self.select_button_dist_to_move
         for option in self.options_list:
             new_button = UIButton(pygame.Rect((self.base_position_rect.x, option_y_pos),
                                               (self.base_position_rect.width - self.close_button_width,
@@ -190,7 +192,7 @@ class UIExpandedDropDownState:
                                   starting_height=3,  # height allows options to overlap other UI elements
                                   parent_element=self.drop_down_menu_ui,
                                   object_id='#option')
-            option_y_pos += option_button_dist_to_move
+            option_y_pos += self.option_button_dist_to_move
             self.menu_buttons.append(new_button)
 
         self.rebuild()
@@ -225,6 +227,30 @@ class UIExpandedDropDownState:
                                                               'ui_element': self.drop_down_menu_ui,
                                                               'ui_object_id': self.object_ids[-1]})
                 pygame.event.post(drop_down_changed_event)
+
+    def update_position(self):
+        """
+        Update the position of all the button elements in the open drop down state.
+
+        Used when the position of the  drop down has been altered directly, rather than when it has been moved as a
+        consequence of it's container being moved.
+        """
+
+        # update the base position rect
+        border_and_shadow = self.drop_down_menu_ui.shadow_width + self.drop_down_menu_ui.border_width
+        self.base_position_rect.x = self.drop_down_menu_ui.relative_rect.x + border_and_shadow
+        self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
+
+        # update all the ui elements that depend on the base position
+        self.selected_option_button.set_position(self.base_position_rect.topleft)
+
+        button_y_position = self.base_position_rect.y + self.select_button_dist_to_move
+        for button in self.menu_buttons:
+            button.set_position([self.base_position_rect.x, button_y_position])
+            button_y_position += self.option_button_dist_to_move
+
+        close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
+        self.close_button.set_position([close_button_x, self.base_position_rect.y])
 
 
 class UIClosedDropDownState:
@@ -327,6 +353,25 @@ class UIClosedDropDownState:
     def update(self):
         if self.open_button.check_pressed():
             self.should_transition = True
+
+    def update_position(self):
+        """
+        Update the position of all the button elements in the closed drop down state.
+
+        Used when the position of the  drop down has been altered directly, rather than when it has been moved as a
+        consequence of it's container being moved.
+        """
+
+        # update the base position rect
+        border_and_shadow = self.drop_down_menu_ui.shadow_width + self.drop_down_menu_ui.border_width
+        self.base_position_rect.x = self.drop_down_menu_ui.relative_rect.x + border_and_shadow
+        self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
+
+        # update all the ui elements that depend on the base position
+        self.selected_option_button.set_position(self.base_position_rect.topleft)
+
+        open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
+        self.open_button.set_position([open_button_x, self.base_position_rect.y])
 
 
 class UIDropDownMenu(UIElement):
@@ -518,3 +563,7 @@ class UIDropDownMenu(UIElement):
             if self.current_state is not None:
 
                 self.current_state.rebuild()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_position(position)
+        self.current_state.update_position()

@@ -264,20 +264,6 @@ class UITextBox(UIElement):
             if self.active_text_effect.should_redraw_from_chunks():
                 self.redraw_from_chunks()
 
-    def update_containing_rect_position(self):
-        """
-        Sets the final screen position of this element based on the position of it's container and it's relative
-        position inside that container.
-        """
-        self.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x,
-                                 self.ui_container.rect.y + self.relative_rect.y),
-                                self.relative_rect.size)
-
-        # for chunk in self.link_hover_chunks:
-        #     chunk.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x + chunk.rect.x,
-        #                               self.ui_container.rect.y + self.relative_rect.y + chunk.rect.y),
-        #                              chunk.rect.size)
-
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_relative_position(position)
 

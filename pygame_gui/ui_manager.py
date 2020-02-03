@@ -37,14 +37,16 @@ class UIManager:
     def get_theme(self) -> UIAppearanceTheme:
         """
         Gets the theme so the data in it can be accessed.
-        :return: UIAppearanceTheme - the theme data used by this UIManager
+
+        :return: The theme data used by this UIManager
         """
         return self.ui_theme
 
     def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and processing input.
-        :return : pygame.sprite.LayeredUpdates -
+
+        :return: The UI's sprite group.
         """
         return self.ui_group
 
@@ -52,7 +54,8 @@ class UIManager:
         """
         The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted and move windows
         we interact with to the top of the stack.
-        :return: UIWindowStack
+
+        :return: The stack of windows.
         """
         return self.ui_window_stack
 
@@ -61,17 +64,19 @@ class UIManager:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
-
         :param size: The size of the object we are shadowing + it's shadow.
         :param shadow_width: The width of the shadowed edge.
-        :param shape: The shape of the requested shadow
+        :param shape: The shape of the requested shadow.
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
-        :return: A shadow.
+        :return: A shadow as a pygame Surface.
         """
         return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width,
                                                                                 shape, corner_radius)
 
     def set_window_resolution(self, window_resolution):
+        """
+        Sets the window resolution.
+        """
         self.window_resolution = window_resolution
 
     def clear_and_reset(self):

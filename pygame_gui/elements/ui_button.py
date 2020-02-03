@@ -213,25 +213,6 @@ class UIButton(UIElement):
             if self.drawable_shape is not None:
                 self.drawable_shape.update()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        Method to directly set the relative rect position of a button.
-
-        :param position: The new position to set.
-        """
-        super().set_relative_position(position)
-
-        self.drawable_shape.set_position(self.rect.topleft)
-
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        Method to directly set the absolute rect position of a button.
-
-        :param position: The new position to set.
-        """
-        super().set_position(position)
-        self.drawable_shape.set_position(self.rect.topleft)
-
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the absolute rect position of a button.
@@ -244,15 +225,6 @@ class UIButton(UIElement):
 
         self.drawable_shape.set_dimensions(self.rect.size)
         self.image = self.drawable_shape.get_surface('normal')
-
-    def update_containing_rect_position(self):
-        """
-        Updates the position of this element based on the position of it's container. Usually called when the container
-        has moved.
-        """
-        super().update_containing_rect_position()
-
-        self.drawable_shape.set_position(self.rect.topleft)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

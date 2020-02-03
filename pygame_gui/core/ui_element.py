@@ -55,6 +55,7 @@ class UIElement(pygame.sprite.Sprite):
                                      self.ui_container.rect.y + relative_rect.y),
                                     relative_rect.size)
 
+        self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
 
         self.is_enabled = True
@@ -96,6 +97,9 @@ class UIElement(pygame.sprite.Sprite):
         self.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x,
                                  self.ui_container.rect.y + self.relative_rect.y),
                                 self.relative_rect.size)
+
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_position(self.rect.topleft)
 
     def change_layer(self, new_layer: int):
         """
@@ -144,7 +148,7 @@ class UIElement(pygame.sprite.Sprite):
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Method to directly set the relative rect position of a button.
+        Method to directly set the relative rect position of an element.
 
         :param position: The new position to set.
         """
@@ -153,9 +157,12 @@ class UIElement(pygame.sprite.Sprite):
         self.rect.x = self.relative_rect.x + self.ui_container.rect.x
         self.rect.y = self.relative_rect.y + self.ui_container.rect.y
 
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_position(self.rect.topleft)
+
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Method to directly set the absolute rect position of a button.
+        Method to directly set the absolute rect position of an element.
 
         :param position: The new position to set.
         """
@@ -163,6 +170,9 @@ class UIElement(pygame.sprite.Sprite):
         self.rect.y = int(position[1])
         self.relative_rect.x = self.rect.x - self.ui_container.rect.x
         self.relative_rect.y = self.rect.y - self.ui_container.rect.y
+
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_position(self.rect.topleft)
 
     def on_hovered(self):
         """
