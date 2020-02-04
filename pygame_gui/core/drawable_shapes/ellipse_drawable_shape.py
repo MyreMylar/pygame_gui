@@ -135,7 +135,7 @@ class EllipseDrawableShape(DrawableShape):
         found_shape = None
         shape_id = None
         if 'filled_bar' not in self.theming and 'filled_bar_width' not in self.theming:
-            shape_id = self.shape_cache.build_cache_id('rounded_rectangle', self.containing_rect.size,
+            shape_id = self.shape_cache.build_cache_id('ellipse', self.containing_rect.size,
                                                        self.theming['shadow_width'],
                                                        self.theming['border_width'],
                                                        self.theming[border_colour_state_str],

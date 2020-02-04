@@ -45,7 +45,7 @@ class UIWindow(UIElement):
             self.window_stack = self.ui_manager.get_window_stack()
             self.window_stack.add_new_window(self)
 
-        self.image = self.image = pygame.Surface((0, 0))
+        self.image = pygame.Surface((0, 0))
         self.bring_to_front_on_focused = True
 
     def process_event(self, event: pygame.event.Event) -> bool:
@@ -93,8 +93,8 @@ class UIWindow(UIElement):
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
-        if self.get_container().layer_thickness + 1 != self.layer_thickness:
-            self.layer_thickness = self.get_container().layer_thickness + 1
+        if self.get_container().layer_thickness != self.layer_thickness:
+            self.layer_thickness = self.get_container().layer_thickness
 
     def get_container(self) -> UIContainer:
         """
@@ -133,7 +133,7 @@ class UIWindow(UIElement):
         if new_layer != self._layer:
             self._layer = new_layer
             self.ui_manager.get_sprite_group().change_layer(self, new_layer)
-            self.window_container.change_container_layer(new_layer+1)
+            self.window_container.change_container_layer(new_layer)
 
     def kill(self):
         """

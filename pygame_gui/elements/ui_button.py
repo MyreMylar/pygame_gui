@@ -497,9 +497,9 @@ class UIButton(UIElement):
                 has_any_changed = True
 
         if has_any_changed:
-            self.rebuild_shape()
+            self.rebuild()
 
-    def rebuild_shape(self):
+    def rebuild(self):
         """
         A complete rebuild of the drawable shape used by this button.
 

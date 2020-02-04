@@ -23,6 +23,7 @@ class UIExpandedDropDownState:
         self.should_transition = False
         self.options_list = options_list
         self.selected_option = selected_option
+
         self.base_position_rect = base_position_rect
         self.selected_option_rect = None
         self.expand_direction = expand_direction
@@ -43,6 +44,7 @@ class UIExpandedDropDownState:
 
         self.should_transition = False
         self.target_state = 'closed'
+        self.already_expanded_rect = False
 
     def rebuild(self):
         # shape for expanded drop down is a little trick because it is two rectangles, one on top of the other
@@ -66,10 +68,15 @@ class UIExpandedDropDownState:
             self.selected_option_rect = pygame.Rect((0, 0),
                                                     self.drop_down_menu_ui.rect.size)
         else:
-            # need to adjust the position of the rect so it appears in the right position
+
             self.rect_height_offset = self.base_position_rect.height * len(self.options_list)
-            self.drop_down_menu_ui.rect.y = self.drop_down_menu_ui.rect.y - self.rect_height_offset
-            self.drop_down_menu_ui.relative_rect.y = self.drop_down_menu_ui.relative_rect.y - self.rect_height_offset
+
+            # If we haven't already done so, we need to adjust the top left position of the element's rect so that it
+            # appears in the right place.
+            if not self.already_expanded_rect:
+                self.drop_down_menu_ui.rect.y = self.drop_down_menu_ui.rect.y - self.rect_height_offset
+                self.drop_down_menu_ui.relative_rect.y = (self.drop_down_menu_ui.relative_rect.y -
+                                                          self.rect_height_offset)
 
             self.selected_option_rect = pygame.Rect((0, self.rect_height_offset),
                                                     self.drop_down_menu_ui.rect.size)
@@ -197,6 +204,8 @@ class UIExpandedDropDownState:
 
         self.rebuild()
 
+        self.already_expanded_rect = True
+
     def finish(self):
         """
         cleans everything up upon exiting the expanded menu state.
@@ -211,6 +220,8 @@ class UIExpandedDropDownState:
 
         self.drop_down_menu_ui.rect.y += self.rect_height_offset
         self.drop_down_menu_ui.relative_rect.y += self.rect_height_offset
+
+        self.already_expanded_rect = False
 
     def update(self):
         if self.close_button is not None and self.close_button.check_pressed():
@@ -408,7 +419,7 @@ class UIDropDownMenu(UIElement):
         super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,
-                         layer_thickness=1, starting_height=1)
+                         layer_thickness=3, starting_height=1)
         self.options_list = options_list
         self.selected_option = starting_option
         self.open_button_width = 20
@@ -560,9 +571,15 @@ class UIDropDownMenu(UIElement):
             for state in self.menu_states:
                 self.menu_states[state].expand_direction = self.expand_direction
 
-            if self.current_state is not None:
+            self.rebuild()
 
-                self.current_state.rebuild()
+    def rebuild(self):
+        """
+        A complete rebuild of the drawable parts of this element.
+
+        """
+        if self.current_state is not None:
+            self.current_state.rebuild()
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_position(position)

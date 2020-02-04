@@ -36,7 +36,7 @@ class UIHorizontalSlider(UIElement):
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=1,
-                         layer_thickness=1)
+                         layer_thickness=2)
 
         self.button_width = 20
         self.current_percentage = 0.5

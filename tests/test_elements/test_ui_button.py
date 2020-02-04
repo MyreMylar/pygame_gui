@@ -528,7 +528,7 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        button.rebuild_shape()
+        button.rebuild()
 
         assert button.image is not None
 
@@ -538,6 +538,6 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        button.rebuild_shape()
+        button.rebuild()
 
         assert button.image is not None

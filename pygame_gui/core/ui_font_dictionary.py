@@ -51,7 +51,12 @@ class UIFontDictionary:
 
     def __init__(self):
         self.default_font_size = 14
-        self.default_font_id = "fira_code_regular_14"
+        self.default_font_name = "fira_code"
+        self.default_font_style = "regular"
+        self.default_font_id = (self.default_font_name + '_' + self.default_font_style
+                                + '_' + str(self.default_font_size))
+
+        self.debug_font_size = 8
 
         self.loaded_fonts = None
         self.known_font_paths = None
@@ -107,7 +112,7 @@ class UIFontDictionary:
         if font_id not in self.used_font_ids:
             self.used_font_ids.append(font_id)  # record font usage for optimisation purposes
 
-        if font_id in self.loaded_fonts:  # font already loaded
+        if self.check_font_preloaded(font_id):  # font already loaded
             return self.loaded_fonts[font_id]
         elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
 
@@ -264,3 +269,12 @@ class UIFontDictionary:
             return UIFontDictionary._html_font_sizes[html_size]
         else:
             return self.default_font_size
+
+    def check_font_preloaded(self, font_id: str) -> bool:
+        """
+        Check if a font is already preloaded or not.
+
+        :param font_id: The ID of the font to check for
+        :return: True or False.
+        """
+        return font_id in self.loaded_fonts

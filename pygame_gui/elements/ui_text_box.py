@@ -61,7 +61,7 @@ class UITextBox(UIElement):
                                                                 element_id='text_box')
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
-                         layer_thickness=1,
+                         layer_thickness=2,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids
                          )

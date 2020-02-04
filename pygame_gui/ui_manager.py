@@ -34,6 +34,8 @@ class UIManager:
         self.mouse_position = (0, 0)
         self.mouse_pos_scale_factor = [1.0, 1.0]
 
+        self.visual_debug_active = False
+
     def get_theme(self) -> UIAppearanceTheme:
         """
         Gets the theme so the data in it can be accessed.
@@ -101,7 +103,7 @@ class UIManager:
         """
         event_handled = False
         window_sorting_event_handled = False
-        sorted_layers = sorted(self.ui_group.layers(), reverse=True)
+        sorted_layers = sorted(self.ui_group.layers(), reverse=True) # TODO: See if  possible to keep track of the reversed layers so we don't have to sort them each loop
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
             if not window_sorting_event_handled:
@@ -309,3 +311,37 @@ class UIManager:
         :return: A UIElement.
         """
         return self.last_focused_vertical_scrollbar
+
+    def set_visual_debug_mode(self, is_active):
+        """
+        Loops through all our UIElements to turn visual debug mode on or off.
+        :param is_active:
+        :return:
+        """
+        if self.visual_debug_active and not is_active:
+            self.visual_debug_active = False
+            for layer in self.ui_group.layers():
+                for element in self.ui_group.get_sprites_from_layer(layer):
+                    element.set_visual_debug_mode(self.visual_debug_active)
+        elif not self.visual_debug_active and is_active:
+            self.visual_debug_active = True
+            # preload the debug font if it's not already loaded
+            font_dict = self.get_theme().get_font_dictionary()
+            if not font_dict.check_font_preloaded(font_dict.default_font_name + '_' + font_dict.default_font_style +
+                                                  '_' + str(font_dict.debug_font_size)):
+                font_dict.preload_font(font_dict.debug_font_size, font_dict.default_font_name)
+            for layer in self.ui_group.layers():
+                for element in self.ui_group.get_sprites_from_layer(layer):
+                    element.set_visual_debug_mode(self.visual_debug_active)
+
+            # Finally print a version of the current layers to the console:
+            self.print_layer_debug()
+
+    def print_layer_debug(self):
+        for layer in self.ui_group.layers():
+            print("Layer: " + str(layer))
+            print("-----------------------")
+            for element in self.ui_group.get_sprites_from_layer(layer):
+                combined_ids = self.get_theme().build_all_combined_ids(element.element_ids, element.object_ids)
+                print(str(combined_ids[0]))
+            print(' ')

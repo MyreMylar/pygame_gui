@@ -30,7 +30,7 @@ class UIVerticalScrollBar(UIElement):
                                                                 object_id=object_id,
                                                                 element_id='vertical_scroll_bar')
         super().__init__(relative_rect, manager, container,
-                         layer_thickness=1, starting_height=1,
+                         layer_thickness=2, starting_height=1,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids)
 

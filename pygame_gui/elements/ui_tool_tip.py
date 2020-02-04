@@ -35,7 +35,7 @@ class UITooltip(UIElement):
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
                          container=None,
-                         starting_height=manager.get_sprite_group().get_top_layer(),
+                         starting_height=manager.get_sprite_group().get_top_layer()+1,
                          layer_thickness=1,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids)
@@ -49,14 +49,14 @@ class UITooltip(UIElement):
         self.text_block = ui_text_box.UITextBox(html_text,
                                                 pygame.Rect(0, 0, self.rect_width, -1),
                                                 manager=self.ui_manager,
-                                                layer_starting_height=self._layer+1,
+                                                layer_starting_height=self._layer,
                                                 parent_element=self)
 
         self.relative_rect.height = self.text_block.rect.height
         self.relative_rect.width = self.text_block.rect.width
         self.rect.width = self.text_block.rect.width
         self.rect.height = self.text_block.rect.height
-        # Get a shadow from the shadow generator
+
         self.image = pygame.Surface((0, 0))
 
     def rebuild(self):
@@ -64,6 +64,8 @@ class UITooltip(UIElement):
         Rebuild anything that might need rebuilding.
 
         """
+        self.image = pygame.Surface((0, 0))
+
         if self.text_block is not None:
             self.text_block.set_dimensions((self.rect_width, -1))
 

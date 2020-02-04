@@ -35,7 +35,7 @@ class UIContainer(UIElement):
         self.sprite_group = self.ui_manager.get_sprite_group()
         self.image = pygame.Surface((0, 0))
         self.elements = []
-        self.layer_thickness = 1
+        self.layer_thickness = 0  # default to 0 thickness for an empty container
 
         self.hovered = False
 

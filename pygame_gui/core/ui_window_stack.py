@@ -26,7 +26,7 @@ class UIWindowStack:
 
         :param window: The window to add.
         """
-        new_layer = self.stack[-1].get_top_layer() + 1 if len(self.stack) > 0 else 0
+        new_layer = self.stack[-1].get_top_layer() if len(self.stack) > 0 else 0
         window.change_window_layer(new_layer)
         self.stack.append(window)
 

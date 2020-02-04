@@ -1,5 +1,5 @@
 import pygame
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional, Any
 
 from pygame_gui.core import ui_container
 from pygame_gui import ui_manager
@@ -61,6 +61,8 @@ class UIElement(pygame.sprite.Sprite):
         self.is_enabled = True
         self.hovered = False
         self.hover_time = 0.0
+
+        self.pre_debug_image = None
 
     @staticmethod
     def create_valid_ids(parent_element, object_id, element_id):
@@ -237,3 +239,39 @@ class UIElement(pygame.sprite.Sprite):
 
     def rebuild_from_changed_theme_data(self):
         pass
+
+    def rebuild(self):
+        if self.pre_debug_image is not None:
+            self.image = self.pre_debug_image
+            self.pre_debug_image = None
+
+    def set_visual_debug_mode(self, activate_mode):
+        if activate_mode:
+            font_dict = self.ui_manager.get_theme().get_font_dictionary()
+            default_font = font_dict.find_font(font_size=font_dict.debug_font_size,
+                                               font_name=font_dict.default_font_name)
+            layer_text_render = default_font.render("UI Layer: " + str(self._layer),
+                                                    True, pygame.Color('#FFFFFFFF'))
+
+            if self.image is not None:
+                self.pre_debug_image = self.image.copy()
+                # check if our surface is big enough to hold the debug info, if not make a new, bigger copy
+                make_new_larger_surface = False
+                surf_width = self.image.get_width()
+                surf_height = self.image.get_height()
+                if self.image.get_width() < layer_text_render.get_width():
+                    make_new_larger_surface = True
+                    surf_width = layer_text_render.get_width()
+                if self.image.get_height() < layer_text_render.get_height():
+                    make_new_larger_surface = True
+                    surf_height = layer_text_render.get_height()
+
+                if make_new_larger_surface:
+                    new_surface = pygame.Surface((surf_width, surf_height), flags=pygame.SRCALPHA, depth=32)
+                    new_surface.blit(self.image, (0, 0))
+                    self.image = new_surface
+                self.image.blit(layer_text_render, (0, 0))
+            else:
+                self.image = layer_text_render
+        else:
+            self.rebuild()
