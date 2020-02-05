@@ -22,7 +22,7 @@ Colours
 :class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
- - "**normal_bg**" -  The default colour/gradient of the background to the entry line element.
+ - "**dark_bg**" -  The default colour/gradient of the background to the entry line element.
  - "**selected_bg**" - The colour/gradient the background changes to when the text above it is selected.
  - "**normal_text**" - The default colour/gradient of text entered into the element.
  - "**selected_text**" - The colour/gradient of text when it has been selected.
@@ -66,15 +66,15 @@ Here is an example of a text entry line block in a JSON theme file using all the
    :linenos:
 
     {
-        "button":
+        "text_entry_line":
         {
             "colours":
             {
-                "normal_bg": "#25292e",
+                "dark_bg": "#25292e",
                 "selected_bg": "#55595e",
                 "normal_text": "#AAAAAA",
                 "selected_text": "#FFFFFF",
-                "border": "#FFFFFF"
+                "normal_border": "#FFFFFF"
             },
             "font":
             {
@@ -89,6 +89,8 @@ Here is an example of a text entry line block in a JSON theme file using all the
             },
             "misc":
             {
+                "shape": "rounded_rectangle",
+                "shape_corner_radius": 5,
                 "border_width": "2",
                 "shadow_width": "2",
                 "padding": "6,4"
