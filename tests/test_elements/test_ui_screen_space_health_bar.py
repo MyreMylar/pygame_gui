@@ -121,3 +121,15 @@ class TestUIScreenSpaceHealthBar:
         screen_space_health_bar.set_position((150.0, 30.0))
 
         assert screen_space_health_bar.relative_rect.topleft == (50, -70)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        healthy_sprite = HealthySprite()
+        test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250), manager=default_ui_manager)
+        screen_space_health_bar = UIScreenSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                                         sprite_to_monitor=healthy_sprite,
+                                                         container=test_container,
+                                                         manager=default_ui_manager)
+
+        screen_space_health_bar.set_relative_position((50.0, 30.0))
+
+        assert screen_space_health_bar.rect.topleft == (100, 80)

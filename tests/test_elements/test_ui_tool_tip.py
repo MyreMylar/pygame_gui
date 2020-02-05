@@ -120,3 +120,12 @@ class TestUIToolTip:
         tool_tip.set_position((150.0, 30.0))
 
         assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+
+        tool_tip.set_relative_position((150.0, 30.0))
+
+        assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)

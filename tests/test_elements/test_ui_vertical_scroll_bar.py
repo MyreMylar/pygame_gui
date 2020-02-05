@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
+from pygame_gui.core.ui_container import UIContainer
 
 
 class TestUIVerticalScrollBar:
@@ -146,6 +147,27 @@ class TestUIVerticalScrollBar:
         assert scroll_bar.bottom_button.held is True
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (215, 250)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.sliding_button.held is True
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250), manager=default_ui_manager)
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(80, 100, 30, 200),
+                                         visible_percentage=0.25, manager=default_ui_manager,
+                                         container=test_container)
+
+        scroll_bar.set_relative_position((50, 50))
+
+        # try to click on the scroll bar's top button
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (115, 105)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.top_button.held is True
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (115, 295)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.bottom_button.held is True
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (115, 150)}))
         # if we successfully clicked on the moved scroll bar then this button should be True
         assert scroll_bar.sliding_button.held is True
 

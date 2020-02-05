@@ -26,3 +26,13 @@ class TestUIImage:
         ui_image.set_position((200, 200))
 
         assert ui_image.relative_rect.topleft == (200, 200)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
+        ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
+                           image_surface=loaded_image,
+                           manager=default_ui_manager)
+
+        ui_image.set_relative_position((200, 200))
+
+        assert ui_image.relative_rect.topleft == (200, 200)

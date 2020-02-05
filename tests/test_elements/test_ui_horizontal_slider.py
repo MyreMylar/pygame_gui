@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
+from pygame_gui.core.ui_container import UIContainer
 
 
 class TestUIHorizontalSlider:
@@ -139,3 +140,16 @@ class TestUIHorizontalSlider:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (205, 205)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.left_button.held is True
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(300, 400, 150, 40), start_value=50,
+                                    container=test_container,
+                                    value_range=(0, 200), manager=default_ui_manager)
+
+        slider.set_relative_position((150.0, 30.0))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (260, 150)}))
+
+        assert slider.rect.topleft == (250, 130) and slider.left_button.held is True

@@ -704,10 +704,21 @@ class TestUITextEntryLine:
 
     def test_set_position(self, _init_pygame, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
-        button = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
-                                 container=test_container,
-                                 manager=default_ui_manager)
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
+                                     container=test_container,
+                                     manager=default_ui_manager)
 
-        button.set_position((150.0, 30.0))
+        text_entry.set_position((150.0, 30.0))
 
-        assert button.relative_rect.topleft == (50, -70) and button.drawable_shape.containing_rect.topleft == (150, 30)
+        assert (text_entry.relative_rect.topleft == (50, -70) and
+                text_entry.drawable_shape.containing_rect.topleft == (150, 30))
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250), manager=default_ui_manager)
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
+                                     container=test_container,
+                                     manager=default_ui_manager)
+
+        text_entry.set_relative_position((50.0, 30.0))
+
+        assert text_entry.rect.topleft == (100, 80)

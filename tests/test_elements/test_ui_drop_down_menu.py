@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
+from pygame_gui.core.ui_container import UIContainer
 
 
 class TestUIDropDownMenu:
@@ -110,3 +111,18 @@ class TestUIDropDownMenu:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (250, 215)}))
         # if we successfully clicked on the moved menu then this button should be True
         assert menu.current_state.selected_option_button.held is True
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              container=test_container,
+                              manager=default_ui_manager)
+
+        menu.set_relative_position((150.0, 30.0))
+
+        # try to click on the menu
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (260, 145)}))
+
+        assert menu.rect.topleft == (250, 130) and menu.current_state.selected_option_button.held is True
