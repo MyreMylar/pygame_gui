@@ -1,6 +1,6 @@
 import pygame
 import warnings
-from typing import Union
+from typing import Union, Tuple
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -182,3 +182,15 @@ class UILabel(UIElement):
 
         if any_changed:
             self.rebuild()
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the dimensions of a label.
+
+        :param dimensions: The new dimensions to set.
+        """
+        self.rect.width = int(dimensions[0])
+        self.rect.height = int(dimensions[1])
+        self.relative_rect.size = self.rect.size
+
+        self.rebuild()

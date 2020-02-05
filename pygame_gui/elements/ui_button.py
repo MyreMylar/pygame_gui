@@ -213,19 +213,6 @@ class UIButton(UIElement):
             if self.drawable_shape is not None:
                 self.drawable_shape.update()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        Method to directly set the absolute rect position of a button.
-
-        :param dimensions: The new dimensions to set.
-        """
-        self.rect.width = int(dimensions[0])
-        self.rect.height = int(dimensions[1])
-        self.relative_rect.size = self.rect.size
-
-        self.drawable_shape.set_dimensions(self.rect.size)
-        self.image = self.drawable_shape.get_surface('normal')
-
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles interactions with the button.

@@ -176,6 +176,20 @@ class UIElement(pygame.sprite.Sprite):
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
 
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the dimensions of an element.
+
+        :param dimensions: The new dimensions to set.
+        """
+        self.rect.width = int(dimensions[0])
+        self.rect.height = int(dimensions[1])
+        self.relative_rect.size = self.rect.size
+
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_dimensions(self.rect.size)
+            self.image = self.drawable_shape.get_surface('normal')
+
     def on_hovered(self):
         """
         A stub to override. Called when this UI element first enters the 'hovered' state.

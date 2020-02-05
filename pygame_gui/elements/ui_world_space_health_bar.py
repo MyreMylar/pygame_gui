@@ -146,7 +146,7 @@ class UIWorldSpaceHealthBar(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius,
                               'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width': self.current_health_rect.width}
+                              'filled_bar_width_percentage': self.health_percentage}
 
         if self.shape_type == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,

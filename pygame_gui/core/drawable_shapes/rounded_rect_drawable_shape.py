@@ -213,7 +213,7 @@ class RoundedRectangleShape(DrawableShape):
 
         found_shape = None
         shape_id = None
-        if 'filled_bar' not in self.theming and 'filled_bar_width' not in self.theming:
+        if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
             shape_id = self.shape_cache.build_cache_id('rounded_rectangle', self.containing_rect.size,
                                                        self.theming['shadow_width'],
                                                        self.theming['border_width'],
@@ -248,34 +248,30 @@ class RoundedRectangleShape(DrawableShape):
                                           self.containing_rect.height * aa), flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.theming['border_width'] > 0:
-                # If we have a border, draw it
-                # Two paths here, 1. Drawing with a colour gradient or 2. With a single colour.
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
                                                                         0, border_corner_radius,
                                                                         aa_amount=aa, clear=False)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
-                    bab_surface.blit(shape_surface, self.border_rect)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
                                                                         0, border_corner_radius,
                                                                         aa_amount=aa, clear=False)
                     self.apply_colour_to_surface(self.theming[border_colour_state_str], shape_surface)
-                    bab_surface.blit(shape_surface, self.border_rect)
 
-            # Next we draw the main background colour of the shape
-            # four paths here, 1. Drawing with a colour gradient 2. With a single colour.
-            # 3. Drawing bars with gradients. 4. Drawing bars with single colours.
+                bab_surface.blit(shape_surface, self.border_rect)
             if type(self.theming[bg_colour_state_str]) == ColourGradient:
                 shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
                                                                     0, bg_corner_radius, aa_amount=aa)
 
-                if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
-                    bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
-                    unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                    (self.background_rect.width -
-                                                     (self.theming['filled_bar_width'] * aa),
-                                                     self.background_rect.height))
+                if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+
+                    filled_bar_width = int(self.background_rect.width * self.theming['filled_bar_width_percentage'])
+                    bar_rect = pygame.Rect((0, 0), (filled_bar_width, self.background_rect.height))
+
+                    unfilled_bar_width = self.background_rect.width - filled_bar_width
+                    unfilled_bar_rect = pygame.Rect((filled_bar_width, 0),
+                                                    (unfilled_bar_width, self.background_rect.height))
 
                     if type(self.theming['filled_bar']) == ColourGradient:
                         self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
@@ -285,16 +281,16 @@ class RoundedRectangleShape(DrawableShape):
                         self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
                 else:
                     self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
-                bab_surface.blit(shape_surface, self.background_rect)
             else:
                 shape_surface = self.clear_and_create_shape_surface(bab_surface, self.background_rect,
                                                                     0, bg_corner_radius, aa_amount=aa)
-                if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
-                    bar_rect = pygame.Rect((0, 0), (self.theming['filled_bar_width'] * aa, self.background_rect.height))
-                    unfilled_bar_rect = pygame.Rect((self.theming['filled_bar_width'] * aa, 0),
-                                                    (self.background_rect.width -
-                                                     (self.theming['filled_bar_width'] * aa),
-                                                     self.background_rect.height))
+                if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+                    filled_bar_width = int(self.background_rect.width * self.theming['filled_bar_width_percentage'])
+                    bar_rect = pygame.Rect((0, 0), (filled_bar_width, self.background_rect.height))
+
+                    unfilled_bar_width = self.background_rect.width - filled_bar_width
+                    unfilled_bar_rect = pygame.Rect((filled_bar_width, 0),
+                                                    (unfilled_bar_width, self.background_rect.height))
 
                     if type(self.theming['filled_bar']) == ColourGradient:
                         self.apply_colour_to_surface(self.theming[bg_colour_state_str],
@@ -306,8 +302,8 @@ class RoundedRectangleShape(DrawableShape):
                         self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
                 else:
                     self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
-                bab_surface.blit(shape_surface, self.background_rect)
 
+            bab_surface.blit(shape_surface, self.background_rect)
             # clear space in shadow for background
             if self.theming['shadow_width'] > 0:
                 # we want our shadow clear shape to be a little bigger than the background ideally at the curvy parts

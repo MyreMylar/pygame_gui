@@ -295,10 +295,14 @@ class UITextBox(UIElement):
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        self.rect.width = dimensions[0]
-        self.rect.height = dimensions[1]
-        self.relative_rect.width = dimensions[0]
-        self.relative_rect.height = dimensions[1]
+        """
+        Method to directly set the dimensions of a text box.
+
+        :param dimensions: The new dimensions to set.
+        """
+        self.rect.width = int(dimensions[0])
+        self.rect.height = int(dimensions[1])
+        self.relative_rect.size = self.rect.size
 
         self.rebuild()
 

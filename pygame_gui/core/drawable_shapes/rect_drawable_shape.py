@@ -129,7 +129,7 @@ class RectDrawableShape(DrawableShape):
 
         found_shape = None
         shape_id = None
-        if 'filled_bar' not in self.theming and 'filled_bar_width' not in self.theming:
+        if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
             shape_id = self.shape_cache.build_cache_id('rectangle', self.containing_rect.size,
                                                        self.theming['shadow_width'],
                                                        self.theming['border_width'],
@@ -164,9 +164,10 @@ class RectDrawableShape(DrawableShape):
             else:
                 self.surfaces[state_str].fill(self.theming[bg_colour_state_str], self.background_rect)
 
-            if 'filled_bar' in self.theming and 'filled_bar_width' in self.theming:
-                bar_rect = pygame.Rect(self.background_rect.topleft, (self.theming['filled_bar_width'],
-                                                                      self.background_rect.height))
+            if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+                bar_rect = pygame.Rect(self.background_rect.topleft,
+                                       (int(self.theming['filled_bar_width_percentage'] * self.background_rect.width),
+                                        self.background_rect.height))
                 if type(self.theming['filled_bar']) == ColourGradient:
                     bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA, depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))

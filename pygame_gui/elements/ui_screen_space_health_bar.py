@@ -5,7 +5,6 @@ from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class UIScreenSpaceHealthBar(UIElement):
@@ -49,6 +48,10 @@ class UIScreenSpaceHealthBar(UIElement):
         self.bar_filled_colour = None
         self.text_shadow_colour = None
         self.text_colour = None
+        self.text_horiz_alignment = 'center'
+        self.text_vert_alignment = 'center'
+        self.text_horiz_alignment_padding = 1
+        self.text_vert_alignment_padding = 1
 
         self.border_rect = None
         self.capacity_width = None
@@ -115,13 +118,24 @@ class UIScreenSpaceHealthBar(UIElement):
         Redraws the health bar rectangles and text onto the underlying sprite's image surface.
         Takes a little while so we only do it when the health has changed.
         """
+        health_display_string = str(self.current_health) + "/" + str(self.health_capacity)
+
         theming_parameters = {'normal_bg': self.bar_unfilled_colour,
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius,
                               'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width': int(self.capacity_width * self.health_percentage)}
+                              'filled_bar_width_percentage': self.health_percentage,
+                              'font': self.font,
+                              'text': health_display_string,
+                              'normal_text': self.text_colour,
+                              'text_shadow': self.text_shadow_colour,
+                              'text_horiz_alignment': self.text_horiz_alignment,
+                              'text_vert_alignment': self.text_vert_alignment,
+                              'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                              'text_vert_alignment_padding': self.text_vert_alignment_padding,
+                              }
 
         if self.shape_type == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -131,33 +145,6 @@ class UIScreenSpaceHealthBar(UIElement):
                                                         ['normal'], self.ui_manager)
 
         self.image = self.drawable_shape.get_surface('normal')
-
-        health_display_string = str(self.current_health) + "/" + str(self.health_capacity)
-        self.background_text = self.font.render(health_display_string, True, self.text_shadow_colour)
-
-        if type(self.text_colour) != ColourGradient:
-            self.foreground_text = self.font.render(health_display_string, True, self.text_colour)
-        else:
-            self.foreground_text = self.font.render(health_display_string, True, pygame.Color('#FFFFFFFF'))
-            self.text_colour.apply_gradient_to_surface(self.foreground_text)
-
-        self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=int(self.rect.width/2),
-                                                      centery=int(self.rect.height/2) + 1))
-        self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=int(self.rect.width/2),
-                                                      centery=int(self.rect.height/2) - 1))
-
-        self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=int(self.rect.width/2) + 1,
-                                                      centery=int(self.rect.height/2)))
-        self.image.blit(self.background_text,
-                        self.background_text.get_rect(centerx=int(self.rect.width/2) - 1,
-                                                      centery=int(self.rect.height/2)))
-
-        self.image.blit(self.foreground_text,
-                        self.foreground_text.get_rect(centerx=int(self.rect.width/2),
-                                                      centery=int(self.rect.height/2)))
 
     def update(self, time_delta: float):
         """

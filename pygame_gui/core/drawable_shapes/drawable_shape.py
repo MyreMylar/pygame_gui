@@ -56,8 +56,8 @@ class DrawableShape:
         # first we need to create rectangle the size of the text, if there is any text to draw
         self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
 
-        if (self.theming['text_horiz_alignment'] == 'center' or
-                not self.theming['text_horiz_alignment'] in ['left', 'right']):
+        if self.theming['text_horiz_alignment'] == 'center' or self.theming['text_horiz_alignment'] not in ['left',
+                                                                                                            'right']:
             self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
         elif self.theming['text_horiz_alignment'] == 'left':
             self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
@@ -66,8 +66,8 @@ class DrawableShape:
             x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
                      self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
             self.aligned_text_rect.x = x_pos
-        if (self.theming['text_vert_alignment'] == 'center' or
-                not self.theming['text_vert_alignment'] in ['top', 'bottom']):
+        if self.theming['text_vert_alignment'] == 'center' or self.theming['text_vert_alignment'] not in ['top',
+                                                                                                          'bottom']:
             self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
         elif self.theming['text_vert_alignment'] == 'top':
             self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
@@ -131,6 +131,14 @@ class DrawableShape:
                     self.theming[text_colour_state_str].apply_gradient_to_surface(text_surface)
             else:
                 text_surface = None
+
+            if 'text_shadow' in self.theming:
+                text_shadow = self.theming['font'].render(self.theming['text'], True, self.theming['text_shadow'])
+
+                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y + 1))
+                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y - 1))
+                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x + 1, self.aligned_text_rect.y))
+                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x - 1, self.aligned_text_rect.y))
 
             if text_surface is not None and self.aligned_text_rect is not None:
                 self.surfaces[state_str].blit(text_surface, self.aligned_text_rect)
