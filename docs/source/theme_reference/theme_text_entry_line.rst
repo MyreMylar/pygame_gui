@@ -22,7 +22,7 @@ Colours
 :class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
- - "**normal_bg**" -  The default colour/gradient of the background to the entry line element.
+ - "**dark_bg**" -  The default colour/gradient of the background to the entry line element.
  - "**selected_bg**" - The colour/gradient the background changes to when the text above it is selected.
  - "**normal_text**" - The default colour/gradient of text entered into the element.
  - "**selected_text**" - The colour/gradient of text when it has been selected.
