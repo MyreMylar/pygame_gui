@@ -66,15 +66,15 @@ Here is an example of a text entry line block in a JSON theme file using all the
    :linenos:
 
     {
-        "button":
+        "text_entry_line":
         {
             "colours":
             {
-                "normal_bg": "#25292e",
+                "dark_bg": "#25292e",
                 "selected_bg": "#55595e",
                 "normal_text": "#AAAAAA",
                 "selected_text": "#FFFFFF",
-                "border": "#FFFFFF"
+                "normal_border": "#FFFFFF"
             },
             "font":
             {
@@ -89,6 +89,8 @@ Here is an example of a text entry line block in a JSON theme file using all the
             },
             "misc":
             {
+                "shape": "rounded_rectangle",
+                "shape_corner_radius": 5,
                 "border_width": "2",
                 "shadow_width": "2",
                 "padding": "6,4"
