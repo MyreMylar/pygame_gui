@@ -265,6 +265,11 @@ class UITextBox(UIElement):
                 self.redraw_from_chunks()
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the relative screen position of this text box, updating it's subordinate scroll bar at the same time.
+
+        :param position: The relative screen position to set.
+        """
         super().set_relative_position(position)
 
         if self.scroll_bar is not None:
@@ -275,6 +280,11 @@ class UITextBox(UIElement):
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this text box, updating it's subordinate scroll bar at the same time.
+
+        :param position: The absolute screen position to set.
+        """
         super().set_position(position)
 
         if self.scroll_bar is not None:

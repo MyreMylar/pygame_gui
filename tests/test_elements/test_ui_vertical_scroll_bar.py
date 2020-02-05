@@ -110,7 +110,6 @@ class TestUIVerticalScrollBar:
 
         assert pygame.MOUSEWHEEL == -1
 
-
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_vertical_scroll_bar_non_default.json"))
@@ -130,3 +129,23 @@ class TestUIVerticalScrollBar:
                                          visible_percentage=1.0,
                                          manager=manager)
         assert scroll_bar.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(80, 100, 30, 200),
+                                         visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.set_position((200, 200))
+
+        # try to click on the scroll bar's top button
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (215, 205)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.top_button.held is True
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (215, 395)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.bottom_button.held is True
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (215, 250)}))
+        # if we successfully clicked on the moved scroll bar then this button should be True
+        assert scroll_bar.sliding_button.held is True
+

@@ -8,7 +8,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_tool_tip import UITooltip
 
 
-class TestUIButton:
+class TestUIToolTip:
 
     def test_creation(self, _init_pygame, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
@@ -111,3 +111,12 @@ class TestUIButton:
                              manager=manager)
 
         assert tool_tip.text_block.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+
+        tool_tip.set_position((150.0, 30.0))
+
+        assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)

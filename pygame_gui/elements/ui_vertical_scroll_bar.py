@@ -386,3 +386,43 @@ class UIVerticalScrollBar(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this scroll bar, updating all subordinate button elements at the same time.
+
+        :param position: The absolute screen position to set.
+        """
+        super().set_position(position)
+
+        border_and_shadow = self.border_width + self.shadow_width
+        self.background_rect.x = border_and_shadow + self.relative_rect.x
+        self.background_rect.y = border_and_shadow + self.relative_rect.y
+
+        inner_top_left = (position[0] + border_and_shadow, position[1] + border_and_shadow)
+        self.top_button.set_position(inner_top_left)
+        self.bottom_button.set_position((inner_top_left[0],
+                                        inner_top_left[1] + self.background_rect.height - self.button_height))
+
+        slider_y_position = self.scroll_position + self.rect.y + border_and_shadow + self.button_height
+        self.sliding_button.set_position((inner_top_left[0], slider_y_position))
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the relative screen position of this scroll bar, updating all subordinate button elements at the same time.
+
+        :param position: The relative screen position to set.
+        """
+        super().set_relative_position(position)
+
+        border_and_shadow = self.border_width + self.shadow_width
+        self.background_rect.x = border_and_shadow + self.relative_rect.x
+        self.background_rect.y = border_and_shadow + self.relative_rect.y
+
+        inner_top_left = (position[0] + border_and_shadow, position[1] + border_and_shadow)
+        self.top_button.set_relative_position(inner_top_left)
+        self.bottom_button.set_relative_position((inner_top_left[0],
+                                                  inner_top_left[1] + self.background_rect.height - self.button_height))
+
+        slider_y_position = self.scroll_position + self.relative_rect.y + border_and_shadow + self.button_height
+        self.sliding_button.set_relative_position((inner_top_left[0], slider_y_position))

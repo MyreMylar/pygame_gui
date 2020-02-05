@@ -147,3 +147,21 @@ class UITooltip(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this tool tip, updating it's subordinate text box at the same time.
+
+        :param position: The absolute screen position to set.
+        """
+        super().set_position(position)
+        self.text_block.set_position(position)
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the relative screen position of this tool tip, updating it's subordinate text box at the same time.
+
+        :param position: The relative screen position to set.
+        """
+        super().set_relative_position(position)
+        self.text_block.set_relative_position(position)

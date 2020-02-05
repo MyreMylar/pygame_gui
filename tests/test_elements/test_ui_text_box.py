@@ -111,6 +111,10 @@ class TestUITextBox:
         text_box.set_position(pygame.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
 
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (92, 8)}))
+        # if we successfully clicked on the moved text box scroll bar then this button should be True
+        assert text_box.scroll_bar.top_button.held is True
+
     def test_set_relative_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
@@ -123,6 +127,10 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.set_relative_position(pygame.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (142, 8)}))
+        # if we successfully clicked on the moved text box scroll bar then this button should be True
+        assert text_box.scroll_bar.top_button.held is True
 
     def test_update_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'

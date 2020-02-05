@@ -253,15 +253,15 @@ class UIExpandedDropDownState:
         self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
 
         # update all the ui elements that depend on the base position
-        self.selected_option_button.set_position(self.base_position_rect.topleft)
+        self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
 
         button_y_position = self.base_position_rect.y + self.select_button_dist_to_move
         for button in self.menu_buttons:
-            button.set_position([self.base_position_rect.x, button_y_position])
+            button.set_relative_position([self.base_position_rect.x, button_y_position])
             button_y_position += self.option_button_dist_to_move
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
-        self.close_button.set_position([close_button_x, self.base_position_rect.y])
+        self.close_button.set_relative_position([close_button_x, self.base_position_rect.y])
 
 
 class UIClosedDropDownState:
@@ -379,10 +379,10 @@ class UIClosedDropDownState:
         self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
 
         # update all the ui elements that depend on the base position
-        self.selected_option_button.set_position(self.base_position_rect.topleft)
+        self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
 
         open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
-        self.open_button.set_position([open_button_x, self.base_position_rect.y])
+        self.open_button.set_relative_position([open_button_x, self.base_position_rect.y])
 
 
 class UIDropDownMenu(UIElement):
@@ -582,5 +582,19 @@ class UIDropDownMenu(UIElement):
             self.current_state.rebuild()
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this drop down, updating all subordinate button elements at the same time.
+
+        :param position: The absolute screen position to set.
+        """
         super().set_position(position)
+        self.current_state.update_position()
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the relative screen position of this drop down, updating all subordinate button elements at the same time.
+
+        :param position: The relative screen position to set.
+        """
+        super().set_relative_position(position)
         self.current_state.update_position()

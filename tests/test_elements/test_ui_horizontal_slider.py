@@ -8,7 +8,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
 
 
-class TestUIVerticalScrollBar:
+class TestUIHorizontalSlider:
 
     def test_creation(self, _init_pygame, default_ui_manager):
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -128,3 +128,14 @@ class TestUIVerticalScrollBar:
                                         value_range=(0, 100),
                                         manager=manager)
         assert scroll_bar.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(300, 400, 150, 40), start_value=50,
+                                    value_range=(0, 200), manager=default_ui_manager)
+
+        slider.set_position((200, 200))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (205, 205)}))
+        # if we successfully clicked on the moved slider then this button should be True
+        assert slider.left_button.held is True

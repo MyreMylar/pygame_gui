@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
+from pygame_gui.core.ui_container import UIContainer
 
 from pygame_gui.core.utility import clipboard_paste
 
@@ -700,3 +701,13 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=manager)
         assert text_entry.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        button = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
+                                 container=test_container,
+                                 manager=default_ui_manager)
+
+        button.set_position((150.0, 30.0))
+
+        assert button.relative_rect.topleft == (50, -70) and button.drawable_shape.containing_rect.topleft == (150, 30)

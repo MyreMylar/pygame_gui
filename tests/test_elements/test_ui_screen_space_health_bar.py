@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_screen_space_health_bar import UIScreenSpaceHealthBar
+from pygame_gui.core.ui_container import UIContainer
 
 
 class HealthySprite(pygame.sprite.Sprite):
@@ -30,7 +31,7 @@ class HealthySpriteNoCurrentHealth(pygame.sprite.Sprite):
         self.rect = pygame.Rect(150, 150, 50, 75)
 
 
-class TestUIWorldSpaceHealthBar:
+class TestUIScreenSpaceHealthBar:
 
     def test_creation_with_sprite(self, _init_pygame, default_ui_manager):
         healthy_sprite = HealthySprite()
@@ -91,7 +92,8 @@ class TestUIWorldSpaceHealthBar:
         assert health_bar.image is not None
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
-        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_screen_health_bar_non_default.json"))
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
+                                                     "ui_screen_health_bar_non_default.json"))
         healthy_sprite = HealthySprite()
         health_bar = UIScreenSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                             sprite_to_monitor=healthy_sprite,
@@ -107,3 +109,15 @@ class TestUIWorldSpaceHealthBar:
                                             sprite_to_monitor=healthy_sprite,
                                             manager=manager)
         assert health_bar.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        healthy_sprite = HealthySprite()
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        screen_space_health_bar = UIScreenSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                                         sprite_to_monitor=healthy_sprite,
+                                                         container=test_container,
+                                                         manager=default_ui_manager)
+
+        screen_space_health_bar.set_position((150.0, 30.0))
+
+        assert screen_space_health_bar.relative_rect.topleft == (50, -70)
