@@ -232,11 +232,11 @@ class UIExpandedDropDownState:
                 self.drop_down_menu_ui.selected_option = button.text
                 self.should_transition = True
 
-                drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
-                                                             {'user_type': pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
-                                                              'text': button.text,
-                                                              'ui_element': self.drop_down_menu_ui,
-                                                              'ui_object_id': self.object_ids[-1]})
+                event_data = {'user_type': pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
+                              'text': button.text,
+                              'ui_element': self.drop_down_menu_ui,
+                              'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
+                drop_down_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
                 pygame.event.post(drop_down_changed_event)
 
     def update_position(self):

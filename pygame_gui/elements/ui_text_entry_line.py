@@ -486,7 +486,7 @@ class UITextEntryLine(UIElement):
                                                           {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
                                                            'text': self.text,
                                                            'ui_element': self,
-                                                           'ui_object_id': self.object_ids[-1]})
+                                                           'ui_object_id': self.most_specific_combined_id})
                 pygame.event.post(entry_finished_event)
                 processed_event = True
             elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:

@@ -10,23 +10,23 @@ from pygame_gui.core.ui_window import UIWindow
 
 class TestWindowStack:
     def test_creation(self, _init_pygame, default_ui_manager):
-        UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, element_ids=[])
+        UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, element_ids=['test_window'])
 
     def test_stub_methods(self, _init_pygame, default_ui_manager):
-        window = UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, element_ids=[])
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, element_ids=['test_window'])
 
         window.select()
         window.unselect()
 
     def test_process_event(self, _init_pygame, default_ui_manager, _display_surface_return_none: None):
-        window = UIWindow(pygame.Rect(0, 0, 200, 200), manager=default_ui_manager, element_ids=[])
+        window = UIWindow(pygame.Rect(0, 0, 200, 200), manager=default_ui_manager, element_ids=['test_window'])
         processed_down_event = window.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                        {'button': 1, 'pos': (100, 100)}))
 
         assert processed_down_event is True
 
     def test_check_clicked_inside(self, _init_pygame, default_ui_manager, _display_surface_return_none: None):
-        window = UIWindow(pygame.Rect(0, 0, 200, 200), manager=default_ui_manager, element_ids=[])
+        window = UIWindow(pygame.Rect(0, 0, 200, 200), manager=default_ui_manager, element_ids=['test_window'])
         clicked_inside = window.check_clicked_inside(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                         {'button': 1, 'pos': (100, 100)}))
 

@@ -35,6 +35,12 @@ class UIElement(pygame.sprite.Sprite):
         self.object_ids = object_ids
         self.element_ids = element_ids
 
+        combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids, self.object_ids)
+        if combined_ids is not None and len(combined_ids) > 0:
+            self.most_specific_combined_id = combined_ids[0]
+        else:
+            self.most_specific_combined_id = 'no_id'
+
         self.layer_thickness = layer_thickness
         self.starting_height = starting_height
         self.top_layer = self._layer + self.layer_thickness

@@ -342,6 +342,5 @@ class UIManager:
             print("Layer: " + str(layer))
             print("-----------------------")
             for element in self.ui_group.get_sprites_from_layer(layer):
-                combined_ids = self.get_theme().build_all_combined_ids(element.element_ids, element.object_ids)
-                print(str(combined_ids[0]))
+                print(str(element.most_specific_combined_id))
             print(' ')
