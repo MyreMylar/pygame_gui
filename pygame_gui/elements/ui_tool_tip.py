@@ -104,8 +104,8 @@ class UITooltip(UIElement):
             self.rect.top = int(position.y + self.hover_distance_from_target[1])
 
             if window_rect.contains(self.rect):
-                self.text_block.rect.x = self.rect.x
-                self.text_block.rect.y = self.rect.y
+                self.relative_rect = self.rect.copy()
+                self.text_block.set_position(self.rect.topleft)
                 return True
             else:
                 if self.rect.bottom > window_rect.bottom:
@@ -116,13 +116,15 @@ class UITooltip(UIElement):
                     self.rect.left = window_rect.left + self.hover_distance_from_target[0]
 
             if window_rect.contains(self.rect):
-                self.text_block.rect.x = self.rect.x
-                self.text_block.rect.y = self.rect.y
+                self.relative_rect = self.rect.copy()
+                self.text_block.set_position(self.rect.topleft)
                 return True
             else:
+                self.relative_rect = self.rect.copy()
                 warnings.warn("Unable to fit tool tip on screen")
                 return False
         else:
+            self.relative_rect = self.rect.copy()
             warnings.warn("initial position for tool tip is off screen, unable to find valid position")
             return False
 

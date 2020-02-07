@@ -65,14 +65,14 @@ class UILabel(UIElement):
         """
 
         text_size = self.font.size(self.text)
-        if text_size[1] > self.rect.height or text_size[0] > self.rect.width:
-            width_overlap = self.rect.width - text_size[0]
-            height_overlap = self.rect.height - text_size[1]
+        if text_size[1] > self.relative_rect.height or text_size[0] > self.relative_rect.width:
+            width_overlap = self.relative_rect.width - text_size[0]
+            height_overlap = self.relative_rect.height - text_size[1]
             warn_text = 'Label Rect is too small for text: ' + self.text + ' - size diff: ' + str((width_overlap,
                                                                                                    height_overlap))
             warnings.warn(warn_text, UserWarning)
 
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+        self.image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
 
         if type(self.bg_colour) == ColourGradient:
             self.image.fill(pygame.Color('#FFFFFFFF'))

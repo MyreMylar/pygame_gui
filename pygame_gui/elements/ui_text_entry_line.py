@@ -116,9 +116,10 @@ class UITextEntryLine(UIElement):
 
         self.text_image_rect = pygame.Rect((self.border_width + self.shadow_width + self.shape_corner_radius,
                                             self.border_width + self.shadow_width),
-                                           (self.rect.width - (self.border_width * 2) - (self.shadow_width * 2) -
-                                            (2 * self.shape_corner_radius),
-                                            self.rect.height - (self.border_width * 2) - (self.shadow_width * 2)))
+                                           (self.relative_rect.width - (self.border_width * 2) -
+                                            (self.shadow_width * 2) - (2 * self.shape_corner_radius),
+                                            self.relative_rect.height - (self.border_width * 2) -
+                                            (self.shadow_width * 2)))
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
@@ -151,23 +152,6 @@ class UITextEntryLine(UIElement):
 
         # setup for drawing
         self.redraw()
-
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        Method to directly set the absolute rect position of a text entry line.
-
-        :param position: The new position to set.
-        """
-        super().set_position(position)
-        self.drawable_shape.set_position(self.rect.topleft)
-
-    def update_containing_rect_position(self):
-        """
-        Updates the position of this element based on the position of it's container. Usually called when the container
-        has moved.
-        """
-        super().update_containing_rect_position()
-        self.drawable_shape.set_position(self.rect.topleft)
 
     def set_text_length_limit(self, limit: int):
         """

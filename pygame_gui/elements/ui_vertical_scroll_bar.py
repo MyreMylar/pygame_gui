@@ -19,6 +19,7 @@ class UIVerticalScrollBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
+
     def __init__(self, relative_rect: pygame.Rect,
                  visible_percentage: float,
                  manager: ui_manager.UIManager,
@@ -105,13 +106,13 @@ class UIVerticalScrollBar(UIElement):
 
         """
         border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                       (self.rect.width - (2 * self.shadow_width),
-                                        self.rect.height - (2 * self.shadow_width)))
+                                  (self.rect.width - (2 * self.shadow_width),
+                                   self.rect.height - (2 * self.shadow_width)))
 
         relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
                                                 self.border_width + self.shadow_width),
-                                                (border_rect.width - (2 * self.border_width),
-                                                 border_rect.height - (2 * self.border_width)))
+                                               (border_rect.width - (2 * self.border_width),
+                                                border_rect.height - (2 * self.border_width)))
 
         self.background_rect = pygame.Rect((relative_background_rect.x + self.relative_rect.x,
                                             relative_background_rect.y + self.relative_rect.y),
@@ -209,10 +210,9 @@ class UIVerticalScrollBar(UIElement):
         processed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
         if ((last_focused_scrollbar_element is self) or (
-                    last_focused_scrollbar_element is self.sliding_button) or (
+                last_focused_scrollbar_element is self.sliding_button) or (
                     last_focused_scrollbar_element is self.top_button) or (
-                last_focused_scrollbar_element is self.bottom_button
-            )) and event.type == pygame.MOUSEWHEEL:
+                    last_focused_scrollbar_element is self.bottom_button)) and event.type == pygame.MOUSEWHEEL:
             if event.y > 0:
                 self.scroll_wheel_up = True
                 processed_event = True
@@ -240,18 +240,20 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_wheel_up = False
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.top_limit)
-                x_pos = self.rect.x + self.shadow_width + self.border_width
-                y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+                x_pos = self.relative_rect.x + self.shadow_width + self.border_width
+                y_pos = (self.scroll_position + self.relative_rect.y + self.shadow_width
+                         + self.border_width + self.button_height)
+                self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
             elif (self.bottom_button.held or self.scroll_wheel_down) and self.scroll_position < self.bottom_limit:
                 self.scroll_wheel_down = False
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
-                                           self.bottom_limit - self.sliding_button.rect.height)
-                x_pos = self.rect.x + self.shadow_width + self.border_width
-                y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+                                           self.bottom_limit - self.sliding_button.relative_rect.height)
+                x_pos = self.relative_rect.x + self.shadow_width + self.border_width
+                y_pos = (self.scroll_position + self.relative_rect.y + self.shadow_width
+                         + self.border_width + self.button_height)
+                self.sliding_button.set_relative_position((x_pos, y_pos))
 
                 moved_this_frame = True
 
@@ -273,9 +275,10 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_position = min(max(self.scroll_position, self.top_limit),
                                            self.bottom_limit - self.sliding_button.rect.height)
 
-                x_pos = self.rect.x + self.shadow_width + self.border_width
-                y_pos = self.scroll_position + self.rect.y + self.shadow_width + self.border_width + self.button_height
-                self.sliding_button.set_position(pygame.math.Vector2(x_pos, y_pos))
+                x_pos = self.relative_rect.x + self.shadow_width + self.border_width
+                y_pos = (self.scroll_position + self.relative_rect.y + self.shadow_width
+                         + self.border_width + self.button_height)
+                self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
             elif not self.sliding_button.held:
                 self.grabbed_slider = False
@@ -294,7 +297,7 @@ class UIVerticalScrollBar(UIElement):
         self.scrollable_height = (self.rect.height - (2 * self.button_height) -
                                   (2 * self.border_width) - (2 * self.shadow_width))
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
-        self.sliding_rect_position.y = (self.rect.y + self.button_height +
+        self.sliding_rect_position.y = (self.relative_rect.y + self.button_height +
                                         self.shadow_width + self.border_width +
                                         int(self.start_percentage * self.scrollable_height))
         self.sliding_button = ui_button.UIButton(pygame.Rect(int(self.sliding_rect_position[0]),
@@ -400,7 +403,7 @@ class UIVerticalScrollBar(UIElement):
         inner_top_left = (position[0] + border_and_shadow, position[1] + border_and_shadow)
         self.top_button.set_position(inner_top_left)
         self.bottom_button.set_position((inner_top_left[0],
-                                        inner_top_left[1] + self.background_rect.height - self.button_height))
+                                         inner_top_left[1] + self.background_rect.height - self.button_height))
 
         slider_y_position = self.scroll_position + self.rect.y + border_and_shadow + self.button_height
         self.sliding_button.set_position((inner_top_left[0], slider_y_position))
@@ -450,5 +453,3 @@ class UIVerticalScrollBar(UIElement):
 
         self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
         self.sliding_button.set_relative_position(self.sliding_rect_position)
-
-

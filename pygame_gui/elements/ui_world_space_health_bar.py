@@ -124,6 +124,7 @@ class UIWorldSpaceHealthBar(UIElement):
 
             self.rect.x = self.position[0]
             self.rect.y = self.position[1]
+            self.relative_rect.topleft = self.rect.topleft
 
             if (self.current_health != self.sprite_to_monitor.current_health) or (
                     self.health_capacity != self.sprite_to_monitor.health_capacity):
