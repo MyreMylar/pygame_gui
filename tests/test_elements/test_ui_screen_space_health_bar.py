@@ -2,7 +2,8 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
+    _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_screen_space_health_bar import UIScreenSpaceHealthBar
@@ -133,3 +134,17 @@ class TestUIScreenSpaceHealthBar:
         screen_space_health_bar.set_relative_position((50.0, 30.0))
 
         assert screen_space_health_bar.rect.topleft == (100, 80)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        healthy_sprite = HealthySprite()
+        test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250), manager=default_ui_manager)
+        health_bar = UIScreenSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                            sprite_to_monitor=healthy_sprite,
+                                            container=test_container,
+                                            manager=default_ui_manager)
+
+        health_bar.set_dimensions((250.0, 60.0))
+
+        assert health_bar.drawable_shape.containing_rect.size == (250, 60)
+        assert health_bar.rect.size == (250, 60)
+        assert health_bar.relative_rect.size == (250, 60)

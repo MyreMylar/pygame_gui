@@ -171,3 +171,14 @@ class TestUIVerticalScrollBar:
         # if we successfully clicked on the moved scroll bar then this button should be True
         assert scroll_bar.sliding_button.held is True
 
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(0, 100, 30, 200),
+                                         visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.set_dimensions((60, 100))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (40, 195)}))
+        # if we successfully clicked on the moved slider then this button should be True
+        assert scroll_bar.bottom_button.held is True
+

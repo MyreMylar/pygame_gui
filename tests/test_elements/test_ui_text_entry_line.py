@@ -722,3 +722,14 @@ class TestUITextEntryLine:
         text_entry.set_relative_position((50.0, 30.0))
 
         assert text_entry.rect.topleft == (100, 80)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
+                                     container=test_container,
+                                     manager=default_ui_manager)
+
+        text_entry.set_dimensions((200, -1))
+
+        assert text_entry.rect.right == 300
+        assert text_entry.drawable_shape.containing_rect.right == 300

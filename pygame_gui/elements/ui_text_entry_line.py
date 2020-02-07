@@ -793,3 +793,24 @@ class UITextEntryLine(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Will allow us to change the width of the text entry line but not it's height which is determined by the height
+        of the font.
+
+        :param dimensions: Teh dimensions to set. Only the first, the width, will actually be used.
+        """
+        self.rect.width = int(dimensions[0])
+        self.relative_rect.size = self.rect.size
+
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_dimensions(self.rect.size)
+
+        self.background_and_border = self.drawable_shape.get_surface('normal')
+        self.text_image_rect.width = (self.rect.width - (self.border_width * 2) -
+                                      (self.shadow_width * 2) - (2 * self.shape_corner_radius))
+
+        self.text_image = pygame.transform.smoothscale(self.text_image, self.text_image_rect.size)
+
+        self.redraw()

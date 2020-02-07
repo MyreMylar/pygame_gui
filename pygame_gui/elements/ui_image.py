@@ -34,14 +34,15 @@ class UIImage(UIElement):
                          object_ids=new_object_ids,
                          element_ids=new_element_ids)
 
-        if image_surface.get_width() != self.rect.width or image_surface.get_height() != self.rect.height:
-            self.image = pygame.transform.smoothscale(image_surface, self.rect.size)
+        self.original_image = image_surface
+        if self.original_image.get_width() != self.rect.width or self.original_image.get_height() != self.rect.height:
+            self.image = pygame.transform.smoothscale(self.original_image, self.rect.size)
         else:
             self.image = image_surface
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_dimensions(dimensions)
 
-        if int(dimensions[0]) != self.rect.width or int(dimensions[1]) != self.rect.height:
-            self.image = pygame.transform.smoothscale(self.image, self.rect.size)
+        if self.rect.size != self.image.get_size():
+            self.image = pygame.transform.smoothscale(self.original_image, self.rect.size)
 

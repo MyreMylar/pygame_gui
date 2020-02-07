@@ -39,7 +39,7 @@ class UIExpandedDropDownState:
 
         self.selected_option_button = None
         self.close_button = None
-        self.drawable_shape = None
+
         self.menu_buttons = []
 
         self.should_transition = False
@@ -105,10 +105,11 @@ class UIExpandedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         if self.drop_down_menu_ui.shape_type == 'rectangle':
-            drawable_shape = RectDrawableShape(self.selected_option_rect, theming_parameters,
+            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.selected_option_rect, theming_parameters,
                                                ['normal'], self.ui_manager)
 
-            self.drop_down_menu_ui.image.blit(drawable_shape.get_surface('normal'), self.selected_option_rect.topleft)
+            self.drop_down_menu_ui.image.blit(self.drop_down_menu_ui.drawable_shape.get_surface('normal'),
+                                              self.selected_option_rect.topleft)
             self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'),
                                               pygame.Rect((0, 0),
                                                           (options_background_rect.width -
@@ -120,10 +121,10 @@ class UIExpandedDropDownState:
                                                        ['normal'], self.ui_manager)
             self.drop_down_menu_ui.image.blit(options_drawable_shape.get_surface('normal'), (0, 0))
         elif self.drop_down_menu_ui.shape_type == 'rounded_rectangle':
-            drawable_shape = RoundedRectangleShape(self.selected_option_rect, theming_parameters,
+            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(self.selected_option_rect, theming_parameters,
                                                    ['normal'], self.ui_manager)
 
-            self.drop_down_menu_ui.image.blit(drawable_shape.get_surface('normal'), self.selected_option_rect.topleft)
+            self.drop_down_menu_ui.image.blit(self.drop_down_menu_ui.drawable_shape.get_surface('normal'), self.selected_option_rect.topleft)
             self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'),
                                               pygame.Rect((0, 0),
                                                           (options_background_rect.width -
@@ -263,6 +264,38 @@ class UIExpandedDropDownState:
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
         self.close_button.set_relative_position([close_button_x, self.base_position_rect.y])
 
+    def update_dimensions(self):
+        """
+        Update the dimensions of all the button elements in the closed drop down state.
+
+        Used when the dimensions of the drop down have been altered.
+        """
+
+        # update the base position rect
+        border_and_shadow = self.drop_down_menu_ui.shadow_width + self.drop_down_menu_ui.border_width
+        self.base_position_rect.width = self.drop_down_menu_ui.relative_rect.width - (2 * border_and_shadow)
+        self.base_position_rect.height = self.drop_down_menu_ui.relative_rect.height - (2 * border_and_shadow)
+
+        # update all the ui elements that depend on the base position rect
+        self.selected_option_button.set_dimensions((self.base_position_rect.width - self.close_button_width,
+                                                    self.base_position_rect.height))
+
+        self.select_button_dist_to_move = self.selected_option_button.rect.height
+        self.option_button_dist_to_move = self.base_position_rect.height
+
+        button_y_position = self.base_position_rect.y + self.select_button_dist_to_move
+        for button in self.menu_buttons:
+            button.set_relative_position([self.base_position_rect.x, button_y_position])
+            button.set_dimensions((self.base_position_rect.width - self.close_button_width,
+                                   self.base_position_rect.height))
+            button_y_position += self.option_button_dist_to_move
+
+        open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
+        self.close_button.set_dimensions((self.close_button_width, self.base_position_rect.height))
+        self.close_button.set_relative_position((open_button_x, self.base_position_rect.y))
+
+        self.rebuild()
+
 
 class UIClosedDropDownState:
     """
@@ -284,7 +317,6 @@ class UIClosedDropDownState:
         self.object_ids = object_ids
 
         self.shape_type = None
-        self.drawable_shape = None
 
         self.open_button_width = open_button_width
 
@@ -299,13 +331,14 @@ class UIClosedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         if self.drop_down_menu_ui.shape_type == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
+            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect, theming_parameters,
+                                                                      ['normal'], self.ui_manager)
         elif self.drop_down_menu_ui.shape_type == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.drop_down_menu_ui.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(self.drop_down_menu_ui.rect,
+                                                                          theming_parameters,
+                                                                          ['normal'], self.ui_manager)
 
-        self.drop_down_menu_ui.image = self.drawable_shape.get_surface('normal')
+        self.drop_down_menu_ui.image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
 
         # extra
         if self.open_button is not None:
@@ -382,7 +415,26 @@ class UIClosedDropDownState:
         self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
 
         open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
-        self.open_button.set_relative_position([open_button_x, self.base_position_rect.y])
+        self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
+
+    def update_dimensions(self):
+        """
+        Update the dimensions of all the button elements in the closed drop down state.
+
+        Used when the dimensions of the drop down have been altered.
+        """
+
+        # update the base position rect
+        border_and_shadow = self.drop_down_menu_ui.shadow_width + self.drop_down_menu_ui.border_width
+        self.base_position_rect.width = self.drop_down_menu_ui.relative_rect.width - (2 * border_and_shadow)
+        self.base_position_rect.height = self.drop_down_menu_ui.relative_rect.height - (2 * border_and_shadow)
+
+        # update all the ui elements that depend on the base position rect
+        self.selected_option_button.set_dimensions((self.base_position_rect.width - self.open_button_width,
+                                                    self.base_position_rect.height))
+        open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.open_button_width
+        self.open_button.set_dimensions((self.open_button_width, self.base_position_rect.height))
+        self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
 
 
 class UIDropDownMenu(UIElement):
@@ -598,3 +650,12 @@ class UIDropDownMenu(UIElement):
         """
         super().set_relative_position(position)
         self.current_state.update_position()
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the dimensions of this drop down, updating all subordinate button elements at the same time.
+
+        :param dimensions: The new dimensions to set.
+        """
+        super().set_dimensions(dimensions)
+        self.current_state.update_dimensions()

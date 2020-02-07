@@ -112,6 +112,9 @@ class UITextBox(UIElement):
         Rebuild whatever needs building.
 
         """
+        if self.scroll_bar is not None:
+            self.scroll_bar.kill()
+
         ''' The text_wrap_area is the part of the text box that we try to keep the text inside of so that none 
             of it overlaps. Essentially we start with the containing box, subtract the border,  then subtract 
             the padding, then if necessary subtract the width of the scroll bar'''
@@ -120,10 +123,10 @@ class UITextBox(UIElement):
                                 self.shadow_width + self.rounded_corner_offset),
                                (self.rect[1] + self.padding[1] + self.border_width +
                                 self.shadow_width + self.rounded_corner_offset),
-                               (self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) -
-                                (self.shadow_width * 2) - (2 * self.rounded_corner_offset)),
-                               (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
-                                (self.shadow_width * 2) - (2 * self.rounded_corner_offset))]
+                               max(1, (self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) -
+                                   (self.shadow_width * 2) - (2 * self.rounded_corner_offset))),
+                               max(1, (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
+                                   (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
         if self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
 
@@ -147,9 +150,9 @@ class UITextBox(UIElement):
                                         self.shadow_width + self.rounded_corner_offset),
                                        (self.rect[1] + self.padding[1] + self.border_width +
                                         self.shadow_width + self.rounded_corner_offset),
-                                       text_rect_width,
-                                       (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
-                                        (self.shadow_width * 2) - (2 * self.rounded_corner_offset))]
+                                       max(1, text_rect_width),
+                                       max(1, (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
+                                        (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
                 self.parse_html_into_style_data()
                 percentage_visible = self.text_wrap_rect[3] / self.formatted_text_block.final_dimensions[1]
                 scroll_bar_position = (self.relative_rect.right - self.border_width -
@@ -157,8 +160,6 @@ class UITextBox(UIElement):
                                        self.relative_rect.top + self.border_width +
                                        self.shadow_width)
 
-                if self.scroll_bar is not None:
-                    self.scroll_bar.kill()
                 self.scroll_bar = UIVerticalScrollBar(pygame.Rect(scroll_bar_position,
                                                                   (self.scroll_bar_width,
                                                                    self.rect.height - (2 * self.border_width) -

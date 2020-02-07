@@ -10,6 +10,11 @@ from pygame.math import Vector2
 class DrawableShape:
     def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List, manager: UIManager):
         self.containing_rect = containing_rect
+        if self.containing_rect.width < 1:
+            self.containing_rect.width = 1
+        if self.containing_rect.height < 1:
+            self.containing_rect.height = 1
+
         self.theming = theming_parameters
         self.states = states
         self.ui_manager = manager

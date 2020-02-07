@@ -126,3 +126,25 @@ class TestUIDropDownMenu:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (260, 145)}))
 
         assert menu.rect.topleft == (250, 130) and menu.current_state.selected_option_button.held is True
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+        menu.set_dimensions((300, 50))
+
+        # try to click on the menu
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (395, 140)}))
+        # if we successfully clicked on the moved menu then this button should be True
+        assert menu.current_state.open_button.held is True
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        menu.set_dimensions((200, 30))
+
+        # try to click on the menu
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (295, 120)}))
+        # if we successfully clicked on the moved menu then this button should be True
+        assert menu.current_state.close_button.held is True

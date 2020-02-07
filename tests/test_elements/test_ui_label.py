@@ -83,3 +83,14 @@ class TestUILabel:
         label.set_relative_position((50, 50))
 
         assert label.rect.topleft == (150, 150)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        container=test_container,
+                        manager=default_ui_manager)
+
+        label.set_dimensions((200, 50))
+
+        assert label.rect.size == (200, 50)

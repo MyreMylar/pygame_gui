@@ -36,3 +36,15 @@ class TestUIImage:
         ui_image.set_relative_position((200, 200))
 
         assert ui_image.relative_rect.topleft == (200, 200)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
+        ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
+                           image_surface=loaded_image,
+                           manager=default_ui_manager)
+
+        assert ui_image.image.get_size() == (150, 30) and ui_image.rect.size == (150, 30)
+
+        ui_image.set_dimensions((200, 200))
+
+        assert ui_image.image.get_size() == (200, 200) and ui_image.rect.size == (200, 200)

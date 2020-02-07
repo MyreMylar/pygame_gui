@@ -165,3 +165,14 @@ class UITooltip(UIElement):
         """
         super().set_relative_position(position)
         self.text_block.set_relative_position(position)
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
+
+        :param dimensions: The new dimensions to set
+        """
+        self.rect_width = dimensions[0]
+
+        super().set_dimensions(dimensions)
+        self.text_block.set_dimensions(dimensions)

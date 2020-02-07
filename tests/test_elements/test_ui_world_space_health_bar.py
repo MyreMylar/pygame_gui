@@ -97,3 +97,15 @@ class TestUIWorldSpaceHealthBar:
         health_bar.set_relative_position((150.0, 30.0))
 
         assert health_bar.rect.topleft == (150, 30)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
+        health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                           sprite_to_monitor=healthy_sprite,
+                                           manager=default_ui_manager)
+
+        health_bar.set_dimensions((250.0, 60.0))
+
+        assert health_bar.drawable_shape.containing_rect.size == (250, 60)
+        assert health_bar.rect.size == (250, 60)
+        assert health_bar.relative_rect.size == (250, 60)

@@ -56,8 +56,6 @@ class UIVerticalScrollBar(UIElement):
         self.shape_corner_radius = None
 
         self.background_rect = None
-        self.border_rect = None
-        self.relative_background_rect = None
 
         self.scrollable_height = None  # type: Union[None, int, float]
         self.bottom_limit = None
@@ -106,18 +104,18 @@ class UIVerticalScrollBar(UIElement):
         Rebuild anything that might need rebuilding.
 
         """
-        self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
                                        (self.rect.width - (2 * self.shadow_width),
                                         self.rect.height - (2 * self.shadow_width)))
 
-        self.relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                     self.border_width + self.shadow_width),
-                                                    (self.border_rect.width - (2 * self.border_width),
-                                                     self.border_rect.height - (2 * self.border_width)))
+        relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                self.border_width + self.shadow_width),
+                                                (border_rect.width - (2 * self.border_width),
+                                                 border_rect.height - (2 * self.border_width)))
 
-        self.background_rect = pygame.Rect((self.relative_background_rect.x + self.relative_rect.x,
-                                            self.relative_background_rect.y + self.relative_rect.y),
-                                           self.relative_background_rect.size)
+        self.background_rect = pygame.Rect((relative_background_rect.x + self.relative_rect.x,
+                                            relative_background_rect.y + self.relative_rect.y),
+                                           relative_background_rect.size)
 
         self.scrollable_height = self.background_rect.height - (2 * self.button_height)
         self.bottom_limit = self.scrollable_height
@@ -426,3 +424,31 @@ class UIVerticalScrollBar(UIElement):
 
         slider_y_position = self.scroll_position + self.relative_rect.y + border_and_shadow + self.button_height
         self.sliding_button.set_relative_position((inner_top_left[0], slider_y_position))
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_dimensions(dimensions)
+
+        border_and_shadow = self.border_width + self.shadow_width
+        self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
+        self.background_rect.height = self.relative_rect.height - (2 * border_and_shadow)
+
+        self.top_button.set_dimensions((self.background_rect.width, self.button_height))
+
+        self.bottom_button.set_dimensions((self.background_rect.width, self.button_height))
+        self.bottom_button.set_relative_position((self.background_rect.x,
+                                                  self.background_rect.y + self.background_rect.height
+                                                  - self.button_height))
+
+        # sort out scroll bar parameters
+        self.scrollable_height = (self.relative_rect.height - (2 * self.button_height) - (2 * border_and_shadow))
+        scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
+        self.sliding_rect_position.y = (self.relative_rect.y + self.button_height +
+                                        self.shadow_width + self.border_width +
+                                        int(self.start_percentage * self.scrollable_height))
+
+        self.bottom_limit = self.scrollable_height
+
+        self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
+        self.sliding_button.set_relative_position(self.sliding_rect_position)
+
+

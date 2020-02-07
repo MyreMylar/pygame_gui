@@ -381,3 +381,25 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
         assert text_box.image is not None
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al'
+                                       'al alalalal lfed alal alal alal al'
+                                       'ala lalalal lasda lal a lalalal slapl'
+                                       'alalala lal la blop lal alal aferlal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        text_box.set_dimensions((200, 80))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (195, 75)}))
+        # if we successfully clicked on the moved slider then this button should be True
+        assert text_box.scroll_bar.bottom_button.held is True

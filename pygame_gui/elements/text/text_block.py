@@ -119,14 +119,22 @@ class TextBlock:
                     if word_split_point == 0 and chunk_to_split_index == 0 and chunk_length > self.width:
                         # our chunk is one word, at the start of the line, and the split point is in it, so split the
                         # word instead of hunting for a word split point
-                        if split_point > 1:
-                            chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
-                            chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
 
-                            chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
-                                                                    chunk_2[1].font_name,
-                                                                    chunk_2[1].style.bold,
-                                                                    chunk_2[1].style.italic)
+                        if split_point > 1:
+                            chunk_2_font = self.font_dict.find_font(chunk_to_split[1].font_size,
+                                                                    chunk_to_split[1].font_name,
+                                                                    chunk_to_split[1].style.bold,
+                                                                    chunk_to_split[1].style.italic)
+
+                            # If available space is less than three characters wide,
+                            # we won't be able to split words with hyphens
+                            if self.width < chunk_2_font.size('-W-')[0]:
+                                chunk_1 = [chunk_to_split[0][:split_point - 1], chunk_to_split[1]]
+                                chunk_2 = [chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
+                            else:
+                                chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
+                                chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
+
                             chunk_2_ascent = chunk_2_font.get_ascent()
 
                             lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
