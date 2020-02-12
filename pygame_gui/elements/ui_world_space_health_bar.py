@@ -1,5 +1,5 @@
 import pygame
-from typing import Union
+from typing import Union, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -34,7 +34,8 @@ class UIWorldSpaceHealthBar(UIElement):
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -43,7 +44,8 @@ class UIWorldSpaceHealthBar(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids)
+                         object_ids=new_object_ids,
+                         anchors=anchors)
 
         if sprite_to_monitor is not None:
             if not hasattr(sprite_to_monitor, 'health_capacity'):
@@ -118,6 +120,7 @@ class UIWorldSpaceHealthBar(UIElement):
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
+        super().update(time_delta)
         if self.alive():
             self.position = [self.sprite_to_monitor.rect.x,
                              self.sprite_to_monitor.rect.y - self.hover_height]

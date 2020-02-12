@@ -128,7 +128,12 @@ class TestUIToolTip:
 
         tool_tip.set_relative_position((150.0, 30.0))
 
-        assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)
+        assert tool_tip.rect.topleft == (150, 30)
+
+        assert tool_tip.text_block.ui_container.rect.topleft == (0, 0)
+        assert tool_tip.text_block.relative_rect.bottom == 96
+
+        assert tool_tip.text_block.rect.topleft == (150, 30)
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",

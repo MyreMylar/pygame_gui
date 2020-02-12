@@ -9,7 +9,7 @@ from pygame.math import Vector2
 
 class DrawableShape:
     def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List, manager: UIManager):
-        self.containing_rect = containing_rect
+        self.containing_rect = containing_rect.copy()
         if self.containing_rect.width < 1:
             self.containing_rect.width = 1
         if self.containing_rect.height < 1:
@@ -29,8 +29,20 @@ class DrawableShape:
                          'selected': None,
                          'active': None}  # type: Dict[str,Union[pygame.Surface, None]]
 
+        self.surfaces_with_fresh_rebuild = {'normal': False,
+                                            'hovered': False,
+                                            'disabled': False,
+                                            'selected': False,
+                                            'active': False}
+
         self.states_to_redraw_queue = deque([])
         self.need_to_clean_up = True
+
+        self.should_trigger_full_rebuild = True
+        self.time_until_full_rebuild_after_changing_size = 0.35
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+        self.is_first_quick_scale_since_rebuild = True
+        self.normal_state_copy_for_quick_scale = None
 
     def redraw_state(self, state_str):
         pass
@@ -38,7 +50,7 @@ class DrawableShape:
     def clean_up_temp_shapes(self):
         pass
 
-    def update(self):
+    def update(self, time_delta):
         if len(self.states_to_redraw_queue) > 0:
             state = self.states_to_redraw_queue.popleft()
             self.redraw_state(state)
@@ -46,6 +58,18 @@ class DrawableShape:
             # last state so clean up
             self.clean_up_temp_shapes()
             self.need_to_clean_up = False
+
+        if self.full_rebuild_countdown > 0.0:
+            self.full_rebuild_countdown -= time_delta
+
+        if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
+            self.full_rebuild_on_size_change()
+
+    def full_rebuild_on_size_change(self):
+        self.should_trigger_full_rebuild = False
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+        self.is_first_quick_scale_since_rebuild = True
+        self.normal_state_copy_for_quick_scale = None
 
     def redraw_all_states(self):
         self.states_to_redraw_queue = deque([state for state in self.states])
@@ -92,6 +116,13 @@ class DrawableShape:
             return self.surfaces['normal']
         else:
             return pygame.Surface((0, 0))
+
+    def get_fresh_rebuild_surface(self, surface_name: str):
+        self.surfaces_with_fresh_rebuild[surface_name] = False
+        return self.get_surface(surface_name)
+
+    def has_fresh_rebuild(self, surface_name: str):
+        return self.surfaces_with_fresh_rebuild[surface_name]
 
     def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass

@@ -1,6 +1,6 @@
 import pygame
 import warnings
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -27,7 +27,9 @@ class UIHorizontalSlider(UIElement):
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None
+                 ):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -36,7 +38,8 @@ class UIHorizontalSlider(UIElement):
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=1,
-                         layer_thickness=2)
+                         layer_thickness=2,
+                         anchors=anchors)
 
         self.button_width = 20
         self.current_percentage = 0.5
@@ -160,6 +163,8 @@ class UIHorizontalSlider(UIElement):
 
         :param time_delta: the time in seconds between calls to update.
         """
+        super().update(time_delta)
+
         if not self.alive():
             return
         moved_this_frame = False

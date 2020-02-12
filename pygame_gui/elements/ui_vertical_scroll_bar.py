@@ -1,5 +1,5 @@
 import pygame
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -25,7 +25,8 @@ class UIVerticalScrollBar(UIElement):
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -33,7 +34,8 @@ class UIVerticalScrollBar(UIElement):
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2, starting_height=1,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids)
+                         object_ids=new_object_ids,
+                         anchors=anchors)
 
         self.button_height = 20
         self.scroll_position = 0.0
@@ -233,6 +235,7 @@ class UIVerticalScrollBar(UIElement):
 
         :param time_delta: A float, roughly representing the time in seconds between calls to this method.
         """
+        super().update(time_delta)
         self.has_moved_recently = False
         if self.alive():
             moved_this_frame = False
@@ -445,10 +448,13 @@ class UIVerticalScrollBar(UIElement):
         # sort out scroll bar parameters
         self.scrollable_height = (self.relative_rect.height - (2 * self.button_height) - (2 * border_and_shadow))
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
-        self.sliding_rect_position.y = (self.relative_rect.y + self.button_height +
-                                        self.shadow_width + self.border_width +
-                                        int(self.start_percentage * self.scrollable_height))
 
+        base_scroll_bar_y = (self.relative_rect.y + self.button_height + self.shadow_width + self.border_width)
+
+        max_scroll_bar_y = base_scroll_bar_y + (self.scrollable_height - scroll_bar_height)
+        self.sliding_rect_position.y = max(base_scroll_bar_y, min((base_scroll_bar_y + int(self.start_percentage * self.scrollable_height)),
+                                           max_scroll_bar_y))
+        self.scroll_position = self.sliding_rect_position.y - base_scroll_bar_y
         self.bottom_limit = self.scrollable_height
 
         self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))

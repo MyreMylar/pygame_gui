@@ -27,96 +27,95 @@ class UIMessageWindow(UIWindow):
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=None,
                                                                 object_id=object_id,
                                                                 element_id='message_window')
-        super().__init__(message_window_rect, manager, new_element_ids, new_object_ids)
+        super().__init__(message_window_rect, manager, new_element_ids, new_object_ids, resizable=True)
 
-        self.done_button_vertical_start = 30
-        self.done_button_vertical_space = 40
-        self.menu_bar_height = 20
-        self.close_button_width = 20
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
+        self.set_minimum_dimensions((250, 250))
 
+        # Themed parameters
         self.shadow_width = None  # type: Union[None, int]
         self.border_width = None  # type: Union[None, int]
         self.background_colour = None
         self.border_colour = None
+        self.shape_type = 'rectangle'
+        self.shape_corner_radius = None
 
-        self.border_rect = None
-        self.background_rect = None
-        self.text_block_rect = None  # type: Union[None, pygame.Rect]
-
+        # UI elements
         self.menu_bar = None
         self.close_window_button = None
         self.dismiss_button = None
         self.text_block = None
 
-        self.drawable_shape = None
-        self.shape_type = 'rectangle'
-        self.shape_corner_radius = None
-
         self.rebuild_from_changed_theme_data()
 
+        menu_bar_height = 20
+        close_button_width = 20
         self.menu_bar = UIButton(relative_rect=pygame.Rect((0, 0),
-                                                           ((self.rect.width -
-                                                            (self.shadow_width * 2)) - self.close_button_width,
-                                                            self.menu_bar_height)),
+                                                           ((self.relative_rect.width -
+                                                            (self.shadow_width * 2)) - close_button_width,
+                                                            menu_bar_height)),
                                  text=message_title,
                                  manager=manager,
                                  container=self.get_container(),
                                  parent_element=self,
-                                 object_id='#message_window_title_bar'
+                                 object_id='#message_window_title_bar',
+                                 anchors={'top': 'top', 'bottom': 'top',
+                                          'left': 'left', 'right': 'right'}
                                  )
         self.menu_bar.set_hold_range((100, 100))
 
-        self.close_window_button = UIButton(relative_rect=pygame.Rect(((self.rect.width - self.shadow_width * 2) -
-                                                                       self.close_button_width,
-                                                                       0),
-                                                                      (self.close_button_width, self.menu_bar_height)),
+        self.close_window_button = UIButton(relative_rect=pygame.Rect((-close_button_width, 0),
+                                                                      (close_button_width, menu_bar_height)),
                                             text='╳',
                                             manager=manager,
                                             container=self.get_container(),
                                             parent_element=self,
-                                            object_id='#close_button'
+                                            object_id='#close_button',
+                                            anchors={'top': 'top', 'bottom': 'top',
+                                                     'left': 'right', 'right': 'right'}
                                             )
 
-        self.dismiss_button = UIButton(relative_rect=pygame.Rect((int(self.rect.width / 2) + 45,
-                                                                  (self.border_rect.height -
-                                                                   self.done_button_vertical_start)),
-                                                                 (70, 20)),
+        button_size = (70, 20)
+        bottom_right_margin = (20, 20)
+        button_vertical_space = bottom_right_margin[1] + button_size[1]
+        self.dismiss_button = UIButton(relative_rect=pygame.Rect((-bottom_right_margin[0] - button_size[0],
+                                                                  -bottom_right_margin[1] - button_size[1]),
+                                                                 button_size),
                                        text="Dismiss",
                                        manager=manager,
                                        container=self.get_container(),
                                        tool_tip_text="<font face=fira_code color=normal_text size=2>"
                                                      "Click to get rid of this message.</font>",
                                        parent_element=self,
-                                       object_id='#dismiss_button'
+                                       object_id='#dismiss_button',
+                                       anchors={"left": "right",
+                                                "top": "bottom",
+                                                "right": "right",
+                                                "bottom": "bottom"}
                                        )
 
-        self.text_block = UITextBox(html_message, self.text_block_rect, manager=manager,
+        border_rect_width = self.relative_rect.width - (self.shadow_width * 2)
+        border_rect_height = self.relative_rect.height - (self.shadow_width * 2)
+
+        text_block_rect = pygame.Rect((self.border_width, menu_bar_height),
+                                      (border_rect_width - self.border_width,
+                                       (border_rect_height - menu_bar_height -
+                                        button_vertical_space)))
+        self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self.get_container(),
-                                    parent_element=self)
+                                    parent_element=self,
+                                    anchors={"left": "left",
+                                             "top": "top",
+                                             "right": "right",
+                                             "bottom": "bottom"}
+                                    )
 
     def rebuild(self):
         """
+        Rebuilds the message window when the theme has changed.
 
         """
-        border_rect_width = self.rect.width - (self.shadow_width * 2)
-        border_rect_height = self.rect.height - (self.shadow_width * 2)
-        self.border_rect = pygame.Rect((self.shadow_width,
-                                        self.shadow_width),
-                                       (border_rect_width, border_rect_height))
-
-        background_rect_width = border_rect_width - (self.border_width * 2)
-        background_rect_height = border_rect_height - (self.border_width * 2)
-        self.background_rect = pygame.Rect((self.shadow_width + self.border_width,
-                                            self.shadow_width + self.border_width),
-                                           (background_rect_width, background_rect_height))
-
-        self.text_block_rect = pygame.Rect((self.border_width, self.menu_bar_height),
-                                           (self.border_rect.width - self.border_width,
-                                            (self.border_rect.height - self.menu_bar_height -
-                                             self.done_button_vertical_space)))
-
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
@@ -132,24 +131,12 @@ class UIMessageWindow(UIWindow):
 
         self.image = self.drawable_shape.get_surface('normal')
 
-        self.get_container().relative_rect.width = self.rect.width - self.shadow_width * 2
-        self.get_container().relative_rect.height = self.rect.height - self.shadow_width * 2
-        self.get_container().relative_rect.x = self.relative_rect.x + self.shadow_width
-        self.get_container().relative_rect.y = self.relative_rect.y + self.shadow_width
-        self.get_container().update_containing_rect_position()
+        self.container_margins['left'] = self.shadow_width
+        self.container_margins['right'] = self.shadow_width
+        self.container_margins['top'] = self.shadow_width
+        self.container_margins['bottom'] = self.shadow_width
 
-        if self.menu_bar is not None:
-            self.menu_bar.set_dimensions(((self.rect.width - (self.shadow_width * 2)) - self.close_button_width,
-                                          self.menu_bar_height))
-        if self.close_window_button is not None:
-            self.close_window_button.set_relative_position(((self.rect.width - self.shadow_width * 2) -
-                                                            self.close_button_width, 0))
-        if self.dismiss_button is not None:
-            self.dismiss_button.set_relative_position(((self.rect.width / 2) + 45,
-                                                      (self.border_rect.height - self.done_button_vertical_start)))
-        if self.text_block is not None:
-            self.text_block.set_relative_position(self.text_block_rect.topleft)
-            self.text_block.set_dimensions(self.text_block_rect.size)
+        self.set_dimensions(self.relative_rect.size)
 
     def update(self, time_delta: float):
         """
@@ -157,6 +144,8 @@ class UIMessageWindow(UIWindow):
 
         :param time_delta: The time in seconds between calls to this function.
         """
+        super().update(time_delta)
+
         if self.alive():
 
             if self.dismiss_button.check_pressed():
@@ -176,21 +165,13 @@ class UIMessageWindow(UIWindow):
                 adjustment_required = (current_grab_difference[0] - self.starting_grab_difference[0],
                                        current_grab_difference[1] - self.starting_grab_difference[1])
 
-                self.rect.x += adjustment_required[0]
-                self.rect.y += adjustment_required[1]
-                self.relative_rect.x = self.rect.x - self.ui_container.rect.x
-                self.relative_rect.y = self.rect.y - self.ui_container.rect.y
-                self.get_container().relative_rect.x += adjustment_required[0]
-                self.get_container().relative_rect.y += adjustment_required[1]
-                self.get_container().update_containing_rect_position()
-
+                self.set_relative_position((self.relative_rect.x + adjustment_required[0],
+                                            self.relative_rect.y + adjustment_required[1]))
             else:
                 self.grabbed_window = False
 
             if self.close_window_button.check_pressed():
                 self.kill()
-
-        super().update(time_delta)
 
     def rebuild_from_changed_theme_data(self):
         """

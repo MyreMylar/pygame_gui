@@ -294,9 +294,9 @@ class UIAppearanceTheme:
             if shape in ['rounded_rectangle', 'rectangle'] and shadow_width > 0:
                 if ('shadow_width' in self.ui_element_misc_data[misc_id] and
                         'shape_corner_radius' in self.ui_element_misc_data[misc_id]):
-                    shadow_id = str(shadow_width) + 'x' + str(shape_corner_radius)
+                    shadow_id = str(shadow_width) + 'x' + str(shadow_width + shape_corner_radius)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(shadow_width, shape_corner_radius)
+                        self.shadow_generator.create_shadow_corners(shadow_width, shadow_width + shape_corner_radius)
                 elif 'shadow_width' in self.ui_element_misc_data[misc_id]:
                     # have a shadow width but no idea on the corners, try most common -
                     shadow_id_1 = str(shadow_width) + 'x' + str(2)
@@ -307,12 +307,12 @@ class UIAppearanceTheme:
                         self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
                 elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
                     # have a corner radius but no idea on the shadow width, try most common -
-                    shadow_id_1 = str(1) + 'x' + str(shape_corner_radius)
+                    shadow_id_1 = str(1) + 'x' + str(1 + shape_corner_radius)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(1, shape_corner_radius)
-                    shadow_id_2 = str(2) + 'x' + str(shape_corner_radius)
+                        self.shadow_generator.create_shadow_corners(1, 1 + shape_corner_radius)
+                    shadow_id_2 = str(2) + 'x' + str(2 + shape_corner_radius)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(2, shape_corner_radius)
+                        self.shadow_generator.create_shadow_corners(2, 2 + shape_corner_radius)
                     shadow_id_3 = str(shape_corner_radius) + 'x' + str(shape_corner_radius)
                     if shadow_id_3 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shape_corner_radius, shape_corner_radius)

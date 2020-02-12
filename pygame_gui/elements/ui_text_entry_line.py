@@ -1,7 +1,7 @@
 import pygame
 import re
 import warnings
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 import pygame_gui
 from pygame_gui.ui_manager import UIManager
@@ -39,7 +39,8 @@ class UITextEntryLine(UIElement):
                  manager: UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -47,7 +48,8 @@ class UITextEntryLine(UIElement):
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids)
+                         object_ids=new_object_ids,
+                         anchors=anchors)
         self.selected = False
 
         self.text = ""
@@ -340,6 +342,8 @@ class UITextEntryLine(UIElement):
         :param time_delta: The time in seconds between this update method call and the previous one.
         :return:
         """
+        super().update(time_delta)
+
         if not self.alive():
             return
         if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:

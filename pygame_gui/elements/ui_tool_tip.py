@@ -1,7 +1,7 @@
 import pygame
 import pygame.gfxdraw
 import warnings
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core.ui_element import UIElement
@@ -27,7 +27,8 @@ class UITooltip(UIElement):
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
                  manager: ui_manager.UIManager,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -38,7 +39,8 @@ class UITooltip(UIElement):
                          starting_height=manager.get_sprite_group().get_top_layer()+1,
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids)
+                         object_ids=new_object_ids,
+                         anchors=anchors)
 
         self.text_block = None
         self.rect_width = None
@@ -52,10 +54,7 @@ class UITooltip(UIElement):
                                                 layer_starting_height=self._layer,
                                                 parent_element=self)
 
-        self.relative_rect.height = self.text_block.rect.height
-        self.relative_rect.width = self.text_block.rect.width
-        self.rect.width = self.text_block.rect.width
-        self.rect.height = self.text_block.rect.height
+        self.set_dimensions(self.text_block.rect.size)
 
         self.image = pygame.Surface((0, 0))
 

@@ -1,5 +1,5 @@
 import pygame
-from typing import Union
+from typing import Union, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -24,7 +24,8 @@ class UIScreenSpaceHealthBar(UIElement):
                  sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -34,7 +35,8 @@ class UIScreenSpaceHealthBar(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids)
+                         object_ids=new_object_ids,
+                         anchors=anchors)
 
         self.current_health = 50
         self.health_capacity = 100
@@ -153,6 +155,7 @@ class UIScreenSpaceHealthBar(UIElement):
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
+        super().update(time_delta)
         if (self.alive() and self.sprite_to_monitor is not None and
                 (self.sprite_to_monitor.health_capacity != self.health_capacity or
                  self.current_health != self.sprite_to_monitor.current_health)):

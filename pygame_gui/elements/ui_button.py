@@ -1,6 +1,6 @@
 import pygame
 import pygame_gui
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import ui_container
@@ -34,7 +34,9 @@ class UIButton(UIElement):
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None
+                 ):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -44,7 +46,8 @@ class UIButton(UIElement):
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=starting_height,
-                         layer_thickness=1)
+                         layer_thickness=1,
+                         anchors=anchors)
 
         self.text = text
 
@@ -200,6 +203,7 @@ class UIButton(UIElement):
 
         :param time_delta: the time in seconds between one call to update and the next.
         """
+        super().update(time_delta)
         if self.alive():
             # clear pressed state, we only want it to last one update cycle
             self.pressed = False
@@ -208,10 +212,6 @@ class UIButton(UIElement):
                 # if a pressed event has occurred set the button to the pressed state for one update cycle.
                 self.pressed_event = False
                 self.pressed = True
-
-            # Need to update any shape with more than one state so it loads them all.
-            if self.drawable_shape is not None:
-                self.drawable_shape.update()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

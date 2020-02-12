@@ -34,6 +34,7 @@ class EllipseDrawableShape(DrawableShape):
         self.full_rebuild_on_size_change()
 
     def full_rebuild_on_size_change(self):
+        super().full_rebuild_on_size_change()
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
         if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
                                               math.floor(self.containing_rect.height / 2)):

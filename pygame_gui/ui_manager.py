@@ -36,6 +36,11 @@ class UIManager:
 
         self.visual_debug_active = False
 
+        self.resizing_window_cursors = None
+        self.load_default_cursors()
+        self.active_user_cursor = pygame.cursors.arrow
+        self._active_cursor = self.active_user_cursor
+
     def get_theme(self) -> UIAppearanceTheme:
         """
         Gets the theme so the data in it can be accessed.
@@ -103,7 +108,8 @@ class UIManager:
         """
         event_handled = False
         window_sorting_event_handled = False
-        sorted_layers = sorted(self.ui_group.layers(), reverse=True) # TODO: See if  possible to keep track of the reversed layers so we don't have to sort them each loop
+        sorted_layers = sorted(self.ui_group.layers(),
+                               reverse=True)  # TODO: See if  possible to keep track of the reversed layers so we don't have to sort them each loop
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
             if not window_sorting_event_handled:
@@ -115,7 +121,8 @@ class UIManager:
                 for ui_element in sprites_in_layer:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_x, mouse_y = event.pos
-                        if ui_element.rect.collidepoint(mouse_x, mouse_y) and ui_element is not self.select_focused_element:
+                        if ui_element.rect.collidepoint(mouse_x,
+                                                        mouse_y) and ui_element is not self.select_focused_element:
                             self.unselect_focus_element()
                             self.select_focus_element(ui_element)
 
@@ -158,6 +165,37 @@ class UIManager:
                     hover_handled = True
 
         self.ui_group.update(time_delta)
+
+        # handle mouse cursors
+        any_window_edge_hovered = False
+        for window in self.ui_window_stack.stack:
+            if (window.hovered or window.resizing_mode_active) and (
+                    window.edge_hovering[0] or window.edge_hovering[1] or
+                    window.edge_hovering[2] or window.edge_hovering[3]):
+
+                any_window_edge_hovered = True
+                if (window.edge_hovering[0] and window.edge_hovering[1]) or (
+                        window.edge_hovering[2] and window.edge_hovering[3]):
+                    new_cursor = self.resizing_window_cursors['xy']
+                elif (window.edge_hovering[0] and window.edge_hovering[3]) or (
+                        window.edge_hovering[2] and window.edge_hovering[1]):
+                    new_cursor = self.resizing_window_cursors['yx']
+                elif window.edge_hovering[0]:
+                    new_cursor = self.resizing_window_cursors['xl']
+                elif window.edge_hovering[2]:
+                    new_cursor = self.resizing_window_cursors['xr']
+                elif window.edge_hovering[3]:
+                    new_cursor = self.resizing_window_cursors['yb']
+                else:
+                    new_cursor = self.resizing_window_cursors['yt']
+
+                if new_cursor != self._active_cursor:
+                    self._active_cursor = new_cursor
+                    pygame.mouse.set_cursor(*self._active_cursor)
+
+        if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
+            self._active_cursor = self.active_user_cursor
+            pygame.mouse.set_cursor(*self._active_cursor)
 
     def update_mouse_position(self):
         """
@@ -344,3 +382,33 @@ class UIManager:
             for element in self.ui_group.get_sprites_from_layer(layer):
                 print(str(element.most_specific_combined_id))
             print(' ')
+
+    def load_default_cursors(self):
+        # cursors for resizing windows
+        x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
+        y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
+        xy_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_xy_strings)
+        list_yx = list(pygame.cursors.sizer_xy_strings)
+        list_yx.reverse()
+        yx_sizer_cursor = pygame.cursors.compile(tuple(list_yx))
+
+        self.resizing_window_cursors = {'xl': ((24, 16), (12, 8), *x_sizer_cursor),
+                                        'xr': ((24, 16), (8, 8), *x_sizer_cursor),
+                                        'yt': ((16, 24), (8, 12), *y_sizer_cursor),
+                                        'yb': ((16, 24), (8, 8), *y_sizer_cursor),
+                                        'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
+                                        'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
+
+    def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, ...], Tuple[int, ...]]):
+        """
+        This is for users of the library to set the currently active cursor, it will be currently only be overriden by
+        the resizing cursors.
+
+        The expected input is in the same format as the standard pygame cursor module, except without expanding the
+        initial Tuple. So, to call this function with the default pygame arrow cursor you would do:
+
+            manager.set_active_cursor(pygame.cursors.arrow)
+
+        """
+
+        self.active_user_cursor = cursor

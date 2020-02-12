@@ -1,5 +1,6 @@
 import pygame
-from typing import List, Union, Tuple, Optional, Any
+import warnings
+from typing import List, Union, Tuple, Dict, Optional, Any
 
 from pygame_gui.core import ui_container
 from pygame_gui import ui_manager
@@ -24,7 +25,8 @@ class UIElement(pygame.sprite.Sprite):
                  container: Union['ui_container.UIContainer', None],
                  starting_height: int, layer_thickness: int,
                  object_ids: Union[List[Union[str, None]], None] = None,
-                 element_ids: Union[List[str], None] = None):
+                 element_ids: Union[List[str], None] = None,
+                 anchors: Dict[str, str] = None):
 
         self._layer = 0
         self.ui_manager = manager
@@ -52,23 +54,127 @@ class UIElement(pygame.sprite.Sprite):
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
-        if self.ui_container is self:
-            self.rect = pygame.Rect((relative_rect.x,
-                                    relative_rect.y),
-                                    relative_rect.size)
-        else:
-            self.rect = pygame.Rect((self.ui_container.rect.x + relative_rect.x,
-                                     self.ui_container.rect.y + relative_rect.y),
-                                    relative_rect.size)
+        self.anchors = anchors
+        if self.anchors is None:
+            self.anchors = {'left': 'left',
+                            'top': 'top',
+                            'right': 'left',
+                            'bottom': 'top'}
 
+        self.rect = self.relative_rect.copy()
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
+
+        self.relative_bottom_margin = None
+        self.relative_right_margin = None
+        self._update_absolute_rect_position_from_anchors()
 
         self.is_enabled = True
         self.hovered = False
         self.hover_time = 0.0
 
         self.pre_debug_image = None
+
+    def _update_absolute_rect_position_from_anchors(self):
+        """
+        Called when our element's relative position has changed.
+        """
+        new_top = 0
+        if self.anchors['top'] == 'top':
+            new_top = self.relative_rect.top + self.ui_container.rect.top
+        elif self.anchors['top'] == 'bottom':
+            new_top = self.relative_rect.top + self.ui_container.rect.bottom
+        else:
+            warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
+
+        new_bottom = 0
+        if self.anchors['bottom'] == 'top':
+            new_bottom = self.relative_rect.bottom + self.ui_container.rect.top
+        elif self.anchors['bottom'] == 'bottom':
+            if self.relative_bottom_margin is None:
+                self.relative_bottom_margin = self.ui_container.rect.bottom - (new_top + self.relative_rect.height)
+            new_bottom = self.ui_container.rect.bottom - self.relative_bottom_margin
+        else:
+            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
+
+        new_left = 0
+        if self.anchors['left'] == 'left':
+            new_left = self.relative_rect.left + self.ui_container.rect.left
+        elif self.anchors['left'] == 'right':
+            new_left = self.relative_rect.left + self.ui_container.rect.right
+        else:
+            warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
+
+        new_right = 0
+        if self.anchors['right'] == 'left':
+            new_right = self.relative_rect.right + self.ui_container.rect.left
+        elif self.anchors['right'] == 'right':
+            if self.relative_right_margin is None:
+                self.relative_right_margin = self.ui_container.rect.right - (new_left + self.relative_rect.width)
+            new_right = self.ui_container.rect.right - self.relative_right_margin
+        else:
+            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
+
+        new_height = new_bottom - new_top
+        new_width = new_right - new_left
+        if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
+            self.set_dimensions((new_width, new_height))
+
+        self.rect.left = new_left
+        self.rect.right = new_right
+        self.rect.top = new_top
+        self.rect.bottom = new_bottom
+
+    def _update_relative_rect_position_from_anchors(self):
+        """
+        Called when our element's absolute position has been forcibly changed.
+        """
+
+        # This is a bit easier to calculate than gettin the absolute position fromt he relative one, because the
+        # absolute position rectangle is always relative to the top left of the screen.
+        self.relative_bottom_margin = None
+        self.relative_right_margin = None
+
+        new_top = 0
+        if self.anchors['top'] == 'top':
+            new_top = self.rect.top - self.ui_container.rect.top
+        elif self.anchors['top'] == 'bottom':
+            new_top = self.rect.top - self.ui_container.rect.bottom
+        else:
+            warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
+
+        new_bottom = 0
+        if self.anchors['bottom'] == 'top':
+            new_bottom = self.rect.bottom - self.ui_container.rect.top
+        elif self.anchors['bottom'] == 'bottom':
+            if self.relative_bottom_margin is None:
+                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
+            new_bottom = self.rect.bottom - self.ui_container.rect.bottom
+        else:
+            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
+
+        new_left = 0
+        if self.anchors['left'] == 'left':
+            new_left = self.rect.left - self.ui_container.rect.left
+        elif self.anchors['left'] == 'right':
+            new_left = self.rect.left - self.ui_container.rect.right
+        else:
+            warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
+
+        new_right = 0
+        if self.anchors['right'] == 'left':
+            new_right = self.rect.right - self.ui_container.rect.left
+        elif self.anchors['right'] == 'right':
+            if self.relative_right_margin is None:
+                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
+            new_right = self.rect.right - self.ui_container.rect.right
+        else:
+            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
+
+        self.relative_rect.left = new_left
+        self.relative_rect.right = new_right
+        self.relative_rect.top = new_top
+        self.relative_rect.bottom = new_bottom
 
     @staticmethod
     def create_valid_ids(parent_element, object_id, element_id):
@@ -102,9 +208,7 @@ class UIElement(pygame.sprite.Sprite):
         Updates the position of this element based on the position of it's container. Usually called when the container
         has moved.
         """
-        self.rect = pygame.Rect((self.ui_container.rect.x + self.relative_rect.x,
-                                 self.ui_container.rect.y + self.relative_rect.y),
-                                self.relative_rect.size)
+        self._update_absolute_rect_position_from_anchors()
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
@@ -162,22 +266,20 @@ class UIElement(pygame.sprite.Sprite):
         """
         self.relative_rect.x = int(position[0])
         self.relative_rect.y = int(position[1])
-        self.rect.x = self.relative_rect.x + self.ui_container.rect.x
-        self.rect.y = self.relative_rect.y + self.ui_container.rect.y
+        self._update_absolute_rect_position_from_anchors()
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Method to directly set the absolute rect position of an element.
+        Method to directly set the absolute screen rect position of an element.
 
         :param position: The new position to set.
         """
         self.rect.x = int(position[0])
         self.rect.y = int(position[1])
-        self.relative_rect.x = self.rect.x - self.ui_container.rect.x
-        self.relative_rect.y = self.rect.y - self.ui_container.rect.y
+        self._update_relative_rect_position_from_anchors()
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
@@ -186,15 +288,26 @@ class UIElement(pygame.sprite.Sprite):
         """
         Method to directly set the dimensions of an element.
 
+        NOTE: Using this on elements inside containers with non-default anchoring arrangements will make a mess of them.
+
         :param dimensions: The new dimensions to set.
         """
-        self.rect.width = int(dimensions[0])
-        self.rect.height = int(dimensions[1])
-        self.relative_rect.size = self.rect.size
+        self.relative_rect.width = int(dimensions[0])
+        self.relative_rect.height = int(dimensions[1])
+        self.rect.size = self.relative_rect.size
 
         if self.drawable_shape is not None:
-            self.drawable_shape.set_dimensions(self.rect.size)
+            self.drawable_shape.set_dimensions(self.relative_rect.size)
             self.image = self.drawable_shape.get_surface('normal')
+
+    def update(self, time_delta: float):
+        if self.alive() and self.drawable_shape is not None:
+            self.drawable_shape.update(time_delta)
+            if self.drawable_shape.has_fresh_rebuild('normal'):
+                self.on_fresh_drawable_shape_ready()
+
+    def on_fresh_drawable_shape_ready(self):
+        self.image = self.drawable_shape.get_fresh_rebuild_surface('normal')
 
     def on_hovered(self):
         """

@@ -1,5 +1,5 @@
 import pygame
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
 from pygame_gui.core import ui_container
@@ -22,7 +22,8 @@ class UIImage(UIElement):
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -32,7 +33,8 @@ class UIImage(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          object_ids=new_object_ids,
-                         element_ids=new_element_ids)
+                         element_ids=new_element_ids,
+                         anchors=anchors)
 
         self.original_image = image_surface
         if self.original_image.get_width() != self.rect.width or self.original_image.get_height() != self.rect.height:

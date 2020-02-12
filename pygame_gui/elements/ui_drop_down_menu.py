@@ -1,5 +1,5 @@
 import pygame
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 import pygame_gui
 from pygame_gui.ui_manager import UIManager
@@ -462,7 +462,8 @@ class UIDropDownMenu(UIElement):
                  manager: UIManager,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None
                  ):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
@@ -471,7 +472,8 @@ class UIDropDownMenu(UIElement):
         super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,
-                         layer_thickness=3, starting_height=1)
+                         layer_thickness=3, starting_height=1,
+                         anchors=anchors)
         self.options_list = options_list
         self.selected_option = starting_option
         self.open_button_width = 20
@@ -532,6 +534,7 @@ class UIDropDownMenu(UIElement):
 
         :param time_delta: The time in second between calls to update.
         """
+        super().update(time_delta)
         if self.alive():
             if self.current_state.should_transition:
                 self.current_state.finish()

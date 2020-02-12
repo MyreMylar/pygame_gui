@@ -2,7 +2,7 @@ import pygame
 import warnings
 import math
 
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 import pygame_gui
 from pygame_gui.ui_manager import UIManager
@@ -54,7 +54,8 @@ class UITextBox(UIElement):
                  layer_starting_height: int = 1,
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None):
+                 object_id: Union[str, None] = None,
+                 anchors: Dict[str, str] = None):
 
         new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
                                                                 object_id=object_id,
@@ -63,7 +64,8 @@ class UITextBox(UIElement):
                          starting_height=layer_starting_height,
                          layer_thickness=2,
                          element_ids=new_element_ids,
-                         object_ids=new_object_ids
+                         object_ids=new_object_ids,
+                         anchors=anchors
                          )
         self.html_text = html_text
         self.font_dict = self.ui_theme.get_font_dictionary()
@@ -96,6 +98,10 @@ class UITextBox(UIElement):
         self.drawable_shape = None
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
+
+        self.should_trigger_full_rebuild = True
+        self.time_until_full_rebuild_after_changing_size = 0.2
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
         self.rebuild_from_changed_theme_data()
 
@@ -203,6 +209,9 @@ class UITextBox(UIElement):
 
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
 
+        self.should_trigger_full_rebuild = False
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+
     def update(self, time_delta: float):
         """
         Called once every update loop of the UI Manager. Used to react to scroll bar movement (if there is one),
@@ -210,6 +219,7 @@ class UITextBox(UIElement):
 
         :param time_delta: The time in seconds between calls to update. Useful for timing things.
         """
+        super().update(time_delta)
         if not self.alive():
             return
         if self.scroll_bar is not None and self.scroll_bar.check_has_moved_recently():
@@ -265,6 +275,16 @@ class UITextBox(UIElement):
             if self.active_text_effect.should_redraw_from_chunks():
                 self.redraw_from_chunks()
 
+        if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
+            self.rebuild()
+
+        if self.full_rebuild_countdown > 0.0:
+            self.full_rebuild_countdown -= time_delta
+
+    def on_fresh_drawable_shape_ready(self):
+        self.background_surf = self.drawable_shape.get_surface('normal')
+        self.redraw_from_text_block()
+
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Sets the relative screen position of this text box, updating it's subordinate scroll bar at the same time.
@@ -305,7 +325,24 @@ class UITextBox(UIElement):
         self.rect.height = int(dimensions[1])
         self.relative_rect.size = self.rect.size
 
-        self.rebuild()
+        # Quick and dirty temporary scaling to cut down on number of full rebuilds triggered when rapid scaling
+        if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
+            new_image = pygame.Surface(self.relative_rect.size,  flags=pygame.SRCALPHA, depth=32)
+            new_image.blit(self.image, (0, 0))
+            self.image = new_image
+
+            if self.scroll_bar is not None:
+                self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
+                                                self.relative_rect.height -
+                                                (2 * self.border_width) - (2 * self.shadow_width)))
+                scroll_bar_position = (self.relative_rect.right - self.border_width -
+                                       self.shadow_width - self.scroll_bar_width,
+                                       self.relative_rect.top + self.border_width +
+                                       self.shadow_width)
+                self.scroll_bar.set_relative_position(scroll_bar_position)
+
+        self.should_trigger_full_rebuild = True
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
     def parse_html_into_style_data(self):
         """
@@ -430,7 +467,8 @@ class UITextBox(UIElement):
                 hover_rect = pygame.Rect((base_x + chunk.rect.x,
                                           base_y + chunk.rect.y),
                                          chunk.rect.size)
-                if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                if (hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and
+                        self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
                     processed_event = True
                     if chunk.is_selected:
                         link_clicked_event = pygame.event.Event(pygame.USEREVENT,
