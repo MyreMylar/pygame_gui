@@ -553,10 +553,12 @@ class UIAppearanceTheme:
                     load_success = False
 
                 if load_success:
+
                     for element_name in theme_dict.keys():
                         if element_name == 'defaults':
                             self.load_colour_defaults_from_theme(element_name, theme_dict)
                         else:
+                            self.load_prototype(element_name, theme_dict)
                             for data_type in theme_dict[element_name]:
                                 if data_type == 'font':
                                     self.load_element_font_data_from_theme(data_type, element_name, theme_dict)
@@ -575,6 +577,46 @@ class UIAppearanceTheme:
             self.load_fonts()  # save to trigger load with the same data as it won't do anything
             self.load_images()
             self.preload_shadow_edges()
+
+    def load_prototype(self, element_name, theme_dict):
+        """
+        Loads a prototype theme block for our current theme element if any exists. Prototype blocks must be above their
+        'production' elements in the theme file.
+
+        :param element_name: The element to load a prototype for.
+        :param theme_dict: The theme file dictionary.
+        """
+        if 'prototype' not in theme_dict[element_name]:
+            return
+        prototype_id = theme_dict[element_name]['prototype']
+
+        if prototype_id in self.ui_element_fonts_info:
+            prototype_font = self.ui_element_fonts_info[prototype_id]
+            if element_name not in self.ui_element_fonts_info:
+                self.ui_element_fonts_info[element_name] = {}
+            for data_key in prototype_font:
+                self.ui_element_fonts_info[element_name][data_key] = prototype_font[data_key]
+
+        if prototype_id in self.ui_element_colours:
+            prototype_colours = self.ui_element_colours[prototype_id]
+            if element_name not in self.ui_element_colours:
+                self.ui_element_colours[element_name] = {}
+            for col_key in prototype_colours:
+                self.ui_element_colours[element_name][col_key] = prototype_colours[col_key]
+
+        if prototype_id in self.ui_element_image_paths:
+            prototype_images = self.ui_element_image_paths[prototype_id]
+            if element_name not in self.ui_element_image_paths:
+                self.ui_element_image_paths[element_name] = {}
+            for image_key in prototype_images:
+                self.ui_element_image_paths[element_name][image_key] = prototype_images[image_key]
+
+        if prototype_id in self.ui_element_misc_data:
+            prototype_misc = self.ui_element_misc_data[prototype_id]
+            if element_name not in self.ui_element_misc_data:
+                self.ui_element_misc_data[element_name] = {}
+            for misc_key in prototype_misc:
+                self.ui_element_misc_data[element_name][misc_key] = prototype_misc[misc_key]
 
     def load_element_misc_data_from_theme(self, data_type, element_name, theme_dict):
         if element_name not in self.ui_element_misc_data:
