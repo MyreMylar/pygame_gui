@@ -80,7 +80,7 @@ class UIWorldSpaceHealthBar(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
 
-        self.image = None
+        self.set_image(None)
 
         self.rebuild_from_changed_theme_data()
 
@@ -159,7 +159,7 @@ class UIWorldSpaceHealthBar(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
     def rebuild_from_changed_theme_data(self):
         """

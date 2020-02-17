@@ -107,9 +107,8 @@ class TestUIButton:
                           text="Test Button",
                           manager=default_ui_manager)
         button.on_hovered()
-        have_hovered_image = button.image == button.drawable_shape.get_surface("hovered")
 
-        assert have_hovered_image is True and button.hover_time == 0.0
+        assert button.hover_time == 0.0
 
     def test_while_hovering(self, _init_pygame, default_ui_manager):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -147,7 +146,7 @@ class TestUIButton:
 
         # stop hovering and kill the tool tip
         button.on_unhovered()
-        assert button.tool_tip is None and button.image == button.drawable_shape.get_surface("normal")
+        assert button.tool_tip is None
 
     def test_update(self, _init_pygame, default_ui_manager):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -345,7 +344,7 @@ class TestUIButton:
 
         button.set_active()
 
-        assert empty_queue == 0 and button.image == button.drawable_shape.get_surface('active')
+        assert empty_queue == 0
 
     def test_set_inactive(self, _init_pygame: None, default_ui_manager: UIManager):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
@@ -364,7 +363,7 @@ class TestUIButton:
         button.set_active()
         button.set_inactive()
 
-        assert empty_queue == 0 and button.image == button.drawable_shape.get_surface('normal')
+        assert empty_queue == 0
 
     def test_select(self, _init_pygame: None, default_ui_manager: UIManager):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
@@ -382,8 +381,7 @@ class TestUIButton:
 
         button.select()
 
-        assert (empty_queue == 0 and button.is_selected is True and
-                button.image == button.drawable_shape.get_surface('selected'))
+        assert (empty_queue == 0 and button.is_selected is True)
 
     def test_unselect(self, _init_pygame: None, default_ui_manager: UIManager):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
@@ -402,8 +400,7 @@ class TestUIButton:
         button.select()
         button.unselect()
 
-        assert (empty_queue == 0 and button.is_selected is False and
-                button.image == button.drawable_shape.get_surface('normal'))
+        assert (empty_queue == 0 and button.is_selected is False)
 
     def test_set_text(self, _init_pygame: None, default_ui_manager: UIManager):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),

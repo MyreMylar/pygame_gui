@@ -36,8 +36,6 @@ class RoundedRectangleShape(DrawableShape):
         self.temp_shadow_subtractive_shape = None
         self.has_been_resized = False
 
-        self.cached_background_id = None
-
         self.full_rebuild_on_size_change()
 
     def clean_up_temp_shapes(self):
@@ -209,8 +207,7 @@ class RoundedRectangleShape(DrawableShape):
             quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
                                                     self.theming['shadow_width'],
                                                     'rectangle',
-                                                    corner_radius=(self.corner_radius +
-                                                                   self.theming['shadow_width']))
+                                                    corner_radius=self.theming['shadow_width'] + 2)
         else:
             quick_surf = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
             # quick_surf.fill('#FFFFFF00')
@@ -225,8 +222,12 @@ class RoundedRectangleShape(DrawableShape):
             quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.theming['shadow_width'],
                                                                     self.theming['shadow_width']),
                                                                    self.click_area_shape.size))
-        self.has_been_resized = True
+
         self.surfaces['normal'] = quick_surf
+        self.compute_aligned_text_rect()
+        self.rebuild_images_and_text('normal_image', 'normal', 'normal_text')
+
+        self.has_been_resized = True
         self.should_trigger_full_rebuild = True
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
@@ -355,12 +356,11 @@ class RoundedRectangleShape(DrawableShape):
             self.surfaces[state_str].blit(bab_surface, (0, 0))
 
             if shape_id is not None:
-                if self.cached_background_id is not None:
-                    # if self.has_been_resized:
-                    #     self.shape_cache.remove_user_and_request_clean_up_of_cached_item(self.cached_background_id)
-                    # else:
-                    self.shape_cache.remove_user_from_cache_item(self.cached_background_id)
-                self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
+                if self.cached_background_ids[state_str] is not None:
+                    self.shape_cache.remove_user_from_cache_item(self.cached_background_ids[state_str])
+                if not self.has_been_resized and ((self.containing_rect.width * self.containing_rect.height) < 40000):
+                    self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
+                    self.cached_background_ids[state_str] = shape_id
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 

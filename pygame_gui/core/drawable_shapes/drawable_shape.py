@@ -35,6 +35,12 @@ class DrawableShape:
                                             'selected': False,
                                             'active': False}
 
+        self.cached_background_ids = {'normal': None,
+                                      'hovered': None,
+                                      'disabled': None,
+                                      'selected': None,
+                                      'active': None}
+
         self.states_to_redraw_queue = deque([])
         self.need_to_clean_up = True
 

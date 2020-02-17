@@ -122,7 +122,7 @@ class UIHorizontalSlider(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
         # Things below here depend on theme data so need to be updated on a rebuild
         self.scrollable_width = self.background_rect.width - (3 * self.button_width)

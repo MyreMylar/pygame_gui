@@ -36,15 +36,21 @@ class UIImage(UIElement):
                          element_ids=new_element_ids,
                          anchors=anchors)
 
-        self.original_image = image_surface
-        if self.original_image.get_width() != self.rect.width or self.original_image.get_height() != self.rect.height:
-            self.image = pygame.transform.smoothscale(self.original_image, self.rect.size)
+        self.original_image = None
+        if image_surface.get_width() != self.rect.width or image_surface.get_height() != self.rect.height:
+            self.original_image = image_surface
+            self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
         else:
-            self.image = image_surface
+            self.set_image(image_surface)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_dimensions(dimensions)
 
         if self.rect.size != self.image.get_size():
-            self.image = pygame.transform.smoothscale(self.original_image, self.rect.size)
+            if self.original_image is None:
+                if self._pre_clipped_image is not None:
+                    self.original_image = self._pre_clipped_image
+                else:
+                    self.original_image = self.image
+            self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
 

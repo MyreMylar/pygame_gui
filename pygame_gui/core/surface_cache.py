@@ -19,28 +19,30 @@ class SurfaceCache:
 
         self.consider_purging_list = []
 
+        self.low_on_space = False
+
     def add_surface_to_cache(self, surface, string_id):
-        self.cache_short_term_lookup[string_id] = surface.copy()
+        self.cache_short_term_lookup[string_id] = [surface.copy(), 1]
 
     def update(self):
         if any(self.cache_short_term_lookup):
-            string_id, surface = self.cache_short_term_lookup.popitem()
-            self.add_surface_to_long_term_cache(surface, string_id)
+            string_id, cached_item = self.cache_short_term_lookup.popitem()
+            self.add_surface_to_long_term_cache(cached_item, string_id)
 
-        # don't bother considering any purging until we've filled up at least a few textures
-        if len(self.cache_surfaces) > 3:
+        if self.low_on_space:
+            self.low_on_space = False
             for cache_id in self.consider_purging_list:
                 cached_item = self.cache_long_term_lookup[cache_id]
-                # check our item to be purged takes up more space than 200x200 and is not being used right now.
-                cached_item_area = cached_item.get_width() * cached_item.get_height()
-                if cached_item[1] == 0 and cached_item_area >= 40000:
-                    # purge
+                if cached_item['current_uses'] == 0 and cached_item['total_uses'] == 1:
+                    # print("Freeing cached surface:" + cache_id)
                     self.free_cached_surface(cache_id)
 
             self.consider_purging_list.clear()
 
-    def add_surface_to_long_term_cache(self, surface, string_id):
+    def add_surface_to_long_term_cache(self, cached_item, string_id):
+        surface = cached_item[0]
         surface_size = surface.get_size()
+        current_uses = cached_item[1]
         if surface_size > self.cache_surface_size:
             warnings.warn('Unable to cache surfaces larger than ' + str(self.cache_surface_size))
             return None
@@ -48,7 +50,7 @@ class SurfaceCache:
 
             found_rectangle_cache = None
 
-            while found_rectangle_cache is None:
+            while found_rectangle_cache is None and not self.low_on_space:
                 for cache_surface in self.cache_surfaces:
                     found_rectangle_to_split = None
                     if found_rectangle_cache is None:
@@ -60,8 +62,9 @@ class SurfaceCache:
                                 found_rectangle_to_split = free_rectangle
                                 found_rectangle_cache = pygame.Rect(free_rectangle.topleft, surface_size)
                                 current_surface.blit(surface, free_rectangle.topleft)
-                                self.cache_long_term_lookup[string_id] = [current_surface.subsurface(found_rectangle_cache),
-                                                                          1]
+                                self.cache_long_term_lookup[string_id] = {
+                                    'surface': current_surface.subsurface(found_rectangle_cache),
+                                    'current_uses': current_uses, 'total_uses': current_uses}
                                 break
 
                         if found_rectangle_to_split is not None and found_rectangle_cache is not None:
@@ -70,7 +73,8 @@ class SurfaceCache:
                             rects_to_split = [rect for rect in free_space_rectangles
                                               if rect.colliderect(found_rectangle_cache)]
                             for split_rect in rects_to_split:
-                                self.split_rect(split_rect, found_rectangle_cache, cache_surface['free_space_rectangles'])
+                                self.split_rect(split_rect, found_rectangle_cache,
+                                                cache_surface['free_space_rectangles'])
 
                             # clean up rectangles entirely inside other rectangles
                             rects_to_remove = []
@@ -83,12 +87,16 @@ class SurfaceCache:
                                                                       if rect not in rects_to_remove]
 
                 if found_rectangle_cache is None:
-                    # create a new cache surface
-                    new_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
-                    new_surface.fill(pygame.Color('#00000000'))
-                    self.cache_surfaces.append({'surface': new_surface,
-                                                'free_space_rectangles': [
-                                                    pygame.Rect((0, 0), self.cache_surface_size)]})
+                    if len(self.cache_surfaces) < 3:
+                        # create a new cache surface
+                        # print("Creating new cache surface")
+                        new_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
+                        new_surface.fill(pygame.Color('#00000000'))
+                        self.cache_surfaces.append({'surface': new_surface,
+                                                    'free_space_rectangles': [
+                                                        pygame.Rect((0, 0), self.cache_surface_size)]})
+                    else:
+                        self.low_on_space = True
 
             return True
 
@@ -125,19 +133,23 @@ class SurfaceCache:
     def find_surface_in_cache(self, lookup_id):
         # check short term
         if lookup_id in self.cache_short_term_lookup:
-            return self.cache_short_term_lookup[lookup_id]
+            cached_item = self.cache_short_term_lookup[lookup_id]
+            cached_item[1] += 1
+            return cached_item[0]
         # check long term
         if lookup_id in self.cache_long_term_lookup:
-            self.cache_long_term_lookup[lookup_id][1] += 1
-            return self.cache_long_term_lookup[lookup_id][0]
+            self.cache_long_term_lookup[lookup_id]['current_uses'] += 1
+            self.cache_long_term_lookup[lookup_id]['total_uses'] += 1
+            return self.cache_long_term_lookup[lookup_id]['surface']
         else:
             return None
 
     def remove_user_from_cache_item(self, string_id):
         if string_id in self.cache_long_term_lookup:
-            self.cache_long_term_lookup[string_id][1] -= 1
+            self.cache_long_term_lookup[string_id]['current_uses'] -= 1
 
-            if self.cache_long_term_lookup[string_id][1] == 0:
+            if (self.cache_long_term_lookup[string_id]['current_uses'] == 0 and
+                    self.cache_long_term_lookup[string_id]['total_uses'] == 1):
                 self.consider_purging_list.append(string_id)
 
     def remove_user_and_request_clean_up_of_cached_item(self, string_id):
@@ -145,11 +157,11 @@ class SurfaceCache:
         self.free_cached_surface(string_id)
 
     def free_cached_surface(self, string_id):
-        if string_id not in self.cache_long_term_lookup or self.cache_long_term_lookup[string_id][1] != 0:
+        if string_id not in self.cache_long_term_lookup or self.cache_long_term_lookup[string_id]['current_uses'] != 0:
             return
         # check item to be removed is unused
         cache_to_clear = self.cache_long_term_lookup.pop(string_id)
-        cache_surface_to_clear = cache_to_clear[0]
+        cache_surface_to_clear = cache_to_clear['surface']
 
         for cache_surface in self.cache_surfaces:
             if cache_surface['surface'] == cache_surface_to_clear.get_parent():

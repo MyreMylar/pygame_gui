@@ -61,7 +61,7 @@ class UIWindow(UIElement):
             self.window_stack = self.ui_manager.get_window_stack()
             self.window_stack.add_new_window(self)
 
-        self.image = pygame.Surface((0, 0))
+        self.set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True
 
         self.resizing_mode_active = False
@@ -128,7 +128,7 @@ class UIWindow(UIElement):
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
                 handled = True
-            elif self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+            elif self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 handled = True
 
         if self is not None and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.resizing_mode_active:
@@ -142,8 +142,6 @@ class UIWindow(UIElement):
         A quick event check outside of the normal event processing so that this window is brought to the front of the
         window stack if we click on any of the elements contained within it.
 
-        TODO: Check for drawable shape and use that instead of rect?
-
         :param event: The event to check.
         :return bool: returns True if the processed event represents a click inside this window
         """
@@ -151,7 +149,10 @@ class UIWindow(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-            if self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+            if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]) or (self.edge_hovering[0] or
+                                                                              self.edge_hovering[1] or
+                                                                              self.edge_hovering[2] or
+                                                                              self.edge_hovering[3]):
                 if self.bring_to_front_on_focused:
                     self.window_stack.move_window_to_front(self)
                 event_handled = True
@@ -192,6 +193,13 @@ class UIWindow(UIElement):
 
             x_dimension = max(self.minimum_dimensions[0], min(self.ui_container.rect.width, x_dimension))
             y_dimension = max(self.minimum_dimensions[1], min(self.ui_container.rect.height, y_dimension))
+
+            # once we've compressed our dimensions to their minimums, stop moving the top & left positions
+            if x_dimension == self.minimum_dimensions[0]:
+                x_pos = self.rect.left
+
+            if y_dimension == self.minimum_dimensions[1]:
+                y_pos = self.rect.top
 
             self.set_position((x_pos, y_pos))
             self.set_dimensions((x_dimension, y_dimension))
@@ -239,6 +247,8 @@ class UIWindow(UIElement):
                 if resize_rect.top + 6 > mouse_y > resize_rect.top:
                     self.edge_hovering[1] = True
                     hovered = True
+        elif self.resizing_mode_active:
+            hovered = True
 
         if hovered:
             hovered_higher_element = True

@@ -140,7 +140,7 @@ class UIVerticalScrollBar(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
         if self.top_button is not None:
             self.top_button.set_relative_position(self.background_rect.topleft),

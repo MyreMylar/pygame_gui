@@ -130,9 +130,9 @@ class UITextBox(UIElement):
                                (self.rect[1] + self.padding[1] + self.border_width +
                                 self.shadow_width + self.rounded_corner_offset),
                                max(1, (self.rect[2] - (self.padding[0] * 2) - (self.border_width * 2) -
-                                   (self.shadow_width * 2) - (2 * self.rounded_corner_offset))),
+                                       (self.shadow_width * 2) - (2 * self.rounded_corner_offset))),
                                max(1, (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
-                                   (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
+                                       (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
         if self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
 
@@ -158,7 +158,7 @@ class UITextBox(UIElement):
                                         self.shadow_width + self.rounded_corner_offset),
                                        max(1, text_rect_width),
                                        max(1, (self.rect[3] - (self.padding[1] * 2) - (self.border_width * 2) -
-                                        (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
+                                               (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
                 self.parse_html_into_style_data()
                 percentage_visible = self.text_wrap_rect[3] / self.formatted_text_block.final_dimensions[1]
                 scroll_bar_position = (self.relative_rect.right - self.border_width -
@@ -198,14 +198,16 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-        self.image.fill(pygame.Color(0, 0, 0, 0))
-        self.image.blit(self.background_surf, (0, 0))
-        self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                 self.shadow_width + self.rounded_corner_offset,
-                                                                 self.padding[1] + self.border_width +
-                                                                 self.shadow_width + self.rounded_corner_offset),
-                        drawable_area)
+        new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+        new_image.fill(pygame.Color(0, 0, 0, 0))
+        new_image.blit(self.background_surf, (0, 0))
+        new_image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
+                                                                self.shadow_width + self.rounded_corner_offset,
+                                                                self.padding[1] + self.border_width +
+                                                                self.shadow_width + self.rounded_corner_offset),
+                       drawable_area)
+
+        self.set_image(new_image)
 
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
 
@@ -227,16 +229,17 @@ class UITextBox(UIElement):
                                     self.formatted_text_block.final_dimensions[1])
             drawable_area = pygame.Rect((0, height_adjustment),
                                         (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-            self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-            self.image.fill(pygame.Color(0, 0, 0, 0))
-            self.image.blit(self.background_surf, (0, 0))
-            self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                     self.shadow_width +
-                                                                     self.rounded_corner_offset,
-                                                                     self.padding[1] + self.border_width +
-                                                                     self.shadow_width +
-                                                                     self.rounded_corner_offset),
-                            drawable_area)
+            new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+            new_image.fill(pygame.Color(0, 0, 0, 0))
+            new_image.blit(self.background_surf, (0, 0))
+            new_image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
+                                                                    self.shadow_width +
+                                                                    self.rounded_corner_offset,
+                                                                    self.padding[1] + self.border_width +
+                                                                    self.shadow_width +
+                                                                    self.rounded_corner_offset),
+                           drawable_area)
+            self.set_image(new_image)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         should_redraw_from_chunks = False
@@ -327,9 +330,9 @@ class UITextBox(UIElement):
 
         # Quick and dirty temporary scaling to cut down on number of full rebuilds triggered when rapid scaling
         if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
-            new_image = pygame.Surface(self.relative_rect.size,  flags=pygame.SRCALPHA, depth=32)
+            new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.blit(self.image, (0, 0))
-            self.image = new_image
+            self.set_image(new_image)
 
             if self.scroll_bar is not None:
                 self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
@@ -372,14 +375,16 @@ class UITextBox(UIElement):
             height_adjustment = 0
 
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-        self.image.fill(pygame.Color(0, 0, 0, 0))
-        self.image.blit(self.background_surf, (0, 0))
-        self.image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
-                                                                 self.shadow_width + self.rounded_corner_offset,
-                                                                 self.padding[1] + self.border_width +
-                                                                 self.shadow_width + self.rounded_corner_offset),
-                        drawable_area)
+        new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+        new_image.fill(pygame.Color(0, 0, 0, 0))
+        new_image.blit(self.background_surf, (0, 0))
+        new_image.blit(self.formatted_text_block.block_sprite, (self.padding[0] + self.border_width +
+                                                                self.shadow_width + self.rounded_corner_offset,
+                                                                self.padding[1] + self.border_width +
+                                                                self.shadow_width + self.rounded_corner_offset),
+                       drawable_area)
+
+        self.set_image(new_image)
 
     def redraw_from_chunks(self):
         """
@@ -426,7 +431,7 @@ class UITextBox(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-            if self.drawable_shape.collide_point(scaled_mouse_pos):
+            if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 processed_event = True
                 if self.scroll_bar is not None:
                     text_block_full_height = self.formatted_text_block.final_dimensions[1]
@@ -472,8 +477,7 @@ class UITextBox(UIElement):
                     processed_event = True
                     if chunk.is_selected:
                         link_clicked_event = pygame.event.Event(pygame.USEREVENT,
-                                                                {'user_type':
-                                                                 pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
+                                                                {'user_type': pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
                                                                  'link_target': chunk.link_href,
                                                                  'ui_element': self,
                                                                  'ui_object_id': self.most_specific_combined_id})

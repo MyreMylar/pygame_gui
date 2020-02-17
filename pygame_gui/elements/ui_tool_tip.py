@@ -56,14 +56,14 @@ class UITooltip(UIElement):
 
         self.set_dimensions(self.text_block.rect.size)
 
-        self.image = pygame.Surface((0, 0))
+        self.set_image(self.ui_manager.get_universal_empty_surface())
 
     def rebuild(self):
         """
         Rebuild anything that might need rebuilding.
 
         """
-        self.image = pygame.Surface((0, 0))
+        self.set_image(self.ui_manager.get_universal_empty_surface())
 
         if self.text_block is not None:
             self.text_block.set_dimensions((self.rect_width, -1))

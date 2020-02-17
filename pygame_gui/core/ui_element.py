@@ -74,6 +74,9 @@ class UIElement(pygame.sprite.Sprite):
         self.hover_time = 0.0
 
         self.pre_debug_image = None
+        self._pre_clipped_image = None
+
+        self._image_clip = None
 
     def _update_absolute_rect_position_from_anchors(self):
         """
@@ -213,6 +216,21 @@ class UIElement(pygame.sprite.Sprite):
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
 
+        self._update_container_clip()
+
+    def _update_container_clip(self):
+        if not self.ui_container.rect.contains(self.rect):
+            left = max(0, self.ui_container.rect.left - self.rect.left)
+            right = max(0, self.rect.width - max(0, self.rect.right - self.ui_container.rect.right))
+            top = max(0, self.ui_container.rect.top - self.rect.top)
+            bottom = max(0, self.rect.height - max(0, self.rect.bottom - self.ui_container.rect.bottom))
+            clip_rect = pygame.Rect(left, top,
+                                    right - left,
+                                    bottom - top)
+            self._clip_images_for_container(clip_rect)
+        else:
+            self._restore_container_clipped_images()
+
     def change_layer(self, new_layer: int):
         """
         Changes the layer this element is on.
@@ -271,6 +289,8 @@ class UIElement(pygame.sprite.Sprite):
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
 
+        self._update_container_clip()
+
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the absolute screen rect position of an element.
@@ -283,6 +303,8 @@ class UIElement(pygame.sprite.Sprite):
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
+
+        self._update_container_clip()
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -298,7 +320,9 @@ class UIElement(pygame.sprite.Sprite):
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_dimensions(self.relative_rect.size)
-            self.image = self.drawable_shape.get_surface('normal')
+            self.set_image(self.drawable_shape.get_surface('normal'))
+
+        self._update_container_clip()
 
     def update(self, time_delta: float):
         if self.alive() and self.drawable_shape is not None:
@@ -307,7 +331,7 @@ class UIElement(pygame.sprite.Sprite):
                 self.on_fresh_drawable_shape_ready()
 
     def on_fresh_drawable_shape_ready(self):
-        self.image = self.drawable_shape.get_fresh_rebuild_surface('normal')
+        self.set_image(self.drawable_shape.get_fresh_rebuild_surface('normal'))
 
     def on_hovered(self):
         """
@@ -334,7 +358,10 @@ class UIElement(pygame.sprite.Sprite):
         :param y: The y (vertical) position of the point.
         :return bool: Returns True if we are hovering this element.
         """
-        return bool(self.rect.collidepoint(x, y))
+        if self.drawable_shape is not None:
+            return self.drawable_shape.collide_point((x, y)) and bool(self.ui_container.rect.collidepoint(x, y))
+        else:
+            return bool(self.rect.collidepoint(x, y)) and bool(self.ui_container.rect.collidepoint(x, y))
 
     def on_unhovered(self):
         """
@@ -375,7 +402,7 @@ class UIElement(pygame.sprite.Sprite):
 
     def rebuild(self):
         if self.pre_debug_image is not None:
-            self.image = self.pre_debug_image
+            self.set_image(self.pre_debug_image)
             self.pre_debug_image = None
 
     def set_visual_debug_mode(self, activate_mode):
@@ -402,9 +429,43 @@ class UIElement(pygame.sprite.Sprite):
                 if make_new_larger_surface:
                     new_surface = pygame.Surface((surf_width, surf_height), flags=pygame.SRCALPHA, depth=32)
                     new_surface.blit(self.image, (0, 0))
-                    self.image = new_surface
+                    self.set_image(new_surface)
                 self.image.blit(layer_text_render, (0, 0))
             else:
-                self.image = layer_text_render
+                self.set_image(layer_text_render)
         else:
             self.rebuild()
+
+    def _clip_images_for_container(self, clip_rect):
+        self.set_image_clip(clip_rect)
+
+    def _restore_container_clipped_images(self):
+        self.set_image_clip(None)
+
+    def set_image_clip(self, rect):
+        if rect is not None and self._pre_clipped_image is None and self.image is not None:
+            self._pre_clipped_image = self.image.copy()
+
+        if self._image_clip is not None and rect is None:
+            self._image_clip = None
+            self.set_image(self._pre_clipped_image)
+        elif rect is not None:
+            self._image_clip = rect
+            if self.image is not None:
+                self.image.fill(pygame.Color('#00000000'))
+                self.image.blit(self._pre_clipped_image, self._image_clip, self._image_clip)
+        else:
+            self._image_clip = None
+
+    def set_image(self, new_image):
+        if self._image_clip is not None and new_image is not None:
+            self._pre_clipped_image = new_image
+            if self._image_clip.width == 0 and self._image_clip.height == 0:
+                self.image = self.ui_manager.get_universal_empty_surface()
+            else:
+                self.image = pygame.Surface(self._pre_clipped_image.get_size(), flags=pygame.SRCALPHA, depth=32)
+                self.image.fill(pygame.Color('#00000000'))
+                self.image.blit(self._pre_clipped_image, self._image_clip, self._image_clip)
+        else:
+            self.image = new_image.copy() if new_image is not None else None
+            self._pre_clipped_image = None

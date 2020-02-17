@@ -129,7 +129,7 @@ class UIMessageWindow(UIWindow):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
         self.container_margins['left'] = self.shadow_width
         self.container_margins['right'] = self.shadow_width

@@ -68,7 +68,7 @@ class UIButton(UIElement):
         self.text_surface = None
         self.aligned_text_rect = None
 
-        self.image = None
+        self.set_image(None)
 
         # default range at which we 'let go' of a button
         self.hold_range = (0, 0)
@@ -152,7 +152,7 @@ class UIButton(UIElement):
         if self.held:
             return self.in_hold_range((x, y))
         else:
-            return self.drawable_shape.collide_point((x, y))
+            return self.drawable_shape.collide_point((x, y)) and bool(self.ui_container.rect.collidepoint(x, y))
 
     def can_hover(self) -> bool:
         """
@@ -167,7 +167,7 @@ class UIButton(UIElement):
         Called when we enter the hover state, it sets the colours and image of the button to the appropriate
         values and redraws it.
         """
-        self.image = self.drawable_shape.get_surface('hovered')
+        self.set_image(self.drawable_shape.get_surface('hovered'))
         self.hover_time = 0.0
 
     def while_hovering(self, time_delta, mouse_pos):
@@ -192,7 +192,7 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any tooltip that was
         created while we were hovering the button.
         """
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
@@ -225,7 +225,7 @@ class UIButton(UIElement):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                     int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                if self.drawable_shape.collide_point(scaled_mouse_pos):
+                if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                     self.held = True
                     self.set_active()
                     processed_event = True
@@ -270,28 +270,28 @@ class UIButton(UIElement):
         Disables the button so that it is no longer interactive.
         """
         self.is_enabled = False
-        self.image = self.drawable_shape.get_surface('disabled')
+        self.set_image(self.drawable_shape.get_surface('disabled'))
 
     def enable(self):
         """
         Re-enables the button so we can once again interact with it.
         """
         self.is_enabled = True
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
     def set_active(self):
         """
         Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
         state then redraws the button.
         """
-        self.image = self.drawable_shape.get_surface('active')
+        self.set_image(self.drawable_shape.get_surface('active'))
 
     def set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
         """
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
     def select(self):
         """
@@ -299,7 +299,7 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = True
-        self.image = self.drawable_shape.get_surface('selected')
+        self.set_image(self.drawable_shape.get_surface('selected'))
 
     def unselect(self):
         """
@@ -307,7 +307,7 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = False
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
     def set_text(self, text: str):
         """
@@ -321,7 +321,7 @@ class UIButton(UIElement):
             # recompute aligned_text_rect before rebuild
             self.drawable_shape.compute_aligned_text_rect()
             self.drawable_shape.redraw_all_states()
-            self.image = self.drawable_shape.get_surface('normal')
+            self.set_image(self.drawable_shape.get_surface('normal'))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -534,4 +534,4 @@ class UIButton(UIElement):
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))

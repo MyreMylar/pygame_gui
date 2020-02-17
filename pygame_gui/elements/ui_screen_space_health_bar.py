@@ -73,7 +73,7 @@ class UIScreenSpaceHealthBar(UIElement):
             self.sprite_to_monitor = sprite_to_monitor
         else:
             self.sprite_to_monitor = None
-        self.image = None
+        self.set_image(None)
         self.background_text = None
         self.foreground_text = None
 
@@ -146,7 +146,7 @@ class UIScreenSpaceHealthBar(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.image = self.drawable_shape.get_surface('normal')
+        self.set_image(self.drawable_shape.get_surface('normal'))
 
     def update(self, time_delta: float):
         """

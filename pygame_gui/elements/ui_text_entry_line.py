@@ -145,7 +145,7 @@ class UITextEntryLine(UIElement):
         else:
             self.text_image.fill(self.background_colour)
 
-        self.image = self.background_and_border.copy()
+        self.set_image(self.background_and_border.copy())
 
         self.cursor = pygame.Rect((self.text_image_rect.x +
                                    self.horiz_line_padding - self.start_text_offset,
@@ -318,8 +318,8 @@ class UITextEntryLine(UIElement):
         Redraws only the blinking edit cursor. This allows us to blink the cursor on and off without spending time
         redrawing all the text.
         """
-        self.image = self.background_and_border.copy()
-        self.image.blit(self.text_image, self.text_image_rect)
+        new_image = self.background_and_border.copy()
+        new_image.blit(self.text_image, self.text_image_rect)
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
@@ -327,12 +327,14 @@ class UITextEntryLine(UIElement):
                              self.horiz_line_padding - self.start_text_offset)
 
             if type(self.text_colour) != ColourGradient:
-                pygame.draw.rect(self.image, self.text_colour, self.cursor)
+                pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
                 cursor_surface = pygame.Surface(self.cursor.size)
                 cursor_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(cursor_surface)
-                self.image.blit(cursor_surface, self.cursor)
+                new_image.blit(cursor_surface, self.cursor)
+
+        self.set_image(new_image)
 
     def update(self, time_delta: float):
         """
@@ -411,7 +413,7 @@ class UITextEntryLine(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-            if self.drawable_shape.collide_point(scaled_mouse_pos):
+            if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
                     self.double_click_started = False
                     pattern = re.compile(r"[\w']+")

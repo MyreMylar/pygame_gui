@@ -1,3 +1,5 @@
+from typing import List
+
 import pygame
 
 from pygame_gui.core.ui_element import UIElement
@@ -33,8 +35,8 @@ class UIContainer(UIElement):
                          layer_thickness=1)
 
         self.sprite_group = self.ui_manager.get_sprite_group()
-        self.image = pygame.Surface((0, 0))
-        self.elements = []
+        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self.elements = []  # type: List[UIElement]
         self.layer_thickness = 0  # default to 0 thickness for an empty container
 
         self.hovered = False
@@ -93,8 +95,10 @@ class UIContainer(UIElement):
         This function is called when we move the container to update all the contained UI Elements to move as well.
         """
         super().update_containing_rect_position()
+
         for element in self.elements:
             element.update_containing_rect_position()
+
 
     def get_top_layer(self):
         """

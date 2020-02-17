@@ -19,6 +19,8 @@ class UIManager:
         self.ui_theme = UIAppearanceTheme()
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
+
+        self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
         self.ui_group = pygame.sprite.LayeredUpdates()
 
         self.select_focused_element = None
@@ -40,6 +42,8 @@ class UIManager:
         self.load_default_cursors()
         self.active_user_cursor = pygame.cursors.arrow
         self._active_cursor = self.active_user_cursor
+
+
 
     def get_theme(self) -> UIAppearanceTheme:
         """
@@ -121,13 +125,15 @@ class UIManager:
                 for ui_element in sprites_in_layer:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_x, mouse_y = event.pos
-                        if ui_element.rect.collidepoint(mouse_x,
-                                                        mouse_y) and ui_element is not self.select_focused_element:
+                        if ui_element.hover_point(mouse_x, mouse_y) and ui_element is not self.select_focused_element:
                             self.unselect_focus_element()
                             self.select_focus_element(ui_element)
 
                     event_handled = ui_element.process_event(event)
-                    if event_handled:
+                    if event_handled and event.type == pygame.MOUSEBUTTONDOWN:
+                        # clicks should only be handled by the top layer of whatever GUI thing we are clicking on
+                        # I think other types of events should get a chance to go through the whole lot if need be.
+                        # May be wrong...
                         break
 
     def update(self, time_delta: float):
@@ -412,3 +418,12 @@ class UIManager:
         """
 
         self.active_user_cursor = cursor
+
+    def get_universal_empty_surface(self) -> pygame.Surface:
+        """
+        Sometimes we want to hide sprites or just have sprites with no visual component, when we do we can just use this
+        empty surface to save having lots of empty surfaces all over memory.
+
+        :return: An empty, and therefore invisible pygame.Surface
+        """
+        return self.universal_empty_surface

@@ -27,6 +27,8 @@ class RectDrawableShape(DrawableShape):
         self.background_rect = None
         self.aligned_text_rect = None
         self.base_surface = None
+        self.has_been_resized = False
+
         self.full_rebuild_on_size_change()
 
     def full_rebuild_on_size_change(self):
@@ -98,10 +100,14 @@ class RectDrawableShape(DrawableShape):
         :param dimensions:
         :return:
         """
+        if dimensions[0] == self.containing_rect.width and dimensions[1] == self.containing_rect.height:
+            return
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
         self.click_area_shape.width = dimensions[0] - (2 * self.theming['shadow_width'])
         self.click_area_shape.height = dimensions[1] - (2 * self.theming['shadow_width'])
+
+        self.has_been_resized = True
 
         self.full_rebuild_on_size_change()
 
@@ -178,7 +184,10 @@ class RectDrawableShape(DrawableShape):
                 else:
                     self.surfaces[state_str].fill(self.theming['filled_bar'], bar_rect)
 
-            if shape_id is not None:
+            if self.cached_background_ids[state_str] is not None:
+                self.shape_cache.remove_user_from_cache_item(self.cached_background_ids[state_str])
+            if not self.has_been_resized and ((self.containing_rect.width * self.containing_rect.height) < 40000):
                 self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
+                self.cached_background_ids[state_str] = shape_id
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
