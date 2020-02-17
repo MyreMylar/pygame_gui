@@ -234,7 +234,7 @@ class UIExpandedDropDownState:
 
         if (event.type == pygame.USEREVENT and
                 event.user_type == pygame_gui.UI_BUTTON_PRESSED and
-                event.ui_element == self.close_button):
+                event.ui_element in [self.close_button, self.selected_option_button]):
 
             self.should_transition = True
 
@@ -429,9 +429,8 @@ class UIClosedDropDownState:
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_BUTTON_PRESSED and
-                event.ui_element == self.open_button):
+        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+                event.ui_element in [self.open_button, self.selected_option_button]):
 
             processed_event = True
             self.should_transition = True

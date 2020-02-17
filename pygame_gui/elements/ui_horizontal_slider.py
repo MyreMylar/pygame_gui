@@ -42,6 +42,7 @@ class UIHorizontalSlider(UIElement):
                          anchors=anchors)
 
         self.button_width = 20
+        self.arrow_button_width = self.button_width
         self.current_percentage = 0.5
         self.value_range = value_range
         self.grabbed_slider = False
@@ -68,23 +69,9 @@ class UIHorizontalSlider(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
 
-        self.rebuild_from_changed_theme_data()
+        self.arrow_buttons_enabled = True
 
-        # Things below here depend on theme data so need to be updated on a rebuild
-        self.left_button = UIButton(pygame.Rect(self.background_rect.topleft,
-                                                (self.button_width, self.background_rect.height)),
-                                    '◀',
-                                    self.ui_manager, self.ui_container, starting_height=2,
-                                    parent_element=self,
-                                    object_id='#left_button')
-        self.right_button = UIButton(pygame.Rect((self.background_rect.x + self.background_rect.width -
-                                                  self.button_width,
-                                                  self.background_rect.y),
-                                                 (self.button_width, self.background_rect.height)),
-                                     '▶',
-                                     self.ui_manager, self.ui_container, starting_height=2,
-                                     parent_element=self,
-                                     object_id='#right_button')
+        self.rebuild_from_changed_theme_data()
 
         sliding_x_pos = int(self.background_rect.x + self.background_rect.width/2 - self.button_width/2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos,
@@ -125,7 +112,44 @@ class UIHorizontalSlider(UIElement):
         self.set_image(self.drawable_shape.get_surface('normal'))
 
         # Things below here depend on theme data so need to be updated on a rebuild
-        self.scrollable_width = self.background_rect.width - (3 * self.button_width)
+        if self.arrow_buttons_enabled:
+            self.arrow_button_width = self.button_width
+
+            if self.left_button is None:
+                self.left_button = UIButton(pygame.Rect(self.background_rect.topleft,
+                                                        (self.arrow_button_width, self.background_rect.height)),
+                                            '◀',
+                                            self.ui_manager, self.ui_container, starting_height=2,
+                                            parent_element=self,
+                                            object_id='#left_button')
+            else:
+                self.left_button.set_relative_position(self.background_rect.topleft),
+                self.left_button.set_dimensions((self.arrow_button_width, self.background_rect.height))
+
+            if self.right_button is None:
+                self.right_button = UIButton(pygame.Rect((self.background_rect.x + self.background_rect.width -
+                                                          self.arrow_button_width,
+                                                          self.background_rect.y),
+                                                         (self.arrow_button_width, self.background_rect.height)),
+                                             '▶',
+                                             self.ui_manager, self.ui_container, starting_height=2,
+                                             parent_element=self,
+                                             object_id='#right_button')
+            else:
+                self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width -
+                                                         self.arrow_button_width,
+                                                         self.background_rect.y)),
+                self.right_button.set_dimensions((self.arrow_button_width, self.background_rect.height))
+        else:
+            self.arrow_button_width = 0
+            if self.left_button is not None:
+                self.left_button.kill()
+                self.left_button = None
+            if self.right_button is not None:
+                self.right_button.kill()
+                self.right_button = None
+
+        self.scrollable_width = self.background_rect.width - self.button_width - (2 * self.arrow_button_width)
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width / 2
 
@@ -136,23 +160,15 @@ class UIHorizontalSlider(UIElement):
             self.sliding_button.set_hold_range((self.background_rect.width, 100))
             self.set_current_value(self.current_value)
 
-        if self.left_button is not None:
-            self.left_button.set_relative_position(self.background_rect.topleft),
-            self.left_button.set_dimensions((self.button_width, self.background_rect.height))
-
-        if self.right_button is not None:
-            self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width -
-                                                     self.button_width,
-                                                     self.background_rect.y)),
-            self.right_button.set_dimensions((self.button_width, self.background_rect.height))
-
     def kill(self):
         """
         Overrides the normal sprite kill() method to also kill the button elements that help make up the slider.
 
         """
-        self.left_button.kill()
-        self.right_button.kill()
+        if self.left_button is not None:
+            self.left_button.kill()
+        if self.right_button is not None:
+            self.right_button.kill()
         self.sliding_button.kill()
         super().kill()
 
@@ -168,19 +184,21 @@ class UIHorizontalSlider(UIElement):
         if not self.alive():
             return
         moved_this_frame = False
-        if self.left_button.held and self.scroll_position > self.left_limit_position:
+        if self.left_button is not None and (self.left_button.held and
+                                             self.scroll_position > self.left_limit_position):
             self.scroll_position -= (250.0 * time_delta)
             self.scroll_position = max(self.scroll_position, self.left_limit_position)
             x_pos = (self.scroll_position + self.relative_rect.x + self.shadow_width
-                     + self.border_width + self.button_width)
+                     + self.border_width + self.arrow_button_width)
             y_pos = self.relative_rect.y + self.shadow_width + self.border_width
             self.sliding_button.set_relative_position((x_pos, y_pos))
             moved_this_frame = True
-        elif self.right_button.held and self.scroll_position < self.right_limit_position:
+        elif self.right_button is not None and (self.right_button.held and
+                                                self.scroll_position < self.right_limit_position):
             self.scroll_position += (250.0 * time_delta)
             self.scroll_position = min(self.scroll_position, self.right_limit_position)
             x_pos = (self.scroll_position + self.relative_rect.x + self.shadow_width
-                     + self.border_width + self.button_width)
+                     + self.border_width + self.arrow_button_width)
             y_pos = self.relative_rect.y + self.shadow_width + self.border_width
             self.sliding_button.set_relative_position((x_pos, y_pos))
             moved_this_frame = True
@@ -190,11 +208,11 @@ class UIHorizontalSlider(UIElement):
             if not self.grabbed_slider:
                 self.grabbed_slider = True
                 real_scroll_pos = (self.scroll_position + self.rect.x +
-                                   self.shadow_width + self.border_width + self.button_width)
+                                   self.shadow_width + self.border_width + self.arrow_button_width)
                 self.starting_grab_x_difference = mouse_x - real_scroll_pos
 
             real_scroll_pos = (self.scroll_position + self.rect.x +
-                               self.shadow_width + self.border_width + self.button_width)
+                               self.shadow_width + self.border_width + self.arrow_button_width)
             current_grab_difference = mouse_x - real_scroll_pos
             adjustment_required = current_grab_difference - self.starting_grab_x_difference
             self.scroll_position = self.scroll_position + adjustment_required
@@ -202,7 +220,7 @@ class UIHorizontalSlider(UIElement):
             self.scroll_position = min(max(self.scroll_position, self.left_limit_position),
                                        self.right_limit_position)
             x_pos = (self.scroll_position + self.relative_rect.x + self.shadow_width
-                     + self.border_width + self.button_width)
+                     + self.border_width + self.arrow_button_width)
             y_pos = self.relative_rect.y + self.shadow_width + self.border_width
             self.sliding_button.set_relative_position((x_pos, y_pos))
 
@@ -241,7 +259,7 @@ class UIHorizontalSlider(UIElement):
                 self.scroll_position = self.scrollable_width * self.current_percentage
 
                 x_pos = (self.scroll_position + self.relative_rect.x + self.shadow_width +
-                         self.border_width + self.button_width)
+                         self.border_width + self.arrow_button_width)
                 y_pos = self.relative_rect.y + self.shadow_width + self.border_width
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 self.has_moved_recently = True
@@ -309,6 +327,16 @@ class UIHorizontalSlider(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
+        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'enable_arrow_buttons')
+        if buttons_enable_param is not None:
+            try:
+                buttons_enable = bool(int(buttons_enable_param))
+            except ValueError:
+                buttons_enable = True
+            if buttons_enable != self.arrow_buttons_enabled:
+                self.arrow_buttons_enabled = buttons_enable
+                has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 
@@ -325,11 +353,13 @@ class UIHorizontalSlider(UIElement):
         self.background_rect.y = border_and_shadow + self.relative_rect.y
 
         inner_top_left = (position[0] + border_and_shadow, position[1] + border_and_shadow)
-        self.left_button.set_position(inner_top_left)
-        self.right_button.set_position((inner_top_left[0] + self.background_rect.width - self.button_width,
-                                        inner_top_left[1]))
+        if self.left_button is not None:
+            self.left_button.set_position(inner_top_left)
+        if self.right_button is not None:
+            self.right_button.set_position((inner_top_left[0] + self.background_rect.width - self.arrow_button_width,
+                                            inner_top_left[1]))
 
-        slider_x_position = self.scroll_position + self.rect.x + border_and_shadow + self.button_width
+        slider_x_position = self.scroll_position + self.rect.x + border_and_shadow + self.arrow_button_width
         self.sliding_button.set_position((slider_x_position, inner_top_left[1]))
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -345,11 +375,13 @@ class UIHorizontalSlider(UIElement):
         self.background_rect.y = border_and_shadow + self.relative_rect.y
 
         inner_top_left = (position[0] + border_and_shadow, position[1] + border_and_shadow)
-        self.left_button.set_relative_position(inner_top_left)
-        self.right_button.set_relative_position((inner_top_left[0] + self.background_rect.width - self.button_width,
-                                                inner_top_left[1]))
+        if self.left_button is not None:
+            self.left_button.set_relative_position(inner_top_left)
+        if self.right_button is not None:
+            self.right_button.set_relative_position((inner_top_left[0] + self.background_rect.width - self.arrow_button_width,
+                                                     inner_top_left[1]))
 
-        slider_x_position = self.scroll_position + self.relative_rect.x + border_and_shadow + self.button_width
+        slider_x_position = self.scroll_position + self.relative_rect.x + border_and_shadow + self.arrow_button_width
         self.sliding_button.set_relative_position((slider_x_position, inner_top_left[1]))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -359,19 +391,21 @@ class UIHorizontalSlider(UIElement):
         self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
         self.background_rect.height = self.relative_rect.height - (2 * border_and_shadow)
 
-        self.left_button.set_dimensions((self.button_width, self.background_rect.height))
+        if self.left_button is not None:
+            self.left_button.set_dimensions((self.arrow_button_width, self.background_rect.height))
 
-        self.right_button.set_dimensions((self.button_width, self.background_rect.height))
-        self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width
-                                                 - self.button_width,
-                                                 self.background_rect.y))
+        if self.left_button is not None:
+            self.right_button.set_dimensions((self.arrow_button_width, self.background_rect.height))
+            self.right_button.set_relative_position((self.background_rect.x + self.background_rect.width
+                                                     - self.arrow_button_width,
+                                                     self.background_rect.y))
 
         # sort out sliding button parameters
-        self.scrollable_width = self.background_rect.width - (3 * self.button_width)
+        self.scrollable_width = self.background_rect.width - self.button_width - (2 * self.arrow_button_width)
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width * self.current_percentage
 
-        slider_x_pos = self.scroll_position + self.relative_rect.x + border_and_shadow + self.button_width
+        slider_x_pos = self.scroll_position + self.relative_rect.x + border_and_shadow + self.arrow_button_width
         slider_y_pos = self.relative_rect.y + border_and_shadow
 
         self.sliding_button.set_dimensions((self.button_width, self.background_rect.height))

@@ -345,7 +345,7 @@ class UIManager:
 
         :param vert_scrollbar: A scrollbar UIElement.
         """
-        if vert_scrollbar is self.last_focused_vertical_scrollbar:
+        if vert_scrollbar is not None and vert_scrollbar is self.last_focused_vertical_scrollbar:
             self.last_focused_vertical_scrollbar = None
 
     def get_last_focused_vert_scrollbar(self):
