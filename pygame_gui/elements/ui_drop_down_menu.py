@@ -476,7 +476,7 @@ class UIClosedDropDownState:
         self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
 
     def on_fresh_drawable_shape_ready(self):
-        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_rebuild_surface('normal'))
+        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
 
 class UIDropDownMenu(UIElement):

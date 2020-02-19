@@ -7,6 +7,68 @@ from pygame_gui.core.colour_gradient import ColourGradient
 from pygame.math import Vector2
 
 
+class DrawableShapeState:
+    def __init__(self, state_id: str):
+        self.state_id = state_id
+        self.surface = pygame.Surface((0, 0))  # type: pygame.Surface
+        self.has_fresh_surface = False
+        self.cached_background_id = None  # type: Union[str, None]
+        self.transition = None  # type: Union[DrawableStateTransition, None]
+
+    def get_surface(self):
+        if self.transition is not None:
+            return self.transition.produce_blended_result()
+        else:
+            return self.surface
+
+    def update(self, time_delta):
+        if self.transition is not None:
+            self.transition.update(time_delta)
+            self.has_fresh_surface = True
+            if self.transition.finished:
+                self.transition = None
+
+
+class DrawableStateTransition:
+    def __init__(self, states: Dict[str, DrawableShapeState],
+                 start_state_id: str, target_state_id: str,
+                 duration: float, *, progress: float = 0.0):
+        self.states = states
+        self.duration = duration
+        self.remaining_time = self.duration - progress
+        self.percentage_start_state = 1.0
+        self.percentage_target_state = 0.0
+        self.start_stat_id = start_state_id
+        self.target_state_id = target_state_id
+        self.finished = False
+
+    def update(self, time_delta):
+        self.remaining_time -= time_delta
+        if self.remaining_time > 0.0 and self.duration > 0.0:
+            self.percentage_start_state = self.remaining_time / self.duration
+            self.percentage_target_state = 1.0 - self.percentage_start_state
+        else:
+            self.finished = True
+
+    def produce_blended_result(self):
+        result = self.states[self.start_stat_id].surface.copy()
+        blended_target = self.states[self.target_state_id].surface.copy()
+        start_multiply_surface = pygame.Surface(self.states[self.start_stat_id].surface.get_size(),
+                                                flags=pygame.SRCALPHA, depth=32)
+        target_multiply_surface = start_multiply_surface.copy()
+
+        start_alpha = int(round(255.0*self.percentage_start_state))
+        target_alpha = 255 - start_alpha
+
+        start_multiply_surface.fill(pygame.Color(start_alpha, start_alpha, start_alpha, 255))
+        target_multiply_surface.fill(pygame.Color(target_alpha, target_alpha, target_alpha, 255))
+
+        result.blit(start_multiply_surface, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+        blended_target.blit(target_multiply_surface, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+        result.blit(blended_target, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+        return result
+
+
 class DrawableShape:
     def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List, manager: UIManager):
         self.containing_rect = containing_rect.copy()
@@ -16,30 +78,28 @@ class DrawableShape:
             self.containing_rect.height = 1
 
         self.theming = theming_parameters
-        self.states = states
+
+        self.states = {}
+        for state in states:
+            self.states[state] = DrawableShapeState(state)
+
+        if 'normal' in states:
+            self.active_state = self.states['normal']
+        else:
+            raise NotImplementedError("No 'normal' state id supplied for drawable shape")
+
+        self.previous_state = None
+
+        if 'transitions' in self.theming:
+            self.state_transition_times = self.theming['transitions']
+        else:
+            self.state_transition_times = {}
+
         self.ui_manager = manager
         self.shape_cache = self.ui_manager.ui_theme.shape_cache
 
         self.aligned_text_rect = None
         self.click_area_shape = None
-
-        self.surfaces = {'normal': None,
-                         'hovered': None,
-                         'disabled': None,
-                         'selected': None,
-                         'active': None}  # type: Dict[str,Union[pygame.Surface, None]]
-
-        self.surfaces_with_fresh_rebuild = {'normal': False,
-                                            'hovered': False,
-                                            'disabled': False,
-                                            'selected': False,
-                                            'active': False}
-
-        self.cached_background_ids = {'normal': None,
-                                      'hovered': None,
-                                      'disabled': None,
-                                      'selected': None,
-                                      'active': None}
 
         self.states_to_redraw_queue = deque([])
         self.need_to_clean_up = True
@@ -47,13 +107,39 @@ class DrawableShape:
         self.should_trigger_full_rebuild = True
         self.time_until_full_rebuild_after_changing_size = 0.35
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
-        self.is_first_quick_scale_since_rebuild = True
-        self.normal_state_copy_for_quick_scale = None
+        # self.is_first_quick_scale_since_rebuild = True
+        # self.normal_state_copy_for_quick_scale = None
+
+    def set_active_state(self, state_id: str):
+        if state_id in self.states and self.active_state.state_id != state_id:
+            self.previous_state = self.active_state
+            self.active_state = self.states[state_id]
+            self.active_state.has_fresh_surface = True
+
+            if self.previous_state is not None and (self.previous_state.state_id,
+                                                    self.active_state.state_id) in self.state_transition_times:
+                duration = self.state_transition_times[(self.previous_state.state_id, self.active_state.state_id)]
+                if self.previous_state.transition is None:
+                    # completely fresh transition
+                    self.active_state.transition = DrawableStateTransition(self.states,
+                                                                           self.previous_state.state_id,
+                                                                           self.active_state.state_id,
+                                                                           duration)
+                else:
+                    # check to see if we are reversing an in-progress transition.
+                    if self.previous_state.transition.start_stat_id == self.active_state.state_id:
+                        progress_time = self.previous_state.transition.remaining_time
+                        self.active_state.transition = DrawableStateTransition(self.states,
+                                                                               self.previous_state.state_id,
+                                                                               self.active_state.state_id,
+                                                                               duration,
+                                                                               progress=progress_time)
 
     def redraw_state(self, state_str):
         pass
 
     def clean_up_temp_shapes(self):
+        # TODO: Consider if we need this or not, it's not currently being used afaik
         pass
 
     def update(self, time_delta):
@@ -71,11 +157,13 @@ class DrawableShape:
         if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
             self.full_rebuild_on_size_change()
 
+        self.active_state.update(time_delta)
+
     def full_rebuild_on_size_change(self):
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
-        self.is_first_quick_scale_since_rebuild = True
-        self.normal_state_copy_for_quick_scale = None
+        # self.is_first_quick_scale_since_rebuild = True
+        # self.normal_state_copy_for_quick_scale = None
 
     def redraw_all_states(self):
         self.states_to_redraw_queue = deque([state for state in self.states])
@@ -115,20 +203,26 @@ class DrawableShape:
     def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass
 
+    def get_active_state_surface(self):
+        if self.active_state is not None:
+            return self.active_state.get_surface()
+        else:
+            return self.ui_manager.get_universal_empty_surface()
+
     def get_surface(self, surface_name):
-        if surface_name in self.surfaces and self.surfaces[surface_name] is not None:
-            return self.surfaces[surface_name]
-        elif surface_name in self.surfaces and self.surfaces['normal'] is not None:
-            return self.surfaces['normal']
+        if surface_name in self.states and self.states[surface_name].surface is not None:
+            return self.states[surface_name].surface
+        elif surface_name in self.states and self.states['normal'].surface is not None:
+            return self.states['normal'].surface
         else:
             return pygame.Surface((0, 0))
 
-    def get_fresh_rebuild_surface(self, surface_name: str):
-        self.surfaces_with_fresh_rebuild[surface_name] = False
-        return self.get_surface(surface_name)
+    def get_fresh_surface(self):
+        self.active_state.has_fresh_surface = False
+        return self.get_active_state_surface()
 
-    def has_fresh_rebuild(self, surface_name: str):
-        return self.surfaces_with_fresh_rebuild[surface_name]
+    def has_fresh_surface(self):
+        return self.active_state.has_fresh_surface
 
     def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         pass
@@ -160,7 +254,7 @@ class DrawableShape:
         if image_state_str in self.theming and self.theming[image_state_str] is not None:
             image_rect = self.theming[image_state_str].get_rect()
             image_rect.center = (int(self.containing_rect.width / 2), int(self.containing_rect.height / 2))
-            self.surfaces[state_str].blit(self.theming[image_state_str], image_rect)
+            self.states[state_str].surface.blit(self.theming[image_state_str], image_rect)
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
@@ -177,10 +271,10 @@ class DrawableShape:
             if 'text_shadow' in self.theming:
                 text_shadow = self.theming['font'].render(self.theming['text'], True, self.theming['text_shadow'])
 
-                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y + 1))
-                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y - 1))
-                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x + 1, self.aligned_text_rect.y))
-                self.surfaces[state_str].blit(text_shadow, (self.aligned_text_rect.x - 1, self.aligned_text_rect.y))
+                self.states[state_str].surface.blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y + 1))
+                self.states[state_str].surface.blit(text_shadow, (self.aligned_text_rect.x, self.aligned_text_rect.y - 1))
+                self.states[state_str].surface.blit(text_shadow, (self.aligned_text_rect.x + 1, self.aligned_text_rect.y))
+                self.states[state_str].surface.blit(text_shadow, (self.aligned_text_rect.x - 1, self.aligned_text_rect.y))
 
             if text_surface is not None and self.aligned_text_rect is not None:
-                self.surfaces[state_str].blit(text_surface, self.aligned_text_rect)
+                self.states[state_str].surface.blit(text_surface, self.aligned_text_rect)

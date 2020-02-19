@@ -93,6 +93,8 @@ class UIButton(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = 2
 
+        self.state_transitions = {}
+
         self.drawable_shape = None  # type: Union[DrawableShape, None]
 
         self.rebuild_from_changed_theme_data()
@@ -167,7 +169,7 @@ class UIButton(UIElement):
         Called when we enter the hover state, it sets the colours and image of the button to the appropriate
         values and redraws it.
         """
-        self.set_image(self.drawable_shape.get_surface('hovered'))
+        self.drawable_shape.set_active_state('hovered')
         self.hover_time = 0.0
 
     def while_hovering(self, time_delta, mouse_pos):
@@ -192,7 +194,7 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any tooltip that was
         created while we were hovering the button.
         """
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.drawable_shape.set_active_state('normal')
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
@@ -270,28 +272,28 @@ class UIButton(UIElement):
         Disables the button so that it is no longer interactive.
         """
         self.is_enabled = False
-        self.set_image(self.drawable_shape.get_surface('disabled'))
+        self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
         Re-enables the button so we can once again interact with it.
         """
         self.is_enabled = True
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.drawable_shape.set_active_state('normal')
 
     def set_active(self):
         """
         Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
         state then redraws the button.
         """
-        self.set_image(self.drawable_shape.get_surface('active'))
+        self.drawable_shape.set_active_state('active')
 
     def set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
         """
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.drawable_shape.set_active_state('normal')
 
     def select(self):
         """
@@ -299,7 +301,7 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = True
-        self.set_image(self.drawable_shape.get_surface('selected'))
+        self.drawable_shape.set_active_state('selected')
 
     def unselect(self):
         """
@@ -307,7 +309,7 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         self.is_selected = False
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.drawable_shape.set_active_state('normal')
 
     def set_text(self, text: str):
         """
@@ -321,7 +323,7 @@ class UIButton(UIElement):
             # recompute aligned_text_rect before rebuild
             self.drawable_shape.compute_aligned_text_rect()
             self.drawable_shape.redraw_all_states()
-            self.set_image(self.drawable_shape.get_surface('normal'))
+            # self.set_image(self.drawable_shape.get_active_state_surface())
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -483,6 +485,20 @@ class UIButton(UIElement):
                 self.text_vert_alignment_padding = text_vert_alignment_padding
                 has_any_changed = True
 
+        state_transitions = self.ui_theme.get_misc_data(self.object_ids,
+                                                        self.element_ids, 'state_transitions')
+        if state_transitions is not None and isinstance(state_transitions, dict):
+            for key in state_transitions:
+                states = key.split('_')
+                if len(states) == 2:
+                    start_state = states[0]
+                    target_state = states[1]
+                    try:
+                        duration = float(state_transitions[key])
+                    except ValueError:
+                        duration = 0.0
+                    self.state_transitions[(start_state, target_state)] = duration
+
         if has_any_changed:
             self.rebuild()
 
@@ -519,7 +535,8 @@ class UIButton(UIElement):
                               'text_vert_alignment': self.text_vert_alignment,
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
-                              'shape_corner_radius': self.shape_corner_radius}
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'transitions': self.state_transitions}
 
         if self.shape_type == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -534,4 +551,4 @@ class UIButton(UIElement):
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.on_fresh_drawable_shape_ready()

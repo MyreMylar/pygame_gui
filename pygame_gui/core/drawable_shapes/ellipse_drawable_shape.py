@@ -144,9 +144,9 @@ class EllipseDrawableShape(DrawableShape):
 
             found_shape = self.shape_cache.find_surface_in_cache(shape_id)
         if found_shape is not None:
-            self.surfaces[state_str] = found_shape.copy()
+            self.states[state_str].surface = found_shape.copy()
         else:
-            self.surfaces[state_str] = self.base_surface.copy()
+            self.states[state_str].surface = self.base_surface.copy()
 
             # Try one AA call method
             aa = 4
@@ -193,17 +193,19 @@ class EllipseDrawableShape(DrawableShape):
             small_sub = pygame.transform.smoothscale(sub_surface,
                                                      (self.containing_rect.width - (2 * self.theming['shadow_width']),
                                                       self.containing_rect.height - (2 * self.theming['shadow_width'])))
-            self.surfaces[state_str].blit(small_sub, pygame.Rect((self.theming['shadow_width'],
+            self.states[state_str].surface.blit(small_sub, pygame.Rect((self.theming['shadow_width'],
                                                                   self.theming['shadow_width']),
                                                                  sub_surface.get_size()),
                                           special_flags=pygame.BLEND_RGBA_SUB)
 
-            self.surfaces[state_str].blit(bab_surface, (0, 0))
+            self.states[state_str].surface.blit(bab_surface, (0, 0))
 
             if shape_id is not None:
-                self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
+                self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(), shape_id)
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
+
+        self.states[state_str].has_fresh_surface = True
 
     @staticmethod
     def clear_and_create_shape_surface(surface, rect, overlap, aa_amount, clear=True) -> pygame.Surface:

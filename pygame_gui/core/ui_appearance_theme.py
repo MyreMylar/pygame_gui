@@ -6,7 +6,7 @@ import base64
 import warnings
 from contextlib import contextmanager
 
-from typing import Union
+from typing import Union, Dict
 
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
@@ -623,7 +623,8 @@ class UIAppearanceTheme:
             self.ui_element_misc_data[element_name] = {}
         misc_dict = theme_dict[element_name][data_type]
         for misc_data_key in misc_dict:
-            self.ui_element_misc_data[element_name][misc_data_key] = str(misc_dict[misc_data_key])
+            if isinstance(misc_dict[misc_data_key], dict) or isinstance(misc_dict[misc_data_key], str):
+                self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[misc_data_key]
 
     def load_element_image_data_from_theme(self, data_type, element_name, theme_dict):
         if element_name not in self.ui_element_image_paths:

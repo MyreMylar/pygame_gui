@@ -223,9 +223,10 @@ class RoundedRectangleShape(DrawableShape):
                                                                     self.theming['shadow_width']),
                                                                    self.click_area_shape.size))
 
-        self.surfaces['normal'] = quick_surf
+        self.states['normal'].surface = quick_surf
         self.compute_aligned_text_rect()
         self.rebuild_images_and_text('normal_image', 'normal', 'normal_text')
+        self.states['normal'].has_fresh_surface = True
 
         self.has_been_resized = True
         self.should_trigger_full_rebuild = True
@@ -255,12 +256,12 @@ class RoundedRectangleShape(DrawableShape):
 
             found_shape = self.shape_cache.find_surface_in_cache(shape_id)
         if found_shape is not None:
-            self.surfaces[state_str] = found_shape.copy()
+            self.states[state_str].surface = found_shape.copy()
         else:
             corner_radius = self.corner_radius
             border_corner_radius = corner_radius
 
-            self.surfaces[state_str] = self.base_surface.copy()
+            self.states[state_str].surface = self.base_surface.copy()
 
             # Try one AA call method
             aa = 4
@@ -337,34 +338,21 @@ class RoundedRectangleShape(DrawableShape):
                     self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 
             bab_surface.blit(shape_surface, self.background_rect)
-            # clear space in shadow for background
-            # if self.theming['shadow_width'] > 0:
-            #     # we want our shadow clear shape to be a little bigger than the background ideally at the curvy parts
-            #     large_sub = self.create_shadow_subtract_surface(self.border_rect.size, corner_radius * aa, aa)
-            #     if large_sub is not None:
-            #         small_sub = pygame.transform.smoothscale(large_sub, self.click_area_shape.size)
-            #     else:
-            #         small_sub = None
-            #
-            #     if small_sub is not None:
-            #         self.surfaces[state_str].blit(small_sub, (self.theming['shadow_width'],
-            #                                                   self.theming['shadow_width']),
-            #                                       special_flags=pygame.BLEND_RGBA_SUB)
 
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
-            self.surfaces[state_str].blit(bab_surface, (0, 0))
+            self.states[state_str].surface.blit(bab_surface, (0, 0))
 
             if shape_id is not None:
-                if self.cached_background_ids[state_str] is not None:
-                    self.shape_cache.remove_user_from_cache_item(self.cached_background_ids[state_str])
+                if self.states[state_str].cached_background_id is not None:
+                    self.shape_cache.remove_user_from_cache_item(self.states[state_str].cached_background_id)
                 if not self.has_been_resized and ((self.containing_rect.width * self.containing_rect.height) < 40000):
-                    self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
-                    self.cached_background_ids[state_str] = shape_id
+                    self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(), shape_id)
+                    self.states[state_str].cached_background_id = shape_id
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
-        self.surfaces_with_fresh_rebuild[state_str] = True
+        self.states[state_str].has_fresh_surface = True
 
     def clear_and_create_shape_surface(self, surface, rect, overlap,
                                        corner_radius, aa_amount, clear=True) -> pygame.Surface:

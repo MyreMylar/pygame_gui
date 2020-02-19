@@ -145,31 +145,31 @@ class RectDrawableShape(DrawableShape):
 
             found_shape = self.shape_cache.find_surface_in_cache(shape_id)
         if found_shape is not None:
-            self.surfaces[state_str] = found_shape.copy()
+            self.states[state_str].surface = found_shape.copy()
         else:
-            self.surfaces[state_str] = self.base_surface.copy()
+            self.states[state_str].surface = self.base_surface.copy()
 
             if self.theming['border_width'] > 0:
 
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA, depth=32)
                     border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-                    self.surfaces[state_str].blit(border_shape_surface,
+                    self.states[state_str].surface.blit(border_shape_surface,
                                                   self.border_rect, special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(border_shape_surface)
-                    self.surfaces[state_str].blit(border_shape_surface, self.border_rect)
+                    self.states[state_str].surface.blit(border_shape_surface, self.border_rect)
                 else:
-                    self.surfaces[state_str].fill(self.theming[border_colour_state_str], self.border_rect)
+                    self.states[state_str].surface.fill(self.theming[border_colour_state_str], self.border_rect)
 
             if type(self.theming[bg_colour_state_str]) == ColourGradient:
                 background_shape_surface = pygame.Surface(self.background_rect.size, flags=pygame.SRCALPHA, depth=32)
                 background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-                self.surfaces[state_str].blit(background_shape_surface,
+                self.states[state_str].surface.blit(background_shape_surface,
                                               self.background_rect, special_flags=pygame.BLEND_RGBA_SUB)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(background_shape_surface)
-                self.surfaces[state_str].blit(background_shape_surface, self.background_rect)
+                self.states[state_str].surface.blit(background_shape_surface, self.background_rect)
             else:
-                self.surfaces[state_str].fill(self.theming[bg_colour_state_str], self.background_rect)
+                self.states[state_str].surface.fill(self.theming[bg_colour_state_str], self.background_rect)
 
             if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
                 bar_rect = pygame.Rect(self.background_rect.topleft,
@@ -178,16 +178,18 @@ class RectDrawableShape(DrawableShape):
                 if type(self.theming['filled_bar']) == ColourGradient:
                     bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA, depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-                    self.surfaces[state_str].blit(bar_shape_surface, bar_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect, special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)
-                    self.surfaces[state_str].blit(bar_shape_surface, bar_rect)
+                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect)
                 else:
-                    self.surfaces[state_str].fill(self.theming['filled_bar'], bar_rect)
+                    self.states[state_str].surface.fill(self.theming['filled_bar'], bar_rect)
 
-            if self.cached_background_ids[state_str] is not None:
-                self.shape_cache.remove_user_from_cache_item(self.cached_background_ids[state_str])
+            if self.states[state_str].cached_background_id is not None:
+                self.shape_cache.remove_user_from_cache_item(self.states[state_str].cached_background_id)
             if not self.has_been_resized and ((self.containing_rect.width * self.containing_rect.height) < 40000):
-                self.shape_cache.add_surface_to_cache(self.surfaces[state_str].copy(), shape_id)
-                self.cached_background_ids[state_str] = shape_id
+                self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(), shape_id)
+                self.states[state_str].cached_background_id = shape_id
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
+
+        self.states[state_str].has_fresh_surface = True

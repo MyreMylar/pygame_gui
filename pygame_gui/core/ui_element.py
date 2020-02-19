@@ -320,18 +320,18 @@ class UIElement(pygame.sprite.Sprite):
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_dimensions(self.relative_rect.size)
-            self.set_image(self.drawable_shape.get_surface('normal'))
+            # self.set_image(self.drawable_shape.get_active_state_surface())
 
         self._update_container_clip()
 
     def update(self, time_delta: float):
         if self.alive() and self.drawable_shape is not None:
             self.drawable_shape.update(time_delta)
-            if self.drawable_shape.has_fresh_rebuild('normal'):
+            if self.drawable_shape.has_fresh_surface():
                 self.on_fresh_drawable_shape_ready()
 
     def on_fresh_drawable_shape_ready(self):
-        self.set_image(self.drawable_shape.get_fresh_rebuild_surface('normal'))
+        self.set_image(self.drawable_shape.get_fresh_surface())
 
     def on_hovered(self):
         """
