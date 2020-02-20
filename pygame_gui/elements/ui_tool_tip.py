@@ -30,7 +30,8 @@ class UITooltip(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+        new_element_ids, new_object_ids = self.create_valid_ids(container=None,
+                                                                parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='tool_tip')
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),

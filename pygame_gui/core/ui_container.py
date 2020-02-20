@@ -2,10 +2,11 @@ from typing import List
 
 import pygame
 
+from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.core.ui_element import UIElement
 
 
-class UIContainer(UIElement):
+class UIContainer(UIElement, IContainerInterface):
     """
     A UI Container holds any number of other UI elements inside of a rectangle. When we move the UIContainer
     all the UI elements contained within it can be moved as well.
@@ -18,20 +19,20 @@ class UIContainer(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, manager,
+    def __init__(self, relative_rect, manager, *, starting_height: int = 1,
                  container=None, parent_element=None, object_id=None):
 
-        self._layer = 0
         self.ui_manager = manager
 
-        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
+                                                                parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='container')
 
         super().__init__(relative_rect, manager, container,
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
-                         starting_height=1,
+                         starting_height=starting_height,
                          layer_thickness=1)
 
         self.sprite_group = self.ui_manager.get_sprite_group()
@@ -40,6 +41,9 @@ class UIContainer(UIElement):
         self.layer_thickness = 0  # default to 0 thickness for an empty container
 
         self.hovered = False
+
+    def get_container(self):
+        return self
 
     def add_element(self, element):
         """
@@ -69,8 +73,8 @@ class UIContainer(UIElement):
         """
         max_element_top_layer = 0
         for element in self.elements:
-            if element.top_layer > max_element_top_layer:
-                max_element_top_layer = element.top_layer
+            if element.get_top_layer() > max_element_top_layer:
+                max_element_top_layer = element.get_top_layer()
 
         self.layer_thickness = max_element_top_layer - self._layer
 
@@ -98,7 +102,6 @@ class UIContainer(UIElement):
 
         for element in self.elements:
             element.update_containing_rect_position()
-
 
     def get_top_layer(self):
         """

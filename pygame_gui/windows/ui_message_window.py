@@ -24,7 +24,8 @@ class UIMessageWindow(UIWindow):
                  manager: ui_manager.UIManager,
                  object_id: Union[str, None] = None):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=None,
+        new_element_ids, new_object_ids = self.create_valid_ids(container=None,
+                                                                parent_element=None,
                                                                 object_id=object_id,
                                                                 element_id='message_window')
         super().__init__(message_window_rect, manager, new_element_ids, new_object_ids, resizable=True)
@@ -57,8 +58,7 @@ class UIMessageWindow(UIWindow):
                                                             menu_bar_height)),
                                  text=message_title,
                                  manager=manager,
-                                 container=self.get_container(),
-                                 parent_element=self,
+                                 container=self,
                                  object_id='#message_window_title_bar',
                                  anchors={'top': 'top', 'bottom': 'top',
                                           'left': 'left', 'right': 'right'}
@@ -69,8 +69,7 @@ class UIMessageWindow(UIWindow):
                                                                       (close_button_width, menu_bar_height)),
                                             text='╳',
                                             manager=manager,
-                                            container=self.get_container(),
-                                            parent_element=self,
+                                            container=self,
                                             object_id='#close_button',
                                             anchors={'top': 'top', 'bottom': 'top',
                                                      'left': 'right', 'right': 'right'}
@@ -84,10 +83,9 @@ class UIMessageWindow(UIWindow):
                                                                  button_size),
                                        text="Dismiss",
                                        manager=manager,
-                                       container=self.get_container(),
+                                       container=self,
                                        tool_tip_text="<font face=fira_code color=normal_text size=2>"
                                                      "Click to get rid of this message.</font>",
-                                       parent_element=self,
                                        object_id='#dismiss_button',
                                        anchors={"left": "right",
                                                 "top": "bottom",
@@ -103,8 +101,7 @@ class UIMessageWindow(UIWindow):
                                        (border_rect_height - menu_bar_height -
                                         button_vertical_space)))
         self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
-                                    container=self.get_container(),
-                                    parent_element=self,
+                                    container=self,
                                     anchors={"left": "left",
                                              "top": "top",
                                              "right": "right",

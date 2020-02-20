@@ -74,7 +74,7 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
         with pytest.raises(ValueError, match="Object ID cannot contain fullstops or spaces"):
-            element.create_valid_ids(None, ". .", 'none')
+            element.create_valid_ids(None, None, ". .", 'none')
 
     def test_check_hover(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),

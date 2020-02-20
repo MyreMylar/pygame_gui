@@ -3,11 +3,10 @@ import pygame_gui
 from typing import Union, Tuple, Dict
 
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.core import ui_container
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.elements import ui_tool_tip
-from pygame_gui.core.drawable_shapes import DrawableShape, RectDrawableShape
-from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
+from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape, RectDrawableShape
 
 
 class UIButton(UIElement):
@@ -30,7 +29,7 @@ class UIButton(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
                  manager: UIManager,
-                 container: ui_container.UIContainer = None,
+                 container: Union[IContainerInterface, None] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
@@ -38,7 +37,8 @@ class UIButton(UIElement):
                  anchors: Dict[str, str] = None
                  ):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
+                                                                parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='button')
 
@@ -94,8 +94,6 @@ class UIButton(UIElement):
         self.shape_corner_radius = 2
 
         self.state_transitions = {}
-
-        self.drawable_shape = None  # type: Union[DrawableShape, None]
 
         self.rebuild_from_changed_theme_data()
 

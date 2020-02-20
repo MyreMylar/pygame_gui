@@ -2,7 +2,7 @@ import pygame
 from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
-from pygame_gui.core import ui_container
+from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.elements import ui_button
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -23,12 +23,13 @@ class UIVerticalScrollBar(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  visible_percentage: float,
                  manager: ui_manager.UIManager,
-                 container: ui_container.UIContainer = None,
+                 container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
+                                                                parent_element=parent_element,
                                                                 object_id=object_id,
                                                                 element_id='vertical_scroll_bar')
         super().__init__(relative_rect, manager, container,

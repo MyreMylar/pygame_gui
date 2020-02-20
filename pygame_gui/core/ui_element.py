@@ -1,8 +1,8 @@
 import pygame
 import warnings
-from typing import List, Union, Tuple, Dict, Optional, Any
+from typing import List, Union, Tuple, Dict
 
-from pygame_gui.core import ui_container
+from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui import ui_manager
 
 
@@ -21,9 +21,12 @@ class UIElement(pygame.sprite.Sprite):
     :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
     :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
-    def __init__(self, relative_rect: pygame.Rect, manager: 'ui_manager.UIManager',
-                 container: Union['ui_container.UIContainer', None],
-                 starting_height: int, layer_thickness: int,
+    def __init__(self, relative_rect: pygame.Rect,
+                 manager: 'ui_manager.UIManager',
+                 container: Union[IContainerInterface, None],
+                 *,
+                 starting_height: int,
+                 layer_thickness: int,
                  object_ids: Union[List[Union[str, None]], None] = None,
                  element_ids: Union[List[str], None] = None,
                  anchors: Dict[str, str] = None):
@@ -45,12 +48,14 @@ class UIElement(pygame.sprite.Sprite):
 
         self.layer_thickness = layer_thickness
         self.starting_height = starting_height
-        self.top_layer = self._layer + self.layer_thickness
 
         if container is None:
             root_window = self.ui_manager.get_window_stack().get_root_window()
             container = root_window.get_container() if root_window is not None else self
-        self.ui_container = container
+
+        if isinstance(container, IContainerInterface):
+            self.ui_container = container.get_container()
+
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
@@ -180,25 +185,31 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.bottom = new_bottom
 
     @staticmethod
-    def create_valid_ids(parent_element, object_id, element_id):
+    def create_valid_ids(container: Union[IContainerInterface, None], parent_element: Union[None,'UIElement'],
+                         object_id: str, element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
         containing full stops. These ID lists are used by the theming system to identify what theming parameters to
         apply to which element.
 
+        :param container: The container for this element. If parent is None and the container is not then by default the container will be used as the parent.
         :param parent_element: Element that this element 'belongs to' in theming. Elements inherit colours from parents.
         :param object_id: An optional ID to help distinguish this element from other elements of the same class.
         :param element_id: A string ID representing this element's class.
         :return:
         """
+        if parent_element is None and container is not None:
+            id_parent = container
+        else:
+            id_parent = parent_element
         if object_id is not None and ('.' in object_id or ' ' in object_id):
             raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
 
-        if parent_element is not None:
-            new_element_ids = parent_element.element_ids.copy()
+        if id_parent is not None:
+            new_element_ids = id_parent.element_ids.copy()
             new_element_ids.append(element_id)
 
-            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids = id_parent.object_ids.copy()
             new_object_ids.append(object_id)
         else:
             new_element_ids = [element_id]
@@ -239,7 +250,6 @@ class UIElement(pygame.sprite.Sprite):
         """
         self.ui_group.change_layer(self, new_layer)
         self._layer = new_layer
-        self.top_layer = new_layer + self.layer_thickness
 
     def kill(self):
         """
@@ -380,7 +390,7 @@ class UIElement(pygame.sprite.Sprite):
         A stub to override. Gives UI Elements access to pygame events.
 
         :param event: The event to process.
-        :return bool: Should return True if this element makes use fo this event.
+        :return bool: Should return True if this element makes use of this event.
         """
         if self is not None:
             return False
@@ -469,3 +479,11 @@ class UIElement(pygame.sprite.Sprite):
         else:
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None
+
+    def get_top_layer(self):
+        """
+        Assuming we have correctly calculated the 'thickness' of this container, this method will return the top of this element.
+
+        :return int: An integer representing the current highest layer being used by this element.
+        """
+        return self._layer + self.layer_thickness

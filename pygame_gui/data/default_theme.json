@@ -28,6 +28,14 @@
       "unfilled_bar":"#CCCCCC"
     }
   },
+  "panel":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "2"
+    }
+  },
   "button":
   {
     "misc":

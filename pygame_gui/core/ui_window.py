@@ -1,12 +1,13 @@
 import pygame
 from typing import List, Union, Tuple, Dict
 
+from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui import ui_manager
 
 
-class UIWindow(UIElement):
+class UIWindow(UIElement, IContainerInterface):
     """
     A base class for window GUI elements, any windows should inherit from this class.
 
@@ -34,7 +35,9 @@ class UIWindow(UIElement):
         starting_height = 1
         if len(element_ids) == 1 and element_ids[0] == 'root_window':
             self._layer = 0
-            self.window_container = UIContainer(rect.copy(), manager, None, None, None)
+            self.window_container = UIContainer(rect.copy(), manager, starting_height=1,
+                                                container=None, parent_element=None,
+                                                object_id=None)
             self.window_stack = manager.get_window_stack()
             self.window_stack.add_new_window(self)
             starting_height = 0  # nothing to draw in the root window
@@ -57,7 +60,10 @@ class UIWindow(UIElement):
                                                                                   self.container_margins['right']),
                                                       self.relative_rect.height - (self.container_margins['top'] +
                                                                                    self.container_margins['bottom']))
-            self.window_container = UIContainer(relative_container_rect, manager, None, self, None)
+            self.window_container = UIContainer(relative_container_rect, manager,
+                                                starting_height=1,
+                                                container=None, parent_element=self,
+                                                object_id=None)
             self.window_stack = self.ui_manager.get_window_stack()
             self.window_stack.add_new_window(self)
 
@@ -111,8 +117,6 @@ class UIWindow(UIElement):
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Can be overridden, also handle resizing windows. Gives UI Windows access to pygame events.
-
-        TODO: Check for drawable shape and use that instead of rect?
 
         :param event: The event to process.
         :return bool: Should return True if this element makes use of this event.
