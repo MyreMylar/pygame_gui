@@ -67,16 +67,16 @@ class TestUIManager:
         """
         Check clear and reset is restoring manager to initial state with no extra, lingering, elements.
         """
-        # start with just the root window, and the root window container
-        should_be_two_sprites = len(default_ui_manager.get_sprite_group().sprites())
+        # start with just the root window container
+        should_be_one_sprite = len(default_ui_manager.get_sprite_group().sprites())
 
         UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        should_be_three_sprites = len(default_ui_manager.get_sprite_group().sprites())
+        should_be_two_sprites = len(default_ui_manager.get_sprite_group().sprites())
 
         default_ui_manager.clear_and_reset()
-        should_be_two_sprites_again = len(default_ui_manager.get_sprite_group().sprites())
+        should_be_one_sprite_again = len(default_ui_manager.get_sprite_group().sprites())
 
-        assert should_be_two_sprites == 2 and should_be_three_sprites == 3 and should_be_two_sprites_again == 2
+        assert should_be_one_sprite == 1 and should_be_two_sprites == 2 and should_be_one_sprite_again == 1
 
     def test_process_events(self, _init_pygame, default_ui_manager):
         """

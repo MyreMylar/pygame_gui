@@ -17,7 +17,7 @@ class TestUIContainer:
 
         UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                  manager=default_ui_manager, container=container)
-        container.change_container_layer(2)
+        container.change_layer(2)
         assert container.get_top_layer() == 4
 
     def test_get_top_layer(self, _init_pygame, default_ui_manager):

@@ -29,21 +29,9 @@ class UIWindow(UIElement, IContainerInterface):
         self.resizable = resizable
         self.minimum_dimensions = (100, 100)
         self.edge_hovering = [False, False, False, False]
-        # need to create the container that holds the elements first if this is the root window
-        # so we can bootstrap everything and effectively add the root window to it's own container.
-        # It's a little bit weird.
-        starting_height = 1
-        if len(element_ids) == 1 and element_ids[0] == 'root_window':
-            self._layer = 0
-            self.window_container = UIContainer(rect.copy(), manager, starting_height=1,
-                                                container=None, parent_element=None,
-                                                object_id=None)
-            self.window_stack = manager.get_window_stack()
-            self.window_stack.add_new_window(self)
-            starting_height = 0  # nothing to draw in the root window
 
         super().__init__(rect, manager, container=None,
-                         starting_height=starting_height,
+                         starting_height=1,
                          layer_thickness=1,
                          object_ids=new_object_ids,
                          element_ids=new_element_ids)
@@ -62,7 +50,9 @@ class UIWindow(UIElement, IContainerInterface):
                                                                                    self.container_margins['bottom']))
             self.window_container = UIContainer(relative_container_rect, manager,
                                                 starting_height=1,
-                                                container=None, parent_element=self,
+                                                is_window_container=True,
+                                                container=None,
+                                                parent_element=self,
                                                 object_id=None)
             self.window_stack = self.ui_manager.get_window_stack()
             self.window_stack.add_new_window(self)
@@ -105,14 +95,18 @@ class UIWindow(UIElement, IContainerInterface):
             self.get_container().set_dimensions(new_container_dimensions)
             self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                         self.relative_rect.y + self.container_margins['top']))
-            self.get_container().update_containing_rect_position()
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_relative_position(position)
 
         self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                     self.relative_rect.y + self.container_margins['top']))
-        self.get_container().update_containing_rect_position()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_position(position)
+
+        self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
+                                                    self.relative_rect.y + self.container_margins['top']))
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -225,7 +219,8 @@ class UIWindow(UIElement, IContainerInterface):
         :param hovered_higher_element: Have we already hovered an element/window above this one.
         """
         hovered = False
-        if self.alive() and self.can_hover() and self.resizable and not hovered_higher_element and not self.resizing_mode_active:
+        if (self.alive() and self.can_hover() and self.resizable and
+                not hovered_higher_element and not self.resizing_mode_active):
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
@@ -270,16 +265,16 @@ class UIWindow(UIElement, IContainerInterface):
         """
         return self._layer + self.layer_thickness
 
-    def change_window_layer(self, new_layer: int):
+    def change_layer(self, new_layer: int):
         """
         Move this window, and it's contents, to a new layer in the UI.
 
         :param new_layer: The layer to move to.
         """
         if new_layer != self._layer:
-            self._layer = new_layer
-            self.ui_manager.get_sprite_group().change_layer(self, new_layer)
-            self.window_container.change_container_layer(new_layer)
+            super().change_layer(new_layer)
+            if self.window_container is not None:
+                self.window_container.change_layer(new_layer)
 
     def kill(self):
         """
@@ -289,15 +284,3 @@ class UIWindow(UIElement, IContainerInterface):
         self.window_stack.remove_window(self)
         self.window_container.kill()
         super().kill()
-
-    def select(self):
-        """
-        A stub to override. Called when we select focus this UI element.
-        """
-        pass
-
-    def unselect(self):
-        """
-        A stub to override. Called when we stop select focusing this UI element.
-        """
-        pass

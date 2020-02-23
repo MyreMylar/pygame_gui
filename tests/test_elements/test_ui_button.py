@@ -268,8 +268,7 @@ class TestUIButton:
         processed_up_event = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
                                                                      {'button': 1, 'pos': (1, 1)}))
 
-        assert (processed_down_event is True and processed_up_event is True and
-                button.held is False and button.is_selected is True)
+        assert (processed_down_event is True and processed_up_event is True and button.held is False)
 
     def test_check_pressed(self, _init_pygame: None, default_ui_manager: UIManager,
                            _display_surface_return_none: None):

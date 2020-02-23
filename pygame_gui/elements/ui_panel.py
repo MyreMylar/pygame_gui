@@ -81,7 +81,7 @@ class UIPanel(UIElement, IContainerInterface):
 
         self.panel_container = UIContainer(relative_container_rect, manager,
                                            starting_height=starting_layer_height,
-                                           parent_element=self)
+                                           parent_element=self, object_id='#panel_container')
 
     def update(self, time_delta: float):
         """
@@ -140,14 +140,18 @@ class UIPanel(UIElement, IContainerInterface):
             self.get_container().set_dimensions(new_container_dimensions)
             self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                         self.relative_rect.y + self.container_margins['top']))
-            self.get_container().update_containing_rect_position()
 
     def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_relative_position(position)
 
         self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                     self.relative_rect.y + self.container_margins['top']))
-        self.get_container().update_containing_rect_position()
+
+    def set_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_position(position)
+
+        self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
+                                                    self.relative_rect.y + self.container_margins['top']))
 
     def kill(self):
         """

@@ -54,7 +54,7 @@ class UIButton(UIElement):
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
-        self.ui_root_container = self.ui_manager.get_window_stack().get_root_window().get_container()
+        self.ui_root_container = self.ui_manager.get_root_container()
 
         # Some different states our button can be in, could use a state machine for this if we wanted.
         self.held = False
@@ -252,7 +252,7 @@ class UIButton(UIElement):
                 if self.held:
                     self.held = False
                     self.set_inactive()
-                    self.select()
+                    # self.select()
                     processed_event = True
 
         return processed_event

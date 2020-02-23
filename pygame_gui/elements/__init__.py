@@ -5,6 +5,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.elements.ui_label import UILabel
 from pygame_gui.elements.ui_panel import UIPanel
 from pygame_gui.elements.ui_screen_space_health_bar import UIScreenSpaceHealthBar
+from pygame_gui.elements.ui_selection_list import UISelectionList
 from pygame_gui.elements.ui_tool_tip import UITooltip
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.elements.ui_text_box import UITextBox

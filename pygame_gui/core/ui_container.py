@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union, Tuple
 
 import pygame
 
@@ -19,10 +19,12 @@ class UIContainer(UIElement, IContainerInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, manager, *, starting_height: int = 1,
-                 container=None, parent_element=None, object_id=None):
+    def __init__(self, relative_rect, manager, *, starting_height: int = 1, is_window_container: bool = False,
+                 container=None, parent_element=None, object_id=None, anchors=None):
 
         self.ui_manager = manager
+        self.is_window_container = is_window_container
+        self.elements = []  # type: List[UIElement]
 
         new_element_ids, new_object_ids = self.create_valid_ids(container=container,
                                                                 parent_element=parent_element,
@@ -33,11 +35,12 @@ class UIContainer(UIElement, IContainerInterface):
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          starting_height=starting_height,
-                         layer_thickness=1)
+                         layer_thickness=1,
+                         anchors=anchors)
 
         self.sprite_group = self.ui_manager.get_sprite_group()
         self.set_image(self.ui_manager.get_universal_empty_surface())
-        self.elements = []  # type: List[UIElement]
+
         self.layer_thickness = 0  # default to 0 thickness for an empty container
 
         self.hovered = False
@@ -71,14 +74,20 @@ class UIContainer(UIElement, IContainerInterface):
         that they reach in the 'layer stack'. We then use that to determine the overall 'thickness' of this container.
         The thickness value is used to determine where to place overlapping windows in the layers
         """
-        max_element_top_layer = 0
+        max_element_top_layer = self._layer
         for element in self.elements:
-            if element.get_top_layer() > max_element_top_layer:
+            if ((element not in self.ui_manager.ui_window_stack.stack) and
+                not (isinstance(element, UIContainer) and element.is_window_container) and
+                    element.get_top_layer() > max_element_top_layer):
                 max_element_top_layer = element.get_top_layer()
 
-        self.layer_thickness = max_element_top_layer - self._layer
+        new_thickness = max_element_top_layer - self._layer
+        if new_thickness != self.layer_thickness:
+            self.layer_thickness = new_thickness
+            if self.ui_container is not None and self.ui_container != self:
+                self.ui_container.recalculate_container_layer_thickness()
 
-    def change_container_layer(self, new_layer):
+    def change_layer(self, new_layer):
         """
         Change the layer of this container. Layers are used by the GUI to control the order in which things are drawn
         and which things should currently be interactive (so you can't interact with things behind other things).
@@ -89,8 +98,8 @@ class UIContainer(UIElement, IContainerInterface):
         :param new_layer: The layer to move our container to.
         """
         if new_layer != self._layer:
-            self._layer = new_layer
-            self.sprite_group.change_layer(self, self._layer)
+            super().change_layer(new_layer)
+
             for element in self.elements:
                 element.change_layer(self._layer + element.starting_height)
 
@@ -102,6 +111,19 @@ class UIContainer(UIElement, IContainerInterface):
 
         for element in self.elements:
             element.update_containing_rect_position()
+
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_position(position)
+        self.update_containing_rect_position()
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_relative_position(position)
+        self.update_containing_rect_position()
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        super().set_dimensions(dimensions)
+        # self.set_relative_position(self.relative_rect.topleft)
+        self.update_containing_rect_position()
 
     def get_top_layer(self):
         """

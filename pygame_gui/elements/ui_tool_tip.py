@@ -97,7 +97,7 @@ class UITooltip(UIElement):
         :return bool: returns True if we find a valid (visible) position and False if we do not.
         """
 
-        window_rect = self.ui_manager.get_window_stack().get_root_window().get_container().rect
+        window_rect = self.ui_manager.get_root_container().rect
 
         if window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
             self.rect.centerx = int(position.x)

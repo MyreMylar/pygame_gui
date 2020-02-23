@@ -5,6 +5,7 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_window import UIWindow
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.ui_container import UIContainer
 
 
 class UIManager:
@@ -25,9 +26,14 @@ class UIManager:
 
         self.select_focused_element = None
         self.last_focused_vertical_scrollbar = None
+        self.root_container = None
+        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
+                                          container=None, parent_element=None,
+                                          object_id='#root_container')
 
-        self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
+        self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
+
+        #UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
         self.live_theme_updates = enable_live_theme_updates
         self.theme_update_acc = 0.0
@@ -43,7 +49,8 @@ class UIManager:
         self.active_user_cursor = pygame.cursors.arrow
         self._active_cursor = self.active_user_cursor
 
-
+    def get_root_container(self):
+        return self.root_container
 
     def get_theme(self) -> UIAppearanceTheme:
         """
@@ -92,12 +99,14 @@ class UIManager:
 
     def clear_and_reset(self):
         """
-        Clear all existing windows, including the root window, which should get rid of all created UI elements.
-        We then recreate the UIWindowStack and the root window.
+        Clear all existing windows and the root container, which should get rid of all created UI elements.
+        We then recreate the UIWindowStack and the root container.
         """
-        self.ui_window_stack.clear()
-        self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
+        self.root_container.kill()
+        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
+                                          container=None, parent_element=None,
+                                          object_id='#root_container')
+        self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
 
     def process_events(self, event: pygame.event.Event):
         """
@@ -106,19 +115,15 @@ class UIManager:
         One of the key things it controls is the currently 'focused' or 'selected' element of which there
         can be only one at a time.
 
-        TODO: Pass 'clicked inside' checks down to elements so we can properly test if clicks are inside shapes or not.
-
         :param event:  pygame.event.Event - the event to process.
         """
         event_handled = False
         window_sorting_event_handled = False
-        sorted_layers = sorted(self.ui_group.layers(),
-                               reverse=True)  # TODO: See if  possible to keep track of the reversed layers so we don't have to sort them each loop
+        sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
             if not window_sorting_event_handled:
-                windows_in_layer = [window for window in sprites_in_layer if (
-                        'window' in window.element_ids[-1]) and (self.ui_window_stack.get_root_window() is not window)]
+                windows_in_layer = [window for window in sprites_in_layer if ('window' in window.element_ids[-1])]
                 for window in windows_in_layer:
                     window_sorting_event_handled = window.check_clicked_inside(event)
             if not event_handled:
@@ -386,7 +391,10 @@ class UIManager:
             print("Layer: " + str(layer))
             print("-----------------------")
             for element in self.ui_group.get_sprites_from_layer(layer):
-                print(str(element.most_specific_combined_id))
+                if element.element_ids[-1] == 'container':
+                    print(str(element.most_specific_combined_id) + ': thickness - ' + str(element.layer_thickness))
+                else:
+                    print(str(element.most_specific_combined_id))
             print(' ')
 
     def load_default_cursors(self):

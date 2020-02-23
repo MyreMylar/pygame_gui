@@ -50,8 +50,10 @@ class UIElement(pygame.sprite.Sprite):
         self.starting_height = starting_height
 
         if container is None:
-            root_window = self.ui_manager.get_window_stack().get_root_window()
-            container = root_window.get_container() if root_window is not None else self
+            if self.ui_manager.get_root_container() is not None:
+                container = self.ui_manager.get_root_container()
+            else:
+                container = self
 
         if isinstance(container, IContainerInterface):
             self.ui_container = container.get_container()
@@ -82,6 +84,7 @@ class UIElement(pygame.sprite.Sprite):
         self._pre_clipped_image = None
 
         self._image_clip = None
+        self._update_container_clip()
 
     def _update_absolute_rect_position_from_anchors(self):
         """
@@ -248,8 +251,9 @@ class UIElement(pygame.sprite.Sprite):
 
         :param new_layer: The layer to change this element to.
         """
-        self.ui_group.change_layer(self, new_layer)
-        self._layer = new_layer
+        if new_layer != self._layer:
+            self.ui_group.change_layer(self, new_layer)
+            self._layer = new_layer
 
     def kill(self):
         """
