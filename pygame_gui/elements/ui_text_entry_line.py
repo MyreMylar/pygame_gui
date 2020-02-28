@@ -51,7 +51,7 @@ class UITextEntryLine(UIElement):
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,
                          anchors=anchors)
-        self.selected = False
+        self.focused = False
 
         self.text = ""
 
@@ -374,7 +374,7 @@ class UITextEntryLine(UIElement):
                 if self.cursor_on:
                     self.cursor_on = False
                     self.redraw_cursor()
-                elif self.selected:
+                elif self.focused:
                     self.cursor_on = True
                     self.redraw_cursor()
             else:
@@ -382,21 +382,21 @@ class UITextEntryLine(UIElement):
         else:
             self.cursor_blink_delay_after_moving_acc += time_delta
 
-    def unselect(self):
+    def unfocus(self):
         """
         Called when this element is no longer the current focus.
         """
-        self.selected = False
+        self.focused = False
         pygame.key.set_repeat()
         self.select_range = [0, 0]
         self.redraw()
 
-    def select(self):
+    def focus(self):
         """
         Called when we 'select focus' on this element. In this case it sets up the keyboard to repeat held key presses,
         useful for natural feeling keyboard input.
         """
-        self.selected = True
+        self.focused = True
         pygame.key.set_repeat(500, 25)
         self.redraw()
 
@@ -410,11 +410,12 @@ class UITextEntryLine(UIElement):
         :param event: The current event to consider reacting to.
         :return bool: Returns True if we've done something with the input event.
         """
-        processed_event = False
+        consumed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                # TODO: make text line use same double click schema as buttons
                 if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
                     self.double_click_started = False
                     pattern = re.compile(r"[\w']+")
@@ -459,19 +460,19 @@ class UITextEntryLine(UIElement):
                     self.selection_in_progress = True
                     self.double_click_select_time_acc = 0.0
 
-                processed_event = True
+                consumed_event = True
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.drawable_shape.collide_point(scaled_mouse_pos):
-                processed_event = True
+                consumed_event = True
                 new_edit_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + scaled_mouse_pos[0])
                 if new_edit_pos != self.edit_position:
                     self.edit_position = new_edit_pos
                     self.cursor_has_moved_recently = True
                     self.select_range[1] = self.edit_position
             self.selection_in_progress = False
-        if self.selected and event.type == pygame.KEYDOWN:
+        if self.focused and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 entry_finished_event = pygame.event.Event(pygame.USEREVENT,
                                                           {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
@@ -479,12 +480,12 @@ class UITextEntryLine(UIElement):
                                                            'ui_element': self,
                                                            'ui_object_id': self.most_specific_combined_id})
                 pygame.event.post(entry_finished_event)
-                processed_event = True
+                consumed_event = True
             elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                 self.select_range = [0, len(self.text)]
                 self.edit_position = len(self.text)
                 self.cursor_has_moved_recently = True
-                processed_event = True
+                consumed_event = True
             elif event.key == pygame.K_x and event.mod & pygame.KMOD_CTRL:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     low_end = min(self.select_range[0], self.select_range[1])
@@ -494,13 +495,13 @@ class UITextEntryLine(UIElement):
                     self.edit_position = low_end
                     self.select_range = [0, 0]
                     self.cursor_has_moved_recently = True
-                    processed_event = True
+                    consumed_event = True
             elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     low_end = min(self.select_range[0], self.select_range[1])
                     high_end = max(self.select_range[0], self.select_range[1])
                     clipboard_copy(self.text[low_end:high_end])
-                    processed_event = True
+                    consumed_event = True
             elif event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
                 new_text = clipboard_paste()
                 if self.validate_text_string(new_text):
@@ -525,7 +526,7 @@ class UITextEntryLine(UIElement):
                             self.text = final_text
                             self.edit_position += len(new_text)
                             self.cursor_has_moved_recently = True
-                    processed_event = True
+                    consumed_event = True
             elif event.key == pygame.K_BACKSPACE:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     low_end = min(self.select_range[0], self.select_range[1])
@@ -540,7 +541,7 @@ class UITextEntryLine(UIElement):
                     self.text = self.text[:self.edit_position-1] + self.text[self.edit_position:]
                     self.edit_position -= 1
                     self.cursor_has_moved_recently = True
-                processed_event = True
+                consumed_event = True
             elif event.key == pygame.K_DELETE:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     low_end = min(self.select_range[0], self.select_range[1])
@@ -553,7 +554,7 @@ class UITextEntryLine(UIElement):
                     self.text = self.text[:self.edit_position] + self.text[self.edit_position+1:]
                     self.edit_position = self.edit_position
                     self.cursor_has_moved_recently = True
-                processed_event = True
+                consumed_event = True
             elif event.key == pygame.K_LEFT:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     self.edit_position = min(self.select_range[0], self.select_range[1])
@@ -562,7 +563,7 @@ class UITextEntryLine(UIElement):
                 elif self.edit_position > 0:
                     self.edit_position -= 1
                     self.cursor_has_moved_recently = True
-                processed_event = True
+                consumed_event = True
             elif event.key == pygame.K_RIGHT:
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
                     self.edit_position = max(self.select_range[0], self.select_range[1])
@@ -571,7 +572,7 @@ class UITextEntryLine(UIElement):
                 elif self.edit_position < len(self.text):
                     self.edit_position += 1
                     self.cursor_has_moved_recently = True
-                processed_event = True
+                consumed_event = True
             else:
                 within_length_limit = True
                 if self.length_limit is not None and len(self.text) >= self.length_limit:
@@ -598,8 +599,8 @@ class UITextEntryLine(UIElement):
                                 self.text = start_str + character + end_str
                                 self.edit_position += 1
                             self.cursor_has_moved_recently = True
-                            processed_event = True
-        return processed_event
+                            consumed_event = True
+        return consumed_event
 
     def find_edit_position_from_pixel_pos(self, pixel_pos: int):
         """

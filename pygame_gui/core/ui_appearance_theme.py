@@ -358,6 +358,21 @@ class UIAppearanceTheme:
             if len(element_ids) != 0:
                 self.get_next_id_node(None, element_ids, object_ids, 0, len(element_ids), combined_ids)
 
+            current_ids = combined_ids[:]
+
+            found_all_ids = False
+            while not found_all_ids:
+                if len(current_ids) > 0:
+                    for index, current_id in enumerate(current_ids):
+                        found_full_stop_index = current_id.find('.')
+                        if found_full_stop_index == -1:
+                            found_all_ids = True
+                        else:
+                            current_ids[index] = current_id[found_full_stop_index+1:]
+                            combined_ids.append(current_ids[index])
+                else:
+                    found_all_ids = True
+
         return combined_ids
 
     def get_image(self, object_ids, element_ids, image_id):

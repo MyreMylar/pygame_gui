@@ -78,6 +78,7 @@ class UIElement(pygame.sprite.Sprite):
 
         self.is_enabled = True
         self.hovered = False
+        self.is_focused = False
         self.hover_time = 0.0
 
         self.pre_debug_image = None
@@ -188,7 +189,7 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.bottom = new_bottom
 
     @staticmethod
-    def create_valid_ids(container: Union[IContainerInterface, None], parent_element: Union[None,'UIElement'],
+    def create_valid_ids(container: Union[IContainerInterface, None], parent_element: Union[None, 'UIElement'],
                          object_id: str, element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
@@ -332,6 +333,12 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
+        if self.relative_right_margin is not None:
+            self.relative_right_margin = self.ui_container.rect.right - self.rect.right
+
+        if self.relative_bottom_margin is not None:
+            self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
+
         if self.drawable_shape is not None:
             self.drawable_shape.set_dimensions(self.relative_rect.size)
             # self.set_image(self.drawable_shape.get_active_state_surface())
@@ -399,17 +406,17 @@ class UIElement(pygame.sprite.Sprite):
         if self is not None:
             return False
 
-    def select(self):
+    def focus(self):
         """
-        A stub to override. Called when we select focus this UI element.
+        A stub to override. Called when we focus this UI element.
         """
-        pass
+        self.is_focused = True
 
-    def unselect(self):
+    def unfocus(self):
         """
-        A stub to override. Called when we stop select focusing this UI element.
+        A stub to override. Called when we stop focusing this UI element.
         """
-        pass
+        self.is_focused = False
 
     def rebuild_from_changed_theme_data(self):
         pass

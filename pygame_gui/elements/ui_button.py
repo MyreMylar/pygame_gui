@@ -34,7 +34,8 @@ class UIButton(UIElement):
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 allow_double_clicks: bool = False
                  ):
 
         new_element_ids, new_object_ids = self.create_valid_ids(container=container,
@@ -64,6 +65,10 @@ class UIButton(UIElement):
 
         # time the hovering
         self.hover_time = 0.0
+
+        # timer for double clicks
+        self.allow_double_clicks = allow_double_clicks
+        self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
 
         self.text_surface = None
         self.aligned_text_rect = None
@@ -213,6 +218,9 @@ class UIButton(UIElement):
                 self.pressed_event = False
                 self.pressed = True
 
+            if self.allow_double_clicks and self.double_click_timer < self.ui_manager.get_double_click_time():
+                self.double_click_timer += time_delta
+
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles interactions with the button.
@@ -220,27 +228,35 @@ class UIButton(UIElement):
         :param event: The event to process.
         :return bool: Returns True if we made use of this event.
         """
-        processed_event = False
+        consumed_event = False
         if self.is_enabled:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                     int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                    self.held = True
-                    self.set_active()
-                    processed_event = True
-                    self.hover_time = 0.0
-                    if self.tool_tip is not None:
-                        self.tool_tip.kill()
-                        self.tool_tip = None
+                    if self.allow_double_clicks and self.double_click_timer <= self.ui_manager.get_double_click_time():
+                        button_pressed_event = pygame.event.Event(pygame.USEREVENT,
+                                                                  {'user_type': pygame_gui.UI_BUTTON_DOUBLE_CLICKED,
+                                                                   'ui_element': self,
+                                                                   'ui_object_id': self.most_specific_combined_id})
+                        pygame.event.post(button_pressed_event)
+                    else:
+                        self.double_click_timer = 0.0
+                        self.held = True
+                        self.set_active()
+                        self.hover_time = 0.0
+                        if self.tool_tip is not None:
+                            self.tool_tip.kill()
+                            self.tool_tip = None
+                    consumed_event = True
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                     int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
                     self.held = False
                     self.set_inactive()
-                    self.ui_manager.unselect_focus_element()
-                    processed_event = True
+                    self.ui_manager.unset_focus_element()
+                    consumed_event = True
                     self.pressed_event = True
 
                     button_pressed_event = pygame.event.Event(pygame.USEREVENT,
@@ -252,10 +268,9 @@ class UIButton(UIElement):
                 if self.held:
                     self.held = False
                     self.set_inactive()
-                    # self.select()
-                    processed_event = True
+                    consumed_event = True
 
-        return processed_event
+        return consumed_event
 
     def check_pressed(self):
         """

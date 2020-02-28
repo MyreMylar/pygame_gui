@@ -1,11 +1,9 @@
-import os
 import pytest
 import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.ui_window import UIWindow
 from pygame_gui.core.ui_container import UIContainer
 
 
@@ -29,8 +27,8 @@ class TestUIElement:
         element.while_hovering(0.5, pygame.math.Vector2(0.0, 0.0))
         assert element.can_hover() is True
         assert element.process_event(pygame.event.Event(pygame.USEREVENT, {})) is False
-        element.select()
-        element.unselect()
+        element.focus()
+        element.unfocus()
         element.rebuild_from_changed_theme_data()
 
     def test_hover_point(self, _init_pygame, default_ui_manager):

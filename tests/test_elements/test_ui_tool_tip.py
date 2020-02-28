@@ -131,7 +131,7 @@ class TestUIToolTip:
         assert tool_tip.rect.topleft == (150, 30)
 
         assert tool_tip.text_block.ui_container.rect.topleft == (0, 0)
-        assert tool_tip.text_block.relative_rect.bottom == 96
+        assert tool_tip.text_block.relative_rect.bottom == 67
 
         assert tool_tip.text_block.rect.topleft == (150, 30)
 

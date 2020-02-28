@@ -3,7 +3,6 @@ from typing import Tuple, List, Dict, Union
 
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
-from pygame_gui.core.ui_window import UIWindow
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 
@@ -24,7 +23,7 @@ class UIManager:
         self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
         self.ui_group = pygame.sprite.LayeredUpdates()
 
-        self.select_focused_element = None
+        self.focused_element = None
         self.last_focused_vertical_scrollbar = None
         self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
@@ -39,6 +38,7 @@ class UIManager:
         self.theme_update_acc = 0.0
         self.theme_update_check_interval = 1.0
 
+        self.mouse_double_click_time = 0.5
         self.mouse_position = (0, 0)
         self.mouse_pos_scale_factor = [1.0, 1.0]
 
@@ -48,6 +48,9 @@ class UIManager:
         self.load_default_cursors()
         self.active_user_cursor = pygame.cursors.arrow
         self._active_cursor = self.active_user_cursor
+
+    def get_double_click_time(self) -> float:
+        return self.mouse_double_click_time
 
     def get_root_container(self):
         return self.root_container
@@ -112,33 +115,36 @@ class UIManager:
         """
         This is the top level method through which all input to UI elements is processed and reacted to.
 
-        One of the key things it controls is the currently 'focused' or 'selected' element of which there
-        can be only one at a time.
+        One of the key things it controls is the currently 'focused' element of which there
+        can be only one at a time. It also manages 'consumed events' these events will not be passed on to elements
+        below them in the GUI hierarchy and helps us stop buttons underneath windows from receiving input.
 
         :param event:  pygame.event.Event - the event to process.
         """
-        event_handled = False
-        window_sorting_event_handled = False
+        consumed_event = False
+        window_sorting_consumed_event = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
-            if not window_sorting_event_handled:
+            if not window_sorting_consumed_event:
                 windows_in_layer = [window for window in sprites_in_layer if ('window' in window.element_ids[-1])]
                 for window in windows_in_layer:
-                    window_sorting_event_handled = window.check_clicked_inside(event)
-            if not event_handled:
+                    if not window_sorting_consumed_event:
+                        window_sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
+            if not consumed_event:
                 for ui_element in sprites_in_layer:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_x, mouse_y = event.pos
-                        if ui_element.hover_point(mouse_x, mouse_y) and ui_element is not self.select_focused_element:
-                            self.unselect_focus_element()
-                            self.select_focus_element(ui_element)
+                        if ui_element.hover_point(mouse_x, mouse_y) and ui_element is not self.focused_element:
+                            self.unset_focus_element()
+                            self.set_focus_element(ui_element)
 
-                    event_handled = ui_element.process_event(event)
-                    if event_handled and event.type == pygame.MOUSEBUTTONDOWN:
-                        # clicks should only be handled by the top layer of whatever GUI thing we are clicking on
-                        # I think other types of events should get a chance to go through the whole lot if need be.
-                        # May be wrong...
+                    consumed_event = ui_element.process_event(event)
+                    if consumed_event:
+                        # Generally clicks should only be handled by the top layer of whatever GUI thing we are
+                        # clicking on. I am trusting UIElments to decide whether they need to consume the events they
+                        # respond to. Hopefully this is not a mistake.
+
                         break
 
     def update(self, time_delta: float):
@@ -321,15 +327,15 @@ class UIManager:
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
 
-    def unselect_focus_element(self):
+    def unset_focus_element(self):
         """
         Unselect and clear the currently focused element.
         """
-        if self.select_focused_element is not None:
-            self.select_focused_element.unselect()
-            self.select_focused_element = None
+        if self.focused_element is not None:
+            self.focused_element.unfocus()
+            self.focused_element = None
 
-    def select_focus_element(self, ui_element: UIElement):
+    def set_focus_element(self, ui_element: UIElement):
         """
         Set an element as the focused element.
 
@@ -337,9 +343,9 @@ class UIManager:
 
         :param ui_element: The element to focus on.
         """
-        if self.select_focused_element is None:
-            self.select_focused_element = ui_element
-            self.select_focused_element.select()
+        if self.focused_element is None:
+            self.focused_element = ui_element
+            self.focused_element.focus()
 
             if 'vertical_scroll_bar' in ui_element.element_ids:
                 self.last_focused_vertical_scrollbar = ui_element

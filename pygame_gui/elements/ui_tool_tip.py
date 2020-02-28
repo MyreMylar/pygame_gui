@@ -100,7 +100,7 @@ class UITooltip(UIElement):
         window_rect = self.ui_manager.get_root_container().rect
 
         if window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
-            self.rect.centerx = int(position.x)
+            self.rect.left = int(position.x)
             self.rect.top = int(position.y + self.hover_distance_from_target[1])
 
             if window_rect.contains(self.rect):

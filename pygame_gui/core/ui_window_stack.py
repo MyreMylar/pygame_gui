@@ -1,6 +1,4 @@
-from typing import Union
-
-from pygame_gui.core import ui_window
+from pygame_gui.core.container_interface import IWindowInterface
 
 
 class UIWindowStack:
@@ -21,7 +19,7 @@ class UIWindowStack:
             self.stack.pop().kill()
         self.stack.clear()
 
-    def add_new_window(self, window: ui_window.UIWindow):
+    def add_new_window(self, window: IWindowInterface):
         """
         Adds a window to the top of the stack.
 
@@ -31,7 +29,7 @@ class UIWindowStack:
         window.change_layer(new_layer)
         self.stack.append(window)
 
-    def remove_window(self, window_to_remove: ui_window.UIWindow):
+    def remove_window(self, window_to_remove: IWindowInterface):
         """
         Removes a window from the stack and resorts the remaining windows to adjust for it's absence.
 
@@ -48,7 +46,7 @@ class UIWindowStack:
             for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)
 
-    def move_window_to_front(self, window_to_front: ui_window.UIWindow):
+    def move_window_to_front(self, window_to_front: IWindowInterface):
         """
         Moves the passed in window to the top of the window stack and resorts the other windows to deal with the
         change.
@@ -81,7 +79,7 @@ class UIWindowStack:
     #     else:
     #         return None
 
-    def is_window_at_top(self, window: ui_window.UIWindow) -> bool:
+    def is_window_at_top(self, window: IWindowInterface) -> bool:
         """
         Checks if a window is at the top of the window stack or not.
 

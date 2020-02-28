@@ -107,19 +107,19 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_select(self, _init_pygame, default_ui_manager):
+    def test_focus(self, _init_pygame, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.select()
+        text_entry.focus()
 
         assert text_entry.image is not None
 
-    def test_unselect(self, _init_pygame, default_ui_manager):
+    def test_unfocus(self, _init_pygame, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.unselect()
+        text_entry.unfocus()
 
         assert text_entry.image is not None
 
@@ -128,7 +128,7 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.select()
+        text_entry.focus()
         # process a mouse button down event
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_d, 'mod': 0,
@@ -146,7 +146,7 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.select()
+        text_entry.focus()
 
         text_entry.set_forbidden_characters(['d', 'a', 'n'])
         # process a mouse button down event
@@ -161,7 +161,7 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
-        text_entry.select()
+        text_entry.focus()
 
         text_entry.set_allowed_characters(['d', 'a', 'n'])
         # process a mouse button down event
@@ -177,7 +177,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('Hours and hours of fun writing tests')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [1, 9]
 
         # process a mouse button down event
@@ -193,7 +193,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text_length_limit(3)
-        text_entry.select()
+        text_entry.focus()
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_t, 'mod': 0,
                                                                      'unicode': 't'}))
@@ -215,7 +215,7 @@ class TestUITextEntryLine:
                                      manager=manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [0, 3]
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -232,7 +232,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [1, 3]
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
@@ -250,7 +250,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [0, 0]
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
@@ -268,7 +268,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.length_limit = 3
         text_entry.select_range = [0, 3]
 
@@ -288,7 +288,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.length_limit = 3
         text_entry.select_range = [0, 3]
 
@@ -308,7 +308,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [1, 3]
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
@@ -326,7 +326,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_a, 'mod': pygame.KMOD_CTRL,
@@ -347,7 +347,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_a, 'mod': pygame.KMOD_CTRL,
@@ -433,7 +433,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_RETURN}))
@@ -446,7 +446,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_RIGHT}))
@@ -460,7 +460,7 @@ class TestUITextEntryLine:
 
         text_entry.set_text('dan')
         text_entry.edit_position = 2
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_RIGHT}))
@@ -473,7 +473,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_LEFT}))
@@ -486,7 +486,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [0, 2]
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -500,7 +500,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [0, 2]
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -514,7 +514,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [0, 2]
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -528,7 +528,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.edit_position = 1
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -542,7 +542,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.edit_position = 2
         text_entry.start_text_offset = 1
 
@@ -557,7 +557,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.set_text('dan')
-        text_entry.select()
+        text_entry.focus()
         text_entry.select_range = [1, 3]
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
@@ -653,7 +653,7 @@ class TestUITextEntryLine:
                                      manager=manager)
 
         text_entry.set_text('Wow testing is great so amazing')
-        text_entry.select()
+        text_entry.focus()
 
         text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (30, 15)}))
         default_ui_manager.mouse_position = (70, 15)
@@ -675,7 +675,7 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=manager)
 
-        text_entry.select()
+        text_entry.focus()
         text_entry.cursor_blink_delay_after_moving_acc = 10.0
         text_entry.update(0.01)
         text_entry.blink_cursor_time_acc = 10.0

@@ -49,7 +49,7 @@ class TestUIMessageWindow:
                                          html_message="This is a bold test of the message box functionality.",
                                          manager=default_ui_manager)
 
-        message_window.menu_bar.held = True
+        message_window.title_bar.held = True
         message_window.update(0.01)
 
         assert message_window.grabbed_window is True

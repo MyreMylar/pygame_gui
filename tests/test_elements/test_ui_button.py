@@ -247,7 +247,7 @@ class TestUIButton:
                                                                      {'button': 1, 'pos': (50, 25)}))
 
         assert (processed_down_event is True and processed_up_event is True and button.held is False and
-                button.pressed_event is True and default_ui_manager.select_focused_element is None)
+                button.pressed_event is True and default_ui_manager.focused_element is None)
 
     def test_process_event_mouse_button_up_outside(self, _init_pygame: None, default_ui_manager: UIManager,
                                                    _display_surface_return_none: None):

@@ -411,13 +411,13 @@ class UITextBox(UIElement):
         self.link_hover_chunks = []
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
 
-    def select(self):
+    def focus(self):
         """
-        Called when we focus select the text box (usually by clicking on it). In this case we just pass the focus over
+        Called when we focus the text box (usually by clicking on it). In this case we just pass the focus over
         to the box's scroll bar, if it has one, so that some input events will be directed that way.
         """
         if self.scroll_bar is not None:
-            self.scroll_bar.select()
+            self.scroll_bar.focus()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -426,14 +426,14 @@ class UITextBox(UIElement):
         :param event: A pygame event to check for a reaction to.
         :return bool: Returns True if we made use of this event.
         """
-        processed_event = False
+        consumed_event = False
         should_redraw_from_chunks = False
         should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                processed_event = True
+                consumed_event = True
                 if self.scroll_bar is not None:
                     text_block_full_height = self.formatted_text_block.final_dimensions[1]
                     height_adjustment = self.scroll_bar.start_percentage * text_block_full_height
@@ -449,7 +449,7 @@ class UITextBox(UIElement):
                                               base_y + chunk.rect.y),
                                              chunk.rect.size)
                     if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                        processed_event = True
+                        consumed_event = True
                         if not chunk.is_selected:
                             chunk.on_selected()
                             if chunk.metrics_changed_after_redraw:
@@ -475,7 +475,7 @@ class UITextBox(UIElement):
                                          chunk.rect.size)
                 if (hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and
                         self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
-                    processed_event = True
+                    consumed_event = True
                     if chunk.is_selected:
                         link_clicked_event = pygame.event.Event(pygame.USEREVENT,
                                                                 {'user_type': pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
@@ -497,7 +497,7 @@ class UITextBox(UIElement):
         if should_full_redraw:
             self.full_redraw()
 
-        return processed_event
+        return consumed_event
 
     def set_active_effect(self, effect_name: Union[str, None]):
         """
@@ -580,13 +580,13 @@ class UITextBox(UIElement):
             self.shadow_width = shadow_width
             has_any_changed = True
 
-        padding = (10, 10)
+        padding = (5, 5)
         padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
         if padding_str is not None:
             try:
                 padding = (int(padding_str.split(',')[0]), int(padding_str.split(',')[1]))
             except ValueError:
-                padding = (10, 10)
+                padding = (5, 5)
         if padding != self.padding:
             self.padding = padding
             has_any_changed = True

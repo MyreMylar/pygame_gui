@@ -1,4 +1,5 @@
 import pygame
+
 from typing import Union, Tuple, Dict
 
 from pygame_gui import ui_manager
@@ -34,7 +35,8 @@ class UIVerticalScrollBar(UIElement):
                                                                 object_id=object_id,
                                                                 element_id='vertical_scroll_bar')
         super().__init__(relative_rect, manager, container,
-                         layer_thickness=2, starting_height=1,
+                         layer_thickness=2,
+                         starting_height=1,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,
                          anchors=anchors)
@@ -98,18 +100,11 @@ class UIVerticalScrollBar(UIElement):
         Rebuild anything that might need rebuilding.
 
         """
-        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                  (self.rect.width - (2 * self.shadow_width),
-                                   self.rect.height - (2 * self.shadow_width)))
-
-        relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                self.border_width + self.shadow_width),
-                                               (border_rect.width - (2 * self.border_width),
-                                                border_rect.height - (2 * self.border_width)))
-
-        self.background_rect = pygame.Rect((relative_background_rect.x + self.relative_rect.x,
-                                            relative_background_rect.y + self.relative_rect.y),
-                                           relative_background_rect.size)
+        border_and_shadow = self.border_width + self.shadow_width
+        self.background_rect = pygame.Rect((border_and_shadow + self.relative_rect.x,
+                                            border_and_shadow + self.relative_rect.y),
+                                           (self.relative_rect.width - (2 * border_and_shadow),
+                                            self.relative_rect.height - (2 * border_and_shadow)))
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
@@ -218,14 +213,14 @@ class UIVerticalScrollBar(UIElement):
         self.button_container.kill()
         super().kill()
 
-    def select(self):
+    def focus(self):
         """
-        When we focus select the scroll bar as a whole for any reason we pass that status down to the 'bar' part of
+        When we focus  the scroll bar as a whole for any reason we pass that status down to the 'bar' part of
         the scroll bar.
         """
         if self.sliding_button is not None:
-            self.ui_manager.unselect_focus_element()
-            self.ui_manager.select_focus_element(self.sliding_button)
+            self.ui_manager.unset_focus_element()
+            self.ui_manager.set_focus_element(self.sliding_button)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -243,7 +238,7 @@ class UIVerticalScrollBar(UIElement):
         except AttributeError:
             pygame.MOUSEWHEEL = -1
 
-        processed_event = False
+        consumed_event = False
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
 
         if (last_focused_scrollbar_element is not None and
@@ -253,12 +248,12 @@ class UIVerticalScrollBar(UIElement):
                  (last_focused_scrollbar_element is self.bottom_button)) and event.type == pygame.MOUSEWHEEL):
             if event.y > 0:
                 self.scroll_wheel_up = True
-                processed_event = True
+                consumed_event = True
             elif event.y < 0:
                 self.scroll_wheel_down = True
-                processed_event = True
+                consumed_event = True
 
-        return processed_event
+        return consumed_event
 
     def update(self, time_delta: float):
         """

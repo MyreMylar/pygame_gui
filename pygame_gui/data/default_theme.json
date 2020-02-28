@@ -52,6 +52,14 @@
       "shadow_width": "2"
     }
   },
+  "horizontal_slider.button":
+  {
+    "misc":
+    {
+      "border_width": "0",
+      "shadow_width": "0"
+    }
+  },
   "horizontal_slider.#sliding_button":
   {
     "misc":
@@ -66,6 +74,14 @@
     {
       "border_width": "1",
       "shadow_width": "2"
+    }
+  },
+  "vertical_scroll_bar.button":
+  {
+    "misc":
+    {
+      "border_width": "0",
+      "shadow_width": "0"
     }
   },
   "vertical_scroll_bar.#sliding_button":
@@ -92,6 +108,63 @@
       "shadow_width": "1"
     }
   },
+
+  "selection_list.button":
+  {
+    "misc":
+    {
+      "border_width": "0",
+      "shadow_width": "0"
+    }
+  },
+  "selection_list.vertical_scroll_bar":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "0"
+    }
+  },
+  "selection_list.vertical_scroll_bar.#sliding_button":
+  {
+    "misc":
+    {
+      "border_width": "1",
+      "shadow_width": "1"
+    }
+  },
+
+  "window":
+  {
+    "misc":
+    {
+      "shape": "rectangle",
+      "shadow_width": "15",
+      "border_width": "1"
+    }
+  },
+
+  "window.#title_bar":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "shadow_width": "0",
+          "border_width": "1",
+          "text_horiz_alignment": "left",
+          "text_horiz_alignment_padding": "5"
+      }
+  },
+  "window.#close_button":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "shadow_width": "0",
+          "border_width": "1"
+      }
+  },
+
   "message_window":
   {
     "misc":
@@ -99,9 +172,32 @@
       "shape": "rectangle",
       "shape_corner_radius": "2",
       "shadow_width": "15",
-      "border_width": "1"
+      "border_width": "1",
+      "title_bar_height": "28"
     }
   },
+
+  "message_window.#title_bar":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "shadow_width": "0",
+          "border_width": "1",
+          "text_horiz_alignment": "left",
+          "text_horiz_alignment_padding": "5"
+      }
+  },
+  "message_window.#close_button":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "shadow_width": "0",
+          "border_width": "1"
+      }
+  },
+
   "message_window.text_box":
   {
     "colours":
@@ -125,20 +221,6 @@
       "shadow_width": "1"
     }
   },
-  "message_window.#message_window_title_bar":
-  {
-    "misc":
-    {
-      "border_width": "1"
-    }
-  },
-  "message_window.#close_button":
-  {
-    "misc":
-    {
-      "border_width": "1"
-    }
-  },
   "message_window.#dismiss_button":
   {
     "misc":
@@ -155,6 +237,13 @@
       "shadow_width": "2"
     }
   },
+  "drop_down_menu.vertical_scroll_bar":
+  {
+    "misc":
+    {
+      "enable_arrow_buttons": "0"
+    }
+  },
   "text_entry_line":
   {
     "misc":
@@ -168,7 +257,8 @@
     "misc":
     {
       "border_width": "1",
-      "shadow_width": "3"
+      "shadow_width": "3",
+      "padding": "5,5"
     }
   }
 }

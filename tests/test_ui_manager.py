@@ -88,7 +88,7 @@ class TestUIManager:
                         html_message="This is a bold test of the message box functionality.",
                         manager=default_ui_manager)
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (125, 115)}))
-        assert test_button.is_selected
+        assert test_button.held
 
     def test_update(self, _init_pygame, default_ui_manager: UIManager):
         """
@@ -173,14 +173,14 @@ class TestUIManager:
 
         assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
 
-    def test_select_and_unselect_focus_element(self, _init_pygame, default_ui_manager):
+    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager):
         """
         Test if we correctly select the focused element and unselect it with these functions.
         """
         test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        default_ui_manager.select_focus_element(test_button)
-        was_selected_correctly = test_button.is_selected
-        default_ui_manager.unselect_focus_element()
+        default_ui_manager.set_focus_element(test_button)
+        was_selected_correctly = test_button.is_focused
+        default_ui_manager.unset_focus_element()
         assert was_selected_correctly is True and test_button.is_selected is False
 
     def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager):
@@ -188,7 +188,7 @@ class TestUIManager:
                                               visible_percentage=0.5,
                                               manager=default_ui_manager)
 
-        default_ui_manager.select_focus_element(test_scroll_bar)
+        default_ui_manager.set_focus_element(test_scroll_bar)
         found_bar = test_scroll_bar is default_ui_manager.get_last_focused_vert_scrollbar()
         default_ui_manager.clear_last_focused_from_vert_scrollbar(test_scroll_bar)
         no_last_focused_scroll_bar = default_ui_manager.get_last_focused_vert_scrollbar() is None

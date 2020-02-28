@@ -100,7 +100,7 @@ class TestUIVerticalScrollBar:
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                          visible_percentage=0.7,
                                          manager=default_ui_manager)
-        scroll_bar.select()
+        scroll_bar.focus()
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': 0.5})) is True
 
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5})) is True

@@ -19,11 +19,11 @@ class UIContainer(UIElement, IContainerInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, manager, *, starting_height: int = 1, is_window_container: bool = False,
+    def __init__(self, relative_rect, manager, *, starting_height: int = 1, is_window_root_container: bool = False,
                  container=None, parent_element=None, object_id=None, anchors=None):
 
         self.ui_manager = manager
-        self.is_window_container = is_window_container
+        self.is_window_root_container = is_window_root_container
         self.elements = []  # type: List[UIElement]
 
         new_element_ids, new_object_ids = self.create_valid_ids(container=container,
@@ -77,7 +77,7 @@ class UIContainer(UIElement, IContainerInterface):
         max_element_top_layer = self._layer
         for element in self.elements:
             if ((element not in self.ui_manager.ui_window_stack.stack) and
-                not (isinstance(element, UIContainer) and element.is_window_container) and
+                not (isinstance(element, UIContainer) and element.is_window_root_container) and
                     element.get_top_layer() > max_element_top_layer):
                 max_element_top_layer = element.get_top_layer()
 

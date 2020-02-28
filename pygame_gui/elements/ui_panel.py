@@ -103,15 +103,15 @@ class UIPanel(UIElement, IContainerInterface):
         :param event: The event to process.
         :return bool: Should return True if this element makes use of this event.
         """
-        handled = False
+        consumed_event = False
         if self is not None and event.type == MOUSEBUTTONDOWN and event.button in [1, 3]:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                handled = True
+                consumed_event = True
 
-        return handled
+        return consumed_event
 
     def get_container(self) -> UIContainer:
         """

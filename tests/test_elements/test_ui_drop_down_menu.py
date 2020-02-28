@@ -42,8 +42,8 @@ class TestUIDropDownMenu:
                               manager=default_ui_manager)
         menu.current_state.should_transition = True
         menu.update(0.01)
-        menu.current_state.menu_buttons[0].pressed = True
-        menu.update(0.01)
+        menu.current_state.options_selection_list.item_list[0]['button_element'].pressed = True
+        default_ui_manager.update(0.01)
         assert menu.image is not None
 
     def test_update_closed_state_close_button(self, _init_pygame, default_ui_manager):
@@ -134,8 +134,14 @@ class TestUIDropDownMenu:
                               manager=default_ui_manager)
         menu.set_dimensions((300, 50))
 
+        assert (menu.current_state.open_button.relative_rect.right ==
+                (100 + 300) - (menu.border_width + menu.shadow_width))
+
+        assert (menu.current_state.open_button.relative_rect.bottom ==
+                (100 + 50) - (menu.border_width + menu.shadow_width))
+
         # try to click on the menu
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (395, 140)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (390, 125)}))
         # if we successfully clicked on the moved menu then this button should be True
         assert menu.current_state.open_button.held is True
 
@@ -145,6 +151,6 @@ class TestUIDropDownMenu:
         menu.set_dimensions((200, 30))
 
         # try to click on the menu
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (295, 120)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (290, 115)}))
         # if we successfully clicked on the moved menu then this button should be True
         assert menu.current_state.close_button.held is True

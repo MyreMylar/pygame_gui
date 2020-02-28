@@ -1,6 +1,8 @@
 from typing import Union, Dict, Tuple, List, Any
 
-from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_NEW_SELECTION, UI_SELECTION_LIST_DROPPED_SELECTION
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
+from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, UI_SELECTION_LIST_DROPPED_SELECTION
+from pygame_gui._constants import UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
 from pygame import Rect, USEREVENT
 from pygame.event import Event, post
 from pygame.math import Vector2
@@ -27,11 +29,13 @@ class UISelectionList(UIElement):
 
     def __init__(self,
                  relative_rect: Rect,
-                 item_list: List[str],
+                 item_list: Union[List[str], List[Tuple[str, str]]],
                  manager: UIManager,
                  *,
                  allow_multiselect: bool = False,
+                 allow_doubleclicks: bool = True,
                  container: Union[IContainerInterface, None] = None,
+                 starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
@@ -43,14 +47,17 @@ class UISelectionList(UIElement):
         super().__init__(relative_rect,
                          manager,
                          container,
-                         starting_height=1,
+                         starting_height=starting_height,
                          layer_thickness=1,
                          object_ids=new_object_ids,
                          element_ids=new_element_ids,
                          anchors=anchors)
 
-        self.item_list = [[item, None, False] for item in item_list]  # type: List[List[Any]]
+        self.item_list_container = None
+        self.item_list = []
         self.allow_multiselect = allow_multiselect
+        self.allow_doubleclicks = allow_doubleclicks
+
         self.background_colour = None
         self.border_colour = None
         self.background_image = None
@@ -59,8 +66,12 @@ class UISelectionList(UIElement):
         self.shape_corner_radius = 0
         self.shape_type = 'rectangle'
 
-        self.scroll_bar = None
+        self.scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
+        self.lowest_list_pos = 0
         self.total_height_of_list = 0
+        self.list_item_height = 20
+        self.scroll_bar_width = 20
+        self.current_scroll_bar_width = 0
 
         self.rebuild_from_changed_theme_data()
 
@@ -70,66 +81,29 @@ class UISelectionList(UIElement):
                  self.relative_rect.width - (2 * self.shadow_width) - (2 * self.border_width),
                  self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width)),
             manager=self.ui_manager,
+            starting_height=starting_height,
             container=self.ui_container,
             parent_element=parent_element,
             object_id='#selection_list_container')
 
-        self.height_of_single_item_in_list = 20
+        self.set_item_list(item_list)
 
-        self.total_height_of_list = self.height_of_single_item_in_list * len(self.item_list)
-
-        self.lowest_list_pos = self.total_height_of_list - self.list_and_scroll_bar_container.relative_rect.height
-
-        inner_visible_area_height = self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width)
-
-        scroll_bar_width = 0
-        if self.total_height_of_list > inner_visible_area_height:
-            # we need a scroll bar
-            scroll_bar_width = 20
-            percentage_visible = inner_visible_area_height / max(self.total_height_of_list, 1)
-            self.scroll_bar = UIVerticalScrollBar(Rect(-scroll_bar_width,
-                                                       0,
-                                                       scroll_bar_width,
-                                                       inner_visible_area_height),
-                                                  visible_percentage=percentage_visible,
-                                                  manager=self.ui_manager,
-                                                  parent_element=self,
-                                                  container=self.list_and_scroll_bar_container,
-                                                  anchors={'left': 'right',
-                                                           'right': 'right',
-                                                           'top': 'top',
-                                                           'bottom': 'bottom'})
-
-        # create button list container
-        self.item_list_container = UIContainer(
-            Rect(0, 0,
-                 self.list_and_scroll_bar_container.relative_rect.width - scroll_bar_width,
-                 self.list_and_scroll_bar_container.relative_rect.height),
-            manager=self.ui_manager,
-            parent_element=parent_element,
-            container=self.list_and_scroll_bar_container,
-            object_id='#item_list_container',
-            anchors={'left': 'left',
-                     'right': 'right',
-                     'top': 'top',
-                     'bottom': 'bottom'})
-        item_y_height = 0
-        for item in self.item_list:
-            if item_y_height <= self.item_list_container.relative_rect.height:
-                item[1] = UIButton(relative_rect=Rect(0, item_y_height,
-                                                      self.item_list_container.relative_rect.width,
-                                                      self.height_of_single_item_in_list),
-                                   text=item[0],
-                                   manager=self.ui_manager,
-                                   container=self.item_list_container,
-                                   object_id='#item_list_item',
-                                   anchors={'left': 'left',
-                                            'right': 'right',
-                                            'top': 'top',
-                                            'bottom': 'top'})
-                item_y_height += self.height_of_single_item_in_list
+    def get_single_selection(self) -> str:
+        if not self.allow_multiselect:
+            selected_list = [item['text'] for item in self.item_list if item['selected']]
+            if len(selected_list) == 1:
+                return selected_list[0]
             else:
-                break
+                raise RuntimeError('More than one item selected in single-selection, selection list')
+        else:
+            raise RuntimeError('Requesting single selection, from multi-selection list')
+
+    def get_multi_selection(self) -> List[str]:
+        if self.allow_multiselect:
+            selected_list = [item['text'] for item in self.item_list if item['selected']]
+            return selected_list[0]
+        else:
+            raise ValueError('Requesting multi selection, from single-selection list')
 
     def update(self, time_delta: float):
         """
@@ -144,29 +118,121 @@ class UISelectionList(UIElement):
         if self.scroll_bar is not None and self.scroll_bar.check_has_moved_recently():
             list_height_adjustment = min(self.scroll_bar.start_percentage * self.total_height_of_list,
                                          self.lowest_list_pos)
-            for index, button_item in enumerate(self.item_list):
-                new_height = (index * self.height_of_single_item_in_list) - list_height_adjustment
-                if -self.height_of_single_item_in_list <= new_height <= self.item_list_container.relative_rect.height:
-                    if button_item[1] is not None:
-                        button_item[1].set_relative_position((0, new_height))
+            for index, item in enumerate(self.item_list):
+                new_height = (index * self.list_item_height) - list_height_adjustment
+                if -self.list_item_height <= new_height <= self.item_list_container.relative_rect.height:
+                    if item['button_element'] is not None:
+                        item['button_element'].set_relative_position((0, new_height))
                     else:
-                        button_item[1] = UIButton(relative_rect=Rect(0, new_height,
+                        item['button_element'] = UIButton(relative_rect=Rect(0, new_height,
+                                                                             self.item_list_container.relative_rect.width,
+                                                                             self.list_item_height),
+                                                          text=item['text'],
+                                                          manager=self.ui_manager,
+                                                          parent_element=self,
+                                                          container=self.item_list_container,
+                                                          object_id=item['object_id'],
+                                                          allow_double_clicks=self.allow_doubleclicks,
+                                                          anchors={'left': 'left',
+                                                                   'right': 'right',
+                                                                   'top': 'top',
+                                                                   'bottom': 'top'})
+                        if item['selected']:
+                            item['button_element'].select()
+                else:
+                    if item['button_element'] is not None:
+                        item['button_element'].kill()
+                        item['button_element'] = None
+
+    def set_item_list(self, new_item_list: Union[List[str], List[Tuple[str, str]]]):
+        self.item_list = []  # type: List[Dict]
+        for new_item in new_item_list:
+            if isinstance(new_item, str):
+                new_item_list_item = {'text': new_item,
+                                      'button_element': None,
+                                      'selected': False,
+                                      'object_id': '#item_list_item'}
+            elif isinstance(new_item, tuple):
+                new_item_list_item = {'text': new_item[0],
+                                      'button_element': None,
+                                      'selected': False,
+                                      'object_id': new_item[1]}
+            else:
+                raise ValueError('Invalid item list')
+
+            self.item_list.append(new_item_list_item)
+
+        self.total_height_of_list = self.list_item_height * len(self.item_list)
+        self.lowest_list_pos = self.total_height_of_list - self.list_and_scroll_bar_container.relative_rect.height
+        inner_visible_area_height = self.list_and_scroll_bar_container.relative_rect.height
+
+        if self.total_height_of_list > inner_visible_area_height:
+            # we need a scroll bar
+            self.current_scroll_bar_width = self.scroll_bar_width
+            percentage_visible = inner_visible_area_height / max(self.total_height_of_list, 1)
+
+            if self.scroll_bar is not None:
+                self.scroll_bar.set_visible_percentage(percentage_visible)
+            else:
+                self.scroll_bar = UIVerticalScrollBar(Rect(-self.scroll_bar_width,
+                                                           0,
+                                                           self.scroll_bar_width,
+                                                           inner_visible_area_height),
+                                                      visible_percentage=percentage_visible,
+                                                      manager=self.ui_manager,
+                                                      parent_element=self,
+                                                      container=self.list_and_scroll_bar_container,
+                                                      anchors={'left': 'right',
+                                                               'right': 'right',
+                                                               'top': 'top',
+                                                               'bottom': 'bottom'})
+        else:
+            if self.scroll_bar is not None:
+                self.scroll_bar.kill()
+                self.scroll_bar = None
+            self.current_scroll_bar_width = 0
+
+        # create button list container
+        if self.item_list_container is not None:
+            self.item_list_container.clear()
+            if (self.item_list_container.relative_rect.width !=
+                    (self.list_and_scroll_bar_container.relative_rect.width - self.current_scroll_bar_width)):
+                self.item_list_container.set_dimensions((self.list_and_scroll_bar_container.relative_rect.width
+                                                         - self.current_scroll_bar_width,
+                                                         self.list_and_scroll_bar_container.relative_rect.height))
+        else:
+            self.item_list_container = UIContainer(
+                Rect(0, 0,
+                     self.list_and_scroll_bar_container.relative_rect.width - self.current_scroll_bar_width,
+                     self.list_and_scroll_bar_container.relative_rect.height),
+                manager=self.ui_manager,
+                starting_height=0,
+                parent_element=self,
+                container=self.list_and_scroll_bar_container,
+                object_id='#item_list_container',
+                anchors={'left': 'left',
+                         'right': 'right',
+                         'top': 'top',
+                         'bottom': 'bottom'})
+        item_y_height = 0
+        for item in self.item_list:
+            if item_y_height <= self.item_list_container.relative_rect.height:
+                item['button_element'] = UIButton(relative_rect=Rect(0, item_y_height,
                                                                      self.item_list_container.relative_rect.width,
-                                                                     self.height_of_single_item_in_list),
-                                                  text=button_item[0],
+                                                                     self.list_item_height),
+                                                  text=item['text'],
                                                   manager=self.ui_manager,
+                                                  parent_element=self,
                                                   container=self.item_list_container,
-                                                  object_id='#item_list_item',
+                                                  object_id=item['object_id'],
+                                                  allow_double_clicks=self.allow_doubleclicks,
                                                   anchors={'left': 'left',
                                                            'right': 'right',
                                                            'top': 'top',
                                                            'bottom': 'top'})
-                        if button_item[2]:
-                            button_item[1].select()
-                else:
-                    if button_item[1] is not None:
-                        button_item[1].kill()
-                        button_item[1] = None
+                item_y_height += self.list_item_height
+            else:
+                break
 
     def process_event(self, event: Event) -> bool:
         """
@@ -176,47 +242,51 @@ class UISelectionList(UIElement):
         :param event: The event to process.
         :return bool: Should return True if this element makes use of this event.
         """
-        handled = False
-        if (event.type == USEREVENT and event.user_type == UI_BUTTON_PRESSED and
+        consumed_event = False
+        if (event.type == USEREVENT and event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED] and
                 event.ui_element in self.item_list_container.elements):
-            handled = True
-
             for item in self.item_list:
-                if item[1] == event.ui_element:
-                    if item[2]:
-                        item[2] = False
-                        event.ui_element.unselect()
-
-                        event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
+                if item['button_element'] == event.ui_element:
+                    if event.user_type == UI_BUTTON_DOUBLE_CLICKED:
+                        event_data = {'user_type': UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
                                       'text': event.ui_element.text,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
-
                     else:
-                        item[2] = True
-                        event.ui_element.select()
-
-                        event_data = {'user_type': UI_SELECTION_LIST_NEW_SELECTION,
-                                      'text': event.ui_element.text,
-                                      'ui_element': self,
-                                      'ui_object_id': self.most_specific_combined_id}
-
-                    drop_down_changed_event = Event(USEREVENT, event_data)
-                    post(drop_down_changed_event)
-                elif not self.allow_multiselect:
-                    if item[2]:
-                        item[2] = False
-                        if item[1] is not None:
-                            item[1].unselect()
+                        if item['selected']:
+                            item['selected'] = False
+                            event.ui_element.unselect()
 
                             event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
-                                          'text': item[0],
+                                          'text': event.ui_element.text,
+                                          'ui_element': self,
+                                          'ui_object_id': self.most_specific_combined_id}
+
+                        else:
+                            item['selected'] = True
+                            event.ui_element.select()
+
+                            event_data = {'user_type': UI_SELECTION_LIST_NEW_SELECTION,
+                                          'text': event.ui_element.text,
+                                          'ui_element': self,
+                                          'ui_object_id': self.most_specific_combined_id}
+
+                    selection_list_event = Event(USEREVENT, event_data)
+                    post(selection_list_event)
+                elif not self.allow_multiselect:
+                    if item['selected']:
+                        item['selected'] = False
+                        if item['button_element'] is not None:
+                            item['button_element'].unselect()
+
+                            event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
+                                          'text': item['text'],
                                           'ui_element': self,
                                           'ui_object_id': self.most_specific_combined_id}
                             drop_down_changed_event = Event(USEREVENT, event_data)
                             post(drop_down_changed_event)
 
-        return handled
+        return consumed_event
 
     def set_dimensions(self, dimensions: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -237,6 +307,7 @@ class UISelectionList(UIElement):
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this panel.
 
         """
+        self.list_and_scroll_bar_container.kill()
         super().kill()
 
     def rebuild_from_changed_theme_data(self):
@@ -291,6 +362,16 @@ class UISelectionList(UIElement):
                 shadow_width = 2
             if shadow_width != self.shadow_width:
                 self.shadow_width = shadow_width
+                has_any_changed = True
+
+        list_item_height_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'list_item_height')
+        if list_item_height_string is not None:
+            try:
+                list_item_height = int(list_item_height_string)
+            except ValueError:
+                list_item_height = 20
+            if list_item_height != self.list_item_height:
+                self.list_item_height = list_item_height
                 has_any_changed = True
 
         if has_any_changed:

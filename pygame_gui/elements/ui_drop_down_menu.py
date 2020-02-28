@@ -6,6 +6,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_selection_list import UISelectionList
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
@@ -20,87 +21,31 @@ class UIExpandedDropDownState:
     def __init__(self, drop_down_menu_ui, options_list, selected_option, base_position_rect,
                  close_button_width, expand_direction, manager, container, element_ids, object_ids):
         self.drop_down_menu_ui = drop_down_menu_ui
-        self.should_transition = False
         self.options_list = options_list
         self.selected_option = selected_option
-
         self.base_position_rect = base_position_rect
-        self.selected_option_rect = None
+
         self.expand_direction = expand_direction
         self.ui_manager = manager
         self.ui_container = container
         self.element_ids = element_ids
         self.object_ids = object_ids
-        self.rect_height_offset = 0
 
+        # sizing variables
+        self.options_list_height = 0
+        self.option_list_y_pos = 0
         self.close_button_width = close_button_width
-        self.select_button_dist_to_move = 0
-        self.option_button_dist_to_move = 0
 
+        # UI elements
         self.selected_option_button = None
         self.close_button = None
+        self.options_selection_list = None
 
-        self.menu_buttons = []
-
+        # state transitioning
         self.should_transition = False
         self.target_state = 'closed'
-        self.already_expanded_rect = False
-
-        self.overall_background_rect = None
-        self.options_background_rect = None
-        self.options_drawable_shape = None
 
     def rebuild(self):
-        # shape for expanded drop down is a little trick because it is two rectangles, one on top of the other
-        # forming an 'L' shape (or an inverted L if dropping down)
-
-        if self.expand_direction == 'down':
-            self.overall_background_rect = pygame.Rect(self.drop_down_menu_ui.rect.topleft,
-                                                      (self.drop_down_menu_ui.rect.width + 50,
-                                                       self.base_position_rect.height * (1 + len(self.options_list)) +
-                                                       2 * self.drop_down_menu_ui.shadow_width +
-                                                       2 * self.drop_down_menu_ui.border_width))
-
-            self.options_background_rect = pygame.Rect(self.drop_down_menu_ui.rect.topleft,
-                                                  (self.base_position_rect.width - self.close_button_width +
-                                                   2 * self.drop_down_menu_ui.shadow_width +
-                                                   2 * self.drop_down_menu_ui.border_width,
-                                                   self.base_position_rect.height * (1 + len(self.options_list)) +
-                                                   2 * self.drop_down_menu_ui.shadow_width +
-                                                   2 * self.drop_down_menu_ui.border_width))
-            self.rect_height_offset = 0
-            self.selected_option_rect = pygame.Rect((0, 0),
-                                                    self.drop_down_menu_ui.rect.size)
-        else:
-
-            self.rect_height_offset = self.base_position_rect.height * len(self.options_list)
-
-            # If we haven't already done so, we need to adjust the top left position of the element's rect so that it
-            # appears in the right place.
-            if not self.already_expanded_rect:
-                self.drop_down_menu_ui.rect.y = self.drop_down_menu_ui.rect.y - self.rect_height_offset
-                self.drop_down_menu_ui.relative_rect.y = (self.drop_down_menu_ui.relative_rect.y -
-                                                          self.rect_height_offset)
-
-            self.selected_option_rect = pygame.Rect((0, self.rect_height_offset),
-                                                    self.drop_down_menu_ui.rect.size)
-
-            self.overall_background_rect = pygame.Rect(self.drop_down_menu_ui.rect.topleft,
-                                                  (self.drop_down_menu_ui.rect.width + 50,
-                                                   self.base_position_rect.height * (1 + len(self.options_list)) +
-                                                   2 * self.drop_down_menu_ui.shadow_width +
-                                                   2 * self.drop_down_menu_ui.border_width))
-
-            self.options_background_rect = pygame.Rect(self.drop_down_menu_ui.rect.topleft,
-                                                  (self.base_position_rect.width - self.close_button_width +
-                                                   2 * self.drop_down_menu_ui.shadow_width +
-                                                   2 * self.drop_down_menu_ui.border_width,
-                                                   self.base_position_rect.height * (1 + len(self.options_list)) +
-                                                   2 * self.drop_down_menu_ui.shadow_width +
-                                                   2 * self.drop_down_menu_ui.border_width))
-
-        self.drop_down_menu_ui.image = pygame.Surface(self.overall_background_rect.size, flags=pygame.SRCALPHA, depth=32)
-        self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'))
 
         theming_parameters = {'normal_bg': self.drop_down_menu_ui.background_colour,
                               'normal_border': self.drop_down_menu_ui.border_colour,
@@ -109,37 +54,16 @@ class UIExpandedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         if self.drop_down_menu_ui.shape_type == 'rectangle':
-            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.selected_option_rect, theming_parameters,
+            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.relative_rect,
+                                                                      theming_parameters,
                                                                       ['normal'], self.ui_manager)
 
-            self.drop_down_menu_ui.image.blit(self.drop_down_menu_ui.drawable_shape.get_surface('normal'),
-                                              self.selected_option_rect.topleft)
-            self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'),
-                                              pygame.Rect((0, 0),
-                                                          (self.options_background_rect.width -
-                                                           self.drop_down_menu_ui.shadow_width -
-                                                           self.drop_down_menu_ui.border_width,
-                                                           self.options_background_rect.height)))
-
-            self.options_drawable_shape = RectDrawableShape(self.options_background_rect, theming_parameters,
-                                                       ['normal'], self.ui_manager)
-            self.drop_down_menu_ui.image.blit(self.options_drawable_shape.get_surface('normal'), (0, 0))
         elif self.drop_down_menu_ui.shape_type == 'rounded_rectangle':
-            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(self.selected_option_rect, theming_parameters,
+            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(self.drop_down_menu_ui.relative_rect,
+                                                                          theming_parameters,
                                                                           ['normal'], self.ui_manager)
 
-            self.drop_down_menu_ui.image.blit(self.drop_down_menu_ui.drawable_shape.get_surface('normal'),
-                                              self.selected_option_rect.topleft)
-            self.drop_down_menu_ui.image.fill(pygame.Color('#00000000'),
-                                              pygame.Rect((0, 0),
-                                                          (self.options_background_rect.width -
-                                                           self.drop_down_menu_ui.shadow_width -
-                                                           self.drop_down_menu_ui.border_width,
-                                                           self.options_background_rect.height)))
-
-            self.options_drawable_shape = RoundedRectangleShape(self.options_background_rect, theming_parameters,
-                                                           ['normal'], self.ui_manager)
-            self.drop_down_menu_ui.image.blit(self.options_drawable_shape.get_surface('normal'), (0, 0))
+        self.on_fresh_drawable_shape_ready()
 
         # extra
         if self.close_button is not None:
@@ -158,7 +82,6 @@ class UIExpandedDropDownState:
         """
         self.should_transition = False
 
-        option_y_pos = self.base_position_rect.y
         self.selected_option_button = UIButton(pygame.Rect(self.base_position_rect.topleft,
                                                            (self.base_position_rect.width - self.close_button_width,
                                                             self.base_position_rect.height)),
@@ -170,18 +93,58 @@ class UIExpandedDropDownState:
                                                object_id='#selected_option')
 
         expand_button_symbol = '▼'
-        self.select_button_dist_to_move = self.selected_option_button.rect.height
-        self.option_button_dist_to_move = self.base_position_rect.height
 
+        options_list_object_id = '#drop_down_options_list'
+        options_list_object_ids = self.drop_down_menu_ui.object_ids[:]
+        options_list_object_ids.append(options_list_object_id)
+        options_list_element_ids = self.drop_down_menu_ui.element_ids[:]
+        options_list_element_ids.append('selection_list')
+        options_list_shadow_width_str = self.ui_manager.get_theme().get_misc_data(options_list_object_ids,
+                                                                                  options_list_element_ids,
+                                                                                  'shadow_width')
+        options_list_border_width_str = self.ui_manager.get_theme().get_misc_data(options_list_object_ids,
+                                                                                  options_list_element_ids,
+                                                                                  'border_width')
+        if options_list_shadow_width_str is not None:
+            try:
+                options_list_shadow_width = int(options_list_shadow_width_str)
+            except ValueError:
+                options_list_shadow_width = 2
+        else:
+            options_list_shadow_width = 2
+
+        if options_list_border_width_str is not None:
+            try:
+                options_list_border_width = int(options_list_border_width_str)
+            except ValueError:
+                options_list_border_width = 1
+        else:
+            options_list_border_width = 1
+
+        options_list_border_and_shadow = options_list_shadow_width + options_list_border_width
+        self.options_list_height = (20 * len(self.options_list)) + (2 * options_list_border_and_shadow)
+        self.option_list_y_pos = 0
         if self.expand_direction is not None:
             if self.expand_direction == 'up':
                 expand_button_symbol = '▲'
-                self.select_button_dist_to_move = -self.selected_option_button.rect.height
-                self.option_button_dist_to_move = -self.base_position_rect.height
+
+                if self.drop_down_menu_ui.expansion_height_limit is None:
+                    self.drop_down_menu_ui.expansion_height_limit = self.base_position_rect.top
+
+                self.options_list_height = min(self.options_list_height, self.drop_down_menu_ui.expansion_height_limit)
+
+                self.option_list_y_pos = self.base_position_rect.top - self.options_list_height
+
             elif self.expand_direction == 'down':
                 expand_button_symbol = '▼'
-                self.select_button_dist_to_move = self.selected_option_button.rect.height
-                self.option_button_dist_to_move = self.base_position_rect.height
+
+                if self.drop_down_menu_ui.expansion_height_limit is None:
+                    self.drop_down_menu_ui.expansion_height_limit = (self.drop_down_menu_ui.ui_container.relative_rect.height -
+                                                                     self.base_position_rect.bottom)
+
+                self.options_list_height = min(self.options_list_height, self.drop_down_menu_ui.expansion_height_limit)
+
+                self.option_list_y_pos = self.base_position_rect.bottom
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
 
@@ -194,43 +157,30 @@ class UIExpandedDropDownState:
                                      parent_element=self.drop_down_menu_ui,
                                      object_id='#expand_button')
 
-        option_y_pos += self.select_button_dist_to_move
-        for option in self.options_list:
-            new_button = UIButton(pygame.Rect((self.base_position_rect.x, option_y_pos),
-                                              (self.base_position_rect.width - self.close_button_width,
-                                               self.base_position_rect.height)),
-                                  option,
-                                  self.ui_manager,
-                                  self.ui_container,
-                                  starting_height=3,  # height allows options to overlap other UI elements
-                                  parent_element=self.drop_down_menu_ui,
-                                  object_id='#option')
-            option_y_pos += self.option_button_dist_to_move
-            self.menu_buttons.append(new_button)
+        self.options_selection_list = UISelectionList(pygame.Rect(self.drop_down_menu_ui.relative_rect.left,
+                                                                  self.option_list_y_pos,
+                                                                  (self.drop_down_menu_ui.relative_rect.width -
+                                                                   self.close_button_width),
+                                                                  self.options_list_height),
+                                                      item_list=self.options_list,
+                                                      allow_doubleclicks=False,
+                                                      manager=self.ui_manager,
+                                                      parent_element=self.drop_down_menu_ui,
+                                                      container=self.ui_container,
+                                                      object_id='#drop_down_options_list')
 
         self.rebuild()
-
-        self.already_expanded_rect = True
 
     def finish(self):
         """
         cleans everything up upon exiting the expanded menu state.
         """
-        for button in self.menu_buttons:
-            button.kill()
-
-        self.menu_buttons.clear()
-
+        self.options_selection_list.kill()
         self.selected_option_button.kill()
         self.close_button.kill()
 
-        self.drop_down_menu_ui.rect.y += self.rect_height_offset
-        self.drop_down_menu_ui.relative_rect.y += self.rect_height_offset
-
-        self.already_expanded_rect = False
-
     def process_event(self, event: pygame.event.Event) -> bool:
-        processed_event = False
+        consumed_event = False
 
         if (event.type == pygame.USEREVENT and
                 event.user_type == pygame_gui.UI_BUTTON_PRESSED and
@@ -238,24 +188,19 @@ class UIExpandedDropDownState:
 
             self.should_transition = True
 
-            processed_event = True
-
-        if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element in self.menu_buttons):
-            button = event.ui_element
-            self.drop_down_menu_ui.selected_option = button.text
+        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
+                event.ui_element == self.options_selection_list):
+            self.drop_down_menu_ui.selected_option = self.options_selection_list.get_single_selection()
             self.should_transition = True
 
             event_data = {'user_type': pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
-                          'text': button.text,
+                          'text': self.drop_down_menu_ui.selected_option,
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
             drop_down_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(drop_down_changed_event)
 
-            processed_event = True
-
-        return processed_event
+        return consumed_event
 
     def update_position(self):
         """
@@ -272,11 +217,8 @@ class UIExpandedDropDownState:
 
         # update all the ui elements that depend on the base position
         self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
-
-        button_y_position = self.base_position_rect.y + self.select_button_dist_to_move
-        for button in self.menu_buttons:
-            button.set_relative_position([self.base_position_rect.x, button_y_position])
-            button_y_position += self.option_button_dist_to_move
+        self.options_selection_list.set_relative_position((self.drop_down_menu_ui.relative_rect.left,
+                                                           self.option_list_y_pos))
 
         close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
         self.close_button.set_relative_position([close_button_x, self.base_position_rect.y])
@@ -297,36 +239,20 @@ class UIExpandedDropDownState:
         self.selected_option_button.set_dimensions((self.base_position_rect.width - self.close_button_width,
                                                     self.base_position_rect.height))
 
-        self.select_button_dist_to_move = self.selected_option_button.rect.height
-        self.option_button_dist_to_move = self.base_position_rect.height
+        self.options_selection_list.set_dimensions(((self.drop_down_menu_ui.relative_rect.width -
+                                                     self.close_button_width),
+                                                    self.options_list_height))
+        self.options_selection_list.set_relative_position((self.drop_down_menu_ui.relative_rect.left,
+                                                           self.option_list_y_pos))
 
-        button_y_position = self.base_position_rect.y + self.select_button_dist_to_move
-        for button in self.menu_buttons:
-            button.set_relative_position([self.base_position_rect.x, button_y_position])
-            button.set_dimensions((self.base_position_rect.width - self.close_button_width,
-                                   self.base_position_rect.height))
-            button_y_position += self.option_button_dist_to_move
-
-        open_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
+        close_button_x = self.base_position_rect.x + self.base_position_rect.width - self.close_button_width
         self.close_button.set_dimensions((self.close_button_width, self.base_position_rect.height))
-        self.close_button.set_relative_position((open_button_x, self.base_position_rect.y))
+        self.close_button.set_relative_position((close_button_x, self.base_position_rect.y))
 
         self.rebuild()
 
     def on_fresh_drawable_shape_ready(self):
-        new_image = pygame.Surface(self.overall_background_rect.size, flags=pygame.SRCALPHA, depth=32)
-        new_image.fill(pygame.Color('#00000000'))
-
-        new_image.blit(self.drop_down_menu_ui.drawable_shape.get_surface('normal'), self.selected_option_rect.topleft)
-        new_image.fill(pygame.Color('#00000000'),
-                       pygame.Rect((0, 0),
-                                   (self.options_background_rect.width - self.drop_down_menu_ui.shadow_width -
-                                    self.drop_down_menu_ui.border_width,
-                                    self.options_background_rect.height)))
-
-        new_image.blit(self.options_drawable_shape.get_surface('normal'), (0, 0))
-
-        self.drop_down_menu_ui.set_image(new_image)
+        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_surface('normal'))
 
 
 class UIClosedDropDownState:
@@ -427,15 +353,14 @@ class UIClosedDropDownState:
         self.open_button.kill()
 
     def process_event(self, event: pygame.event.Event) -> bool:
-        processed_event = False
+        consumed_event = False
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED and
                 event.ui_element in [self.open_button, self.selected_option_button]):
 
-            processed_event = True
             self.should_transition = True
 
-        return processed_event
+        return consumed_event
 
     def update_position(self):
         """
@@ -505,6 +430,7 @@ class UIDropDownMenu(UIElement):
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
+                 expansion_height_limit: Union[int, None] = None,
                  anchors: Dict[str, str] = None
                  ):
 
@@ -521,6 +447,8 @@ class UIDropDownMenu(UIElement):
         self.selected_option = starting_option
         self.open_button_width = 20
 
+        self.expansion_height_limit = expansion_height_limit
+
         self.border_width = None
         self.shadow_width = None
         self.background_colour = None
@@ -529,10 +457,7 @@ class UIDropDownMenu(UIElement):
         self.shape_corner_radius = 2
 
         self.current_state = None
-        self.border_rect = None
         self.background_rect = None
-        self.relative_background_rect = None
-
         self.expand_direction = None
 
         self.menu_states = {}
@@ -585,11 +510,11 @@ class UIDropDownMenu(UIElement):
             self.current_state.start()
 
     def process_event(self, event: pygame.event.Event) -> bool:
-        processed_event = False
+        consumed_event = False
         if self.is_enabled:
-            processed_event = self.current_state.process_event(event)
+            consumed_event = self.current_state.process_event(event)
 
-        return processed_event
+        return consumed_event
 
     def rebuild_from_changed_theme_data(self):
         has_any_changed = False
@@ -657,18 +582,11 @@ class UIDropDownMenu(UIElement):
             has_any_changed = True
 
         if has_any_changed:
-            self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                           (self.rect.width - (2 * self.shadow_width),
-                                            self.rect.height - (2 * self.shadow_width)))
-
-            self.relative_background_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                                         self.border_width + self.shadow_width),
-                                                        (self.border_rect.width - (2 * self.border_width),
-                                                         self.border_rect.height - (2 * self.border_width)))
-
-            self.background_rect = pygame.Rect((self.relative_background_rect.x + self.relative_rect.x,
-                                                self.relative_background_rect.y + self.relative_rect.y),
-                                               self.relative_background_rect.size)
+            border_and_shadow = self.border_width + self.shadow_width
+            self.background_rect = pygame.Rect(self.relative_rect.x + border_and_shadow,
+                                               self.relative_rect.y + border_and_shadow,
+                                               self.relative_rect.width - (2 * border_and_shadow),
+                                               self.relative_rect.height - (2 * border_and_shadow))
 
             for state in self.menu_states:
                 self.menu_states[state].expand_direction = self.expand_direction
