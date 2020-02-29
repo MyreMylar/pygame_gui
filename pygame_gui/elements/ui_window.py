@@ -7,6 +7,7 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements import UIButton
 from pygame_gui import ui_manager
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
 
 
 class UIWindow(UIElement, IContainerInterface, IWindowInterface):
@@ -232,6 +233,11 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                 if self.bring_to_front_on_focused:
                     self.window_stack.move_window_to_front(self)
                 consumed_event = True
+
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.close_window_button):
+            self.kill()
+
         return consumed_event
 
     def update(self, time_delta: float):
@@ -264,9 +270,6 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                                         self.relative_rect.y + adjustment_required[1]))
         else:
             self.grabbed_window = False
-
-        if self.close_window_button.check_pressed():
-            self.kill()
 
         if self.resizing_mode_active:
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
@@ -384,6 +387,12 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this window,
         and remove if from the window stack.
         """
+        window_close_event = pygame.event.Event(pygame.USEREVENT,
+                                                {'user_type': UI_WINDOW_CLOSE,
+                                                 'ui_element': self,
+                                                 'ui_object_id': self.most_specific_combined_id})
+        pygame.event.post(window_close_event)
+
         self.window_stack.remove_window(self)
         self._window_root_container.kill()
         super().kill()
