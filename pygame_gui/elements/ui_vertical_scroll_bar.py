@@ -348,6 +348,8 @@ class UIVerticalScrollBar(UIElement):
                                                           'top': 'top',
                                                           'bottom': 'top'})
 
+        self.sliding_button.set_hold_range((100, self.background_rect.height))
+
     def set_visible_percentage(self, percentage: float):
         """
         Sets the percentage of the total 'scrollable area' that is currently visible. This will affect the size of
