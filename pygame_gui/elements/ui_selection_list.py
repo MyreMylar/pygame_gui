@@ -172,7 +172,9 @@ class UISelectionList(UIElement):
             percentage_visible = inner_visible_area_height / max(self.total_height_of_list, 1)
 
             if self.scroll_bar is not None:
+                self.scroll_bar.reset_scroll_position()
                 self.scroll_bar.set_visible_percentage(percentage_visible)
+                self.scroll_bar.start_percentage = 0
             else:
                 self.scroll_bar = UIVerticalScrollBar(Rect(-self.scroll_bar_width,
                                                            0,

@@ -364,6 +364,10 @@ class UIVerticalScrollBar(UIElement):
 
         self.redraw_scrollbar()
 
+    def reset_scroll_position(self):
+        self.scroll_position = 0.0
+        self.start_percentage = 0.0
+
     def rebuild_from_changed_theme_data(self):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when

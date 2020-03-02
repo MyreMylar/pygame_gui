@@ -97,6 +97,7 @@ class UITextEntryLine(UIElement):
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
+        self.should_redraw = False
         self.double_click_started = False
 
         # restrictions on text input
@@ -189,7 +190,7 @@ class UITextEntryLine(UIElement):
             if within_length_limit:
                 self.text = text
                 self.edit_position = len(self.text)
-                self.cursor_has_moved_recently = True
+                self.should_redraw = True
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
         else:
@@ -366,6 +367,9 @@ class UITextEntryLine(UIElement):
             self.cursor_has_moved_recently = False
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
+            self.should_redraw = True
+
+        if self.should_redraw:
             self.redraw()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:

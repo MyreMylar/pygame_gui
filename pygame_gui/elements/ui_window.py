@@ -209,6 +209,10 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         if self is not None and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.resizing_mode_active:
             self.resizing_mode_active = False
 
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.close_window_button):
+            self.kill()
+
         return consumed_event
 
     def check_clicked_inside_or_blocking(self, event: pygame.event.Event) -> bool:
@@ -233,10 +237,6 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                 if self.bring_to_front_on_focused:
                     self.window_stack.move_window_to_front(self)
                 consumed_event = True
-
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.close_window_button):
-            self.kill()
 
         return consumed_event
 

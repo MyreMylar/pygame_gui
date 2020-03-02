@@ -23,12 +23,24 @@ class TestUIMessageWindow:
                                          html_message="This is a bold test of the message box functionality.",
                                          manager=default_ui_manager)
 
-        message_window.close_window_button.pressed = True
-        is_alive_pre_update = message_window.alive()
-        message_window.update(0.01)
-        is_dead_post_update = not message_window.alive()
+        is_alive_pre_process_event = message_window.alive()
 
-        assert is_alive_pre_update is True and is_dead_post_update is True
+        close_button_x = message_window.close_window_button.rect.centerx
+        close_button_y = message_window.close_window_button.rect.centery
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
+                                                                                      'pos': (close_button_x,
+                                                                                              close_button_y)}))
+
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
+                                                                                    'pos': (close_button_x,
+                                                                                            close_button_y)}))
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        is_dead_post_process_event = not message_window.alive()
+
+        assert is_alive_pre_process_event is True and is_dead_post_process_event is True
 
     def test_update_dismiss_button(self, _init_pygame, default_ui_manager):
         message_window = UIMessageWindow(message_window_rect=pygame.Rect(100, 100, 200, 300),

@@ -1,1 +1,3 @@
 from pygame_gui.windows.ui_message_window import UIMessageWindow
+from pygame_gui.windows.ui_confirmation_dialog import UIConfirmationDialog
+from pygame_gui.windows.ui_file_dialog import UIFileDialog
