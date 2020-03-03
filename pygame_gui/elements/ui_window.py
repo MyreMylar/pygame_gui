@@ -272,35 +272,49 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
             self.grabbed_window = False
 
         if self.resizing_mode_active:
+
+            x_pos = self.rect.left
+            y_pos = self.rect.top
+
+            x_dimension = self.rect.width
+            y_dimension = self.rect.height
+
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             x_diff = mouse_x - self.start_resize_point[0]
             y_diff = mouse_y - self.start_resize_point[1]
 
-            y_pos = self.start_resize_rect.y
-            y_dimension = self.start_resize_rect.height
-            if self.edge_hovering[1]:
-                y_dimension = self.start_resize_rect.height - y_diff
-                y_pos = self.start_resize_rect.y + y_diff
-            elif self.edge_hovering[3]:
-                y_dimension = self.start_resize_rect.height + y_diff
+            if self.rect.height >= self.minimum_dimensions[1]:
+                y_pos = self.start_resize_rect.y
+                y_dimension = self.start_resize_rect.height
+                if self.edge_hovering[1]:
+                    y_dimension = self.start_resize_rect.height - y_diff
+                    y_pos = self.start_resize_rect.y + y_diff
+                elif self.edge_hovering[3]:
+                    y_dimension = self.start_resize_rect.height + y_diff
 
-            x_pos = self.start_resize_rect.x
-            x_dimension = self.start_resize_rect.width
-            if self.edge_hovering[0]:
-                x_dimension = self.start_resize_rect.width - x_diff
-                x_pos = self.start_resize_rect.x + x_diff
-            elif self.edge_hovering[2]:
-                x_dimension = self.start_resize_rect.width + x_diff
+                if y_dimension < self.minimum_dimensions[1]:
+                    if y_diff > 0:
+                        y_pos = self.rect.bottom - self.minimum_dimensions[1]
+                    else:
+                        y_pos = self.rect.top
+
+            if self.rect.width >= self.minimum_dimensions[0]:
+                x_pos = self.start_resize_rect.x
+                x_dimension = self.start_resize_rect.width
+                if self.edge_hovering[0]:
+                    x_dimension = self.start_resize_rect.width - x_diff
+                    x_pos = self.start_resize_rect.x + x_diff
+                elif self.edge_hovering[2]:
+                    x_dimension = self.start_resize_rect.width + x_diff
+
+                if x_dimension < self.minimum_dimensions[0]:
+                    if x_diff > 0:
+                        x_pos = self.rect.right - self.minimum_dimensions[0]
+                    else:
+                        x_pos = self.rect.left
 
             x_dimension = max(self.minimum_dimensions[0], min(self.ui_container.rect.width, x_dimension))
             y_dimension = max(self.minimum_dimensions[1], min(self.ui_container.rect.height, y_dimension))
-
-            # once we've compressed our dimensions to their minimums, stop moving the top & left positions
-            if x_dimension == self.minimum_dimensions[0]:
-                x_pos = self.rect.left
-
-            if y_dimension == self.minimum_dimensions[1]:
-                y_pos = self.rect.top
 
             self.set_position((x_pos, y_pos))
             self.set_dimensions((x_dimension, y_dimension))
@@ -322,8 +336,10 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         :param hovered_higher_element: Have we already hovered an element/window above this one.
         """
         hovered = False
+        if not self.resizing_mode_active:
+            self.edge_hovering = [False, False, False, False]
         if (self.alive() and self.can_hover() and self.resizable and
-                not hovered_higher_element and not self.resizing_mode_active):
+                not hovered_higher_element and not self.resizing_mode_active and not self.title_bar.held):
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
@@ -332,7 +348,6 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                                       self._window_root_container.rect.top - 4,
                                       self._window_root_container.rect.width + 8,
                                       self._window_root_container.rect.height + 8)
-            self.edge_hovering = [False, False, False, False]
             if resize_rect.collidepoint(mouse_x, mouse_y):
                 if resize_rect.right > mouse_x > resize_rect.right - 6:
                     self.edge_hovering[2] = True
