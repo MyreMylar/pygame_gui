@@ -2,6 +2,11 @@ import platform
 import subprocess
 import time
 import contextlib
+import os
+import sys
+
+from pathlib import Path
+from typing import Union
 
 # noinspection SpellCheckingInspection
 """
@@ -169,3 +174,17 @@ def clipboard_paste():
         return __linux_paste()
     else:
         return __mac_paste()
+
+
+def create_resource_path(relative_path: Union[str, Path]):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller's 'onefile' mode
+    """
+
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)

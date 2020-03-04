@@ -1,5 +1,6 @@
-import pygame
 from typing import Tuple, List, Dict, Union
+
+import pygame
 
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack

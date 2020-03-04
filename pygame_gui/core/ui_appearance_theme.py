@@ -8,6 +8,7 @@ from contextlib import contextmanager
 
 from typing import Union, Dict
 
+from pygame_gui.core.utility import create_resource_path
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
@@ -243,10 +244,10 @@ class UIAppearanceTheme:
                         image = self.loaded_image_files[path]
                     else:
                         try:
-                            image = pygame.image.load(os.path.normpath(path)).convert_alpha()
+                            image = pygame.image.load(create_resource_path(path)).convert_alpha()
                             self.loaded_image_files[path] = image
                         except pygame.error:
-                            warnings.warn('Unable to load image at path: ' + str(os.path.abspath(path)))
+                            warnings.warn('Unable to load image at path: ' + str(create_resource_path(path)))
 
                     if image is not None:
                         if 'sub_surface_rect' in image_paths_dict[path_key]:
@@ -545,13 +546,14 @@ class UIAppearanceTheme:
         :param file_path: The path to the theme we want to load.
 
         """
+
         if type(file_path) != io.StringIO:
-            self._theme_file_path = file_path
+            self._theme_file_path = create_resource_path(file_path)
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
             except FileNotFoundError:
                 self._theme_file_last_modified = 0
-            used_file_path = os.path.abspath(file_path)
+            used_file_path = self._theme_file_path
         else:
             used_file_path = file_path
 
