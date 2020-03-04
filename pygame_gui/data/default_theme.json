@@ -260,5 +260,40 @@
       "shadow_width": "3",
       "padding": "5,5"
     }
+  },
+  "#colour_picker_dialog.horizontal_slider":
+  {
+      "misc":
+      {
+          "enable_arrow_buttons": "0",
+          "sliding_button_width": "8"
+      }
+  },
+  "#colour_picker_dialog.horizontal_slider.#sliding_button":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "border_width": "1",
+          "shadow_width": "1"
+      }
+  },
+
+  "#colour_picker_dialog.colour_channel_editor.horizontal_slider":
+  {
+      "misc":
+      {
+          "enable_arrow_buttons": "0",
+          "sliding_button_width": "8"
+      }
+  },
+  "#colour_picker_dialog.colour_channel_editor.horizontal_slider.#sliding_button":
+  {
+      "misc":
+      {
+          "shape": "rectangle",
+          "border_width": "1",
+          "shadow_width": "1"
+      }
   }
 }

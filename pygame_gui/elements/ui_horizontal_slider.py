@@ -2,6 +2,7 @@ import pygame
 import warnings
 from typing import Union, Tuple, Dict
 
+import pygame_gui
 from pygame_gui import ui_manager
 from pygame_gui.core.container_interface import IContainerInterface
 from pygame_gui.core.ui_element import UIElement
@@ -43,8 +44,9 @@ class UIHorizontalSlider(UIElement):
                          object_ids=new_object_ids,
                          anchors=anchors)
 
-        self.button_width = 20
-        self.arrow_button_width = self.button_width
+        self.default_button_width = 20
+        self.arrow_button_width = self.default_button_width
+        self.sliding_button_width = self.default_button_width
         self.current_percentage = 0.5
         self.left_limit_position = 0.0
         self.starting_grab_x_difference = 0
@@ -55,6 +57,7 @@ class UIHorizontalSlider(UIElement):
 
         self.grabbed_slider = False
         self.has_moved_recently = False
+        self.has_been_moved_by_user_recently = False
 
         self.background_colour = None
         self.border_colour = None
@@ -80,9 +83,9 @@ class UIHorizontalSlider(UIElement):
 
         self.rebuild_from_changed_theme_data()
 
-        sliding_x_pos = int(self.background_rect.width/2 - self.button_width/2)
+        sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos, 0),
-                                                   (self.button_width, self.background_rect.height)),
+                                                   (self.sliding_button_width, self.background_rect.height)),
                                        '', self.ui_manager,
                                        container=self.button_container,
                                        starting_height=1,
@@ -136,7 +139,7 @@ class UIHorizontalSlider(UIElement):
 
         # Things below here depend on theme data so need to be updated on a rebuild
         if self.arrow_buttons_enabled:
-            self.arrow_button_width = self.button_width
+            self.arrow_button_width = self.default_button_width
 
             if self.left_button is None:
                 self.left_button = UIButton(pygame.Rect((0, 0),
@@ -176,14 +179,14 @@ class UIHorizontalSlider(UIElement):
                 self.right_button.kill()
                 self.right_button = None
 
-        self.scrollable_width = self.background_rect.width - self.button_width - (2 * self.arrow_button_width)
+        self.scrollable_width = self.background_rect.width - self.sliding_button_width - (2 * self.arrow_button_width)
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width / 2
 
         if self.sliding_button is not None:
-            sliding_x_pos = int((self.background_rect.width / 2) - (self.button_width / 2))
+            sliding_x_pos = int((self.background_rect.width / 2) - (self.sliding_button_width / 2))
             self.sliding_button.set_relative_position((sliding_x_pos, 0))
-            self.sliding_button.set_dimensions((self.button_width, self.background_rect.height))
+            self.sliding_button.set_dimensions((self.sliding_button_width, self.background_rect.height))
             self.sliding_button.set_hold_range((self.background_rect.width, 100))
             self.set_current_value(self.current_value)
 
@@ -253,6 +256,16 @@ class UIHorizontalSlider(UIElement):
             if not self.has_moved_recently:
                 self.has_moved_recently = True
 
+            if not self.has_been_moved_by_user_recently:
+                self.has_been_moved_by_user_recently = True
+
+            event_data = {'user_type': pygame_gui.UI_HORIZONTAL_SLIDER_MOVED,
+                          'value': self.current_value,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            slider_moved_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            pygame.event.post(slider_moved_event)
+
     def get_current_value(self) -> Union[float, int]:
         """
         Gets the current value the slider is set to.
@@ -260,6 +273,7 @@ class UIHorizontalSlider(UIElement):
         :return: The current value recorded by the slider.
         """
         self.has_moved_recently = False
+        self.has_been_moved_by_user_recently = False
         return self.current_value
 
     def set_current_value(self, value: Union[float, int]):
@@ -354,6 +368,18 @@ class UIHorizontalSlider(UIElement):
                 self.arrow_buttons_enabled = buttons_enable
                 has_any_changed = True
 
+        sliding_button_width = self.default_button_width
+        sliding_button_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids, 'sliding_button_width')
+        if sliding_button_width_string is not None:
+            try:
+                sliding_button_width = int(sliding_button_width_string)
+            except ValueError:
+                sliding_button_width = self.default_button_width
+        if sliding_button_width != self.sliding_button_width:
+            self.sliding_button_width = sliding_button_width
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 
@@ -395,12 +421,12 @@ class UIHorizontalSlider(UIElement):
         self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out sliding button parameters
-        self.scrollable_width = self.background_rect.width - self.button_width - (2 * self.arrow_button_width)
+        self.scrollable_width = self.background_rect.width - self.sliding_button_width - (2 * self.arrow_button_width)
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width * self.current_percentage
 
         slider_x_pos = self.scroll_position + self.arrow_button_width
         slider_y_pos = 0
 
-        self.sliding_button.set_dimensions((self.button_width, self.background_rect.height))
+        self.sliding_button.set_dimensions((self.sliding_button_width, self.background_rect.height))
         self.sliding_button.set_relative_position((slider_x_pos, slider_y_pos))
