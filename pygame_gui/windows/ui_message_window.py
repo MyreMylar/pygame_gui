@@ -1,10 +1,10 @@
 import pygame
-from typing import Union
+import pygame_gui
 
+from pygame_gui import ui_manager
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_window import UIWindow
-from pygame_gui import ui_manager
 
 
 class UIMessageWindow(UIWindow):
@@ -12,22 +12,21 @@ class UIMessageWindow(UIWindow):
     A simple popup window for delivering text-only messages to users.
 
     :param rect: The size and position of the window, includes the menu bar across the top.
-    :param window_title: The title of the message window.
     :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
     :param manager: The UIManager that manages this UIElement.
+    :param window_title: The title of the  window.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, rect: pygame.Rect,
-                 window_title: str,
                  html_message: str,
                  manager: ui_manager.UIManager,
-                 object_id: Union[str, None] = None):
+                 *,
+                 window_title: str = 'Message',
+                 object_id: str = '#message_window'):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='message_window',
-                         object_id=object_id,
-                         resizable=True)
+                         object_id=object_id)
 
         self.set_minimum_dimensions((250, 250))
 
@@ -63,13 +62,18 @@ class UIMessageWindow(UIWindow):
                                              "bottom": "bottom"}
                                     )
 
-    def update(self, time_delta: float):
+    def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Called every update loop of our UI manager. Handles moving and closing the window.
+        Process any events relevant to the message window. In this case we just close the window when the dismiss
+        button is pressed.
 
-        :param time_delta: The time in seconds between calls to this function.
+        :param event: a pygame.Event.
+        :return: Return True if we 'consumed' this event and don't want to pass it on to the rest of the UI.
         """
-        super().update(time_delta)
+        consumed_event = super().process_event(event)
 
-        if self.alive() and self.dismiss_button.check_pressed():
+        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
+                and event.ui_element == self.dismiss_button):
             self.kill()
+
+        return consumed_event

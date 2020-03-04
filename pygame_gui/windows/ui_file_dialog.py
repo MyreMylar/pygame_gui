@@ -14,7 +14,7 @@ class UIFileDialog(UIWindow):
     def __init__(self,
                  rect: pygame.Rect,
                  manager: 'ui_manager.UIManager',
-                 window_title: str,
+                 window_title: str = 'File Dialog',
                  initial_file_path: Union[str, None] = None,
                  ):
         super().__init__(rect, manager, window_display_title=window_title, object_id='#file_dialog')
