@@ -5,13 +5,14 @@ from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelection
 from pygame_gui.windows import UIConfirmationDialog
 
 from typing import Union, List
-from os import listdir, access, R_OK
+from os import listdir
 from os.path import isfile, join, abspath, exists
 from pathlib import Path
 
 
 class UIFileDialog(UIWindow):
-    def __init__(self, rect: pygame.Rect,
+    def __init__(self,
+                 rect: pygame.Rect,
                  manager: 'ui_manager.UIManager',
                  window_title: str,
                  initial_file_path: Union[str, None] = None,
@@ -34,8 +35,7 @@ class UIFileDialog(UIWindow):
         self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
                                   text='OK',
                                   manager=self.ui_manager,
-                                  container=self.get_container(),
-                                  parent_element=self,
+                                  container=self,
                                   anchors={'left': 'right',
                                            'right': 'right',
                                            'top': 'bottom',
@@ -45,8 +45,7 @@ class UIFileDialog(UIWindow):
         self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
                                       text='Cancel',
                                       manager=self.ui_manager,
-                                      container=self.get_container(),
-                                      parent_element=self,
+                                      container=self,
                                       anchors={'left': 'right',
                                                'right': 'right',
                                                'top': 'bottom',
@@ -56,8 +55,7 @@ class UIFileDialog(UIWindow):
                                     text='⌂',
                                     tool_tip_text='Home Directory',
                                     manager=self.ui_manager,
-                                    container=self.get_container(),
-                                    parent_element=self,
+                                    container=self,
                                     object_id='#home_icon_button',
                                     anchors={'left': 'left',
                                              'right': 'left',
@@ -68,8 +66,7 @@ class UIFileDialog(UIWindow):
                                       text='⌧',
                                       tool_tip_text='Delete',
                                       manager=self.ui_manager,
-                                      container=self.get_container(),
-                                      parent_element=self,
+                                      container=self,
                                       object_id='#delete_icon_button',
                                       anchors={'left': 'left',
                                                'right': 'left',
@@ -81,8 +78,7 @@ class UIFileDialog(UIWindow):
                                                 text='↑',
                                                 tool_tip_text='Parent Directory',
                                                 manager=self.ui_manager,
-                                                container=self.get_container(),
-                                                parent_element=self,
+                                                container=self,
                                                 object_id='#parent_icon_button',
                                                 anchors={'left': 'left',
                                                          'right': 'left',
@@ -93,8 +89,7 @@ class UIFileDialog(UIWindow):
                                        text='⇪',
                                        tool_tip_text='Refresh Directory',
                                        manager=self.ui_manager,
-                                       container=self.get_container(),
-                                       parent_element=self,
+                                       container=self,
                                        object_id='#refresh_icon_button',
                                        anchors={'left': 'left',
                                                 'right': 'left',
@@ -104,8 +99,7 @@ class UIFileDialog(UIWindow):
         text_line_rect = pygame.Rect(10, 40, self.get_container().relative_rect.width - 20, 25)
         self.file_path_text_line = UITextEntryLine(relative_rect=text_line_rect,
                                                    manager=self.ui_manager,
-                                                   container=self.get_container(),
-                                                   parent_element=self,
+                                                   container=self,
                                                    object_id='#file_path_text_line',
                                                    anchors={'left': 'left',
                                                             'right': 'right',
@@ -119,8 +113,7 @@ class UIFileDialog(UIWindow):
         self.file_selection_list = UISelectionList(relative_rect=file_selection_rect,
                                                    item_list=self.current_file_list,
                                                    manager=self.ui_manager,
-                                                   container=self.get_container(),
-                                                   parent_element=self,
+                                                   container=self,
                                                    object_id='#file_display_list',
                                                    anchors={'left': 'left',
                                                             'right': 'right',

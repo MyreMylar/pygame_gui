@@ -11,20 +11,20 @@ class UIMessageWindow(UIWindow):
     """
     A simple popup window for delivering text-only messages to users.
 
-    :param message_window_rect: The size and position of the window, includes the menu bar across the top.
-    :param message_title: The title of the message window.
+    :param rect: The size and position of the window, includes the menu bar across the top.
+    :param window_title: The title of the message window.
     :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
     :param manager: The UIManager that manages this UIElement.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, message_window_rect: pygame.Rect,
-                 message_title: str,
+    def __init__(self, rect: pygame.Rect,
+                 window_title: str,
                  html_message: str,
                  manager: ui_manager.UIManager,
                  object_id: Union[str, None] = None):
 
-        super().__init__(message_window_rect, manager,
-                         window_display_title=message_title,
+        super().__init__(rect, manager,
+                         window_display_title=window_title,
                          element_id='message_window',
                          object_id=object_id,
                          resizable=True)
@@ -33,8 +33,6 @@ class UIMessageWindow(UIWindow):
 
         self.dismiss_button = None
         self.text_block = None
-
-        # self.rebuild_from_changed_theme_data()
 
         button_size = (70, 20)
         bottom_right_margin = (20, 20)

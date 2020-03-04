@@ -152,11 +152,7 @@ class UIColourPickerDialog(UIWindow):
         super().__init__(rect, manager, window_display_title=window_title, object_id=object_id)
 
         self.current_colour = initial_colour
-        # if self.current_colour.hsva[2] == 0:
-        #     self.current_colour.hsva = (int(self.current_colour.hsva[0]),
-        #                                 int(self.current_colour.hsva[1]),
-        #                                 1,
-        #                                 int(self.current_colour.hsva[3]))
+
         self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
                                   text='OK',
                                   manager=self.ui_manager,
