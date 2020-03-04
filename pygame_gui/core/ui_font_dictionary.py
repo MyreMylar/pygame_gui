@@ -178,8 +178,8 @@ class UIFontDictionary:
                     if type(self.known_font_paths[font_name][3]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][3]))
                     else:
-                        file_loc = self.known_font_paths[font_name][3]
-                    new_font = pygame.font.Font(create_resource_path(file_loc), font_size)
+                        file_loc = create_resource_path(self.known_font_paths[font_name][3])
+                    new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_bold(True)
                     new_font.set_italic(True)
                     self.loaded_fonts[font_id] = new_font
@@ -191,8 +191,8 @@ class UIFontDictionary:
                     if type(self.known_font_paths[font_name][1]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][1]))
                     else:
-                        file_loc = self.known_font_paths[font_name][1]
-                    new_font = pygame.font.Font(create_resource_path(file_loc), font_size)
+                        file_loc = create_resource_path(self.known_font_paths[font_name][1])
+                    new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_bold(True)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
@@ -202,8 +202,8 @@ class UIFontDictionary:
                     if type(self.known_font_paths[font_name][2]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][2]))
                     else:
-                        file_loc = self.known_font_paths[font_name][2]
-                    new_font = pygame.font.Font(create_resource_path(file_loc), font_size)
+                        file_loc = create_resource_path(self.known_font_paths[font_name][2])
+                    new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_italic(True)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
@@ -213,8 +213,8 @@ class UIFontDictionary:
                     if type(self.known_font_paths[font_name][0]) == bytes:
                         file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][0]))
                     else:
-                        file_loc = self.known_font_paths[font_name][0]
-                    new_font = pygame.font.Font(create_resource_path(file_loc), font_size)
+                        file_loc = create_resource_path(self.known_font_paths[font_name][0])
+                    new_font = pygame.font.Font(file_loc, font_size)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
                     warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][0])
