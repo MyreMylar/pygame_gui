@@ -234,7 +234,23 @@ class UIElement(pygame.sprite.Sprite):
         self._update_container_clip()
 
     def _update_container_clip(self):
-        if not self.ui_container.rect.contains(self.rect):
+        if self.ui_container.get_image_clipping_rect() is not None:
+            container_clip_rect = self.ui_container.get_image_clipping_rect().copy()
+            container_clip_rect.left += self.ui_container.rect.left
+            container_clip_rect.top += self.ui_container.rect.top
+            if not container_clip_rect.contains(self.rect):
+                left = max(0, container_clip_rect.left - self.rect.left)
+                right = max(0, self.rect.width - max(0, self.rect.right - container_clip_rect.right))
+                top = max(0, container_clip_rect.top - self.rect.top)
+                bottom = max(0, self.rect.height - max(0, self.rect.bottom - container_clip_rect.bottom))
+                clip_rect = pygame.Rect(left, top,
+                                        right - left,
+                                        bottom - top)
+                self._clip_images_for_container(clip_rect)
+            else:
+                self._restore_container_clipped_images()
+
+        elif not self.ui_container.rect.contains(self.rect):
             left = max(0, self.ui_container.rect.left - self.rect.left)
             right = max(0, self.rect.width - max(0, self.rect.right - self.ui_container.rect.right))
             top = max(0, self.ui_container.rect.top - self.rect.top)
@@ -477,6 +493,9 @@ class UIElement(pygame.sprite.Sprite):
                 self.image.blit(self._pre_clipped_image, self._image_clip, self._image_clip)
         else:
             self._image_clip = None
+
+    def get_image_clipping_rect(self):
+        return self._image_clip
 
     def set_image(self, new_image):
         if self._image_clip is not None and new_image is not None:
