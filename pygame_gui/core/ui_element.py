@@ -9,9 +9,7 @@ from pygame_gui import ui_manager
 class UIElement(pygame.sprite.Sprite):
     """
     A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element classes should
-    derive from this class.
-
-    Inherits from pygame.sprite.Sprite.
+    derive from this class. Inherits from pygame.sprite.Sprite.
 
     :param relative_rect: A rectangle shape of the UI element, the position is relative to the element's container.
     :param manager: The UIManager that manages this UIElement.
@@ -142,7 +140,7 @@ class UIElement(pygame.sprite.Sprite):
         Called when our element's absolute position has been forcibly changed.
         """
 
-        # This is a bit easier to calculate than gettin the absolute position fromt he relative one, because the
+        # This is a bit easier to calculate than getting the absolute position from the relative one, because the
         # absolute position rectangle is always relative to the top left of the screen.
         self.relative_bottom_margin = None
         self.relative_right_margin = None
@@ -362,6 +360,11 @@ class UIElement(pygame.sprite.Sprite):
         self._update_container_clip()
 
     def update(self, time_delta: float):
+        """
+        Updates this element's drawable shape, if it has one.
+
+        :param time_delta: The time passed between frames, measured in seconds.
+        """
         if self.alive() and self.drawable_shape is not None:
             self.drawable_shape.update(time_delta)
             if self.drawable_shape.has_fresh_surface():
@@ -512,7 +515,8 @@ class UIElement(pygame.sprite.Sprite):
 
     def get_top_layer(self):
         """
-        Assuming we have correctly calculated the 'thickness' of this container, this method will return the top of this element.
+        Assuming we have correctly calculated the 'thickness' of this container, this method will return the top of
+        this element.
 
         :return int: An integer representing the current highest layer being used by this element.
         """
