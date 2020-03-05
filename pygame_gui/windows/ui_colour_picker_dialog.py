@@ -112,8 +112,9 @@ class UIColourChannelEditor(UIElement):
         return consumed_event
 
     def _set_value_from_slider(self, new_value: int):
-        if self.range[0] <= new_value <= self.range[1] and new_value != self.current_value:
-            self.current_value = new_value
+        clipped_value = min(self.range[1], max(self.range[0], new_value))
+        if clipped_value != self.current_value:
+            self.current_value = clipped_value
             self.entry.set_text(str(self.current_value))
             event_data = {'user_type': pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
                           'value': self.current_value,
@@ -124,8 +125,11 @@ class UIColourChannelEditor(UIElement):
             pygame.event.post(colour_channel_changed_event)
 
     def _set_value_from_entry(self, new_value: int):
-        if self.range[0] <= new_value <= self.range[1] and new_value != self.current_value:
-            self.current_value = new_value
+        clipped_value = min(self.range[1], max(self.range[0], new_value))
+        if clipped_value != new_value:
+            self.entry.set_text(str(clipped_value))
+        if clipped_value != self.current_value:
+            self.current_value = clipped_value
             self.slider.set_current_value(self.current_value)
             event_data = {'user_type': pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
                           'value': self.current_value,
@@ -136,8 +140,9 @@ class UIColourChannelEditor(UIElement):
             pygame.event.post(colour_channel_changed_event)
 
     def set_value(self, new_value: int):
-        if self.range[0] <= new_value <= self.range[1] and new_value != self.current_value:
-            self.current_value = new_value
+        clipped_value = min(self.range[1], max(self.range[0], new_value))
+        if clipped_value != self.current_value:
+            self.current_value = clipped_value
             self.entry.set_text(str(self.current_value))
             self.slider.set_current_value(self.current_value)
 

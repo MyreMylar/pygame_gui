@@ -341,7 +341,7 @@ class UIElement(pygame.sprite.Sprite):
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_dimensions(self.relative_rect.size)
-            self.set_image(self.drawable_shape.get_fresh_surface()) # needed to stop resizing 'lag'
+            self.set_image(self.drawable_shape.get_fresh_surface())  # needed to stop resizing 'lag'
 
         self._update_container_clip()
 

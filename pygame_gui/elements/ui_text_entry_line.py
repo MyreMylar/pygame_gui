@@ -112,18 +112,7 @@ class UITextEntryLine(UIElement):
         Rebuild whatever needs building.
 
         """
-        line_height = self.font.size(' ')[1]
-
-        self.relative_rect.height = (line_height + (2 * self.vert_line_padding) +
-                                     (2 * self.border_width) + (2 * self.shadow_width))
-        self.rect.height = self.relative_rect.height
-
-        self.text_image_rect = pygame.Rect((self.border_width + self.shadow_width + self.shape_corner_radius,
-                                            self.border_width + self.shadow_width),
-                                           (self.relative_rect.width - (self.border_width * 2) -
-                                            (self.shadow_width * 2) - (2 * self.shape_corner_radius),
-                                            self.relative_rect.height - (self.border_width * 2) -
-                                            (self.shadow_width * 2)))
+        self.set_dimensions((self.relative_rect.width, -1))
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
@@ -140,7 +129,9 @@ class UITextEntryLine(UIElement):
 
         self.background_and_border = self.drawable_shape.get_surface('normal')
 
-        self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA, depth=32)
+        if self.text_image is None:
+            self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA, depth=32)
+
         if type(self.background_colour) == ColourGradient:
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
             self.background_colour.apply_gradient_to_surface(self.text_image)
@@ -149,6 +140,7 @@ class UITextEntryLine(UIElement):
 
         self.set_image(self.background_and_border.copy())
 
+        line_height = self.font.size(' ')[1]
         self.cursor = pygame.Rect((self.text_image_rect.x +
                                    self.horiz_line_padding - self.start_text_offset,
                                    self.text_image_rect.y +
@@ -206,7 +198,14 @@ class UITextEntryLine(UIElement):
             self.background_colour.apply_gradient_to_surface(self.text_image)
         else:
             self.text_image.fill(self.background_colour)
-        if self.select_range[0] != self.select_range[1]:
+        if self.select_range[0] == self.select_range[1]:
+            if type(self.text_colour) == ColourGradient:
+                self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+                self.text_colour.apply_gradient_to_surface(self.text_surface)
+
+            else:
+                self.text_surface = self.font.render(self.text, True, self.text_colour)
+        else:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
             pre_select_area_text = self.text[:low_end]
@@ -217,11 +216,11 @@ class UITextEntryLine(UIElement):
             post_select_area_surface = None
 
             if len(pre_select_area_text) > 0:
-                if type(self.text_colour) != ColourGradient:
-                    pre_select_area_surface = self.font.render(pre_select_area_text, True, self.text_colour)
-                else:
+                if type(self.text_colour) == ColourGradient:
                     pre_select_area_surface = self.font.render(pre_select_area_text, True, pygame.Color('#FFFFFFFF'))
                     self.text_colour.apply_gradient_to_surface(pre_select_area_surface)
+                else:
+                    pre_select_area_surface = self.font.render(pre_select_area_text, True, self.text_colour)
                 width_pre = pre_select_area_surface.get_rect().width
             else:
                 width_pre = 0
@@ -231,17 +230,14 @@ class UITextEntryLine(UIElement):
                 select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA, depth=32)
                 select_area_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
-                if type(self.selected_text_colour) != ColourGradient:
-                    alpha_text = self.font.render(select_area_text, True, self.selected_text_colour)
-                else:
+                if type(self.selected_text_colour) == ColourGradient:
                     alpha_text = self.font.render(select_area_text, True, pygame.Color('#FFFFFFFF'))
                     self.selected_text_colour.apply_gradient_to_surface(alpha_text)
+                else:
+                    alpha_text = self.font.render(select_area_text, True, self.selected_text_colour)
                 select_area_surface.blit(alpha_text, (0, 0))
             else:
-                if type(self.selected_text_colour) != ColourGradient:
-                    select_area_surface = self.font.render(select_area_text, True,
-                                                           self.selected_text_colour, self.selected_bg_colour)
-                else:
+                if type(self.selected_text_colour) == ColourGradient:
                     select_size = self.font.size(select_area_text)
                     select_area_surface = pygame.Surface(select_size, flags=pygame.SRCALPHA, depth=32)
                     select_area_surface.fill(self.selected_bg_colour)
@@ -250,12 +246,15 @@ class UITextEntryLine(UIElement):
                     self.selected_text_colour.apply_gradient_to_surface(alpha_text)
                     select_area_surface.blit(alpha_text, (0, 0))
 
-            if len(post_select_area_text) > 0:
-                if type(self.text_colour) != ColourGradient:
-                    post_select_area_surface = self.font.render(post_select_area_text, True, self.text_colour)
                 else:
+                    select_area_surface = self.font.render(select_area_text, True,
+                                                           self.selected_text_colour, self.selected_bg_colour)
+            if len(post_select_area_text) > 0:
+                if type(self.text_colour) == ColourGradient:
                     post_select_area_surface = self.font.render(post_select_area_text, True, pygame.Color('#FFFFFFFF'))
                     self.text_colour.apply_gradient_to_surface(post_select_area_surface)
+                else:
+                    post_select_area_surface = self.font.render(post_select_area_text, True, self.text_colour)
                 width_post = post_select_area_surface.get_rect().width
             else:
                 width_post = 0
@@ -275,13 +274,6 @@ class UITextEntryLine(UIElement):
             self.text_surface.blit(select_area_surface, (width_pre, 0))
             if post_select_area_surface is not None:
                 self.text_surface.blit(post_select_area_surface, (width_pre+width_select, 0))
-        else:
-            if type(self.text_colour) != ColourGradient:
-                self.text_surface = self.font.render(self.text, True, self.text_colour)
-            else:
-                self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
-                self.text_colour.apply_gradient_to_surface(self.text_surface)
-
         text_clip_width = (self.rect.width - (self.horiz_line_padding * 2) - (self.shape_corner_radius * 2) -
                            (self.border_width * 2) - (self.shadow_width * 2))
         text_clip_height = (self.rect.height - (self.vert_line_padding * 2) -
@@ -302,9 +294,6 @@ class UITextEntryLine(UIElement):
             self.start_text_offset = total_width_minus_visible
         elif width_to_edit_pos == 0:
             self.start_text_offset = 0
-        else:
-            pass
-
         text_surface_clip.x += self.start_text_offset
 
         if len(self.text) > 0:
@@ -579,7 +568,8 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
             else:
                 within_length_limit = True
-                if self.length_limit is not None and len(self.text) >= self.length_limit:
+                if (self.length_limit is not None
+                        and (len(self.text) - abs(self.select_range[0] - self.select_range[1])) >= self.length_limit):
                     within_length_limit = False
                 if within_length_limit:
                     character = event.unicode
@@ -792,21 +782,25 @@ class UITextEntryLine(UIElement):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Will allow us to change the width of the text entry line but not it's height which is determined by the height
+        Will allow us to change the width of the text entry line, but not it's height which is determined by the height
         of the font.
 
         :param dimensions: Teh dimensions to set. Only the first, the width, will actually be used.
         """
-        self.rect.width = int(dimensions[0])
-        self.relative_rect.size = self.rect.size
+        corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
+        line_height = self.font.size(' ')[1]
+        corrected_dimensions[1] = int(line_height + (2 * self.vert_line_padding) +
+                                      (2 * self.border_width) + (2 * self.shadow_width))
+        super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))
+
+        self.text_image_rect = pygame.Rect((self.border_width + self.shadow_width + self.shape_corner_radius,
+                                            self.border_width + self.shadow_width),
+                                           (self.relative_rect.width - (self.border_width * 2) -
+                                            (self.shadow_width * 2) - (2 * self.shape_corner_radius),
+                                            self.relative_rect.height - (self.border_width * 2) -
+                                            (self.shadow_width * 2)))
 
         if self.drawable_shape is not None:
-            self.drawable_shape.set_dimensions(self.rect.size)
-
-        self.background_and_border = self.drawable_shape.get_surface('normal')
-        self.text_image_rect.width = (self.rect.width - (self.border_width * 2) -
-                                      (self.shadow_width * 2) - (2 * self.shape_corner_radius))
-
-        self.text_image = pygame.transform.smoothscale(self.text_image, self.text_image_rect.size)
-
-        self.redraw()
+            self.background_and_border = self.drawable_shape.get_fresh_surface()
+            self.text_image = pygame.Surface(self.text_image_rect.size, flags=pygame.SRCALPHA, depth=32)
+            self.redraw()
