@@ -3,12 +3,12 @@ import warnings
 from typing import Union, Tuple, Dict
 
 import pygame_gui
-from pygame_gui import ui_manager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.elements.ui_button import UIButton
-from pygame_gui.core.ui_container import UIContainer
+
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UIHorizontalSlider(UIElement):
@@ -26,7 +26,7 @@ class UIHorizontalSlider(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  start_value: Union[float, int],
                  value_range: Tuple[Union[float, int], Union[float, int]],
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,

@@ -2,12 +2,13 @@ import pygame
 from typing import Union, List, Tuple, Dict
 
 import pygame_gui
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
+
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_selection_list import UISelectionList
-from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
 class UIExpandedDropDownState:
@@ -426,7 +427,7 @@ class UIDropDownMenu(UIElement):
     def __init__(self, options_list: List[str],
                  starting_option: str,
                  relative_rect: pygame.Rect,
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,

@@ -1,8 +1,8 @@
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 
 import pygame
 
-from pygame_gui.core.container_interface import IContainerInterface
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 
 
@@ -19,8 +19,16 @@ class UIContainer(UIElement, IContainerInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect, manager, *, starting_height: int = 1, is_window_root_container: bool = False,
-                 container=None, parent_element=None, object_id=None, anchors=None):
+    def __init__(self,
+                 relative_rect: pygame.Rect,
+                 manager: IUIManagerInterface,
+                 *,
+                 starting_height: int = 1,
+                 is_window_root_container: bool = False,
+                 container: Union[IContainerInterface, None] = None,
+                 parent_element: Union[UIElement, None] = None,
+                 object_id: Union[str, None] = None,
+                 anchors: Union[Dict[str, str], None] = None):
 
         self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
@@ -48,7 +56,7 @@ class UIContainer(UIElement, IContainerInterface):
     def get_container(self):
         return self
 
-    def add_element(self, element):
+    def add_element(self, element: UIElement):
         """
         Add a UIElement to the container. The UI's relative_rect parameter will be relative to this container.
 
@@ -58,7 +66,7 @@ class UIContainer(UIElement, IContainerInterface):
         self.elements.append(element)
         self.recalculate_container_layer_thickness()
 
-    def remove_element(self, element):
+    def remove_element(self, element: UIElement):
         """
         Remove a UIElement from this container.
 
@@ -87,7 +95,7 @@ class UIContainer(UIElement, IContainerInterface):
             if self.ui_container is not None and self.ui_container != self:
                 self.ui_container.recalculate_container_layer_thickness()
 
-    def change_layer(self, new_layer):
+    def change_layer(self, new_layer: int):
         """
         Change the layer of this container. Layers are used by the GUI to control the order in which things are drawn
         and which things should currently be interactive (so you can't interact with things behind other things).
@@ -113,19 +121,34 @@ class UIContainer(UIElement, IContainerInterface):
             element.update_containing_rect_position()
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Set the absolute position of this container - it is usually less chaotic to deal with setting
+        relative positions.
+
+        :param position: the new absolute position to set.
+        """
         super().set_position(position)
         self.update_containing_rect_position()
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Set the position of this container, relative to the container it is within.
+
+        :param position: the new relative position to set.
+        """
         super().set_relative_position(position)
         self.update_containing_rect_position()
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Set the dimension of this container and update the positions of elements within it accordingly.
+
+        :param dimensions: the new dimensions.
+        """
         super().set_dimensions(dimensions)
-        # self.set_relative_position(self.relative_rect.topleft)
         self.update_containing_rect_position()
 
-    def get_top_layer(self):
+    def get_top_layer(self) -> int:
         """
         Assuming we have correctly calculated the 'thickness' of this container, this method will return the 'highest'
         layer in the LayeredUpdates UI Group.
@@ -150,7 +173,7 @@ class UIContainer(UIElement, IContainerInterface):
             self.elements.pop().kill()
 
     # noinspection PyUnusedLocal
-    def check_hover(self, time_delta, hovered_higher_element):
+    def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
         A method that helps us to determine which, if any, UI Element is currently being hovered by the mouse.
 

@@ -4,12 +4,11 @@ import warnings
 from typing import Union, List, Tuple, Dict
 
 import pygame_gui
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.container_interface import IContainerInterface
+
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
-from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core import ColourGradient, UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class UITextEntryLine(UIElement):
@@ -36,7 +35,7 @@ class UITextEntryLine(UIElement):
     _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
 
     def __init__(self, relative_rect: pygame.Rect,
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,

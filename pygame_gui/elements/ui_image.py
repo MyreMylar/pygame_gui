@@ -1,9 +1,8 @@
 import pygame
 from typing import Union, Tuple, Dict
 
-from pygame_gui import ui_manager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement
 
 
 class UIImage(UIElement):
@@ -19,7 +18,7 @@ class UIImage(UIElement):
     """
     def __init__(self, relative_rect: pygame.Rect,
                  image_surface: pygame.Surface,
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
@@ -45,6 +44,11 @@ class UIImage(UIElement):
             self.set_image(image_surface)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Set the dimensions of this image, scaling the image surface to match.
+
+        :param dimensions: The new dimensions of the image.
+        """
         super().set_dimensions(dimensions)
 
         if self.rect.size != self.image.get_size():
@@ -54,4 +58,3 @@ class UIImage(UIElement):
                 else:
                     self.original_image = self.image
             self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
-

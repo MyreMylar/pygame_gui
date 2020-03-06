@@ -1,10 +1,9 @@
 import pygame
 import pygame_gui
 
-from pygame_gui import ui_manager
-from pygame_gui.elements.ui_button import UIButton
-from pygame_gui.elements.ui_text_box import UITextBox
-from pygame_gui.elements.ui_window import UIWindow
+from pygame_gui.core.interfaces import IUIManagerInterface
+
+from pygame_gui.elements import UIButton, UITextBox, UIWindow
 
 
 class UIMessageWindow(UIWindow):
@@ -19,7 +18,7 @@ class UIMessageWindow(UIWindow):
     """
     def __init__(self, rect: pygame.Rect,
                  html_message: str,
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  *,
                  window_title: str = 'Message',
                  object_id: str = '#message_window'):

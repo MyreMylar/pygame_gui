@@ -1,19 +1,20 @@
-import pygame
-import pygame_gui
-from pygame_gui import ui_manager
-from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelectionList
-from pygame_gui.windows import UIConfirmationDialog
-
 from typing import Union, List
 from os import listdir
 from os.path import isfile, join, abspath, exists
 from pathlib import Path
 
+import pygame
+import pygame_gui
+
+from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelectionList
+from pygame_gui.windows import UIConfirmationDialog
+
 
 class UIFileDialog(UIWindow):
     def __init__(self,
                  rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  window_title: str = 'File Dialog',
                  initial_file_path: Union[str, None] = None,
                  ):

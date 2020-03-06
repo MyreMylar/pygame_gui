@@ -6,7 +6,7 @@ import base64
 import warnings
 from contextlib import contextmanager
 
-from typing import Union, Dict
+from typing import Union, List, Dict, Any
 
 from pygame_gui.core.utility import create_resource_path
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
@@ -123,21 +123,26 @@ class UIAppearanceTheme:
         self.load_default_theme_file(default_theme_file_path)
 
     def load_default_theme_file(self, default_theme_file_path):
+        """
+        Loads the default theme file, either from the file directly or from string data if we have been turned into an
+        exe by a program like PyInstaller.
+
+        """
         if os.path.exists(default_theme_file_path):
             self.load_theme(default_theme_file_path)
         else:
             default_theme_file = io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8"))
             self.load_theme(default_theme_file)
 
-    def get_font_dictionary(self):
+    def get_font_dictionary(self) -> UIFontDictionary:
         """
-        Lets us grab the Font dictionary, which is created by the theme object, so we can access it directly.
+        Lets us grab the font dictionary, which is created by the theme object, so we can access it directly.
 
-        :return UIFontDictionary:
+        :return UIFontDictionary: The font dictionary.
         """
         return self.font_dictionary
 
-    def check_need_to_reload(self):
+    def check_need_to_reload(self) -> bool:
         """
         Check if we need to reload our theme file because it's been modified. If so, trigger a reload and return True
         so that the UIManager can trigger elements to rebuild from the theme data.
@@ -158,6 +163,10 @@ class UIAppearanceTheme:
                 return False
 
     def update_shape_cache(self):
+        """
+        Updates the shape cache.
+
+        """
         self.shape_cache.update()
 
     def reload_theming(self):
@@ -318,7 +327,27 @@ class UIAppearanceTheme:
                     if shadow_id_3 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shape_corner_radius, shape_corner_radius)
 
-    def get_next_id_node(self, current_node, element_ids, object_ids, index, tree_size, combined_ids):
+    def get_next_id_node(self, current_node: Union[Dict[str, Union[str, Dict]], None],
+                         element_ids: List[str],
+                         object_ids: List[Union[str, None]],
+                         index: int,
+                         tree_size: int,
+                         combined_ids: List[str]):
+        """
+        Use a recursive algorithm to build up a list of IDs that describe a particular UI object to ever decreasing
+        degrees of accuracy.
+
+        We first iterate forward through the ID strings building up parent->child relationships and then unwind them
+        backwards to create the final string IDs. We pick object IDs over element IDs first when available placing those
+        IDs containing object IDs higher up in our list.
+
+        :param current_node: The current 'node' we are at in the recursive algorithm.
+        :param element_ids: A hierarchical list of all element IDs that apply to our element, this includes parents.
+        :param object_ids: A hierarchical list of all object IDs that apply to our element, this includes parents.
+        :param index: The current index in the two ID lists.
+        :param tree_size: The size of both lists.
+        :param combined_ids: The final list of combined IDs.
+        """
         if index < tree_size:
             if object_ids is not None and index < len(object_ids):
                 object_id = object_ids[index]
@@ -342,13 +371,14 @@ class UIAppearanceTheme:
                 combined_id += gathered_ids[index]
             combined_ids.append(combined_id)
 
-    def build_all_combined_ids(self, element_ids, object_ids):
+    def build_all_combined_ids(self, element_ids: List[str], object_ids: List[Union[str, None]]) -> List[str]:
         """
-        Construct a combined element id from the elements ids.
+        Construct a list of combined element ids from the element's various accumulated ids.
 
         :param element_ids: All the ids of elements this element is contained within.
         :param object_ids: All the ids of objects this element is contained within.
-        :return: The combined id string in the database
+
+        :return: A list of IDs that reference this element in order of decreasing specificity.
         """
         combined_ids = []
         if object_ids is not None and element_ids is not None:
@@ -376,13 +406,17 @@ class UIAppearanceTheme:
 
         return combined_ids
 
-    def get_image(self, object_ids, element_ids, image_id):
+    def get_image(self,
+                  object_ids: List[Union[str, None]],
+                  element_ids: List[str],
+                  image_id: str) -> Union[pygame.Surface, None]:
         """
         Will return None if no image is specified. There are UI elements that have an optional image display.
 
         :param image_id: The id identifying the particular image spot in the UI we are looking for an image to add to.
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+
         :return None or pygame.Surface:
         """
 
@@ -395,12 +429,15 @@ class UIAppearanceTheme:
 
         return None
 
-    def get_font_info(self, object_ids, element_ids):
+    def get_font_info(self,
+                      object_ids: List[Union[str, None]],
+                      element_ids: List[str]) -> Dict[str, Any]:
         """
         Uses some data about a UIElement to get font data as dictionary
 
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+
         :return dictionary: Data about the font requested
         """
         font_info = self.base_font_info
@@ -414,7 +451,9 @@ class UIAppearanceTheme:
 
         return font_info
 
-    def get_font(self, object_ids, element_ids):
+    def get_font(self,
+                 object_ids: List[Union[str, None]],
+                 element_ids: List[str]) -> pygame.font.Font:
         """
         Uses some data about a UIElement to get a font object.
 
@@ -437,13 +476,17 @@ class UIAppearanceTheme:
 
         return font
 
-    def get_misc_data(self, object_ids, element_ids, misc_data_id):
+    def get_misc_data(self,
+                      object_ids: List[Union[str, None]],
+                      element_ids: List[str],
+                      misc_data_id: str) -> Union[str, None]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous theming data.
 
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
+
         :return None or str: Returns a string if we find the data, otherwise returns None.
         """
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
@@ -455,7 +498,10 @@ class UIAppearanceTheme:
 
         return None
 
-    def get_colour(self, object_ids, element_ids, colour_id):
+    def get_colour(self,
+                   object_ids: List[Union[str, None]],
+                   element_ids: List[str],
+                   colour_id: str) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
 
@@ -474,7 +520,10 @@ class UIAppearanceTheme:
             colour = pygame.Color('#000000')
         return colour
 
-    def get_colour_or_gradient(self, object_ids, element_ids, colour_id):
+    def get_colour_or_gradient(self,
+                               object_ids: List[Union[str, None]],
+                               element_ids: List[str],
+                               colour_id: str) -> Union[pygame.Color, ColourGradient]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient, from our theme.
         Use this function if the UIElement can handle either type.
@@ -482,6 +531,7 @@ class UIAppearanceTheme:
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param colour_id: The id for the specific colour we are looking for.
+
         :return pygame.Color or ColourGradient: A colour or a gradient object.
         """
         # first check for a unique theming for this specific object
@@ -521,7 +571,10 @@ class UIAppearanceTheme:
 
     @staticmethod
     @contextmanager
-    def opened_w_error(filename, mode="r"):
+    def _opened_w_error(filename: Any, mode: str = "r"):
+        """
+        Wraps file open in some exception handling.
+        """
         if type(filename) != io.StringIO:
             try:
                 f = open(filename, mode)
@@ -557,7 +610,7 @@ class UIAppearanceTheme:
         else:
             used_file_path = file_path
 
-        with self.opened_w_error(used_file_path, 'r') as (theme_file, error):
+        with self._opened_w_error(used_file_path, 'r') as (theme_file, error):
             if error:
                 warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False
@@ -573,7 +626,7 @@ class UIAppearanceTheme:
 
                     for element_name in theme_dict.keys():
                         if element_name == 'defaults':
-                            self.load_colour_defaults_from_theme(element_name, theme_dict)
+                            self.load_colour_defaults_from_theme(theme_dict)
                         else:
                             self.load_prototype(element_name, theme_dict)
                             for data_type in theme_dict[element_name]:
@@ -595,7 +648,7 @@ class UIAppearanceTheme:
             self.load_images()
             self.preload_shadow_edges()
 
-    def load_prototype(self, element_name, theme_dict):
+    def load_prototype(self, element_name: str, theme_dict: Dict[str, Any]):
         """
         Loads a prototype theme block for our current theme element if any exists. Prototype blocks must be above their
         'production' elements in the theme file.
@@ -635,7 +688,19 @@ class UIAppearanceTheme:
             for misc_key in prototype_misc:
                 self.ui_element_misc_data[element_name][misc_key] = prototype_misc[misc_key]
 
-    def load_element_misc_data_from_theme(self, data_type, element_name, theme_dict):
+    def load_element_misc_data_from_theme(self,
+                                          data_type: str,
+                                          element_name: str,
+                                          theme_dict: Dict[str, Any]):
+        """
+        Load miscellaneous theming data direct from the theme file's data dictionary into our misc data dictionary.
+
+        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+
+        :param data_type: The type of misc data as described by a string.
+        :param element_name: The theming element ID that this data belongs to.
+        :param theme_dict: The data dictionary from the theming file to load data from.
+        """
         if element_name not in self.ui_element_misc_data:
             self.ui_element_misc_data[element_name] = {}
         misc_dict = theme_dict[element_name][data_type]
@@ -643,7 +708,19 @@ class UIAppearanceTheme:
             if isinstance(misc_dict[misc_data_key], dict) or isinstance(misc_dict[misc_data_key], str):
                 self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[misc_data_key]
 
-    def load_element_image_data_from_theme(self, data_type, element_name, theme_dict):
+    def load_element_image_data_from_theme(self,
+                                           data_type: str,
+                                           element_name: str,
+                                           theme_dict: Dict[str, Any]):
+        """
+        Load image theming data direct from the theme file's data dictionary into our image data dictionary.
+
+        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+
+        :param data_type: The type of image data as described by a string.
+        :param element_name: The theming element ID that this data belongs to.
+        :param theme_dict: The data dictionary from the theming file to load data from.
+        """
         if element_name not in self.ui_element_image_paths:
             self.ui_element_image_paths[element_name] = {}
         images_dict = theme_dict[element_name][data_type]
@@ -677,7 +754,19 @@ class UIAppearanceTheme:
                         self.ui_element_image_paths[element_name][image_key]['changed'] = True
                     self.ui_element_image_paths[element_name][image_key]['sub_surface_rect'] = rect
 
-    def load_element_colour_data_from_theme(self, data_type, element_name, theme_dict):
+    def load_element_colour_data_from_theme(self,
+                                            data_type: str,
+                                            element_name: str,
+                                            theme_dict: Dict[str, Any]):
+        """
+        Load colour/gradient theming data direct from the theme file's data dictionary into our colour data dictionary.
+
+        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+
+        :param data_type: The type of colour data as described by a string.
+        :param element_name: The theming element ID that this data belongs to.
+        :param theme_dict: The data dictionary from the theming file to load data from.
+        """
         if element_name not in self.ui_element_colours:
             self.ui_element_colours[element_name] = {}
         colours_dict = theme_dict[element_name][data_type]
@@ -685,7 +774,19 @@ class UIAppearanceTheme:
             self.ui_element_colours[element_name][colour_key] = self.load_colour_or_gradient_from_theme(colours_dict,
                                                                                                         colour_key)
 
-    def load_element_font_data_from_theme(self, data_type, element_name, theme_dict):
+    def load_element_font_data_from_theme(self,
+                                          data_type: str,
+                                          element_name: str,
+                                          theme_dict: Dict[str, Any]):
+        """
+        Load font theming data direct from the theme file's data dictionary into our font data dictionary.
+
+        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+
+        :param data_type: The type of font data as described by a string.
+        :param element_name: The theming element ID that this data belongs to.
+        :param theme_dict: The data dictionary from the theming file to load data from.
+        """
         font_dict = theme_dict[element_name][data_type]
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
@@ -718,15 +819,27 @@ class UIAppearanceTheme:
             bold_italic_path = font_dict['bold_italic_path']
             self.ui_element_fonts_info[element_name]['bold_italic_path'] = bold_italic_path
 
-    def load_colour_defaults_from_theme(self, element_name, theme_dict):
-        for data_type in theme_dict[element_name]:
+    def load_colour_defaults_from_theme(self, theme_dict: Dict[str, Any]):
+        """
+        Load the default colours for this theme.
+
+        :param theme_dict: The data dictionary from the theming file to load data from.
+        """
+        for data_type in theme_dict['defaults']:
             if data_type == 'colours':
-                colours_dict = theme_dict[element_name][data_type]
+                colours_dict = theme_dict['defaults'][data_type]
                 for colour_key in colours_dict:
                     self.base_colours[colour_key] = self.load_colour_or_gradient_from_theme(colours_dict, colour_key)
 
     @staticmethod
-    def load_colour_or_gradient_from_theme(theme_colours_dictionary, colour_id):
+    def load_colour_or_gradient_from_theme(theme_colours_dictionary: Dict[str, str],
+                                           colour_id: str) -> Union[pygame.Color, ColourGradient]:
+        """
+        Load a single colour, or gradient, from theming file data.
+
+        :param theme_colours_dictionary: Part of the theming file data relating to colours.
+        :param colour_id: The ID of the colour or gradient to load.
+        """
         loaded_colour_or_gradient = None
         string_data = theme_colours_dictionary[colour_id]
         if ',' in string_data:

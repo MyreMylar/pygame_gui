@@ -1,4 +1,4 @@
-from pygame_gui.core.container_interface import IWindowInterface
+from pygame_gui.core.interfaces import IWindowInterface
 
 
 class UIWindowStack:

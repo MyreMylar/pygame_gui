@@ -5,10 +5,8 @@ from pygame.math import Vector2
 from pygame.event import Event
 from pygame.constants import MOUSEBUTTONDOWN
 
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.ui_container import UIContainer
-from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
@@ -33,7 +31,7 @@ class UIPanel(UIElement, IContainerInterface):
     """
     def __init__(self, relative_rect: Rect,
                  starting_layer_height: int,
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  *,
                  element_id: str = 'panel',
                  panel_container_margins: Dict[str, int] = None,

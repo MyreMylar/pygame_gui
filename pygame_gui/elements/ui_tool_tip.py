@@ -3,9 +3,10 @@ import pygame.gfxdraw
 import warnings
 from typing import Union, Tuple, Dict
 
-from pygame_gui import ui_manager
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
-from pygame_gui.elements import ui_text_box
+
+from pygame_gui.elements.ui_text_box import UITextBox
 
 
 class UITooltip(UIElement):
@@ -25,7 +26,7 @@ class UITooltip(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
@@ -49,11 +50,11 @@ class UITooltip(UIElement):
 
         self.rebuild_from_changed_theme_data()
 
-        self.text_block = ui_text_box.UITextBox(html_text,
-                                                pygame.Rect(0, 0, self.rect_width, -1),
-                                                manager=self.ui_manager,
-                                                layer_starting_height=self._layer,
-                                                parent_element=self)
+        self.text_block = UITextBox(html_text,
+                                    pygame.Rect(0, 0, self.rect_width, -1),
+                                    manager=self.ui_manager,
+                                    layer_starting_height=self._layer,
+                                    parent_element=self)
 
         self.set_dimensions(self.text_block.rect.size)
 

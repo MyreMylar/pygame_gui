@@ -2,8 +2,7 @@ import pygame
 import warnings
 from typing import List, Union, Tuple, Dict
 
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui import ui_manager
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
 
 
 class UIElement(pygame.sprite.Sprite):
@@ -20,7 +19,7 @@ class UIElement(pygame.sprite.Sprite):
     :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
     def __init__(self, relative_rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None],
                  *,
                  starting_height: int,
@@ -339,7 +338,7 @@ class UIElement(pygame.sprite.Sprite):
         """
         Method to directly set the dimensions of an element.
 
-        NOTE: Using this on elements inside containers with non-default anchoring arrangements will make a mess of them.
+        NOTE: Using this on elements inside containers with non-default anchoring arrangements may make a mess of them.
 
         :param dimensions: The new dimensions to set.
         """

@@ -1,10 +1,10 @@
 import math
 import warnings
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Any
 
 import pygame
 
-from pygame_gui import UIManager
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
@@ -19,7 +19,11 @@ class RectDrawableShape(DrawableShape):
     :param manager: The UI manager.
     """
 
-    def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List, manager: UIManager):
+    def __init__(self,
+                 containing_rect: pygame.Rect,
+                 theming_parameters: Dict[str, Any],
+                 states: List[str],
+                 manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
         self.click_area_shape = None
@@ -33,8 +37,12 @@ class RectDrawableShape(DrawableShape):
 
     def full_rebuild_on_size_change(self):
         """
+        Completely rebuilds the rectangle shape from it's dimensions and parameters.
+
         Everything needs rebuilding if we change the size of the containing rectangle.
+
         """
+
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
         super().full_rebuild_on_size_change()
         if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
@@ -84,7 +92,7 @@ class RectDrawableShape(DrawableShape):
                                             self.click_area_shape.height - (2 * self.theming['border_width'])))
         self.redraw_all_states()
 
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
         """
         Tests if a point is colliding with our Drawable shape's 'click area' hot spot.
 
@@ -95,10 +103,9 @@ class RectDrawableShape(DrawableShape):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Expensive size change.
+        Changes the size of the rectangle shape. Relatively expensive to do.
 
-        :param dimensions:
-        :return:
+        :param dimensions: The new dimensions.
         """
         if dimensions[0] == self.containing_rect.width and dimensions[1] == self.containing_rect.height:
             return
@@ -122,7 +129,7 @@ class RectDrawableShape(DrawableShape):
         self.click_area_shape.x = point[0] + self.theming['shadow_width']
         self.click_area_shape.y = point[1] + self.theming['shadow_width']
 
-    def redraw_state(self, state_str):
+    def redraw_state(self, state_str: str):
         """
         Redraws the shape's surface for a given UI state.
 
@@ -155,7 +162,7 @@ class RectDrawableShape(DrawableShape):
                     border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA, depth=32)
                     border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                     self.states[state_str].surface.blit(border_shape_surface,
-                                                  self.border_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                                                        self.border_rect, special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(border_shape_surface)
                     self.states[state_str].surface.blit(border_shape_surface, self.border_rect)
                 else:
@@ -165,7 +172,7 @@ class RectDrawableShape(DrawableShape):
                 background_shape_surface = pygame.Surface(self.background_rect.size, flags=pygame.SRCALPHA, depth=32)
                 background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.states[state_str].surface.blit(background_shape_surface,
-                                              self.background_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                                                    self.background_rect, special_flags=pygame.BLEND_RGBA_SUB)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(background_shape_surface)
                 self.states[state_str].surface.blit(background_shape_surface, self.background_rect)
             else:
@@ -178,7 +185,8 @@ class RectDrawableShape(DrawableShape):
                 if type(self.theming['filled_bar']) == ColourGradient:
                     bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA, depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))
-                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect, special_flags=pygame.BLEND_RGBA_SUB)
+                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
+                                                        special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)
                     self.states[state_str].surface.blit(bar_shape_surface, bar_rect)
                 else:

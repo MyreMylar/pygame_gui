@@ -2,13 +2,17 @@ from typing import Tuple, List, Dict, Union
 
 import pygame
 
+from pygame_gui.core.interfaces import IUIManagerInterface
+
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 
+from pygame_gui.elements import UITooltip
 
-class UIManager:
+
+class UIManager(IUIManagerInterface):
     """
     The UI Manager class helps keep track of all the moving parts in the pygame_gui system.
 
@@ -93,7 +97,7 @@ class UIManager:
         return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width,
                                                                                 shape, corner_radius)
 
-    def set_window_resolution(self, window_resolution):
+    def set_window_resolution(self, window_resolution: Tuple[int, int]):
         """
         Sets the window resolution.
         """
@@ -360,7 +364,7 @@ class UIManager:
         if vert_scrollbar is not None and vert_scrollbar is self.last_focused_vertical_scrollbar:
             self.last_focused_vertical_scrollbar = None
 
-    def get_last_focused_vert_scrollbar(self):
+    def get_last_focused_vert_scrollbar(self) -> UIElement:
         """
         Gets the last scrollbar that we used.
 
@@ -368,11 +372,11 @@ class UIManager:
         """
         return self.last_focused_vertical_scrollbar
 
-    def set_visual_debug_mode(self, is_active):
+    def set_visual_debug_mode(self, is_active: bool):
         """
         Loops through all our UIElements to turn visual debug mode on or off.
+
         :param is_active:
-        :return:
         """
         if self.visual_debug_active and not is_active:
             self.visual_debug_active = False
@@ -442,3 +446,8 @@ class UIManager:
         :return: An empty, and therefore invisible pygame.Surface
         """
         return self.universal_empty_surface
+
+    def create_tool_tip(self, text: str, position: Tuple[int, int], hover_distance: Tuple[int, int]) -> UITooltip:
+        tool_tip = UITooltip(text, hover_distance, self)
+        tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
+        return tool_tip

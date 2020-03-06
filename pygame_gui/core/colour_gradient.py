@@ -1,11 +1,22 @@
-from typing import Union
+from typing import Union, Any
 
 import pygame
 
 
 class ColourGradient:
-    def __init__(self, angle_direction: int, colour_1: pygame.Color,
-                 colour_2: pygame.Color, colour_3: Union[pygame.Color, None] = None):
+    """
+    Creates a small surface containing a smooth gradient between two or three colours.
+
+    :param angle_direction: Angle direction of the gradient in degrees.
+    :param colour_1: The first colour of the gradient.
+    :param colour_2: The second colour of the gradient.
+    :param colour_3: An optional third colour for the gradient.
+    """
+    def __init__(self, angle_direction: int,
+                 colour_1: pygame.Color,
+                 colour_2: pygame.Color,
+                 colour_3: Union[pygame.Color, None] = None):
+
         self.angle_direction = angle_direction
         self.colour_1 = colour_1
         self.colour_2 = colour_2
@@ -25,7 +36,12 @@ class ColourGradient:
 
         self.gradient_surface = pygame.transform.rotozoom(colour_pixels_surf, 0, 30)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
+        """
+        Checks if this gradient is equal to another when compared with the == symbol.
+
+        :return: True if they have the same colours and direction.
+        """
         if type(other) != ColourGradient:
             return False
         return (self.colour_1 == other.colour_1 and
@@ -33,7 +49,12 @@ class ColourGradient:
                 self.colour_3 == other.colour_3 and
                 self.angle_direction == other.angle_direction)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Creates a string representation of this gradient.
+
+        :return: The string representation.
+        """
         result = (str(self.angle_direction) + '_' +
                   str(self.colour_1.r) + '_' + str(self.colour_1.g) + '_' +
                   str(self.colour_1.b) + '_' + str(self.colour_1.a) + '_' +
@@ -45,13 +66,14 @@ class ColourGradient:
 
         return result
 
-    def apply_gradient_to_surface(self, input_surface: pygame.Surface, rect=None):
+    def apply_gradient_to_surface(self, input_surface: pygame.Surface,
+                                  rect: Union[pygame.Rect, None] = None):
         """
         Applies this gradient to a specified input surface using blending multiplication.
         As a result this method works best when the input surface is a mostly white, stencil shape type surface.
 
         :param input_surface:
-        :param rect: The rectangle on the surface to apply the gradient to.
+        :param rect: The rectangle on the surface to apply the gradient to. If None, applies to the whole surface.
         """
         # scale the gradient up to the right size
         input_surface_size = input_surface.get_size()

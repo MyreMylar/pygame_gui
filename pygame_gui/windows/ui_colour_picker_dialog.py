@@ -1,19 +1,18 @@
+from typing import Union, Tuple, Dict
+
 import pygame
 import pygame_gui
 
-from pygame_gui.elements import UIButton, UIImage, UIHorizontalSlider, UILabel, UITextEntryLine
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerInterface
+from pygame_gui.core import UIElement, UIContainer
 
-from pygame_gui.elements import UIWindow
-from pygame_gui import ui_manager
-
-from typing import Union, Tuple, Dict
-from pygame_gui.core import UIElement, IContainerInterface, UIContainer
+from pygame_gui.elements import UIWindow, UIButton, UIImage, UIHorizontalSlider, UILabel, UITextEntryLine
 
 
 class UIColourChannelEditor(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  name: str,
                  channel_index: int,
                  value_range: Tuple[int, int],
@@ -149,7 +148,7 @@ class UIColourChannelEditor(UIElement):
 
 class UIColourPickerDialog(UIWindow):
     def __init__(self, rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0),
                  window_title: str = "Colour Picker",

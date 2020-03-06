@@ -1,20 +1,20 @@
 import pygame
-from typing import List, Union, Tuple
+from typing import Union, Tuple
 
-from pygame_gui.core.container_interface import IContainerInterface, IWindowInterface
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.ui_container import UIContainer
-from pygame_gui.elements import UIButton
-from pygame_gui import ui_manager
-from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
+
+from pygame_gui.core.interfaces import IContainerInterface, IWindowInterface, IUIManagerInterface
+from pygame_gui.core import UIElement, UIContainer
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UIWindow(UIElement, IContainerInterface, IWindowInterface):
     """
     A base class for window GUI elements, any windows should inherit from this class.
 
-    :param rect: A rectangle, that represents the size and position of the window (including the title bar, shadow and borders).
+    :param rect: A rectangle, representing size and position of the window (including title bar, shadow and borders).
     :param manager: The UIManager that manages this UIWindow.
     :param window_display_title: A string that will appear in the windows title bar if it has one.
     :param element_id: An element ID for this window, if one is not supplied it defaults to 'window'.
@@ -22,7 +22,7 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
     :param resizable: Whether this window is resizable or not, defaults to False.
     """
     def __init__(self, rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  window_display_title: str = "",
                  element_id: Union[str, None] = None,
                  object_id: Union[str, None] = None,
@@ -51,7 +51,7 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         self.set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True
 
-        self.is_blocking = False # blocks all clicking events from interacting beyond this window
+        self.is_blocking = False  # blocks all clicking events from interacting beyond this window
 
         self.resizing_mode_active = False
         self.start_resize_point = (0, 0)
@@ -446,9 +446,9 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                                                    self.title_bar_button_width,
                                                    self.title_bar_height))
                 else:
+                    title_bar_width = self._window_root_container.relative_rect.width - self.title_bar_button_width
                     self.title_bar = UIButton(relative_rect=pygame.Rect(0, 0,
-                                                                        (self._window_root_container.relative_rect.width -
-                                                                         self.title_bar_button_width),
+                                                                        title_bar_width,
                                                                         self.title_bar_height),
                                               text=self.window_display_title,
                                               manager=self.ui_manager,

@@ -1,11 +1,18 @@
 import warnings
 
+from typing import List, Union, Tuple
+
 import pygame
 
 from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class SurfaceCache:
+    """
+    A cache for surfaces that we estimate the UI may want to reuse to save constantly remaking almost identical
+    drawable shapes.
+
+    """
     def __init__(self):
         self.cache_surface_size = (1024, 1024)
         self.cache_surfaces = []
@@ -21,10 +28,23 @@ class SurfaceCache:
 
         self.low_on_space = False
 
-    def add_surface_to_cache(self, surface, string_id):
+    def add_surface_to_cache(self, surface: pygame.Surface, string_id: str):
+        """
+        Adds a surface to the cache. There are two levels to the cache, the short term level just keeps hold of
+        the surface until we have time to add it to the long term level.
+
+        :param surface: The surface to add to the cache.
+        :param string_id: An ID to store the surface under to make it easy to recall later.
+        """
         self.cache_short_term_lookup[string_id] = [surface.copy(), 1]
 
     def update(self):
+        """
+        Takes care of steadily moving surfaces from the short term cache into the long term. Long term caching takes a
+        while so we limit it to adding one surface a frame.
+
+        We also purge some lesser used surfaces from the long term cache when we run out of space.
+        """
         if any(self.cache_short_term_lookup):
             string_id, cached_item = self.cache_short_term_lookup.popitem()
             self.add_surface_to_long_term_cache(cached_item, string_id)
@@ -34,12 +54,17 @@ class SurfaceCache:
             for cache_id in self.consider_purging_list:
                 cached_item = self.cache_long_term_lookup[cache_id]
                 if cached_item['current_uses'] == 0 and cached_item['total_uses'] == 1:
-                    # print("Freeing cached surface:" + cache_id)
-                    self.free_cached_surface(cache_id)
+                    self._free_cached_surface(cache_id)
 
             self.consider_purging_list.clear()
 
-    def add_surface_to_long_term_cache(self, cached_item, string_id):
+    def add_surface_to_long_term_cache(self, cached_item: pygame.Surface, string_id: str):
+        """
+        Move a surface from the short term cache into the long term one.
+
+        :param cached_item: The surface to move into the long term cache.
+        :param string_id: The ID of the surface in the cache.
+        """
         surface = cached_item[0]
         surface_size = surface.get_size()
         current_uses = cached_item[1]
@@ -89,7 +114,6 @@ class SurfaceCache:
                 if found_rectangle_cache is None:
                     if len(self.cache_surfaces) < 3:
                         # create a new cache surface
-                        # print("Creating new cache surface")
                         new_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
                         new_surface.fill(pygame.Color('#00000000'))
                         self.cache_surfaces.append({'surface': new_surface,
@@ -101,7 +125,17 @@ class SurfaceCache:
             return True
 
     @staticmethod
-    def split_rect(found_rectangle_to_split, dividing_rect, free_space_rectangles):
+    def split_rect(found_rectangle_to_split: pygame.Rect,
+                   dividing_rect: pygame.Rect,
+                   free_space_rectangles: List[pygame.Rect]):
+        """
+        Takes an existing free space rectangle that we are placing a new surface inside of and then divides up the
+        remaining space into new, smaller free space rectangles.
+
+        :param found_rectangle_to_split: The rectangle we are spliting.
+        :param dividing_rect: The rectangle dividing up the split rectangle.
+        :param free_space_rectangles: A list of all free space rectangles for a particular surface.
+        """
         free_space_rectangles.remove(found_rectangle_to_split)
 
         # create new rectangles
@@ -130,7 +164,13 @@ class SurfaceCache:
                                  found_rectangle_to_split.height)
             free_space_rectangles.append(rect_4)
 
-    def find_surface_in_cache(self, lookup_id):
+    def find_surface_in_cache(self, lookup_id: str) -> Union[pygame.Surface, None]:
+        """
+        Looks for a surface in the cache by an ID and returns it if found.
+
+        :param lookup_id: ID of the surface to look for in the cache.
+        :return The found surface, or None.
+        """
         # check short term
         if lookup_id in self.cache_short_term_lookup:
             cached_item = self.cache_short_term_lookup[lookup_id]
@@ -144,7 +184,13 @@ class SurfaceCache:
         else:
             return None
 
-    def remove_user_from_cache_item(self, string_id):
+    def remove_user_from_cache_item(self, string_id: str):
+        """
+        Deduct a 'user' from a particular cache surface. The number of users of a cache surface over the lifetime of
+        a program would be a decent measure of how 'valuable' it is to keep a surface in the cache.
+
+        :param string_id: The ID of the cached surface to deduct a user from.
+        """
         if string_id in self.cache_long_term_lookup:
             self.cache_long_term_lookup[string_id]['current_uses'] -= 1
 
@@ -152,11 +198,23 @@ class SurfaceCache:
                     self.cache_long_term_lookup[string_id]['total_uses'] == 1):
                 self.consider_purging_list.append(string_id)
 
-    def remove_user_and_request_clean_up_of_cached_item(self, string_id):
-        self.remove_user_from_cache_item(string_id)
-        self.free_cached_surface(string_id)
+    def remove_user_and_request_clean_up_of_cached_item(self, string_id: str):
+        """
+        If we are certain that a cached surface won't be used again anytime soon we can request it is removed from the
+        cache directly.
 
-    def free_cached_surface(self, string_id):
+        :param string_id: the ID of the cached surface to remove from the cache.
+        """
+        self.remove_user_from_cache_item(string_id)
+        self._free_cached_surface(string_id)
+
+    def _free_cached_surface(self, string_id: str):
+        """
+        Directly remove an unused surface from the long term cache.
+
+        :param string_id: the ID of the cached surface to remove from the cache.
+
+        """
         if string_id not in self.cache_long_term_lookup or self.cache_long_term_lookup[string_id]['current_uses'] != 0:
             return
         # check item to be removed is unused
@@ -174,7 +232,28 @@ class SurfaceCache:
             self.consider_purging_list.remove(string_id)
 
     @staticmethod
-    def build_cache_id(shape, size, shadow_width, border_width, border_colour, bg_colour, corner_radius=None):
+    def build_cache_id(shape: str,
+                       size: Tuple[int, int],
+                       shadow_width: int,
+                       border_width: int,
+                       border_colour: pygame.Color,
+                       bg_colour: pygame.Color,
+                       corner_radius: Union[int, None] = None) -> str:
+        """
+        Create an ID string for a surface based on it's dimensions and parameters. The idea is that any surface in the
+        cache with the same values in this ID should be identical.
+
+        :param shape: A string for the overall shape of the surface (rounded rectangle, rectangle, etc).
+        :param size: The dimensions of the surface.
+        :param shadow_width: The thickness of the shadow around the shape.
+        :param border_width: The thickness of the border around the shape.
+        :param border_colour: The colour of the border.
+        :param bg_colour: The background, or main colour of the surface.
+        :param corner_radius: Optional corner radius parameter, only used for rounded rectangles.
+
+        :return: A assembled string ID from the provided data.
+
+        """
 
         id_string = (shape + '_' + str(size[0]) + '_' + str(size[1]) + '_' +
                      str(shadow_width) + '_' + str(border_width))

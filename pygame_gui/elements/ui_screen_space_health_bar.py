@@ -1,9 +1,8 @@
 import pygame
 from typing import Union, Dict
 
-from pygame_gui import ui_manager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
@@ -20,7 +19,7 @@ class UIScreenSpaceHealthBar(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, relative_rect: pygame.Rect,
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,

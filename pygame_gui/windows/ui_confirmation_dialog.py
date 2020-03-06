@@ -1,7 +1,7 @@
 import pygame
 import pygame_gui
 
-from pygame_gui import ui_manager
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED
 from pygame_gui.elements import UIWindow, UIButton, UITextBox
 
@@ -20,7 +20,7 @@ class UIConfirmationDialog(UIWindow):
     :param blocking: Whether this window should block all other mouse interactions with the GUI until it is closed.
     """
     def __init__(self, rect: pygame.Rect,
-                 manager: 'ui_manager.UIManager',
+                 manager: IUIManagerInterface,
                  confirming_action_long_desc: str,
                  *,
                  window_title: str = 'Confirm',

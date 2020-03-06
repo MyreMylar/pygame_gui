@@ -2,10 +2,8 @@ import pygame
 import warnings
 from typing import Union, Tuple, Dict
 
-from pygame_gui import ui_manager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.colour_gradient import ColourGradient
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import ColourGradient, UIElement
 
 
 class UILabel(UIElement):
@@ -20,7 +18,9 @@ class UILabel(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
-    def __init__(self, relative_rect: pygame.Rect, text: str, manager: ui_manager.UIManager,
+    def __init__(self, relative_rect: pygame.Rect,
+                 text: str,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,

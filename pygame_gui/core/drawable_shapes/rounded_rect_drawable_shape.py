@@ -1,11 +1,11 @@
 import math
 import warnings
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Any
 
 import pygame
 from pygame.math import Vector2
 
-from pygame_gui import UIManager
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
@@ -21,8 +21,10 @@ class RoundedRectangleShape(DrawableShape):
     :param manager: The UI manager.
     """
 
-    def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List,
-                 manager: UIManager):
+    def __init__(self, containing_rect: pygame.Rect,
+                 theming_parameters: Dict[str, Any],
+                 states: List[str],
+                 manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
         self.click_area_shape = None
@@ -39,19 +41,31 @@ class RoundedRectangleShape(DrawableShape):
         self.full_rebuild_on_size_change()
 
     def clean_up_temp_shapes(self):
+        """
+        Clean up some temporary surfaces we use repeatedly when rebuilding multiple states of the shape but have no
+        need of afterwards.
+
+        """
         self.temp_additive_shape = None
         self.temp_subtractive_shape = None
         self.temp_shadow_subtractive_shape = None
 
     def full_rebuild_on_size_change(self):
-        # clamping border, shadow widths and corner radii so we can't form impossible shapes
-        # having impossible values here will also mean the shadow pre-generating system fails leading to
-        # slow down when creating elements
+        """
+        Completely rebuilds the rounded rectangle shape from it's dimensions and parameters.
+
+        Everything needs rebuilding if we change the size of the containing rectangle.
+
+        """
         super().full_rebuild_on_size_change()
 
         self.temp_additive_shape = None
         self.temp_subtractive_shape = None
         self.temp_shadow_subtractive_shape = None
+
+        # clamping border, shadow widths and corner radii so we can't form impossible shapes
+        # having impossible values here will also mean the shadow pre-generating system fails leading to
+        # slow down when creating elements
         if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
                                               math.floor(self.containing_rect.height / 2)):
             old_width = self.theming['shadow_width']
@@ -129,12 +143,13 @@ class RoundedRectangleShape(DrawableShape):
                                             self.click_area_shape.height - (2 * self.theming['border_width'])))
         self.redraw_all_states()
 
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
         """
         Checks collision between a point and this rounded rectangle.
 
-        :param point:
-        :return: If the point is inside the shape.
+        :param point: The point to test collision with.
+
+        :return: True, if the point is inside the shape.
         """
         collided = False
         if self.click_area_shape.collidepoint(point[0], point[1]):
@@ -191,10 +206,10 @@ class RoundedRectangleShape(DrawableShape):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Expensive size change.
+        Changes the size of the rounded rectangle shape. Relatively expensive to completely do so has support for
+        'temporary rapid resizing' while the dimensions are being changed frequently.
 
-        :param dimensions:
-        :return:
+        :param dimensions: The new dimensions.
         """
         if dimensions[0] == self.containing_rect.width and dimensions[1] == self.containing_rect.height:
             return
@@ -232,7 +247,7 @@ class RoundedRectangleShape(DrawableShape):
         self.should_trigger_full_rebuild = True
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-    def redraw_state(self, state_str):
+    def redraw_state(self, state_str: str):
         """
         Redraws the shape's surface for a given UI state.
 
@@ -354,8 +369,13 @@ class RoundedRectangleShape(DrawableShape):
 
         self.states[state_str].has_fresh_surface = True
 
-    def clear_and_create_shape_surface(self, surface, rect, overlap,
-                                       corner_radius, aa_amount, clear=True) -> pygame.Surface:
+    def clear_and_create_shape_surface(self,
+                                       surface: pygame.Surface,
+                                       rect: pygame.Rect,
+                                       overlap: int,
+                                       corner_radius: int,
+                                       aa_amount: int,
+                                       clear: bool = True) -> pygame.Surface:
         """
         Clear a space for a new shape surface on the main state surface for this state. The surface created will be
         plain white so that it can be easily multiplied with a colour surface.
@@ -406,7 +426,12 @@ class RoundedRectangleShape(DrawableShape):
 
         return large_shape_surface
 
-    def create_subtract_surface(self, subtract_size, corner_radius, aa_amount):
+    def create_subtract_surface(self, subtract_size: Tuple[int, int], corner_radius: int, aa_amount: int):
+        """
+        Create a rounded rectangle shaped surface that can be used to subtract everything from a surface to
+        leave a transparent hole in it.
+
+        """
         if subtract_size[0] > 0 and subtract_size[1] > 0:
             if self.temp_subtractive_shape is None:
                 # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
@@ -423,28 +448,13 @@ class RoundedRectangleShape(DrawableShape):
             return large_sub_surface
         return None
 
-    def create_shadow_subtract_surface(self, subtract_size, corner_radius, aa_amount):
-        if subtract_size[0] > 0 and subtract_size[1] > 0:
-            if self.temp_shadow_subtractive_shape is None:
-                # for the subtract surface we want to blend in all RGBA channels to clear correctly for our new shape
-                self.temp_shadow_subtractive_shape = pygame.Surface(subtract_size, flags=pygame.SRCALPHA, depth=32)
-                self.temp_shadow_subtractive_shape.fill(pygame.Color('#00000000'))
-                RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radius,
-                                                                        self.temp_shadow_subtractive_shape,
-                                                                        clear_colour_string='#00000000',
-                                                                        corner_offset=int(-aa_amount/4))
-                large_sub_surface = self.temp_shadow_subtractive_shape
-            else:
-                large_sub_surface = pygame.transform.scale(self.temp_shadow_subtractive_shape, subtract_size)
-
-            return large_sub_surface
-        return None
-
     @staticmethod
     def draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface,
                                           clear_colour_string='#FFFFFF00', corner_offset=0):
         """
-        TODO: We should be able to make this faster in Pygame 2 with the new rounded rectangle drawing functions.
+        Draw a rounded rectangle shape in pure white so it is ready to be multiplied by a colour or gradient.
+
+        TODO: We should be able to make this faster in Pygame 2 with the planned rounded rectangle drawing functions.
 
         :param large_corner_radius: The radius of the corners.
         :param large_shape_surface: The surface to draw onto, the shape fills the surface.

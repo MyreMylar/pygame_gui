@@ -2,12 +2,11 @@ import pygame
 
 from typing import Union, Tuple, Dict
 
-from pygame_gui import ui_manager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.elements import ui_button
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UIVerticalScrollBar(UIElement):
@@ -24,7 +23,7 @@ class UIVerticalScrollBar(UIElement):
 
     def __init__(self, relative_rect: pygame.Rect,
                  visible_percentage: float,
-                 manager: ui_manager.UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
@@ -79,7 +78,7 @@ class UIVerticalScrollBar(UIElement):
         self.rebuild_from_changed_theme_data()
 
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
-        self.sliding_button = ui_button.UIButton(pygame.Rect((int(self.sliding_rect_position[0]),
+        self.sliding_button = UIButton(pygame.Rect((int(self.sliding_rect_position[0]),
                                                               int(self.sliding_rect_position[1])),
                                                              (self.background_rect.width,
                                                               scroll_bar_height)),
@@ -135,7 +134,7 @@ class UIVerticalScrollBar(UIElement):
             self.arrow_button_height = self.button_height
 
             if self.top_button is None:
-                self.top_button = ui_button.UIButton(pygame.Rect((0, 0),
+                self.top_button = UIButton(pygame.Rect((0, 0),
                                                                  (self.background_rect.width,
                                                                   self.arrow_button_height)),
                                                      '▲', self.ui_manager,
@@ -150,7 +149,7 @@ class UIVerticalScrollBar(UIElement):
                                                      )
 
             if self.bottom_button is None:
-                self.bottom_button = ui_button.UIButton(pygame.Rect((0, -self.arrow_button_height),
+                self.bottom_button = UIButton(pygame.Rect((0, -self.arrow_button_height),
                                                                     (self.background_rect.width,
                                                                      self.arrow_button_height)),
                                                         '▼', self.ui_manager,
@@ -334,7 +333,7 @@ class UIVerticalScrollBar(UIElement):
         y_pos = (self.scroll_position + self.arrow_button_height)
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
-        self.sliding_button = ui_button.UIButton(pygame.Rect(int(x_pos),
+        self.sliding_button = UIButton(pygame.Rect(int(x_pos),
                                                              int(y_pos),
                                                              self.background_rect.width,
                                                              scroll_bar_height),

@@ -2,10 +2,8 @@ import pygame
 import pygame_gui
 from typing import Union, Tuple, Dict
 
-from pygame_gui.ui_manager import UIManager
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.elements import ui_tool_tip
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape, RectDrawableShape
 
 
@@ -28,7 +26,7 @@ class UIButton(UIElement):
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
@@ -183,12 +181,10 @@ class UIButton(UIElement):
         :param time_delta: Time in seconds between calls to update.
         :param mouse_pos: The current position of the mouse.
         """
-        if self.tool_tip is None and self.tool_tip_text is not None \
-                and self.hover_time > self.tool_tip_delay:
-            self.tool_tip = ui_tool_tip.UITooltip(self.tool_tip_text,
-                                                  (0, int(self.rect.height / 2)),
-                                                  self.ui_manager)
-            self.tool_tip.find_valid_position(pygame.math.Vector2(mouse_pos.x, self.rect.centery))
+        if self.tool_tip is None and self.tool_tip_text is not None and self.hover_time > self.tool_tip_delay:
+            self.tool_tip = self.ui_manager.create_tool_tip(text=self.tool_tip_text,
+                                                            position=(mouse_pos.x, self.rect.centery),
+                                                            hover_distance=(0, int(self.rect.height / 2)))
 
         self.hover_time += time_delta
 

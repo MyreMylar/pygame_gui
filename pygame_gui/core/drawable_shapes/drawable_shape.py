@@ -2,7 +2,8 @@ from collections import deque
 from typing import Dict, List, Union, Tuple
 
 import pygame
-from pygame_gui.ui_manager import UIManager
+
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame.math import Vector2
 
@@ -118,7 +119,10 @@ class DrawableShape:
     :param states: Names for the different states the shape can be in, each may have different sets of colours & images.
     :param manager: The UI manager for this UI.
     """
-    def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List[str], manager: UIManager):
+    def __init__(self, containing_rect: pygame.Rect,
+                 theming_parameters: Dict,
+                 states: List[str],
+                 manager: IUIManagerInterface):
 
         self.containing_rect = containing_rect.copy()
         if self.containing_rect.width < 1:

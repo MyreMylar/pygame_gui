@@ -5,15 +5,13 @@ import math
 from typing import Union, Tuple, Dict
 
 import pygame_gui
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
-from pygame_gui.elements.text.text_block import TextBlock
-from pygame_gui.elements.text.html_parser import TextHTMLParser
-from pygame_gui.elements.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
+from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
+from pygame_gui.elements.text import TextBlock, TextHTMLParser, TypingAppearEffect, FadeInEffect, FadeOutEffect
 
 
 class UITextBox(UIElement):
@@ -49,7 +47,7 @@ class UITextBox(UIElement):
 
     def __init__(self, html_text: str,
                  relative_rect: pygame.Rect,
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
                  container: Union[IContainerInterface, None] = None,

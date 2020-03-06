@@ -1,9 +1,9 @@
 import math
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Any
 
 import pygame
 
-from pygame_gui import UIManager
+from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
@@ -18,8 +18,10 @@ class EllipseDrawableShape(DrawableShape):
     :param manager: The UI manager.
     """
 
-    def __init__(self, containing_rect: pygame.Rect, theming_parameters: Dict, states: List,
-                 manager: UIManager):
+    def __init__(self, containing_rect: pygame.Rect,
+                 theming_parameters: Dict[str, Any],
+                 states: List[str],
+                 manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
         self.ellipse_center = containing_rect.center
@@ -34,6 +36,10 @@ class EllipseDrawableShape(DrawableShape):
         self.full_rebuild_on_size_change()
 
     def full_rebuild_on_size_change(self):
+        """
+        Completely redraw the shape from it's theming parameters and dimensions.
+
+        """
         super().full_rebuild_on_size_change()
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
         if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
@@ -77,12 +83,12 @@ class EllipseDrawableShape(DrawableShape):
                                             self.click_area_shape.height - (2 * self.theming['border_width'])))
         self.redraw_all_states()
 
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
         """
         Checks collision between a point and this ellipse.
 
-        :param point:
-        :return: If the point is inside the shape.
+        :param point: The point to test against the shape.
+        :return: True if the point is inside the shape.
         """
         collided = False
         x_val = ((point[0] - self.ellipse_center[0]) ** 2) / (self.ellipse_half_diameters[0] ** 2)
@@ -94,10 +100,9 @@ class EllipseDrawableShape(DrawableShape):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Expensive size change.
+        Expensive size change of the ellipse shape.
 
-        :param dimensions:
-        :return:
+        :param dimensions: The new size to set the shape to.
         """
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
@@ -121,7 +126,7 @@ class EllipseDrawableShape(DrawableShape):
 
         self.ellipse_center = self.click_area_shape.center
 
-    def redraw_state(self, state_str):
+    def redraw_state(self, state_str: str):
         """
         Redraws the shape's surface for a given UI state.
 
@@ -194,9 +199,9 @@ class EllipseDrawableShape(DrawableShape):
                                                      (self.containing_rect.width - (2 * self.theming['shadow_width']),
                                                       self.containing_rect.height - (2 * self.theming['shadow_width'])))
             self.states[state_str].surface.blit(small_sub, pygame.Rect((self.theming['shadow_width'],
-                                                                  self.theming['shadow_width']),
-                                                                 sub_surface.get_size()),
-                                          special_flags=pygame.BLEND_RGBA_SUB)
+                                                                        self.theming['shadow_width']),
+                                                                       sub_surface.get_size()),
+                                                special_flags=pygame.BLEND_RGBA_SUB)
 
             self.states[state_str].surface.blit(bab_surface, (0, 0))
 
@@ -208,7 +213,11 @@ class EllipseDrawableShape(DrawableShape):
         self.states[state_str].has_fresh_surface = True
 
     @staticmethod
-    def clear_and_create_shape_surface(surface, rect, overlap, aa_amount, clear=True) -> pygame.Surface:
+    def clear_and_create_shape_surface(surface: pygame.Surface,
+                                       rect: pygame.Rect,
+                                       overlap: int,
+                                       aa_amount: int,
+                                       clear: bool = True) -> pygame.Surface:
         """
         Clear a space for a new shape surface on the main state surface for this state. The surface created will be
         plain white so that it can be easily multiplied with a colour surface.

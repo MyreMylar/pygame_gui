@@ -1,4 +1,4 @@
-from typing import Union, Dict, Tuple, List, Any
+from typing import Union, Dict, Tuple, List
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, UI_SELECTION_LIST_DROPPED_SELECTION
@@ -7,12 +7,12 @@ from pygame import Rect, USEREVENT
 from pygame.event import Event, post
 from pygame.math import Vector2
 
-from pygame_gui.core.container_interface import IContainerInterface
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.elements import UIVerticalScrollBar, UIButton
+
+from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 
 class UISelectionList(UIElement):
@@ -30,7 +30,7 @@ class UISelectionList(UIElement):
     def __init__(self,
                  relative_rect: Rect,
                  item_list: Union[List[str], List[Tuple[str, str]]],
-                 manager: UIManager,
+                 manager: IUIManagerInterface,
                  *,
                  allow_multiselect: bool = False,
                  allow_doubleclicks: bool = True,
