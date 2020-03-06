@@ -33,8 +33,6 @@ class UIManager:
 
         self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
 
-        #UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
-
         self.live_theme_updates = enable_live_theme_updates
         self.theme_update_acc = 0.0
         self.theme_update_check_interval = 1.0
@@ -107,6 +105,8 @@ class UIManager:
         We then recreate the UIWindowStack and the root container.
         """
         self.root_container.kill()
+        # need to reset to None before recreating otherwise the old container will linger around.
+        self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
                                           container=None, parent_element=None,
                                           object_id='#root_container')
