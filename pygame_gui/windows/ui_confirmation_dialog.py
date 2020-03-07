@@ -18,6 +18,7 @@ class UIConfirmationDialog(UIWindow):
     :param window_title: The title of the  window.
     :param confirming_action_short_name: Short, one or two word description of action for button.
     :param blocking: Whether this window should block all other mouse interactions with the GUI until it is closed.
+    :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#confirmation_dialog'.
     """
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,

@@ -1,5 +1,5 @@
 import pygame
-from typing import Tuple, Union
+from typing import Tuple, Union, Dict
 import warnings
 
 
@@ -17,7 +17,10 @@ class ShadowGenerator:
         self.created_ellipse_shadows = {}
         self.preloaded_shadow_corners = {}
 
-    def create_shadow_corners(self, shadow_width_param, corner_radius_param, aa_amount=4):
+    def create_shadow_corners(self,
+                              shadow_width_param: int,
+                              corner_radius_param: int,
+                              aa_amount=4) -> Dict[str, pygame.Surface]:
         if shadow_width_param <= 0:
             shadow_width_param = 1
             warnings.warn("Tried to make shadow with width <= 0")
@@ -110,8 +113,11 @@ class ShadowGenerator:
 
         return corners_and_edges
 
-    def create_new_rectangle_shadow(self, width: int, height: int,
-                                    shadow_width_param: int, corner_radius_param: int, ):
+    def create_new_rectangle_shadow(self,
+                                    width: int,
+                                    height: int,
+                                    shadow_width_param: int,
+                                    corner_radius_param: int) -> pygame.Surface:
         """
         Creates a rectangular shadow surface at the specified size and stores it for later use.
 
@@ -158,7 +164,10 @@ class ShadowGenerator:
 
         return final_surface
 
-    def create_new_ellipse_shadow(self, width: int, height: int, shadow_width_param: int, aa_amount: int = 4):
+    def create_new_ellipse_shadow(self, width: int,
+                                  height: int,
+                                  shadow_width_param: int,
+                                  aa_amount: int = 4) -> pygame.Surface:
         """
         Creates a ellipse shaped shadow surface at the specified size and stores it for later use.
 
@@ -186,7 +195,8 @@ class ShadowGenerator:
         self.created_ellipse_shadows[str(width) + 'x' + str(height) + 'x' + str(shadow_width_param)] = final_surface
         return final_surface
 
-    def find_closest_shadow_scale_to_size(self, size: Tuple[int, int],
+    def find_closest_shadow_scale_to_size(self,
+                                          size: Tuple[int, int],
                                           shadow_width: int = 2,
                                           shape: str = "rectangle",
                                           corner_radius: int = 2) -> Union[pygame.Surface, None]:

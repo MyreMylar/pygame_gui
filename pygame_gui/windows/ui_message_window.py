@@ -14,7 +14,7 @@ class UIMessageWindow(UIWindow):
     :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
     :param manager: The UIManager that manages this UIElement.
     :param window_title: The title of the  window.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#message_window'.
     """
     def __init__(self, rect: pygame.Rect,
                  html_message: str,

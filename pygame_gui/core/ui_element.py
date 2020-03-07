@@ -15,8 +15,9 @@ class UIElement(pygame.sprite.Sprite):
     :param container: A container that this element is contained in.
     :param starting_height: Used to record how many layers above it's container this element should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
     :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -186,18 +187,19 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.bottom = new_bottom
 
     @staticmethod
-    def create_valid_ids(container: Union[IContainerInterface, None], parent_element: Union[None, 'UIElement'],
-                         object_id: str, element_id: str):
+    def create_valid_ids(container: Union[IContainerInterface, None],
+                         parent_element: Union[None, 'UIElement'],
+                         object_id: str,
+                         element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
         containing full stops. These ID lists are used by the theming system to identify what theming parameters to
         apply to which element.
 
-        :param container: The container for this element. If parent is None and the container is not then by default the container will be used as the parent.
+        :param container: The container for this element. If parent is None the container will be used as the parent.
         :param parent_element: Element that this element 'belongs to' in theming. Elements inherit colours from parents.
         :param object_id: An optional ID to help distinguish this element from other elements of the same class.
         :param element_id: A string ID representing this element's class.
-        :return:
         """
         if parent_element is None and container is not None:
             id_parent = container
@@ -231,6 +233,11 @@ class UIElement(pygame.sprite.Sprite):
         self._update_container_clip()
 
     def _update_container_clip(self):
+        """
+        Creates a clipping rectangle for the element's image surface based on whether this element is inside its
+        container, part-way in it, or all the way out of it.
+
+        """
         if self.ui_container.get_image_clipping_rect() is not None:
             container_clip_rect = self.ui_container.get_image_clipping_rect().copy()
             container_clip_rect.left += self.ui_container.rect.left
@@ -282,6 +289,7 @@ class UIElement(pygame.sprite.Sprite):
 
         :param time_delta: A float, the time in seconds between the last call to this function and now (roughly).
         :param hovered_higher_element: A boolean, representing whether we have already hovered a 'higher' element.
+
         :return bool: A boolean that is true if we have hovered a UI element, either just now or before this method.
         """
         if self.alive() and self.can_hover():
@@ -370,6 +378,10 @@ class UIElement(pygame.sprite.Sprite):
                 self.on_fresh_drawable_shape_ready()
 
     def on_fresh_drawable_shape_ready(self):
+        """
+        Called when our drawable shape has finished rebuilding the active surface. This is needed because sometimes we
+        defer rebuilding until a more advantageous (read quieter) moment.
+        """
         self.set_image(self.drawable_shape.get_fresh_surface())
 
     def on_hovered(self):
@@ -437,14 +449,28 @@ class UIElement(pygame.sprite.Sprite):
         self.is_focused = False
 
     def rebuild_from_changed_theme_data(self):
+        """
+        A stub to override. Used to test if the theming data for this element has changed and rebuild the element if so.
+
+        """
         pass
 
     def rebuild(self):
+        """
+        Takes care of rebuilding this element. Most derived elements are going to override this, an hopefully call
+        the super() class method.
+
+        """
         if self.pre_debug_image is not None:
             self.set_image(self.pre_debug_image)
             self.pre_debug_image = None
 
-    def set_visual_debug_mode(self, activate_mode):
+    def set_visual_debug_mode(self, activate_mode: bool):
+        """
+        Enables a debug mode for the element which displays layer information on top of it in a tiny font.
+
+        :param activate_mode: True or False to enable or disable the mode.
+        """
         if activate_mode:
             font_dict = self.ui_manager.get_theme().get_font_dictionary()
             default_font = font_dict.find_font(font_size=font_dict.debug_font_size,
@@ -475,13 +501,28 @@ class UIElement(pygame.sprite.Sprite):
         else:
             self.rebuild()
 
-    def _clip_images_for_container(self, clip_rect):
+    def _clip_images_for_container(self, clip_rect: Union[pygame.Rect, None]):
+        """
+        Set the current image clip based on the container.
+
+        :param clip_rect: The clipping rectangle.
+        """
         self.set_image_clip(clip_rect)
 
     def _restore_container_clipped_images(self):
+        """
+        Clear the image clip.
+
+        """
         self.set_image_clip(None)
 
-    def set_image_clip(self, rect):
+    def set_image_clip(self, rect: Union[pygame.Rect, None]):
+        """
+        Sets a clipping rectangle on this element's image determining what portion of it will actually be displayed
+        when this element is blitted to the screen.
+
+        :param rect: A clipping rectangle, or None to clear the clip.
+        """
         if rect is not None and self._pre_clipped_image is None and self.image is not None:
             self._pre_clipped_image = self.image.copy()
 
@@ -496,10 +537,21 @@ class UIElement(pygame.sprite.Sprite):
         else:
             self._image_clip = None
 
-    def get_image_clipping_rect(self):
+    def get_image_clipping_rect(self) -> Union[pygame.Rect, None]:
+        """
+        Obtain the current image clipping rect.
+
+        :return: The current clipping rect. May be None.
+        """
         return self._image_clip
 
-    def set_image(self, new_image):
+    def set_image(self, new_image: Union[pygame.Surface, None]):
+        """
+        Wraps setting the image variable of this element so that we also set the current image clip on the image at the
+        same time.
+
+        :param new_image: The new image to set.
+        """
         if self._image_clip is not None and new_image is not None:
             self._pre_clipped_image = new_image
             if self._image_clip.width == 0 and self._image_clip.height == 0:
@@ -512,7 +564,7 @@ class UIElement(pygame.sprite.Sprite):
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None
 
-    def get_top_layer(self):
+    def get_top_layer(self) -> int:
         """
         Assuming we have correctly calculated the 'thickness' of this container, this method will return the top of
         this element.

@@ -15,9 +15,12 @@ class UIContainer(UIElement, IContainerInterface):
 
     :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is inside of, if any.
     :param manager: The UIManager that manages this UIElement.
+    :param starting_height: The starting layer height for this element above it's container.
+    :param is_window_root_container: True/False flag for whether this container is the root container for a UI window.
     :param container: The UIContainer that this UIElement is contained within.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -53,7 +56,12 @@ class UIContainer(UIElement, IContainerInterface):
 
         self.hovered = False
 
-    def get_container(self):
+    def get_container(self) -> 'UIContainer':
+        """
+        Implements the container interface. In this case we just return this since it is a container.
+
+        :return: This container.
+        """
         return self
 
     def add_element(self, element: UIElement):

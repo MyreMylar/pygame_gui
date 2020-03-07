@@ -1,12 +1,18 @@
+from typing import Tuple
+
 from pygame_gui.core.interfaces import IWindowInterface
+from pygame_gui.core.ui_container import UIContainer
 
 
 class UIWindowStack:
     """
     A class for managing a stack of GUI windows so that only one is 'in front' at a time and the rest are sorted based
     on the last time they were interacted with/created.
+
+    :param window_resolution: The resolution of the OS window.
+    :param root_container: The root container for the whole UI.
     """
-    def __init__(self, window_resolution, root_container):
+    def __init__(self, window_resolution: Tuple[int, int], root_container: UIContainer):
         self.window_resolution = window_resolution
         self.stack = []
         self.root_container = root_container
@@ -66,18 +72,6 @@ class UIWindowStack:
             self.add_new_window(old_window)
 
         self.add_new_window(window_to_front)
-
-    # def get_root_window(self) -> Union[ui_window.UIWindow, None]:
-    #     """
-    #     Gets the 'root' window, which should always be the first one in the stack and should represent an imaginary
-    #     window the size of the whole pygame application's display surface.
-    #
-    #     :return Union[ui_window.UIWindow, None]:  The 'root' window
-    #     """
-    #     if len(self.stack) > 0:
-    #         return self.stack[0]
-    #     else:
-    #         return None
 
     def is_window_at_top(self, window: IWindowInterface) -> bool:
         """

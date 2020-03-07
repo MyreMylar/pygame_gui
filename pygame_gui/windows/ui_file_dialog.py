@@ -12,13 +12,28 @@ from pygame_gui.windows import UIConfirmationDialog
 
 
 class UIFileDialog(UIWindow):
+    """
+    A dialog window for handling file selection operations. The dialog will let you pick a file from a file system but
+    won't do anything with it once you have, the path will just be returned leaving it up to the rest of the
+    application to decide what to do with it.
+
+    TODO: This works fine for loading files, but can it be adjusted to allow for saving files?
+
+    :param rect: The size and position of the file dialog window. Includes the size of shadow, border and title bar.
+    :param manager: The manager for the whole of the UI.
+    :param window_title: The title for the window, defaults to 'File Dialog'
+    :param initial_file_path: The initial path to open the file dialog at.
+    :param object_id: The object ID for the window, used for theming - defaults to '#file_dialog'
+    """
     def __init__(self,
                  rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  window_title: str = 'File Dialog',
                  initial_file_path: Union[str, None] = None,
+                 object_id: str = '#file_dialog'
                  ):
-        super().__init__(rect, manager, window_display_title=window_title, object_id='#file_dialog')
+
+        super().__init__(rect, manager, window_display_title=window_title, object_id=object_id)
 
         self.delete_confirmation_dialog = None  # type: Union[None, UIConfirmationDialog]
 
@@ -122,6 +137,10 @@ class UIFileDialog(UIWindow):
                                                             'bottom': 'bottom'})
 
     def update_current_file_list(self):
+        """
+        Updates the currently displayed list of files and directories. Usually called when the directory path has
+        changed.
+        """
         try:
             directories_on_path = [f for f in listdir(self.current_directory_path)
                                    if not isfile(join(self.current_directory_path, f))]
@@ -139,6 +158,15 @@ class UIFileDialog(UIWindow):
             self.update_current_file_list()
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Handles events that this UI element is interested in. There are a lot of buttons in the file dialog.
+
+        TODO: May need to pull text for delete confirmation box out to variables or constructor somewhere.
+        TODO: Generic problem with default display text is that it is all in english -> should read it from a file.
+
+        :param event: The pygame Event to process.
+        :return: True if event is consumed by this element and should not be passed on to other elements.
+        """
         handled = super().process_event(event)
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED

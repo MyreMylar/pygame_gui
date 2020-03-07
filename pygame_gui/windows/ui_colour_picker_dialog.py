@@ -10,6 +10,22 @@ from pygame_gui.elements import UIWindow, UIButton, UIImage, UIHorizontalSlider,
 
 
 class UIColourChannelEditor(UIElement):
+    """
+    This colour picker specific element lets us edit a single colour channel (Red, Green, Blue, Hue etc). It's bundled
+    along with the colour picker class because I don't see much use for it outside of a colour picker, but it still
+    seemed sensible to make a class for a pattern in the colour picker that is repeated six times.
+
+    :param relative_rect: The relative rectangle for sizing and positioning the element, relative to the anchors.
+    :param manager: The UI manager for the UI system.
+    :param name: Name for this colour channel, (e.g 'R:' or 'B:'). Used for the label.
+    :param channel_index: Index for the colour channel (e.g. red is 0, blue is 1, hue is also 0, saturation is 1)
+    :param value_range: Range of values for this channel (0 to 255 for R,G,B - 0 to 360 for hue, 0 to 100 for the rest)
+    :param initial_value: Starting value for this colour channel.
+    :param container: UI container for this element.
+    :param parent_element: An element to parent this element, used for theming hierarchies and events.
+    :param object_id: A specific theming/event ID for this element.
+    :param anchors: A dictionary of anchors used for setting up what this element's relative_rect is relative to.
+    """
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -21,6 +37,7 @@ class UIColourChannelEditor(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
+
         new_element_ids, new_object_ids = self.create_valid_ids(container=container,
                                                                 parent_element=parent_element,
                                                                 object_id=object_id,
@@ -45,6 +62,9 @@ class UIColourChannelEditor(UIElement):
                                              container=self.ui_container,
                                              parent_element=self,
                                              anchors=anchors)
+
+        # TODO: alter this so that the labels and text entry boxes are fixed width based on the font and the slider
+        #  expands to fill the space in between.
 
         space_between = 5
         width_without_spacing = self.element_container.relative_rect.width - (2 * space_between)
@@ -88,6 +108,13 @@ class UIColourChannelEditor(UIElement):
         self.entry.set_text_length_limit(3)
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Handles events that this UI element is interested in. In this case we are responding to the slider being moved
+        and the user finishing entering text in the text entry element.
+
+        :param event: The pygame Event to process.
+        :return: True if event is consumed by this element and should not be passed on to other elements.
+        """
         consumed_event = super().process_event(event)
         if (event.type == pygame.USEREVENT and
                 event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED and
@@ -111,6 +138,12 @@ class UIColourChannelEditor(UIElement):
         return consumed_event
 
     def _set_value_from_slider(self, new_value: int):
+        """
+        For updating the value in the text entry element when we've moved the slider. Also sends out an event for the
+        color picker.
+
+        :param new_value: The new value to set.
+        """
         clipped_value = min(self.range[1], max(self.range[0], new_value))
         if clipped_value != self.current_value:
             self.current_value = clipped_value
@@ -124,6 +157,13 @@ class UIColourChannelEditor(UIElement):
             pygame.event.post(colour_channel_changed_event)
 
     def _set_value_from_entry(self, new_value: int):
+        """
+        For updating the value the slider element is set to when we've edited the text entry. The slider may have much
+        less precision than the text entry depending on it's available width so we need to be careful to make the change
+        one way. Also sends out an event for the color picker and clips the value to within the allowed value range.
+
+        :param new_value: The new value to set.
+        """
         clipped_value = min(self.range[1], max(self.range[0], new_value))
         if clipped_value != new_value:
             self.entry.set_text(str(clipped_value))
@@ -139,6 +179,12 @@ class UIColourChannelEditor(UIElement):
             pygame.event.post(colour_channel_changed_event)
 
     def set_value(self, new_value: int):
+        """
+        For when we need to set the value of the colour channel from outside, usually from adjusting the colour
+        elsewhere in the colour picker. Makes sure the new value is within the allowed range.
+
+        :param new_value:
+        """
         clipped_value = min(self.range[1], max(self.range[0], new_value))
         if clipped_value != self.current_value:
             self.current_value = clipped_value
@@ -147,12 +193,25 @@ class UIColourChannelEditor(UIElement):
 
 
 class UIColourPickerDialog(UIWindow):
+    """
+    A colour picker window that gives us a small range of UI tools to pick a final colour.
+
+    TODO: specify the minimum dimensions with the default font somewhere in here?
+    TODO: Also scale what needs scaling with the window. Enable resizing to test.
+
+    :param rect: The size and position of the colour picker window. Includes the size of shadow, border and title bar.
+    :param manager: The manager for the whole of the UI.
+    :param initial_colour: The starting colour for the colour picker, defaults to black.
+    :param window_title: The title for the window, defaults to 'Colour Picker'
+    :param object_id: The object ID for the window, used for theming - defaults to '#colour_picker_dialog'
+    """
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0),
                  window_title: str = "Colour Picker",
                  object_id: str = '#colour_picker_dialog'):
+
         super().__init__(rect, manager, window_display_title=window_title, object_id=object_id)
 
         self.current_colour = initial_colour
@@ -275,6 +334,17 @@ class UIColourPickerDialog(UIWindow):
                                      container=self)
 
     def update_saturation_value_square(self):
+        """
+        Updates the appearance of the big square that lets us visually pick the Saturation and Value of our current
+        Hue. This is done by drawing a very small 4x4 pixel square with a pattern like so:
+
+                   [black] [hue at max saturation & value)]
+                   [black] [white]
+
+        And then using the smoothscale transform to enlarge it so that the colours blend smoothly from one to the other.
+
+        #TODO: This also needs to be made to scale with the window.
+        """
         mini_colour_surf = pygame.Surface((2, 2))
         mini_colour_surf.fill(pygame.Color(0, 0, 0), pygame.Rect(0, 0, 1, 2))
         mini_colour_surf.fill(pygame.Color(255, 255, 255), pygame.Rect(1, 1, 1, 1))
@@ -286,6 +356,14 @@ class UIColourPickerDialog(UIWindow):
         self.colour_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Handles events that this UI element is interested in. In this case we are responding to the colour channel
+        elements being changed, the OK or Cancel buttons being pressed or the user clicking the mouse inside of the
+        Saturation & Value picking square.
+
+        :param event: The pygame Event to process.
+        :return: True if event is consumed by this element and should not be passed on to other elements.
+        """
         consumed_event = super().process_event(event)
         if (event.type == pygame.USEREVENT and
                 event.user_type == pygame_gui.UI_BUTTON_PRESSED and
@@ -339,16 +417,29 @@ class UIColourPickerDialog(UIWindow):
         return consumed_event
 
     def update_current_colour_image(self):
+        """
+        Updates the 'current colour' image when the current colour has been changed.
+
+        #TODO: This also needs to be made to scale with the window.
+        """
         current_colour_surface = pygame.Surface((64, 64))
         current_colour_surface.fill(self.current_colour)
         self.current_colour_image.set_image(current_colour_surface)
 
     def changed_hsv_update_rgb(self):
+        """
+        Updates the RGB channels when we've altered the HSV ones.
+
+        """
         self.red_channel.set_value(self.current_colour.r)
         self.green_channel.set_value(self.current_colour.g)
         self.blue_channel.set_value(self.current_colour.b)
 
     def changed_rgb_update_hsv(self):
+        """
+        Updates the HSV channels when we've altered the RGB ones.
+
+        """
         self.hue_channel.set_value(int(self.current_colour.hsva[0]))
         self.saturation_channel.set_value(int(self.current_colour.hsva[1]))
         self.value_channel.set_value(int(self.current_colour.hsva[2]))
