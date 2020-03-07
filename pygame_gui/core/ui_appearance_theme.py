@@ -371,7 +371,9 @@ class UIAppearanceTheme:
                 combined_id += gathered_ids[index]
             combined_ids.append(combined_id)
 
-    def build_all_combined_ids(self, element_ids: List[str], object_ids: List[Union[str, None]]) -> List[str]:
+    def build_all_combined_ids(self,
+                               element_ids: Union[None, List[str]],
+                               object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
         """
         Construct a list of combined element ids from the element's various accumulated ids.
 
@@ -499,8 +501,8 @@ class UIAppearanceTheme:
         return None
 
     def get_colour(self,
-                   object_ids: List[Union[str, None]],
-                   element_ids: List[str],
+                   object_ids: Union[None, List[Union[str, None]]],
+                   element_ids: Union[None, List[str]],
                    colour_id: str) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
@@ -521,8 +523,8 @@ class UIAppearanceTheme:
         return colour
 
     def get_colour_or_gradient(self,
-                               object_ids: List[Union[str, None]],
-                               element_ids: List[str],
+                               object_ids: Union[None, List[Union[str, None]]],
+                               element_ids: Union[None, List[str]],
                                colour_id: str) -> Union[pygame.Color, ColourGradient]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient, from our theme.

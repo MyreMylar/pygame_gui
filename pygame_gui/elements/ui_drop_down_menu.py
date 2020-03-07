@@ -422,6 +422,7 @@ class UIDropDownMenu(UIElement):
     :param container: The container that this element is within. If set to None will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
 
     def __init__(self, options_list: List[str],

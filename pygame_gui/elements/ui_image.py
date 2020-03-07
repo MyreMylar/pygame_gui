@@ -10,11 +10,12 @@ class UIImage(UIElement):
     Displays a pygame surface as a UI element, intended for an image but it can serve other purposes.
 
     :param relative_rect: The rectangle that contains, positions and scales the image relative to it's container.
-    :param image_surface:
+    :param image_surface: A pygame surface to display.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  image_surface: pygame.Surface,

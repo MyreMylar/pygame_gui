@@ -1,20 +1,46 @@
 import warnings
+from typing import Union, List, Dict, Any
 
 import pygame
+
+from pygame_gui.core.colour_gradient import ColourGradient
+from pygame_gui.core.ui_font_dictionary import UIFontDictionary
+
 from pygame_gui.elements.text.text_effects import TextBoxEffect
 from pygame_gui.elements.text.styled_chunk import StyledChunk
-from pygame_gui.core.colour_gradient import ColourGradient
+from pygame_gui.elements.text.html_parser import TextLineContext
 
 
 class TextBlock:
+    """
+    Handles turning parsed HTML in TextLineContexts into surfaces in StyledChunks and deals with word wrapping.
+
+    :param text: Raw text to be styled with TextLineContext objects.
+    :param rect: The rectangle to wrap the text to.
+    :param indexed_styles: Text styles stored by their index in the raw text.
+    :param font_dict: The UI's font dictionary.
+    :param link_style: The link style for this text block (so we can do several bits of styling at once in an <a> block.
+    :param bg_colour: The background colour or gradient for the whole block.
+    :param wrap_to_height: Whether we should wrap the text to our block height. Not sure if this works.
+    """
     class TextLine:
+        """
+        TODO: move this out of the TextBlock class if it still needs to exist.
+        """
         def __init__(self):
             self.chunks = []
             self.max_line_char_height = 0
             self.max_line_ascent = 0
 
-    def __init__(self, text: str, rect: pygame.Rect, indexed_styles,
-                 font_dict, link_style, bg_colour, wrap_to_height=False):
+    def __init__(self,
+                 text: str,
+                 rect: pygame.Rect,
+                 indexed_styles: Dict[int, TextLineContext],
+                 font_dict: UIFontDictionary,
+                 link_style: Dict[str, Any],
+                 bg_colour: Union[pygame.Color, ColourGradient],
+                 wrap_to_height: bool = False):
+
         self.characters = text
 
         self.position = (rect[0], rect[1])
@@ -33,10 +59,12 @@ class TextBlock:
         self.lines = []
         self.redraw(None)
 
-    def redraw(self, text_effect):
+    def redraw(self, text_effect: Union[TextBoxEffect, None]):
         """
         Takes our parsed text and the styles generated from that parsing and builds rendered 'chunks' out of them
         that are then blitted onto a final surface containing all our drawn text.
+
+        :param text_effect: The text effect to apply when drawing the text.
         """
         self.lines = []
         if text_effect:
@@ -63,7 +91,7 @@ class TextBlock:
                 if chunk_ascent > max_line_ascent:
                     max_line_ascent = chunk_ascent
                 if chunk[0] == '\n':
-                    if len(chunk_line) == 0:
+                    if not chunk_line:
                         lines_of_chunks.append([max_line_ascent, [['', chunk[1]]]])
                     else:
                         lines_of_chunks.append([max_line_ascent, chunk_line])
@@ -97,7 +125,7 @@ class TextBlock:
                     line_render_length += chunk_length
                     if line_render_length > self.width:
                         char_line_length = line_render_length - chunk_length
-                        for i in range(0, len(metrics)):
+                        for i in range(len(metrics)):
                             advance = metrics[i][4]
                             char_line_length += advance
                             if char_line_length > self.width:
@@ -153,7 +181,7 @@ class TextBlock:
                                 if remaining_chunk_ascent > new_line[0]:
                                     new_line[0] = remaining_chunk_ascent
 
-                            for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                            for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
                                 lines_of_chunks[line_index][1].pop()
 
                             lines_of_chunks.insert(line_index + 1, new_line)
@@ -187,7 +215,7 @@ class TextBlock:
                             if remaining_chunk_ascent > new_line[0]:
                                 new_line[0] = remaining_chunk_ascent
 
-                        for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                        for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
                             lines_of_chunks[line_index][1].pop()
 
                         lines_of_chunks.insert(line_index + 1, new_line)
@@ -196,7 +224,7 @@ class TextBlock:
         surface = None
         surface_width = self.width
         surface_height = self.height
-        if self.height != -1 and self.width != -1:
+        if not (self.height == -1 or self.width == -1):
             surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA, depth=32)
 
         position = [0, 0]
@@ -242,15 +270,8 @@ class TextBlock:
             line_height_acc += max_line_char_height
 
         if surface is None:
-            if self.width == -1:
-                surface_width = max_line_length
-            else:
-                surface_width = self.width
-            if self.height == -1:
-                surface_height = line_height_acc
-            else:
-                surface_height = self.height
-
+            surface_width = max_line_length if self.width == -1 else self.width
+            surface_height = line_height_acc if self.height == -1 else self.height
             surface = pygame.Surface((surface_width, surface_height), pygame.SRCALPHA, depth=32)
 
             for line in self.lines:
@@ -266,7 +287,12 @@ class TextBlock:
         self.width = surface_width
         self.height = surface_height
 
-    def redraw_from_chunks(self, text_effect: TextBoxEffect):
+    def redraw_from_chunks(self, text_effect: Union[TextBoxEffect, None]):
+        """
+        Redraw only the last part of text block starting from the already complete styled and word wrapped StyledChunks.
+
+        :param text_effect: The text effect to use when redrawing.
+        """
         final_alpha = text_effect.get_final_alpha() if text_effect else 255
         self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA, depth=32)
 
@@ -282,7 +308,13 @@ class TextBlock:
                     self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
         self.block_sprite.set_alpha(final_alpha)
 
-    def add_chunks_to_hover_group(self, hover_group):
+    def add_chunks_to_hover_group(self, hover_group: List[StyledChunk]):
+        """
+        Grab the StyledChunks that are hyperlinks and add them to a passed in 'hover group' so they can be checked
+        By the UITextBox for mouse over and mouse click events.
+
+        :param hover_group: The group to add our hyperlink StyledChunks to.
+        """
         for line in self.lines:
             for chunk in line.chunks:
                 if chunk.is_link:

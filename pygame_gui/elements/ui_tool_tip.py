@@ -24,6 +24,7 @@ class UITooltip(UIElement):
     :param manager: The UIManager that manages this element.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
                  manager: IUIManagerInterface,

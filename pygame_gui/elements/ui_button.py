@@ -23,6 +23,7 @@ class UIButton(UIElement):
     :param starting_height: The height in layers above it's container that this element will be placed.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
