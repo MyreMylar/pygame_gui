@@ -20,8 +20,12 @@ class UISelectionList(UIElement):
     A rectangular element that holds any number of selectable text items displayed as a list.
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout guide for details.
+    :param item_list: A list of items as strings (item name only), or tuples of two strings (name, theme_object_id).
     :param manager: The GUI manager that handles drawing and updating the UI and interactions between elements.
+    :param allow_multi_select: True if we are allowed to pick multiple things from the selection list.
+    :param allow_double_clicks: True if we can double click on items in the selection list.
     :param container: The container this element is inside of (by default the root container) distinct from this panel's container.
+    :param starting_height: The starting height up from it's container where this list is placed into a layer.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in theming and events.
     :param object_id: An identifier that can be used to help distinguish this particular element from others with the same hierarchy.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to. Defaults to the top left.
@@ -32,8 +36,8 @@ class UISelectionList(UIElement):
                  item_list: Union[List[str], List[Tuple[str, str]]],
                  manager: IUIManagerInterface,
                  *,
-                 allow_multiselect: bool = False,
-                 allow_doubleclicks: bool = True,
+                 allow_multi_select: bool = False,
+                 allow_double_clicks: bool = True,
                  container: Union[IContainerInterface, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
@@ -55,8 +59,8 @@ class UISelectionList(UIElement):
 
         self.item_list_container = None
         self.item_list = []
-        self.allow_multiselect = allow_multiselect
-        self.allow_doubleclicks = allow_doubleclicks
+        self.allow_multi_select = allow_multi_select
+        self.allow_double_clicks = allow_double_clicks
 
         self.background_colour = None
         self.border_colour = None
@@ -88,20 +92,31 @@ class UISelectionList(UIElement):
 
         self.set_item_list(item_list)
 
-    def get_single_selection(self) -> str:
-        if not self.allow_multiselect:
+    def get_single_selection(self) -> Union[str, None]:
+        """
+        Get the selected item in a list, if any. Only works if this is a single-selection list.
+
+        :return: A single item name as a string or None.
+        """
+        if not self.allow_multi_select:
             selected_list = [item['text'] for item in self.item_list if item['selected']]
             if len(selected_list) == 1:
                 return selected_list[0]
+            elif len(selected_list) == 0:
+                return None
             else:
                 raise RuntimeError('More than one item selected in single-selection, selection list')
         else:
             raise RuntimeError('Requesting single selection, from multi-selection list')
 
     def get_multi_selection(self) -> List[str]:
-        if self.allow_multiselect:
-            selected_list = [item['text'] for item in self.item_list if item['selected']]
-            return selected_list[0]
+        """
+        Get all the selected items in our selection list. Only works if this is a multi-selection list.
+
+        :return: A list of the selected items in our selection list. May be empty if nothing selected.
+        """
+        if self.allow_multi_select:
+            return [item['text'] for item in self.item_list if item['selected']]
         else:
             raise ValueError('Requesting multi selection, from single-selection list')
 
@@ -132,7 +147,7 @@ class UISelectionList(UIElement):
                                                           parent_element=self,
                                                           container=self.item_list_container,
                                                           object_id=item['object_id'],
-                                                          allow_double_clicks=self.allow_doubleclicks,
+                                                          allow_double_clicks=self.allow_double_clicks,
                                                           anchors={'left': 'left',
                                                                    'right': 'right',
                                                                    'top': 'top',
@@ -227,7 +242,7 @@ class UISelectionList(UIElement):
                                                   parent_element=self,
                                                   container=self.item_list_container,
                                                   object_id=item['object_id'],
-                                                  allow_double_clicks=self.allow_doubleclicks,
+                                                  allow_double_clicks=self.allow_double_clicks,
                                                   anchors={'left': 'left',
                                                            'right': 'right',
                                                            'top': 'top',
@@ -275,7 +290,7 @@ class UISelectionList(UIElement):
 
                     selection_list_event = Event(USEREVENT, event_data)
                     post(selection_list_event)
-                elif not self.allow_multiselect:
+                elif not self.allow_multi_select:
                     if item['selected']:
                         item['selected'] = False
                         if item['button_element'] is not None:
@@ -302,6 +317,11 @@ class UISelectionList(UIElement):
         super().set_dimensions(dimensions)
 
     def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the relative rect position of an element.
+
+        :param position: The new position to set.
+        """
         super().set_relative_position(position)
 
     def kill(self):

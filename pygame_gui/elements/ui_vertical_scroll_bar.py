@@ -22,7 +22,8 @@ class UIVerticalScrollBar(UIElement):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
 
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self,
+                 relative_rect: pygame.Rect,
                  visible_percentage: float,
                  manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
@@ -365,6 +366,10 @@ class UIVerticalScrollBar(UIElement):
         self.redraw_scrollbar()
 
     def reset_scroll_position(self):
+        """
+        Reset the current scroll position back to the top.
+
+        """
         self.scroll_position = 0.0
         self.start_percentage = 0.0
 
@@ -470,6 +475,11 @@ class UIVerticalScrollBar(UIElement):
         self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the dimensions of an element.
+
+        :param dimensions: The new dimensions to set.
+        """
         super().set_dimensions(dimensions)
 
         border_and_shadow = self.border_width + self.shadow_width

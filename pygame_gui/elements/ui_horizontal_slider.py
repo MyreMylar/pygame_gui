@@ -24,7 +24,8 @@ class UIHorizontalSlider(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self,
+                 relative_rect: pygame.Rect,
                  start_value: Union[float, int],
                  value_range: Tuple[Union[float, int], Union[float, int]],
                  manager: IUIManagerInterface,
@@ -413,6 +414,11 @@ class UIHorizontalSlider(UIElement):
         self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the dimensions of an element.
+
+        :param dimensions: The new dimensions to set.
+        """
         super().set_dimensions(dimensions)
 
         border_and_shadow = self.border_width + self.shadow_width

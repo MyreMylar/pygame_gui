@@ -354,17 +354,18 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
-        if self.relative_right_margin is not None:
-            self.relative_right_margin = self.ui_container.rect.right - self.rect.right
+        if dimensions[0] >= 0 and dimensions[1] >= 0:
+            if self.relative_right_margin is not None:
+                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
 
-        if self.relative_bottom_margin is not None:
-            self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
+            if self.relative_bottom_margin is not None:
+                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
 
-        if self.drawable_shape is not None:
-            self.drawable_shape.set_dimensions(self.relative_rect.size)
-            self.set_image(self.drawable_shape.get_fresh_surface())  # needed to stop resizing 'lag'
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_dimensions(self.relative_rect.size)
+                self.set_image(self.drawable_shape.get_fresh_surface())  # needed to stop resizing 'lag'
 
-        self._update_container_clip()
+            self._update_container_clip()
 
     def update(self, time_delta: float):
         """

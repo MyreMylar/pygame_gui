@@ -17,9 +17,17 @@ class UIManager(IUIManagerInterface):
     The UI Manager class helps keep track of all the moving parts in the pygame_gui system.
 
     Before doing anything else with pygame_gui create a UIManager and remember to update it every frame.
+
+    :param window_resolution: window resolution.
+    :param theme_path: relative file path to theme.
+    :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file/
     """
 
-    def __init__(self, window_resolution: Tuple[int, int], theme_path: str = None, enable_live_theme_updates=True):
+    def __init__(self,
+                 window_resolution: Tuple[int, int],
+                 theme_path: str = None,
+                 enable_live_theme_updates=True):
+
         self.window_resolution = window_resolution
         self.ui_theme = UIAppearanceTheme()
         if theme_path is not None:
@@ -53,9 +61,20 @@ class UIManager(IUIManagerInterface):
         self._active_cursor = self.active_user_cursor
 
     def get_double_click_time(self) -> float:
+        """
+        Returns time between clicks that counts as a double click.
+
+        :return: A float, time measured in seconds.
+        """
         return self.mouse_double_click_time
 
-    def get_root_container(self):
+    def get_root_container(self) -> UIContainer:
+        """
+        Returns the 'root' container. The one all UI elements are placed in by default if they are not placed
+        anywhere else, fills the whole OS/pygame window.
+
+        :return: A container.
+        """
         return self.root_container
 
     def get_theme(self) -> UIAppearanceTheme:
@@ -100,6 +119,8 @@ class UIManager(IUIManagerInterface):
     def set_window_resolution(self, window_resolution: Tuple[int, int]):
         """
         Sets the window resolution.
+
+        :param window_resolution: the resolution to set.
         """
         self.window_resolution = window_resolution
 
@@ -355,18 +376,18 @@ class UIManager(IUIManagerInterface):
             if 'vertical_scroll_bar' in ui_element.element_ids:
                 self.last_focused_vertical_scrollbar = ui_element
 
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar):
+    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: UIElement):
         """
-        Clears the last scrollbar that we used.
+        Clears the last scrollbar that we used. Right now this may also be one of the buttons of the scroll bar.
 
         :param vert_scrollbar: A scrollbar UIElement.
         """
         if vert_scrollbar is not None and vert_scrollbar is self.last_focused_vertical_scrollbar:
             self.last_focused_vertical_scrollbar = None
 
-    def get_last_focused_vert_scrollbar(self) -> UIElement:
+    def get_last_focused_vert_scrollbar(self) -> Union[UIElement, None]:
         """
-        Gets the last scrollbar that we used.
+        Gets the last scrollbar that we used. Right now this may also be one of the buttons of the scroll bar.
 
         :return: A UIElement.
         """
@@ -374,9 +395,9 @@ class UIManager(IUIManagerInterface):
 
     def set_visual_debug_mode(self, is_active: bool):
         """
-        Loops through all our UIElements to turn visual debug mode on or off.
+        Loops through all our UIElements to turn visual debug mode on or off. Also calls print_layer_debug()
 
-        :param is_active:
+        :param is_active: True to activate visual debug and False to turn it off.
         """
         if self.visual_debug_active and not is_active:
             self.visual_debug_active = False
@@ -398,6 +419,11 @@ class UIManager(IUIManagerInterface):
             self.print_layer_debug()
 
     def print_layer_debug(self):
+        """
+        Print some formatted information on the current state of the UI Layers.
+
+        Handy for debugging layer problems.
+        """
         for layer in self.ui_group.layers():
             print("Layer: " + str(layer))
             print("-----------------------")
@@ -409,6 +435,11 @@ class UIManager(IUIManagerInterface):
             print(' ')
 
     def load_default_cursors(self):
+        """
+        'Loads' the default cursors we use in the GUI for resizing windows. No actual files are opened as this is all
+        string date compiled into pygame cursor images.
+
+        """
         # cursors for resizing windows
         x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
         y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
@@ -448,6 +479,16 @@ class UIManager(IUIManagerInterface):
         return self.universal_empty_surface
 
     def create_tool_tip(self, text: str, position: Tuple[int, int], hover_distance: Tuple[int, int]) -> UITooltip:
+        """
+        Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it from other UI
+        elements and create tool tips without creating cyclical import problems.
+
+        :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
+        :param position: The screen position to create the tool tip for.
+        :param hover_distance: The distance we should hover away from our target position.
+
+        :return: A tool tip placed somewhere on the screen.
+        """
         tool_tip = UITooltip(text, hover_distance, self)
         tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
         return tool_tip

@@ -35,7 +35,8 @@ class UITextEntryLine(UIElement):
     # reduce the problems that input will leave you with.
     _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
 
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self,
+                 relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
@@ -401,6 +402,7 @@ class UITextEntryLine(UIElement):
         letters, symbols and numbers.
 
         :param event: The current event to consider reacting to.
+
         :return bool: Returns True if we've done something with the input event.
         """
         consumed_event = False
@@ -596,7 +598,7 @@ class UITextEntryLine(UIElement):
                             consumed_event = True
         return consumed_event
 
-    def find_edit_position_from_pixel_pos(self, pixel_pos: int):
+    def find_edit_position_from_pixel_pos(self, pixel_pos: int) -> int:
         """
         Locates the correct position to move the edit cursor to, when reacting to a mouse click inside the text entry
         element.

@@ -29,7 +29,8 @@ class UIWorldSpaceHealthBar(UIElement):
             self.health_capacity = 100
             self.rect = pygame.Rect(0, 0, 32, 64)
 
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self,
+                 relative_rect: pygame.Rect,
                  sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
                  manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,

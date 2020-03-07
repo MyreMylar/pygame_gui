@@ -17,10 +17,31 @@ class UIExpandedDropDownState:
     to close the menu and return to the closed state.
 
     Picking an option will also close the menu.
+
+    :param drop_down_menu_ui: The UIDropDownElement this state belongs to.
+    :param options_list: The list of options in this drop down.
+    :param selected_option: The currently selected option.
+    :param base_position_rect: Position and dimensions rectangle.
+    :param close_button_width: Width of close button.
+    :param expand_direction: Direction of expansion, 'up' or 'down'.
+    :param manager: The UI Manager for the whole UI.
+    :param container: The container the element is within.
+    :param object_ids: The object IDs for the drop down UI element.
+    :param element_ids: The element IDs for the drop down UI element.
     """
 
-    def __init__(self, drop_down_menu_ui, options_list, selected_option, base_position_rect,
-                 close_button_width, expand_direction, manager, container, element_ids, object_ids):
+    def __init__(self,
+                 drop_down_menu_ui: 'UIDropDownMenu',
+                 options_list: List[str],
+                 selected_option: str,
+                 base_position_rect: Union[pygame.Rect, None],
+                 close_button_width: int,
+                 expand_direction: Union[str, None],
+                 manager: IUIManagerInterface,
+                 container: IContainerInterface,
+                 object_ids: Union[List[Union[str, None]], None],
+                 element_ids: Union[List[str], None]):
+
         self.drop_down_menu_ui = drop_down_menu_ui
         self.options_list = options_list
         self.selected_option = selected_option
@@ -47,7 +68,10 @@ class UIExpandedDropDownState:
         self.target_state = 'closed'
 
     def rebuild(self):
+        """
+        Rebuild the state from theming parameters and dimensions.
 
+        """
         theming_parameters = {'normal_bg': self.drop_down_menu_ui.background_colour,
                               'normal_border': self.drop_down_menu_ui.border_colour,
                               'border_width': self.drop_down_menu_ui.border_width,
@@ -80,6 +104,7 @@ class UIExpandedDropDownState:
         """
         Called each time we enter the expanded state. It creates the necessary elements, the selected option, all the
         other available options and the close button.
+
         """
         self.should_transition = False
 
@@ -164,7 +189,7 @@ class UIExpandedDropDownState:
                                                                    self.close_button_width),
                                                                   self.options_list_height),
                                                       item_list=self.options_list,
-                                                      allow_doubleclicks=False,
+                                                      allow_double_clicks=False,
                                                       manager=self.ui_manager,
                                                       parent_element=self.drop_down_menu_ui,
                                                       container=self.ui_container,
@@ -181,6 +206,13 @@ class UIExpandedDropDownState:
         self.close_button.kill()
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Processes events for the closed state of the drop down.
+
+        :param event: The event to process.
+
+        :return bool: Return True if we want to consume this event so it is not passed on to the rest of the UI.
+        """
         consumed_event = False
 
         if (event.type == pygame.USEREVENT and
@@ -253,6 +285,12 @@ class UIExpandedDropDownState:
         self.rebuild()
 
     def on_fresh_drawable_shape_ready(self):
+        """
+        Called by an element's drawable shape when it has a new image surface ready for use, normally after a
+        rebuilding/redrawing of some kind.
+
+        In this case the result is to set the UI element's image to the new surface.
+        """
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_surface('normal'))
 
 
@@ -260,10 +298,29 @@ class UIClosedDropDownState:
     """
     The closed state of the drop down just displays the currently chosen option and a button that will switch the menu
     to the expanded state.
+
+    :param drop_down_menu_ui: The UIDropDownElement this state belongs to.
+    :param selected_option: The currently selected option.
+    :param base_position_rect: Position and dimensions rectangle.
+    :param open_button_width: Width of open button.
+    :param expand_direction: Direction of expansion, 'up' or 'down'.
+    :param manager: The UI Manager for the whole UI.
+    :param container: The container the element is within.
+    :param object_ids: The object IDs for the drop down UI element.
+    :param element_ids: The element IDs for the drop down UI element.
     """
 
-    def __init__(self, drop_down_menu_ui, selected_option, base_position_rect,
-                 open_button_width, expand_direction, manager, container, element_ids, object_ids):
+    def __init__(self,
+                 drop_down_menu_ui: 'UIDropDownMenu',
+                 selected_option: str,
+                 base_position_rect: Union[pygame.Rect, None],
+                 open_button_width: int,
+                 expand_direction: Union[str, None],
+                 manager: IUIManagerInterface,
+                 container: IContainerInterface,
+                 object_ids: Union[List[Union[str, None]], None],
+                 element_ids: Union[List[str], None]):
+
         self.drop_down_menu_ui = drop_down_menu_ui
         self.selected_option_button = None
         self.open_button = None
@@ -283,6 +340,10 @@ class UIClosedDropDownState:
         self.target_state = 'expanded'
 
     def rebuild(self):
+        """
+        Rebuild the closed state from theming parameters and dimensions.
+
+        """
         theming_parameters = {'normal_bg': self.drop_down_menu_ui.background_colour,
                               'normal_border': self.drop_down_menu_ui.border_colour,
                               'border_width': self.drop_down_menu_ui.border_width,
@@ -354,6 +415,13 @@ class UIClosedDropDownState:
         self.open_button.kill()
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Processes events for the closed state of the drop down.
+
+        :param event: The event to process.
+
+        :return bool: Return True if we want to consume this event so it is not passed on to the rest of the UI.
+        """
         consumed_event = False
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED and
@@ -402,6 +470,12 @@ class UIClosedDropDownState:
         self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
 
     def on_fresh_drawable_shape_ready(self):
+        """
+        Called by an element's drawable shape when it has a new image surface ready for use, normally after a
+        rebuilding/redrawing of some kind.
+
+        In this case the result is to set the UI element's image to the new surface.
+        """
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
 
@@ -422,10 +496,12 @@ class UIDropDownMenu(UIElement):
     :param container: The container that this element is within. If set to None will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
+    :param expansion_height_limit: Limit on the height that this will expand to, defaults to the container bounds.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
 
-    def __init__(self, options_list: List[str],
+    def __init__(self,
+                 options_list: List[str],
                  starting_option: str,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -512,6 +588,13 @@ class UIDropDownMenu(UIElement):
             self.current_state.start()
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        """
+        Handles various interactions with the drop down menu by passing them along to the active state.
+
+        :param event: The event to process.
+
+        :return bool: Return True if we want to consume this event so it is not passed on to the rest of the UI.
+        """
         consumed_event = False
         if self.is_enabled:
             consumed_event = self.current_state.process_event(event)
@@ -519,6 +602,11 @@ class UIDropDownMenu(UIElement):
         return consumed_event
 
     def rebuild_from_changed_theme_data(self):
+        """
+        Triggers the element to rebuild if any of it's theming data has changed, which involves a lot of checking and
+        validating it's theming data.
+
+        """
         has_any_changed = False
 
         expand_direction_string = self.ui_manager.get_theme().get_misc_data(self.object_ids,
@@ -631,6 +719,10 @@ class UIDropDownMenu(UIElement):
         self.current_state.update_dimensions()
 
     def on_fresh_drawable_shape_ready(self):
+        """
+        Called by an element's drawable shape when it has a new image surface ready for use, normally after a
+        rebuilding/redrawing of some kind.
+        """
         self.current_state.on_fresh_drawable_shape_ready()
 
     def hover_point(self, x: float, y: float) -> bool:
@@ -641,6 +733,7 @@ class UIDropDownMenu(UIElement):
 
         :param x: The x (horizontal) position of the point.
         :param y: The y (vertical) position of the point.
+
         :return bool: Returns True if we are hovering this element.
         """
         return bool(self.rect.collidepoint(x, y)) and bool(self.ui_container.rect.collidepoint(x, y))

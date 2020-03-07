@@ -21,12 +21,13 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
     :param object_id: An optional object ID for this window, useful for distinguishing different windows.
     :param resizable: Whether this window is resizable or not, defaults to False.
     """
-    def __init__(self, rect: pygame.Rect,
+    def __init__(self,
+                 rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  window_display_title: str = "",
                  element_id: Union[str, None] = None,
                  object_id: Union[str, None] = None,
-                 resizable=False):
+                 resizable: bool = False):
 
         if element_id is None:
             element_id = 'window'
@@ -134,22 +135,31 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         self.window_stack.add_new_window(self)
 
     def set_blocking(self, state: bool):
+        """
+        Sets whether this window being open should block clicks to the rest of the UI or not. Defaults to False.
+
+        :param state: True if this window should block mouse clicks.
+        """
         self.is_blocking = state
 
     def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         If this window is resizable, then the dimensions we set here will be the minimum that users can change the
         window to. They are also used as the minimum size when 'set_dimensions' is called.
+
+        TODO: check if current size is smaller than the minimum and, if so, re-size to the new minimum.
+
+        :param dimensions: The new minimum dimension for the window.
         """
         self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
                                    min(self.ui_container.rect.height, int(dimensions[1])))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Set the size of this window and then resizes and shifts the contents of the windows container to fit the new
+        Set the size of this window and then re-sizes and shifts the contents of the windows container to fit the new
         size.
 
-        :param dimensions:
+        :param dimensions: The new dimensions to set.
         """
         # clamp to minimum dimensions and container size
         dimensions = (min(self.ui_container.rect.width, max(self.minimum_dimensions[0], int(dimensions[0]))),
@@ -168,6 +178,11 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                                                                    self.relative_rect.y + self.shadow_width))
 
     def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the relative rect position of an element.
+
+        :param position: The new position to set.
+        """
         super().set_relative_position(position)
 
         if self._window_root_container is not None:
@@ -175,6 +190,11 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
                                                                self.relative_rect.y + self.shadow_width))
 
     def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the absolute screen rect position of an element.
+
+        :param position: The new position to set.
+        """
         super().set_position(position)
 
         if self._window_root_container is not None:
@@ -183,10 +203,12 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Can be overridden, also handle resizing windows. Gives UI Windows access to pygame events.
+        Handles resizing & closing windows. Gives UI Windows access to pygame events. Derived windows should super()
+        call this class if they implement their own process_event method.
 
         :param event: The event to process.
-        :return bool: Should return True if this element makes use of this event.
+
+        :return bool: Return True if this element should consume this event and not pass it to the rest of the UI.
         """
         consumed_event = False
 
@@ -221,7 +243,8 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         window stack if we click on any of the elements contained within it.
 
         :param event: The event to check.
-        :return bool: returns True if the processed event represents a click inside this window
+
+        :return bool: returns True if the event represents a click inside this window or the window is blocking.
         """
         consumed_event = False
         if self.is_blocking and event.type == pygame.MOUSEBUTTONDOWN:
@@ -328,7 +351,7 @@ class UIWindow(UIElement, IContainerInterface, IWindowInterface):
         return self.window_element_container
 
     # noinspection PyUnusedLocal
-    def check_hover(self, time_delta: float, hovered_higher_element: bool):
+    def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
         For the window the only hovering we care about is the edges if this is a resizable window.
 

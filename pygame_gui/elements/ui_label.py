@@ -132,6 +132,10 @@ class UILabel(UIElement):
         self.set_image(new_image)
 
     def rebuild_from_changed_theme_data(self):
+        """
+        Checks if any theming parameters have changed, and if so triggers a full rebuild of the element.
+
+        """
         any_changed = False
 
         font = self.ui_theme.get_font(self.object_ids, self.element_ids)

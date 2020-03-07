@@ -17,7 +17,8 @@ class UIImage(UIElement):
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self,
+                 relative_rect: pygame.Rect,
                  image_surface: pygame.Surface,
                  manager: IUIManagerInterface,
                  container: Union[IContainerInterface, None] = None,

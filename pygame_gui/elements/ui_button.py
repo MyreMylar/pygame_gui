@@ -24,6 +24,7 @@ class UIButton(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+    :param allow_double_clicks: Enables double clicking on buttons which will generate a unique event.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
@@ -101,11 +102,11 @@ class UIButton(UIElement):
 
         self.rebuild_from_changed_theme_data()
 
-    def set_any_images_from_theme(self):
+    def set_any_images_from_theme(self) -> bool:
         """
         Grabs images for this button from the UI theme if any are set.
 
-        :return changed:
+        :return: True if any of the images have changed since last time they were set.
         """
 
         changed = False
@@ -174,7 +175,8 @@ class UIButton(UIElement):
         self.drawable_shape.set_active_state('hovered')
         self.hover_time = 0.0
 
-    def while_hovering(self, time_delta, mouse_pos):
+    def while_hovering(self, time_delta: float,
+                       mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Called while we are in the hover state. It will create a tool tip if we've been in the hover state for a while,
         the text exists to create one and we haven't created one already.
@@ -184,7 +186,7 @@ class UIButton(UIElement):
         """
         if self.tool_tip is None and self.tool_tip_text is not None and self.hover_time > self.tool_tip_delay:
             self.tool_tip = self.ui_manager.create_tool_tip(text=self.tool_tip_text,
-                                                            position=(mouse_pos.x, self.rect.centery),
+                                                            position=(mouse_pos[0], self.rect.centery),
                                                             hover_distance=(0, int(self.rect.height / 2)))
 
         self.hover_time += time_delta
@@ -199,7 +201,7 @@ class UIButton(UIElement):
             self.tool_tip.kill()
             self.tool_tip = None
 
-    def update(self, time_delta):
+    def update(self, time_delta: float):
         """
         Sets the pressed state for an update cycle if we've pressed this button recently.
 
@@ -220,10 +222,11 @@ class UIButton(UIElement):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Handles interactions with the button.
+        Handles various interactions with the button.
 
         :param event: The event to process.
-        :return bool: Returns True if we made use of this event.
+
+        :return bool: Return True if we want to consume this event so it is not passed on to the rest of the UI.
         """
         consumed_event = False
         if self.is_enabled:
@@ -269,7 +272,7 @@ class UIButton(UIElement):
 
         return consumed_event
 
-    def check_pressed(self):
+    def check_pressed(self) -> bool:
         """
         A direct way to check if this button has been pressed in the last update cycle.
 
@@ -333,7 +336,6 @@ class UIButton(UIElement):
             # recompute aligned_text_rect before rebuild
             self.drawable_shape.compute_aligned_text_rect()
             self.drawable_shape.redraw_all_states()
-            # self.set_image(self.drawable_shape.get_active_state_surface())
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """

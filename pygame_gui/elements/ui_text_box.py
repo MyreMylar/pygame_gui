@@ -46,7 +46,8 @@ class UITextBox(UIElement):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
 
-    def __init__(self, html_text: str,
+    def __init__(self,
+                 html_text: str,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  wrap_to_height: bool = False,
@@ -140,12 +141,13 @@ class UITextBox(UIElement):
         if self.formatted_text_block is not None:
             if self.wrap_to_height or self.rect[3] == -1:
                 final_text_area_size = self.formatted_text_block.final_dimensions
-                self.rect.size = [(final_text_area_size[0] + (self.padding[0] * 2) +
+                new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
                                    (2 * self.rounded_corner_offset)),
                                   (final_text_area_size[1] + (self.padding[1] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
-                                   (2 * self.rounded_corner_offset))]
+                                   (2 * self.rounded_corner_offset)))
+                self.set_dimensions(new_dimensions)
 
             elif self.formatted_text_block.final_dimensions[1] > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we have to display it.
@@ -175,7 +177,8 @@ class UITextBox(UIElement):
                                                       self.ui_container,
                                                       parent_element=self)
             else:
-                self.rect.size = [self.rect[2], self.rect[3]]
+                new_dimensions = (self.rect[2], self.rect[3])
+                self.set_dimensions(new_dimensions)
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
@@ -285,6 +288,10 @@ class UITextBox(UIElement):
             self.full_rebuild_countdown -= time_delta
 
     def on_fresh_drawable_shape_ready(self):
+        """
+        Called by an element's drawable shape when it has a new image surface ready for use, normally after a
+        rebuilding/redrawing of some kind.
+        """
         self.background_surf = self.drawable_shape.get_surface('normal')
         self.redraw_from_text_block()
 
@@ -324,28 +331,27 @@ class UITextBox(UIElement):
 
         :param dimensions: The new dimensions to set.
         """
-        self.rect.width = int(dimensions[0])
-        self.rect.height = int(dimensions[1])
-        self.relative_rect.size = self.rect.size
+        super().set_dimensions(dimensions)
 
         # Quick and dirty temporary scaling to cut down on number of full rebuilds triggered when rapid scaling
-        if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
-            new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
-            new_image.blit(self.image, (0, 0))
-            self.set_image(new_image)
+        if self.image is not None:
+            if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
+                new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
+                new_image.blit(self.image, (0, 0))
+                self.set_image(new_image)
 
-            if self.scroll_bar is not None:
-                self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
-                                                self.relative_rect.height -
-                                                (2 * self.border_width) - (2 * self.shadow_width)))
-                scroll_bar_position = (self.relative_rect.right - self.border_width -
-                                       self.shadow_width - self.scroll_bar_width,
-                                       self.relative_rect.top + self.border_width +
-                                       self.shadow_width)
-                self.scroll_bar.set_relative_position(scroll_bar_position)
+                if self.scroll_bar is not None:
+                    self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
+                                                    self.relative_rect.height -
+                                                    (2 * self.border_width) - (2 * self.shadow_width)))
+                    scroll_bar_position = (self.relative_rect.right - self.border_width -
+                                           self.shadow_width - self.scroll_bar_width,
+                                           self.relative_rect.top + self.border_width +
+                                           self.shadow_width)
+                    self.scroll_bar.set_relative_position(scroll_bar_position)
 
-        self.should_trigger_full_rebuild = True
-        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+            self.should_trigger_full_rebuild = True
+            self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
     def parse_html_into_style_data(self):
         """

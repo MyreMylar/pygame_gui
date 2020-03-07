@@ -22,19 +22,21 @@ class UIPanel(UIElement, IContainerInterface):
     above the fray.
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout guide for details.
+    :param starting_layer_height: How many layers above its container to place this panel on.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions between elements.
-    :param panel_container_margins: Margins indicating the distance between the edge of the panel and where it's container should begin.
-    :param container: The container this panel is inside of (by default the root container) distinct from this panel's container.
+    :param margins: Controls the distance between the edge of the panel and where it's container should begin.
+    :param container: The container this panel is inside of distinct from this panel's own container.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in theming and events.
-    :param object_id: An identifier that can be used to help distinguish this particular panel from others with the same hierarchy.
+    :param object_id: An identifier that can be used to help distinguish this particular panel from others.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to. Defaults to the top left.
     """
-    def __init__(self, relative_rect: Rect,
+    def __init__(self,
+                 relative_rect: Rect,
                  starting_layer_height: int,
                  manager: IUIManagerInterface,
                  *,
                  element_id: str = 'panel',
-                 panel_container_margins: Dict[str, int] = None,
+                 margins: Dict[str, int] = None,
                  container: Union[IContainerInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
@@ -62,13 +64,13 @@ class UIPanel(UIElement, IContainerInterface):
 
         self.rebuild_from_changed_theme_data()
 
-        if panel_container_margins is None:
+        if margins is None:
             self.container_margins = {'left': self.shadow_width + self.border_width,
                                       'right': self.shadow_width + self.border_width,
                                       'top': self.shadow_width + self.border_width,
                                       'bottom': self.shadow_width + self.border_width}
         else:
-            self.container_margins = panel_container_margins
+            self.container_margins = margins
 
         relative_container_rect = Rect(self.relative_rect.left + self.container_margins['left'],
                                        self.relative_rect.top + self.container_margins['top'],
@@ -140,12 +142,22 @@ class UIPanel(UIElement, IContainerInterface):
                                                         self.relative_rect.y + self.container_margins['top']))
 
     def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the relative rect position of an element.
+
+        :param position: The new position to set.
+        """
         super().set_relative_position(position)
 
         self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                     self.relative_rect.y + self.container_margins['top']))
 
     def set_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the absolute screen rect position of an element.
+
+        :param position: The new position to set.
+        """
         super().set_position(position)
 
         self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
