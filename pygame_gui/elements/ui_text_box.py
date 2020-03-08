@@ -331,27 +331,38 @@ class UITextBox(UIElement):
 
         :param dimensions: The new dimensions to set.
         """
-        super().set_dimensions(dimensions)
+        self.relative_rect.width = int(dimensions[0])
+        self.relative_rect.height = int(dimensions[1])
+        self.rect.size = self.relative_rect.size
 
-        # Quick and dirty temporary scaling to cut down on number of full rebuilds triggered when rapid scaling
-        if self.image is not None:
-            if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
-                new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
-                new_image.blit(self.image, (0, 0))
-                self.set_image(new_image)
+        if dimensions[0] >= 0 and dimensions[1] >= 0:
+            if self.relative_right_margin is not None:
+                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
 
-                if self.scroll_bar is not None:
-                    self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
-                                                    self.relative_rect.height -
-                                                    (2 * self.border_width) - (2 * self.shadow_width)))
-                    scroll_bar_position = (self.relative_rect.right - self.border_width -
-                                           self.shadow_width - self.scroll_bar_width,
-                                           self.relative_rect.top + self.border_width +
-                                           self.shadow_width)
-                    self.scroll_bar.set_relative_position(scroll_bar_position)
+            if self.relative_bottom_margin is not None:
+                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
 
-            self.should_trigger_full_rebuild = True
-            self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+            self._update_container_clip()
+
+            # Quick and dirty temporary scaling to cut down on number of full rebuilds triggered when rapid scaling
+            if self.image is not None:
+                if self.full_rebuild_countdown > 0.0 and (self.relative_rect.width > 0 and self.relative_rect.height > 0):
+                    new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
+                    new_image.blit(self.image, (0, 0))
+                    self.set_image(new_image)
+
+                    if self.scroll_bar is not None:
+                        self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
+                                                        self.relative_rect.height -
+                                                        (2 * self.border_width) - (2 * self.shadow_width)))
+                        scroll_bar_position = (self.relative_rect.right - self.border_width -
+                                               self.shadow_width - self.scroll_bar_width,
+                                               self.relative_rect.top + self.border_width +
+                                               self.shadow_width)
+                        self.scroll_bar.set_relative_position(scroll_bar_position)
+
+                self.should_trigger_full_rebuild = True
+                self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
     def parse_html_into_style_data(self):
         """
