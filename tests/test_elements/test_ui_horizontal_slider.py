@@ -164,3 +164,26 @@ class TestUIHorizontalSlider:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (195, 50)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.bottom == 60 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.right == 200 - (slider.shadow_width + slider.border_width)
+
+        slider.set_dimensions((100, 30))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (95, 15)}))
+        # if we successfully clicked on the moved slider then this button should be True
+        assert slider.right_button.held is True
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.bottom == 30 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.right == 100 - (slider.shadow_width + slider.border_width)
+
+        slider.set_dimensions((150, 45))
+
+        # try to click on the slider
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (145, 22)}))
+        # if we successfully clicked on the moved slider then this button should be True
+        assert slider.right_button.held is True
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.bottom == 45 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.right == 150 - (slider.shadow_width + slider.border_width)

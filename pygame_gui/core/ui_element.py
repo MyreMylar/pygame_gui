@@ -125,15 +125,12 @@ class UIElement(pygame.sprite.Sprite):
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
 
+        self.rect.left = new_left
+        self.rect.top = new_top
         new_height = new_bottom - new_top
         new_width = new_right - new_left
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
             self.set_dimensions((new_width, new_height))
-
-        self.rect.left = new_left
-        self.rect.right = new_right
-        self.rect.top = new_top
-        self.rect.bottom = new_bottom
 
     def _update_relative_rect_position_from_anchors(self):
         """
