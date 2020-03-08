@@ -316,6 +316,11 @@ class UISelectionList(UIElement):
         # window
         super().set_dimensions(dimensions)
 
+        border_and_shadow = self.border_width + self.shadow_width
+        container_width = self.relative_rect.width - (2 * border_and_shadow)
+        container_height = self.relative_rect.height - (2 * border_and_shadow)
+        self.list_and_scroll_bar_container.set_dimensions((container_width, container_height))
+
     def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the relative rect position of an element.
@@ -323,6 +328,22 @@ class UISelectionList(UIElement):
         :param position: The new position to set.
         """
         super().set_relative_position(position)
+        border_and_shadow = self.border_width + self.shadow_width
+        container_left = self.relative_rect.left + border_and_shadow
+        container_top = self.relative_rect.top + border_and_shadow
+        self.list_and_scroll_bar_container.set_relative_position((container_left, container_top))
+
+    def set_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this slider, updating all subordinate button elements at the same time.
+
+        :param position: The absolute screen position to set.
+        """
+        super().set_position(position)
+        border_and_shadow = self.border_width + self.shadow_width
+        container_left = self.relative_rect.left + border_and_shadow
+        container_top = self.relative_rect.top + border_and_shadow
+        self.list_and_scroll_bar_container.set_relative_position((container_left, container_top))
 
     def kill(self):
         """

@@ -268,6 +268,15 @@ class UIExpandedDropDownState:
         self.base_position_rect.width = self.drop_down_menu_ui.relative_rect.width - (2 * border_and_shadow)
         self.base_position_rect.height = self.drop_down_menu_ui.relative_rect.height - (2 * border_and_shadow)
 
+        if self.expand_direction is not None:
+            if self.expand_direction == 'up':
+                self.options_list_height = min(self.options_list_height, self.drop_down_menu_ui.expansion_height_limit)
+                self.option_list_y_pos = self.base_position_rect.top - self.options_list_height
+
+            elif self.expand_direction == 'down':
+                self.options_list_height = min(self.options_list_height, self.drop_down_menu_ui.expansion_height_limit)
+                self.option_list_y_pos = self.base_position_rect.bottom
+
         # update all the ui elements that depend on the base position rect
         self.selected_option_button.set_dimensions((self.base_position_rect.width - self.close_button_width,
                                                     self.base_position_rect.height))
@@ -275,6 +284,7 @@ class UIExpandedDropDownState:
         self.options_selection_list.set_dimensions(((self.drop_down_menu_ui.relative_rect.width -
                                                      self.close_button_width),
                                                     self.options_list_height))
+
         self.options_selection_list.set_relative_position((self.drop_down_menu_ui.relative_rect.left,
                                                            self.option_list_y_pos))
 
@@ -282,7 +292,7 @@ class UIExpandedDropDownState:
         self.close_button.set_dimensions((self.close_button_width, self.base_position_rect.height))
         self.close_button.set_relative_position((close_button_x, self.base_position_rect.y))
 
-        self.rebuild()
+        # self.rebuild()
 
     def on_fresh_drawable_shape_ready(self):
         """
