@@ -208,7 +208,7 @@ class UIColourPickerDialog(UIWindow):
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  *,
-                 initial_colour: pygame.Color = pygame.Color(0, 0, 0),
+                 initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "Colour Picker",
                  object_id: str = '#colour_picker_dialog'):
 
@@ -320,40 +320,18 @@ class UIColourPickerDialog(UIWindow):
                                                            'bottom': 'top'})
 
         mini_colour_surf = pygame.Surface((2, 2))
-        mini_colour_surf.fill(pygame.Color(0, 0, 0), pygame.Rect(0, 0, 1, 2))
-        mini_colour_surf.fill(pygame.Color(255, 255, 255), pygame.Rect(1, 1, 1, 1))
+        mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
+        mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
 
-        hue_colour = pygame.Color(255, 255, 255)
+        hue_colour = pygame.Color(255, 255, 255, 255)
         hue_colour.hsva = (int(self.hue_channel.current_value),
                            100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
         colour_square_surface = pygame.transform.smoothscale(mini_colour_surf, (200, 200))
-        self.colour_square = UIImage(pygame.Rect(20, 20, 200, 200),
-                                     image_surface=colour_square_surface,
-                                     manager=self.ui_manager,
-                                     container=self)
-
-    def update_saturation_value_square(self):
-        """
-        Updates the appearance of the big square that lets us visually pick the Saturation and Value of our current
-        Hue. This is done by drawing a very small 4x4 pixel square with a pattern like so:
-
-                   [black] [hue at max saturation & value)]
-                   [black] [white]
-
-        And then using the smoothscale transform to enlarge it so that the colours blend smoothly from one to the other.
-
-        #TODO: This also needs to be made to scale with the window.
-        """
-        mini_colour_surf = pygame.Surface((2, 2))
-        mini_colour_surf.fill(pygame.Color(0, 0, 0), pygame.Rect(0, 0, 1, 2))
-        mini_colour_surf.fill(pygame.Color(255, 255, 255), pygame.Rect(1, 1, 1, 1))
-
-        hue_colour = pygame.Color(255, 255, 255)
-        hue_colour.hsva = (int(self.hue_channel.current_value),
-                           100, 100, 100)
-        mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
-        self.colour_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
+        self.saturation_value_square = UIImage(pygame.Rect(20, 20, 200, 200),
+                                               image_surface=colour_square_surface,
+                                               manager=self.ui_manager,
+                                               container=self)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -399,18 +377,19 @@ class UIColourPickerDialog(UIWindow):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-            if self.colour_square.rect.collidepoint(scaled_mouse_pos):
-                relative_click_pos = [scaled_mouse_pos[0] - self.colour_square.rect.left,
-                                      scaled_mouse_pos[1] - self.colour_square.rect.top]
+            if self.saturation_value_square.rect.collidepoint(scaled_mouse_pos):
+                relative_click_pos = [scaled_mouse_pos[0] - self.saturation_value_square.rect.left,
+                                      scaled_mouse_pos[1] - self.saturation_value_square.rect.top]
                 # put in range 0 - 100 and reverse y
-                value = min(100, max(0, int((relative_click_pos[0] / self.colour_square.rect.width) * 100)))
-                saturation = min(100, max(0, 100 - int((relative_click_pos[1] / self.colour_square.rect.height) * 100)))
+                value = min(100, max(0, int((relative_click_pos[0] / self.saturation_value_square.rect.width) * 100)))
+                saturation = min(100, max(0, 100 - int((relative_click_pos[1] / self.saturation_value_square.rect.height) * 100)))
 
                 self.saturation_channel.set_value(saturation)
                 self.value_channel.set_value(value)
                 self.current_colour.hsva = (self.hue_channel.current_value,
                                             self.saturation_channel.current_value,
-                                            self.value_channel.current_value)
+                                            self.value_channel.current_value,
+                                            100)
                 self.changed_hsv_update_rgb()
                 self.update_current_colour_image()
 
@@ -425,6 +404,28 @@ class UIColourPickerDialog(UIWindow):
         current_colour_surface = pygame.Surface((64, 64))
         current_colour_surface.fill(self.current_colour)
         self.current_colour_image.set_image(current_colour_surface)
+
+    def update_saturation_value_square(self):
+        """
+        Updates the appearance of the big square that lets us visually pick the Saturation and Value of our current
+        Hue. This is done by drawing a very small 4x4 pixel square with a pattern like so:
+
+                   [black] [hue at max saturation & value)]
+                   [black] [white]
+
+        And then using the smoothscale transform to enlarge it so that the colours blend smoothly from one to the other.
+
+        #TODO: This also needs to be made to scale with the window.
+        """
+        mini_colour_surf = pygame.Surface((2, 2))
+        mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
+        mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
+
+        hue_colour = pygame.Color(255, 255, 255, 255)
+        hue_colour.hsva = (int(self.hue_channel.current_value),
+                           100, 100, 100)
+        mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
+        self.saturation_value_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
 
     def changed_hsv_update_rgb(self):
         """

@@ -43,6 +43,8 @@ class UIFileDialog(UIWindow):
         else:
             self.current_directory_path = abspath('.')
 
+        self.last_valid_path = None
+
         self.selected_file_path = None
 
         self.current_file_list = None  # type: Union[None, List[str]]
@@ -153,9 +155,11 @@ class UIFileDialog(UIWindow):
             files_on_path_tuples = [(f, '#file_list_item') for f in files_on_path]
 
             self.current_file_list = directories_on_path_tuples + files_on_path_tuples
-        except PermissionError:
-            self.current_directory_path = str(Path(self.current_directory_path).parent)
+        except (PermissionError, FileNotFoundError):
+            self.current_directory_path = self.last_valid_path
             self.update_current_file_list()
+        else:
+            self.last_valid_path = self.current_directory_path
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -206,7 +210,7 @@ class UIFileDialog(UIWindow):
                 self.update_current_file_list()
                 self.file_path_text_line.set_text(self.current_directory_path)
                 self.file_selection_list.set_item_list(self.current_file_list)
-            except FileNotFoundError:
+            except (PermissionError, FileNotFoundError):
                 pass
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED

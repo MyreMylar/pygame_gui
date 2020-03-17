@@ -17,7 +17,7 @@ class TestUIMessageWindow:
                         html_message="This is a <b>bold</b> test of the message box functionality.",
                         manager=default_ui_manager)
 
-    def test_update_close_button(self, _init_pygame, default_ui_manager):
+    def test_press_close_window_button(self, _init_pygame, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 200, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the message box functionality.",
@@ -28,11 +28,11 @@ class TestUIMessageWindow:
         close_button_x = message_window.close_window_button.rect.centerx
         close_button_y = message_window.close_window_button.rect.centery
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': pygame.BUTTON_LEFT,
                                                                                       'pos': (close_button_x,
                                                                                               close_button_y)}))
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': pygame.BUTTON_LEFT,
                                                                                     'pos': (close_button_x,
                                                                                             close_button_y)}))
         for event in pygame.event.get():
@@ -50,10 +50,10 @@ class TestUIMessageWindow:
 
         is_alive_pre_events = message_window.alive()
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
+                                                             {'button': pygame.BUTTON_LEFT,
                                                               'pos': message_window.dismiss_button.rect.center}))
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP,
-                                                             {'button': 1,
+                                                             {'button': pygame.BUTTON_LEFT,
                                                               'pos': message_window.dismiss_button.rect.center}))
         for event in pygame.event.get():
             default_ui_manager.process_events(event)

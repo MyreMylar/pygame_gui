@@ -20,6 +20,7 @@ class UIConfirmationDialog(UIWindow):
     :param blocking: Whether this window should block all other mouse interactions with the GUI until it is closed.
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#confirmation_dialog'.
     """
+
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  confirming_action_long_desc: str,
@@ -33,14 +34,14 @@ class UIConfirmationDialog(UIWindow):
                          window_display_title=window_title,
                          object_id=object_id)
 
-        self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                  text=confirming_action_short_name,
-                                  manager=self.ui_manager,
-                                  container=self,
-                                  anchors={'left': 'right',
-                                           'right': 'right',
-                                           'top': 'bottom',
-                                           'bottom': 'bottom'})
+        self.confirm_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
+                                       text=confirming_action_short_name,
+                                       manager=self.ui_manager,
+                                       container=self,
+                                       anchors={'left': 'right',
+                                                'right': 'right',
+                                                'top': 'bottom',
+                                                'bottom': 'bottom'})
 
         self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
                                       text='Cancel',
@@ -81,7 +82,7 @@ class UIConfirmationDialog(UIWindow):
             self.kill()
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.ok_button):
+                and event.ui_element == self.confirm_button):
             event_data = {'user_type': UI_CONFIRMATION_DIALOG_CONFIRMED,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
