@@ -3,8 +3,45 @@ import pytest
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
-from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
+from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape, DrawableShapeState, DrawableStateTransition
 from pygame_gui.ui_manager import UIManager
+
+
+class TestDrawableShapeState:
+    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+        DrawableShapeState('normal')
+
+    def test_get_surface(self, _init_pygame, default_ui_manager: UIManager):
+        normal_state = DrawableShapeState('normal')
+        selected_state = DrawableShapeState('selected')
+        states = {'normal': normal_state,
+                  'selected': selected_state}
+        assert isinstance(normal_state.get_surface(), pygame.Surface)
+
+        normal_state.transition = DrawableStateTransition(states=states,
+                                                          start_state_id='normal',
+                                                          target_state_id='selected',
+                                                          duration=0.8)
+
+        assert isinstance(normal_state.get_surface(), pygame.Surface)
+
+    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+        normal_state = DrawableShapeState('normal')
+        selected_state = DrawableShapeState('selected')
+        states = {'normal': normal_state,
+                  'selected': selected_state}
+
+        normal_state.transition = DrawableStateTransition(states=states,
+                                                          start_state_id='normal',
+                                                          target_state_id='selected',
+                                                          duration=0.8)
+        normal_state.update(0.1)
+
+        assert normal_state.has_fresh_surface
+
+        normal_state.update(0.9)
+
+        assert normal_state.transition is None
 
 
 class TestDrawableShape:
