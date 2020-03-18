@@ -199,8 +199,7 @@ class UILabel(UIElement):
 
         :param dimensions: The new dimensions to set.
         """
-        self.rect.width = int(dimensions[0])
-        self.rect.height = int(dimensions[1])
-        self.relative_rect.size = self.rect.size
+        super().set_dimensions(dimensions)
 
-        self.rebuild()
+        if dimensions[0] >= 0 and dimensions[1] >= 0:
+            self.rebuild()
