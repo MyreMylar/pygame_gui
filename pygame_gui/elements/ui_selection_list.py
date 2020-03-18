@@ -7,7 +7,7 @@ from pygame import Rect, USEREVENT
 from pygame.event import Event, post
 from pygame.math import Vector2
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -38,7 +38,7 @@ class UISelectionList(UIElement):
                  *,
                  allow_multi_select: bool = False,
                  allow_double_clicks: bool = True,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,

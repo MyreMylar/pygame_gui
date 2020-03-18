@@ -117,7 +117,7 @@ class UIAppearanceTheme:
         self._theme_file_last_modified = None
         self._theme_file_path = None
 
-        # Only load  the 'stringified' data if we can't find the actual default theme file
+        # Only load the 'stringified' data if we can't find the actual default theme file
         # This is need for PyInstaller build
         default_theme_file_path = os.path.normpath(os.path.join(module_root_path, 'data', 'default_theme.json'))
         self.load_default_theme_file(default_theme_file_path)
@@ -171,7 +171,7 @@ class UIAppearanceTheme:
 
     def reload_theming(self):
         """
-        We need to load our theme file see if anything expensive has changed, if so trigger it to reload/rebuild.
+        We need to load our theme file to see if anything expensive has changed, if so trigger it to reload/rebuild.
 
         """
         self.load_theme(self._theme_file_path)

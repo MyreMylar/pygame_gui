@@ -2,7 +2,7 @@ import pygame
 import warnings
 from typing import Union, Tuple, Dict
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import ColourGradient, UIElement
 
 
@@ -22,7 +22,7 @@ class UILabel(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

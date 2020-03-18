@@ -137,8 +137,7 @@ class UIFontDictionary:
         else:
             return self.loaded_fonts[self.default_font_id]
 
-    @staticmethod
-    def create_font_id(font_size: int, font_name: str, bold: bool, italic: bool) -> str:
+    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
 
@@ -148,6 +147,9 @@ class UIFontDictionary:
         :param italic: Whether the font is italic styled or not.
         :return str: The finished font id.
         """
+        if font_size <= 0:
+            font_size = self.default_font_size
+            warnings.warn("Font size less than or equal to 0", UserWarning)
         if bold and italic:
             font_style_string = "bold_italic"
         elif bold:

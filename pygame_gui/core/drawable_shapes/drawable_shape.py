@@ -119,7 +119,8 @@ class DrawableShape:
     :param states: Names for the different states the shape can be in, each may have different sets of colours & images.
     :param manager: The UI manager for this UI.
     """
-    def __init__(self, containing_rect: pygame.Rect,
+    def __init__(self,
+                 containing_rect: pygame.Rect,
                  theming_parameters: Dict,
                  states: List[str],
                  manager: IUIManagerInterface):
@@ -149,7 +150,7 @@ class DrawableShape:
             self.state_transition_times = {}
 
         self.ui_manager = manager
-        self.shape_cache = self.ui_manager.ui_theme.shape_cache
+        self.shape_cache = self.ui_manager.get_theme().shape_cache
 
         self.aligned_text_rect = None
         self.click_area_shape = None
@@ -191,20 +192,6 @@ class DrawableShape:
                                                                                self.active_state.state_id,
                                                                                duration,
                                                                                progress=progress_time)
-
-    def redraw_state(self, state_str: str):
-        """
-        This method is declared for derived classes to implement but has no default implementation.
-
-        :param state_str: The ID/name of the state to redraw.
-        """
-        pass
-
-    def clean_up_temp_shapes(self):
-        """
-        This method is declared for derived classes to implement but has no default implementation.
-        """
-        pass
 
     def update(self, time_delta: float):
         """
@@ -251,7 +238,11 @@ class DrawableShape:
         Aligns the text drawing position correctly according to our theming options.
 
         """
-        if 'text' not in self.theming or len(self.theming['text']) <= 0:
+        if ('text' not in self.theming or
+                len(self.theming['text']) <= 0 or
+                'font' not in self.theming or
+                'shadow_width' not in self.theming or
+                'border_width' not in self.theming):
             return
         # first we need to create rectangle the size of the text, if there is any text to draw
         self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
@@ -276,14 +267,6 @@ class DrawableShape:
             self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
                                         - self.theming['text_vert_alignment_padding'] -
                                         self.theming['shadow_width'] - self.theming['border_width'])
-
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        This method is declared for derived classes to implement but has no default implementation.
-
-        :param point: A point to collide with this shape.
-        """
-        pass
 
     def get_active_state_surface(self) -> pygame.Surface:
         """
@@ -327,22 +310,6 @@ class DrawableShape:
         :return: True if there is a freshly built surface waiting, False if the shape has not changed.
         """
         return self.active_state.has_fresh_surface
-
-    def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        This method is declared for derived classes to implement but has no default implementation.
-
-        :param point: A point to set this shapes position to.
-        """
-        pass
-
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        This method is declared for derived classes to implement but has no default implementation.
-
-        :param dimensions: The new dimensions for our shape.
-        """
-        pass
 
     @staticmethod
     def apply_colour_to_surface(colour: pygame.Color,
@@ -407,3 +374,41 @@ class DrawableShape:
 
             if text_surface is not None and self.aligned_text_rect is not None:
                 self.states[state_str].surface.blit(text_surface, self.aligned_text_rect)
+
+    def redraw_state(self, state_str: str):
+        """
+        This method is declared for derived classes to implement but has no default implementation.
+
+        :param state_str: The ID/name of the state to redraw.
+        """
+        pass
+
+    def clean_up_temp_shapes(self):
+        """
+        This method is declared for derived classes to implement but has no default implementation.
+        """
+        pass
+
+    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        This method is declared for derived classes to implement but has no default implementation.
+
+        :param point: A point to collide with this shape.
+        """
+        pass
+
+    def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        This method is declared for derived classes to implement but has no default implementation.
+
+        :param point: A point to set this shapes position to.
+        """
+        pass
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        This method is declared for derived classes to implement but has no default implementation.
+
+        :param dimensions: The new dimensions for our shape.
+        """
+        pass

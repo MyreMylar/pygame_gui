@@ -6,7 +6,7 @@ from typing import Union, Tuple, Dict
 
 import pygame_gui
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -52,7 +52,7 @@ class UITextBox(UIElement):
                  manager: IUIManagerInterface,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

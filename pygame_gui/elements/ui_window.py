@@ -3,14 +3,14 @@ from typing import Union, Tuple
 
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
 
-from pygame_gui.core.interfaces import IContainerInterface, IWindowInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IWindowInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
 
 
-class UIWindow(UIElement, IContainerInterface, IWindowInterface):
+class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     """
     A base class for window GUI elements, any windows should inherit from this class.
 

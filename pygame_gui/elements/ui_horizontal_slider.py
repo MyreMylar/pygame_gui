@@ -4,7 +4,7 @@ from typing import Union, Tuple, Dict
 
 import pygame_gui
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -29,7 +29,7 @@ class UIHorizontalSlider(UIElement):
                  start_value: Union[float, int],
                  value_range: Tuple[Union[float, int], Union[float, int]],
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None

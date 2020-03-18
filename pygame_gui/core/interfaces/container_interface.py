@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
 
-class IContainerInterface:
+class IContainerLikeInterface:
     """
         A meta class that defines the interface for containers used by elements.
 

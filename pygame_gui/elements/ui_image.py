@@ -1,7 +1,7 @@
 import pygame
 from typing import Union, Tuple, Dict
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 
 
@@ -21,7 +21,7 @@ class UIImage(UIElement):
                  relative_rect: pygame.Rect,
                  image_surface: pygame.Surface,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

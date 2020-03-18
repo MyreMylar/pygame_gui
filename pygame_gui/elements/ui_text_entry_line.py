@@ -5,7 +5,7 @@ from typing import Union, List, Tuple, Dict
 
 import pygame_gui
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 from pygame_gui.core import ColourGradient, UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -38,7 +38,7 @@ class UITextEntryLine(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

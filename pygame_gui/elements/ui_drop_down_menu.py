@@ -3,7 +3,7 @@ from typing import Union, List, Tuple, Dict
 
 import pygame_gui
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -38,7 +38,7 @@ class UIExpandedDropDownState:
                  close_button_width: int,
                  expand_direction: Union[str, None],
                  manager: IUIManagerInterface,
-                 container: IContainerInterface,
+                 container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
                  element_ids: Union[List[str], None]):
 
@@ -327,7 +327,7 @@ class UIClosedDropDownState:
                  open_button_width: int,
                  expand_direction: Union[str, None],
                  manager: IUIManagerInterface,
-                 container: IContainerInterface,
+                 container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
                  element_ids: Union[List[str], None]):
 
@@ -515,7 +515,7 @@ class UIDropDownMenu(UIElement):
                  starting_option: str,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  expansion_height_limit: Union[int, None] = None,

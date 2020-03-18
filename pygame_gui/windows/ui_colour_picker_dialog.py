@@ -3,7 +3,7 @@ from typing import Union, Tuple, Dict
 import pygame
 import pygame_gui
 
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
 from pygame_gui.core import UIElement, UIContainer
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage, UIHorizontalSlider, UILabel, UITextEntryLine
@@ -33,7 +33,7 @@ class UIColourChannelEditor(UIElement):
                  channel_index: int,
                  value_range: Tuple[int, int],
                  initial_value: int,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

@@ -2,7 +2,7 @@ import pygame
 import pygame_gui
 from typing import Union, Tuple, Dict
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape, RectDrawableShape
 
@@ -29,7 +29,7 @@ class UIButton(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,

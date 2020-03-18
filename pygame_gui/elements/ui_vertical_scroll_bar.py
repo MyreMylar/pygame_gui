@@ -2,7 +2,7 @@ import pygame
 
 from typing import Union, Tuple, Dict
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -26,7 +26,7 @@ class UIVerticalScrollBar(UIElement):
                  relative_rect: pygame.Rect,
                  visible_percentage: float,
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

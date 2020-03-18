@@ -1,7 +1,7 @@
 import pygame
 from typing import Union, Dict
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -33,7 +33,7 @@ class UIWorldSpaceHealthBar(UIElement):
                  relative_rect: pygame.Rect,
                  sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
                  manager: IUIManagerInterface,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):

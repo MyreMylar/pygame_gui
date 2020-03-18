@@ -5,12 +5,12 @@ from pygame.math import Vector2
 from pygame.event import Event
 from pygame.constants import MOUSEBUTTONDOWN
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
-class UIPanel(UIElement, IContainerInterface):
+class UIPanel(UIElement, IContainerLikeInterface):
     """
     A rectangular panel that holds a UI container and is designed to overlap other elements. It acts a little like a
     window that is not shuffled about in a stack - instead remaining at the same layer distance from the container
@@ -37,7 +37,7 @@ class UIPanel(UIElement, IContainerInterface):
                  *,
                  element_id: str = 'panel',
                  margins: Dict[str, int] = None,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None

@@ -22,6 +22,14 @@ class TestShadowGenerator:
                                                      corner_radius_param=20,
                                                      shadow_width_param=20) is None
 
+    def test_create_new_rectangle_shadow(self, _init_pygame):
+        generator = ShadowGenerator()
+        assert isinstance(generator.create_new_rectangle_shadow(50, 50, 1, 1), pygame.Surface)
+
+    def test_create_new_ellipse_shadow(self, _init_pygame):
+        generator = ShadowGenerator()
+        assert isinstance(generator.create_new_ellipse_shadow(50, 50, 1), pygame.Surface)
+
     def test_create_shadow_corners(self):
         generator = ShadowGenerator()
         with pytest.warns(UserWarning, match="Tried to make shadow with width <= 0"):

@@ -18,6 +18,18 @@ class TestWindowStack:
 
         assert len(stack.stack) == 1
 
+    def test_clear(self, _init_pygame, default_ui_manager):
+        stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, element_id='test_window')
+        stack.add_new_window(window)
+
+        assert len(stack.stack) == 1
+
+        stack.clear()
+
+        assert len(stack.stack) == 0
+
     def test_remove_window(self, _init_pygame, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",

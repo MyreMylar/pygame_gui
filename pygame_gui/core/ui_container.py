@@ -2,11 +2,11 @@ from typing import List, Union, Tuple, Dict
 
 import pygame
 
-from pygame_gui.core.interfaces import IContainerInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 
 
-class UIContainer(UIElement, IContainerInterface):
+class UIContainer(UIElement, IContainerLikeInterface):
     """
     A UI Container holds any number of other UI elements inside of a rectangle. When we move the UIContainer
     all the UI elements contained within it can be moved as well.
@@ -28,7 +28,7 @@ class UIContainer(UIElement, IContainerInterface):
                  *,
                  starting_height: int = 1,
                  is_window_root_container: bool = False,
-                 container: Union[IContainerInterface, None] = None,
+                 container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
                  anchors: Union[Dict[str, str], None] = None):
@@ -92,7 +92,7 @@ class UIContainer(UIElement, IContainerInterface):
         """
         max_element_top_layer = self._layer
         for element in self.elements:
-            if ((element not in self.ui_manager.ui_window_stack.stack) and
+            if ((element not in self.ui_manager.get_window_stack().stack) and
                 not (isinstance(element, UIContainer) and element.is_window_root_container) and
                     element.get_top_layer() > max_element_top_layer):
                 max_element_top_layer = element.get_top_layer()

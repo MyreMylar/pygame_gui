@@ -67,6 +67,10 @@ class TestUIAppearanceTheme:
         theme.check_need_to_reload()
         assert theme.check_need_to_reload() is False
 
+    def test_update_shape_cache(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        theme.update_shape_cache()
+
     def test_load_images_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme()
         theme.ui_element_image_paths['button'] = {'regular_path': {'changed': True, 'path': 'not_an_image.png'}}
