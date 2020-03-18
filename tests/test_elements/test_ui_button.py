@@ -1,8 +1,10 @@
 import os
 import pytest
 import pygame
+import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
+    _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_button import UIButton
@@ -209,6 +211,32 @@ class TestUIButton:
         button.update_containing_rect_position()
 
         assert button.rect.topleft == (60, 60)
+
+    def test_process_event_double_click(self, _init_pygame: None, default_ui_manager: UIManager,
+                                        _display_surface_return_none: None):
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          allow_double_clicks=True)
+
+        # process a mouse button down event
+        consumed_event_1 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                       {'button': pygame.BUTTON_LEFT,
+                                                                        'pos': button.rect.center}))
+
+        consumed_event_2 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                       {'button': pygame.BUTTON_LEFT,
+                                                                        'pos': button.rect.center}))
+
+        confirm_double_click_event_fired = False
+        for event in pygame.event.get():
+            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
+                    event.ui_element == button):
+                confirm_double_click_event_fired = True
+
+        assert consumed_event_1 and consumed_event_2
+        assert confirm_double_click_event_fired
 
     def test_process_event_mouse_button_down(self, _init_pygame: None, default_ui_manager: UIManager,
                                              _display_surface_return_none: None):
