@@ -1,6 +1,7 @@
 import os
 import pytest
 import pygame
+import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
@@ -70,6 +71,55 @@ class TestUIDropDownMenu:
         menu.update(0.01)
         assert menu.image is not None
 
+    def test_process_event(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+
+        # process a mouse button down event
+        menu.process_event(pygame.event.Event(pygame.USEREVENT,
+                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                                               'ui_element': menu.menu_states['closed'].open_button}))
+
+        assert menu.current_state.should_transition
+
+        menu.update(0.01)
+
+        assert not menu.current_state.should_transition
+
+        menu.process_event(pygame.event.Event(pygame.USEREVENT,
+                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                                               'ui_element': menu.menu_states['expanded'].close_button}))
+
+        assert menu.current_state.should_transition
+
+        menu.update(0.01)
+
+        assert not menu.current_state.should_transition
+
+        menu.process_event(pygame.event.Event(pygame.USEREVENT,
+                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                                               'ui_element': menu.menu_states['closed'].open_button}))
+
+        assert menu.current_state.should_transition
+
+        menu.update(0.01)
+
+        assert not menu.current_state.should_transition
+
+        menu.process_event(pygame.event.Event(pygame.USEREVENT,
+                                              {'user_type': pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
+                                               'ui_element': menu.menu_states['expanded'].options_selection_list}))
+
+        confirm_drop_down_changed_event_fired = False
+        for event in pygame.event.get():
+            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED and
+                    event.ui_element == menu):
+                confirm_drop_down_changed_event_fired = True
+
+        assert confirm_drop_down_changed_event_fired
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_drop_down_menu_non_default.json"))
@@ -103,6 +153,8 @@ class TestUIDropDownMenu:
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
                               manager=default_ui_manager)
+
+        menu.set_position((0, 0))
         menu.current_state.should_transition = True
         menu.update(0.01)
         menu.set_position((200, 200))
@@ -126,6 +178,12 @@ class TestUIDropDownMenu:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (260, 145)}))
 
         assert menu.rect.topleft == (250, 130) and menu.current_state.selected_option_button.held is True
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        menu.set_relative_position((50.0, 20.0))
+        assert menu.rect.topleft == (150, 120)
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -154,3 +212,20 @@ class TestUIDropDownMenu:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (290, 115)}))
         # if we successfully clicked on the moved menu then this button should be True
         assert menu.current_state.close_button.held is True
+
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+
+        assert not menu.on_fresh_drawable_shape_ready()
+
+    def test_hover_point(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+
+        assert not menu.hover_point(0, 0)
+        assert menu.hover_point(150, 115)
