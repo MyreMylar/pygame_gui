@@ -88,8 +88,8 @@ class UITextEntryLine(UIElement):
         self.cursor_blink_delay_after_moving = 1.0
         self.blink_cursor_time_acc = 0.0
         self.blink_cursor_time = 0.4
-        self.double_click_select_time = 0.4
-        self.double_click_select_time_acc = 0.0
+
+        self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
 
         self.start_text_offset = 0
         self.edit_position = 0
@@ -99,7 +99,6 @@ class UITextEntryLine(UIElement):
         self.cursor_on = False
         self.cursor_has_moved_recently = False
         self.should_redraw = False
-        self.double_click_started = False
 
         # restrictions on text input
         self.allowed_characters = None
@@ -340,8 +339,8 @@ class UITextEntryLine(UIElement):
 
         if not self.alive():
             return
-        if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
-            self.double_click_select_time_acc += time_delta
+        if self.double_click_timer < self.ui_manager.get_double_click_time():
+            self.double_click_timer += time_delta
         if self.selection_in_progress:
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             select_end_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset + mouse_x)
@@ -410,9 +409,7 @@ class UITextEntryLine(UIElement):
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                # TODO: make text line use same double click schema as buttons
-                if self.double_click_started and self.double_click_select_time_acc < self.double_click_select_time:
-                    self.double_click_started = False
+                if self.double_click_timer < self.ui_manager.get_double_click_time():
                     pattern = re.compile(r"[\w']+")
                     index = min(self.edit_position, len(self.text)-1)
                     if index > 0:
@@ -446,14 +443,13 @@ class UITextEntryLine(UIElement):
                         self.edit_position = end_select_index
                         self.cursor_has_moved_recently = True
                 else:
-                    self.double_click_started = True
                     self.edit_position = self.find_edit_position_from_pixel_pos(self.start_text_offset +
                                                                                 scaled_mouse_pos[0])
                     self.select_range[0] = self.edit_position
                     self.select_range[1] = self.edit_position
                     self.cursor_has_moved_recently = True
                     self.selection_in_progress = True
-                    self.double_click_select_time_acc = 0.0
+                    self.double_click_timer = 0.0
 
                 consumed_event = True
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -787,7 +783,7 @@ class UITextEntryLine(UIElement):
         Will allow us to change the width of the text entry line, but not it's height which is determined by the height
         of the font.
 
-        :param dimensions: Teh dimensions to set. Only the first, the width, will actually be used.
+        :param dimensions: The dimensions to set. Only the first, the width, will actually be used.
         """
         corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
         line_height = self.font.size(' ')[1]

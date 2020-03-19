@@ -282,6 +282,29 @@ class TestUITextEntryLine:
 
         assert processed_key_event and text_entry.get_text() == 'dan'
 
+    def test_process_event_ctrl_v_at_limit(self, _init_pygame: None, default_ui_manager: UIManager,
+                                             _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.focus()
+        text_entry.length_limit = 3
+        text_entry.select_range = [0, 3]
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'c'}))
+
+        text_entry.set_text('bob')
+        text_entry.focus()
+        text_entry.select_range = [0, 3]
+        text_entry.edit_position = 0
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
+                                                                           'unicode': 'v'}))
+
+        assert processed_key_event and text_entry.get_text() == 'dan'
+
     def test_process_event_ctrl_v_over_limit_select_range(self, _init_pygame: None, default_ui_manager: UIManager,
                                                           _display_surface_return_none: None):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -409,9 +432,11 @@ class TestUITextEntryLine:
 
         text_entry.set_text('dan is amazing')
         processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                           {'button': 1, 'pos': (15, 15)}))
+                                                                           {'button': pygame.BUTTON_LEFT,
+                                                                            'pos': (15, 15)}))
         processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                         {'button': 1, 'pos': (15, 15)}))
+                                                                         {'button': pygame.BUTTON_LEFT,
+                                                                          'pos': (15, 15)}))
 
         assert (processed_down_event and processed_up_event and text_entry.select_range == [0, 3])
 
