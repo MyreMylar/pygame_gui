@@ -147,12 +147,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         If this window is resizable, then the dimensions we set here will be the minimum that users can change the
         window to. They are also used as the minimum size when 'set_dimensions' is called.
 
-        TODO: check if current size is smaller than the minimum and, if so, re-size to the new minimum.
-
         :param dimensions: The new minimum dimension for the window.
         """
         self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
                                    min(self.ui_container.rect.height, int(dimensions[1])))
+
+        if (self.rect.width > self.minimum_dimensions[0]) or (self.rect.height > self.minimum_dimensions[1]):
+            self.set_dimensions(self.minimum_dimensions)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -215,12 +216,14 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if self.is_blocking and event.type == pygame.MOUSEBUTTONDOWN:
             consumed_event = True
 
-        if self is not None and event.type == pygame.MOUSEBUTTONDOWN and event.button in [1, 3]:
+        if self is not None and event.type == pygame.MOUSEBUTTONDOWN and event.button in [pygame.BUTTON_LEFT,
+                                                                                          pygame.BUTTON_MIDDLE,
+                                                                                          pygame.BUTTON_RIGHT]:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
-            if event.button == 1 and (self.edge_hovering[0] or self.edge_hovering[1] or
-                                      self.edge_hovering[2] or self.edge_hovering[3]):
+            if event.button == pygame.BUTTON_LEFT and (self.edge_hovering[0] or self.edge_hovering[1] or
+                                                       self.edge_hovering[2] or self.edge_hovering[3]):
                 self.resizing_mode_active = True
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
@@ -228,7 +231,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             elif self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
-        if self is not None and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.resizing_mode_active:
+        if (self is not None and event.type == pygame.MOUSEBUTTONUP and
+                event.button == pygame.BUTTON_LEFT and self.resizing_mode_active):
             self.resizing_mode_active = False
 
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
@@ -272,6 +276,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
         super().update(time_delta)
+
+        # This is needed to keep the window in sync with the container after adding elements to it
         if self._window_root_container.layer_thickness != self.layer_thickness:
             self.layer_thickness = self._window_root_container.layer_thickness
 
@@ -420,6 +426,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             if self._window_root_container is not None:
                 self._window_root_container.change_layer(new_layer)
 
+                if self._window_root_container.layer_thickness != self.layer_thickness:
+                    self.layer_thickness = self._window_root_container.layer_thickness
+
     def kill(self):
         """
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this window,
@@ -437,7 +446,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     def rebuild(self):
         """
-        Rebuilds the message window when the theme has changed.
+        Rebuilds the window when the theme has changed.
 
         """
         theming_parameters = {'normal_bg': self.background_colour,
