@@ -1,9 +1,11 @@
+import pygame
+
 from typing import Union, Dict, Tuple, List
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, UI_SELECTION_LIST_DROPPED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
-from pygame import Rect, USEREVENT
+from pygame import USEREVENT
 from pygame.event import Event, post
 from pygame.math import Vector2
 
@@ -32,7 +34,7 @@ class UISelectionList(UIElement):
     """
 
     def __init__(self,
-                 relative_rect: Rect,
+                 relative_rect: pygame.Rect,
                  item_list: Union[List[str], List[Tuple[str, str]]],
                  manager: IUIManagerInterface,
                  *,
@@ -58,6 +60,7 @@ class UISelectionList(UIElement):
                          anchors=anchors)
 
         self.item_list_container = None
+        self._raw_item_list = item_list
         self.item_list = []
         self.allow_multi_select = allow_multi_select
         self.allow_double_clicks = allow_double_clicks
@@ -77,20 +80,18 @@ class UISelectionList(UIElement):
         self.scroll_bar_width = 20
         self.current_scroll_bar_width = 0
 
-        self.rebuild_from_changed_theme_data()
-
         self.list_and_scroll_bar_container = UIContainer(
-            Rect(self.relative_rect.left + self.shadow_width + self.border_width,
-                 self.relative_rect.top + self.shadow_width + self.border_width,
-                 self.relative_rect.width - (2 * self.shadow_width) - (2 * self.border_width),
-                 self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width)),
+            pygame.Rect(self.relative_rect.left + self.shadow_width + self.border_width,
+                        self.relative_rect.top + self.shadow_width + self.border_width,
+                        self.relative_rect.width - (2 * self.shadow_width) - (2 * self.border_width),
+                        self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width)),
             manager=self.ui_manager,
             starting_height=starting_height,
             container=self.ui_container,
             parent_element=parent_element,
             object_id='#selection_list_container')
 
-        self.set_item_list(item_list)
+        self.rebuild_from_changed_theme_data()
 
     def get_single_selection(self) -> Union[str, None]:
         """
@@ -118,7 +119,7 @@ class UISelectionList(UIElement):
         if self.allow_multi_select:
             return [item['text'] for item in self.item_list if item['selected']]
         else:
-            raise ValueError('Requesting multi selection, from single-selection list')
+            raise RuntimeError('Requesting multi selection, from single-selection list')
 
     def update(self, time_delta: float):
         """
@@ -134,14 +135,17 @@ class UISelectionList(UIElement):
             list_height_adjustment = min(self.scroll_bar.start_percentage * self.total_height_of_list,
                                          self.lowest_list_pos)
             for index, item in enumerate(self.item_list):
-                new_height = (index * self.list_item_height) - list_height_adjustment
+                new_height = int((index * self.list_item_height) - list_height_adjustment)
                 if -self.list_item_height <= new_height <= self.item_list_container.relative_rect.height:
                     if item['button_element'] is not None:
                         item['button_element'].set_relative_position((0, new_height))
                     else:
-                        item['button_element'] = UIButton(relative_rect=Rect(0, new_height,
-                                                                             self.item_list_container.relative_rect.width,
-                                                                             self.list_item_height),
+                        button_rect = pygame.Rect(0,
+                                                  new_height,
+                                                  self.item_list_container.relative_rect.width,
+                                                  self.list_item_height)
+
+                        item['button_element'] = UIButton(relative_rect=button_rect,
                                                           text=item['text'],
                                                           manager=self.ui_manager,
                                                           parent_element=self,
@@ -160,6 +164,7 @@ class UISelectionList(UIElement):
                         item['button_element'] = None
 
     def set_item_list(self, new_item_list: Union[List[str], List[Tuple[str, str]]]):
+        self._raw_item_list = new_item_list
         self.item_list = []  # type: List[Dict]
         for new_item in new_item_list:
             if isinstance(new_item, str):
@@ -191,10 +196,10 @@ class UISelectionList(UIElement):
                 self.scroll_bar.set_visible_percentage(percentage_visible)
                 self.scroll_bar.start_percentage = 0
             else:
-                self.scroll_bar = UIVerticalScrollBar(Rect(-self.scroll_bar_width,
-                                                           0,
-                                                           self.scroll_bar_width,
-                                                           inner_visible_area_height),
+                self.scroll_bar = UIVerticalScrollBar(pygame.Rect(-self.scroll_bar_width,
+                                                                  0,
+                                                                  self.scroll_bar_width,
+                                                                  inner_visible_area_height),
                                                       visible_percentage=percentage_visible,
                                                       manager=self.ui_manager,
                                                       parent_element=self,
@@ -219,9 +224,9 @@ class UISelectionList(UIElement):
                                                          self.list_and_scroll_bar_container.relative_rect.height))
         else:
             self.item_list_container = UIContainer(
-                Rect(0, 0,
-                     self.list_and_scroll_bar_container.relative_rect.width - self.current_scroll_bar_width,
-                     self.list_and_scroll_bar_container.relative_rect.height),
+                pygame.Rect(0, 0,
+                            self.list_and_scroll_bar_container.relative_rect.width - self.current_scroll_bar_width,
+                            self.list_and_scroll_bar_container.relative_rect.height),
                 manager=self.ui_manager,
                 starting_height=0,
                 parent_element=self,
@@ -234,9 +239,10 @@ class UISelectionList(UIElement):
         item_y_height = 0
         for item in self.item_list:
             if item_y_height <= self.item_list_container.relative_rect.height:
-                item['button_element'] = UIButton(relative_rect=Rect(0, item_y_height,
-                                                                     self.item_list_container.relative_rect.width,
-                                                                     self.list_item_height),
+                button_rect = pygame.Rect(0, item_y_height,
+                                          self.item_list_container.relative_rect.width,
+                                          self.list_item_height)
+                item['button_element'] = UIButton(relative_rect=button_rect,
                                                   text=item['text'],
                                                   manager=self.ui_manager,
                                                   parent_element=self,
@@ -440,3 +446,5 @@ class UISelectionList(UIElement):
                                                         ['normal'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+        self.set_item_list(self._raw_item_list)
