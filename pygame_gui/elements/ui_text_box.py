@@ -136,10 +136,12 @@ class UITextBox(UIElement):
                                        (self.shadow_width * 2) - (2 * self.rounded_corner_offset)))]
         if self.wrap_to_height or self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
+        if self.rect[2] == -1:
+            self.text_wrap_rect[2] = -1
 
         self.parse_html_into_style_data()  # This gives us the height of the text at the 'width' of the text_wrap_area
         if self.formatted_text_block is not None:
-            if self.wrap_to_height or self.rect[3] == -1:
+            if self.wrap_to_height or self.rect[3] == -1 or self.rect[2] == -1:
                 final_text_area_size = self.formatted_text_block.final_dimensions
                 new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +

@@ -20,15 +20,15 @@ class TestUITextBox:
                              manager=default_ui_manager)
         assert text_box.image is not None
 
-    # def test_creation_grow_to_fit_width(self, _init_pygame: None, default_ui_manager: UIManager):
-    #     default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-    #                                       {"name": "fira_code", "size:": 14, "style": "italic"}])
-    #     text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
-    #                                    "<i>styles</i>. Hey hey hey, what is this? More text padding this out a little."
-    #                                    "Well OK.",
-    #                          relative_rect=pygame.Rect(100, 100, -1, 50),
-    #                          manager=default_ui_manager)
-    #     assert text_box.image is not None
+    def test_creation_grow_to_fit_width(self, _init_pygame: None, default_ui_manager: UIManager):
+        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                                       "<i>styles</i>. Hey hey hey, what is this? More text padding this out a little."
+                                       "Well OK.",
+                             relative_rect=pygame.Rect(100, 100, -1, 50),
+                             manager=default_ui_manager)
+        assert text_box.image is not None
 
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
@@ -97,6 +97,84 @@ class TestUITextBox:
                                  manager=default_ui_manager)
 
         assert text_box.image is not None
+
+    def test_kill(self, _init_pygame: None, default_ui_manager: UIManager):
+        default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
+                                          {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
+                                          {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
+                                          {'name': 'fira_code', 'html_size': 2, 'style': 'italic'},
+                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold'},
+                                          {'name': 'fira_code', 'html_size': 6, 'style': 'regular'},
+                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold_italic'},
+                                          {'name': 'fira_code', 'html_size': 4, 'style': 'bold'},
+                                          {'name': 'fira_code', 'html_size': 4, 'style': 'italic'},
+                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
+                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
+        text_box = UITextBox(html_text=''
+                             '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
+                             'ipsum dolor sit amet</b></font>,'
+                             ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
+                             'rub a la clob slip the perry tin fo glorp yip dorp'
+                             'skorp si pork flum de dum be dung, slob be robble glurp destination flum kin slum. '
+                             'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
+                             'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>Vestibulum'
+                             '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere ullamcorper '
+                             'sem pulvinar.'
+                             'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>tellus a'
+                             'tortor. a<br>'
+                             'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                             'In hac a habitasse to platea dictumst.<br>'
+                             '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                             'accumsan, lectus at '
+                             'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                             'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                             'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                             'sollicitudin.</font></font>'
+                             '<br><br>'
+                             '<b>consectetur</b> adipiscing elit. in a<br>'
+                             'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                             'Vestibulum <font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, '
+                             'posuere ullamcorper sem pulvinar. '
+                             'Nulla at pulvinar a odio, a dictum dolor.<br>'
+                             'Maecenas at <font size=6><b>tellus a tortor. a<br>'
+                             'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                             'In hac a habitasse to platea dictumst.<br>'
+                             '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                             'accumsan, lectus at'
+                             'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                             'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                             'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                             'sollicitudin.</font></font>',
+                             relative_rect=pygame.Rect(100, 100, 200, 300),
+                             manager=default_ui_manager)
+
+        assert len(default_ui_manager.get_root_container().elements) == 3
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 7
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
+                                                                   text_box,
+                                                                   text_box.scroll_bar,
+                                                                   text_box.scroll_bar.button_container,
+                                                                   text_box.scroll_bar.top_button,
+                                                                   text_box.scroll_bar.bottom_button,
+                                                                   text_box.scroll_bar.sliding_button]
+        text_box.kill()
+        assert len(default_ui_manager.get_root_container().elements) == 0
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 1
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
+
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame: None, default_ui_manager: UIManager):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                      'LLALAALALA ALALA ALAL ALA'
+                                      'LAALA ALALA ALALA AAaal aa'
+                                      'ALALAa laalal alalal alala'
+                                      'alalalala alalalalalal alal'
+                                      'alalalala alala alalala ala'
+                                      'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(100, 100, 100, 100),
+                             manager=default_ui_manager)
+        text_box.on_fresh_drawable_shape_ready()
+
+        assert text_box.background_surf is not None
 
     def test_set_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
