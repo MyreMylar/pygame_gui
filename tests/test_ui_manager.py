@@ -9,6 +9,7 @@ from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.windows.ui_message_window import UIMessageWindow
+from pygame_gui.elements.ui_window import UIWindow
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 
@@ -106,6 +107,78 @@ class TestUIManager:
         default_ui_manager.update(0.01)
 
         assert long_term_cache_size_after_update > starting_long_term_cache_size
+
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, element_id='test_window',
+                          resizable=True)
+
+        default_ui_manager.mouse_position = window.rect.topleft
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[0]
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xy']
+
+        default_ui_manager.mouse_position = window.rect.topright
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[2]
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yx']
+
+        default_ui_manager.mouse_position = window.rect.midleft
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[0]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xl']
+
+        default_ui_manager.mouse_position = window.rect.midright
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[2]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xr']
+
+        default_ui_manager.mouse_position = window.rect.midtop
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yt']
+
+        default_ui_manager.mouse_position = window.rect.midbottom
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[3]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yb']
+
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.active_user_cursor
 
     def test_draw_ui(self, _init_pygame):
         """
