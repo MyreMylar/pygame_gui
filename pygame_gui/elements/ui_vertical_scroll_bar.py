@@ -81,18 +81,18 @@ class UIVerticalScrollBar(UIElement):
 
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
         self.sliding_button = UIButton(pygame.Rect((int(self.sliding_rect_position[0]),
-                                                              int(self.sliding_rect_position[1])),
-                                                             (self.background_rect.width,
-                                                              scroll_bar_height)),
-                                                 '', self.ui_manager,
-                                                 container=self.button_container,
-                                                 starting_height=1,
-                                                 parent_element=self,
-                                                 object_id="#sliding_button",
-                                                 anchors={'left': 'left',
-                                                          'right': 'right',
-                                                          'top': 'top',
-                                                          'bottom': 'top'})
+                                                    int(self.sliding_rect_position[1])),
+                                                   (self.background_rect.width,
+                                                    scroll_bar_height)),
+                                       '', self.ui_manager,
+                                       container=self.button_container,
+                                       starting_height=1,
+                                       parent_element=self,
+                                       object_id="#sliding_button",
+                                       anchors={'left': 'left',
+                                                'right': 'right',
+                                                'top': 'top',
+                                                'bottom': 'top'})
 
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 
@@ -137,32 +137,32 @@ class UIVerticalScrollBar(UIElement):
 
             if self.top_button is None:
                 self.top_button = UIButton(pygame.Rect((0, 0),
-                                                                 (self.background_rect.width,
-                                                                  self.arrow_button_height)),
-                                                     '▲', self.ui_manager,
-                                                     container=self.button_container,
-                                                     starting_height=1,
-                                                     parent_element=self,
-                                                     object_id="#top_button",
-                                                     anchors={'left': 'left',
-                                                              'right': 'right',
-                                                              'top': 'top',
-                                                              'bottom': 'top'}
-                                                     )
+                                                       (self.background_rect.width,
+                                                        self.arrow_button_height)),
+                                           '▲', self.ui_manager,
+                                           container=self.button_container,
+                                           starting_height=1,
+                                           parent_element=self,
+                                           object_id="#top_button",
+                                           anchors={'left': 'left',
+                                                    'right': 'right',
+                                                    'top': 'top',
+                                                    'bottom': 'top'}
+                                           )
 
             if self.bottom_button is None:
                 self.bottom_button = UIButton(pygame.Rect((0, -self.arrow_button_height),
-                                                                    (self.background_rect.width,
-                                                                     self.arrow_button_height)),
-                                                        '▼', self.ui_manager,
-                                                        container=self.button_container,
-                                                        starting_height=1,
-                                                        parent_element=self,
-                                                        object_id="#bottom_button",
-                                                        anchors={'left': 'left',
-                                                                 'right': 'right',
-                                                                 'top': 'bottom',
-                                                                 'bottom': 'bottom'})
+                                                          (self.background_rect.width,
+                                                           self.arrow_button_height)),
+                                              '▼', self.ui_manager,
+                                              container=self.button_container,
+                                              starting_height=1,
+                                              parent_element=self,
+                                              object_id="#bottom_button",
+                                              anchors={'left': 'left',
+                                                       'right': 'right',
+                                                       'top': 'bottom',
+                                                       'bottom': 'bottom'})
         else:
             self.arrow_button_height = 0
             if self.top_button is not None:
@@ -336,18 +336,18 @@ class UIVerticalScrollBar(UIElement):
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
         self.sliding_button = UIButton(pygame.Rect(int(x_pos),
-                                                             int(y_pos),
-                                                             self.background_rect.width,
-                                                             scroll_bar_height),
-                                                 '', self.ui_manager,
-                                                 container=self.button_container,
-                                                 starting_height=1,
-                                                 parent_element=self,
-                                                 object_id="#sliding_button",
-                                                 anchors={'left': 'left',
-                                                          'right': 'right',
-                                                          'top': 'top',
-                                                          'bottom': 'top'})
+                                                   int(y_pos),
+                                                   self.background_rect.width,
+                                                   scroll_bar_height),
+                                       '', self.ui_manager,
+                                       container=self.button_container,
+                                       starting_height=1,
+                                       parent_element=self,
+                                       object_id="#sliding_button",
+                                       anchors={'left': 'left',
+                                                'right': 'right',
+                                                'top': 'top',
+                                                'bottom': 'top'})
 
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 

@@ -2,11 +2,13 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
+    _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.interfaces import IUIManagerInterface
 
 
 class TestUIVerticalScrollBar:
@@ -72,6 +74,13 @@ class TestUIVerticalScrollBar:
         scroll_bar.redraw_scrollbar()
         assert scroll_bar.sliding_button is not None
 
+    def test_reset_scroll_position(self, _init_pygame, default_ui_manager):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
+                                         visible_percentage=0.7,
+                                         manager=default_ui_manager)
+        scroll_bar.reset_scroll_position()
+        assert scroll_bar.scroll_position == 0.0 and scroll_bar.start_percentage == 0.0
+
     def test_set_visible_percentage(self, _init_pygame, default_ui_manager):
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                          visible_percentage=0.7,
@@ -86,15 +95,23 @@ class TestUIVerticalScrollBar:
         scroll_bar.set_visible_percentage(1.9)
         assert scroll_bar.visible_percentage == 1.0
 
-    def test_kill(self, _init_pygame, default_ui_manager):
+    def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                          visible_percentage=0.7,
                                          manager=default_ui_manager)
 
-        # should kill everything
+        assert len(default_ui_manager.get_root_container().elements) == 2
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 6
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
+                                                                   scroll_bar,
+                                                                   scroll_bar.button_container,
+                                                                   scroll_bar.top_button,
+                                                                   scroll_bar.bottom_button,
+                                                                   scroll_bar.sliding_button]
         scroll_bar.kill()
-
-        assert scroll_bar.alive() is False and scroll_bar.sliding_button.alive() is False
+        assert len(default_ui_manager.get_root_container().elements) == 0
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 1
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
 
     def test_process_event(self, _init_pygame, default_ui_manager):
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
@@ -181,4 +198,3 @@ class TestUIVerticalScrollBar:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (40, 195)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert scroll_bar.bottom_button.held is True
-
