@@ -1,3 +1,5 @@
+import pygame
+
 from typing import Union, Dict, Tuple
 
 from pygame import Rect
@@ -104,7 +106,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :return bool: Should return True if this element makes use of this event.
         """
         consumed_event = False
-        if self is not None and event.type == MOUSEBUTTONDOWN and event.button in [1, 3]:
+        if self is not None and event.type == MOUSEBUTTONDOWN and event.button in [pygame.BUTTON_LEFT,
+                                                                                   pygame.BUTTON_RIGHT,
+                                                                                   pygame.BUTTON_MIDDLE]:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
@@ -120,6 +124,14 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :return UIContainer: The panel's container.
         """
         return self.panel_container
+
+    def kill(self):
+        """
+        Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this panel.
+
+        """
+        self.get_container().kill()
+        super().kill()
 
     def set_dimensions(self, dimensions: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -162,14 +174,6 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
                                                     self.relative_rect.y + self.container_margins['top']))
-
-    def kill(self):
-        """
-        Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this panel.
-
-        """
-        self.get_container().kill()
-        super().kill()
 
     def rebuild_from_changed_theme_data(self):
         """

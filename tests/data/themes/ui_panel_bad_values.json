@@ -1,0 +1,25 @@
+{
+    "panel":
+    {
+        "colours":
+        {
+            "normal_border": "dog",
+            "dark_bg": "flipping"
+        },
+        "misc":
+        {
+            "shape": "4",
+            "shape_corner_radius": "10.6666",
+            "border_width": "4.99",
+            "shadow_width": "potato"
+        },
+        "images":
+        {
+            "background_image":
+            {
+                "path": "99999",
+                "sub_surface_rect": "nutsford_city_limits"
+            }
+        }
+    }
+}

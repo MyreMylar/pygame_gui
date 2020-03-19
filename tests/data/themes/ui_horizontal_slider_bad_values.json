@@ -3,7 +3,7 @@
     {
         "colours":
          {
-             "border": "horse",
+             "normal_border": "horse",
              "dark_bg": "patrol"
          },
          "misc":

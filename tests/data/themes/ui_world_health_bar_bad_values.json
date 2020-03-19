@@ -3,7 +3,7 @@
     {
         "colours":
          {
-             "border": "black",
+             "normal_border": "black",
              "filled_bar": "#f4251b,#FF0000AA,90",
              "unfilled_bar": "slipper"
          },
