@@ -7,24 +7,44 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
 from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.interfaces import IUIManagerInterface
 
 
 class TestUIHorizontalSlider:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
         assert scroll_bar.image is not None
 
-    def test_rebuild(self, _init_pygame, default_ui_manager):
+    def test_rebuild(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                         start_value=50,
                                         value_range=(0, 100),
                                         manager=default_ui_manager)
         scroll_bar.rebuild()
         assert scroll_bar.image is not None
+
+    def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                        start_value=50,
+                                        value_range=(0, 100),
+                                        manager=default_ui_manager)
+
+        assert len(default_ui_manager.get_root_container().elements) == 2
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 6
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
+                                                                   scroll_bar,
+                                                                   scroll_bar.button_container,
+                                                                   scroll_bar.left_button,
+                                                                   scroll_bar.right_button,
+                                                                   scroll_bar.sliding_button]
+        scroll_bar.kill()
+        assert len(default_ui_manager.get_root_container().elements) == 0
+        assert len(default_ui_manager.get_sprite_group().sprites()) == 1
+        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
 
     def test_check_has_moved_recently(self, _init_pygame, default_ui_manager):
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -70,17 +90,6 @@ class TestUIHorizontalSlider:
         scroll_bar.update(0.3)
 
         assert scroll_bar.grabbed_slider is False
-
-    def test_kill(self, _init_pygame, default_ui_manager):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
-
-        # should kill everything
-        scroll_bar.kill()
-
-        assert scroll_bar.alive() is False and scroll_bar.sliding_button.alive() is False
 
     def test_get_current_value(self, _init_pygame, default_ui_manager):
         scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
