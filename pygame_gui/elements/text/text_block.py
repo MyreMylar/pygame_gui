@@ -265,6 +265,8 @@ class TextBlock:
             text_line.max_line_ascent = max_line_ascent
             self.lines.append(text_line)
 
+            if position[0] > max_line_length:
+                max_line_length = position[0]
             position[0] = 0
             position[1] += max_line_char_height
             line_height_acc += max_line_char_height
