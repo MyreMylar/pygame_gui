@@ -8,7 +8,8 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from pygame_gui.core.ui_container import UIContainer
 
-from pygame_gui.core.utility import clipboard_paste
+from pygame_gui.core.utility import clipboard_paste, clipboard_copy
+
 
 
 class TestUITextEntryLine:
@@ -238,6 +239,7 @@ class TestUITextEntryLine:
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
                                                                      'unicode': 'c'}))
         text_entry.select_range = [0, 0]
+        text_entry.edit_position = 3
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'v'}))
@@ -249,18 +251,15 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
+        clipboard_copy('')
         text_entry.set_text('dan')
         text_entry.focus()
-        text_entry.select_range = [0, 0]
-
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c, 'mod': pygame.KMOD_CTRL,
-                                                                     'unicode': 'c'}))
         text_entry.select_range = [0, 0]
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_v, 'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'v'}))
 
-        assert processed_key_event and text_entry.get_text() == 'danan'
+        assert processed_key_event and text_entry.get_text() == 'dan'
 
     def test_process_event_ctrl_v_over_limit(self, _init_pygame: None, default_ui_manager: UIManager,
                                              _display_surface_return_none: None):
