@@ -127,6 +127,19 @@ class TestUIHorizontalSlider:
                                         manager=manager)
         assert scroll_bar.image is not None
 
+    def test_rebuild_from_theme_data_no_arrow_buttons(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_horizontal_slider_no_arrows.json"))
+
+        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                        start_value=50,
+                                        value_range=(0, 100),
+                                        manager=manager)
+
+        assert scroll_bar.left_button is None
+        assert scroll_bar.right_button is None
+        assert scroll_bar.image is not None
+
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame):

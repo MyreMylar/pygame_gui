@@ -137,6 +137,18 @@ class TestUIVerticalScrollBar:
                                          manager=manager)
         assert scroll_bar.image is not None
 
+    def test_rebuild_from_theme_data_no_arrow_buttons(self, _init_pygame):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_vertical_scroll_bar_no_arrows.json"))
+
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
+                                         visible_percentage=0.1,
+                                         manager=manager)
+
+        assert scroll_bar.top_button is None
+        assert scroll_bar.bottom_button is None
+        assert scroll_bar.image is not None
+
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame):

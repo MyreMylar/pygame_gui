@@ -10,9 +10,9 @@
          {
              "shape": "rounded_rectangle",
              "shape_corner_radius": "6",
-             "border_width": "0",
-             "shadow_width": "3",
-             "sliding_button_width": "15"
+             "border_width": "2",
+             "shadow_width": "2",
+             "enable_arrow_buttons": "0"
          }
     }
 }
