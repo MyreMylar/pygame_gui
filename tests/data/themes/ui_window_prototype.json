@@ -1,0 +1,37 @@
+{
+
+    "#prototype_theming":
+    {
+        "colours":
+        {
+            "normal_border": "#AAAAAA,#FFFFFF,0",
+            "dark_bg": "#f4251b,#FF0000AA,90"
+        },
+        "misc":
+        {
+            "shape": "rounded_rectangle",
+            "border_width": "2",
+            "shadow_width": "1"
+        }
+    },
+    "window":
+    {
+        "prototype": "#prototype_theming",
+
+        "misc":
+        {
+            "shape_corner_radius": "10",
+            "enable_close_button": "0",
+            "title_bar_height": "22"
+        }
+    },
+    "window.button":
+    {
+        "prototype": "#prototype_theming",
+
+        "misc":
+        {
+            "shape_corner_radius": "4"
+        }
+    }
+}

@@ -332,6 +332,31 @@ class TestUIWindow:
 
         assert window.image is not None
 
+    def test_using_theme_prototype(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_window_prototype.json"))
+        window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
+                          manager=manager)
+
+        button_rect = pygame.Rect(0, 0, 150, 30)
+        button_rect.topright = (-10, 10)
+        button = UIButton(relative_rect=button_rect,
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=manager,
+                          container=window,
+                          anchors={'left': 'right',
+                                   'right': 'right',
+                                   'top': 'top',
+                                   'bottom': 'top'})
+
+        assert window.image is not None
+        assert window.shadow_width == 1
+        assert window.border_width == 2
+        assert window.shape_corner_radius == 10
+        assert button.shadow_width == 1
+        assert button.border_width == 2
+        assert button.shape_corner_radius == 4
+
     def test_rebuild_from_changed_theme_data_no_title_bar(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_window_no_title_bar.json"))
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
