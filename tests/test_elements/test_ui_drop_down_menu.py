@@ -307,3 +307,33 @@ class TestUIDropDownMenu:
         menu.update(0.01)
 
         assert menu.current_state.options_selection_list.rect.height == 53  # cropped to container size by default
+
+    def test_select_option_from_drop_down(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300), manager=default_ui_manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.selected_option == 'eggs'
+        flour_button = menu.current_state.options_selection_list.item_list_container.elements[1]
+
+        flour_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                      {'button': pygame.BUTTON_LEFT,
+                                                       'pos': flour_button.rect.center}))
+
+        flour_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                      {'button': pygame.BUTTON_LEFT,
+                                                       'pos': flour_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert menu.selected_option == 'flour'
