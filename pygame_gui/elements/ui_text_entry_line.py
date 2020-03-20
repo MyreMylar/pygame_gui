@@ -181,7 +181,7 @@ class UITextEntryLine(UIElement):
                 within_length_limit = False
             if within_length_limit:
                 self.text = text
-                self.edit_position = len(self.text)
+                self.edit_position = 0
                 self.should_redraw = True
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
@@ -382,6 +382,8 @@ class UITextEntryLine(UIElement):
         self.focused = False
         pygame.key.set_repeat()
         self.select_range = [0, 0]
+        self.edit_position = 0
+        self.cursor_on = False
         self.redraw()
 
     def focus(self):
@@ -405,7 +407,7 @@ class UITextEntryLine(UIElement):
         :return bool: Returns True if we've done something with the input event.
         """
         consumed_event = False
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
@@ -442,6 +444,7 @@ class UITextEntryLine(UIElement):
                         self.select_range[1] = end_select_index
                         self.edit_position = end_select_index
                         self.cursor_has_moved_recently = True
+                        self.selection_in_progress = False
                 else:
                     self.edit_position = self.find_edit_position_from_pixel_pos(self.start_text_offset +
                                                                                 scaled_mouse_pos[0])
@@ -452,7 +455,7 @@ class UITextEntryLine(UIElement):
                     self.double_click_timer = 0.0
 
                 consumed_event = True
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONUP and event.button == pygame.BUTTON_LEFT and self.selection_in_progress:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.drawable_shape.collide_point(scaled_mouse_pos):
