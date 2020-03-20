@@ -32,7 +32,10 @@ class UIConfirmationDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         object_id=object_id)
+                         object_id=object_id,
+                         resizable=True)
+
+        self.set_minimum_dimensions((260, 200))
 
         self.confirm_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
                                        text=confirming_action_short_name,

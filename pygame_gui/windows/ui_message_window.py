@@ -25,7 +25,8 @@ class UIMessageWindow(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         object_id=object_id)
+                         object_id=object_id,
+                         resizable=True)
 
         self.set_minimum_dimensions((250, 250))
 
@@ -33,11 +34,12 @@ class UIMessageWindow(UIWindow):
         self.text_block = None
 
         button_size = (70, 20)
-        bottom_right_margin = (20, 20)
-        button_vertical_space = bottom_right_margin[1] + button_size[1]
-        self.dismiss_button = UIButton(relative_rect=pygame.Rect((-bottom_right_margin[0] - button_size[0],
-                                                                  -bottom_right_margin[1] - button_size[1]),
-                                                                 button_size),
+        button_spacing = 10
+        button_vertical_space = (button_spacing * 2) + button_size[1]
+
+        dismiss_button_rect = pygame.Rect((0, 0), button_size)
+        dismiss_button_rect.bottomright = (-button_spacing, -button_spacing)
+        self.dismiss_button = UIButton(relative_rect=dismiss_button_rect,
                                        text="Dismiss",
                                        manager=manager,
                                        container=self,

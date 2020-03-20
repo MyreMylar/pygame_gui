@@ -53,9 +53,9 @@ class TestUIWindow:
 
         assert window.rect.size == (200, 200)
 
-        window.set_minimum_dimensions((100, 100))
+        window.set_minimum_dimensions((250, 250))
 
-        assert window.rect.size == (100, 100)
+        assert window.rect.size == (250, 250)
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",

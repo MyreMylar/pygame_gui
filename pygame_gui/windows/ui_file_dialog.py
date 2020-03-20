@@ -33,7 +33,10 @@ class UIFileDialog(UIWindow):
                  object_id: str = '#file_dialog'
                  ):
 
-        super().__init__(rect, manager, window_display_title=window_title, object_id=object_id)
+        super().__init__(rect, manager,
+                         window_display_title=window_title,
+                         object_id=object_id,
+                         resizable=True)
 
         self.delete_confirmation_dialog = None  # type: Union[None, UIConfirmationDialog]
 
@@ -164,9 +167,6 @@ class UIFileDialog(UIWindow):
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles events that this UI element is interested in. There are a lot of buttons in the file dialog.
-
-        TODO: May need to pull text for delete confirmation box out to variables or constructor somewhere.
-        TODO: Generic problem with default display text is that it is all in english -> should read it from a file.
 
         :param event: The pygame Event to process.
         :return: True if event is consumed by this element and should not be passed on to other elements.

@@ -202,6 +202,9 @@ class UITextBox(UIElement):
         else:
             height_adjustment = 0
 
+        if self.rect.width <= 0 or self.rect.height <= 0:
+            return
+
         drawable_area = pygame.Rect((0, height_adjustment), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
         new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
@@ -234,6 +237,10 @@ class UITextBox(UIElement):
                                     self.formatted_text_block.final_dimensions[1])
             drawable_area = pygame.Rect((0, height_adjustment),
                                         (self.text_wrap_rect[2], self.text_wrap_rect[3]))
+
+            if self.rect.width <= 0 or self.rect.height <= 0:
+                return
+
             new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.fill(pygame.Color(0, 0, 0, 0))
             new_image.blit(self.background_surf, (0, 0))
@@ -388,6 +395,8 @@ class UITextBox(UIElement):
         Redraws the final parts of the text box element that don't include redrawing the actual text. Useful if we've
         just moved the position of the text (say, with a scroll bar) without actually changing the text itself.
         """
+        if self.rect.width <= 0 or self.rect.height <= 0:
+            return
         if self.scroll_bar is not None:
             height_adjustment = int(self.scroll_bar.start_percentage * self.formatted_text_block.final_dimensions[1])
         else:

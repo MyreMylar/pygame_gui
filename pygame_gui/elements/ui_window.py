@@ -152,8 +152,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
                                    min(self.ui_container.rect.height, int(dimensions[1])))
 
-        if (self.rect.width > self.minimum_dimensions[0]) or (self.rect.height > self.minimum_dimensions[1]):
-            self.set_dimensions(self.minimum_dimensions)
+        if (self.rect.width < self.minimum_dimensions[0]) or (self.rect.height < self.minimum_dimensions[1]):
+            new_width = max(self.minimum_dimensions[0], self.rect.width)
+            new_height = max(self.minimum_dimensions[1], self.rect.height)
+            self.set_dimensions((new_width, new_height))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """

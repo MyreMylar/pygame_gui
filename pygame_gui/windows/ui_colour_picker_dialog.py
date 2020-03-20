@@ -212,7 +212,10 @@ class UIColourPickerDialog(UIWindow):
                  window_title: str = "Colour Picker",
                  object_id: str = '#colour_picker_dialog'):
 
-        super().__init__(rect, manager, window_display_title=window_title, object_id=object_id)
+        super().__init__(rect, manager,
+                         window_display_title=window_title,
+                         object_id=object_id,
+                         resizable=True)
 
         self.current_colour = initial_colour
 
