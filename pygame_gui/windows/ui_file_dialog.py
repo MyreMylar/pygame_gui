@@ -38,6 +38,8 @@ class UIFileDialog(UIWindow):
                          object_id=object_id,
                          resizable=True)
 
+        self.set_minimum_dimensions((260, 300))
+
         self.delete_confirmation_dialog = None  # type: Union[None, UIConfirmationDialog]
 
         if initial_file_path is not None:
