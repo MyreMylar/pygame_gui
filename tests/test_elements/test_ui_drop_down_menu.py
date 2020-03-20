@@ -101,7 +101,7 @@ class TestUIDropDownMenu:
 
         menu.process_event(pygame.event.Event(pygame.USEREVENT,
                                               {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                               'ui_element': menu.menu_states['closed'].open_button}))
+                                               'ui_element': menu.menu_states['closed'].selected_option_button}))
 
         assert menu.current_state.should_transition
 
