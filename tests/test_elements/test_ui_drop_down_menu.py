@@ -3,7 +3,8 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
+    _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
@@ -149,6 +150,7 @@ class TestUIDropDownMenu:
         assert menu.image is not None
 
     def test_set_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -163,6 +165,24 @@ class TestUIDropDownMenu:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (250, 215)}))
         # if we successfully clicked on the moved menu then this button should be True
         assert menu.current_state.selected_option_button.held is True
+
+        drop_down_anchor_bottom_right = UIDropDownMenu(relative_rect=pygame.Rect(0, 0, 50, 50),
+                                                       options_list=['eggs', 'flour', 'sugar'],
+                                                       starting_option='eggs',
+                                                       manager=default_ui_manager,
+                                                       container=test_container,
+                                                       anchors={'left': 'right',
+                                                                'right': 'right',
+                                                                'top': 'bottom',
+                                                                'bottom': 'bottom'})
+
+        drop_down_anchor_bottom_right.current_state.should_transition = True
+        drop_down_anchor_bottom_right.update(0.01)
+
+        drop_down_anchor_bottom_right.set_position((230, 230))
+        assert drop_down_anchor_bottom_right.relative_rect.topleft == (-80, -80)
+        assert drop_down_anchor_bottom_right.relative_rect.size == (50, 50)
+        assert drop_down_anchor_bottom_right.relative_rect.bottomright == (-30, -30)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
