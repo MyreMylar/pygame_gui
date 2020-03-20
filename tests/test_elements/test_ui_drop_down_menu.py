@@ -249,3 +249,61 @@ class TestUIDropDownMenu:
 
         assert not menu.hover_point(0, 0)
         assert menu.hover_point(150, 115)
+
+    def test_cropping_size_of_drop_down(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state.options_selection_list.rect.height == 366  # uncropped
+
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager,
+                              expansion_height_limit=200)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state.options_selection_list.scroll_bar is not None
+        assert menu.current_state.options_selection_list.rect.height == 200  # cropped to fixed height
+
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 100), manager=default_ui_manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state.options_selection_list.rect.height == 63  # cropped to container size by default
+
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_drop_down_menu_non_default.json"))
+
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 100), manager=manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
+                                            'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 50, 200, 30),
+                              manager=manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state.options_selection_list.rect.height == 53  # cropped to container size by default
