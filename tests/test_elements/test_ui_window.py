@@ -126,6 +126,37 @@ class TestUIWindow:
     def test_process_event(self, _init_pygame, default_ui_manager, _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
+
+        button_rect = pygame.Rect(0, 0, 150, 30)
+        button_rect.topright = (-10, 10)
+        button = UIButton(relative_rect=button_rect,
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          container=window,
+                          object_id='#specific_id_test',
+                          anchors={'left': 'right',
+                                   'right': 'right',
+                                   'top': 'top',
+                                   'bottom': 'top'})
+
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                {'button': pygame.BUTTON_LEFT,
+                                                 'pos': button.rect.center}))
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                {'button': pygame.BUTTON_LEFT,
+                                                 'pos': button.rect.center}))
+
+        confirm_event_fired = False
+        event_object_id = None
+        for event in pygame.event.get():
+            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+                    event.ui_element == button):
+                confirm_event_fired = True
+                event_object_id = event.ui_object_id
+        assert confirm_event_fired
+        assert event_object_id == 'test_window.#specific_id_test'
+
         consumed_event = window.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                  {'button': pygame.BUTTON_RIGHT,
                                                                   'pos': window.rect.center}))
@@ -282,11 +313,14 @@ class TestUIWindow:
         window.kill()
 
         confirm_event_fired = False
+        event_object_id = None
         for event in pygame.event.get():
             if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_WINDOW_CLOSE and
                     event.ui_element == window):
                 confirm_event_fired = True
+                event_object_id = event.ui_object_id
         assert confirm_event_fired
+        assert event_object_id == 'test_window'
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
