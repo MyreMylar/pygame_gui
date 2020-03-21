@@ -1,3 +1,4 @@
+import warnings
 from typing import Union, List
 from os import listdir
 from os.path import isfile, join, abspath, exists
@@ -38,7 +39,12 @@ class UIFileDialog(UIWindow):
                          object_id=object_id,
                          resizable=True)
 
-        self.set_minimum_dimensions((260, 300))
+        minimum_dimensions = (260, 300)
+        if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
+            warn_string = ("Initial size: " + str(rect.size) +
+                           " is less than minimum dimensions: " + str(minimum_dimensions))
+            warnings.warn(warn_string, UserWarning)
+        self.set_minimum_dimensions(minimum_dimensions)
 
         self.delete_confirmation_dialog = None  # type: Union[None, UIConfirmationDialog]
 

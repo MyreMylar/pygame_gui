@@ -1,3 +1,4 @@
+import warnings
 from typing import Union, Tuple, Dict
 
 import pygame
@@ -63,27 +64,12 @@ class UIColourChannelEditor(UIElement):
                                              parent_element=self,
                                              anchors=anchors)
 
-        # TODO: alter this so that the labels and text entry boxes are fixed width based on the font and the slider
-        #  expands to fill the space in between.
-
         space_between = 5
-        width_without_spacing = self.element_container.relative_rect.width - (2 * space_between)
-        slider_width = int(9 * (width_without_spacing / 16))
-        label_width = int(2 * (width_without_spacing / 16))
-        entry_width = int(5 * (width_without_spacing / 16))
+        label_width = 17
+        entry_width = 43
+
         everything_else_height = 29
         slider_height = 21
-        self.slider = UIHorizontalSlider(pygame.Rect(-(slider_width + space_between + entry_width), 4,
-                                                     slider_width, slider_height),
-                                         start_value=initial_value,
-                                         value_range=value_range,
-                                         manager=self.ui_manager,
-                                         container=self.element_container,
-                                         parent_element=self,
-                                         anchors={'left': 'right',
-                                                  'right': 'right',
-                                                  'top': 'top',
-                                                  'bottom': 'bottom'})
 
         self.label = UILabel(pygame.Rect(0, 0, label_width, everything_else_height),
                              text=name,
@@ -103,6 +89,20 @@ class UIColourChannelEditor(UIElement):
                                               'right': 'right',
                                               'top': 'top',
                                               'bottom': 'bottom'})
+
+        slider_width = (self.entry.rect.left - self.label.rect.right) - (2 * space_between)
+        self.slider = UIHorizontalSlider(pygame.Rect(label_width + space_between, 4,
+                                                     slider_width, slider_height),
+                                         start_value=initial_value,
+                                         value_range=value_range,
+                                         manager=self.ui_manager,
+                                         container=self.element_container,
+                                         parent_element=self,
+                                         anchors={'left': 'left',
+                                                  'right': 'right',
+                                                  'top': 'top',
+                                                  'bottom': 'bottom'})
+
         self.entry.set_allowed_characters('numbers')
         self.entry.set_text(str(initial_value))
         self.entry.set_text_length_limit(3)
@@ -191,13 +191,37 @@ class UIColourChannelEditor(UIElement):
             self.entry.set_text(str(self.current_value))
             self.slider.set_current_value(self.current_value)
 
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the absolute screen position of this channel, updating all subordinate elements at the same time.
+
+        :param position: The absolute screen position to set.
+        """
+        super().set_position(position)
+        self.element_container.set_relative_position(self.relative_rect.topleft)
+
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Sets the relative screen position of this channel, updating all subordinate elements at the same time.
+
+        :param position: The relative screen position to set.
+        """
+        super().set_relative_position(position)
+        self.element_container.set_relative_position(self.relative_rect.topleft)
+
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        """
+        Method to directly set the dimensions of an element.
+
+        :param dimensions: The new dimensions to set.
+        """
+        super().set_dimensions(dimensions)
+        self.element_container.set_dimensions(self.relative_rect.size)
+
 
 class UIColourPickerDialog(UIWindow):
     """
     A colour picker window that gives us a small range of UI tools to pick a final colour.
-
-    TODO: specify the minimum dimensions with the default font somewhere in here?
-    TODO: Also scale what needs scaling with the window. Enable resizing to test.
 
     :param rect: The size and position of the colour picker window. Includes the size of shadow, border and title bar.
     :param manager: The manager for the whole of the UI.
@@ -216,6 +240,13 @@ class UIColourPickerDialog(UIWindow):
                          window_display_title=window_title,
                          object_id=object_id,
                          resizable=True)
+
+        minimum_dimensions = (390, 390)
+        if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
+            warn_string = ("Initial size: " + str(rect.size) +
+                           " is less than minimum dimensions: " + str(minimum_dimensions))
+            warnings.warn(warn_string, UserWarning)
+        self.set_minimum_dimensions(minimum_dimensions)
 
         self.current_colour = initial_colour
 
@@ -240,7 +271,9 @@ class UIColourPickerDialog(UIWindow):
         current_colour_surface = pygame.Surface((64, 64))
         current_colour_surface.fill(self.current_colour)
 
-        self.current_colour_image = UIImage(pygame.Rect(20, -100, 64, 64),
+        element_spacing = 20
+
+        self.current_colour_image = UIImage(pygame.Rect(element_spacing, -100, 64, 64),
                                             image_surface=current_colour_surface,
                                             manager=self.ui_manager,
                                             container=self,
@@ -250,91 +283,107 @@ class UIColourPickerDialog(UIWindow):
                                                      'bottom': 'bottom'}
                                             )
 
-        self.hue_channel = UIColourChannelEditor(pygame.Rect(-160, 20, 150, 29),
+        mini_colour_surf = pygame.Surface((2, 2))
+        mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
+        mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
+
+        hue_colour = pygame.Color(255, 255, 255, 255)
+        hue_colour.hsva = (int(self.current_colour.hsva[0]),
+                           100, 100, 100)
+        mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
+        colour_square_surface = pygame.transform.smoothscale(mini_colour_surf, (200, 200))
+        self.sat_value_square = UIImage(pygame.Rect(element_spacing, element_spacing, 200, 200),
+                                        image_surface=colour_square_surface,
+                                        manager=self.ui_manager,
+                                        container=self)
+
+        channel_width = (self.rect.right - self.sat_value_square.rect.right) - (element_spacing * 2)
+        channel_left_start = (element_spacing * 2) + self.sat_value_square.rect.width
+        channel_spacing = 11
+        channel_height = 29
+        acc_channel_top = element_spacing
+        self.hue_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                             channel_width, channel_height),
                                                  manager=self.ui_manager,
                                                  container=self,
                                                  name='H:',
                                                  channel_index=0,
                                                  initial_value=int(self.current_colour.hsva[0]),
                                                  value_range=(0, 360),
-                                                 anchors={'left': 'right',
+                                                 anchors={'left': 'left',
                                                           'right': 'right',
                                                           'top': 'top',
                                                           'bottom': 'top'})
 
-        self.saturation_channel = UIColourChannelEditor(pygame.Rect(-160, 60, 150, 29),
+        acc_channel_top += (channel_height + channel_spacing)
+        self.saturation_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                                    channel_width, channel_height),
                                                         manager=self.ui_manager,
                                                         container=self,
                                                         name='S:',
                                                         channel_index=0,
                                                         initial_value=int(self.current_colour.hsva[1]),
                                                         value_range=(0, 100),
-                                                        anchors={'left': 'right',
+                                                        anchors={'left': 'left',
                                                                  'right': 'right',
                                                                  'top': 'top',
                                                                  'bottom': 'top'})
 
-        self.value_channel = UIColourChannelEditor(pygame.Rect(-160, 100, 150, 29),
+        acc_channel_top += (channel_height + channel_spacing)
+        self.value_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                               channel_width, channel_height),
                                                    manager=self.ui_manager,
                                                    container=self,
                                                    name='V:',
                                                    channel_index=2,
                                                    initial_value=int(self.current_colour.hsva[2]),
                                                    value_range=(0, 100),
-                                                   anchors={'left': 'right',
+                                                   anchors={'left': 'left',
                                                             'right': 'right',
                                                             'top': 'top',
                                                             'bottom': 'top'})
 
-        self.red_channel = UIColourChannelEditor(pygame.Rect(-160, 140, 150, 29),
+        acc_channel_top += (channel_height + channel_spacing)
+        self.red_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                             channel_width, channel_height),
                                                  manager=self.ui_manager,
                                                  container=self,
                                                  name='R:',
                                                  channel_index=0,
                                                  initial_value=self.current_colour.r,
                                                  value_range=(0, 255),
-                                                 anchors={'left': 'right',
+                                                 anchors={'left': 'left',
                                                           'right': 'right',
                                                           'top': 'top',
                                                           'bottom': 'top'})
 
-        self.green_channel = UIColourChannelEditor(pygame.Rect(-160, 180, 150, 29),
+        acc_channel_top += (channel_height + channel_spacing)
+        self.green_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                               channel_width, channel_height),
                                                    manager=self.ui_manager,
                                                    container=self,
                                                    name='G:',
                                                    channel_index=1,
                                                    initial_value=self.current_colour.g,
                                                    value_range=(0, 255),
-                                                   anchors={'left': 'right',
+                                                   anchors={'left': 'left',
                                                             'right': 'right',
                                                             'top': 'top',
                                                             'bottom': 'top'})
 
-        self.blue_channel = UIColourChannelEditor(pygame.Rect(-160, 220, 150, 29),
+        acc_channel_top += (channel_height + channel_spacing)
+        self.blue_channel = UIColourChannelEditor(pygame.Rect(channel_left_start, acc_channel_top,
+                                                              channel_width, channel_height),
                                                   manager=self.ui_manager,
                                                   container=self,
                                                   name='B:',
                                                   channel_index=2,
                                                   initial_value=self.current_colour.b,
                                                   value_range=(0, 255),
-                                                  anchors={'left': 'right',
+                                                  anchors={'left': 'left',
                                                            'right': 'right',
                                                            'top': 'top',
                                                            'bottom': 'top'})
-
-        mini_colour_surf = pygame.Surface((2, 2))
-        mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
-        mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
-
-        hue_colour = pygame.Color(255, 255, 255, 255)
-        hue_colour.hsva = (int(self.hue_channel.current_value),
-                           100, 100, 100)
-        mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
-        colour_square_surface = pygame.transform.smoothscale(mini_colour_surf, (200, 200))
-        self.saturation_value_square = UIImage(pygame.Rect(20, 20, 200, 200),
-                                               image_surface=colour_square_surface,
-                                               manager=self.ui_manager,
-                                               container=self)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -380,12 +429,13 @@ class UIColourPickerDialog(UIWindow):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-            if self.saturation_value_square.rect.collidepoint(scaled_mouse_pos):
-                relative_click_pos = [scaled_mouse_pos[0] - self.saturation_value_square.rect.left,
-                                      scaled_mouse_pos[1] - self.saturation_value_square.rect.top]
+            if self.sat_value_square.rect.collidepoint(scaled_mouse_pos):
+                relative_click_pos = [scaled_mouse_pos[0] - self.sat_value_square.rect.left,
+                                      scaled_mouse_pos[1] - self.sat_value_square.rect.top]
                 # put in range 0 - 100 and reverse y
-                value = min(100, max(0, int((relative_click_pos[0] / self.saturation_value_square.rect.width) * 100)))
-                saturation = min(100, max(0, 100 - int((relative_click_pos[1] / self.saturation_value_square.rect.height) * 100)))
+                value = min(100, max(0, int((relative_click_pos[0] / self.sat_value_square.rect.width) * 100)))
+                saturation = min(100,
+                                 max(0, 100 - int((relative_click_pos[1] / self.sat_value_square.rect.height) * 100)))
 
                 self.saturation_channel.set_value(saturation)
                 self.value_channel.set_value(value)
@@ -402,7 +452,6 @@ class UIColourPickerDialog(UIWindow):
         """
         Updates the 'current colour' image when the current colour has been changed.
 
-        #TODO: This also needs to be made to scale with the window.
         """
         current_colour_surface = pygame.Surface((64, 64))
         current_colour_surface.fill(self.current_colour)
@@ -417,8 +466,6 @@ class UIColourPickerDialog(UIWindow):
                    [black] [white]
 
         And then using the smoothscale transform to enlarge it so that the colours blend smoothly from one to the other.
-
-        #TODO: This also needs to be made to scale with the window.
         """
         mini_colour_surf = pygame.Surface((2, 2))
         mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
@@ -428,7 +475,7 @@ class UIColourPickerDialog(UIWindow):
         hue_colour.hsva = (int(self.hue_channel.current_value),
                            100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
-        self.saturation_value_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
+        self.sat_value_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
 
     def changed_hsv_update_rgb(self):
         """
