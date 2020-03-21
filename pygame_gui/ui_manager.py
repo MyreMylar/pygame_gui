@@ -16,11 +16,12 @@ class UIManager(IUIManagerInterface):
     """
     The UI Manager class helps keep track of all the moving parts in the pygame_gui system.
 
-    Before doing anything else with pygame_gui create a UIManager and remember to update it every frame.
+    Before doing anything else with pygame_gui create a UIManager and remember to update it every
+    frame.
 
     :param window_resolution: window resolution.
     :param theme_path: relative file path to theme.
-    :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file/
+    :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file
     """
 
     def __init__(self,
@@ -39,7 +40,8 @@ class UIManager(IUIManagerInterface):
         self.focused_element = None
         self.last_focused_vertical_scrollbar = None
         self.root_container = None
-        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
+        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
+                                          self, starting_height=1,
                                           container=None, parent_element=None,
                                           object_id='#root_container')
 
@@ -70,8 +72,8 @@ class UIManager(IUIManagerInterface):
 
     def get_root_container(self) -> UIContainer:
         """
-        Returns the 'root' container. The one all UI elements are placed in by default if they are not placed
-        anywhere else, fills the whole OS/pygame window.
+        Returns the 'root' container. The one all UI elements are placed in by default if they are
+        not placed anywhere else, fills the whole OS/pygame window.
 
         :return: A container.
         """
@@ -87,7 +89,8 @@ class UIManager(IUIManagerInterface):
 
     def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
         """
-        Gets the sprite group used by the entire UI to keep it in the correct order for drawing and processing input.
+        Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
+        processing input.
 
         :return: The UI's sprite group.
         """
@@ -95,8 +98,8 @@ class UIManager(IUIManagerInterface):
 
     def get_window_stack(self) -> UIWindowStack:
         """
-        The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted and move windows
-        we interact with to the top of the stack.
+        The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted
+        and move windows we interact with to the top of the stack.
 
         :return: The stack of windows.
         """
@@ -113,8 +116,10 @@ class UIManager(IUIManagerInterface):
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
         :return: A shadow as a pygame Surface.
         """
-        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width,
-                                                                                shape, corner_radius)
+        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size,
+                                                                                shadow_width,
+                                                                                shape,
+                                                                                corner_radius)
 
     def set_window_resolution(self, window_resolution: Tuple[int, int]):
         """
@@ -126,64 +131,70 @@ class UIManager(IUIManagerInterface):
 
     def clear_and_reset(self):
         """
-        Clear all existing windows and the root container, which should get rid of all created UI elements.
-        We then recreate the UIWindowStack and the root container.
+        Clear all existing windows and the root container, which should get rid of all created UI
+        elements. We then recreate the UIWindowStack and the root container.
         """
         self.root_container.kill()
         # need to reset to None before recreating otherwise the old container will linger around.
         self.root_container = None
-        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution), self, starting_height=1,
+        self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
+                                          self, starting_height=1,
                                           container=None, parent_element=None,
                                           object_id='#root_container')
         self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
 
     def process_events(self, event: pygame.event.Event):
         """
-        This is the top level method through which all input to UI elements is processed and reacted to.
+        This is the top level method through which all input to UI elements is processed and
+        reacted to.
 
         One of the key things it controls is the currently 'focused' element of which there
-        can be only one at a time. It also manages 'consumed events' these events will not be passed on to elements
-        below them in the GUI hierarchy and helps us stop buttons underneath windows from receiving input.
+        can be only one at a time. It also manages 'consumed events' these events will not be
+        passed on to elements below them in the GUI hierarchy and helps us stop buttons underneath
+        windows from receiving input.
 
         :param event:  pygame.event.Event - the event to process.
         """
         consumed_event = False
-        window_sorting_consumed_event = False
+        sorting_consumed_event = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
-            if not window_sorting_consumed_event:
-                windows_in_layer = [window for window in sprites_in_layer if ('window' in window.element_ids[-1])]
+            if not sorting_consumed_event:
+                windows_in_layer = [window for window in sprites_in_layer
+                                    if 'window' in window.element_ids[-1]]
                 for window in windows_in_layer:
-                    if not window_sorting_consumed_event:
-                        window_sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
+                    if not sorting_consumed_event:
+                        sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
             if not consumed_event:
                 for ui_element in sprites_in_layer:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_x, mouse_y = event.pos
-                        if ui_element.hover_point(mouse_x, mouse_y) and ui_element is not self.focused_element:
+                        if (ui_element.hover_point(mouse_x, mouse_y) and
+                                ui_element is not self.focused_element):
                             self.unset_focus_element()
                             self.set_focus_element(ui_element)
 
                     consumed_event = ui_element.process_event(event)
                     if consumed_event:
-                        # Generally clicks should only be handled by the top layer of whatever GUI thing we are
-                        # clicking on. I am trusting UIElments to decide whether they need to consume the events they
-                        # respond to. Hopefully this is not a mistake.
+                        # Generally clicks should only be handled by the top layer of whatever
+                        # GUI thing we are  clicking on. I am trusting UIElments to decide whether
+                        # they need to consume the events they respond to. Hopefully this is not
+                        # a mistake.
 
                         break
 
     def update(self, time_delta: float):
         """
-        From here all our UI elements are updated and which element is currently 'hovered' is checked; which means
-        the mouse pointer is overlapping them. This is managed centrally so we aren't ever overlapping two elements at
-        once.
+        From here all our UI elements are updated and which element is currently 'hovered' is
+        checked; which means the mouse pointer is overlapping them. This is managed centrally so
+        we aren't ever overlapping two elements at once.
 
-        It also updates the shape cache to continue storing already created elements shapes in the long term cache, in
-        case we need them later.
+        It also updates the shape cache to continue storing already created elements shapes in the
+        long term cache, in case we need them later.
 
-        Finally, if live theme updates are enabled, it checks to see if the theme file has been modified and triggers
-        all the UI elements to rebuild if it has.
+        Finally, if live theme updates are enabled, it checks to see if the theme file has been
+        modified and triggers all the UI elements to rebuild if it has.
 
         :param time_delta: The time passed since the last call to update, in seconds.
         """
@@ -244,10 +255,10 @@ class UIManager(IUIManagerInterface):
         """
         Wrapping pygame mouse position so we can mess with it.
         """
-        x, y = pygame.mouse.get_pos()
+        mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * x),
-                               int(self.mouse_pos_scale_factor[1] * y))
+        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * mouse_x),
+                               int(self.mouse_pos_scale_factor[1] * mouse_y))
 
     def get_mouse_position(self) -> Tuple[int, int]:
         """
@@ -257,12 +268,14 @@ class UIManager(IUIManagerInterface):
 
     def draw_ui(self, window_surface: pygame.Surface):
         """
-        Draws all the UI elements on the screen. Generally you want this to be after the rest of your game sprites
-        have been drawn.
+        Draws all the UI elements on the screen. Generally you want this to be after the rest of
+        your game sprites have been drawn.
 
-        If you want to do something particularly unusual with drawing you may have to write your own UI manager.
+        If you want to do something particularly unusual with drawing you may have to write your
+        own UI manager.
 
-        :param window_surface: The screen or window surface on which we are going to draw all of our UI Elements.
+        :param window_surface: The screen or window surface on which we are going to draw all of
+         our UI Elements.
 
         """
         self.ui_group.draw(window_surface)
@@ -270,24 +283,27 @@ class UIManager(IUIManagerInterface):
     def add_font_paths(self, font_name: str, regular_path: str, bold_path: str = None,
                        italic_path: str = None, bold_italic_path: str = None):
         """
-        Add file paths for custom fonts you want to use in the UI. For each font name you add you can specify
-        font files for different styles. Fonts with designed styles tend to render a lot better than fonts that are
-        forced to make use of pygame's bold and italic styling effects, so if you plan to use bold and italic text
-        at small sizes - find fonts with these styles available as separate files.
+        Add file paths for custom fonts you want to use in the UI. For each font name you add you
+        can specify font files for different styles. Fonts with designed styles tend to render a
+        lot better than fonts that are forced to make use of pygame's bold and italic styling
+        effects, so if you plan to use bold and italic text at small sizes - find fonts with these
+        styles available as separate files.
 
-        The font name you specify here can be used to choose the font in the blocks of HTML-subset formatted text,
-        available in some of the UI elements like the UITextBox.
+        The font name you specify here can be used to choose the font in the blocks of HTML-subset
+        formatted text, available in some of the UI elements like the UITextBox.
 
-        It is recommended that you also pre-load any fonts you use at an appropriate moment in your project
-        rather than letting the library dynamically load them when they are required. That is because dynamic loading
-        of large font files can cause UI elements with a lot of font usage to appear rather slowly as they are waiting
-        for the fonts they need to load.
+        It is recommended that you also pre-load any fonts you use at an appropriate moment in your
+        project rather than letting the library dynamically load them when they are required. That
+        is because dynamic loading of large font files can cause UI elements with a lot of font
+        usage to appear rather slowly as they are waiting for the fonts they need to load.
 
-        :param font_name: The name of the font that will be used to reference it elsewhere in the GUI.
+        :param font_name: The name of the font that will be used to reference it elsewhere in
+        the GUI.
         :param regular_path: The path of the font file for this font with no styles applied.
         :param bold_path: The path of the font file for this font with just bold style applied.
         :param italic_path: The path of the font file for this font with just italic style applied.
-        :param bold_italic_path: The path of the font file for this font with bold & italic style applied.
+        :param bold_italic_path: The path of the font file for this font with bold & italic style
+        applied.
 
         """
         self.get_theme().get_font_dictionary().add_font_path(font_name,
@@ -298,19 +314,19 @@ class UIManager(IUIManagerInterface):
 
     def preload_fonts(self, font_list: List[Dict[str, Union[str, int, float]]]):
         """
-        It's a good idea to pre-load the exact fonts your program uses during the loading phase of your program.
-        By default the pygame_gui library will still work, but will spit out reminder warnings when you haven't
-        done this. Loading fonts on the fly will slow down the apparent responsiveness when creating UI elements
-        that use a lot of different fonts.
+        It's a good idea to pre-load the exact fonts your program uses during the loading phase of
+        your program. By default the pygame_gui library will still work, but will spit out reminder
+        warnings when you haven't done this. Loading fonts on the fly will slow down the apparent
+        responsiveness when creating UI elements that use a lot of different fonts.
 
-        To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default 'fira_code' font)
-        you must first add the paths to the files for those fonts, then load the specific fonts with a list of font
-        descriptions in a dictionary form like so:
+        To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default
+        'fira_code' font) you must first add the paths to the files for those fonts, then load the
+        specific fonts with a list of font descriptions in a dictionary form like so:
 
         code:`{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}`
 
-        You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style sizes with
-        'html_size'. Style options are:
+        You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style
+        sizes with 'html_size'. Style options are:
 
         - 'regular'
         - 'italic'
@@ -335,7 +351,8 @@ class UIManager(IUIManagerInterface):
                 if 'italic' in font['style']:
                     italic = True
             if 'html_size' in font:
-                size = self.ui_theme.get_font_dictionary().convert_html_size_to_point_size(font['html_size'])
+                font_dict = self.ui_theme.get_font_dictionary()
+                size = font_dict.convert_html_to_point_size(font['html_size'])
             elif 'point_size' in font:
                 size = font['point_size']
 
@@ -343,12 +360,13 @@ class UIManager(IUIManagerInterface):
 
     def print_unused_fonts(self):
         """
-        Helps you identify which pre-loaded fonts you are actually still using in your project after you've
-        fiddled around with the text a lot by printing out a list of fonts that have not been used yet at the
-        time this function is called.
+        Helps you identify which pre-loaded fonts you are actually still using in your project
+        after you've fiddled around with the text a lot by printing out a list of fonts that have
+        not been used yet at the time this function is called.
 
-        Of course if you don't run the code path in which a particular font is used before calling this function
-        then it won't be of much use, so take it's results under advisement rather than as gospel.
+        Of course if you don't run the code path in which a particular font is used before calling
+        this function then it won't be of much use, so take it's results under advisement rather
+        than as gospel.
 
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
@@ -378,7 +396,8 @@ class UIManager(IUIManagerInterface):
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: UIElement):
         """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of the scroll bar.
+        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
 
         :param vert_scrollbar: A scrollbar UIElement.
         """
@@ -387,7 +406,8 @@ class UIManager(IUIManagerInterface):
 
     def get_last_focused_vert_scrollbar(self) -> Union[UIElement, None]:
         """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of the scroll bar.
+        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
 
         :return: A UIElement.
         """
@@ -395,7 +415,8 @@ class UIManager(IUIManagerInterface):
 
     def set_visual_debug_mode(self, is_active: bool):
         """
-        Loops through all our UIElements to turn visual debug mode on or off. Also calls print_layer_debug()
+        Loops through all our UIElements to turn visual debug mode on or off. Also calls
+        print_layer_debug()
 
         :param is_active: True to activate visual debug and False to turn it off.
         """
@@ -408,7 +429,8 @@ class UIManager(IUIManagerInterface):
             self.visual_debug_active = True
             # preload the debug font if it's not already loaded
             font_dict = self.get_theme().get_font_dictionary()
-            if not font_dict.check_font_preloaded(font_dict.default_font_name + '_' + font_dict.default_font_style +
+            if not font_dict.check_font_preloaded(font_dict.default_font_name + '_'
+                                                  + font_dict.default_font_style +
                                                   '_' + str(font_dict.debug_font_size)):
                 font_dict.preload_font(font_dict.debug_font_size, font_dict.default_font_name)
             for layer in self.ui_group.layers():
@@ -429,15 +451,16 @@ class UIManager(IUIManagerInterface):
             print("-----------------------")
             for element in self.ui_group.get_sprites_from_layer(layer):
                 if element.element_ids[-1] == 'container':
-                    print(str(element.most_specific_combined_id) + ': thickness - ' + str(element.layer_thickness))
+                    print(str(element.most_specific_combined_id) +
+                          ': thickness - ' + str(element.layer_thickness))
                 else:
                     print(str(element.most_specific_combined_id))
             print(' ')
 
     def load_default_cursors(self):
         """
-        'Loads' the default cursors we use in the GUI for resizing windows. No actual files are opened as this is all
-        string date compiled into pygame cursor images.
+        'Loads' the default cursors we use in the GUI for resizing windows. No actual files are
+        opened as this is all string date compiled into pygame cursor images.
 
         """
         # cursors for resizing windows
@@ -455,13 +478,15 @@ class UIManager(IUIManagerInterface):
                                         'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
                                         'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
 
-    def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, ...], Tuple[int, ...]]):
+    def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int],
+                                              Tuple[int, ...], Tuple[int, ...]]):
         """
-        This is for users of the library to set the currently active cursor, it will be currently only be overriden by
-        the resizing cursors.
+        This is for users of the library to set the currently active cursor, it will be currently
+        only be overriden by the resizing cursors.
 
-        The expected input is in the same format as the standard pygame cursor module, except without expanding the
-        initial Tuple. So, to call this function with the default pygame arrow cursor you would do:
+        The expected input is in the same format as the standard pygame cursor module, except
+        without expanding the initial Tuple. So, to call this function with the default pygame
+        arrow cursor you would do:
 
             manager.set_active_cursor(pygame.cursors.arrow)
 
@@ -471,17 +496,18 @@ class UIManager(IUIManagerInterface):
 
     def get_universal_empty_surface(self) -> pygame.Surface:
         """
-        Sometimes we want to hide sprites or just have sprites with no visual component, when we do we can just use this
-        empty surface to save having lots of empty surfaces all over memory.
+        Sometimes we want to hide sprites or just have sprites with no visual component, when we
+        do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
         :return: An empty, and therefore invisible pygame.Surface
         """
         return self.universal_empty_surface
 
-    def create_tool_tip(self, text: str, position: Tuple[int, int], hover_distance: Tuple[int, int]) -> UITooltip:
+    def create_tool_tip(self, text: str, position: Tuple[int, int],
+                        hover_distance: Tuple[int, int]) -> UITooltip:
         """
-        Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it from other UI
-        elements and create tool tips without creating cyclical import problems.
+        Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it
+        from other UI elements and create tool tips without creating cyclical import problems.
 
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
         :param position: The screen position to create the tool tip for.

@@ -7,16 +7,20 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 
 class UIElement(pygame.sprite.Sprite):
     """
-    A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element classes should
-    derive from this class. Inherits from pygame.sprite.Sprite.
+    A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element
+    classes should derive from this class. Inherits from pygame.sprite.Sprite.
 
-    :param relative_rect: A rectangle shape of the UI element, the position is relative to the element's container.
+    :param relative_rect: A rectangle shape of the UI element, the position is relative to the
+    element's container.
     :param manager: The UIManager that manages this UIElement.
     :param container: A container that this element is contained in.
-    :param starting_height: Used to record how many layers above it's container this element should be. Normally 1.
+    :param starting_height: Used to record how many layers above it's container this element
+    should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
-    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this
+    UIElement is part of.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this
+    UIElement is part of.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     """
     def __init__(self, relative_rect: pygame.Rect,
@@ -38,7 +42,8 @@ class UIElement(pygame.sprite.Sprite):
         self.object_ids = object_ids
         self.element_ids = element_ids
 
-        combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids, self.object_ids)
+        combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids,
+                                                                          self.object_ids)
         if combined_ids is not None and len(combined_ids) > 0:
             self.most_specific_combined_id = combined_ids[0]
         else:
@@ -93,13 +98,16 @@ class UIElement(pygame.sprite.Sprite):
                          object_id: str,
                          element_id: str) -> Tuple[List[str], List[Union[str, None]]]:
         """
-        Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
-        containing full stops. These ID lists are used by the theming system to identify what theming parameters to
-        apply to which element.
+        Creates valid id lists for an element. It will assert if users supply object IDs that
+        won't work such as those containing full stops. These ID lists are used by the theming
+        system to identify what theming parameters to apply to which element.
 
-        :param container: The container for this element. If parent is None the container will be used as the parent.
-        :param parent_element: Element that this element 'belongs to' in theming. Elements inherit colours from parents.
-        :param object_id: An optional ID to help distinguish this element from other elements of the same class.
+        :param container: The container for this element. If parent is None the container will be
+        used as the parent.
+        :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
+        colours from parents.
+        :param object_id: An optional ID to help distinguish this element from other elements of
+        the same class.
         :param element_id: A string ID representing this element's class.
         """
         if parent_element is None and container is not None:
@@ -138,7 +146,8 @@ class UIElement(pygame.sprite.Sprite):
             new_bottom = self.relative_rect.bottom + self.ui_container.rect.top
         elif self.anchors['bottom'] == 'bottom':
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = self.ui_container.rect.bottom - (new_top + self.relative_rect.height)
+                self.relative_bottom_margin = (self.ui_container.rect.bottom -
+                                               (new_top + self.relative_rect.height))
             new_bottom = self.ui_container.rect.bottom - self.relative_bottom_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
@@ -156,7 +165,8 @@ class UIElement(pygame.sprite.Sprite):
             new_right = self.relative_rect.right + self.ui_container.rect.left
         elif self.anchors['right'] == 'right':
             if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = self.ui_container.rect.right - (new_left + self.relative_rect.width)
+                self.relative_right_margin = (self.ui_container.rect.right -
+                                              (new_left + self.relative_rect.width))
             new_right = self.ui_container.rect.right - self.relative_right_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
@@ -173,8 +183,9 @@ class UIElement(pygame.sprite.Sprite):
         Called when our element's absolute position has been forcibly changed.
         """
 
-        # This is a bit easier to calculate than getting the absolute position from the relative one, because the
-        # absolute position rectangle is always relative to the top left of the screen.
+        # This is a bit easier to calculate than getting the absolute position from the
+        # relative one, because the absolute position rectangle is always relative to the top
+        # left of the screen.
 
         # Setting these to None means we are always recalculating the margins in here.
         self.relative_bottom_margin = None
@@ -220,17 +231,18 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect.bottom = new_bottom
         self.relative_rect.right = new_right
 
-        # set top and left last to give these priority, in most cases where all anchors are set we want
-        # relative_rect parameters to be correct for whatever the top & left sides are anchored to.
-        # The data for the bottom and right in cases where left is anchored differently to right and/or top is anchored
-        # differently to bottom should be captured by the bottom and right margins.
+        # set top and left last to give these priority, in most cases where all anchors are set
+        # we want relative_rect parameters to be correct for whatever the top & left sides are
+        # anchored to. The data for the bottom and right in cases where left is anchored
+        # differently to right and/or top is anchored differently to bottom should be captured by
+        # the bottom and right margins.
         self.relative_rect.left = new_left
         self.relative_rect.top = new_top
 
     def _update_container_clip(self):
         """
-        Creates a clipping rectangle for the element's image surface based on whether this element is inside its
-        container, part-way in it, or all the way out of it.
+        Creates a clipping rectangle for the element's image surface based on whether this
+        element is inside its container, part-way in it, or all the way out of it.
 
         """
         if self.ui_container.get_image_clipping_rect() is not None:
@@ -239,9 +251,13 @@ class UIElement(pygame.sprite.Sprite):
             container_clip_rect.top += self.ui_container.rect.top
             if not container_clip_rect.contains(self.rect):
                 left = max(0, container_clip_rect.left - self.rect.left)
-                right = max(0, self.rect.width - max(0, self.rect.right - container_clip_rect.right))
+                right = max(0, self.rect.width - max(0,
+                                                     self.rect.right -
+                                                     container_clip_rect.right))
                 top = max(0, container_clip_rect.top - self.rect.top)
-                bottom = max(0, self.rect.height - max(0, self.rect.bottom - container_clip_rect.bottom))
+                bottom = max(0, self.rect.height - max(0,
+                                                       self.rect.bottom -
+                                                       container_clip_rect.bottom))
                 clip_rect = pygame.Rect(left, top,
                                         right - left,
                                         bottom - top)
@@ -251,9 +267,13 @@ class UIElement(pygame.sprite.Sprite):
 
         elif not self.ui_container.rect.contains(self.rect):
             left = max(0, self.ui_container.rect.left - self.rect.left)
-            right = max(0, self.rect.width - max(0, self.rect.right - self.ui_container.rect.right))
+            right = max(0, self.rect.width - max(0,
+                                                 self.rect.right -
+                                                 self.ui_container.rect.right))
             top = max(0, self.ui_container.rect.top - self.rect.top)
-            bottom = max(0, self.rect.height - max(0, self.rect.bottom - self.ui_container.rect.bottom))
+            bottom = max(0, self.rect.height - max(0,
+                                                   self.rect.bottom -
+                                                   self.ui_container.rect.bottom))
             clip_rect = pygame.Rect(left, top,
                                     right - left,
                                     bottom - top)
@@ -263,8 +283,8 @@ class UIElement(pygame.sprite.Sprite):
 
     def update_containing_rect_position(self):
         """
-        Updates the position of this element based on the position of it's container. Usually called when the container
-        has moved.
+        Updates the position of this element based on the position of it's container. Usually
+        called when the container has moved.
         """
         self._update_absolute_rect_position_from_anchors()
 
@@ -273,7 +293,9 @@ class UIElement(pygame.sprite.Sprite):
 
         self._update_container_clip()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
         Method to directly set the relative rect position of an element.
 
@@ -289,7 +311,9 @@ class UIElement(pygame.sprite.Sprite):
 
         self._update_container_clip()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -304,11 +328,14 @@ class UIElement(pygame.sprite.Sprite):
 
         self._update_container_clip()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Method to directly set the dimensions of an element.
 
-        NOTE: Using this on elements inside containers with non-default anchoring arrangements may make a mess of them.
+        NOTE: Using this on elements inside containers with non-default anchoring arrangements
+        may make a mess of them.
 
         :param dimensions: The new dimensions to set.
         """
@@ -325,7 +352,8 @@ class UIElement(pygame.sprite.Sprite):
 
             if self.drawable_shape is not None:
                 self.drawable_shape.set_dimensions(self.relative_rect.size)
-                self.set_image(self.drawable_shape.get_fresh_surface())  # needed to stop resizing 'lag'
+                # needed to stop resizing 'lag'
+                self.set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
 
@@ -359,18 +387,24 @@ class UIElement(pygame.sprite.Sprite):
 
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
-        A method that helps us to determine which, if any, UI Element is currently being hovered by the mouse.
+        A method that helps us to determine which, if any, UI Element is currently being hovered
+        by the mouse.
 
-        :param time_delta: A float, the time in seconds between the last call to this function and now (roughly).
-        :param hovered_higher_element: A boolean, representing whether we have already hovered a 'higher' element.
+        :param time_delta: A float, the time in seconds between the last call to this function
+        and now (roughly).
+        :param hovered_higher_element: A boolean, representing whether we have already hovered a
+        'higher' element.
 
-        :return bool: A boolean that is true if we have hovered a UI element, either just now or before this method.
+        :return bool: A boolean that is true if we have hovered a UI element, either just now or
+        before this method.
         """
         if self.alive() and self.can_hover():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
-            if self.is_enabled and self.hover_point(mouse_x, mouse_y) and not hovered_higher_element:
+            if (self.is_enabled and
+                    self.hover_point(mouse_x, mouse_y) and
+                    not hovered_higher_element):
                 if not self.hovered:
                     self.hovered = True
                     self.on_hovered()
@@ -388,8 +422,8 @@ class UIElement(pygame.sprite.Sprite):
 
     def on_fresh_drawable_shape_ready(self):
         """
-        Called when our drawable shape has finished rebuilding the active surface. This is needed because sometimes we
-        defer rebuilding until a more advantageous (read quieter) moment.
+        Called when our drawable shape has finished rebuilding the active surface. This is needed
+        because sometimes we defer rebuilding until a more advantageous (read quieter) moment.
         """
         self.set_image(self.drawable_shape.get_fresh_surface())
 
@@ -409,7 +443,8 @@ class UIElement(pygame.sprite.Sprite):
         """
         A stub method to override. Called when this UI element is currently hovered.
 
-        :param time_delta: A float, the time in seconds between the last call to this function and now (roughly).
+        :param time_delta: A float, the time in seconds between the last call to this function
+        and now (roughly).
         :param mouse_pos: The current position of the mouse as 2D Vector.
         """
         pass
@@ -422,18 +457,21 @@ class UIElement(pygame.sprite.Sprite):
 
     def hover_point(self, x: float, y: float) -> bool:
         """
-        Test if a given point counts as 'hovering' this UI element. Normally that is a straightforward matter of
-        seeing if a point is inside the rectangle. Occasionally it will also check if we are in a wider zone around
-        a UI element once it is already active, this makes it easier to move scroll bars and the like.
+        Test if a given point counts as 'hovering' this UI element. Normally that is a
+        straightforward matter of seeing if a point is inside the rectangle. Occasionally it
+        will also check if we are in a wider zone around a UI element once it is already active,
+        this makes it easier to move scroll bars and the like.
 
         :param x: The x (horizontal) position of the point.
         :param y: The y (vertical) position of the point.
         :return bool: Returns True if we are hovering this element.
         """
         if self.drawable_shape is not None:
-            return self.drawable_shape.collide_point((x, y)) and bool(self.ui_container.rect.collidepoint(x, y))
+            return (self.drawable_shape.collide_point((x, y)) and
+                    bool(self.ui_container.rect.collidepoint(x, y)))
         else:
-            return bool(self.rect.collidepoint(x, y)) and bool(self.ui_container.rect.collidepoint(x, y))
+            return (bool(self.rect.collidepoint(x, y)) and
+                    bool(self.ui_container.rect.collidepoint(x, y)))
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -459,15 +497,16 @@ class UIElement(pygame.sprite.Sprite):
 
     def rebuild_from_changed_theme_data(self):
         """
-        A stub to override. Used to test if the theming data for this element has changed and rebuild the element if so.
+        A stub to override. Used to test if the theming data for this element has changed and
+        rebuild the element if so.
 
         """
         pass
 
     def rebuild(self):
         """
-        Takes care of rebuilding this element. Most derived elements are going to override this, and hopefully call
-        the super() class method.
+        Takes care of rebuilding this element. Most derived elements are going to override this,
+        and hopefully call the super() class method.
 
         """
         if self._visual_debug_mode:
@@ -476,7 +515,8 @@ class UIElement(pygame.sprite.Sprite):
 
     def set_visual_debug_mode(self, activate_mode: bool):
         """
-        Enables a debug mode for the element which displays layer information on top of it in a tiny font.
+        Enables a debug mode for the element which displays layer information on top of it in
+        a tiny font.
 
         :param activate_mode: True or False to enable or disable the mode.
         """
@@ -489,7 +529,8 @@ class UIElement(pygame.sprite.Sprite):
 
             if self.image is not None:
                 self.pre_debug_image = self.image.copy()
-                # check if our surface is big enough to hold the debug info, if not make a new, bigger copy
+                # check if our surface is big enough to hold the debug info,
+                # if not make a new, bigger copy
                 make_new_larger_surface = False
                 surf_width = self.image.get_width()
                 surf_height = self.image.get_height()
@@ -501,7 +542,9 @@ class UIElement(pygame.sprite.Sprite):
                     surf_height = layer_text_render.get_height()
 
                 if make_new_larger_surface:
-                    new_surface = pygame.Surface((surf_width, surf_height), flags=pygame.SRCALPHA, depth=32)
+                    new_surface = pygame.Surface((surf_width, surf_height),
+                                                 flags=pygame.SRCALPHA,
+                                                 depth=32)
                     new_surface.blit(self.image, (0, 0))
                     self.set_image(new_surface)
                 self.image.blit(layer_text_render, (0, 0))
@@ -529,8 +572,8 @@ class UIElement(pygame.sprite.Sprite):
 
     def set_image_clip(self, rect: Union[pygame.Rect, None]):
         """
-        Sets a clipping rectangle on this element's image determining what portion of it will actually be displayed
-        when this element is blitted to the screen.
+        Sets a clipping rectangle on this element's image determining what portion of it will
+        actually be displayed when this element is blitted to the screen.
 
         :param rect: A clipping rectangle, or None to clear the clip.
         """
@@ -558,27 +601,32 @@ class UIElement(pygame.sprite.Sprite):
 
     def set_image(self, new_image: Union[pygame.Surface, None]):
         """
-        Wraps setting the image variable of this element so that we also set the current image clip on the image at the
-        same time.
+        Wraps setting the image variable of this element so that we also set the current image
+        clip on the image at the same time.
 
         :param new_image: The new image to set.
         """
         if self.get_image_clipping_rect() is not None and new_image is not None:
             self._pre_clipped_image = new_image
-            if self.get_image_clipping_rect().width == 0 and self.get_image_clipping_rect().height == 0:
+            if (self.get_image_clipping_rect().width == 0 and
+                    self.get_image_clipping_rect().height == 0):
                 self.image = self.ui_manager.get_universal_empty_surface()
             else:
-                self.image = pygame.Surface(self._pre_clipped_image.get_size(), flags=pygame.SRCALPHA, depth=32)
+                self.image = pygame.Surface(self._pre_clipped_image.get_size(),
+                                            flags=pygame.SRCALPHA,
+                                            depth=32)
                 self.image.fill(pygame.Color('#00000000'))
-                self.image.blit(self._pre_clipped_image, self.get_image_clipping_rect(), self.get_image_clipping_rect())
+                self.image.blit(self._pre_clipped_image,
+                                self.get_image_clipping_rect(),
+                                self.get_image_clipping_rect())
         else:
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None
 
     def get_top_layer(self) -> int:
         """
-        Assuming we have correctly calculated the 'thickness' of this container, this method will return the top of
-        this element.
+        Assuming we have correctly calculated the 'thickness' of this container, this method will
+        return the top of this element.
 
         :return int: An integer representing the current highest layer being used by this element.
         """

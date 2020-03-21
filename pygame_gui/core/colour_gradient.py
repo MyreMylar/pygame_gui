@@ -70,10 +70,12 @@ class ColourGradient:
                                   rect: Union[pygame.Rect, None] = None):
         """
         Applies this gradient to a specified input surface using blending multiplication.
-        As a result this method works best when the input surface is a mostly white, stencil shape type surface.
+        As a result this method works best when the input surface is a mostly white, stencil shape
+        type surface.
 
         :param input_surface:
-        :param rect: The rectangle on the surface to apply the gradient to. If None, applies to the whole surface.
+        :param rect: The rectangle on the surface to apply the gradient to. If None, applies to the
+        whole surface.
         """
         # scale the gradient up to the right size
         input_surface_size = input_surface.get_size()
@@ -90,6 +92,9 @@ class ColourGradient:
             input_surface.set_clip(None)
         else:
             gradient_placement_rect = gradient_surf.get_rect()
-            gradient_placement_rect.center = (int(input_surface_size[0] / 2), int(input_surface_size[1] / 2))
+            gradient_placement_rect.center = (int(input_surface_size[0] / 2),
+                                              int(input_surface_size[1] / 2))
 
-            input_surface.blit(gradient_surf, gradient_placement_rect, special_flags=pygame.BLEND_RGBA_MULT)
+            input_surface.blit(gradient_surf,
+                               gradient_placement_rect,
+                               special_flags=pygame.BLEND_RGBA_MULT)

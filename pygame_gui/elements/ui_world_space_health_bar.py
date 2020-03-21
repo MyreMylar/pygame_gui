@@ -8,15 +8,17 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleS
 
 class UIWorldSpaceHealthBar(UIElement):
     """
-    A UI that will display a sprite's 'health_capacity' and their 'current_health' in 'world space' above the sprite.
-    This means that the health bar will move with the camera and the sprite itself.
+    A UI that will display a sprite's 'health_capacity' and their 'current_health' in 'world space'
+    above the sprite. This means that the health bar will move with the camera and the sprite
+    itself.
 
     A sprite passed to this class must have the attributes 'health_capacity' and 'current_health'.
 
     :param relative_rect: The rectangle that defines the size of the health bar.
     :param sprite_to_monitor: The sprite we are displaying the health of.
     :param manager: The UIManager that manages this element.
-    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param container: The container that this element is within. If set to None will be the root
+    window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -117,8 +119,8 @@ class UIWorldSpaceHealthBar(UIElement):
 
     def update(self, time_delta: float):
         """
-        Updates the health bar sprite's image and rectangle with the latest health and position data from the
-        sprite we are monitoring
+        Updates the health bar sprite's image and rectangle with the latest health and position
+        data from the sprite we are monitoring
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
@@ -165,14 +167,15 @@ class UIWorldSpaceHealthBar(UIElement):
 
     def rebuild_from_changed_theme_data(self):
         """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
-        the theme data has changed.
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
+        for this element when the theme data has changed.
         """
         has_any_changed = False
 
         shape_type = 'rectangle'
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+        if shape_type_string is not None and shape_type_string in ['rectangle',
+                                                                   'rounded_rectangle']:
             shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
@@ -180,7 +183,8 @@ class UIWorldSpaceHealthBar(UIElement):
 
         corner_radius = 2
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids, 'shape_corner_radius')
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
         if shape_corner_radius_string is not None:
             try:
                 corner_radius = int(shape_corner_radius_string)
@@ -191,7 +195,9 @@ class UIWorldSpaceHealthBar(UIElement):
             has_any_changed = True
 
         hover_height = 1
-        hover_height_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'hover_height')
+        hover_height_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'hover_height')
         if hover_height_string is not None:
             try:
                 hover_height = int(hover_height_string)
@@ -203,7 +209,9 @@ class UIWorldSpaceHealthBar(UIElement):
             has_any_changed = True
 
         border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
         if border_width_string is not None:
             try:
                 border_width = int(border_width_string)
@@ -215,7 +223,9 @@ class UIWorldSpaceHealthBar(UIElement):
             has_any_changed = True
 
         shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
         if shadow_width_string is not None:
             try:
                 shadow_width = int(shadow_width_string)
@@ -225,17 +235,23 @@ class UIWorldSpaceHealthBar(UIElement):
             self.shadow_width = shadow_width
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                             self.element_ids,
+                                                             'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'unfilled_bar')
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                   self.element_ids,
+                                                                   'unfilled_bar')
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'filled_bar')
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'filled_bar')
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True

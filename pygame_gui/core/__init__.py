@@ -7,3 +7,13 @@ from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.interfaces.container_interface import IContainerLikeInterface
 from pygame_gui.core.interfaces.window_interface import IWindowInterface
 from pygame_gui.core.colour_gradient import ColourGradient
+
+__all__ = ['UIAppearanceTheme',
+           'UIContainer',
+           'UIElement',
+           'UIFontDictionary',
+           'ShadowGenerator',
+           'UIWindowStack',
+           'IContainerLikeInterface',
+           'IWindowInterface',
+           'ColourGradient']

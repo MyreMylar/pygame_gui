@@ -13,15 +13,18 @@ from pygame_gui.elements.text.html_parser import TextLineContext
 
 class TextBlock:
     """
-    Handles turning parsed HTML in TextLineContexts into surfaces in StyledChunks and deals with word wrapping.
+    Handles turning parsed HTML in TextLineContexts into surfaces in StyledChunks and deals with
+    word wrapping.
 
     :param text: Raw text to be styled with TextLineContext objects.
     :param rect: The rectangle to wrap the text to.
     :param indexed_styles: Text styles stored by their index in the raw text.
     :param font_dict: The UI's font dictionary.
-    :param link_style: The link style for this text block (so we can do several bits of styling at once in an <a> block.
+    :param link_style: The link style for this text block (so we can do several bits of styling at
+    once in an <a> block.
     :param bg_colour: The background colour or gradient for the whole block.
-    :param wrap_to_height: Whether we should wrap the text to our block height. Not sure if this works.
+    :param wrap_to_height: Whether we should wrap the text to our block height. Not sure if this
+    works.
     """
     class TextLine:
         """
@@ -61,8 +64,9 @@ class TextBlock:
 
     def redraw(self, text_effect: Union[TextBoxEffect, None]):
         """
-        Takes our parsed text and the styles generated from that parsing and builds rendered 'chunks' out of them
-        that are then blitted onto a final surface containing all our drawn text.
+        Takes our parsed text and the styles generated from that parsing and builds rendered
+        'chunks' out of them that are then blitted onto a final surface containing all our drawn
+        text.
 
         :param text_effect: The text effect to apply when drawing the text.
         """
@@ -138,87 +142,8 @@ class TextBlock:
                     chunk_index += 1
 
                 if split_point != -1:
-                    word_split_point = 0
-                    chunk_to_split = line[chunk_to_split_index]
-                    for i in range(split_point, 0, -1):
-                        if chunk_to_split[0][i] == ' ':
-                            word_split_point = i
-                            break
-                    if word_split_point == 0 and chunk_to_split_index == 0 and chunk_length > self.width:
-                        # our chunk is one word, at the start of the line, and the split point is in it, so split the
-                        # word instead of hunting for a word split point
-
-                        if split_point > 1:
-                            chunk_2_font = self.font_dict.find_font(chunk_to_split[1].font_size,
-                                                                    chunk_to_split[1].font_name,
-                                                                    chunk_to_split[1].style.bold,
-                                                                    chunk_to_split[1].style.italic)
-
-                            # If available space is less than three characters wide,
-                            # we won't be able to split words with hyphens
-                            if self.width < chunk_2_font.size('-W-')[0]:
-                                chunk_1 = [chunk_to_split[0][:split_point - 1], chunk_to_split[1]]
-                                chunk_2 = [chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
-                            else:
-                                chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
-                                chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
-
-                            chunk_2_ascent = chunk_2_font.get_ascent()
-
-                            lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
-                            new_line = [chunk_2_ascent, [chunk_2]]
-
-                            chunk_length_of_line = len(lines_of_chunks[line_index][1])
-                            for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
-                                remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
-                                new_line[1].append(remaining_chunk)
-
-                                remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
-                                                                                remaining_chunk[1].font_name,
-                                                                                remaining_chunk[1].style.bold,
-                                                                                remaining_chunk[1].style.italic)
-                                remaining_chunk_ascent = remaining_chunk_font.get_ascent()
-                                if remaining_chunk_ascent > new_line[0]:
-                                    new_line[0] = remaining_chunk_ascent
-
-                            for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
-                                lines_of_chunks[line_index][1].pop()
-
-                            lines_of_chunks.insert(line_index + 1, new_line)
-
-                        else:
-                            warnings.warn('Unable to split word into chunks because text box is too narrow')
-
-                    else:
-                        chunk_1 = [chunk_to_split[0][:word_split_point], chunk_to_split[1]]
-                        chunk_2 = [chunk_to_split[0][word_split_point:].lstrip(' '), chunk_to_split[1]]
-
-                        chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
-                                                                chunk_2[1].font_name,
-                                                                chunk_2[1].style.bold,
-                                                                chunk_2[1].style.italic)
-                        chunk_2_ascent = chunk_2_font.get_ascent()
-
-                        lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
-                        new_line = [chunk_2_ascent, [chunk_2]]
-
-                        chunk_length_of_line = len(lines_of_chunks[line_index][1])
-                        for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
-                            remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
-                            new_line[1].append(remaining_chunk)
-
-                            remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
-                                                                            remaining_chunk[1].font_name,
-                                                                            remaining_chunk[1].style.bold,
-                                                                            remaining_chunk[1].style.italic)
-                            remaining_chunk_ascent = remaining_chunk_font.get_ascent()
-                            if remaining_chunk_ascent > new_line[0]:
-                                new_line[0] = remaining_chunk_ascent
-
-                        for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
-                            lines_of_chunks[line_index][1].pop()
-
-                        lines_of_chunks.insert(line_index + 1, new_line)
+                    self.split_chunk(chunk_length, chunk_to_split_index, line, line_index,
+                                     lines_of_chunks, split_point)
                 line_index += 1
 
         surface = None
@@ -289,14 +214,103 @@ class TextBlock:
         self.width = surface_width
         self.height = surface_height
 
+    def split_chunk(self, chunk_length, chunk_to_split_index, line, line_index, lines_of_chunks,
+                    split_point):
+        word_split_point = 0
+        chunk_to_split = line[chunk_to_split_index]
+        for i in range(split_point, 0, -1):
+            if chunk_to_split[0][i] == ' ':
+                word_split_point = i
+                break
+        if (word_split_point == 0 and chunk_to_split_index == 0 and
+                chunk_length > self.width):
+            # our chunk is one word, at the start of the line, and the split point is
+            # in it, so split the word instead of hunting for a word split point
+
+            if split_point > 1:
+                chunk_2_font = self.font_dict.find_font(chunk_to_split[1].font_size,
+                                                        chunk_to_split[1].font_name,
+                                                        chunk_to_split[1].style.bold,
+                                                        chunk_to_split[1].style.italic)
+
+                # If available space is less than three characters wide,
+                # we won't be able to split words with hyphens
+                if self.width < chunk_2_font.size('-W-')[0]:
+                    chunk_1 = [chunk_to_split[0][:split_point - 1], chunk_to_split[1]]
+                    chunk_2 = [chunk_to_split[0][split_point - 1:].lstrip(' '), chunk_to_split[1]]
+                else:
+                    chunk_1 = [chunk_to_split[0][:split_point - 1] + '-', chunk_to_split[1]]
+                    chunk_2 = ["-" + chunk_to_split[0][split_point - 1:].lstrip(' '),
+                               chunk_to_split[1]]
+
+                chunk_2_ascent = chunk_2_font.get_ascent()
+
+                lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
+                new_line = [chunk_2_ascent, [chunk_2]]
+
+                chunk_length_of_line = len(lines_of_chunks[line_index][1])
+                for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                    remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
+                    new_line[1].append(remaining_chunk)
+
+                    remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
+                                                                    remaining_chunk[1].font_name,
+                                                                    remaining_chunk[1].style.bold,
+                                                                    remaining_chunk[1].style.italic)
+                    remaining_chunk_ascent = remaining_chunk_font.get_ascent()
+                    if remaining_chunk_ascent > new_line[0]:
+                        new_line[0] = remaining_chunk_ascent
+
+                for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
+                    lines_of_chunks[line_index][1].pop()
+
+                lines_of_chunks.insert(line_index + 1, new_line)
+
+            else:
+                warnings.warn('Unable to split word into'
+                              ' chunks because text box is too narrow')
+
+        else:
+            chunk_1 = [chunk_to_split[0][:word_split_point], chunk_to_split[1]]
+            chunk_2 = [chunk_to_split[0][word_split_point:].lstrip(' '), chunk_to_split[1]]
+
+            chunk_2_font = self.font_dict.find_font(chunk_2[1].font_size,
+                                                    chunk_2[1].font_name,
+                                                    chunk_2[1].style.bold,
+                                                    chunk_2[1].style.italic)
+            chunk_2_ascent = chunk_2_font.get_ascent()
+
+            lines_of_chunks[line_index][1][chunk_to_split_index] = chunk_1
+            new_line = [chunk_2_ascent, [chunk_2]]
+
+            chunk_length_of_line = len(lines_of_chunks[line_index][1])
+            for remaining_chunk_index in range(chunk_to_split_index + 1, chunk_length_of_line):
+                remaining_chunk = lines_of_chunks[line_index][1][remaining_chunk_index]
+                new_line[1].append(remaining_chunk)
+
+                remaining_chunk_font = self.font_dict.find_font(remaining_chunk[1].font_size,
+                                                                remaining_chunk[1].font_name,
+                                                                remaining_chunk[1].style.bold,
+                                                                remaining_chunk[1].style.italic)
+                remaining_chunk_ascent = remaining_chunk_font.get_ascent()
+                if remaining_chunk_ascent > new_line[0]:
+                    new_line[0] = remaining_chunk_ascent
+
+            for _ in range(chunk_to_split_index + 1, chunk_length_of_line):
+                lines_of_chunks[line_index][1].pop()
+
+            lines_of_chunks.insert(line_index + 1, new_line)
+
     def redraw_from_chunks(self, text_effect: Union[TextBoxEffect, None]):
         """
-        Redraw only the last part of text block starting from the already complete styled and word wrapped StyledChunks.
+        Redraw only the last part of text block starting from the already complete styled and word
+        wrapped StyledChunks.
 
         :param text_effect: The text effect to use when redrawing.
         """
         final_alpha = text_effect.get_final_alpha() if text_effect else 255
-        self.block_sprite = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA, depth=32)
+        self.block_sprite = pygame.Surface((self.width, self.height),
+                                           flags=pygame.SRCALPHA, depth=32)
 
         if type(self.bg_colour) == ColourGradient:
             self.block_sprite.fill(pygame.Color("#FFFFFFFF"))
@@ -312,8 +326,8 @@ class TextBlock:
 
     def add_chunks_to_hover_group(self, hover_group: List[StyledChunk]):
         """
-        Grab the StyledChunks that are hyperlinks and add them to a passed in 'hover group' so they can be checked
-        By the UITextBox for mouse over and mouse click events.
+        Grab the StyledChunks that are hyperlinks and add them to a passed in 'hover group' so they
+        can be checked by the UITextBox for mouse over and mouse click events.
 
         :param hover_group: The group to add our hyperlink StyledChunks to.
         """

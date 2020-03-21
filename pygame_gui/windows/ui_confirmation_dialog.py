@@ -10,25 +10,29 @@ from pygame_gui.elements import UIWindow, UIButton, UITextBox
 
 class UIConfirmationDialog(UIWindow):
     """
-    A confirmation dialog that lets a user choose between continuing on a path they've chosen or cancelling.
-    It's good practice to give a very brief description of the action they are confirming on the button they click to
-    confirm it i.e. 'Delete' for a file deletion operation or, 'Rename' for a file rename operation.
+    A confirmation dialog that lets a user choose between continuing on a path they've chosen or
+    cancelling. It's good practice to give a very brief description of the action they are
+    confirming on the button they click to confirm it i.e. 'Delete' for a file deletion operation
+    or, 'Rename' for a file rename operation.
 
     :param rect: The size and position of the window, includes the menu bar across the top.
     :param manager: The UIManager that manages this UIElement.
-    :param confirming_action_long_desc: Long-ish description of action. Can make use of HTML to style the text.
+    :param action_long_desc: Long-ish description of action. Can make use of HTML to
+    style the text.
     :param window_title: The title of the  window.
-    :param confirming_action_short_name: Short, one or two word description of action for button.
-    :param blocking: Whether this window should block all other mouse interactions with the GUI until it is closed.
-    :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#confirmation_dialog'.
+    :param action_short_name: Short, one or two word description of action for button.
+    :param blocking: Whether this window should block all other mouse interactions with the GUI
+    until it is closed.
+    :param object_id: A custom defined ID for fine tuning of theming. Defaults to
+    '#confirmation_dialog'.
     """
 
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 confirming_action_long_desc: str,
+                 action_long_desc: str,
                  *,
                  window_title: str = 'Confirm',
-                 confirming_action_short_name: str = 'OK',
+                 action_short_name: str = 'OK',
                  blocking: bool = True,
                  object_id: str = '#confirmation_dialog'):
 
@@ -45,7 +49,7 @@ class UIConfirmationDialog(UIWindow):
         self.set_minimum_dimensions(minimum_dimensions)
 
         self.confirm_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                       text=confirming_action_short_name,
+                                       text=action_short_name,
                                        manager=self.ui_manager,
                                        container=self,
                                        anchors={'left': 'right',
@@ -62,10 +66,12 @@ class UIConfirmationDialog(UIWindow):
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
 
-        self.confirmation_text = UITextBox(html_text=confirming_action_long_desc,
+        text_width = self.get_container().relative_rect.width - 10
+        text_height = self.get_container().relative_rect.height - 50
+        self.confirmation_text = UITextBox(html_text=action_long_desc,
                                            relative_rect=pygame.Rect(5, 5,
-                                                                     self.get_container().relative_rect.width - 10,
-                                                                     self.get_container().relative_rect.height - 50),
+                                                                     text_width,
+                                                                     text_height),
                                            manager=self.ui_manager,
                                            container=self,
                                            anchors={'left': 'left',
@@ -83,7 +89,8 @@ class UIConfirmationDialog(UIWindow):
         (UI_CONFIRMATION_DIALOG_CONFIRMED) when the OK button is pressed, and also close the window.
 
         :param event: a pygame.Event.
-        :return: Return True if we 'consumed' this event and don't want to pass it on to the rest of the UI.
+        :return: Return True if we 'consumed' this event and don't want to pass it on to the rest
+        of the UI.
         """
         consumed_event = super().process_event(event)
 

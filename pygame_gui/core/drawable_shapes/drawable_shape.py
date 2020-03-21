@@ -5,7 +5,6 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
-from pygame.math import Vector2
 
 
 class DrawableShapeState:
@@ -24,8 +23,8 @@ class DrawableShapeState:
 
     def get_surface(self) -> pygame.Surface:
         """
-        Gets the pygame.Surface of this state. Will be a blend of this state and the previous one if we are in
-        a transition.
+        Gets the pygame.Surface of this state. Will be a blend of this state and the previous one
+        if we are in a transition.
 
         :return: A pygame Surface for this state.
         """
@@ -85,8 +84,8 @@ class DrawableStateTransition:
 
     def produce_blended_result(self) -> pygame.Surface:
         """
-        Produces a blend between the images of our start state and our target state. The progression of the blend is
-        dictated by the progress of time through the transition.
+        Produces a blend between the images of our start state and our target state. The
+        progression of the blend is dictated by the progress of time through the transition.
 
         :return: The blended surface.
         """
@@ -110,13 +109,16 @@ class DrawableStateTransition:
 
 class DrawableShape:
     """
-    Base class for a graphical 'shape' that we can use for many different UI elements. The intent is to make it easy to
-    switch between UI elements having normal rectangles, circles or rounded rectangles as their visual shape while
-    having the same non-shape related functionality.
+    Base class for a graphical 'shape' that we can use for many different UI elements. The intent
+    is to make it easy to switch between UI elements having normal rectangles, circles or rounded
+    rectangles as their visual shape while having the same non-shape related functionality.
 
-    :param containing_rect: The rectangle which this shape is entirely contained within (including shadows, borders etc)
-    :param theming_parameters: A dictionary of user supplied data that alters the appearance of the shape.
-    :param states: Names for the different states the shape can be in, each may have different sets of colours & images.
+    :param containing_rect: The rectangle which this shape is entirely contained within (including
+    shadows, borders etc)
+    :param theming_parameters: A dictionary of user supplied data that alters the appearance of
+    the shape.
+    :param states: Names for the different states the shape can be in, each may have different
+    sets of colours & images.
     :param manager: The UI manager for this UI.
     """
     def __init__(self,
@@ -167,8 +169,8 @@ class DrawableShape:
 
     def set_active_state(self, state_id: str):
         """
-        Changes the currently active state for the drawable shape and, if setup in the theme, creates a transition
-        blend from the previous state to the newly active one.
+        Changes the currently active state for the drawable shape and, if setup in the theme,
+        creates a transition blend from the previous state to the newly active one.
 
         :param state_id: the ID of the new state to make active.
         """
@@ -177,24 +179,29 @@ class DrawableShape:
             self.active_state = self.states[state_id]
             self.active_state.has_fresh_surface = True
 
-            if self.previous_state is not None and (self.previous_state.state_id,
-                                                    self.active_state.state_id) in self.state_transition_times:
-                duration = self.state_transition_times[(self.previous_state.state_id, self.active_state.state_id)]
+            if self.previous_state is not None and ((self.previous_state.state_id,
+                                                    self.active_state.state_id) in
+                                                    self.state_transition_times):
+                prev_id = self.previous_state.state_id
+                next_id = self.active_state.state_id
+                duration = self.state_transition_times[(self.previous_state.state_id,
+                                                        self.active_state.state_id)]
                 if self.previous_state.transition is None:
                     # completely fresh transition
                     self.active_state.transition = DrawableStateTransition(self.states,
-                                                                           self.previous_state.state_id,
-                                                                           self.active_state.state_id,
+                                                                           prev_id,
+                                                                           next_id,
                                                                            duration)
                 else:
                     # check to see if we are reversing an in-progress transition.
                     if self.previous_state.transition.start_stat_id == self.active_state.state_id:
                         progress_time = self.previous_state.transition.remaining_time
-                        self.active_state.transition = DrawableStateTransition(self.states,
-                                                                               self.previous_state.state_id,
-                                                                               self.active_state.state_id,
-                                                                               duration,
-                                                                               progress=progress_time)
+                        transition = DrawableStateTransition(self.states,
+                                                             prev_id,
+                                                             next_id,
+                                                             duration,
+                                                             progress=progress_time)
+                        self.active_state.transition = transition
 
     def update(self, time_delta: float):
         """
@@ -220,7 +227,8 @@ class DrawableShape:
 
     def full_rebuild_on_size_change(self):
         """
-        Triggered when we've changed the size of the shape and need to rebuild basically everything to account for it.
+        Triggered when we've changed the size of the shape and need to rebuild basically everything
+        to account for it.
 
         """
         if 'shadow_width' in self.theming:
@@ -232,8 +240,8 @@ class DrawableShape:
 
     def redraw_all_states(self):
         """
-        Starts the redrawing process for all states of this shape. Redrawing is done one state at a time so will take a
-        few loops of the game to complete if this shape has many states.
+        Starts the redrawing process for all states of this shape. Redrawing is done one state at
+        a time so will take a few loops of the game to complete if this shape has many states.
 
         """
         self.states_to_redraw_queue = deque([state for state in self.states])
@@ -250,10 +258,11 @@ class DrawableShape:
                 'font' not in self.theming):
             return
         # first we need to create rectangle the size of the text, if there is any text to draw
-        self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
+        self.aligned_text_rect = pygame.Rect((0, 0),
+                                             self.theming['font'].size(self.theming['text']))
 
-        if self.theming['text_horiz_alignment'] == 'center' or self.theming['text_horiz_alignment'] not in ['left',
-                                                                                                            'right']:
+        if (self.theming['text_horiz_alignment'] == 'center' or
+                self.theming['text_horiz_alignment'] not in ['left', 'right']):
             self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
         elif self.theming['text_horiz_alignment'] == 'left':
             self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
@@ -262,8 +271,8 @@ class DrawableShape:
             x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
                      self.aligned_text_rect.width - self.shadow_width - self.border_width)
             self.aligned_text_rect.x = x_pos
-        if self.theming['text_vert_alignment'] == 'center' or self.theming['text_vert_alignment'] not in ['top',
-                                                                                                          'bottom']:
+        if (self.theming['text_vert_alignment'] == 'center' or
+                self.theming['text_vert_alignment'] not in ['top', 'bottom']):
             self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
         elif self.theming['text_vert_alignment'] == 'top':
             self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
@@ -309,10 +318,11 @@ class DrawableShape:
 
     def has_fresh_surface(self) -> bool:
         """
-        Lets UI elements find out when a state has finished building a fresh surface for times when we have to delay
-        it for whatever reason.
+        Lets UI elements find out when a state has finished building a fresh surface for times
+        when we have to delay it for whatever reason.
 
-        :return: True if there is a freshly built surface waiting, False if the shape has not changed.
+        :return: True if there is a freshly built surface waiting, False if the shape has not
+        changed.
         """
         return self.active_state.has_fresh_surface
 
@@ -321,8 +331,8 @@ class DrawableShape:
                                 shape_surface: pygame.Surface,
                                 rect: Union[pygame.Rect, None] = None):
         """
-        Apply a colour to a shape surface by multiplication blend. This works best when the shape surface is
-        predominantly white.
+        Apply a colour to a shape surface by multiplication blend. This works best when the shape
+        surface is predominantly white.
 
         :param colour: The colour to apply.
         :param shape_surface: The shape surface to apply the colour to.
@@ -333,24 +343,31 @@ class DrawableShape:
             colour_surface.fill(colour)
             shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
         else:
-            colour_surface = pygame.Surface(shape_surface.get_size(), flags=pygame.SRCALPHA, depth=32)
+            colour_surface = pygame.Surface(shape_surface.get_size(),
+                                            flags=pygame.SRCALPHA, depth=32)
             colour_surface.fill(colour)
             shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
-    def rebuild_images_and_text(self, image_state_str: str, state_str: str, text_colour_state_str: str):
+    def rebuild_images_and_text(self,
+                                image_state_str: str,
+                                state_str: str,
+                                text_colour_state_str: str):
         """
-        Rebuilds any text or image used by a specific state in the drawable shape. Effectively this means adding them
-        on top of whatever is already in the state's surface. As such it should generally be called last in the
-        process of building up a finished drawable shape state.
+        Rebuilds any text or image used by a specific state in the drawable shape. Effectively
+        this means adding them on top of whatever is already in the state's surface. As such it
+        should generally be called last in the process of building up a finished drawable shape
+        state.
 
         :param image_state_str: image ID of the state we are going to be adding images and text to.
         :param state_str: normal ID of the state we are going to be adding images and text to.
-        :param text_colour_state_str: text ID of the state we are going to be adding images and text to.
+        :param text_colour_state_str: text ID of the state we are going to be adding images and
+        text to.
         """
         # Draw any themed images
         if image_state_str in self.theming and self.theming[image_state_str] is not None:
             image_rect = self.theming[image_state_str].get_rect()
-            image_rect.center = (int(self.containing_rect.width / 2), int(self.containing_rect.height / 2))
+            image_rect.center = (int(self.containing_rect.width / 2),
+                                 int(self.containing_rect.height / 2))
             self.states[state_str].surface.blit(self.theming[image_state_str], image_rect)
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
@@ -366,16 +383,21 @@ class DrawableShape:
                 text_surface = None
 
             if 'text_shadow' in self.theming:
-                text_shadow = self.theming['font'].render(self.theming['text'], True, self.theming['text_shadow'])
+                text_shadow = self.theming['font'].render(self.theming['text'],
+                                                          True, self.theming['text_shadow'])
 
                 self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x, self.aligned_text_rect.y + 1))
+                                                    (self.aligned_text_rect.x,
+                                                     self.aligned_text_rect.y + 1))
                 self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x, self.aligned_text_rect.y - 1))
+                                                    (self.aligned_text_rect.x,
+                                                     self.aligned_text_rect.y - 1))
                 self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x + 1, self.aligned_text_rect.y))
+                                                    (self.aligned_text_rect.x + 1,
+                                                     self.aligned_text_rect.y))
                 self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x - 1, self.aligned_text_rect.y))
+                                                    (self.aligned_text_rect.x - 1,
+                                                     self.aligned_text_rect.y))
 
             if text_surface is not None and self.aligned_text_rect is not None:
                 self.states[state_str].surface.blit(text_surface, self.aligned_text_rect)
@@ -394,7 +416,9 @@ class DrawableShape:
         """
         pass
 
-    def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def collide_point(self, point: Union[pygame.math.Vector2,
+                                         Tuple[int, int],
+                                         Tuple[float, float]]):
         """
         This method is declared for derived classes to implement but has no default implementation.
 
@@ -402,7 +426,9 @@ class DrawableShape:
         """
         pass
 
-    def set_position(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, point: Union[pygame.math.Vector2,
+                                        Tuple[int, int],
+                                        Tuple[float, float]]):
         """
         This method is declared for derived classes to implement but has no default implementation.
 
@@ -410,7 +436,9 @@ class DrawableShape:
         """
         pass
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         This method is declared for derived classes to implement but has no default implementation.
 

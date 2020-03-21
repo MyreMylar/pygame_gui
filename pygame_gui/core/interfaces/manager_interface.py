@@ -8,8 +8,8 @@ class IUIManagerInterface:
     """
     A meta class that defines the interface that a UI Manager uses.
 
-    Interfaces like this help us evade cyclical import problems by allowing us to define the actual manager class later
-    on and have it make use of the classes that use the interface.
+    Interfaces like this help us evade cyclical import problems by allowing us to define the
+    actual manager class later on and have it make use of the classes that use the interface.
     """
     __metaclass__ = ABCMeta
 
@@ -84,11 +84,17 @@ class IUIManagerInterface:
     def load_default_cursors(self):
         pass
 
-    def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, ...], Tuple[int, ...]]):
+    def set_active_cursor(self, cursor: Tuple[Tuple[int, int],
+                                              Tuple[int, int],
+                                              Tuple[int, ...],
+                                              Tuple[int, ...]]):
         pass
 
     def get_universal_empty_surface(self) -> pygame.Surface:
         pass
 
-    def create_tool_tip(self, text: str, position: Tuple[int, int], hover_distance: Tuple[int, int]):
+    def create_tool_tip(self,
+                        text: str,
+                        position: Tuple[int, int],
+                        hover_distance: Tuple[int, int]):
         pass

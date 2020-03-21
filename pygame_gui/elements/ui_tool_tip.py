@@ -11,13 +11,15 @@ from pygame_gui.elements.ui_text_box import UITextBox
 
 class UITooltip(UIElement):
     """
-    A tool tip is a floating block of text that gives additional information after a user hovers over an interactive
-    part of a GUI for a short time. In Pygame GUI the tooltip's text is style-able with HTML.
+    A tool tip is a floating block of text that gives additional information after a user hovers
+    over an interactive part of a GUI for a short time. In Pygame GUI the tooltip's text is
+    style-able with HTML.
 
     At the moment the tooltips are only available as an option on UIButton elements.
 
-    Tooltips also don't allow a container as they are designed to overlap normal UI boundaries and be contained only
-    within the 'root' window/container, which is synonymous with the pygame display surface.
+    Tooltips also don't allow a container as they are designed to overlap normal UI boundaries and
+    be contained only within the 'root' window/container, which is synonymous with the pygame
+    display surface.
 
     :param html_text: Text styled with HTML, to be displayed on the tooltip.
     :param hover_distance: Distance in pixels between the tooltip and the thing being hovered.
@@ -80,8 +82,8 @@ class UITooltip(UIElement):
 
     def kill(self):
         """
-        Overrides the UIElement's default kill method to also kill the text block element that helps make up the
-        complete tool tip.
+        Overrides the UIElement's default kill method to also kill the text block element that
+        helps make up the complete tool tip.
         """
         self.text_block.kill()
         super().kill()
@@ -91,11 +93,12 @@ class UITooltip(UIElement):
         Finds a valid position for the tool tip inside the root container of the UI.
 
         The algorithm starts from the position of the target we are providing a tool tip for then it
-        tries to fit the rectangle for the tool tip onto the screen by moving it above, below, to the left and to the
-        right, until we find a position that fits the whole tooltip rectangle on the screen at once.
+        tries to fit the rectangle for the tool tip onto the screen by moving it above, below, to
+        the left and to the right, until we find a position that fits the whole tooltip rectangle
+        on the screen at once.
 
-        If we fail to manage this then the method will return False. Otherwise it returns True and set the position
-        of the tool tip to our valid position.
+        If we fail to manage this then the method will return False. Otherwise it returns True and
+        set the position of the tool tip to our valid position.
 
         :param position: A 2D vector representing the position of the target this tool tip is for.
         :return bool: returns True if we find a valid (visible) position and False if we do not.
@@ -129,18 +132,21 @@ class UITooltip(UIElement):
                 return False
         else:
             self.relative_rect = self.rect.copy()
-            warnings.warn("initial position for tool tip is off screen, unable to find valid position")
+            warnings.warn("initial position for tool tip is off screen,"
+                          " unable to find valid position")
             return False
 
     def rebuild_from_changed_theme_data(self):
         """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
-        the theme data has changed.
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for
+        this element when the theme data has changed.
         """
         has_any_changed = False
 
         rect_width = 170
-        rect_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'rect_width')
+        rect_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                        self.element_ids,
+                                                        'rect_width')
         if rect_width_string is not None:
             try:
                 rect_width = int(rect_width_string)
@@ -154,25 +160,33 @@ class UITooltip(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
-        Sets the absolute screen position of this tool tip, updating it's subordinate text box at the same time.
+        Sets the absolute screen position of this tool tip, updating it's subordinate text box at
+        the same time.
 
         :param position: The absolute screen position to set.
         """
         super().set_position(position)
         self.text_block.set_position(position)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
-        Sets the relative screen position of this tool tip, updating it's subordinate text box at the same time.
+        Sets the relative screen position of this tool tip, updating it's subordinate text box at
+        the same time.
 
         :param position: The relative screen position to set.
         """
         super().set_relative_position(position)
         self.text_block.set_relative_position(position)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
 

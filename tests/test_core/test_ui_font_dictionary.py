@@ -130,11 +130,11 @@ class TestUIFontDictionary:
 
     def test_convert_html_size_to_point_size_invalid(self, _init_pygame):
         font_dictionary = UIFontDictionary()
-        assert font_dictionary.convert_html_size_to_point_size(9000) == font_dictionary.default_font_size
+        assert font_dictionary.convert_html_to_point_size(9000) == font_dictionary.default_font_size
 
     def test_convert_html_size_to_point_size_valid(self, _init_pygame):
         font_dictionary = UIFontDictionary()
-        assert font_dictionary.convert_html_size_to_point_size(3) == 12
+        assert font_dictionary.convert_html_to_point_size(3) == 12
 
     def test_check_font_preloaded(self, _init_pygame):
         font_dictionary = UIFontDictionary()

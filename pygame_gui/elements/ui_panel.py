@@ -14,23 +14,30 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleS
 
 class UIPanel(UIElement, IContainerLikeInterface):
     """
-    A rectangular panel that holds a UI container and is designed to overlap other elements. It acts a little like a
-    window that is not shuffled about in a stack - instead remaining at the same layer distance from the container
-    it was initially placed in.
+    A rectangular panel that holds a UI container and is designed to overlap other elements. It
+    acts a little like a window that is not shuffled about in a stack - instead remaining at the
+    same layer distance from the container it was initially placed in.
 
-    It's primary purpose is for things like involved HUDs in games that want to always sit on top of UI elements that
-    may be present 'inside' the game world (e.g. player health bars). By creating a UI Panel at a height above the
-    highest layer used by the game world's UI elements we can ensure that all elements added to the panel are always
-    above the fray.
+    It's primary purpose is for things like involved HUDs in games that want to always sit on top
+    of UI elements that may be present 'inside' the game world (e.g. player health bars). By
+    creating a UI Panel at a height above the highest layer used by the game world's UI elements
+    we can ensure that all elements added to the panel are always above the fray.
 
-    :param relative_rect: The positioning and sizing rectangle for the panel. See the layout guide for details.
+    :param relative_rect: The positioning and sizing rectangle for the panel. See the layout
+    guide for details.
     :param starting_layer_height: How many layers above its container to place this panel on.
-    :param manager: The GUI manager that handles drawing and updating the UI and interactions between elements.
-    :param margins: Controls the distance between the edge of the panel and where it's container should begin.
-    :param container: The container this panel is inside of distinct from this panel's own container.
-    :param parent_element: A hierarchical 'parent' used for signifying belonging and used in theming and events.
-    :param object_id: An identifier that can be used to help distinguish this particular panel from others.
-    :param anchors: Used to layout elements and dictate what the relative_rect is relative to. Defaults to the top left.
+    :param manager: The GUI manager that handles drawing and updating the UI and interactions
+    between elements.
+    :param margins: Controls the distance between the edge of the panel and where it's
+    container should begin.
+    :param container: The container this panel is inside of distinct from this panel's own
+    container.
+    :param parent_element: A hierarchical 'parent' used for signifying belonging and used in
+    theming and events.
+    :param object_id: An identifier that can be used to help distinguish this particular panel
+    from others.
+    :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
+    Defaults to the top left.
     """
     def __init__(self,
                  relative_rect: Rect,
@@ -74,22 +81,22 @@ class UIPanel(UIElement, IContainerLikeInterface):
         else:
             self.container_margins = margins
 
-        relative_container_rect = Rect(self.relative_rect.left + self.container_margins['left'],
-                                       self.relative_rect.top + self.container_margins['top'],
-                                       self.relative_rect.width - (self.container_margins['left'] +
-                                                                   self.container_margins['right']),
-                                       self.relative_rect.height - (self.container_margins['top'] +
-                                                                    self.container_margins['bottom']))
+        container_rect = Rect(self.relative_rect.left + self.container_margins['left'],
+                              self.relative_rect.top + self.container_margins['top'],
+                              self.relative_rect.width - (self.container_margins['left'] +
+                                                          self.container_margins['right']),
+                              self.relative_rect.height - (self.container_margins['top'] +
+                                                           self.container_margins['bottom']))
 
-        self.panel_container = UIContainer(relative_container_rect, manager,
+        self.panel_container = UIContainer(container_rect, manager,
                                            starting_height=starting_layer_height,
                                            parent_element=self, object_id='#panel_container')
 
     def update(self, time_delta: float):
         """
-        A method called every update cycle of our application. Designed to be overridden by derived classes
-        but also has a little functionality to make sure the panel's layer 'thickness' is accurate and to handle
-        window resizing.
+        A method called every update cycle of our application. Designed to be overridden by derived
+        classes but also has a little functionality to make sure the panel's layer 'thickness' is
+        accurate and to handle window resizing.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         """
@@ -106,9 +113,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :return bool: Should return True if this element makes use of this event.
         """
         consumed_event = False
-        if self is not None and event.type == MOUSEBUTTONDOWN and event.button in [pygame.BUTTON_LEFT,
-                                                                                   pygame.BUTTON_RIGHT,
-                                                                                   pygame.BUTTON_MIDDLE]:
+        if (self is not None and
+                event.type == MOUSEBUTTONDOWN and
+                event.button in [pygame.BUTTON_LEFT,
+                                 pygame.BUTTON_RIGHT,
+                                 pygame.BUTTON_MIDDLE]):
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
@@ -127,7 +136,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def kill(self):
         """
-        Overrides the basic kill() method of a pygame sprite so that we also kill all the UI elements in this panel.
+        Overrides the basic kill() method of a pygame sprite so that we also kill all the UI
+        elements in this panel.
 
         """
         self.get_container().kill()
@@ -135,13 +145,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        Set the size of this panel and then resizes and shifts the contents of the panel container to fit the new
-        size.
+        Set the size of this panel and then re-sizes and shifts the contents of the panel container
+        to fit the new size.
 
         :param dimensions:
         """
-        # Don't use a basic gate on this set dimensions method because the container may be a different size to the
-        # window
+        # Don't use a basic gate on this set dimensions method because the container may be a
+        # different size to the window
         super().set_dimensions(dimensions)
 
         new_container_dimensions = (self.relative_rect.width - (self.container_margins['left'] +
@@ -149,9 +159,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                     self.relative_rect.height - (self.container_margins['top'] +
                                                                  self.container_margins['bottom']))
         if new_container_dimensions != self.get_container().relative_rect.size:
+            container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
+                                 self.relative_rect.y + self.container_margins['top'])
             self.get_container().set_dimensions(new_container_dimensions)
-            self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
-                                                        self.relative_rect.y + self.container_margins['top']))
+            self.get_container().set_relative_position(container_rel_pos)
 
     def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -160,9 +171,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :param position: The new position to set.
         """
         super().set_relative_position(position)
-
-        self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
-                                                    self.relative_rect.y + self.container_margins['top']))
+        container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
+                             self.relative_rect.y + self.container_margins['top'])
+        self.get_container().set_relative_position(container_rel_pos)
 
     def set_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
         """
@@ -171,40 +182,49 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :param position: The new position to set.
         """
         super().set_position(position)
-
-        self.get_container().set_relative_position((self.relative_rect.x + self.container_margins['left'],
-                                                    self.relative_rect.y + self.container_margins['top']))
+        container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
+                             self.relative_rect.y + self.container_margins['top'])
+        self.get_container().set_relative_position(container_rel_pos)
 
     def rebuild_from_changed_theme_data(self):
         """
-        Checks if any theming parameters have changed, and if so triggers a full rebuild of the button's drawable shape
+        Checks if any theming parameters have changed, and if so triggers a full rebuild of the
+        button's drawable shape.
         """
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                             self.element_ids,
+                                                             'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        background_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'background_image')
+        background_image = self.ui_theme.get_image(self.object_ids,
+                                                   self.element_ids,
+                                                   'background_image')
         if background_image is not None and background_image != self.background_image:
             self.background_image = background_image
             has_any_changed = True
 
         # misc
         shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle'] and
+        if (shape_type_string is not None and shape_type_string in ['rectangle',
+                                                                    'rounded_rectangle'] and
                 shape_type_string != self.shape_type):
             self.shape_type = shape_type_string
             has_any_changed = True
 
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids, 'shape_corner_radius')
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
         if shape_corner_radius_string is not None:
             try:
                 corner_radius = int(shape_corner_radius_string)
@@ -214,7 +234,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 self.shape_corner_radius = corner_radius
                 has_any_changed = True
 
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
         if border_width_string is not None:
             try:
                 border_width = int(border_width_string)
@@ -224,7 +246,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 self.border_width = border_width
                 has_any_changed = True
 
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
         if shadow_width_string is not None:
             try:
                 shadow_width = int(shadow_width_string)

@@ -63,7 +63,8 @@ class UIFontDictionary:
         self.loaded_fonts = None
         self.known_font_paths = None
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        default_font_file_path = os.path.normpath(os.path.join(module_root_path, 'data/FiraCode-Regular.ttf'))
+        default_font_file_path = os.path.normpath(os.path.join(module_root_path,
+                                                               'data/FiraCode-Regular.ttf'))
         self.load_default_font(default_font_file_path, module_root_path)
 
         self.used_font_ids = [self.default_font_id]
@@ -74,19 +75,23 @@ class UIFontDictionary:
         if os.path.exists(default_font_file_path):
             self.loaded_fonts = {self.default_font_id: pygame.font.Font(default_font_file_path,
                                                                         self.default_font_size)}
-
-            self.known_font_paths = {'fira_code': [os.path.normpath(os.path.join(module_root_path,
-                                                                                 'data/FiraCode-Regular.ttf')),
-                                                   os.path.normpath(os.path.join(module_root_path,
-                                                                                 'data/FiraCode-Bold.ttf')),
-                                                   os.path.normpath(os.path.join(module_root_path,
-                                                                                 'data/FiraMono-RegularItalic.ttf')),
-                                                   os.path.normpath(os.path.join(module_root_path,
-                                                                                 'data/FiraMono-BoldItalic.ttf'))]}
+            regular_path = os.path.abspath(os.path.join(module_root_path,
+                                                        'data/FiraCode-Regular.ttf'))
+            bold_path = os.path.abspath(os.path.join(module_root_path,
+                                                     'data/FiraCode-Bold.ttf'))
+            italic_path = os.path.abspath(os.path.join(module_root_path,
+                                                       'data/FiraMono-RegularItalic.ttf'))
+            bold_italic_path = os.path.abspath(os.path.join(module_root_path,
+                                                            'data/FiraMono-BoldItalic.ttf'))
+            self.known_font_paths = {'fira_code': [regular_path,
+                                                   bold_path,
+                                                   italic_path,
+                                                   bold_italic_path]}
         else:
             fira_code_regular_file_object = io.BytesIO(base64.standard_b64decode(FiraCode_Regular))
-            self.loaded_fonts = {self.default_font_id: pygame.font.Font(fira_code_regular_file_object,
-                                                                        self.default_font_size)}
+            self.loaded_fonts = {self.default_font_id:
+                                 pygame.font.Font(fira_code_regular_file_object,
+                                                  self.default_font_size)}
 
             self.known_font_paths = {'fira_code': [FiraCode_Regular,
                                                    FiraCode_Bold,
@@ -96,12 +101,13 @@ class UIFontDictionary:
     def find_font(self, font_size: int, font_name: str,
                   bold: bool = False, italic: bool = False) -> pygame.font.Font:
         """
-        Find a loaded font from the font dictionary. Will load a font if it does not already exist and we have paths
-        to the needed files, however it will issue a warning after doing so because dynamic file loading is normally a
-        bad idea as you will get frame rate hitches while the running program waits for the font to load.
+        Find a loaded font from the font dictionary. Will load a font if it does not already exist
+        and we have paths to the needed files, however it will issue a warning after doing so
+        because dynamic file loading is normally a bad idea as you will get frame rate hitches
+        while the running program waits for the font to load.
 
-        Instead it's best to preload all your needed files at another time in your program when you have more control
-        over the user experience.
+        Instead it's best to preload all your needed files at another time in your program when
+        you have more control over the user experience.
 
         :param font_size: The size of the font to find.
         :param font_name: The name of the font to find.
@@ -116,8 +122,8 @@ class UIFontDictionary:
 
         if self.check_font_preloaded(font_id):  # font already loaded
             return self.loaded_fonts[font_id]
-        elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
-
+        elif font_name in self.known_font_paths:
+            # we know paths to this font, just haven't loaded current size/style
             style_string = "regular"
             if bold and italic:
                 style_string = "bold_italic"
@@ -126,11 +132,13 @@ class UIFontDictionary:
             elif italic:
                 style_string = "italic"
 
-            warning_string = ('Finding font with id: ' + font_id + " that is not already loaded.\n"
-                                                                   "Preload this font with {'name': "
-                                                                   "'" + font_name + "',"
-                                                                   " 'point_size': " + str(font_size) + ","
-                                                                   " 'style': '" + style_string + "'}")
+            warning_string = ('Finding font with id: ' +
+                              font_id +
+                              " that is not already loaded.\n"
+                              "Preload this font with {'name': "
+                              "'" + font_name + "',"
+                              " 'point_size': " + str(font_size) + ","
+                              " 'style': '" + style_string + "'}")
             warnings.warn(warning_string, UserWarning)
             self.preload_font(font_size, font_name, bold, italic)
             return self.loaded_fonts[font_id]
@@ -160,11 +168,12 @@ class UIFontDictionary:
             font_style_string = "regular"
         return font_name + "_" + font_style_string + "_" + str(font_size)
 
-    def preload_font(self, font_size: int, font_name: str, bold: bool = False, italic: bool = False):
+    def preload_font(self, font_size: int, font_name: str,
+                     bold: bool = False, italic: bool = False):
         """
-        Lets us load a font at a particular size and style before we use it. While you can get away with relying on
-        dynamic font loading during development, it is better to eventually pre-load all your font data at a
-        controlled time, which is where this method comes in.
+        Lets us load a font at a particular size and style before we use it. While you can get
+        away with relying on dynamic font loading during development, it is better to eventually
+        pre-load all your font data at a controlled time, which is where this method comes in.
 
         :param font_size: The size of the font to load.
         :param font_name: The name of the font to load.
@@ -173,53 +182,60 @@ class UIFontDictionary:
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
         if font_id in self.loaded_fonts:    # font already loaded
-            warnings.warn('Trying to pre-load font id: ' + font_id + ' that is already loaded', UserWarning)
-        elif font_name in self.known_font_paths:  # we know paths to this font, just haven't loaded current size/style
+            warnings.warn('Trying to pre-load font id: ' +
+                          font_id +
+                          ' that is already loaded', UserWarning)
+        elif font_name in self.known_font_paths:
+            # we know paths to this font, just haven't loaded current size/style
+            regular_path = self.known_font_paths[font_name][0]
+            bold_path = self.known_font_paths[font_name][1]
+            italic_path = self.known_font_paths[font_name][2]
+            bold_italic_path = self.known_font_paths[font_name][3]
             if bold and italic:
                 try:
-                    if type(self.known_font_paths[font_name][3]) == bytes:
-                        file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][3]))
+                    if type(bold_italic_path) == bytes:
+                        file_loc = io.BytesIO(base64.standard_b64decode(bold_italic_path))
                     else:
-                        file_loc = create_resource_path(self.known_font_paths[font_name][3])
+                        file_loc = create_resource_path(bold_italic_path)
                     new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_bold(True)
                     new_font.set_italic(True)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
-                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][3])
+                    warnings.warn("Failed to load font at path: " + bold_italic_path)
 
             elif bold:
                 try:
-                    if type(self.known_font_paths[font_name][1]) == bytes:
-                        file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][1]))
+                    if type(bold_path) == bytes:
+                        file_loc = io.BytesIO(base64.standard_b64decode(bold_path))
                     else:
-                        file_loc = create_resource_path(self.known_font_paths[font_name][1])
+                        file_loc = create_resource_path(bold_path)
                     new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_bold(True)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
-                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][1])
+                    warnings.warn("Failed to load font at path: " + bold_path)
             elif italic:
                 try:
-                    if type(self.known_font_paths[font_name][2]) == bytes:
-                        file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][2]))
+                    if type(italic_path) == bytes:
+                        file_loc = io.BytesIO(base64.standard_b64decode(italic_path))
                     else:
-                        file_loc = create_resource_path(self.known_font_paths[font_name][2])
+                        file_loc = create_resource_path(italic_path)
                     new_font = pygame.font.Font(file_loc, font_size)
                     new_font.set_italic(True)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
-                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][2])
+                    warnings.warn("Failed to load font at path: " + italic_path)
             else:
                 try:
-                    if type(self.known_font_paths[font_name][0]) == bytes:
-                        file_loc = io.BytesIO(base64.standard_b64decode(self.known_font_paths[font_name][0]))
+                    if type(regular_path) == bytes:
+                        file_loc = io.BytesIO(base64.standard_b64decode(regular_path))
                     else:
-                        file_loc = create_resource_path(self.known_font_paths[font_name][0])
+                        file_loc = create_resource_path(regular_path)
                     new_font = pygame.font.Font(file_loc, font_size)
                     self.loaded_fonts[font_id] = new_font
                 except FileNotFoundError:
-                    warnings.warn("Failed to load font at path: " + self.known_font_paths[font_name][0])
+                    warnings.warn("Failed to load font at path: " + regular_path)
         else:
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
 
@@ -248,21 +264,22 @@ class UIFontDictionary:
 
     def print_unused_loaded_fonts(self):
         """
-        Can be called to check if the UI is loading any fonts that we haven't used by the point this function is
-        called. If a font is truly unused then we can remove it from our loading and potentially speed up the overall
-        loading of the program.
+        Can be called to check if the UI is loading any fonts that we haven't used by the point
+        this function is called. If a font is truly unused then we can remove it from our loading
+        and potentially speed up the overall loading of the program.
 
-        This is not a foolproof check because this function could easily be called before we have explored all the code
-        paths in a project that may use fonts.
+        This is not a foolproof check because this function could easily be called before we have
+        explored all the code paths in a project that may use fonts.
         """
         unused_font_ids = [key for key in self.loaded_fonts.keys() if key not in self.used_font_ids]
         if len(unused_font_ids) > 0:
             print('Unused font ids:')
             for font_id in unused_font_ids:
-                html_size = UIFontDictionary._html_font_sizes_reverse_lookup[int(font_id.split('_')[-1])]
+                point_size = int(font_id.split('_')[-1])
+                html_size = UIFontDictionary._html_font_sizes_reverse_lookup[point_size]
                 print(font_id + '(HTML size: ' + str(html_size) + ')')
 
-    def convert_html_size_to_point_size(self, html_size: float) -> int:
+    def convert_html_to_point_size(self, html_size: float) -> int:
         """
         Takes in a HTML style font size and converts it into a point font size.
 

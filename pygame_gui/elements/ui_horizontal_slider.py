@@ -13,13 +13,15 @@ from pygame_gui.elements.ui_button import UIButton
 
 class UIHorizontalSlider(UIElement):
     """
-    A horizontal slider is intended to help users adjust values within a range, for example a volume control.
+    A horizontal slider is intended to help users adjust values within a range, for example a
+    volume control.
 
     :param relative_rect: A rectangle describing the position and dimensions of the element.
     :param start_value: The value to start the slider at.
     :param value_range: The full range of values.
     :param manager: The UIManager that manages this element.
-    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param container: The container that this element is within. If set to None will be the root
+    window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -55,7 +57,8 @@ class UIHorizontalSlider(UIElement):
 
         self.value_range = value_range
         value_range_length = self.value_range[1] - self.value_range[0]
-        self.current_value = int(self.value_range[0] + (self.current_percentage * value_range_length))
+        self.current_value = int(self.value_range[0] +
+                                 (self.current_percentage * value_range_length))
 
         self.grabbed_slider = False
         self.has_moved_recently = False
@@ -87,7 +90,8 @@ class UIHorizontalSlider(UIElement):
 
         sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos, 0),
-                                                   (self.sliding_button_width, self.background_rect.height)),
+                                                   (self.sliding_button_width,
+                                                    self.background_rect.height)),
                                        '', self.ui_manager,
                                        container=self.button_container,
                                        starting_height=1,
@@ -181,20 +185,23 @@ class UIHorizontalSlider(UIElement):
                 self.right_button.kill()
                 self.right_button = None
 
-        self.scrollable_width = self.background_rect.width - self.sliding_button_width - (2 * self.arrow_button_width)
+        self.scrollable_width = (self.background_rect.width -
+                                 self.sliding_button_width - (2 * self.arrow_button_width))
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width / 2
 
         if self.sliding_button is not None:
             sliding_x_pos = int((self.background_rect.width / 2) - (self.sliding_button_width / 2))
             self.sliding_button.set_relative_position((sliding_x_pos, 0))
-            self.sliding_button.set_dimensions((self.sliding_button_width, self.background_rect.height))
+            self.sliding_button.set_dimensions((self.sliding_button_width,
+                                                self.background_rect.height))
             self.sliding_button.set_hold_range((self.background_rect.width, 100))
             self.set_current_value(self.current_value)
 
     def kill(self):
         """
-        Overrides the normal sprite kill() method to also kill the button elements that help make up the slider.
+        Overrides the normal sprite kill() method to also kill the button elements that help make
+        up the slider.
 
         """
         self.button_container.kill()
@@ -202,8 +209,8 @@ class UIHorizontalSlider(UIElement):
 
     def update(self, time_delta: float):
         """
-        Takes care of actually moving the slider based on interactions reported by the buttons or based on movement of
-        the mouse if we are gripping the slider itself.
+        Takes care of actually moving the slider based on interactions reported by the buttons or
+        based on movement of the mouse if we are gripping the slider itself.
 
         :param time_delta: the time in seconds between calls to update.
         """
@@ -280,16 +287,19 @@ class UIHorizontalSlider(UIElement):
 
     def set_current_value(self, value: Union[float, int]):
         """
-        Sets the value of the slider, which will move the position of the slider to match. Will issue a warning if the
-        value set is not in the value range.
+        Sets the value of the slider, which will move the position of the slider to match. Will
+        issue a warning if the value set is not in the value range.
 
         :param value: The value to set.
         """
-        if min(self.value_range[0], self.value_range[1]) <= value <= max(self.value_range[0], self.value_range[1]):
+        if min(self.value_range[0],
+               self.value_range[1]) <= value <= max(self.value_range[0],
+                                                    self.value_range[1]):
             self.current_value = float(value)
             value_range_size = (self.value_range[1] - self.value_range[0])
             if value_range_size != 0:
-                self.current_percentage = (self.current_value - self.value_range[0])/value_range_size
+                self.current_percentage = (self.current_value -
+                                           self.value_range[0])/value_range_size
                 self.scroll_position = self.scrollable_width * self.current_percentage
 
                 x_pos = (self.scroll_position + self.arrow_button_width)
@@ -302,14 +312,17 @@ class UIHorizontalSlider(UIElement):
 
     def rebuild_from_changed_theme_data(self):
         """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
-        the theme data has changed.
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for
+        this element when the theme data has changed.
         """
         has_any_changed = False
 
         shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                        self.element_ids,
+                                                        'shape')
+        if shape_type_string is not None and shape_type_string in ['rectangle',
+                                                                   'rounded_rectangle']:
             shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
@@ -317,7 +330,8 @@ class UIHorizontalSlider(UIElement):
 
         corner_radius = 2
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids, 'shape_corner_radius')
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
         if shape_corner_radius_string is not None:
             try:
                 corner_radius = int(shape_corner_radius_string)
@@ -328,7 +342,9 @@ class UIHorizontalSlider(UIElement):
             has_any_changed = True
 
         border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
         if border_width_string is not None:
             try:
                 border_width = int(border_width_string)
@@ -340,7 +356,9 @@ class UIHorizontalSlider(UIElement):
             has_any_changed = True
 
         shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
         if shadow_width_string is not None:
             try:
                 shadow_width = int(shadow_width_string)
@@ -350,17 +368,23 @@ class UIHorizontalSlider(UIElement):
             self.shadow_width = shadow_width
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                             self.element_ids,
+                                                             'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'enable_arrow_buttons')
+        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids,
+                                                           self.element_ids,
+                                                           'enable_arrow_buttons')
         if buttons_enable_param is not None:
             try:
                 buttons_enable = bool(int(buttons_enable_param))
@@ -372,7 +396,8 @@ class UIHorizontalSlider(UIElement):
 
         sliding_button_width = self.default_button_width
         sliding_button_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids, 'sliding_button_width')
+                                                                  self.element_ids,
+                                                                  'sliding_button_width')
         if sliding_button_width_string is not None:
             try:
                 sliding_button_width = int(sliding_button_width_string)
@@ -385,9 +410,12 @@ class UIHorizontalSlider(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
-        Sets the absolute screen position of this slider, updating all subordinate button elements at the same time.
+        Sets the absolute screen position of this slider, updating all subordinate button elements
+        at the same time.
 
         :param position: The absolute screen position to set.
         """
@@ -399,9 +427,12 @@ class UIHorizontalSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
-        Sets the relative screen position of this slider, updating all subordinate button elements at the same time.
+        Sets the relative screen position of this slider, updating all subordinate button elements
+        at the same time.
 
         :param position: The relative screen position to set.
         """
@@ -413,7 +444,9 @@ class UIHorizontalSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Method to directly set the dimensions of an element.
 
@@ -428,7 +461,9 @@ class UIHorizontalSlider(UIElement):
         self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out sliding button parameters
-        self.scrollable_width = self.background_rect.width - self.sliding_button_width - (2 * self.arrow_button_width)
+        self.scrollable_width = (self.background_rect.width -
+                                 self.sliding_button_width -
+                                 (2 * self.arrow_button_width))
         self.right_limit_position = self.scrollable_width
         self.scroll_position = self.scrollable_width * self.current_percentage
 

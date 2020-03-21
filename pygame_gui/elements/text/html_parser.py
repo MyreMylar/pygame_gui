@@ -30,12 +30,15 @@ class CharStyle:
 
         :param other: The other to test against.
         """
-        return self.bold == other.bold and self.italic == other.italic and self.underline == other.underline
+        return (self.bold == other.bold and
+                self.italic == other.italic and
+                self.underline == other.underline)
 
 
 class TextLineContext:
     """
-    A class that covers all the states of the text 'options' so we know what to apply when rendering a letter.
+    A class that covers all the states of the text 'options' so we know what to apply when
+    rendering a letter.
 
     :param font_size: The size of the font in pixels.
     :param font_name: The name of the font to use.
@@ -92,15 +95,18 @@ class TextLineContext:
 
 class TextStyleData:
     """
-    A group of styles organised so that we can easily access them when stepping through our text character by character
-    so we always know what style goes with what text. Also stores the text that goes along with the styles.
+    A group of styles organised so that we can easily access them when stepping through our text
+    character by character o we always know what style goes with what text. Also stores the text
+    that goes along with the styles.
 
     There are three main things going on in this class and the Parse one below:
 
-    1. Parsing the html tags into 'styles' which don't have an associated object but maybe should (StyleTag?).
+    1. Parsing the html tags into 'styles' which don't have an associated object but maybe should
+       (StyleTag?).
     2. Storing the style tags into a stack as we also step through the regular text.
-    3. Each time we change the style tags in some way we take the current state of the style stack, and the current
-       progress through the regular text and store the style under an index for the current text position.
+    3. Each time we change the style tags in some way we take the current state of the style stack,
+       and the current progress through the regular text and store the style under an index for the
+       current text position.
 
     :param theme:
     :param element_ids:
@@ -138,8 +144,12 @@ class TextStyleData:
         self.default_style['font_name'] = self.default_font_name
         self.default_style['font_size'] = self.default_font_size
 
-        self.default_font_color = self.ui_theme.get_colour_or_gradient(object_id, element_ids, 'normal_text')
-        self.default_bg_color = self.ui_theme.get_colour_or_gradient(object_id, element_ids, 'dark_bg')
+        self.default_font_color = self.ui_theme.get_colour_or_gradient(object_id,
+                                                                       element_ids,
+                                                                       'normal_text')
+        self.default_bg_color = self.ui_theme.get_colour_or_gradient(object_id,
+                                                                     element_ids,
+                                                                     'dark_bg')
         self.font_name = self.default_font_name
         self.font_size = self.default_font_size
         self.font_color = self.default_font_color
@@ -152,14 +162,16 @@ class TextStyleData:
 
     def push_style(self, key: str, styles: Dict[str, Any]):
         """
-        Add a new styling element onto the style stack. These are single styles generally (i.e. a font size change, or
-        a bolding of text) rather than a load of different styles all at once. The eventual style of a character/bit of
-        text is built up by evaluating all styling elements currently on the stack when we parse that bit of text.
+        Add a new styling element onto the style stack. These are single styles generally (i.e. a
+        font size change, or a bolding of text) rather than a load of different styles all at once.
+        The eventual style of a character/bit of text is built up by evaluating all styling
+        elements currently on the stack when we parse that bit of text.
 
-        Styles on top of the stack will be evaluated last so they can overwrite elements earlier in the stack (i.e. a
-        later 'font_size' of 5 wil overwrite an earlier 'font_size' of 3).
+        Styles on top of the stack will be evaluated last so they can overwrite elements earlier
+        in the stack (i.e. a later 'font_size' of 5 wil overwrite an earlier 'font_size' of 3).
 
-        :param key: Name for this styling element so we can identify when to remove it when the styling block is closed
+        :param key: Name for this styling element so we can identify when to remove it when the
+        styling block is closed
         :param styles: The styling dictionary that contains the actual styling.
         """
         old_styles = {name: self.current_style.get(name) for name in styles.keys()}
@@ -309,8 +321,9 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: Dict[str, str]):
         """
-        Process an HTML 'start tag' (e.g. <b>) where we have a start and an end tag enclosing a range of text this is
-        the first one of those and controls where we add the 'styling' thing to our styling stack.
+        Process an HTML 'start tag' (e.g. <b>) where we have a start and an end tag enclosing a
+        range of text this is the first one of those and controls where we add the 'styling' thing
+        to our styling stack.
 
         Eventually we will want to expand this to handle tags like <img>.
 
@@ -354,9 +367,10 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
             if 'bgcolor' in attributes:
                 if len(attributes['bgcolor']) > 0:
                     if ',' in attributes['bgcolor']:
+                        col_id = attributes['bgcolor']
                         style["bg_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
                                                                                  self.element_ids,
-                                                                                 attributes['bgcolor'])
+                                                                                 col_id)
                     else:
                         style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
                 else:
@@ -373,7 +387,8 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
     def handle_endtag(self, tag: str):
         """
-        Handles encountering an HTML end tag. Usually this will involve us popping a style off our stack of styles.
+        Handles encountering an HTML end tag. Usually this will involve us popping a style off our
+        stack of styles.
 
         :param tag: The end tag to handle.
         """

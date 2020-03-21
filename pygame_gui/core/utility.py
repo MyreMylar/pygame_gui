@@ -20,8 +20,8 @@ plat = platform.system().upper()
 if plat == 'WINDOWS':
     import ctypes
     # from ctypes import c_size_t, sizeof, c_wchar_p, c_wchar
-    from ctypes.wintypes import HGLOBAL, LPVOID, BOOL, UINT, HANDLE, HWND, DWORD, INT, HMENU, HINSTANCE, LPCSTR
-
+    from ctypes.wintypes import HGLOBAL, LPVOID, BOOL, UINT, HANDLE, HWND
+    from ctypes.wintypes import DWORD, INT, HMENU, HINSTANCE, LPCSTR
 
     @contextlib.contextmanager
     def __windows_clipboard(hwnd):
@@ -46,7 +46,6 @@ if plat == 'WINDOWS':
         finally:
             ctypes.windll.user32.CloseClipboard()
 
-
     def __windows_paste():
         ctypes.windll.user32.GetClipboardData.argtypes = [UINT]
         ctypes.windll.user32.GetClipboardData.restype = HANDLE
@@ -56,7 +55,6 @@ if plat == 'WINDOWS':
             if not handle:
                 return ""
             return ctypes.c_wchar_p(handle).value
-
 
     # noinspection PyUnresolvedReferences
     class CheckedCall(object):
@@ -69,7 +67,6 @@ if plat == 'WINDOWS':
 
         def __setattr__(self, key, value):
             setattr(self.f, key, value)
-
 
     def __windows_copy(data: str):
         msvcrt = ctypes.CDLL('msvcrt')
@@ -138,7 +135,6 @@ elif plat == 'LINUX':
         process = subprocess.Popen(['xsel', '-b', '-i'], stdin=subprocess.PIPE, close_fds=True)
         process.communicate(input=data.encode('utf-8'))
 
-
     def __linux_paste():
         process = subprocess.Popen(['xsel', '-b', '-o'], stdout=subprocess.PIPE, close_fds=True)
         stdout, stderr = process.communicate()
@@ -149,7 +145,6 @@ else:
         process = subprocess.Popen(
             'pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
         process.communicate(data.encode('utf-8'))
-
 
     def __mac_paste():
         return subprocess.check_output(

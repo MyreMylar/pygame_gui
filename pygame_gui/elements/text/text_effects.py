@@ -51,8 +51,8 @@ class TextBoxEffect:
 
 class TypingAppearEffect(TextBoxEffect):
     """
-    Does that 'typewriter' effect where the text in a box appears one character at a time as if they were being typed by
-    an invisible hand.
+    Does that 'typewriter' effect where the text in a box appears one character at a time as if
+    they were being typed by an invisible hand.
 
     :param all_characters: All the character sin the text box.
     """
@@ -65,8 +65,8 @@ class TypingAppearEffect(TextBoxEffect):
 
     def update(self, time_delta: float):
         """
-        Updates the effect with amount of time passed since the last call to update. Adds a new letter to the progress
-        every self.time_per_letter seconds.
+        Updates the effect with amount of time passed since the last call to update. Adds a new
+        letter to the progress every self.time_per_letter seconds.
 
         :param time_delta: time in seconds since last frame.
         """
@@ -83,7 +83,8 @@ class TypingAppearEffect(TextBoxEffect):
         Test if we should redraw the whole text box.
 
         TODO: Once text box is refactored change this.
-              So we only redraw the new bits of added text and the last two lines (current and previous)
+              So we only redraw the new bits of added text and the last two lines
+              (current and previous)
 
         :return: True if we should redraw, False otherwise.
         """
@@ -105,8 +106,8 @@ class TypingAppearEffect(TextBoxEffect):
 # TODO: Should we merge these two effects into one with a direction parameter?
 class FadeInEffect(TextBoxEffect):
     """
-    A fade in effect for the text box. Allows us to fade the text, though this class just takes care of
-    fading up an alpha value over time.
+    A fade in effect for the text box. Allows us to fade the text, though this class just takes
+    care of fading up an alpha value over time.
 
     :param all_characters: The text characters in the text box. Useful to know for some effects.
     """
@@ -136,8 +137,8 @@ class FadeInEffect(TextBoxEffect):
 
     def should_redraw_from_chunks(self) -> bool:
         """
-        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us redrawing the text box
-        with the new alpha value.
+        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us
+        redrawing the text box with the new alpha value.
 
         :return: True if it is is time to redraw our text.
         """
@@ -158,8 +159,8 @@ class FadeInEffect(TextBoxEffect):
 
 class FadeOutEffect(TextBoxEffect):
     """
-    A fade out effect for the text box. Allows us to fade the text, though this class just takes care of
-    fading out an alpha value over time.
+    A fade out effect for the text box. Allows us to fade the text, though this class just takes
+    care of fading out an alpha value over time.
 
     :param all_characters: The text characters in the text box. Useful to know for some effects.
     """
@@ -190,8 +191,8 @@ class FadeOutEffect(TextBoxEffect):
 
     def should_redraw_from_chunks(self) -> bool:
         """
-        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us redrawing the text box
-        with the new alpha value.
+        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us
+        redrawing the text box with the new alpha value.
 
         :return: True if it is is time to redraw our text.
         """

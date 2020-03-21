@@ -8,15 +8,18 @@ from pygame_gui.core.ui_element import UIElement
 
 class UIContainer(UIElement, IContainerLikeInterface):
     """
-    A UI Container holds any number of other UI elements inside of a rectangle. When we move the UIContainer
-    all the UI elements contained within it can be moved as well.
+    A UI Container holds any number of other UI elements inside of a rectangle. When we move the
+    UIContainer all the UI elements contained within it can be moved as well.
 
-    This class helps us make UI Windows, but likely will have wider uses as well as the GUI system develops.
+    This class helps us make UI Windows, but likely will have wider uses as well as the GUI
+    system develops.
 
-    :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is inside of, if any.
+    :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is
+    inside of, if any.
     :param manager: The UIManager that manages this UIElement.
     :param starting_height: The starting layer height for this element above it's container.
-    :param is_window_root_container: True/False flag for whether this container is the root container for a UI window.
+    :param is_window_root_container: True/False flag for whether this container is the root
+    container for a UI window.
     :param container: The UIContainer that this UIElement is contained within.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
@@ -58,7 +61,8 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def get_container(self) -> 'UIContainer':
         """
-        Implements the container interface. In this case we just return this since it is a container.
+        Implements the container interface. In this case we just return this since it is a
+        container.
 
         :return: This container.
         """
@@ -66,7 +70,8 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def add_element(self, element: UIElement):
         """
-        Add a UIElement to the container. The UI's relative_rect parameter will be relative to this container.
+        Add a UIElement to the container. The UI's relative_rect parameter will be relative to
+        this container.
 
         :param element: A UIElement to add to this container.
         """
@@ -86,9 +91,10 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def recalculate_container_layer_thickness(self):
         """
-        This function will iterate through the elements in our container and determine the maximum 'height'
-        that they reach in the 'layer stack'. We then use that to determine the overall 'thickness' of this container.
-        The thickness value is used to determine where to place overlapping windows in the layers
+        This function will iterate through the elements in our container and determine the
+        maximum 'height' that they reach in the 'layer stack'. We then use that to determine the
+        overall 'thickness' of this container. The thickness value is used to determine where to
+        place overlapping windows in the layers
         """
         max_element_top_layer = self._layer
         for element in self.elements:
@@ -105,11 +111,12 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def change_layer(self, new_layer: int):
         """
-        Change the layer of this container. Layers are used by the GUI to control the order in which things are drawn
-        and which things should currently be interactive (so you can't interact with things behind other things).
+        Change the layer of this container. Layers are used by the GUI to control the order in
+        which things are drawn and which things should currently be interactive (so you can't
+        interact with things behind other things).
 
-        This particular method is most often used to shift the visible contents of a window in front of any others when
-        it is moved to the front of the window stack.
+        This particular method is most often used to shift the visible contents of a window in
+        front of any others when it is moved to the front of the window stack.
 
         :param new_layer: The layer to move our container to.
         """
@@ -121,24 +128,29 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def update_containing_rect_position(self):
         """
-        This function is called when we move the container to update all the contained UI Elements to move as well.
+        This function is called when we move the container to update all the contained UI Elements
+        to move as well.
         """
         super().update_containing_rect_position()
 
         for element in self.elements:
             element.update_containing_rect_position()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
-        Set the absolute position of this container - it is usually less chaotic to deal with setting
-        relative positions.
+        Set the absolute position of this container - it is usually less chaotic to deal with
+        setting relative positions.
 
         :param position: the new absolute position to set.
         """
         super().set_position(position)
         self.update_containing_rect_position()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
         Set the position of this container, relative to the container it is within.
 
@@ -147,9 +159,12 @@ class UIContainer(UIElement, IContainerLikeInterface):
         super().set_relative_position(position)
         self.update_containing_rect_position()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
-        Set the dimension of this container and update the positions of elements within it accordingly.
+        Set the dimension of this container and update the positions of elements within it
+        accordingly.
 
         :param dimensions: the new dimensions.
         """
@@ -158,8 +173,8 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def get_top_layer(self) -> int:
         """
-        Assuming we have correctly calculated the 'thickness' of this container, this method will return the 'highest'
-        layer in the LayeredUpdates UI Group.
+        Assuming we have correctly calculated the 'thickness' of this container, this method will
+        return the 'highest' layer in the LayeredUpdates UI Group.
 
         :return int: An integer representing the current highest layer being used by this container.
         """
@@ -167,8 +182,8 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
     def kill(self):
         """
-        Overrides the standard kill method of UI Elements (and pygame sprites beyond that) to also call the kill method
-        on all contained UI Elements.
+        Overrides the standard kill method of UI Elements (and pygame sprites beyond that) to also
+        call the kill method on all contained UI Elements.
         """
         self.clear()
         super().kill()
@@ -183,11 +198,15 @@ class UIContainer(UIElement, IContainerLikeInterface):
     # noinspection PyUnusedLocal
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
-        A method that helps us to determine which, if any, UI Element is currently being hovered by the mouse.
+        A method that helps us to determine which, if any, UI Element is currently being hovered
+        by the mouse.
 
-        :param time_delta: A float, the time in seconds between the last call to this function and now (roughly).
-        :param hovered_higher_element: A boolean, representing whether we have already hovered a 'higher' element.
-        :return bool: A boolean that is true if we have hovered a UI element, either just now or before this method.
+        :param time_delta: A float, the time in seconds between the last call to this function
+        and now (roughly).
+        :param hovered_higher_element: A boolean, representing whether we have already hovered a
+        'higher' element.
+        :return bool: A boolean that is true if we have hovered a UI element, either just now or
+        before this method.
         """
         if self.alive():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()

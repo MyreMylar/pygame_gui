@@ -9,8 +9,8 @@ from pygame_gui.core.colour_gradient import ColourGradient
 
 class SurfaceCache:
     """
-    A cache for surfaces that we estimate the UI may want to reuse to save constantly remaking almost identical
-    drawable shapes.
+    A cache for surfaces that we estimate the UI may want to reuse to save constantly remaking
+    almost identical drawable shapes.
 
     """
     def __init__(self):
@@ -19,7 +19,8 @@ class SurfaceCache:
         starting_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
         starting_surface.fill(pygame.Color('#00000000'))
         self.cache_surfaces.append({'surface': starting_surface,
-                                    'free_space_rectangles': [pygame.Rect((0, 0), self.cache_surface_size)]})
+                                    'free_space_rectangles':
+                                        [pygame.Rect((0, 0), self.cache_surface_size)]})
 
         self.cache_long_term_lookup = {}
         self.cache_short_term_lookup = {}
@@ -30,8 +31,8 @@ class SurfaceCache:
 
     def add_surface_to_cache(self, surface: pygame.Surface, string_id: str):
         """
-        Adds a surface to the cache. There are two levels to the cache, the short term level just keeps hold of
-        the surface until we have time to add it to the long term level.
+        Adds a surface to the cache. There are two levels to the cache, the short term level
+        just keeps hold of the surface until we have time to add it to the long term level.
 
         :param surface: The surface to add to the cache.
         :param string_id: An ID to store the surface under to make it easy to recall later.
@@ -40,8 +41,8 @@ class SurfaceCache:
 
     def update(self):
         """
-        Takes care of steadily moving surfaces from the short term cache into the long term. Long term caching takes a
-        while so we limit it to adding one surface a frame.
+        Takes care of steadily moving surfaces from the short term cache into the long term.
+        Long term caching takes a while so we limit it to adding one surface a frame.
 
         We also purge some lesser used surfaces from the long term cache when we run out of space.
         """
@@ -82,17 +83,20 @@ class SurfaceCache:
                         free_space_rectangles = cache_surface['free_space_rectangles']
                         current_surface = cache_surface['surface']
                         for free_rectangle in free_space_rectangles:
-                            if free_rectangle.width >= surface_size[0] and free_rectangle.height >= surface_size[1]:
+                            if (free_rectangle.width >= surface_size[0] and
+                                    free_rectangle.height >= surface_size[1]):
                                 # we fits, so we sits
                                 found_rectangle_to_split = free_rectangle
-                                found_rectangle_cache = pygame.Rect(free_rectangle.topleft, surface_size)
+                                found_rectangle_cache = pygame.Rect(free_rectangle.topleft,
+                                                                    surface_size)
                                 current_surface.blit(surface, free_rectangle.topleft)
                                 self.cache_long_term_lookup[string_id] = {
                                     'surface': current_surface.subsurface(found_rectangle_cache),
                                     'current_uses': current_uses, 'total_uses': current_uses}
                                 break
 
-                        if found_rectangle_to_split is not None and found_rectangle_cache is not None:
+                        if (found_rectangle_to_split is not None and
+                                found_rectangle_cache is not None):
                             self.split_rect(found_rectangle_to_split, found_rectangle_cache,
                                             cache_surface['free_space_rectangles'])
                             rects_to_split = [rect for rect in free_space_rectangles
@@ -106,19 +110,26 @@ class SurfaceCache:
                             rectangles_to_check = [rectangle for rectangle in free_space_rectangles]
                             for free_rectangle in free_space_rectangles:
                                 for check_rect in rectangles_to_check:
-                                    if free_rectangle != check_rect and check_rect.contains(free_rectangle):
+                                    if (free_rectangle != check_rect and
+                                            check_rect.contains(free_rectangle)):
                                         rects_to_remove.append(free_rectangle)
-                            cache_surface['free_space_rectangles'] = [rect for rect in free_space_rectangles
-                                                                      if rect not in rects_to_remove]
+                            cache_surface['free_space_rectangles'] = [rect
+                                                                      for rect in
+                                                                      free_space_rectangles
+                                                                      if rect not in
+                                                                      rects_to_remove]
 
                 if found_rectangle_cache is None:
                     if len(self.cache_surfaces) < 3:
                         # create a new cache surface
-                        new_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
+                        new_surface = pygame.Surface(self.cache_surface_size,
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
                         new_surface.fill(pygame.Color('#00000000'))
                         self.cache_surfaces.append({'surface': new_surface,
-                                                    'free_space_rectangles': [
-                                                        pygame.Rect((0, 0), self.cache_surface_size)]})
+                                                    'free_space_rectangles':
+                                                        [pygame.Rect((0, 0),
+                                                                     self.cache_surface_size)]})
                     else:
                         self.low_on_space = True
 
@@ -129,8 +140,8 @@ class SurfaceCache:
                    dividing_rect: pygame.Rect,
                    free_space_rectangles: List[pygame.Rect]):
         """
-        Takes an existing free space rectangle that we are placing a new surface inside of and then divides up the
-        remaining space into new, smaller free space rectangles.
+        Takes an existing free space rectangle that we are placing a new surface inside of and
+        then divides up the remaining space into new, smaller free space rectangles.
 
         :param found_rectangle_to_split: The rectangle we are spliting.
         :param dividing_rect: The rectangle dividing up the split rectangle.
@@ -186,8 +197,9 @@ class SurfaceCache:
 
     def remove_user_from_cache_item(self, string_id: str):
         """
-        Deduct a 'user' from a particular cache surface. The number of users of a cache surface over the lifetime of
-        a program would be a decent measure of how 'valuable' it is to keep a surface in the cache.
+        Deduct a 'user' from a particular cache surface. The number of users of a cache surface
+        over the lifetime of a program would be a decent measure of how 'valuable' it is to
+        keep a surface in the cache.
 
         :param string_id: The ID of the cached surface to deduct a user from.
         """
@@ -200,8 +212,8 @@ class SurfaceCache:
 
     def remove_user_and_request_clean_up_of_cached_item(self, string_id: str):
         """
-        If we are certain that a cached surface won't be used again anytime soon we can request it is removed from the
-        cache directly.
+        If we are certain that a cached surface won't be used again anytime soon we can request
+        it is removed from the cache directly.
 
         :param string_id: the ID of the cached surface to remove from the cache.
         """
@@ -215,7 +227,8 @@ class SurfaceCache:
         :param string_id: the ID of the cached surface to remove from the cache.
 
         """
-        if string_id not in self.cache_long_term_lookup or self.cache_long_term_lookup[string_id]['current_uses'] != 0:
+        if (string_id not in self.cache_long_term_lookup or
+                self.cache_long_term_lookup[string_id]['current_uses'] != 0):
             return
         # check item to be removed is unused
         cache_to_clear = self.cache_long_term_lookup.pop(string_id)
@@ -240,10 +253,11 @@ class SurfaceCache:
                        bg_colour: pygame.Color,
                        corner_radius: Union[int, None] = None) -> str:
         """
-        Create an ID string for a surface based on it's dimensions and parameters. The idea is that any surface in the
-        cache with the same values in this ID should be identical.
+        Create an ID string for a surface based on it's dimensions and parameters. The idea is
+        that any surface in the cache with the same values in this ID should be identical.
 
-        :param shape: A string for the overall shape of the surface (rounded rectangle, rectangle, etc).
+        :param shape: A string for the overall shape of the surface (rounded rectangle,
+         rectangle, etc).
         :param size: The dimensions of the surface.
         :param shadow_width: The thickness of the shadow around the shape.
         :param border_width: The thickness of the border around the shape.

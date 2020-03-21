@@ -13,3 +13,23 @@ from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.text import TextHTMLParser, FadeInEffect, FadeOutEffect, TypingAppearEffect
+
+
+__all__ = ['UIImage',
+           'UIButton',
+           'UIHorizontalSlider',
+           'UIVerticalScrollBar',
+           'UILabel',
+           'UIPanel',
+           'UIScreenSpaceHealthBar',
+           'UISelectionList',
+           'UITextBox',
+           'UITooltip',
+           'UIDropDownMenu',
+           'UIWorldSpaceHealthBar',
+           'UITextEntryLine',
+           'UIWindow',
+           'TextHTMLParser',
+           'FadeInEffect',
+           'FadeOutEffect',
+           'TypingAppearEffect']

@@ -11,12 +11,15 @@ from pygame_gui.elements.ui_button import UIButton
 
 class UIVerticalScrollBar(UIElement):
     """
-    A vertical scroll bar allows users to position a smaller visible area within a vertically larger area.
+    A vertical scroll bar allows users to position a smaller visible area within a vertically
+    larger area.
 
     :param relative_rect: The size and position of the scroll bar.
-    :param visible_percentage: The vertical percentage of the larger area that is visible, between 0.0 and 1.0.
+    :param visible_percentage: The vertical percentage of the larger area that is visible,
+    between 0.0 and 1.0.
     :param manager: The UIManager that manages this element.
-    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param container: The container that this element is within. If set to None will be the
+    root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -198,13 +201,14 @@ class UIVerticalScrollBar(UIElement):
 
     def kill(self):
         """
-        Overrides the kill() method of the UI element class to kill all the buttons in the scroll bar and
-        clear any of the parts of the scroll bar that are currently recorded as the 'last focused vertical scroll bar
-        element' on the ui manager.
+        Overrides the kill() method of the UI element class to kill all the buttons in the scroll
+        bar and clear any of the parts of the scroll bar that are currently recorded as the
+        'last focused vertical scroll bar element' on the ui manager.
 
-        NOTE: the 'last focused' state on the UI manager is used so that the mouse wheel will move whichever scrollbar
-        we last fiddled with even if we've been doing other stuff. This seems to be consistent with the most common
-        mousewheel/scrollbar interactions used elsewhere.
+        NOTE: the 'last focused' state on the UI manager is used so that the mouse wheel will
+        move whichever scrollbar we last fiddled with even if we've been doing other stuff.
+        This seems to be consistent with the most common mousewheel/scrollbar interactions
+        used elsewhere.
         """
         self.ui_manager.clear_last_focused_from_vert_scrollbar(self)
         self.ui_manager.clear_last_focused_from_vert_scrollbar(self.sliding_button)
@@ -216,8 +220,8 @@ class UIVerticalScrollBar(UIElement):
 
     def focus(self):
         """
-        When we focus  the scroll bar as a whole for any reason we pass that status down to the 'bar' part of
-        the scroll bar.
+        When we focus  the scroll bar as a whole for any reason we pass that status down to the
+        'bar' part of the scroll bar.
         """
         if self.sliding_button is not None:
             self.ui_manager.unset_focus_element()
@@ -225,9 +229,9 @@ class UIVerticalScrollBar(UIElement):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Checks an event from pygame's event queue to see if the scroll bar needs to react to it. In this case
-        it is just mousewheel events, mainly because the buttons that make up the scroll bar will handle the required
-        mouse click events.
+        Checks an event from pygame's event queue to see if the scroll bar needs to react to it.
+        In this case it is just mousewheel events, mainly because the buttons that make up
+        the scroll bar will handle the required mouse click events.
 
         :param event: The event to process.
         :return bool: Returns True if we've done something with the input event.
@@ -246,7 +250,8 @@ class UIVerticalScrollBar(UIElement):
                 ((last_focused_scrollbar_element is self) or
                  (last_focused_scrollbar_element is self.sliding_button) or
                  (last_focused_scrollbar_element is self.top_button) or
-                 (last_focused_scrollbar_element is self.bottom_button)) and event.type == pygame.MOUSEWHEEL):
+                 (last_focused_scrollbar_element is self.bottom_button)) and
+                event.type == pygame.MOUSEWHEEL):
             if event.y > 0:
                 self.scroll_wheel_up = True
                 consumed_event = True
@@ -258,14 +263,15 @@ class UIVerticalScrollBar(UIElement):
 
     def update(self, time_delta: float):
         """
-        Called once per update loop of our UI manager. Deals largely with moving the scroll bar and updating the
-        resulting 'start_percentage' variable that is then used by other 'scrollable' UI elements to control the point
-        they start drawing.
+        Called once per update loop of our UI manager. Deals largely with moving the scroll bar
+        and updating the resulting 'start_percentage' variable that is then used by other
+        'scrollable' UI elements to control the point they start drawing.
 
-        Reacts to presses of the up and down arrow buttons, movement of the mouse wheel and dragging of the scroll
-        bar itself.
+        Reacts to presses of the up and down arrow buttons, movement of the mouse wheel and
+        dragging of the scroll bar itself.
 
-        :param time_delta: A float, roughly representing the time in seconds between calls to this method.
+        :param time_delta: A float, roughly representing the time in seconds between calls to this
+        method.
         """
         super().update(time_delta)
         self.has_moved_recently = False
@@ -280,12 +286,14 @@ class UIVerticalScrollBar(UIElement):
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
-            elif (self.bottom_button is not None and (self.bottom_button.held or self.scroll_wheel_down) and
+            elif (self.bottom_button is not None and
+                  (self.bottom_button.held or self.scroll_wheel_down) and
                   self.scroll_position < self.bottom_limit):
                 self.scroll_wheel_down = False
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
-                                           self.bottom_limit - self.sliding_button.relative_rect.height)
+                                           self.bottom_limit -
+                                           self.sliding_button.relative_rect.height)
                 x_pos = 0
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))
@@ -322,7 +330,8 @@ class UIVerticalScrollBar(UIElement):
 
     def redraw_scrollbar(self):
         """
-        Redraws the 'scrollbar' portion of the whole UI element. Called when we change the visible percentage.
+        Redraws the 'scrollbar' portion of the whole UI element. Called when we change the
+        visible percentage.
         """
         self.sliding_button.kill()
 
@@ -353,9 +362,9 @@ class UIVerticalScrollBar(UIElement):
 
     def set_visible_percentage(self, percentage: float):
         """
-        Sets the percentage of the total 'scrollable area' that is currently visible. This will affect the size of
-        the scrollbar and should be called if the vertical size of the 'scrollable area' or the vertical size of the
-        visible area change.
+        Sets the percentage of the total 'scrollable area' that is currently visible. This will
+        affect the size of the scrollbar and should be called if the vertical size of the
+        'scrollable area' or the vertical size of the visible area change.
 
         :param percentage: A float between 0.0 and 1.0 representing the percentage that is visible.
         """
@@ -375,14 +384,17 @@ class UIVerticalScrollBar(UIElement):
 
     def rebuild_from_changed_theme_data(self):
         """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
-        the theme data has changed.
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
+        for this element when the theme data has changed.
         """
         has_any_changed = False
 
         shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                        self.element_ids,
+                                                        'shape')
+        if shape_type_string is not None and shape_type_string in ['rectangle',
+                                                                   'rounded_rectangle']:
             shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
@@ -390,7 +402,8 @@ class UIVerticalScrollBar(UIElement):
 
         corner_radius = 2
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids, 'shape_corner_radius')
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
         if shape_corner_radius_string is not None:
             try:
                 corner_radius = int(shape_corner_radius_string)
@@ -401,7 +414,9 @@ class UIVerticalScrollBar(UIElement):
             has_any_changed = True
 
         border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
         if border_width_string is not None:
             try:
                 border_width = int(border_width_string)
@@ -413,7 +428,9 @@ class UIVerticalScrollBar(UIElement):
             has_any_changed = True
 
         shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
         if shadow_width_string is not None:
             try:
                 shadow_width = int(shadow_width_string)
@@ -423,17 +440,23 @@ class UIVerticalScrollBar(UIElement):
             self.shadow_width = shadow_width
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                             self.element_ids,
+                                                             'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'enable_arrow_buttons')
+        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids,
+                                                           self.element_ids,
+                                                           'enable_arrow_buttons')
         if buttons_enable_param is not None:
             try:
                 buttons_enable = bool(int(buttons_enable_param))
@@ -446,9 +469,12 @@ class UIVerticalScrollBar(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
-        Sets the absolute screen position of this scroll bar, updating all subordinate button elements at the same time.
+        Sets the absolute screen position of this scroll bar, updating all subordinate button
+        elements at the same time.
 
         :param position: The absolute screen position to set.
         """
@@ -460,9 +486,12 @@ class UIVerticalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
-        Sets the relative screen position of this scroll bar, updating all subordinate button elements at the same time.
+        Sets the relative screen position of this scroll bar, updating all subordinate button
+        elements at the same time.
 
         :param position: The relative screen position to set.
         """
@@ -474,7 +503,9 @@ class UIVerticalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Method to directly set the dimensions of an element.
 
@@ -497,7 +528,8 @@ class UIVerticalScrollBar(UIElement):
         max_scroll_bar_y = base_scroll_bar_y + (self.scrollable_height - scroll_bar_height)
         self.sliding_rect_position.y = max(base_scroll_bar_y,
                                            min((base_scroll_bar_y +
-                                                int(self.start_percentage * self.scrollable_height)),
+                                                int(self.start_percentage *
+                                                    self.scrollable_height)),
                                                max_scroll_bar_y))
         self.scroll_position = self.sliding_rect_position.y - base_scroll_bar_y
 

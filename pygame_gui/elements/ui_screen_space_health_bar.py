@@ -14,7 +14,8 @@ class UIScreenSpaceHealthBar(UIElement):
     :param relative_rect: The rectangle that defines the size and position of the health bar.
     :param manager: The UIManager that manages this element.
     :param sprite_to_monitor: The sprite we are displaying the health of.
-    :param container: The container that this element is within. If set to None will be the root window's container.
+    :param container: The container that this element is within. If set to None will be the root
+    window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -28,16 +29,16 @@ class UIScreenSpaceHealthBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='screen_space_health_bar')
+        element_ids, object_ids = self.create_valid_ids(container=container,
+                                                        parent_element=parent_element,
+                                                        object_id=object_id,
+                                                        element_id='screen_space_health_bar')
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
+                         element_ids=element_ids,
+                         object_ids=object_ids,
                          anchors=anchors)
 
         self.current_health = 50
@@ -83,7 +84,8 @@ class UIScreenSpaceHealthBar(UIElement):
 
     def set_sprite_to_monitor(self, sprite_to_monitor: pygame.sprite.Sprite):
         """
-        Sprite to monitor the health of. Must have 'health_capacity' and 'current_health' attributes.
+        Sprite to monitor the health of. Must have 'health_capacity' and 'current_health'
+        attributes.
 
         :param sprite_to_monitor:
         """
@@ -165,16 +167,17 @@ class UIScreenSpaceHealthBar(UIElement):
             self.health_capacity = self.sprite_to_monitor.health_capacity
             self.health_percentage = self.current_health / self.health_capacity
 
+            rect_width = int(self.capacity_width * self.health_percentage)
             self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
                                                     self.shadow_width + self.border_width),
-                                                   (int(self.capacity_width * self.health_percentage),
+                                                   (rect_width,
                                                     self.capacity_height))
             self.redraw()
 
     def rebuild_from_changed_theme_data(self):
         """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for this element when
-        the theme data has changed.
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
+        for this element when the theme data has changed.
         """
         has_any_changed = False
 
@@ -184,8 +187,11 @@ class UIScreenSpaceHealthBar(UIElement):
             has_any_changed = True
 
         shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle', 'rounded_rectangle']:
+        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                        self.element_ids,
+                                                        'shape')
+        if shape_type_string is not None and shape_type_string in ['rectangle',
+                                                                   'rounded_rectangle']:
             shape_type = shape_type_string
         if shape_type != self.shape_type:
             self.shape_type = shape_type
@@ -193,7 +199,8 @@ class UIScreenSpaceHealthBar(UIElement):
 
         corner_radius = 2
         shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids, 'shape_corner_radius')
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
         if shape_corner_radius_string is not None:
             try:
                 corner_radius = int(shape_corner_radius_string)
@@ -204,7 +211,9 @@ class UIScreenSpaceHealthBar(UIElement):
             has_any_changed = True
 
         border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
         if border_width_string is not None:
             try:
                 border_width = int(border_width_string)
@@ -216,7 +225,9 @@ class UIScreenSpaceHealthBar(UIElement):
             has_any_changed = True
 
         shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
         if shadow_width_string is not None:
             try:
                 shadow_width = int(shadow_width_string)
@@ -226,27 +237,37 @@ class UIScreenSpaceHealthBar(UIElement):
             self.shadow_width = shadow_width
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                             self.element_ids,
+                                                             'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'unfilled_bar')
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                   self.element_ids,
+                                                                   'unfilled_bar')
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'filled_bar')
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'filled_bar')
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'text_shadow')
+        text_shadow_colour = self.ui_theme.get_colour(self.object_ids,
+                                                      self.element_ids,
+                                                      'text_shadow')
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
             has_any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids, self.element_ids, 'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
+                                                           self.element_ids,
+                                                           'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True

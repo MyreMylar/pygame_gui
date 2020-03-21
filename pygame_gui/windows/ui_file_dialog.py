@@ -14,18 +14,20 @@ from pygame_gui.windows import UIConfirmationDialog
 
 class UIFileDialog(UIWindow):
     """
-    A dialog window for handling file selection operations. The dialog will let you pick a file from a file system but
-    won't do anything with it once you have, the path will just be returned leaving it up to the rest of the
-    application to decide what to do with it.
+    A dialog window for handling file selection operations. The dialog will let you pick a file
+    from a file system but won't do anything with it once you have, the path will just be returned
+    leaving it up to the rest of the application to decide what to do with it.
 
     TODO: This works fine for loading files, but can it be adjusted to allow for saving files?
 
-    :param rect: The size and position of the file dialog window. Includes the size of shadow, border and title bar.
+    :param rect: The size and position of the file dialog window. Includes the size of shadow,
+    border and title bar.
     :param manager: The manager for the whole of the UI.
     :param window_title: The title for the window, defaults to 'File Dialog'
     :param initial_file_path: The initial path to open the file dialog at.
     :param object_id: The object ID for the window, used for theming - defaults to '#file_dialog'
     """
+
     def __init__(self,
                  rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -151,8 +153,8 @@ class UIFileDialog(UIWindow):
 
     def update_current_file_list(self):
         """
-        Updates the currently displayed list of files and directories. Usually called when the directory path has
-        changed.
+        Updates the currently displayed list of files and directories. Usually called when the
+        directory path has changed.
         """
         try:
             directories_on_path = [f for f in listdir(self.current_directory_path)
@@ -174,10 +176,12 @@ class UIFileDialog(UIWindow):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Handles events that this UI element is interested in. There are a lot of buttons in the file dialog.
+        Handles events that this UI element is interested in. There are a lot of buttons in the
+        file dialog.
 
         :param event: The pygame Event to process.
-        :return: True if event is consumed by this element and should not be passed on to other elements.
+        :return: True if event is consumed by this element and should not be passed on to other
+        elements.
         """
         handled = super().process_event(event)
 
@@ -186,8 +190,9 @@ class UIFileDialog(UIWindow):
             self.kill()
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-            and event.ui_element == self.ok_button and self.selected_file_path is not None and exists(
-                self.selected_file_path) and isfile(self.selected_file_path)):
+                and event.ui_element == self.ok_button and
+                self.selected_file_path is not None and exists(self.selected_file_path) and
+                isfile(self.selected_file_path)):
             event_data = {'user_type': pygame_gui.UI_FILE_DIALOG_PATH_PICKED,
                           'text': self.selected_file_path,
                           'ui_element': self,
@@ -205,12 +210,13 @@ class UIFileDialog(UIWindow):
             long_desc = "Delete " + str(selected_file_name) + "?"
             self.delete_confirmation_dialog = UIConfirmationDialog(rect=confirmation_rect,
                                                                    manager=self.ui_manager,
-                                                                   confirming_action_long_desc=long_desc,
-                                                                   confirming_action_short_name='Delete',
+                                                                   action_long_desc=long_desc,
+                                                                   action_short_name='Delete',
                                                                    window_title='Delete')
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED
-                and event.ui_element == self.delete_confirmation_dialog):
+        if (event.type == pygame.USEREVENT and
+                event.user_type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
+                event.ui_element == self.delete_confirmation_dialog):
             try:
                 Path(self.selected_file_path).unlink()
                 self.delete_button.disable()
@@ -234,7 +240,6 @@ class UIFileDialog(UIWindow):
 
         if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
                 and event.ui_element == self.refresh_button):
-
             self.update_current_file_list()
             self.file_path_text_line.set_text(self.current_directory_path)
             self.file_selection_list.set_item_list(self.current_file_list)
@@ -266,8 +271,9 @@ class UIFileDialog(UIWindow):
                 self.delete_button.disable()
                 self.ok_button.disable()
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION
-                and event.ui_element == self.file_selection_list):
+        if (event.type == pygame.USEREVENT and
+                event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
+                event.ui_element == self.file_selection_list):
             new_selection_file_path = join(self.current_directory_path, event.text)
             if exists(new_selection_file_path) and isfile(new_selection_file_path):
                 self.selected_file_path = new_selection_file_path
@@ -277,7 +283,8 @@ class UIFileDialog(UIWindow):
                 self.ok_button.disable()
                 self.delete_button.disable()
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
+        if (event.type == pygame.USEREVENT and
+                event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
                 and event.ui_element == self.file_selection_list):
             new_directory_file_path = join(self.current_directory_path, event.text)
             if exists(new_directory_file_path) and not isfile(new_directory_file_path):

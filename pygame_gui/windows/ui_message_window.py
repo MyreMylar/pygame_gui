@@ -50,7 +50,8 @@ class UIMessageWindow(UIWindow):
                                        text="Dismiss",
                                        manager=manager,
                                        container=self,
-                                       tool_tip_text="<font face=fira_code color=normal_text size=2>"
+                                       tool_tip_text="<font face=fira_code "
+                                                     "color=normal_text size=2>"
                                                      "Click to get rid of this message.</font>",
                                        object_id='#dismiss_button',
                                        anchors={"left": "right",
@@ -72,11 +73,12 @@ class UIMessageWindow(UIWindow):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Process any events relevant to the message window. In this case we just close the window when the dismiss
-        button is pressed.
+        Process any events relevant to the message window. In this case we just close the window
+        when the dismiss button is pressed.
 
         :param event: a pygame.Event.
-        :return: Return True if we 'consumed' this event and don't want to pass it on to the rest of the UI.
+        :return: Return True if we 'consumed' this event and don't want to pass it on to the rest
+        of the UI.
         """
         consumed_event = super().process_event(event)
 

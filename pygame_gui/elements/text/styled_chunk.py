@@ -9,9 +9,8 @@ from pygame_gui.elements.text.html_parser import CharStyle
 
 class StyledChunk:
     """
-    Takes care of turning styling and some ordinary text into a rendered pygame Surface of the text in an appropriate
-    style.
-
+    Takes care of turning styling and some ordinary text into a rendered pygame Surface of the text
+    in an appropriate style.
 
     :param font_size: The size of the font to use.
     :param font_name: The name of the font to use.
@@ -46,7 +45,8 @@ class StyledChunk:
         self.link_href = link_href
         self.link_style = link_style
 
-        self.font = font_dictionary.find_font(font_size, font_name, self.style.bold, self.style.italic)
+        self.font = font_dictionary.find_font(font_size, font_name,
+                                              self.style.bold, self.style.italic)
 
         if self.is_link:
             self.normal_colour = self.link_style['link_text']
@@ -77,7 +77,8 @@ class StyledChunk:
                 if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                    self.rendered_chunk = self.font.render(self.chunk, True,
+                                                           self.color, self.bg_color)
             else:
                 self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
                 self.color.apply_gradient_to_surface(self.rendered_chunk)
@@ -99,7 +100,8 @@ class StyledChunk:
 
     def unset_underline_style(self):
         """
-        Un-sets the underline style. This is a function we have to call on our loaded font before rendering.
+        Un-sets the underline style. This is a function we have to call on our loaded font before
+        rendering.
 
         """
         self.font.set_underline(False)
@@ -121,7 +123,8 @@ class StyledChunk:
                 if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk, True, self.color, self.bg_color)
+                    self.rendered_chunk = self.font.render(self.chunk, True,
+                                                           self.color, self.bg_color)
         else:
             self.rendered_chunk = pygame.Surface((0, 0))
 
@@ -131,7 +134,8 @@ class StyledChunk:
         new_ascent = self.font.get_ascent()
         new_width = self.font.size(self.chunk)[0]
         new_height = self.font.size(self.chunk)[1]
-        new_advance = sum(new_metrics[i][4] for i in range(len(self.chunk)) if len(new_metrics[i]) == 5)
+        new_advance = sum(new_metrics[i][4] for i in range(len(self.chunk))
+                          if len(new_metrics[i]) == 5)
         if (new_ascent == self.ascent and new_width == self.width and
                 new_height == self.height and new_advance == self.advance):
             self.metrics_changed_after_redraw = False
