@@ -39,6 +39,7 @@ class UIImage(UIElement):
                          anchors=anchors)
 
         self.original_image = None
+        image_surface = image_surface.convert_alpha()  # GUI images must support an alpha channel
         if image_surface.get_width() != self.rect.width or image_surface.get_height() != self.rect.height:
             self.original_image = image_surface
             self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
