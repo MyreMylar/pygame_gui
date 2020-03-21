@@ -84,7 +84,7 @@ class TestUIManager:
         Fake a click button event on a button to check they are going through the ui event manager properly/
         """
         test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        UIMessageWindow(rect=pygame.Rect(500, 400, 200, 300),
+        UIMessageWindow(rect=pygame.Rect(500, 400, 250, 300),
                         window_title="Test Message",
                         html_message="This is a bold test of the message box functionality.",
                         manager=default_ui_manager)
