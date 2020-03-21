@@ -42,45 +42,45 @@ class EllipseDrawableShape(DrawableShape):
         """
         super().full_rebuild_on_size_change()
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
-        if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
+        if self.shadow_width > min(math.floor(self.containing_rect.width / 2),
                                               math.floor(self.containing_rect.height / 2)):
-            self.theming['shadow_width'] = min(math.floor(self.containing_rect.width / 2),
+            self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                                math.floor(self.containing_rect.height / 2))
-        if self.theming['shadow_width'] < 0:
-            self.theming['shadow_width'] = 0
+        if self.shadow_width < 0:
+            self.shadow_width = 0
 
-        if self.theming['border_width'] > min(math.floor((self.containing_rect.width -
-                                                          (self.theming['shadow_width'] * 2)) / 2),
+        if self.border_width > min(math.floor((self.containing_rect.width -
+                                                          (self.shadow_width * 2)) / 2),
                                               math.floor((self.containing_rect.height -
-                                                          (self.theming['shadow_width'] * 2)) / 2)):
-            self.theming['border_width'] = min(math.floor((self.containing_rect.width -
-                                                           (self.theming['shadow_width'] * 2)) / 2),
+                                                          (self.shadow_width * 2)) / 2)):
+            self.border_width = min(math.floor((self.containing_rect.width -
+                                                           (self.shadow_width * 2)) / 2),
                                                math.floor((self.containing_rect.height -
-                                                           (self.theming['shadow_width'] * 2)) / 2))
-        if self.theming['border_width'] < 0:
-            self.theming['border_width'] = 0
+                                                           (self.shadow_width * 2)) / 2))
+        if self.border_width < 0:
+            self.border_width = 0
 
-        if self.theming['shadow_width'] > 0:
-            self.click_area_shape = pygame.Rect((self.containing_rect.x + self.theming['shadow_width'],
-                                                 self.containing_rect.y + self.theming['shadow_width']),
-                                                (self.containing_rect.width - (2 * self.theming['shadow_width']),
-                                                 self.containing_rect.height - (2 * self.theming['shadow_width'])))
+        if self.shadow_width > 0:
+            self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
+                                                 self.containing_rect.y + self.shadow_width),
+                                                (self.containing_rect.width - (2 * self.shadow_width),
+                                                 self.containing_rect.height - (2 * self.shadow_width)))
             self.base_surface = self.ui_manager.get_shadow(self.containing_rect.size,
-                                                           self.theming['shadow_width'], 'ellipse')
+                                                           self.shadow_width, 'ellipse')
         else:
             self.click_area_shape = self.containing_rect.copy()
             self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
 
         self.compute_aligned_text_rect()
 
-        self.border_rect = pygame.Rect((self.theming['shadow_width'],
-                                        self.theming['shadow_width']),
+        self.border_rect = pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
                                        (self.click_area_shape.width, self.click_area_shape.height))
 
-        self.background_rect = pygame.Rect((self.theming['border_width'] + self.theming['shadow_width'],
-                                            self.theming['border_width'] + self.theming['shadow_width']),
-                                           (self.click_area_shape.width - (2 * self.theming['border_width']),
-                                            self.click_area_shape.height - (2 * self.theming['border_width'])))
+        self.background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                            self.border_width + self.shadow_width),
+                                           (self.click_area_shape.width - (2 * self.border_width),
+                                            self.click_area_shape.height - (2 * self.border_width)))
         self.redraw_all_states()
 
     def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
@@ -106,8 +106,8 @@ class EllipseDrawableShape(DrawableShape):
         """
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
-        self.click_area_shape.width = dimensions[0] - (2 * self.theming['shadow_width'])
-        self.click_area_shape.height = dimensions[1] - (2 * self.theming['shadow_width'])
+        self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
+        self.click_area_shape.height = dimensions[1] - (2 * self.shadow_width)
 
         self.ellipse_half_diameters = (0.5 * self.containing_rect.width, 0.5 * self.containing_rect.height)
 
@@ -121,8 +121,8 @@ class EllipseDrawableShape(DrawableShape):
         """
         self.containing_rect.x = point[0]
         self.containing_rect.y = point[1]
-        self.click_area_shape.x = point[0] + self.theming['shadow_width']
-        self.click_area_shape.y = point[1] + self.theming['shadow_width']
+        self.click_area_shape.x = point[0] + self.shadow_width
+        self.click_area_shape.y = point[1] + self.shadow_width
 
         self.ellipse_center = self.click_area_shape.center
 
@@ -142,8 +142,8 @@ class EllipseDrawableShape(DrawableShape):
         shape_id = None
         if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
             shape_id = self.shape_cache.build_cache_id('ellipse', self.containing_rect.size,
-                                                       self.theming['shadow_width'],
-                                                       self.theming['border_width'],
+                                                       self.shadow_width,
+                                                       self.border_width,
                                                        self.theming[border_colour_state_str],
                                                        self.theming[bg_colour_state_str])
 
@@ -155,19 +155,19 @@ class EllipseDrawableShape(DrawableShape):
 
             # Try one AA call method
             aa = 4
-            self.border_rect = pygame.Rect((self.theming['shadow_width'] * aa,
-                                            self.theming['shadow_width'] * aa),
+            self.border_rect = pygame.Rect((self.shadow_width * aa,
+                                            self.shadow_width * aa),
                                            (self.click_area_shape.width * aa, self.click_area_shape.height * aa))
 
-            self.background_rect = pygame.Rect(((self.theming['border_width'] + self.theming['shadow_width']) * aa,
-                                                (self.theming['border_width'] + self.theming['shadow_width']) * aa),
-                                               (self.border_rect.width - (2 * self.theming['border_width'] * aa),
-                                                self.border_rect.height - (2 * self.theming['border_width'] * aa)))
+            self.background_rect = pygame.Rect(((self.border_width + self.shadow_width) * aa,
+                                                (self.border_width + self.shadow_width) * aa),
+                                               (self.border_rect.width - (2 * self.border_width * aa),
+                                                self.border_rect.height - (2 * self.border_width * aa)))
 
             bab_surface = pygame.Surface((self.containing_rect.width * aa,
                                           self.containing_rect.height * aa), flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
-            if self.theming['border_width'] > 0:
+            if self.border_width > 0:
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface, self.border_rect,
                                                                         0, aa_amount=aa, clear=False)
@@ -190,16 +190,16 @@ class EllipseDrawableShape(DrawableShape):
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
             # cut a hole in shadow, then blit background into it
-            sub_surface = pygame.Surface(((self.containing_rect.width - (2 * self.theming['shadow_width'])) * aa,
-                                          (self.containing_rect.height - (2 * self.theming['shadow_width'])) * aa),
+            sub_surface = pygame.Surface(((self.containing_rect.width - (2 * self.shadow_width)) * aa,
+                                          (self.containing_rect.height - (2 * self.shadow_width)) * aa),
                                          flags=pygame.SRCALPHA, depth=32)
             sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(sub_surface, pygame.Color("#FFFFFFFF"), sub_surface.get_rect())
             small_sub = pygame.transform.smoothscale(sub_surface,
-                                                     (self.containing_rect.width - (2 * self.theming['shadow_width']),
-                                                      self.containing_rect.height - (2 * self.theming['shadow_width'])))
-            self.states[state_str].surface.blit(small_sub, pygame.Rect((self.theming['shadow_width'],
-                                                                        self.theming['shadow_width']),
+                                                     (self.containing_rect.width - (2 * self.shadow_width),
+                                                      self.containing_rect.height - (2 * self.shadow_width)))
+            self.states[state_str].surface.blit(small_sub, pygame.Rect((self.shadow_width,
+                                                                        self.shadow_width),
                                                                        sub_surface.get_size()),
                                                 special_flags=pygame.BLEND_RGBA_SUB)
 

@@ -133,6 +133,9 @@ class DrawableShape:
 
         self.theming = theming_parameters
 
+        self.shadow_width = 0
+        self.border_width = 0
+
         self.states = {}
         for state in states:
             self.states[state] = DrawableShapeState(state)
@@ -220,6 +223,10 @@ class DrawableShape:
         Triggered when we've changed the size of the shape and need to rebuild basically everything to account for it.
 
         """
+        if 'shadow_width' in self.theming:
+            self.shadow_width = self.theming['shadow_width']
+        if 'border_width' in self.theming:
+            self.border_width = self.theming['border_width']
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
@@ -240,9 +247,7 @@ class DrawableShape:
         """
         if ('text' not in self.theming or
                 len(self.theming['text']) <= 0 or
-                'font' not in self.theming or
-                'shadow_width' not in self.theming or
-                'border_width' not in self.theming):
+                'font' not in self.theming):
             return
         # first we need to create rectangle the size of the text, if there is any text to draw
         self.aligned_text_rect = pygame.Rect((0, 0), self.theming['font'].size(self.theming['text']))
@@ -252,21 +257,21 @@ class DrawableShape:
             self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
         elif self.theming['text_horiz_alignment'] == 'left':
             self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
-                                        self.theming['shadow_width'] + self.theming['border_width'])
+                                        self.shadow_width + self.border_width)
         else:
             x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
-                     self.aligned_text_rect.width - self.theming['shadow_width'] - self.theming['border_width'])
+                     self.aligned_text_rect.width - self.shadow_width - self.border_width)
             self.aligned_text_rect.x = x_pos
         if self.theming['text_vert_alignment'] == 'center' or self.theming['text_vert_alignment'] not in ['top',
                                                                                                           'bottom']:
             self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
         elif self.theming['text_vert_alignment'] == 'top':
             self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
-                                        self.theming['shadow_width'] + self.theming['border_width'])
+                                        self.shadow_width + self.border_width)
         else:
             self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
                                         - self.theming['text_vert_alignment_padding'] -
-                                        self.theming['shadow_width'] - self.theming['border_width'])
+                                        self.shadow_width - self.border_width)
 
     def get_active_state_surface(self) -> pygame.Surface:
         """

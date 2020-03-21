@@ -45,32 +45,33 @@ class RectDrawableShape(DrawableShape):
 
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
         super().full_rebuild_on_size_change()
-        if self.theming['shadow_width'] > min(math.floor(self.containing_rect.width / 2),
+
+        if self.shadow_width > min(math.floor(self.containing_rect.width / 2),
                                               math.floor(self.containing_rect.height / 2)):
-            self.theming['shadow_width'] = min(math.floor(self.containing_rect.width / 2),
+            self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                                math.floor(self.containing_rect.height / 2))
-        if self.theming['shadow_width'] < 0:
-            self.theming['shadow_width'] = 0
+        if self.shadow_width < 0:
+            self.shadow_width = 0
 
-        if self.theming['border_width'] > min(math.floor((self.containing_rect.width -
-                                                          (self.theming['shadow_width'] * 2)) / 2),
+        if self.border_width > min(math.floor((self.containing_rect.width -
+                                                          (self.shadow_width * 2)) / 2),
                                               math.floor((self.containing_rect.height -
-                                                          (self.theming['shadow_width'] * 2)) / 2)):
-            self.theming['border_width'] = min(math.floor((self.containing_rect.width -
-                                                           (self.theming['shadow_width'] * 2)) / 2),
+                                                          (self.shadow_width * 2)) / 2)):
+            self.border_width = min(math.floor((self.containing_rect.width -
+                                                           (self.shadow_width * 2)) / 2),
                                                math.floor((self.containing_rect.height -
-                                                           (self.theming['shadow_width'] * 2)) / 2))
-        if self.theming['border_width'] < 0:
-            self.theming['border_width'] = 0
+                                                           (self.shadow_width * 2)) / 2))
+        if self.border_width < 0:
+            self.border_width = 0
 
-        if self.theming['shadow_width'] > 0:
-            self.click_area_shape = pygame.Rect((self.containing_rect.x + self.theming['shadow_width'],
-                                                 self.containing_rect.y + self.theming['shadow_width']),
-                                                (self.containing_rect.width - (2 * self.theming['shadow_width']),
-                                                 self.containing_rect.height - (2 * self.theming['shadow_width'])))
+        if self.shadow_width > 0:
+            self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
+                                                 self.containing_rect.y + self.shadow_width),
+                                                (self.containing_rect.width - (2 * self.shadow_width),
+                                                 self.containing_rect.height - (2 * self.shadow_width)))
             shadow = self.ui_manager.get_shadow(self.containing_rect.size,
-                                                shadow_width=self.theming['shadow_width'],
-                                                corner_radius=self.theming['shadow_width'])
+                                                shadow_width=self.shadow_width,
+                                                corner_radius=self.shadow_width)
             if shadow is not None:
                 self.base_surface = shadow
             else:
@@ -82,14 +83,14 @@ class RectDrawableShape(DrawableShape):
 
         self.compute_aligned_text_rect()
 
-        self.border_rect = pygame.Rect((self.theming['shadow_width'],
-                                        self.theming['shadow_width']),
+        self.border_rect = pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
                                        (self.click_area_shape.width, self.click_area_shape.height))
 
-        self.background_rect = pygame.Rect((self.theming['border_width'] + self.theming['shadow_width'],
-                                            self.theming['border_width'] + self.theming['shadow_width']),
-                                           (self.click_area_shape.width - (2 * self.theming['border_width']),
-                                            self.click_area_shape.height - (2 * self.theming['border_width'])))
+        self.background_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                            self.border_width + self.shadow_width),
+                                           (self.click_area_shape.width - (2 * self.border_width),
+                                            self.click_area_shape.height - (2 * self.border_width)))
         self.redraw_all_states()
 
     def collide_point(self, point: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> bool:
@@ -111,8 +112,8 @@ class RectDrawableShape(DrawableShape):
             return
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
-        self.click_area_shape.width = dimensions[0] - (2 * self.theming['shadow_width'])
-        self.click_area_shape.height = dimensions[1] - (2 * self.theming['shadow_width'])
+        self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
+        self.click_area_shape.height = dimensions[1] - (2 * self.shadow_width)
 
         self.has_been_resized = True
 
@@ -126,8 +127,8 @@ class RectDrawableShape(DrawableShape):
         """
         self.containing_rect.x = point[0]
         self.containing_rect.y = point[1]
-        self.click_area_shape.x = point[0] + self.theming['shadow_width']
-        self.click_area_shape.y = point[1] + self.theming['shadow_width']
+        self.click_area_shape.x = point[0] + self.shadow_width
+        self.click_area_shape.y = point[1] + self.shadow_width
 
     def redraw_state(self, state_str: str):
         """
@@ -145,8 +146,8 @@ class RectDrawableShape(DrawableShape):
         shape_id = None
         if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
             shape_id = self.shape_cache.build_cache_id('rectangle', self.containing_rect.size,
-                                                       self.theming['shadow_width'],
-                                                       self.theming['border_width'],
+                                                       self.shadow_width,
+                                                       self.border_width,
                                                        self.theming[border_colour_state_str],
                                                        self.theming[bg_colour_state_str])
 
@@ -156,7 +157,7 @@ class RectDrawableShape(DrawableShape):
         else:
             self.states[state_str].surface = self.base_surface.copy()
 
-            if self.theming['border_width'] > 0:
+            if self.border_width > 0:
 
                 if type(self.theming[border_colour_state_str]) == ColourGradient:
                     border_shape_surface = pygame.Surface(self.border_rect.size, flags=pygame.SRCALPHA, depth=32)
