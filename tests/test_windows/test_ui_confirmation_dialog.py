@@ -19,6 +19,16 @@ class TestUIConfirmationDialog:
                              window_title="Confirm",
                              confirming_action_short_name="Confirm")
 
+    def test_create_too_small(self, _init_pygame, default_ui_manager):
+        default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
+
+        with pytest.warns(UserWarning, match="Initial size"):
+            UIConfirmationDialog(rect=pygame.Rect(100, 100, 50, 50),
+                                 manager=default_ui_manager,
+                                 confirming_action_long_desc="Confirm a <b>bold</b> test of the confirmation dialog.",
+                                 window_title="Confirm",
+                                 confirming_action_short_name="Confirm")
+
     def test_press_close_window_button(self, _init_pygame, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,

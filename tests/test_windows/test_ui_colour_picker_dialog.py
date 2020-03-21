@@ -4,8 +4,10 @@ import pytest
 import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
+from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
 
@@ -79,14 +81,61 @@ class TestUIColourChannelEditor:
         assert channel_editor.slider.get_current_value() == 200
         assert channel_editor.current_value == 200
 
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=default_ui_manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container)
+
+        channel_editor.set_position((150, 30))
+
+        assert channel_editor.relative_rect.topleft == (50, -70)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=default_ui_manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container)
+
+        channel_editor.set_relative_position((50, 50))
+
+        assert channel_editor.rect.topleft == (150, 150)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=default_ui_manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container)
+
+        channel_editor.set_dimensions((200, 29))
+
+        assert channel_editor.rect.size == (200, 29)
+
 
 class TestUIColourPickerDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                              manager=default_ui_manager)
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager):
+    def test_create_too_small(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        with pytest.warns(UserWarning, match="Initial size"):
+            UIColourPickerDialog(rect=pygame.Rect(100, 100, 50, 50),
+                                 manager=default_ui_manager)
+
+    def test_press_cancel_button(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager)
 
@@ -103,7 +152,7 @@ class TestUIColourPickerDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_press_ok_button(self, _init_pygame, default_ui_manager):
+    def test_press_ok_button(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -134,7 +183,8 @@ class TestUIColourPickerDialog:
         assert confirm_event_fired
         assert event_colour == pygame.Color(200, 220, 50, 255)
 
-    def test_click_in_saturation_value_square_button(self, _init_pygame, default_ui_manager):
+    def test_click_in_saturation_value_square_button(self, _init_pygame,
+                                                     default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -143,12 +193,12 @@ class TestUIColourPickerDialog:
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
-                                                              'pos': colour_picker.saturation_value_square.rect.center}
+                                                              'pos': colour_picker.sat_value_square.rect.center}
                                                              ))
 
         assert colour_picker.current_colour == pygame.Color(120, 127, 63, 255)
 
-    def test_mess_with_colour_channel_event(self, _init_pygame, default_ui_manager):
+    def test_mess_with_colour_channel_event(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -179,13 +229,13 @@ class TestUIColourPickerDialog:
 
         assert confirm_event_fired
 
-    def test_update_saturation_value_square(self, _init_pygame, default_ui_manager):
+    def test_update_saturation_value_square(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager)
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
-                                                              'pos': colour_picker.saturation_value_square.rect.center}
+                                                              'pos': colour_picker.sat_value_square.rect.center}
                                                              ))
         assert colour_picker.current_colour == pygame.Color(127, 63, 63, 255)
 
@@ -194,11 +244,11 @@ class TestUIColourPickerDialog:
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
-                                                              'pos': colour_picker.saturation_value_square.rect.center}
+                                                              'pos': colour_picker.sat_value_square.rect.center}
                                                              ))
         assert colour_picker.current_colour == pygame.Color(63, 127, 95, 255)
 
-    def test_update_current_colour_image(self, _init_pygame, default_ui_manager):
+    def test_update_current_colour_image(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -223,7 +273,7 @@ class TestUIColourPickerDialog:
 
         assert pixel_colour == colour_picker.current_colour_image.image.map_rgb(pygame.Color(50, 180, 150, 255))
 
-    def test_changed_rgb_update_hsv(self, _init_pygame, default_ui_manager):
+    def test_changed_rgb_update_hsv(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -250,7 +300,7 @@ class TestUIColourPickerDialog:
         assert colour_picker.saturation_channel.current_value == 57
         assert colour_picker.value_channel.current_value == 74
 
-    def test_changed_hsv_update_rgb(self, _init_pygame, default_ui_manager):
+    def test_changed_hsv_update_rgb(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
