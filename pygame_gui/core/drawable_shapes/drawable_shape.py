@@ -167,6 +167,12 @@ class DrawableShape:
         self.time_until_full_rebuild_after_changing_size = 0.35
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
+        self.click_area_shape = None
+        self.border_rect = None
+        self.background_rect = None
+        self.aligned_text_rect = None
+        self.base_surface = None
+
     def set_active_state(self, state_id: str):
         """
         Changes the currently active state for the drawable shape and, if setup in the theme,
@@ -180,7 +186,7 @@ class DrawableShape:
             self.active_state.has_fresh_surface = True
 
             if self.previous_state is not None and ((self.previous_state.state_id,
-                                                    self.active_state.state_id) in
+                                                     self.active_state.state_id) in
                                                     self.state_transition_times):
                 prev_id = self.previous_state.state_id
                 next_id = self.active_state.state_id
@@ -244,7 +250,7 @@ class DrawableShape:
         a time so will take a few loops of the game to complete if this shape has many states.
 
         """
-        self.states_to_redraw_queue = deque([state for state in self.states])
+        self.states_to_redraw_queue = deque(self.states)
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 
@@ -372,7 +378,7 @@ class DrawableShape:
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-                if type(self.theming[text_colour_state_str]) != ColourGradient:
+                if not isinstance(self.theming[text_colour_state_str], ColourGradient):
                     text_surface = self.theming['font'].render(self.theming['text'], True,
                                                                self.theming[text_colour_state_str])
                 else:
@@ -408,13 +414,11 @@ class DrawableShape:
 
         :param state_str: The ID/name of the state to redraw.
         """
-        pass
 
     def clean_up_temp_shapes(self):
         """
         This method is declared for derived classes to implement but has no default implementation.
         """
-        pass
 
     def collide_point(self, point: Union[pygame.math.Vector2,
                                          Tuple[int, int],
@@ -424,7 +428,6 @@ class DrawableShape:
 
         :param point: A point to collide with this shape.
         """
-        pass
 
     def set_position(self, point: Union[pygame.math.Vector2,
                                         Tuple[int, int],
@@ -434,7 +437,6 @@ class DrawableShape:
 
         :param point: A point to set this shapes position to.
         """
-        pass
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -444,4 +446,3 @@ class DrawableShape:
 
         :param dimensions: The new dimensions for our shape.
         """
-        pass

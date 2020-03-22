@@ -28,11 +28,6 @@ class RectDrawableShape(DrawableShape):
                  manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
-        self.click_area_shape = None
-        self.border_rect = None
-        self.background_rect = None
-        self.aligned_text_rect = None
-        self.base_surface = None
         self.has_been_resized = False
 
         self.full_rebuild_on_size_change()
@@ -69,10 +64,10 @@ class RectDrawableShape(DrawableShape):
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
                                                  self.containing_rect.y + self.shadow_width),
-                                                (self.containing_rect.width - (
-                                                            2 * self.shadow_width),
-                                                 self.containing_rect.height - (
-                                                             2 * self.shadow_width)))
+                                                (self.containing_rect.width -
+                                                 (2 * self.shadow_width),
+                                                 self.containing_rect.height -
+                                                 (2 * self.shadow_width)))
             shadow = self.ui_manager.get_shadow(self.containing_rect.size,
                                                 shadow_width=self.shadow_width,
                                                 corner_radius=self.shadow_width)
@@ -150,7 +145,6 @@ class RectDrawableShape(DrawableShape):
 
         :param state_str: The ID string of the state to rebuild.
         """
-        state_str = state_str
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
@@ -173,7 +167,7 @@ class RectDrawableShape(DrawableShape):
 
             if self.border_width > 0:
 
-                if type(self.theming[border_colour_state_str]) == ColourGradient:
+                if isinstance(self.theming[border_colour_state_str], ColourGradient):
                     border_shape_surface = pygame.Surface(self.border_rect.size,
                                                           flags=pygame.SRCALPHA, depth=32)
                     border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
@@ -187,7 +181,7 @@ class RectDrawableShape(DrawableShape):
                     self.states[state_str].surface.fill(self.theming[border_colour_state_str],
                                                         self.border_rect)
 
-            if type(self.theming[bg_colour_state_str]) == ColourGradient:
+            if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                 background_shape_surface = pygame.Surface(self.background_rect.size,
                                                           flags=pygame.SRCALPHA, depth=32)
                 background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
@@ -206,7 +200,7 @@ class RectDrawableShape(DrawableShape):
                                        (int(self.theming['filled_bar_width_percentage'] *
                                             self.background_rect.width),
                                         self.background_rect.height))
-                if type(self.theming['filled_bar']) == ColourGradient:
+                if isinstance(self.theming['filled_bar'], ColourGradient):
                     bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA,
                                                        depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))

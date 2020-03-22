@@ -1,7 +1,9 @@
-import pygame
 from typing import Union, List, Tuple, Dict
 
-import pygame_gui
+import pygame
+
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_NEW_SELECTION
+from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
@@ -229,19 +231,19 @@ class UIExpandedDropDownState:
         consumed_event = False
 
         if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+                event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.close_button, self.selected_option_button]):
 
             self.should_transition = True
 
         if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
+                event.user_type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.options_selection_list):
             selection = self.options_selection_list.get_single_selection()
             self.drop_down_menu_ui.selected_option = selection
             self.should_transition = True
 
-            event_data = {'user_type': pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
+            event_data = {'user_type': UI_DROP_DOWN_MENU_CHANGED,
                           'text': self.drop_down_menu_ui.selected_option,
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
@@ -471,7 +473,7 @@ class UIClosedDropDownState:
         """
         consumed_event = False
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.open_button, self.selected_option_button]):
 
             self.should_transition = True
@@ -691,43 +693,9 @@ class UIDropDownMenu(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
-            has_any_changed = True
-
-        border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
@@ -807,17 +775,17 @@ class UIDropDownMenu(UIElement):
         """
         self.current_state.on_fresh_drawable_shape_ready()
 
-    def hover_point(self, x: float, y: float) -> bool:
+    def hover_point(self, hover_x: float, hover_y: float) -> bool:
         """
         Test if a given point counts as 'hovering' this UI element. Normally that is a
         straightforward matter of seeing if a point is inside the rectangle. Occasionally it
         will also check if we are in a wider zone around a UI element once it is already active,
         this makes it easier to move scroll bars and the like.
 
-        :param x: The x (horizontal) position of the point.
-        :param y: The y (vertical) position of the point.
+        :param hover_x: The x (horizontal) position of the point.
+        :param hover_y: The y (vertical) position of the point.
 
         :return bool: Returns True if we are hovering this element.
         """
-        return (bool(self.rect.collidepoint(x, y)) and
-                bool(self.ui_container.rect.collidepoint(x, y)))
+        return (bool(self.rect.collidepoint(hover_x, hover_y)) and
+                bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))

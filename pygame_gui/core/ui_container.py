@@ -99,7 +99,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         max_element_top_layer = self._layer
         for element in self.elements:
             if ((element not in self.ui_manager.get_window_stack().stack) and
-                not (isinstance(element, UIContainer) and element.is_window_root_container) and
+                    not (isinstance(element, UIContainer) and element.is_window_root_container) and
                     element.get_top_layer() > max_element_top_layer):
                 max_element_top_layer = element.get_top_layer()
 

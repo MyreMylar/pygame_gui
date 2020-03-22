@@ -1,12 +1,13 @@
-import pygame
 import json
 import os
 import io
 import base64
 import warnings
-from contextlib import contextmanager
 
+from contextlib import contextmanager
 from typing import Union, List, Dict, Any
+
+import pygame
 
 from pygame_gui.core.utility import create_resource_path
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
@@ -167,8 +168,8 @@ class UIAppearanceTheme:
                 self._theme_file_last_modified = stamp
                 self.reload_theming()
                 return True
-            else:
-                return False
+
+        return False
 
     def update_shape_cache(self):
         """
@@ -207,7 +208,7 @@ class UIAppearanceTheme:
                                               self.base_font_info['bold'],
                                               self.base_font_info['italic'])
 
-        for element_key in self.ui_element_fonts_info.keys():
+        for element_key in self.ui_element_fonts_info:
             font_info = self.ui_element_fonts_info[element_key]
 
             bold_path = None
@@ -250,7 +251,7 @@ class UIAppearanceTheme:
         Loads all images in our loaded theme.
 
         """
-        for element_key in self.ui_element_image_paths.keys():
+        for element_key in self.ui_element_image_paths:
             image_paths_dict = self.ui_element_image_paths[element_key]
             if element_key not in self.ui_element_image_surfaces:
                 self.ui_element_image_surfaces[element_key] = {}
@@ -388,9 +389,9 @@ class UIAppearanceTheme:
                 unwind_node = unwind_node['parent']
             gathered_ids.reverse()
             combined_id = gathered_ids[0]
-            for index in range(1, len(gathered_ids)):
+            for gathered_index in range(1, len(gathered_ids)):
                 combined_id += '.'
-                combined_id += gathered_ids[index]
+                combined_id += gathered_ids[gathered_index]
             combined_ids.append(combined_id)
 
     def build_all_combined_ids(self,
@@ -542,10 +543,10 @@ class UIAppearanceTheme:
         :return pygame.Color: A pygame colour.
         """
         colour_or_gradient = self.get_colour_or_gradient(object_ids, element_ids, colour_id)
-        if type(colour_or_gradient) == ColourGradient:
+        if isinstance(colour_or_gradient, ColourGradient):
             gradient = colour_or_gradient
             colour = gradient.colour_1
-        elif type(colour_or_gradient) == pygame.Color:
+        elif isinstance(colour_or_gradient, pygame.Color):
             colour = colour_or_gradient
         else:
             colour = pygame.Color('#000000')
@@ -593,7 +594,7 @@ class UIAppearanceTheme:
         colour_parts = colour_id.split('_')
         best_fit_key_count = 0
         best_fit_colour = self.base_colours['normal_bg']
-        for key in self.base_colours.keys():
+        for key in self.base_colours:
             key_words = key.split('_')
             count = sum(el in colour_parts for el in key_words)
             if count > best_fit_key_count:
@@ -607,22 +608,22 @@ class UIAppearanceTheme:
         """
         Wraps file open in some exception handling.
         """
-        if type(filename) != io.StringIO:
+        if not isinstance(filename, io.StringIO):
             try:
-                f = open(filename, mode)
+                file = open(filename, mode)
             except IOError as err:
                 yield None, err
             else:
                 try:
-                    yield f, None
+                    yield file, None
                 finally:
-                    f.close()
+                    file.close()
         else:
-            f = filename
+            file = filename
             try:
-                yield f, None
+                yield file, None
             finally:
-                f.close()
+                file.close()
 
     def load_theme(self, file_path: Union[str, PathLike, io.StringIO]):
         """
@@ -633,7 +634,7 @@ class UIAppearanceTheme:
 
         """
 
-        if type(file_path) != io.StringIO:
+        if not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
@@ -748,8 +749,7 @@ class UIAppearanceTheme:
             self.ui_element_misc_data[element_name] = {}
         misc_dict = theme_dict[element_name][data_type]
         for misc_data_key in misc_dict:
-            if (isinstance(misc_dict[misc_data_key], dict) or
-                    isinstance(misc_dict[misc_data_key], str)):
+            if isinstance(misc_dict[misc_data_key], (dict, str)):
                 self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[misc_data_key]
 
     def load_element_image_data_from_theme(self,
@@ -784,12 +784,12 @@ class UIAppearanceTheme:
                 rect_list = str(images_dict[image_key]['sub_surface_rect']).strip().split(',')
                 if len(rect_list) == 4:
                     try:
-                        x = int(rect_list[0].strip())
-                        y = int(rect_list[1].strip())
-                        w = int(rect_list[2].strip())
-                        h = int(rect_list[3].strip())
-                        rect = pygame.Rect((x, y), (w, h))
-                    except ValueError or TypeError:
+                        left = int(rect_list[0].strip())
+                        top = int(rect_list[1].strip())
+                        width = int(rect_list[2].strip())
+                        height = int(rect_list[3].strip())
+                        rect = pygame.Rect((left, top), (width, height))
+                    except (ValueError, TypeError):
                         rect = pygame.Rect((0, 0), (10, 10))
                         warnings.warn("Unable to create subsurface rectangle from string: "
                                       "" + images_dict[image_key]['sub_surface_rect'])

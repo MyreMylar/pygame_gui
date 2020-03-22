@@ -1,6 +1,6 @@
-import pygame
-
 from typing import Union, Tuple, Dict
+
+import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
@@ -244,14 +244,8 @@ class UIVerticalScrollBar(UIElement):
             pygame.MOUSEWHEEL = -1
 
         consumed_event = False
-        last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
 
-        if (last_focused_scrollbar_element is not None and
-                ((last_focused_scrollbar_element is self) or
-                 (last_focused_scrollbar_element is self.sliding_button) or
-                 (last_focused_scrollbar_element is self.top_button) or
-                 (last_focused_scrollbar_element is self.bottom_button)) and
-                event.type == pygame.MOUSEWHEEL):
+        if self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
             if event.y > 0:
                 self.scroll_wheel_up = True
                 consumed_event = True
@@ -260,6 +254,19 @@ class UIVerticalScrollBar(UIElement):
                 consumed_event = True
 
         return consumed_event
+
+    def _check_was_last_focused(self) -> bool:
+        """
+        Check if this scroll bar was the last one focused in the UI.
+
+        :return: True if it was.
+        """
+        last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
+        return (last_focused_scrollbar_element is not None and
+                ((last_focused_scrollbar_element is self) or
+                 (last_focused_scrollbar_element is self.sliding_button) or
+                 (last_focused_scrollbar_element is self.top_button) or
+                 (last_focused_scrollbar_element is self.bottom_button)))
 
     def update(self, time_delta: float):
         """
@@ -400,44 +407,9 @@ class UIVerticalScrollBar(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
-            has_any_changed = True
-
-        border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,

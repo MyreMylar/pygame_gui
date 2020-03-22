@@ -129,8 +129,8 @@ class TextBlock:
                     line_render_length += chunk_length
                     if line_render_length > self.width:
                         char_line_length = line_render_length - chunk_length
-                        for i in range(len(metrics)):
-                            advance = metrics[i][4]
+                        for i, metric in enumerate(metrics):
+                            advance = metric[4]
                             char_line_length += advance
                             if char_line_length > self.width:
                                 # splitting time
@@ -142,8 +142,8 @@ class TextBlock:
                     chunk_index += 1
 
                 if split_point != -1:
-                    self.split_chunk(chunk_length, chunk_to_split_index, line, line_index,
-                                     lines_of_chunks, split_point)
+                    self._split_chunk(chunk_length, chunk_to_split_index, line, line_index,
+                                      lines_of_chunks, split_point)
                 line_index += 1
 
         surface = None
@@ -214,8 +214,24 @@ class TextBlock:
         self.width = surface_width
         self.height = surface_height
 
-    def split_chunk(self, chunk_length, chunk_to_split_index, line, line_index, lines_of_chunks,
-                    split_point):
+    def _split_chunk(self,
+                     chunk_length: int,
+                     chunk_to_split_index: int,
+                     line,
+                     line_index: int,
+                     lines_of_chunks,
+                     split_point: int):
+        """
+        Split a chunk of text into two.
+
+        :param chunk_length:
+        :param chunk_to_split_index:
+        :param line:
+        :param line_index:
+        :param lines_of_chunks:
+        :param split_point:
+        :return:
+        """
         word_split_point = 0
         chunk_to_split = line[chunk_to_split_index]
         for i in range(split_point, 0, -1):
@@ -312,7 +328,7 @@ class TextBlock:
         self.block_sprite = pygame.Surface((self.width, self.height),
                                            flags=pygame.SRCALPHA, depth=32)
 
-        if type(self.bg_colour) == ColourGradient:
+        if isinstance(self.bg_colour, ColourGradient):
             self.block_sprite.fill(pygame.Color("#FFFFFFFF"))
             self.bg_colour.apply_gradient_to_surface(self.block_sprite)
         else:

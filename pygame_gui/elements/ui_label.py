@@ -1,6 +1,7 @@
-import pygame
 import warnings
 from typing import Union, Tuple, Dict
+
+import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import ColourGradient, UIElement
@@ -81,16 +82,16 @@ class UILabel(UIElement):
 
         new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
 
-        if type(self.bg_colour) == ColourGradient:
+        if isinstance(self.bg_colour, ColourGradient):
             new_image.fill(pygame.Color('#FFFFFFFF'))
             self.bg_colour.apply_gradient_to_surface(new_image)
-            if type(self.text_colour) == ColourGradient:
+            if isinstance(self.text_colour, ColourGradient):
                 text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(text_render)
 
             else:
                 text_render = self.font.render(self.text, True, self.text_colour)
-        elif type(self.text_colour) == ColourGradient:
+        elif isinstance(self.text_colour, ColourGradient):
             new_image.fill(self.bg_colour)
             text_render = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
             self.text_colour.apply_gradient_to_surface(text_render)
@@ -106,14 +107,14 @@ class UILabel(UIElement):
         if self.shadow_enabled:
             shadow_text_render = self.font.render(self.text, True, self.text_shadow_colour)
 
-            for y in range(-self.shadow_size, self.shadow_size + 1):
+            for y_pos in range(-self.shadow_size, self.shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_render_rect.x + self.shadow_offset[0],
-                                                text_render_rect.y + self.shadow_offset[1] + y),
+                                                text_render_rect.y + self.shadow_offset[1] + y_pos),
                                                text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)
 
-            for x in range(-self.shadow_size, self.shadow_size + 1):
-                shadow_text_rect = pygame.Rect((text_render_rect.x + self.shadow_offset[0] + x,
+            for x_pos in range(-self.shadow_size, self.shadow_size + 1):
+                shadow_text_rect = pygame.Rect((text_render_rect.x + self.shadow_offset[0] + x_pos,
                                                 text_render_rect.y + self.shadow_offset[1]),
                                                text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)

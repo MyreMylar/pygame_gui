@@ -73,8 +73,8 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if type(self.color) != ColourGradient:
-                if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
+            if not isinstance(self.color, ColourGradient):
+                if isinstance(self.bg_color, ColourGradient) or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
                     self.rendered_chunk = self.font.render(self.chunk, True,
@@ -116,11 +116,11 @@ class StyledChunk:
             self.font.set_underline(True)
 
         if len(self.chunk) > 0:
-            if type(self.color) == ColourGradient:
+            if isinstance(self.color, ColourGradient):
                 self.rendered_chunk = self.font.render(self.chunk, True, pygame.Color('#FFFFFFFF'))
                 self.color.apply_gradient_to_surface(self.rendered_chunk)
             else:
-                if type(self.bg_color) == ColourGradient or self.bg_color.a != 255:
+                if isinstance(self.bg_color, ColourGradient) or self.bg_color.a != 255:
                     self.rendered_chunk = self.font.render(self.chunk, True, self.color)
                 else:
                     self.rendered_chunk = self.font.render(self.chunk, True,

@@ -1,9 +1,11 @@
-import pygame
 import re
 import warnings
+
 from typing import Union, List, Tuple, Dict
 
-import pygame_gui
+import pygame
+
+from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
@@ -136,7 +138,7 @@ class UITextEntryLine(UIElement):
                                              flags=pygame.SRCALPHA,
                                              depth=32)
 
-        if type(self.background_colour) == ColourGradient:
+        if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
             self.background_colour.apply_gradient_to_surface(self.text_image)
         else:
@@ -197,13 +199,13 @@ class UITextEntryLine(UIElement):
         Redraws the entire text entry element onto the underlying sprite image. Usually called
         when the displayed text has been edited or changed in some fashion.
         """
-        if type(self.background_colour) == ColourGradient:
+        if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
             self.background_colour.apply_gradient_to_surface(self.text_image)
         else:
             self.text_image.fill(self.background_colour)
         if self.select_range[0] == self.select_range[1]:
-            if type(self.text_colour) == ColourGradient:
+            if isinstance(self.text_colour, ColourGradient):
                 self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(self.text_surface)
 
@@ -220,7 +222,7 @@ class UITextEntryLine(UIElement):
             post_select_area_surface = None
 
             if len(pre_select_area_text) > 0:
-                if type(self.text_colour) == ColourGradient:
+                if isinstance(self.text_colour, ColourGradient):
                     pre_select_area_surface = self.font.render(pre_select_area_text,
                                                                True,
                                                                pygame.Color('#FFFFFFFF'))
@@ -233,14 +235,14 @@ class UITextEntryLine(UIElement):
             else:
                 width_pre = 0
 
-            if type(self.selected_bg_colour) == ColourGradient:
+            if isinstance(self.selected_bg_colour, ColourGradient):
                 select_size = self.font.size(select_area_text)
                 select_area_surface = pygame.Surface(select_size,
                                                      flags=pygame.SRCALPHA,
                                                      depth=32)
                 select_area_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
-                if type(self.selected_text_colour) == ColourGradient:
+                if isinstance(self.selected_text_colour, ColourGradient):
                     alpha_text = self.font.render(select_area_text,
                                                   True,
                                                   pygame.Color('#FFFFFFFF'))
@@ -249,7 +251,7 @@ class UITextEntryLine(UIElement):
                     alpha_text = self.font.render(select_area_text, True, self.selected_text_colour)
                 select_area_surface.blit(alpha_text, (0, 0))
             else:
-                if type(self.selected_text_colour) == ColourGradient:
+                if isinstance(self.selected_text_colour, ColourGradient):
                     select_size = self.font.size(select_area_text)
                     select_area_surface = pygame.Surface(select_size,
                                                          flags=pygame.SRCALPHA,
@@ -267,7 +269,7 @@ class UITextEntryLine(UIElement):
                                                            self.selected_text_colour,
                                                            self.selected_bg_colour)
             if len(post_select_area_text) > 0:
-                if type(self.text_colour) == ColourGradient:
+                if isinstance(self.text_colour, ColourGradient):
                     post_select_area_surface = self.font.render(post_select_area_text,
                                                                 True,
                                                                 pygame.Color('#FFFFFFFF'))
@@ -287,7 +289,7 @@ class UITextEntryLine(UIElement):
                                                 text_height),
                                                flags=pygame.SRCALPHA,
                                                depth=32)
-            if type(self.background_colour) == ColourGradient:
+            if isinstance(self.background_colour, ColourGradient):
                 self.text_image.fill(pygame.Color("#FFFFFFFF"))
                 self.background_colour.apply_gradient_to_surface(self.text_image)
             else:
@@ -342,7 +344,7 @@ class UITextEntryLine(UIElement):
             self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
                              self.horiz_line_padding - self.start_text_offset)
 
-            if type(self.text_colour) != ColourGradient:
+            if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
                 cursor_surface = pygame.Surface(self.cursor.size)
@@ -367,7 +369,7 @@ class UITextEntryLine(UIElement):
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
         if self.selection_in_progress:
-            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+            mouse_x, _ = self.ui_manager.get_mouse_position()
             select_end_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset +
                                                                     mouse_x)
             new_range = [self.select_range[0], select_end_pos]
@@ -498,7 +500,7 @@ class UITextEntryLine(UIElement):
             self.selection_in_progress = False
         if self.focused and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                event_data = {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
+                event_data = {'user_type': UI_TEXT_ENTRY_FINISHED,
                               'text': self.text,
                               'ui_element': self,
                               'ui_object_id': self.most_specific_combined_id}
@@ -649,8 +651,8 @@ class UITextEntryLine(UIElement):
 
             if acc_pos + (x_width/2) > pixel_pos:
                 break
-            else:
-                index += 1
+
+            index += 1
             acc_pos += x_width
         return index
 
@@ -665,7 +667,7 @@ class UITextEntryLine(UIElement):
         :param allowed_characters: The characters to allow, either in a list form or one of the
         supported string ids.
         """
-        if type(allowed_characters) is str:
+        if isinstance(allowed_characters, str):
             if allowed_characters == 'numbers':
                 self.allowed_characters = UITextEntryLine._number_character_set
             else:
@@ -687,7 +689,7 @@ class UITextEntryLine(UIElement):
         :param forbidden_characters: The characters to forbid, either in a list form or one of
         the supported string ids.
         """
-        if type(forbidden_characters) is str:
+        if isinstance(forbidden_characters, str):
             if forbidden_characters == 'numbers':
                 self.forbidden_characters = UITextEntryLine._number_character_set
             elif forbidden_characters == 'forbidden_file_path':
@@ -742,44 +744,9 @@ class UITextEntryLine(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
-            has_any_changed = True
-
-        border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         padding_str = self.ui_theme.get_misc_data(self.object_ids,

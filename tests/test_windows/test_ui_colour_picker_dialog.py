@@ -291,13 +291,13 @@ class TestUIColourPickerDialog:
                                                     colour_picker.blue_channel.current_value)
 
         assert colour_picker.hue_channel.current_value == 67
-        assert colour_picker.saturation_channel.current_value == 77
+        assert colour_picker.sat_channel.current_value == 77
         assert colour_picker.value_channel.current_value == 86
 
         colour_picker.changed_rgb_update_hsv()
 
         assert colour_picker.hue_channel.current_value == 250
-        assert colour_picker.saturation_channel.current_value == 57
+        assert colour_picker.sat_channel.current_value == 57
         assert colour_picker.value_channel.current_value == 74
 
     def test_changed_hsv_update_rgb(self, _init_pygame, default_ui_manager, _display_surface_return_none):
@@ -306,15 +306,15 @@ class TestUIColourPickerDialog:
                                              initial_colour=pygame.Color(200, 220, 50, 255))
 
         assert colour_picker.hue_channel.current_value == 67
-        assert colour_picker.saturation_channel.current_value == 77
+        assert colour_picker.sat_channel.current_value == 77
         assert colour_picker.value_channel.current_value == 86
 
         colour_picker.hue_channel.set_value(250)
-        colour_picker.saturation_channel.set_value(57)
+        colour_picker.sat_channel.set_value(57)
         colour_picker.value_channel.set_value(74)
 
         colour_picker.current_colour.hsva = (colour_picker.hue_channel.current_value,
-                                             colour_picker.saturation_channel.current_value,
+                                             colour_picker.sat_channel.current_value,
                                              colour_picker.value_channel.current_value,
                                              100)
 

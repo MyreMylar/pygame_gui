@@ -7,6 +7,7 @@ class TextBoxEffect:
     def __init__(self, all_characters: str):
         self.all_characters = all_characters
 
+    # pylint: disable=unused-argument,no-self-use
     def should_full_redraw(self) -> bool:
         """
         Stub that returns False
@@ -15,6 +16,7 @@ class TextBoxEffect:
         """
         return False
 
+    # pylint: disable=unused-argument,no-self-use
     def should_redraw_from_chunks(self) -> bool:
         """
         Stub that returns False
@@ -29,7 +31,6 @@ class TextBoxEffect:
 
         :param time_delta: time in seconds since last frame.
         """
-        pass
 
     def get_end_text_pos(self) -> int:
         """
@@ -40,6 +41,7 @@ class TextBoxEffect:
         """
         return len(self.all_characters)
 
+    # pylint: disable=unused-argument,no-self-use
     def get_final_alpha(self) -> int:
         """
         The alpha value to draw the text box with. By default it is 255.

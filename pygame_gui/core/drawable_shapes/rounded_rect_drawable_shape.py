@@ -28,11 +28,6 @@ class RoundedRectangleShape(DrawableShape):
                  manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
-        self.click_area_shape = None
-        self.border_rect = None
-        self.background_rect = None
-        self.aligned_text_rect = None
-        self.base_surface = None
         self.corner_radius = None
         self.temp_additive_shape = None
         self.temp_subtractive_shape = None
@@ -267,7 +262,7 @@ class RoundedRectangleShape(DrawableShape):
         else:
             quick_surf = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
             # quick_surf.fill('#FFFFFF00')
-        if type(self.theming['normal_bg']) == ColourGradient:
+        if isinstance(self.theming['normal_bg'], ColourGradient):
             grad_surf = pygame.Surface(self.click_area_shape.size, flags=pygame.SRCALPHA, depth=32)
             grad_surf.fill(pygame.Color('#FFFFFFFF'))
             self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
@@ -294,15 +289,10 @@ class RoundedRectangleShape(DrawableShape):
 
         :param state_str: The ID string of the state to rebuild.
         """
-
-        state_str = state_str
-        border_colour_state_str = state_str + '_border'
-        bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
         image_state_str = state_str + '_image'
-
-        bg_col = self.theming[bg_colour_state_str]
-        border_col = self.theming[border_colour_state_str]
+        bg_col = self.theming[state_str + '_bg']
+        border_col = self.theming[state_str + '_border']
 
         found_shape = None
         shape_id = None
@@ -319,106 +309,59 @@ class RoundedRectangleShape(DrawableShape):
         if found_shape is not None:
             self.states[state_str].surface = found_shape.copy()
         else:
-            corner_radius = self.corner_radius
-            border_corner_radius = corner_radius
+            border_corner_radius = self.corner_radius
 
             self.states[state_str].surface = self.base_surface.copy()
 
             # Try one AA call method
-            aa = 4
-            self.border_rect = pygame.Rect((self.shadow_width * aa,
-                                            self.shadow_width * aa),
-                                           (self.click_area_shape.width * aa,
-                                            self.click_area_shape.height * aa))
+            aa_amount = 4
+            self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
+                                            self.shadow_width * aa_amount),
+                                           (self.click_area_shape.width * aa_amount,
+                                            self.click_area_shape.height * aa_amount))
 
-            self.background_rect = pygame.Rect(((self.border_width + self.shadow_width) * aa,
-                                                (self.border_width + self.shadow_width) * aa),
+            self.background_rect = pygame.Rect(((self.border_width +
+                                                 self.shadow_width) * aa_amount,
+                                                (self.border_width +
+                                                 self.shadow_width) * aa_amount),
                                                (self.border_rect.width -
-                                                (2 * self.border_width * aa),
+                                                (2 * self.border_width * aa_amount),
                                                 self.border_rect.height -
-                                                (2 * self.border_width * aa)))
+                                                (2 * self.border_width * aa_amount)))
 
             dimension_scale = min(self.background_rect.width / max(self.border_rect.width, 1),
                                   self.background_rect.height / max(self.border_rect.height, 1))
             bg_corner_radius = int(border_corner_radius * dimension_scale)
 
-            bab_surface = pygame.Surface((self.containing_rect.width * aa,
-                                          self.containing_rect.height * aa),
+            bab_surface = pygame.Surface((self.containing_rect.width * aa_amount,
+                                          self.containing_rect.height * aa_amount),
                                          flags=pygame.SRCALPHA, depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.border_width > 0:
-                if type(border_col) == ColourGradient:
-                    shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.border_rect,
-                                                                        0,
-                                                                        border_corner_radius,
-                                                                        aa_amount=aa,
-                                                                        clear=False)
+                shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                    self.border_rect,
+                                                                    0,
+                                                                    border_corner_radius,
+                                                                    aa_amount=aa_amount,
+                                                                    clear=False)
+                if isinstance(border_col, ColourGradient):
                     border_col.apply_gradient_to_surface(shape_surface)
                 else:
-                    shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.border_rect,
-                                                                        0,
-                                                                        border_corner_radius,
-                                                                        aa_amount=aa,
-                                                                        clear=False)
                     self.apply_colour_to_surface(border_col, shape_surface)
 
                 bab_surface.blit(shape_surface, self.border_rect)
-            if type(bg_col) == ColourGradient:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                    self.background_rect,
-                                                                    0,
-                                                                    bg_corner_radius,
-                                                                    aa_amount=aa)
 
-                if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+            shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                self.background_rect,
+                                                                0,
+                                                                bg_corner_radius,
+                                                                aa_amount=aa_amount)
 
-                    filled_bar_width = int(self.background_rect.width *
-                                           self.theming['filled_bar_width_percentage'])
-                    bar_rect = pygame.Rect((0, 0), (filled_bar_width, self.background_rect.height))
-
-                    unfilled_bar_width = self.background_rect.width - filled_bar_width
-                    unfilled_bar_rect = pygame.Rect((filled_bar_width, 0),
-                                                    (unfilled_bar_width,
-                                                     self.background_rect.height))
-
-                    if type(self.theming['filled_bar']) == ColourGradient:
-                        bg_col.apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
-                        self.theming['filled_bar'].apply_gradient_to_surface(shape_surface,
-                                                                             bar_rect)
-                    else:
-                        bg_col.apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
-                        self.apply_colour_to_surface(self.theming['filled_bar'],
-                                                     shape_surface, bar_rect)
-                else:
-                    bg_col.apply_gradient_to_surface(shape_surface)
+            if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+                self._redraw_filled_bar(bg_col, shape_surface)
             else:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                    self.background_rect,
-                                                                    0, bg_corner_radius,
-                                                                    aa_amount=aa)
-                if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
-                    filled_bar_width = int(self.background_rect.width *
-                                           self.theming['filled_bar_width_percentage'])
-                    bar_rect = pygame.Rect((0, 0), (filled_bar_width,
-                                                    self.background_rect.height))
-
-                    unfilled_bar_width = self.background_rect.width - filled_bar_width
-                    unfilled_bar_rect = pygame.Rect((filled_bar_width, 0),
-                                                    (unfilled_bar_width,
-                                                     self.background_rect.height))
-
-                    if type(self.theming['filled_bar']) == ColourGradient:
-                        self.apply_colour_to_surface(bg_col,
-                                                     shape_surface, unfilled_bar_rect)
-                        self.theming['filled_bar'].apply_gradient_to_surface(shape_surface,
-                                                                             bar_rect)
-                    else:
-                        self.apply_colour_to_surface(bg_col,
-                                                     shape_surface, unfilled_bar_rect)
-                        self.apply_colour_to_surface(self.theming['filled_bar'],
-                                                     shape_surface, bar_rect)
+                if isinstance(bg_col, ColourGradient):
+                    bg_col.apply_gradient_to_surface(shape_surface)
                 else:
                     self.apply_colour_to_surface(bg_col, shape_surface)
 
@@ -441,6 +384,34 @@ class RoundedRectangleShape(DrawableShape):
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
+
+    def _redraw_filled_bar(self,
+                           bg_col: Union[pygame.Color, ColourGradient],
+                           shape_surface: pygame.Surface):
+        """
+        Draw a 'filled bar' onto our drawable shape, allows for things like loading bars,
+        health bars etc.
+
+        :param bg_col: the colour or gradient of the bar.
+        :param shape_surface: the surface we are drawing on to.
+        """
+        filled_bar_width = int(self.background_rect.width *
+                               self.theming['filled_bar_width_percentage'])
+        bar_rect = pygame.Rect((0, 0), (filled_bar_width,
+                                        self.background_rect.height))
+        unfilled_bar_width = self.background_rect.width - filled_bar_width
+        unfilled_bar_rect = pygame.Rect((filled_bar_width, 0),
+                                        (unfilled_bar_width,
+                                         self.background_rect.height))
+
+        if isinstance(bg_col, ColourGradient):
+            bg_col.apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
+        else:
+            self.apply_colour_to_surface(bg_col, shape_surface, unfilled_bar_rect)
+        if isinstance(self.theming['filled_bar'], ColourGradient):
+            self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
+        else:
+            self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
 
     def clear_and_create_shape_surface(self,
                                        surface: pygame.Surface,
@@ -538,8 +509,10 @@ class RoundedRectangleShape(DrawableShape):
         return None
 
     @staticmethod
-    def draw_colourless_rounded_rectangle(large_corner_radius, large_shape_surface,
-                                          clear_colour_string='#FFFFFF00', corner_offset=0):
+    def draw_colourless_rounded_rectangle(large_corner_radius: int,
+                                          large_shape_surface: pygame.Surface,
+                                          clear_colour_string: str = '#FFFFFF00',
+                                          corner_offset: int = 0):
         """
         Draw a rounded rectangle shape in pure white so it is ready to be multiplied by a colour
         or gradient.

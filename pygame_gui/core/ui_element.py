@@ -1,6 +1,7 @@
-import pygame
 import warnings
-from typing import List, Union, Tuple, Dict
+from typing import List, Union, Tuple, Dict, Any
+
+import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 
@@ -91,6 +92,11 @@ class UIElement(pygame.sprite.Sprite):
         self._update_container_clip()
 
         self._visual_debug_mode = False
+
+        # Themed parameters
+        self.shadow_width = None  # type: Union[None, int]
+        self.border_width = None  # type: Union[None, int]
+        self.shape_corner_radius = None  # type: Union[None, int]
 
     @staticmethod
     def create_valid_ids(container: Union[IContainerLikeInterface, None],
@@ -431,13 +437,11 @@ class UIElement(pygame.sprite.Sprite):
         """
         A stub to override. Called when this UI element first enters the 'hovered' state.
         """
-        pass
 
     def on_unhovered(self):
         """
         A stub to override. Called when this UI element leaves the 'hovered' state.
         """
-        pass
 
     def while_hovering(self, time_delta: float, mouse_pos: pygame.math.Vector2):
         """
@@ -447,41 +451,41 @@ class UIElement(pygame.sprite.Sprite):
         and now (roughly).
         :param mouse_pos: The current position of the mouse as 2D Vector.
         """
-        pass
 
     def can_hover(self) -> bool:
         """
         A stub method to override. Called to test if this method can be hovered.
         """
-        return True
+        return self.alive()
 
-    def hover_point(self, x: float, y: float) -> bool:
+    def hover_point(self, hover_x: float, hover_y: float) -> bool:
         """
         Test if a given point counts as 'hovering' this UI element. Normally that is a
         straightforward matter of seeing if a point is inside the rectangle. Occasionally it
         will also check if we are in a wider zone around a UI element once it is already active,
         this makes it easier to move scroll bars and the like.
 
-        :param x: The x (horizontal) position of the point.
-        :param y: The y (vertical) position of the point.
+        :param hover_x: The x (horizontal) position of the point.
+        :param hover_y: The y (vertical) position of the point.
         :return bool: Returns True if we are hovering this element.
         """
         if self.drawable_shape is not None:
-            return (self.drawable_shape.collide_point((x, y)) and
-                    bool(self.ui_container.rect.collidepoint(x, y)))
-        else:
-            return (bool(self.rect.collidepoint(x, y)) and
-                    bool(self.ui_container.rect.collidepoint(x, y)))
+            return (self.drawable_shape.collide_point((hover_x, hover_y)) and
+                    bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
 
+        return (bool(self.rect.collidepoint(hover_x, hover_y)) and
+                bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+
+    # pylint: disable=unused-argument,no-self-use
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         A stub to override. Gives UI Elements access to pygame events.
 
         :param event: The event to process.
+
         :return bool: Should return True if this element makes use of this event.
         """
-        if self is not None:
-            return False
+        return False
 
     def focus(self):
         """
@@ -501,7 +505,6 @@ class UIElement(pygame.sprite.Sprite):
         rebuild the element if so.
 
         """
-        pass
 
     def rebuild(self):
         """
@@ -631,3 +634,46 @@ class UIElement(pygame.sprite.Sprite):
         :return int: An integer representing the current highest layer being used by this element.
         """
         return self._layer + self.layer_thickness
+
+    def _check_shape_theming_changed(self, defaults: Dict[str, Any]) -> bool:
+        has_any_changed = False
+        border_width = defaults['border_width']
+        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'border_width')
+        if border_width_string is not None:
+            try:
+                border_width = int(border_width_string)
+            except ValueError:
+                border_width = defaults['border_width']
+        if border_width != self.border_width:
+            self.border_width = border_width
+            has_any_changed = True
+
+        shadow_width = defaults['shadow_width']
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'shadow_width')
+        if shadow_width_string is not None:
+            try:
+                shadow_width = int(shadow_width_string)
+            except ValueError:
+                shadow_width = defaults['shadow_width']
+        if shadow_width != self.shadow_width:
+            self.shadow_width = shadow_width
+            has_any_changed = True
+
+        corner_radius = defaults['shape_corner_radius']
+        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                 self.element_ids,
+                                                                 'shape_corner_radius')
+        if shape_corner_radius_string is not None:
+            try:
+                corner_radius = int(shape_corner_radius_string)
+            except ValueError:
+                corner_radius = defaults['shape_corner_radius']
+        if corner_radius != self.shape_corner_radius:
+            self.shape_corner_radius = corner_radius
+            has_any_changed = True
+
+        return has_any_changed

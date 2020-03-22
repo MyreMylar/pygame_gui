@@ -1,10 +1,13 @@
-import pygame
 import warnings
 import math
 
 from typing import Union, Tuple, Dict
 
-import pygame_gui
+import pygame
+
+from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED
+from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR
+from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
@@ -570,7 +573,7 @@ class UITextBox(UIElement):
                         self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
                     consumed_event = True
                     if chunk.is_selected:
-                        event_data = {'user_type': pygame_gui.UI_TEXT_BOX_LINK_CLICKED,
+                        event_data = {'user_type': UI_TEXT_BOX_LINK_CLICKED,
                                       'link_target': chunk.link_href,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
@@ -607,16 +610,16 @@ class UITextBox(UIElement):
         """
         if effect_name is None:
             self.active_text_effect = None
-        elif type(effect_name) is str:
-            if effect_name == pygame_gui.TEXT_EFFECT_TYPING_APPEAR:
+        elif isinstance(effect_name, str):
+            if effect_name == TEXT_EFFECT_TYPING_APPEAR:
                 effect = TypingAppearEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.full_redraw()
-            elif effect_name == pygame_gui.TEXT_EFFECT_FADE_IN:
+            elif effect_name == TEXT_EFFECT_FADE_IN:
                 effect = FadeInEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.redraw_from_chunks()
-            elif effect_name == pygame_gui.TEXT_EFFECT_FADE_OUT:
+            elif effect_name == TEXT_EFFECT_FADE_OUT:
                 effect = FadeOutEffect(self.formatted_text_block.characters)
                 self.active_text_effect = effect
                 self.redraw_from_chunks()
@@ -640,44 +643,9 @@ class UITextBox(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
-            has_any_changed = True
-
-        border_width = 0
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 0
-
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 0
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 0
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         padding = (5, 5)
@@ -708,6 +676,19 @@ class UITextBox(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
+        if self._check_link_style_changed():
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+
+    def _check_link_style_changed(self) -> bool:
+        """
+        Checks for any changes in hyper link related styling in the theme data.
+
+        :return: True if changes detected.
+        """
+        has_any_changed = False
         # link styles
         link_normal_underline = True
         link_normal_underline_string = self.ui_theme.get_misc_data(self.object_ids,
@@ -720,7 +701,6 @@ class UITextBox(UIElement):
                 link_normal_underline = True
         if link_normal_underline != self.link_normal_underline:
             self.link_normal_underline = link_normal_underline
-
         link_hover_underline = True
         link_hover_underline_string = self.ui_theme.get_misc_data(self.object_ids,
                                                                   self.element_ids,
@@ -732,34 +712,27 @@ class UITextBox(UIElement):
                 link_hover_underline = True
         if link_hover_underline != self.link_hover_underline:
             self.link_hover_underline = link_hover_underline
-
         link_normal_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                   self.element_ids,
                                                                   'link_text')
         if link_normal_colour != self.link_normal_colour:
             self.link_normal_colour = link_normal_colour
-
         link_hover_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                  self.element_ids,
                                                                  'link_hover')
         if link_hover_colour != self.link_hover_colour:
             self.link_hover_colour = link_hover_colour
-
         link_selected_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                     self.element_ids,
                                                                     'link_selected')
         if link_selected_colour != self.link_selected_colour:
             self.link_selected_colour = link_selected_colour
-
         link_style = {'link_text': self.link_normal_colour,
                       'link_hover': self.link_hover_colour,
                       'link_selected': self.link_selected_colour,
                       'link_normal_underline': self.link_normal_underline,
                       'link_hover_underline': self.link_hover_underline}
-
         if link_style != self.link_style:
             self.link_style = link_style
             has_any_changed = True
-
-        if has_any_changed:
-            self.rebuild()
+        return has_any_changed

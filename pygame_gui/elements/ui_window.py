@@ -1,5 +1,6 @@
-import pygame
 from typing import Union, Tuple
+
+import pygame
 
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
 
@@ -65,13 +66,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
 
-        # Themed parameters
-        self.shadow_width = None  # type: Union[None, int]
-        self.border_width = None  # type: Union[None, int]
         self.background_colour = None
         self.border_colour = None
         self.shape_type = 'rectangle'
-        self.shape_corner_radius = None
         self.enable_title_bar = True
         self.enable_close_button = True
         self.title_bar_height = 28
@@ -337,54 +334,54 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             self.grabbed_window = False
 
         if self.resizing_mode_active:
+            self._update_drag_resizing()
 
-            x_pos = self.rect.left
-            y_pos = self.rect.top
+    def _update_drag_resizing(self):
+        """
+        Re-sizes a window that is being dragged around its the edges by the mouse.
 
-            x_dimension = self.rect.width
-            y_dimension = self.rect.height
+        """
+        x_pos = self.rect.left
+        y_pos = self.rect.top
+        x_dimension = self.rect.width
+        y_dimension = self.rect.height
+        mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+        x_diff = mouse_x - self.start_resize_point[0]
+        y_diff = mouse_y - self.start_resize_point[1]
+        if self.rect.height >= self.minimum_dimensions[1]:
+            y_pos = self.start_resize_rect.y
+            y_dimension = self.start_resize_rect.height
+            if self.edge_hovering[1]:
+                y_dimension = self.start_resize_rect.height - y_diff
+                y_pos = self.start_resize_rect.y + y_diff
+            elif self.edge_hovering[3]:
+                y_dimension = self.start_resize_rect.height + y_diff
 
-            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            x_diff = mouse_x - self.start_resize_point[0]
-            y_diff = mouse_y - self.start_resize_point[1]
+            if y_dimension < self.minimum_dimensions[1]:
+                if y_diff > 0:
+                    y_pos = self.rect.bottom - self.minimum_dimensions[1]
+                else:
+                    y_pos = self.rect.top
+        if self.rect.width >= self.minimum_dimensions[0]:
+            x_pos = self.start_resize_rect.x
+            x_dimension = self.start_resize_rect.width
+            if self.edge_hovering[0]:
+                x_dimension = self.start_resize_rect.width - x_diff
+                x_pos = self.start_resize_rect.x + x_diff
+            elif self.edge_hovering[2]:
+                x_dimension = self.start_resize_rect.width + x_diff
 
-            if self.rect.height >= self.minimum_dimensions[1]:
-                y_pos = self.start_resize_rect.y
-                y_dimension = self.start_resize_rect.height
-                if self.edge_hovering[1]:
-                    y_dimension = self.start_resize_rect.height - y_diff
-                    y_pos = self.start_resize_rect.y + y_diff
-                elif self.edge_hovering[3]:
-                    y_dimension = self.start_resize_rect.height + y_diff
-
-                if y_dimension < self.minimum_dimensions[1]:
-                    if y_diff > 0:
-                        y_pos = self.rect.bottom - self.minimum_dimensions[1]
-                    else:
-                        y_pos = self.rect.top
-
-            if self.rect.width >= self.minimum_dimensions[0]:
-                x_pos = self.start_resize_rect.x
-                x_dimension = self.start_resize_rect.width
-                if self.edge_hovering[0]:
-                    x_dimension = self.start_resize_rect.width - x_diff
-                    x_pos = self.start_resize_rect.x + x_diff
-                elif self.edge_hovering[2]:
-                    x_dimension = self.start_resize_rect.width + x_diff
-
-                if x_dimension < self.minimum_dimensions[0]:
-                    if x_diff > 0:
-                        x_pos = self.rect.right - self.minimum_dimensions[0]
-                    else:
-                        x_pos = self.rect.left
-
-            x_dimension = max(self.minimum_dimensions[0],
-                              min(self.ui_container.rect.width, x_dimension))
-            y_dimension = max(self.minimum_dimensions[1],
-                              min(self.ui_container.rect.height, y_dimension))
-
-            self.set_position((x_pos, y_pos))
-            self.set_dimensions((x_dimension, y_dimension))
+            if x_dimension < self.minimum_dimensions[0]:
+                if x_diff > 0:
+                    x_pos = self.rect.right - self.minimum_dimensions[0]
+                else:
+                    x_pos = self.rect.left
+        x_dimension = max(self.minimum_dimensions[0],
+                          min(self.ui_container.rect.width, x_dimension))
+        y_dimension = max(self.minimum_dimensions[1],
+                          min(self.ui_container.rect.height, y_dimension))
+        self.set_position((x_pos, y_pos))
+        self.set_dimensions((x_dimension, y_dimension))
 
     def get_container(self) -> UIContainer:
         """
@@ -393,6 +390,12 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :return UIContainer: The window's container.
         """
         return self.window_element_container
+
+    def can_hover(self) -> bool:
+        """
+        Called to test if this window can be hovered.
+        """
+        return not (self.resizing_mode_active or self.title_bar.held)
 
     # noinspection PyUnusedLocal
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
@@ -405,9 +408,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         hovered = False
         if not self.resizing_mode_active:
             self.edge_hovering = [False, False, False, False]
-        if (self.alive() and self.can_hover() and self.resizable and
-                not hovered_higher_element and not self.resizing_mode_active and
-                not self.title_bar.held):
+        if self.alive() and self.can_hover() and not hovered_higher_element and self.resizable:
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
 
             # Build a temporary rect just a little bit larger than our container rect.
@@ -585,44 +586,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
-            has_any_changed = True
-
-        border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,

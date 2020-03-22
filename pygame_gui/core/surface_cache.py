@@ -59,17 +59,17 @@ class SurfaceCache:
 
             self.consider_purging_list.clear()
 
-    def add_surface_to_long_term_cache(self, cached_item: pygame.Surface, string_id: str):
+    def add_surface_to_long_term_cache(self,
+                                       cached_item: List[Union[pygame.Surface, int]],
+                                       string_id: str):
         """
         Move a surface from the short term cache into the long term one.
 
         :param cached_item: The surface to move into the long term cache.
         :param string_id: The ID of the surface in the cache.
         """
-        surface = cached_item[0]
-        surface_size = surface.get_size()
-        current_uses = cached_item[1]
-        if surface_size > self.cache_surface_size:
+
+        if cached_item[0].get_size() > self.cache_surface_size:
             warnings.warn('Unable to cache surfaces larger than ' + str(self.cache_surface_size))
             return None
         else:
@@ -78,62 +78,106 @@ class SurfaceCache:
 
             while found_rectangle_cache is None and not self.low_on_space:
                 for cache_surface in self.cache_surfaces:
-                    found_rectangle_to_split = None
                     if found_rectangle_cache is None:
-                        free_space_rectangles = cache_surface['free_space_rectangles']
-                        current_surface = cache_surface['surface']
-                        for free_rectangle in free_space_rectangles:
-                            if (free_rectangle.width >= surface_size[0] and
-                                    free_rectangle.height >= surface_size[1]):
-                                # we fits, so we sits
-                                found_rectangle_to_split = free_rectangle
-                                found_rectangle_cache = pygame.Rect(free_rectangle.topleft,
-                                                                    surface_size)
-                                current_surface.blit(surface, free_rectangle.topleft)
-                                self.cache_long_term_lookup[string_id] = {
-                                    'surface': current_surface.subsurface(found_rectangle_cache),
-                                    'current_uses': current_uses, 'total_uses': current_uses}
-                                break
-
-                        if (found_rectangle_to_split is not None and
-                                found_rectangle_cache is not None):
-                            self.split_rect(found_rectangle_to_split, found_rectangle_cache,
-                                            cache_surface['free_space_rectangles'])
-                            rects_to_split = [rect for rect in free_space_rectangles
-                                              if rect.colliderect(found_rectangle_cache)]
-                            for split_rect in rects_to_split:
-                                self.split_rect(split_rect, found_rectangle_cache,
-                                                cache_surface['free_space_rectangles'])
-
-                            # clean up rectangles entirely inside other rectangles
-                            rects_to_remove = []
-                            rectangles_to_check = [rectangle for rectangle in free_space_rectangles]
-                            for free_rectangle in free_space_rectangles:
-                                for check_rect in rectangles_to_check:
-                                    if (free_rectangle != check_rect and
-                                            check_rect.contains(free_rectangle)):
-                                        rects_to_remove.append(free_rectangle)
-                            cache_surface['free_space_rectangles'] = [rect
-                                                                      for rect in
-                                                                      free_space_rectangles
-                                                                      if rect not in
-                                                                      rects_to_remove]
+                        result = self._find_spot_in_lt_cache(cache_surface, cached_item, string_id)
+                        found_rectangle_cache = result[0]
+                        found_rectangle_to_split = result[1]
+                        self._divide_lt_cache(cache_surface, found_rectangle_cache,
+                                              found_rectangle_to_split)
 
                 if found_rectangle_cache is None:
-                    if len(self.cache_surfaces) < 3:
-                        # create a new cache surface
-                        new_surface = pygame.Surface(self.cache_surface_size,
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
-                        new_surface.fill(pygame.Color('#00000000'))
-                        self.cache_surfaces.append({'surface': new_surface,
-                                                    'free_space_rectangles':
-                                                        [pygame.Rect((0, 0),
-                                                                     self.cache_surface_size)]})
-                    else:
-                        self.low_on_space = True
+                    self._expand_lt_cache()
 
             return True
+
+    def _divide_lt_cache(self, cache_surface, found_rectangle_cache, found_rectangle_to_split):
+        """
+        Having reserved a spot in one of our long term cache surfaces, divide up the rest of
+        the cache surface to correctly ascertain the new set of free spaces.
+
+        :param cache_surface: The long term cache surface we are dividing.
+        :param found_rectangle_cache: The newly reserved space.
+        :param found_rectangle_to_split: The old rectangle the newly reserved space is in.
+        """
+        if (found_rectangle_to_split is not None and
+                found_rectangle_cache is not None):
+            free_space_rectangles = cache_surface['free_space_rectangles']
+            self.split_rect(found_rectangle_to_split, found_rectangle_cache,
+                            cache_surface['free_space_rectangles'])
+            rects_to_split = [rect for rect in free_space_rectangles
+                              if rect.colliderect(found_rectangle_cache)]
+            for split_rect in rects_to_split:
+                self.split_rect(split_rect, found_rectangle_cache,
+                                cache_surface['free_space_rectangles'])
+
+            self._clean_up_lt_cache(cache_surface, free_space_rectangles)
+
+    @staticmethod
+    def _clean_up_lt_cache(cache_surface, free_space_rectangles):
+        """
+        Clean up rectangles entirely inside other rectangles.
+
+        :param cache_surface:
+        :param free_space_rectangles:
+
+        """
+        rects_to_remove = []
+        rectangles_to_check = free_space_rectangles[:]
+        for free_rectangle in free_space_rectangles:
+            for check_rect in rectangles_to_check:
+                if (free_rectangle != check_rect and
+                        check_rect.contains(free_rectangle)):
+                    rects_to_remove.append(free_rectangle)
+        cache_surface['free_space_rectangles'] = [rect
+                                                  for rect in
+                                                  free_space_rectangles
+                                                  if rect not in
+                                                  rects_to_remove]
+
+    def _find_spot_in_lt_cache(self, cache_surface, new_item, string_id):
+        """
+        Find a place in a long term cache surface for our new item from the short term cache.
+
+        :param cache_surface: the surface to search.
+        :param new_item: the item to cache.
+        :param string_id: the look up id.
+        :return: A tuple of the new rect we are reserving, and the rectangle it's inside of.
+        """
+        found_rectangle_cache = None
+        found_rectangle_to_split = None
+        current_surface = cache_surface['surface']
+        surface_size = new_item[0].get_size()
+        for free_rectangle in cache_surface['free_space_rectangles']:
+            if (free_rectangle.width >= surface_size[0] and
+                    free_rectangle.height >= surface_size[1]):
+                # we fits, so we sits
+                found_rectangle_to_split = free_rectangle
+                found_rectangle_cache = pygame.Rect(free_rectangle.topleft,
+                                                    surface_size)
+                current_surface.blit(new_item[0], free_rectangle.topleft)
+                self.cache_long_term_lookup[string_id] = {
+                    'surface': current_surface.subsurface(found_rectangle_cache),
+                    'current_uses': new_item[1],
+                    'total_uses': new_item[1]}
+                break
+        return found_rectangle_cache, found_rectangle_to_split
+
+    def _expand_lt_cache(self):
+        """
+        Try to expand the long term cache by adding more surfaces, until we hit the limit.
+        """
+        if len(self.cache_surfaces) < 3:
+            # create a new cache surface
+            new_surface = pygame.Surface(self.cache_surface_size,
+                                         flags=pygame.SRCALPHA,
+                                         depth=32)
+            new_surface.fill(pygame.Color('#00000000'))
+            self.cache_surfaces.append({'surface': new_surface,
+                                        'free_space_rectangles':
+                                            [pygame.Rect((0, 0),
+                                                         self.cache_surface_size)]})
+        else:
+            self.low_on_space = True
 
     @staticmethod
     def split_rect(found_rectangle_to_split: pygame.Rect,
@@ -275,13 +319,13 @@ class SurfaceCache:
         if corner_radius is not None:
             id_string += '_' + str(corner_radius)
 
-        if type(border_colour) == ColourGradient:
+        if isinstance(border_colour, ColourGradient):
             id_string += '_' + str(border_colour)
         else:
             id_string += ('_' + str(border_colour.r) + '_' + str(border_colour.g) +
                           '_' + str(border_colour.b) + '_' + str(border_colour.a))
 
-        if type(bg_colour) == ColourGradient:
+        if isinstance(bg_colour, ColourGradient):
             id_string += '_' + str(bg_colour)
         else:
             id_string += ('_' + str(bg_colour.r) + '_' + str(bg_colour.g) +

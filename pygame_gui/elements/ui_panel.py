@@ -1,6 +1,6 @@
-import pygame
-
 from typing import Union, Dict, Tuple
+
+import pygame
 
 from pygame import Rect
 from pygame.math import Vector2
@@ -222,41 +222,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
             self.shape_type = shape_type_string
             has_any_changed = True
 
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-            if corner_radius != self.shape_corner_radius:
-                self.shape_corner_radius = corner_radius
-                has_any_changed = True
-
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-            if border_width != self.border_width:
-                self.border_width = border_width
-                has_any_changed = True
-
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-            if shadow_width != self.shadow_width:
-                self.shadow_width = shadow_width
-                has_any_changed = True
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
+            has_any_changed = True
 
         if has_any_changed:
             self.rebuild()

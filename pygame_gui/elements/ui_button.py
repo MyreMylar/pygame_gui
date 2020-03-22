@@ -1,6 +1,8 @@
-import pygame
-import pygame_gui
 from typing import Union, Tuple, Dict
+
+import pygame
+
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
@@ -98,14 +100,12 @@ class UIButton(UIElement):
         self.disabled_image = None
 
         self.tool_tip_delay = 1.0
-        self.border_width = 0
-        self.shadow_width = 0
+
         self.text_horiz_alignment = 'center'
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
         self.shape_type = 'rectangle'
-        self.shape_corner_radius = 2
 
         self.state_transitions = {}
 
@@ -155,22 +155,22 @@ class UIButton(UIElement):
             self.tool_tip.kill()
         super().kill()
 
-    def hover_point(self, x: int, y: int) -> bool:
+    def hover_point(self, hover_x: int, hover_y: int) -> bool:
         """
         Tests if a position should be considered 'hovering' the button. Normally this just means
         our mouse pointer is inside the buttons rectangle, however if we are holding onto the
         button for a purpose(e.g. dragging a window around by it's menu bar) the hover radius can
         be made to grow so we don't keep losing touch with whatever we are moving.
 
-        :param x: horizontal pixel co-ordinate to test.
-        :param y: vertical pixel co-ordinate to test
+        :param hover_x: horizontal pixel co-ordinate to test.
+        :param hover_y: vertical pixel co-ordinate to test
         :return bool: Returns True if we are hovering.
         """
         if self.held:
-            return self.in_hold_range((x, y))
+            return self.in_hold_range((hover_x, hover_y))
         else:
-            return (self.drawable_shape.collide_point((x, y)) and
-                    bool(self.ui_container.rect.collidepoint(x, y)))
+            return (self.drawable_shape.collide_point((hover_x, hover_y)) and
+                    bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
 
     def can_hover(self) -> bool:
         """
@@ -256,7 +256,7 @@ class UIButton(UIElement):
                 if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                     if (self.allow_double_clicks and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        event_data = {'user_type': pygame_gui.UI_BUTTON_DOUBLE_CLICKED,
+                        event_data = {'user_type': UI_BUTTON_DOUBLE_CLICKED,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
@@ -279,7 +279,7 @@ class UIButton(UIElement):
                     consumed_event = True
                     self.pressed_event = True
 
-                    event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                    event_data = {'user_type': UI_BUTTON_PRESSED,
                                   'ui_element': self,
                                   'ui_object_id': self.most_specific_combined_id}
                     pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
@@ -463,17 +463,10 @@ class UIButton(UIElement):
             self.shape_type = shape_type_string
             has_any_changed = True
 
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-            if corner_radius != self.shape_corner_radius:
-                self.shape_corner_radius = corner_radius
-                has_any_changed = True
+        if self._check_shape_theming_changed(defaults={'border_width': 0,
+                                                       'shadow_width': 0,
+                                                       'shape_corner_radius': 2}):
+            has_any_changed = True
 
         tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids,
                                                             self.element_ids,
@@ -488,67 +481,8 @@ class UIButton(UIElement):
                 self.tool_tip_delay = tool_tip_delay
                 has_any_changed = True
 
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 0
-            if border_width != self.border_width:
-                self.border_width = border_width
-                has_any_changed = True
-
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 0
-            if shadow_width != self.shadow_width:
-                self.shadow_width = shadow_width
-                has_any_changed = True
-
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                           self.element_ids,
-                                                           'text_horiz_alignment')
-        if text_horiz_alignment != self.text_horiz_alignment:
-            self.text_horiz_alignment = text_horiz_alignment
+        if self._check_text_alignment_theming():
             has_any_changed = True
-
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids,
-                                                                   'text_horiz_alignment_padding')
-        if text_horiz_alignment_padding is not None:
-            try:
-                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
-            except ValueError:
-                text_horiz_alignment_padding = 1
-            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
-                self.text_horiz_alignment_padding = text_horiz_alignment_padding
-                has_any_changed = True
-
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'text_vert_alignment')
-        if text_vert_alignment != self.text_vert_alignment:
-            self.text_vert_alignment = text_vert_alignment
-            has_any_changed = True
-
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'text_vert_alignment_padding')
-        if text_vert_alignment_padding is not None:
-            try:
-                text_vert_alignment_padding = int(text_vert_alignment_padding)
-            except ValueError:
-                text_vert_alignment_padding = 1
-            if text_vert_alignment_padding != self.text_vert_alignment_padding:
-                self.text_vert_alignment_padding = text_vert_alignment_padding
-                has_any_changed = True
 
         state_transitions = self.ui_theme.get_misc_data(self.object_ids,
                                                         self.element_ids, 'state_transitions')
@@ -566,6 +500,49 @@ class UIButton(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+    def _check_text_alignment_theming(self) -> bool:
+        """
+        Checks for any changes in the theming data related to text alignment.
+
+        :return: True if changes found.
+        """
+        has_any_changed = False
+        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
+                                                           self.element_ids,
+                                                           'text_horiz_alignment')
+        if text_horiz_alignment != self.text_horiz_alignment:
+            self.text_horiz_alignment = text_horiz_alignment
+            has_any_changed = True
+        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                   self.element_ids,
+                                                                   'text_horiz_alignment_padding')
+        if text_horiz_alignment_padding is not None:
+            try:
+                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
+            except ValueError:
+                text_horiz_alignment_padding = 1
+            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
+                self.text_horiz_alignment_padding = text_horiz_alignment_padding
+                has_any_changed = True
+        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids,
+                                                          self.element_ids,
+                                                          'text_vert_alignment')
+        if text_vert_alignment != self.text_vert_alignment:
+            self.text_vert_alignment = text_vert_alignment
+            has_any_changed = True
+        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids,
+                                                                  'text_vert_alignment_padding')
+        if text_vert_alignment_padding is not None:
+            try:
+                text_vert_alignment_padding = int(text_vert_alignment_padding)
+            except ValueError:
+                text_vert_alignment_padding = 1
+            if text_vert_alignment_padding != self.text_vert_alignment_padding:
+                self.text_vert_alignment_padding = text_vert_alignment_padding
+                has_any_changed = True
+        return has_any_changed
 
     def rebuild(self):
         """

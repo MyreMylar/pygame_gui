@@ -1,14 +1,15 @@
+from typing import Union, Dict, Tuple, List
+
 import pygame
 
-from typing import Union, Dict, Tuple, List
+from pygame import USEREVENT
+from pygame.event import Event, post
+from pygame.math import Vector2
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
-from pygame import USEREVENT
-from pygame.event import Event, post
-from pygame.math import Vector2
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
@@ -185,6 +186,19 @@ class UISelectionList(UIElement):
                         item['button_element'] = None
 
     def set_item_list(self, new_item_list: Union[List[str], List[Tuple[str, str]]]):
+        """
+        Set a new string list (or tuple of strings & ids list) as the item list for this selection
+        list. This will change what is displayed in the list.
+
+        Tuples should be arranged like so:
+
+         (list_text, object_ID)
+
+         - list_text: displayed in the UI
+         - object_ID: used for theming and events
+
+        :param new_item_list: The new list to switch to. Can be a list of strings or tuples.
+        """
         self._raw_item_list = new_item_list
         self.item_list = []  # type: List[Dict]
         for new_item in new_item_list:
@@ -422,41 +436,10 @@ class UISelectionList(UIElement):
             self.shape_type = shape_type_string
             has_any_changed = True
 
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-            if corner_radius != self.shape_corner_radius:
-                self.shape_corner_radius = corner_radius
-                has_any_changed = True
-
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-            if border_width != self.border_width:
-                self.border_width = border_width
-                has_any_changed = True
-
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-            if shadow_width != self.shadow_width:
-                self.shadow_width = shadow_width
-                has_any_changed = True
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
+            has_any_changed = True
 
         list_item_height_string = self.ui_theme.get_misc_data(self.object_ids,
                                                               self.element_ids,

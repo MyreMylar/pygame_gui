@@ -1,7 +1,8 @@
-import pygame
-import pygame.gfxdraw
 import warnings
+
 from typing import Union, Tuple, Dict
+
+import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement

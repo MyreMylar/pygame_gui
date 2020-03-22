@@ -29,12 +29,6 @@ class EllipseDrawableShape(DrawableShape):
         self.ellipse_center = containing_rect.center
         self.ellipse_half_diameters = (0.5 * containing_rect.width, 0.5 * containing_rect.height)
 
-        self.click_area_shape = None
-        self.border_rect = None
-        self.background_rect = None
-        self.aligned_text_rect = None
-        self.base_surface = None
-
         self.full_rebuild_on_size_change()
 
     def full_rebuild_on_size_change(self):
@@ -65,10 +59,10 @@ class EllipseDrawableShape(DrawableShape):
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
                                                  self.containing_rect.y + self.shadow_width),
-                                                (self.containing_rect.width - (
-                                                            2 * self.shadow_width),
-                                                 self.containing_rect.height - (
-                                                             2 * self.shadow_width)))
+                                                (self.containing_rect.width -
+                                                 (2 * self.shadow_width),
+                                                 self.containing_rect.height -
+                                                 (2 * self.shadow_width)))
             self.base_surface = self.ui_manager.get_shadow(self.containing_rect.size,
                                                            self.shadow_width, 'ellipse')
         else:
@@ -144,7 +138,6 @@ class EllipseDrawableShape(DrawableShape):
 
         :param state_str: The ID string of the state to rebuild.
         """
-        state_str = state_str
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
@@ -153,7 +146,8 @@ class EllipseDrawableShape(DrawableShape):
         found_shape = None
         shape_id = None
         if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
-            shape_id = self.shape_cache.build_cache_id('ellipse', self.containing_rect.size,
+            shape_id = self.shape_cache.build_cache_id('ellipse',
+                                                       self.containing_rect.size,
                                                        self.shadow_width,
                                                        self.border_width,
                                                        self.theming[border_colour_state_str],
@@ -166,48 +160,51 @@ class EllipseDrawableShape(DrawableShape):
             self.states[state_str].surface = self.base_surface.copy()
 
             # Try one AA call method
-            aa = 4
-            self.border_rect = pygame.Rect((self.shadow_width * aa,
-                                            self.shadow_width * aa),
-                                           (self.click_area_shape.width * aa,
-                                            self.click_area_shape.height * aa))
+            aa_amount = 4
+            self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
+                                            self.shadow_width * aa_amount),
+                                           (self.click_area_shape.width * aa_amount,
+                                            self.click_area_shape.height * aa_amount))
 
-            self.background_rect = pygame.Rect(((self.border_width + self.shadow_width) * aa,
-                                                (self.border_width + self.shadow_width) * aa),
-                                               (self.border_rect.width - (
-                                                           2 * self.border_width * aa),
-                                                self.border_rect.height - (
-                                                            2 * self.border_width * aa)))
+            self.background_rect = pygame.Rect(((self.border_width +
+                                                 self.shadow_width) * aa_amount,
+                                                (self.border_width +
+                                                 self.shadow_width) * aa_amount),
+                                               (self.border_rect.width -
+                                                (2 * self.border_width * aa_amount),
+                                                self.border_rect.height -
+                                                (2 * self.border_width * aa_amount)))
 
-            bab_surface = pygame.Surface((self.containing_rect.width * aa,
-                                          self.containing_rect.height * aa), flags=pygame.SRCALPHA,
+            bab_surface = pygame.Surface((self.containing_rect.width * aa_amount,
+                                          self.containing_rect.height * aa_amount),
+                                         flags=pygame.SRCALPHA,
                                          depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.border_width > 0:
-                if type(self.theming[border_colour_state_str]) == ColourGradient:
+                if isinstance(self.theming[border_colour_state_str], ColourGradient):
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                         self.border_rect,
-                                                                        0, aa_amount=aa,
+                                                                        0, aa_amount=aa_amount,
                                                                         clear=False)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                         self.border_rect,
-                                                                        0, aa_amount=aa,
+                                                                        0, aa_amount=aa_amount,
                                                                         clear=False)
                     self.apply_colour_to_surface(self.theming[border_colour_state_str],
                                                  shape_surface)
 
                 bab_surface.blit(shape_surface, self.border_rect)
-            if type(self.theming[bg_colour_state_str]) == ColourGradient:
+            if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect, 1,
-                                                                    aa_amount=aa)
+                                                                    aa_amount=aa_amount)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
             else:
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect, 1,
-                                                                    aa_amount=aa)
+                                                                    aa_amount=aa_amount)
                 self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 
             bab_surface.blit(shape_surface, self.background_rect)
@@ -216,16 +213,16 @@ class EllipseDrawableShape(DrawableShape):
 
             # cut a hole in shadow, then blit background into it
             sub_surface = pygame.Surface(
-                ((self.containing_rect.width - (2 * self.shadow_width)) * aa,
-                 (self.containing_rect.height - (2 * self.shadow_width)) * aa),
+                ((self.containing_rect.width - (2 * self.shadow_width)) * aa_amount,
+                 (self.containing_rect.height - (2 * self.shadow_width)) * aa_amount),
                 flags=pygame.SRCALPHA, depth=32)
             sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(sub_surface, pygame.Color("#FFFFFFFF"), sub_surface.get_rect())
             small_sub = pygame.transform.smoothscale(sub_surface,
-                                                     (self.containing_rect.width - (
-                                                                 2 * self.shadow_width),
-                                                      self.containing_rect.height - (
-                                                                  2 * self.shadow_width)))
+                                                     (self.containing_rect.width -
+                                                      (2 * self.shadow_width),
+                                                      self.containing_rect.height -
+                                                      (2 * self.shadow_width)))
             self.states[state_str].surface.blit(small_sub, pygame.Rect((self.shadow_width,
                                                                         self.shadow_width),
                                                                        sub_surface.get_size()),

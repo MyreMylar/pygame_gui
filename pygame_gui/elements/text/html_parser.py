@@ -9,12 +9,12 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 
 
 class CharStyle:
-    def __init__(self, char_style: Union['CharStyle', None] = None):
-        """
-        Encapsulates the three classic styling options for a character; bold, italic and underlined.
+    """
+    Encapsulates the three classic styling options for a character; bold, italic and underlined.
 
-        :param char_style: An optional CharStyle to copy this character style from.
-        """
+    :param char_style: An optional CharStyle to copy this character style from.
+    """
+    def __init__(self, char_style: Union['CharStyle', None] = None):
         if char_style is not None:
             self.bold = char_style.bold
             self.italic = char_style.italic
@@ -78,8 +78,10 @@ class TextLineContext:
         font_bg_color_eq = self.bg_color == other.bg_color
         link_eq = self.is_link == other.is_link
         link_href_eq = self.link_href == other.link_href
-        if font_size_eq and font_name_eq and font_style_eq and\
-                font_color_eq and font_bg_color_eq and link_eq and link_href_eq:
+
+        font_name_size_style_equal = (font_size_eq and font_name_eq and font_style_eq)
+        font_colours_equal = (font_color_eq and font_bg_color_eq)
+        if font_name_size_style_equal and font_colours_equal and link_eq and link_href_eq:
             return self.__dict__ == other.__dict__
         else:
             return False
@@ -115,7 +117,9 @@ class TextStyleData:
 
     default_style = {
         'font_name': 'fira_code',
-        'font_size': 14
+        'font_size': 14,
+        'font_colour': pygame.Color(255, 255, 255, 255),
+        'bg_colour': pygame.Color(0, 0, 0, 0)
     }
 
     def __init__(self,
@@ -139,21 +143,19 @@ class TextStyleData:
 
         font_info = self.ui_theme.get_font_info(object_id, element_ids)
 
-        self.default_font_name = font_info['name']
-        self.default_font_size = int(font_info['size'])
-        self.default_style['font_name'] = self.default_font_name
-        self.default_style['font_size'] = self.default_font_size
+        self.default_style['font_name'] = font_info['name']
+        self.default_style['font_size'] = int(font_info['size'])
 
-        self.default_font_color = self.ui_theme.get_colour_or_gradient(object_id,
-                                                                       element_ids,
-                                                                       'normal_text')
-        self.default_bg_color = self.ui_theme.get_colour_or_gradient(object_id,
-                                                                     element_ids,
-                                                                     'dark_bg')
-        self.font_name = self.default_font_name
-        self.font_size = self.default_font_size
-        self.font_color = self.default_font_color
-        self.bg_color = self.default_bg_color
+        self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient(object_id,
+                                                                                 element_ids,
+                                                                                 'normal_text')
+        self.default_style['bg_color'] = self.ui_theme.get_colour_or_gradient(object_id,
+                                                                              element_ids,
+                                                                              'dark_bg')
+        self.font_name = self.default_style['font_name']
+        self.font_size = self.default_style['font_size']
+        self.font_color = self.default_style['font_colour']
+        self.bg_color = self.default_style['bg_color']
 
         self.is_link = False
         self.link_href = ''
@@ -234,30 +236,11 @@ class TextStyleData:
                 self.char_style.underline = False
         else:
             self.char_style.underline = False
-        if 'font_name' in self.current_style.keys():
-            self.font_name = self.current_style['font_name']
-            if self.font_name is None:
-                self.font_name = self.default_font_name
-        else:
-            self.font_name = self.default_font_name
-        if 'font_size' in self.current_style.keys():
-            self.font_size = self.current_style['font_size']
-            if self.font_size is None:
-                self.font_size = self.default_font_size
-        else:
-            self.font_size = self.default_font_size
-        if 'font_color' in self.current_style.keys():
-            self.font_color = self.current_style['font_color']
-            if self.font_color is None:
-                self.font_color = self.default_font_color
-        else:
-            self.font_color = self.default_font_color
-        if 'bg_color' in self.current_style.keys():
-            self.bg_color = self.current_style['bg_color']
-            if self.bg_color is None:
-                self.bg_color = self.default_bg_color
-        else:
-            self.bg_color = self.default_bg_color
+
+        self._set_style_attribute('font_name')
+        self._set_style_attribute('font_size')
+        self._set_style_attribute('font_color')
+        self._set_style_attribute('bg_color')
 
         if 'link' in self.current_style.keys():
             self.is_link = self.current_style['link']
@@ -280,6 +263,19 @@ class TextStyleData:
                                                      self.bg_color,
                                                      self.is_link,
                                                      self.link_href)
+
+    def _set_style_attribute(self, attribute: str):
+        """
+        Set a style attribute for this font style.
+
+        :param attribute: Name of the attribute to set.
+        """
+        if attribute in self.current_style:
+            setattr(self, attribute, self.current_style[attribute])
+            if getattr(self, attribute) is None:
+                setattr(self, attribute, self.default_style[attribute])
+        else:
+            setattr(self, attribute, self.default_style[attribute])
 
 
 class TextHTMLParser(TextStyleData, html.parser.HTMLParser):

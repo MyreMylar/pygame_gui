@@ -58,7 +58,7 @@ class UIManager(IUIManagerInterface):
         self.visual_debug_active = False
 
         self.resizing_window_cursors = None
-        self.load_default_cursors()
+        self._load_default_cursors()
         self.active_user_cursor = pygame.cursors.arrow
         self._active_cursor = self.active_user_cursor
 
@@ -209,7 +209,7 @@ class UIManager(IUIManagerInterface):
 
         self.ui_theme.update_shape_cache()
 
-        self.update_mouse_position()
+        self._update_mouse_position()
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
@@ -223,10 +223,7 @@ class UIManager(IUIManagerInterface):
         # handle mouse cursors
         any_window_edge_hovered = False
         for window in self.ui_window_stack.stack:
-            if (window.hovered or window.resizing_mode_active) and (
-                    window.edge_hovering[0] or window.edge_hovering[1] or
-                    window.edge_hovering[2] or window.edge_hovering[3]):
-
+            if (window.hovered or window.resizing_mode_active) and any(window.edge_hovering):
                 any_window_edge_hovered = True
                 if (window.edge_hovering[0] and window.edge_hovering[1]) or (
                         window.edge_hovering[2] and window.edge_hovering[3]):
@@ -250,15 +247,6 @@ class UIManager(IUIManagerInterface):
         if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
             self._active_cursor = self.active_user_cursor
             pygame.mouse.set_cursor(*self._active_cursor)
-
-    def update_mouse_position(self):
-        """
-        Wrapping pygame mouse position so we can mess with it.
-        """
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * mouse_x),
-                               int(self.mouse_pos_scale_factor[1] * mouse_y))
 
     def get_mouse_position(self) -> Tuple[int, int]:
         """
@@ -373,7 +361,7 @@ class UIManager(IUIManagerInterface):
 
     def unset_focus_element(self):
         """
-        Unselect and clear the currently focused element.
+        Clear the currently focused element.
         """
         if self.focused_element is not None:
             self.focused_element.unfocus()
@@ -457,27 +445,6 @@ class UIManager(IUIManagerInterface):
                     print(str(element.most_specific_combined_id))
             print(' ')
 
-    def load_default_cursors(self):
-        """
-        'Loads' the default cursors we use in the GUI for resizing windows. No actual files are
-        opened as this is all string date compiled into pygame cursor images.
-
-        """
-        # cursors for resizing windows
-        x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
-        y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
-        xy_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_xy_strings)
-        list_yx = list(pygame.cursors.sizer_xy_strings)
-        list_yx.reverse()
-        yx_sizer_cursor = pygame.cursors.compile(tuple(list_yx))
-
-        self.resizing_window_cursors = {'xl': ((24, 16), (12, 8), *x_sizer_cursor),
-                                        'xr': ((24, 16), (8, 8), *x_sizer_cursor),
-                                        'yt': ((16, 24), (8, 12), *y_sizer_cursor),
-                                        'yb': ((16, 24), (8, 8), *y_sizer_cursor),
-                                        'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
-                                        'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
-
     def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int],
                                               Tuple[int, ...], Tuple[int, ...]]):
         """
@@ -518,3 +485,33 @@ class UIManager(IUIManagerInterface):
         tool_tip = UITooltip(text, hover_distance, self)
         tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
         return tool_tip
+
+    def _update_mouse_position(self):
+        """
+        Wrapping pygame mouse position so we can mess with it.
+        """
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * mouse_x),
+                               int(self.mouse_pos_scale_factor[1] * mouse_y))
+
+    def _load_default_cursors(self):
+        """
+        'Loads' the default cursors we use in the GUI for resizing windows. No actual files are
+        opened as this is all string date compiled into pygame cursor images.
+
+        """
+        # cursors for resizing windows
+        x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
+        y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
+        xy_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_xy_strings)
+        list_yx = list(pygame.cursors.sizer_xy_strings)
+        list_yx.reverse()
+        yx_sizer_cursor = pygame.cursors.compile(tuple(list_yx))
+
+        self.resizing_window_cursors = {'xl': ((24, 16), (12, 8), *x_sizer_cursor),
+                                        'xr': ((24, 16), (8, 8), *x_sizer_cursor),
+                                        'yt': ((16, 24), (8, 12), *y_sizer_cursor),
+                                        'yb': ((16, 24), (8, 8), *y_sizer_cursor),
+                                        'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
+                                        'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}

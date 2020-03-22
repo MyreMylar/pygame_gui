@@ -1,15 +1,19 @@
 import warnings
+
 from typing import Union, List
 from os import listdir
 from os.path import isfile, join, abspath, exists
 from pathlib import Path
 
 import pygame
-import pygame_gui
+
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
+from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, UI_TEXT_ENTRY_FINISHED
+from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_FILE_DIALOG_PATH_PICKED
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelectionList
-from pygame_gui.windows import UIConfirmationDialog
+from pygame_gui.windows.ui_confirmation_dialog import UIConfirmationDialog
 
 
 class UIFileDialog(UIWindow):
@@ -174,6 +178,16 @@ class UIFileDialog(UIWindow):
         else:
             self.last_valid_path = self.current_directory_path
 
+    def _validate_selected_path(self) -> bool:
+        """
+        Checks the selected path is valid.
+
+        :return: True if valid.
+        """
+        if self.selected_file_path is None:
+            return False
+        return exists(self.selected_file_path) and isfile(self.selected_file_path)
+
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles events that this UI element is interested in. There are a lot of buttons in the
@@ -185,80 +199,21 @@ class UIFileDialog(UIWindow):
         """
         handled = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.cancel_button):
-            self.kill()
+        self._process_ok_cancel_events(event)
+        self._process_confirmation_dialog_events(event)
+        self._process_mini_file_operation_button_events(event)
+        self._process_file_path_entry_events(event)
+        self._process_file_list_events(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.ok_button and
-                self.selected_file_path is not None and exists(self.selected_file_path) and
-                isfile(self.selected_file_path)):
-            event_data = {'user_type': pygame_gui.UI_FILE_DIALOG_PATH_PICKED,
-                          'text': self.selected_file_path,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            new_file_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(new_file_chosen_event)
-            self.kill()
+        return handled
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.delete_button):
-            confirmation_rect = pygame.Rect(0, 0, 300, 200)
-            confirmation_rect.center = self.rect.center
+    def _process_file_path_entry_events(self, event):
+        """
+        Handle events coming from text entry element which displays the current file path.
 
-            selected_file_name = Path(self.selected_file_path).name
-            long_desc = "Delete " + str(selected_file_name) + "?"
-            self.delete_confirmation_dialog = UIConfirmationDialog(rect=confirmation_rect,
-                                                                   manager=self.ui_manager,
-                                                                   action_long_desc=long_desc,
-                                                                   action_short_name='Delete',
-                                                                   window_title='Delete')
-
-        if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
-                event.ui_element == self.delete_confirmation_dialog):
-            try:
-                Path(self.selected_file_path).unlink()
-                self.delete_button.disable()
-
-                self.update_current_file_list()
-                self.file_path_text_line.set_text(self.current_directory_path)
-                self.file_selection_list.set_item_list(self.current_file_list)
-            except (PermissionError, FileNotFoundError):
-                pass
-
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.parent_directory_button):
-            self.current_directory_path = str(Path(self.current_directory_path).parent)
-
-            self.update_current_file_list()
-            self.file_path_text_line.set_text(self.current_directory_path)
-            self.file_selection_list.set_item_list(self.current_file_list)
-
-            self.delete_button.disable()
-            self.ok_button.disable()
-
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.refresh_button):
-            self.update_current_file_list()
-            self.file_path_text_line.set_text(self.current_directory_path)
-            self.file_selection_list.set_item_list(self.current_file_list)
-
-            self.delete_button.disable()
-            self.ok_button.disable()
-
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
-                and event.ui_element == self.home_button):
-            self.current_directory_path = str(Path.home())
-
-            self.update_current_file_list()
-            self.file_path_text_line.set_text(self.current_directory_path)
-            self.file_selection_list.set_item_list(self.current_file_list)
-
-            self.delete_button.disable()
-            self.ok_button.disable()
-
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED
+        :param event: event to check.
+        """
+        if (event.type == pygame.USEREVENT and event.user_type == UI_TEXT_ENTRY_FINISHED
                 and event.ui_element == self.file_path_text_line):
             entered_file_path = self.file_path_text_line.get_text()
             if exists(entered_file_path):
@@ -271,8 +226,14 @@ class UIFileDialog(UIWindow):
                 self.delete_button.disable()
                 self.ok_button.disable()
 
+    def _process_file_list_events(self, event):
+        """
+        Handle events coming from the file/folder list.
+
+        :param event: event to check.
+        """
         if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
+                event.user_type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.file_selection_list):
             new_selection_file_path = join(self.current_directory_path, event.text)
             if exists(new_selection_file_path) and isfile(new_selection_file_path):
@@ -282,9 +243,8 @@ class UIFileDialog(UIWindow):
             else:
                 self.ok_button.disable()
                 self.delete_button.disable()
-
         if (event.type == pygame.USEREVENT and
-                event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
+                event.user_type == UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
                 and event.ui_element == self.file_selection_list):
             new_directory_file_path = join(self.current_directory_path, event.text)
             if exists(new_directory_file_path) and not isfile(new_directory_file_path):
@@ -297,4 +257,87 @@ class UIFileDialog(UIWindow):
                 self.delete_button.disable()
                 self.ok_button.disable()
 
-        return handled
+    def _process_confirmation_dialog_events(self, event):
+        """
+        Handle any events coming from the confirmation dialog if that's up.
+
+        :param event: event to check.
+        """
+        if (event.type == pygame.USEREVENT and
+                event.user_type == UI_CONFIRMATION_DIALOG_CONFIRMED and
+                event.ui_element == self.delete_confirmation_dialog):
+            try:
+                Path(self.selected_file_path).unlink()
+                self.delete_button.disable()
+
+                self.update_current_file_list()
+                self.file_path_text_line.set_text(self.current_directory_path)
+                self.file_selection_list.set_item_list(self.current_file_list)
+            except (PermissionError, FileNotFoundError):
+                pass
+
+    def _process_mini_file_operation_button_events(self, event):
+        """
+        Handle what happens when you press one of the tiny file/folder operation buttons.
+
+        :param event: event to check.
+        """
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.delete_button):
+            confirmation_rect = pygame.Rect(0, 0, 300, 200)
+            confirmation_rect.center = self.rect.center
+
+            selected_file_name = Path(self.selected_file_path).name
+            long_desc = "Delete " + str(selected_file_name) + "?"
+            self.delete_confirmation_dialog = UIConfirmationDialog(rect=confirmation_rect,
+                                                                   manager=self.ui_manager,
+                                                                   action_long_desc=long_desc,
+                                                                   action_short_name='Delete',
+                                                                   window_title='Delete')
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.parent_directory_button):
+            self.current_directory_path = str(Path(self.current_directory_path).parent)
+
+            self.update_current_file_list()
+            self.file_path_text_line.set_text(self.current_directory_path)
+            self.file_selection_list.set_item_list(self.current_file_list)
+
+            self.delete_button.disable()
+            self.ok_button.disable()
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.refresh_button):
+            self.update_current_file_list()
+            self.file_path_text_line.set_text(self.current_directory_path)
+            self.file_selection_list.set_item_list(self.current_file_list)
+
+            self.delete_button.disable()
+            self.ok_button.disable()
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.home_button):
+            self.current_directory_path = str(Path.home())
+
+            self.update_current_file_list()
+            self.file_path_text_line.set_text(self.current_directory_path)
+            self.file_selection_list.set_item_list(self.current_file_list)
+
+            self.delete_button.disable()
+            self.ok_button.disable()
+
+    def _process_ok_cancel_events(self, event):
+        """
+        Handle what happens when you press OK and Cancel.
+
+        :param event: event to check.
+        """
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.cancel_button):
+            self.kill()
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
+                and event.ui_element == self.ok_button and self._validate_selected_path()):
+            event_data = {'user_type': UI_FILE_DIALOG_PATH_PICKED,
+                          'text': self.selected_file_path,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            new_file_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            pygame.event.post(new_file_chosen_event)
+            self.kill()

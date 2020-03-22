@@ -1,10 +1,9 @@
 import warnings
 
 import pygame
-import pygame_gui
 
+from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core.interfaces import IUIManagerInterface
-
 from pygame_gui.elements import UIButton, UITextBox, UIWindow
 
 
@@ -82,7 +81,7 @@ class UIMessageWindow(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.dismiss_button):
             self.kill()
 

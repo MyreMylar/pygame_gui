@@ -15,4 +15,3 @@ class IContainerLikeInterface:
         """
         Gets an actual container from this container-like UI element.
         """
-        pass

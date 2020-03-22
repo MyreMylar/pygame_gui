@@ -12,4 +12,8 @@ class IWindowInterface:
     __metaclass__ = ABCMeta
 
     def change_layer(self, layer: int):
-        pass
+        """
+        Change the drawing layer of this window.
+
+        :param layer: the new layer to move to.
+        """

@@ -1,5 +1,6 @@
-import pygame
 from typing import Union, Dict
+
+import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
@@ -25,6 +26,11 @@ class UIWorldSpaceHealthBar(UIElement):
     """
 
     class ExampleHealthSprite(pygame.sprite.Sprite):
+        """
+        An example sprite with health instance attributes.
+
+        :param groups: Sprite groups to put the sprite in.
+        """
         def __init__(self, *groups):
             super().__init__(*groups)
             self.current_health = 50
@@ -181,17 +187,9 @@ class UIWorldSpaceHealthBar(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        corner_radius = 2
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = 2
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
+                                                       'shape_corner_radius': 2}):
             has_any_changed = True
 
         hover_height = 1
@@ -206,33 +204,6 @@ class UIWorldSpaceHealthBar(UIElement):
 
         if hover_height != self.hover_height:
             self.hover_height = hover_height
-            has_any_changed = True
-
-        border_width = 1
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = 1
-
-        if border_width != self.border_width:
-            self.border_width = border_width
-            has_any_changed = True
-
-        shadow_width = 2
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = 2
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
             has_any_changed = True
 
         border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,

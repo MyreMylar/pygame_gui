@@ -1,5 +1,6 @@
-import pygame
 from typing import Union, Tuple, Dict
+
+import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement

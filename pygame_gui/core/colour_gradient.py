@@ -42,7 +42,7 @@ class ColourGradient:
 
         :return: True if they have the same colours and direction.
         """
-        if type(other) != ColourGradient:
+        if not isinstance(other, ColourGradient):
             return False
         return (self.colour_1 == other.colour_1 and
                 self.colour_2 == other.colour_2 and

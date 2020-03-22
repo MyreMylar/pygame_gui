@@ -1,10 +1,9 @@
 import warnings
 
 import pygame
-import pygame_gui
 
+from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED
 from pygame_gui.core.interfaces import IUIManagerInterface
-from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED
 from pygame_gui.elements import UIWindow, UIButton, UITextBox
 
 
@@ -94,11 +93,11 @@ class UIConfirmationDialog(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.cancel_button):
             self.kill()
 
-        if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED
+        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.confirm_button):
             event_data = {'user_type': UI_CONFIRMATION_DIALOG_CONFIRMED,
                           'ui_element': self,
