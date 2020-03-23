@@ -204,132 +204,140 @@ class UITextEntryLine(UIElement):
             self.background_colour.apply_gradient_to_surface(self.text_image)
         else:
             self.text_image.fill(self.background_colour)
+
         if self.select_range[0] == self.select_range[1]:
-            if isinstance(self.text_colour, ColourGradient):
-                self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
-                self.text_colour.apply_gradient_to_surface(self.text_surface)
-
-            else:
-                self.text_surface = self.font.render(self.text, True, self.text_colour)
+            self._redraw_unselected_text()
         else:
-            low_end = min(self.select_range[0], self.select_range[1])
-            high_end = max(self.select_range[0], self.select_range[1])
-            pre_select_area_text = self.text[:low_end]
-            select_area_text = self.text[low_end:high_end]
-            post_select_area_text = self.text[high_end:]
+            self._redraw_selected_text()
 
-            pre_select_area_surface = None
-            post_select_area_surface = None
-
-            if len(pre_select_area_text) > 0:
-                if isinstance(self.text_colour, ColourGradient):
-                    pre_select_area_surface = self.font.render(pre_select_area_text,
-                                                               True,
-                                                               pygame.Color('#FFFFFFFF'))
-                    self.text_colour.apply_gradient_to_surface(pre_select_area_surface)
-                else:
-                    pre_select_area_surface = self.font.render(pre_select_area_text,
-                                                               True,
-                                                               self.text_colour)
-                width_pre = pre_select_area_surface.get_rect().width
-            else:
-                width_pre = 0
-
-            if isinstance(self.selected_bg_colour, ColourGradient):
-                select_size = self.font.size(select_area_text)
-                select_area_surface = pygame.Surface(select_size,
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
-                select_area_surface.fill(pygame.Color('#FFFFFFFF'))
-                self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
-                if isinstance(self.selected_text_colour, ColourGradient):
-                    alpha_text = self.font.render(select_area_text,
-                                                  True,
-                                                  pygame.Color('#FFFFFFFF'))
-                    self.selected_text_colour.apply_gradient_to_surface(alpha_text)
-                else:
-                    alpha_text = self.font.render(select_area_text, True, self.selected_text_colour)
-                select_area_surface.blit(alpha_text, (0, 0))
-            else:
-                if isinstance(self.selected_text_colour, ColourGradient):
-                    select_size = self.font.size(select_area_text)
-                    select_area_surface = pygame.Surface(select_size,
-                                                         flags=pygame.SRCALPHA,
-                                                         depth=32)
-                    select_area_surface.fill(self.selected_bg_colour)
-
-                    alpha_text = self.font.render(select_area_text,
-                                                  True,
-                                                  pygame.Color('#FFFFFFFF'))
-                    self.selected_text_colour.apply_gradient_to_surface(alpha_text)
-                    select_area_surface.blit(alpha_text, (0, 0))
-
-                else:
-                    select_area_surface = self.font.render(select_area_text, True,
-                                                           self.selected_text_colour,
-                                                           self.selected_bg_colour)
-            if len(post_select_area_text) > 0:
-                if isinstance(self.text_colour, ColourGradient):
-                    post_select_area_surface = self.font.render(post_select_area_text,
-                                                                True,
-                                                                pygame.Color('#FFFFFFFF'))
-                    self.text_colour.apply_gradient_to_surface(post_select_area_surface)
-                else:
-                    post_select_area_surface = self.font.render(post_select_area_text,
-                                                                True,
-                                                                self.text_colour)
-                width_post = post_select_area_surface.get_rect().width
-            else:
-                width_post = 0
-
-            text_height = select_area_surface.get_rect().height
-            width_select = select_area_surface.get_rect().width
-
-            self.text_surface = pygame.Surface((width_pre + width_select + width_post,
-                                                text_height),
-                                               flags=pygame.SRCALPHA,
-                                               depth=32)
-            if isinstance(self.background_colour, ColourGradient):
-                self.text_image.fill(pygame.Color("#FFFFFFFF"))
-                self.background_colour.apply_gradient_to_surface(self.text_image)
-            else:
-                self.text_image.fill(self.background_colour)
-            if pre_select_area_surface is not None:
-                self.text_surface.blit(pre_select_area_surface, (0, 0))
-            self.text_surface.blit(select_area_surface, (width_pre, 0))
-            if post_select_area_surface is not None:
-                self.text_surface.blit(post_select_area_surface, (width_pre+width_select, 0))
         text_clip_width = (self.rect.width -
                            (self.horiz_line_padding * 2) -
                            (self.shape_corner_radius * 2) -
-                           (self.border_width * 2) - (self.shadow_width * 2))
-        text_clip_height = (self.rect.height - (self.vert_line_padding * 2) -
-                            (self.border_width * 2) - (self.shadow_width * 2))
-        text_surface_clip = pygame.Rect((0,
-                                         0),
-                                        (text_clip_width,
-                                         text_clip_height))
+                           (self.border_width * 2) -
+                           (self.shadow_width * 2))
 
-        edit_pos_str = self.text[:self.edit_position]
-        width_to_edit_pos = self.font.size(edit_pos_str)[0]
+        width_to_edit_pos = self.font.size(self.text[:self.edit_position])[0]
 
         if self.start_text_offset > width_to_edit_pos:
-            total_width_minus_visible = width_to_edit_pos
-            self.start_text_offset = total_width_minus_visible
+            self.start_text_offset = width_to_edit_pos
         elif width_to_edit_pos > (self.start_text_offset + text_clip_width):
-            total_width_minus_visible = max(0, width_to_edit_pos - text_clip_width)
-            self.start_text_offset = total_width_minus_visible
+            self.start_text_offset = max(0, width_to_edit_pos - text_clip_width)
         elif width_to_edit_pos == 0:
             self.start_text_offset = 0
-        text_surface_clip.x += self.start_text_offset
 
         if len(self.text) > 0:
             self.text_image.blit(self.text_surface,
                                  (self.horiz_line_padding,
                                   self.vert_line_padding),
-                                 text_surface_clip)
+                                 pygame.Rect((self.start_text_offset, 0),
+                                             (text_clip_width,
+                                              (self.rect.height -
+                                               (self.vert_line_padding * 2) -
+                                               (self.border_width * 2) -
+                                               (self.shadow_width * 2)))))
 
         self.redraw_cursor()
+
+    def _redraw_unselected_text(self):
+        """
+        Redraw text where none has been selected by a user.
+        """
+        if isinstance(self.text_colour, ColourGradient):
+            self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
+            self.text_colour.apply_gradient_to_surface(self.text_surface)
+
+        else:
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
+
+    def _redraw_selected_text(self):
+        """
+        Redraw text where some has been selected by a user.
+        """
+        low_end = min(self.select_range[0], self.select_range[1])
+        high_end = max(self.select_range[0], self.select_range[1])
+        pre_select_area_text = self.text[:low_end]
+        select_area_text = self.text[low_end:high_end]
+        post_select_area_text = self.text[high_end:]
+        pre_select_area_surface = None
+        post_select_area_surface = None
+
+        overall_size = self.font.size(self.text)
+        advances = [letter_metrics[4] for letter_metrics in self.font.metrics(self.text)]
+        pre_select_width = sum(advances[:low_end])
+        select_area_width = sum(advances[low_end:high_end])
+
+        if len(pre_select_area_text) > 0:
+            pre_select_area_surface = self._draw_text_with_grad_or_col(pre_select_area_text,
+                                                                       self.text_colour)
+
+        if isinstance(self.selected_bg_colour, ColourGradient):
+            select_area_surface = pygame.Surface((select_area_width,
+                                                  overall_size[1]),
+                                                 flags=pygame.SRCALPHA,
+                                                 depth=32)
+            select_area_surface.fill(pygame.Color('#FFFFFFFF'))
+            self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
+
+            alpha_text = self._draw_text_with_grad_or_col(select_area_text,
+                                                          self.selected_text_colour)
+
+            select_area_surface.blit(alpha_text, (0, 0))
+        else:
+            if isinstance(self.selected_text_colour, ColourGradient):
+                select_area_surface = pygame.Surface((select_area_width,
+                                                      overall_size[1]),
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
+                select_area_surface.fill(self.selected_bg_colour)
+
+                alpha_text = self.font.render(select_area_text,
+                                              True,
+                                              pygame.Color('#FFFFFFFF'))
+                self.selected_text_colour.apply_gradient_to_surface(alpha_text)
+                select_area_surface.blit(alpha_text, (0, 0))
+
+            else:
+                select_area_surface = self.font.render(select_area_text, True,
+                                                       self.selected_text_colour,
+                                                       self.selected_bg_colour)
+        if len(post_select_area_text) > 0:
+            post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
+                                                                        self.text_colour)
+
+        self.text_surface = pygame.Surface(overall_size,
+                                           flags=pygame.SRCALPHA,
+                                           depth=32)
+
+        if isinstance(self.background_colour, ColourGradient):
+            self.text_image.fill(pygame.Color("#FFFFFFFF"))
+            self.background_colour.apply_gradient_to_surface(self.text_image)
+        else:
+            self.text_image.fill(self.background_colour)
+
+        if pre_select_area_surface is not None:
+            self.text_surface.blit(pre_select_area_surface, (0, 0))
+        self.text_surface.blit(select_area_surface, (pre_select_width, 0))
+        if post_select_area_surface is not None:
+            self.text_surface.blit(post_select_area_surface,
+                                   (pre_select_width + select_area_width, 0))
+
+    def _draw_text_with_grad_or_col(self,
+                                    text: str,
+                                    col_or_grad: Union[ColourGradient,
+                                                       pygame.Color]) -> pygame.Surface:
+        """
+        Draw text to a surface using either a colour or gradient.
+
+        :param text: The text to render.
+        :param col_or_grad: A colour or a colour gradient.
+        :return: A surface with the text on.
+        """
+        if isinstance(col_or_grad, ColourGradient):
+            text_surface = self.font.render(text, True, pygame.Color('#FFFFFFFF'))
+            col_or_grad.apply_gradient_to_surface(text_surface)
+        else:
+            text_surface = self.font.render(text, True, col_or_grad)
+        return text_surface
 
     def redraw_cursor(self):
         """
@@ -436,47 +444,230 @@ class UITextEntryLine(UIElement):
         :return bool: Returns True if we've done something with the input event.
         """
         consumed_event = False
+        if self._process_mouse_button_event(event):
+            consumed_event = True
+        if self.focused and event.type == pygame.KEYDOWN:
+            if self._process_keyboard_shortcut_event(event):
+                consumed_event = True
+            elif self._process_action_key_event(event):
+                consumed_event = True
+            elif self._process_text_entry_key(event):
+                consumed_event = True
+        return consumed_event
+
+    def _process_text_entry_key(self, event: pygame.event.Event) -> bool:
+        """
+        Process key input that can be added to the text entry text.
+
+        :param event: The event to process.
+
+        :return: True if consumed.
+        """
+        consumed_event = False
+        within_length_limit = True
+        if (self.length_limit is not None
+                and (len(self.text) -
+                     abs(self.select_range[0] -
+                         self.select_range[1])) >= self.length_limit):
+            within_length_limit = False
+        if within_length_limit:
+            character = event.unicode
+            char_metrics = self.font.metrics(character)
+            if len(char_metrics) > 0 and char_metrics[0] is not None:
+                valid_character = True
+                if (self.allowed_characters is not None and
+                        character not in self.allowed_characters):
+                    valid_character = False
+                if (self.forbidden_characters is not None and
+                        character in self.forbidden_characters):
+                    valid_character = False
+                if valid_character:
+                    if abs(self.select_range[0] - self.select_range[1]) > 0:
+                        low_end = min(self.select_range[0], self.select_range[1])
+                        high_end = max(self.select_range[0], self.select_range[1])
+                        self.text = self.text[:low_end] + character + self.text[high_end:]
+                        self.edit_position = low_end + 1
+                        self.select_range = [0, 0]
+                    else:
+                        start_str = self.text[:self.edit_position]
+                        end_str = self.text[self.edit_position:]
+                        self.text = start_str + character + end_str
+                        self.edit_position += 1
+                    self.cursor_has_moved_recently = True
+                    consumed_event = True
+        return consumed_event
+
+    def _process_action_key_event(self, event: pygame.event.Event) -> bool:
+        """
+        Check if event is one of the keys that triggers an action like deleting, or moving
+        the edit position.
+
+        :param event: The event to check.
+
+        :return: True if event is consumed.
+        """
+        consumed_event = False
+        if event.key == pygame.K_RETURN:
+            event_data = {'user_type': UI_TEXT_ENTRY_FINISHED,
+                          'text': self.text,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+            consumed_event = True
+        elif event.key == pygame.K_BACKSPACE:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                self.text = self.text[:low_end] + self.text[high_end:]
+                self.edit_position = low_end
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position > 0:
+                if self.start_text_offset > 0:
+                    self.start_text_offset -= self.font.size(self.text[self.edit_position - 1])[0]
+                self.text = self.text[:self.edit_position - 1] + self.text[self.edit_position:]
+                self.edit_position -= 1
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_DELETE:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                self.text = self.text[:low_end] + self.text[high_end:]
+                self.edit_position = low_end
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position < len(self.text):
+                self.text = self.text[:self.edit_position] + self.text[self.edit_position + 1:]
+                self.edit_position = self.edit_position
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif self._process_edit_pos_move_key(event):
+            consumed_event = True
+
+        return consumed_event
+
+    def _process_edit_pos_move_key(self, event: pygame.event.Event) -> bool:
+        """
+        Process an action key that is moving the cursor edit position.
+
+        :param event: The event to process.
+
+        :return: True if event is consumed.
+        """
+        consumed_event = False
+        if event.key == pygame.K_LEFT:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = min(self.select_range[0], self.select_range[1])
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position > 0:
+                self.edit_position -= 1
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_RIGHT:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = max(self.select_range[0], self.select_range[1])
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position < len(self.text):
+                self.edit_position += 1
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        return consumed_event
+
+    def _process_keyboard_shortcut_event(self, event: pygame.event.Event) -> bool:
+        """
+        Check if event is one of the CTRL key keyboard shortcuts.
+
+        :param event: event to process.
+
+        :return: True if event consumed.
+        """
+        consumed_event = False
+        if event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
+            self.select_range = [0, len(self.text)]
+            self.edit_position = len(self.text)
+            self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_x and event.mod & pygame.KMOD_CTRL:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                clipboard_copy(self.text[low_end:high_end])
+                self.text = self.text[:low_end] + self.text[high_end:]
+                self.edit_position = low_end
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+                consumed_event = True
+        elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                clipboard_copy(self.text[low_end:high_end])
+                consumed_event = True
+        elif self._process_paste_event(event):
+            consumed_event = True
+        return consumed_event
+
+    def _process_paste_event(self, event: pygame.event.Event) -> bool:
+        """
+        Process a paste shortcut event. (CTRL+ V)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+        """
+        consumed_event = False
+        if event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
+            new_text = clipboard_paste()
+            if self.validate_text_string(new_text):
+                if abs(self.select_range[0] - self.select_range[1]) > 0:
+                    low_end = min(self.select_range[0], self.select_range[1])
+                    high_end = max(self.select_range[0], self.select_range[1])
+                    final_text = self.text[:low_end] + new_text + self.text[high_end:]
+                    within_length_limit = True
+                    if self.length_limit is not None and len(final_text) > self.length_limit:
+                        within_length_limit = False
+                    if within_length_limit:
+                        self.text = final_text
+                        self.edit_position = low_end + len(new_text)
+                        self.select_range = [0, 0]
+                        self.cursor_has_moved_recently = True
+                elif len(new_text) > 0:
+                    final_text = (self.text[:self.edit_position] +
+                                  new_text +
+                                  self.text[self.edit_position:])
+                    within_length_limit = True
+                    if self.length_limit is not None and len(final_text) > self.length_limit:
+                        within_length_limit = False
+                    if within_length_limit:
+                        self.text = final_text
+                        self.edit_position += len(new_text)
+                        self.cursor_has_moved_recently = True
+                consumed_event = True
+        return consumed_event
+
+    def _process_mouse_button_event(self, event: pygame.event.Event) -> bool:
+        """
+        Process a mouse button event.
+
+        :param event: Event to process.
+
+        :return: True if we consumed the mouse event.
+        """
+        consumed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-                if self.double_click_timer < self.ui_manager.get_double_click_time():
-                    pattern = re.compile(r"[\w']+")
-                    index = min(self.edit_position, len(self.text)-1)
-                    if index > 0:
-                        char = self.text[index]
-                        while not pattern.match(char):
-                            index -= 1
-                            if index > 0:
-                                char = self.text[index]
-                            else:
-                                break
-                        while pattern.match(char):
-                            index -= 1
-                            if index > 0:
-                                char = self.text[index]
-                            else:
-                                break
-                        if index > 0:
-                            start_select_index = index+1
-                        else:
-                            start_select_index = index
-                        index += 1
-                        char = self.text[index]
-                        while index < len(self.text) and pattern.match(char):
-                            index += 1
-                            if index < len(self.text):
-                                char = self.text[index]
-                        end_select_index = index
 
-                        self.select_range[0] = start_select_index
-                        self.select_range[1] = end_select_index
-                        self.edit_position = end_select_index
-                        self.cursor_has_moved_recently = True
-                        self.selection_in_progress = False
+                pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
+                self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
+
+                if self.double_click_timer < self.ui_manager.get_double_click_time():
+                    self._calculate_double_click_word_selection()
                 else:
-                    pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
-                    self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
                     self.select_range[0] = self.edit_position
                     self.select_range[1] = self.edit_position
                     self.cursor_has_moved_recently = True
@@ -498,141 +689,46 @@ class UITextEntryLine(UIElement):
                     self.cursor_has_moved_recently = True
                     self.select_range[1] = self.edit_position
             self.selection_in_progress = False
-        if self.focused and event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                event_data = {'user_type': UI_TEXT_ENTRY_FINISHED,
-                              'text': self.text,
-                              'ui_element': self,
-                              'ui_object_id': self.most_specific_combined_id}
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
-                consumed_event = True
-            elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
-                self.select_range = [0, len(self.text)]
-                self.edit_position = len(self.text)
-                self.cursor_has_moved_recently = True
-                consumed_event = True
-            elif event.key == pygame.K_x and event.mod & pygame.KMOD_CTRL:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    clipboard_copy(self.text[low_end:high_end])
-                    self.text = self.text[:low_end] + self.text[high_end:]
-                    self.edit_position = low_end
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                    consumed_event = True
-            elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    clipboard_copy(self.text[low_end:high_end])
-                    consumed_event = True
-            elif event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
-                new_text = clipboard_paste()
-                if self.validate_text_string(new_text):
-                    if abs(self.select_range[0] - self.select_range[1]) > 0:
-                        low_end = min(self.select_range[0], self.select_range[1])
-                        high_end = max(self.select_range[0], self.select_range[1])
-                        final_text = self.text[:low_end] + new_text + self.text[high_end:]
-                        within_length_limit = True
-                        if self.length_limit is not None and len(final_text) > self.length_limit:
-                            within_length_limit = False
-                        if within_length_limit:
-                            self.text = final_text
-                            self.edit_position = low_end + len(new_text)
-                            self.select_range = [0, 0]
-                            self.cursor_has_moved_recently = True
-                    elif len(new_text) > 0:
-                        final_text = (self.text[:self.edit_position] +
-                                      new_text +
-                                      self.text[self.edit_position:])
-                        within_length_limit = True
-                        if self.length_limit is not None and len(final_text) > self.length_limit:
-                            within_length_limit = False
-                        if within_length_limit:
-                            self.text = final_text
-                            self.edit_position += len(new_text)
-                            self.cursor_has_moved_recently = True
-                    consumed_event = True
-            elif event.key == pygame.K_BACKSPACE:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    self.text = self.text[:low_end] + self.text[high_end:]
-                    self.edit_position = low_end
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                elif self.edit_position > 0:
-                    if self.start_text_offset > 0:
-                        self.start_text_offset -= self.font.size(self.text[self.edit_position-1])[0]
-                    self.text = self.text[:self.edit_position-1] + self.text[self.edit_position:]
-                    self.edit_position -= 1
-                    self.cursor_has_moved_recently = True
-                consumed_event = True
-            elif event.key == pygame.K_DELETE:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    self.text = self.text[:low_end] + self.text[high_end:]
-                    self.edit_position = low_end
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                elif self.edit_position < len(self.text):
-                    self.text = self.text[:self.edit_position] + self.text[self.edit_position+1:]
-                    self.edit_position = self.edit_position
-                    self.cursor_has_moved_recently = True
-                consumed_event = True
-            elif event.key == pygame.K_LEFT:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    self.edit_position = min(self.select_range[0], self.select_range[1])
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                elif self.edit_position > 0:
-                    self.edit_position -= 1
-                    self.cursor_has_moved_recently = True
-                consumed_event = True
-            elif event.key == pygame.K_RIGHT:
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    self.edit_position = max(self.select_range[0], self.select_range[1])
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                elif self.edit_position < len(self.text):
-                    self.edit_position += 1
-                    self.cursor_has_moved_recently = True
-                consumed_event = True
-            else:
-                within_length_limit = True
-                if (self.length_limit is not None
-                        and (len(self.text) -
-                             abs(self.select_range[0] -
-                                 self.select_range[1])) >= self.length_limit):
-                    within_length_limit = False
-                if within_length_limit:
-                    character = event.unicode
-                    char_metrics = self.font.metrics(character)
-                    if len(char_metrics) > 0 and char_metrics[0] is not None:
-                        valid_character = True
-                        if (self.allowed_characters is not None and
-                                character not in self.allowed_characters):
-                            valid_character = False
-                        if (self.forbidden_characters is not None and
-                                character in self.forbidden_characters):
-                            valid_character = False
-                        if valid_character:
-                            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                                low_end = min(self.select_range[0], self.select_range[1])
-                                high_end = max(self.select_range[0], self.select_range[1])
-                                self.text = self.text[:low_end] + character + self.text[high_end:]
-                                self.edit_position = low_end + 1
-                                self.select_range = [0, 0]
-                            else:
-                                start_str = self.text[:self.edit_position]
-                                end_str = self.text[self.edit_position:]
-                                self.text = start_str + character + end_str
-                                self.edit_position += 1
-                            self.cursor_has_moved_recently = True
-                            consumed_event = True
         return consumed_event
+
+    def _calculate_double_click_word_selection(self):
+        """
+        If we double clicked on a word in the text, select that word.
+
+    """
+        if self.edit_position != self.select_range[0]:
+            return
+        index = min(self.edit_position, len(self.text) - 1)
+        if index > 0:
+            char = self.text[index]
+            # Check we clicked in the same place on a our second click.
+            pattern = re.compile(r"[\w']+")
+            while not pattern.match(char):
+                index -= 1
+                if index > 0:
+                    char = self.text[index]
+                else:
+                    break
+            while pattern.match(char):
+                index -= 1
+                if index > 0:
+                    char = self.text[index]
+                else:
+                    break
+            start_select_index = index + 1 if index > 0 else index
+            index += 1
+            char = self.text[index]
+            while index < len(self.text) and pattern.match(char):
+                index += 1
+                if index < len(self.text):
+                    char = self.text[index]
+            end_select_index = index
+
+            self.select_range[0] = start_select_index
+            self.select_range[1] = end_select_index
+            self.edit_position = end_select_index
+            self.cursor_has_moved_recently = True
+            self.selection_in_progress = False
 
     def find_edit_position_from_pixel_pos(self, pixel_pos: int) -> int:
         """
@@ -769,43 +865,50 @@ class UITextEntryLine(UIElement):
             self.horiz_line_padding = horiz_line_padding
             has_any_changed = True
 
+        if self._check_theme_colours_changed():
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+
+    def _check_theme_colours_changed(self):
+        """
+        Check if any colours have changed in the theme.
+
+        :return: colour has changed.
+        """
+        has_any_changed = False
         background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                  self.element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
-
         border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                              self.element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
-
         text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                            self.element_ids,
                                                            'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True
-
         selected_text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                     self.element_ids,
                                                                     'selected_text')
         if selected_text_colour != self.selected_text_colour:
             self.selected_text_colour = selected_text_colour
             has_any_changed = True
-
         selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                   self.element_ids,
                                                                   'selected_bg')
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour
             has_any_changed = True
-
-        if has_any_changed:
-            self.rebuild()
+        return has_any_changed
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],

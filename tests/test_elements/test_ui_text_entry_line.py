@@ -11,7 +11,6 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 
 
-
 class TestUITextEntryLine:
 
     def test_creation(self, _init_pygame, default_ui_manager):
