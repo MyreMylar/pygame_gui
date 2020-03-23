@@ -20,16 +20,19 @@ class TestCharStyle:
 class TestTextLineContext:
     def test_creation(self, _init_pygame):
         TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
-                        color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
+                        colour=pygame.Color('#FFFFFF'),
+                        bg_colour=pygame.Color('#000000'),
                         is_link=True, link_href='None')
 
     def test_comparison_equal(self, _init_pygame):
         text_line_1 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
-                                      color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
+                                      colour=pygame.Color('#FFFFFF'),
+                                      bg_colour=pygame.Color('#000000'),
                                       is_link=True, link_href='None')
 
         text_line_2 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
-                                      color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
+                                      colour=pygame.Color('#FFFFFF'),
+                                      bg_colour=pygame.Color('#000000'),
                                       is_link=True, link_href='None')
 
         assert text_line_1 == text_line_2
@@ -40,11 +43,13 @@ class TestTextLineContext:
 
     def test_comparison_not_equal(self, _init_pygame):
         text_line_1 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
-                                      color=pygame.Color('#FFFFFF'), bg_color=pygame.Color('#000000'),
+                                      colour=pygame.Color('#FFFFFF'),
+                                      bg_colour=pygame.Color('#000000'),
                                       is_link=True, link_href='None')
 
         text_line_2 = TextLineContext(font_size=14, font_name='fira_code', style=CharStyle(),
-                                      color=pygame.Color('#FF0000'), bg_color=pygame.Color('#000000'),
+                                      colour=pygame.Color('#FF0000'),
+                                      bg_colour=pygame.Color('#000000'),
                                       is_link=False, link_href='gui')
 
         assert text_line_1 != text_line_2

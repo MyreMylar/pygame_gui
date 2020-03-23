@@ -438,7 +438,7 @@ class UITextBox(UIElement):
         rendered text.
         """
         parser = TextHTMLParser(self.ui_theme, self.element_ids, self.object_ids)
-        parser.push_style('body', {"bg_color": self.background_colour})
+        parser.push_style('body', {"bg_colour": self.background_colour})
         parser.feed(self.html_text)
 
         self.formatted_text_block = TextBlock(parser.text_data,
@@ -643,8 +643,8 @@ class UITextBox(UIElement):
             self.shape_type = shape_type
             has_any_changed = True
 
-        if self._check_shape_theming_changed(defaults={'border_width': 1,
-                                                       'shadow_width': 2,
+        if self._check_shape_theming_changed(defaults={'border_width': 0,
+                                                       'shadow_width': 0,
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 

@@ -43,8 +43,8 @@ class TextLineContext:
     :param font_size: The size of the font in pixels.
     :param font_name: The name of the font to use.
     :param style: The style of the letter (some combination of bold, italic & underlined)
-    :param color: The colour or gradient to render the text with.
-    :param bg_color: The colour or gradient to render the background of the text with.
+    :param colour: The colour or gradient to render the text with.
+    :param bg_colour: The colour or gradient to render the background of the text with.
     :param is_link: True if it is a hyperlink.
     :param link_href: The destination of the hyperlink if we have one.
     """
@@ -52,16 +52,16 @@ class TextLineContext:
                  font_size: int,
                  font_name: str,
                  style: CharStyle,
-                 color: Union[pygame.Color, ColourGradient],
-                 bg_color: Union[pygame.Color, ColourGradient],
+                 colour: Union[pygame.Color, ColourGradient],
+                 bg_colour: Union[pygame.Color, ColourGradient],
                  is_link: bool,
                  link_href: str):
 
         self.font_size = font_size
         self.font_name = font_name
         self.style = style
-        self.color = color
-        self.bg_color = bg_color
+        self.colour = colour
+        self.bg_colour = bg_colour
         self.is_link = is_link
         self.link_href = link_href
 
@@ -74,13 +74,13 @@ class TextLineContext:
         font_size_eq = self.font_size == other.font_size
         font_name_eq = self.font_name == other.font_name
         font_style_eq = self.style == other.style
-        font_color_eq = self.color == other.color
-        font_bg_color_eq = self.bg_color == other.bg_color
+        font_colour_eq = self.colour == other.colour
+        font_bg_colour_eq = self.bg_colour == other.bg_colour
         link_eq = self.is_link == other.is_link
         link_href_eq = self.link_href == other.link_href
 
         font_name_size_style_equal = (font_size_eq and font_name_eq and font_style_eq)
-        font_colours_equal = (font_color_eq and font_bg_color_eq)
+        font_colours_equal = (font_colour_eq and font_bg_colour_eq)
         if font_name_size_style_equal and font_colours_equal and link_eq and link_href_eq:
             return self.__dict__ == other.__dict__
         else:
@@ -149,13 +149,13 @@ class TextStyleData:
         self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient(object_id,
                                                                                  element_ids,
                                                                                  'normal_text')
-        self.default_style['bg_color'] = self.ui_theme.get_colour_or_gradient(object_id,
-                                                                              element_ids,
-                                                                              'dark_bg')
+        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient(object_id,
+                                                                               element_ids,
+                                                                               'dark_bg')
         self.font_name = self.default_style['font_name']
         self.font_size = self.default_style['font_size']
-        self.font_color = self.default_style['font_colour']
-        self.bg_color = self.default_style['bg_color']
+        self.font_colour = self.default_style['font_colour']
+        self.bg_colour = self.default_style['bg_colour']
 
         self.is_link = False
         self.link_href = ''
@@ -239,8 +239,8 @@ class TextStyleData:
 
         self._set_style_attribute('font_name')
         self._set_style_attribute('font_size')
-        self._set_style_attribute('font_color')
-        self._set_style_attribute('bg_color')
+        self._set_style_attribute('font_colour')
+        self._set_style_attribute('bg_colour')
 
         if 'link' in self.current_style.keys():
             self.is_link = self.current_style['link']
@@ -259,8 +259,8 @@ class TextStyleData:
         self.indexed_styles[index] = TextLineContext(self.font_size,
                                                      self.font_name,
                                                      CharStyle(self.char_style),
-                                                     self.font_color,
-                                                     self.bg_color,
+                                                     self.font_colour,
+                                                     self.bg_colour,
                                                      self.is_link,
                                                      self.link_href)
 
@@ -354,23 +354,23 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
                 style["font_size"] = font_size
             if 'color' in attributes:
                 if attributes['color'][0] == '#':
-                    style["font_color"] = pygame.color.Color(attributes['color'])
+                    style["font_colour"] = pygame.color.Color(attributes['color'])
                 else:
-                    style["font_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
-                                                                               self.element_ids,
-                                                                               attributes['color'])
+                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(self.object_id,
+                                                                                self.element_ids,
+                                                                                attributes['color'])
         elif element == 'body':
             if 'bgcolor' in attributes:
                 if len(attributes['bgcolor']) > 0:
                     if ',' in attributes['bgcolor']:
                         col_id = attributes['bgcolor']
-                        style["bg_color"] = self.ui_theme.get_colour_or_gradient(self.object_id,
-                                                                                 self.element_ids,
-                                                                                 col_id)
+                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(self.object_id,
+                                                                                  self.element_ids,
+                                                                                  col_id)
                     else:
-                        style["bg_color"] = pygame.color.Color(attributes['bgcolor'])
+                        style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
                 else:
-                    style["bg_color"] = None
+                    style["bg_colour"] = None
 
         elif element == 'br':
             self.add_text('\n')  # u'\u2028'
