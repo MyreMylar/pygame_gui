@@ -108,7 +108,7 @@ class ShadowGenerator:
                                             flags=pygame.SRCALPHA, depth=32)
         final_edge_surface.fill(pygame.Color('#00000000'))
         corner_radius = corner_radius_param * aa_amount
-
+        corner_centre = (corner_radius, corner_radius)
         edge_rect = pygame.Rect(0, 0,
                                 shadow_width_param * aa_amount,
                                 shadow_width_param * aa_amount)
@@ -140,7 +140,7 @@ class ShadowGenerator:
                 corner_shadow_surface.fill(pygame.Color('#00000000'))
                 pygame.draw.circle(corner_shadow_surface,
                                    pygame.Color(0, 0, 0, int(shadow_alpha)),
-                                   (corner_radius, corner_radius),
+                                   corner_centre,
                                    corner_radius)
 
                 final_corner_surface.blit(corner_shadow_surface,
