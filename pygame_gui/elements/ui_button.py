@@ -463,8 +463,8 @@ class UIButton(UIElement):
             self.shape_type = shape_type_string
             has_any_changed = True
 
-        if self._check_shape_theming_changed(defaults={'border_width': 0,
-                                                       'shadow_width': 0,
+        if self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                       'shadow_width': 2,
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
