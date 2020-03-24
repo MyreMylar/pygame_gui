@@ -157,6 +157,55 @@ Here's an example of adding a 'button' theme block to the JSON file above:
 Each of the UI Elements supports different theme options, what exactly these are is detailed in the individual
 theming guide for each element shown below.
 
+Theme Prototypes
+----------------
+
+As well as creating theming blocks that address specific elements, or classes of elements, you can also create theming
+blocks that don't have an ID that matches any element in your UI.
+
+Why would you do this?
+
+To save yourself a bunch of typing by taking advantage of theme prototypes, that's why! In every element theme block
+you create you can also specify a 'prototype' theme block which will be loaded as that block parameters first before
+any changes are applied. This lets us quickly apply a bunch of identical theming changes to multiple different parts
+of our UI theme.
+
+Prototype theme blocks must be defined higher in the theme file than where they are used, otherwise they won't exist to
+be imported.
+
+Here's a quick example:
+
+.. code-block:: json
+   :caption: theme.json
+   :linenos:
+
+   {
+      "#new_shape_style":
+      {
+         "misc":
+         {
+            "shape": "rectangle",
+            "border_width": "2",
+            "shadow_width": "1"
+         }
+      },
+
+      "button"
+      {
+         "prototype": "#new_shape_style"
+      },
+
+      "horizontal_slider"
+      {
+         "prototype": "#new_shape_style",
+         "misc":
+         {
+            "enable_arrow_buttons": 0
+         }
+      }
+   }
+
+
 Theme Options Per Element
 -------------------------
 .. toctree::
@@ -165,9 +214,20 @@ Theme Options Per Element
     theme_reference/theme_horizontal_slider
     theme_reference/theme_image
     theme_reference/theme_label
+    theme_reference/theme_panel
     theme_reference/theme_screen_space_health_bar
+    theme_reference/theme_selection_list
     theme_reference/theme_text_box
     theme_reference/theme_text_entry_line
     theme_reference/theme_tooltip
     theme_reference/theme_vertical_scroll_bar
+    theme_reference/theme_window
     theme_reference/theme_world_space_health_bar
+
+Theme Options Per Window
+-------------------------
+.. toctree::
+    theme_reference/theme_colour_picker_dialog
+    theme_reference/theme_confirmation_dialog
+    theme_reference/theme_file_dialog
+    theme_reference/theme_message_window

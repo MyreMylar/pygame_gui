@@ -68,4 +68,60 @@ is and will produce a layout looking a bit like this:
 
 .. figure:: _static/layout_bottom_right_anchors.png
 
-Sometimes though you want a layout to change size with it's container so we make maximum use of the available space.
+Sometimes though you want a layout to change size with it's container so we make maximum use of the available space. In
+those cases we can simply set the appropriate axis anchors of our button to their counterparts on the window. So to
+stretch in the x axis (horizontal) set 'left' to 'left' & 'right' to 'right'. To stretch in the y axis (vertical) set
+'top' to 'top' & 'bottom' to 'bottom'. For example, here is a hello button with a stretch (both x & y axes) anchor
+setup:
+
+.. code-block:: python
+   :linenos:
+
+    button_layout_rect = pygame.Rect(30, 20, 100, 20)
+
+    UIButton(relative_rect=button_layout_rect,
+             text='Hello', manager=manager,
+             container=ui_window,
+             anchors={'left': 'left',
+                      'right': 'right',
+                      'top': 'top',
+                      'bottom': 'bottom'})
+
+Here's what it might look like placed in a small UIWindow:
+
+.. figure:: _static/layout_before_stretch_anchors.png
+
+
+And here's what happens to it when we resize the UIWindow to be a bit larger:
+
+.. figure:: _static/layout_after_stretch_anchors.png
+
+You'll note the gaps between the edges of the window have been maintained.
+
+
+UI Layers
+---------
+
+UI Layers start at 0, which represents the lowest level, and progress upwards as they are needed. Things in higher
+layers will be drawn on top of things in lower layers if they overlap.
+
+Most of the time using Pygame GUI you don not have to interact too much with the layer system. UIs don't tend to
+be designed with their interactive bits overlapping that often, and when they do they tend to be in windows.
+The main exception is for groups of elements, used for things like, HUDs which may overlap UI elements that appear
+'in' game worlds; such as monster health bars. For these occasions there is the UIPanel element which works as a
+container, much like a UI Window, except you specify what layer of the UI it will draw on (and thus what it will appear
+on top of).
+
+So how do you know where to position your UI Panels? Well for that purpose and for any other time you might need to
+interrogate the layer system there is a layer debug mode that you can activate by calling a function on the UI manager.
+This should let you figure out how many layers are being used for your 'in game' UI stuff and thus where to position
+your Panel. Here's how to turn it on:
+
+.. code-block:: python
+   :linenos:
+
+   ui_manager.set_visual_debug_mode(True)
+
+It gives you information as a snapshot of the current state of the UI, so I recommend temporarily binding it to a
+keypress - then you can toggle it on and off at different times in your game. It will not keep track of any changes
+in the UI after being turned on.
