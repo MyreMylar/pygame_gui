@@ -17,8 +17,9 @@ class RectDrawableShape(DrawableShape):
     :param containing_rect: The layout rectangle that surrounds and controls the size of this shape.
     :param theming_parameters: Various styling parameters that control the final look of the shape.
     :param states: The different UI states the shape can be in. Shapes have different surfaces
-    for each state.
+                   for each state.
     :param manager: The UI manager.
+
     """
 
     def __init__(self,
@@ -102,7 +103,9 @@ class RectDrawableShape(DrawableShape):
         Tests if a point is colliding with our Drawable shape's 'click area' hot spot.
 
         :param point: The point to test.
+
         :return: True if we are colliding.
+
         """
         return bool(self.click_area_shape.collidepoint(int(point[0]), int(point[1])))
 
@@ -113,6 +116,7 @@ class RectDrawableShape(DrawableShape):
         Changes the size of the rectangle shape. Relatively expensive to do.
 
         :param dimensions: The new dimensions.
+
         """
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
@@ -133,6 +137,7 @@ class RectDrawableShape(DrawableShape):
         Move the shape. Only really impacts the position of the 'click_area' hot spot.
 
         :param point: The new position to move it to.
+
         """
         self.containing_rect.x = point[0]
         self.containing_rect.y = point[1]
@@ -144,6 +149,7 @@ class RectDrawableShape(DrawableShape):
         Redraws the shape's surface for a given UI state.
 
         :param state_str: The ID string of the state to rebuild.
+
         """
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'

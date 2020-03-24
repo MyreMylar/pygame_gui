@@ -10,7 +10,7 @@ UIScreenSpaceHealthBar Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` theming block id is 'screen_space_health_bar'.
+The :class:`UIScreenSpaceHealthBar <pygame_gui.elements.UIScreenSpaceHealthBar>` theming block id is 'screen_space_health_bar'.
 
 Colours
 -------
@@ -20,7 +20,7 @@ Colours
    A diagram of which part of the element is themed by which colour parameter. The text shadow **cannot** be themed
    with a colour gradient.
 
-:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block. Most of these colours can
+:class:`UIScreenSpaceHealthBar <pygame_gui.elements.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block. Most of these colours can
 also be a colour gradient:
 
  - "**normal_text**" - The colour/gradient of the health bars's text.
@@ -32,7 +32,7 @@ also be a colour gradient:
 Misc
 ----
 
-:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIScreenSpaceHealthBar <pygame_gui.elements.UIScreenSpaceHealthBar>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
@@ -43,7 +43,7 @@ Misc
 Font
 -----
 
-:class:`UIScreenSpaceHealthBar <.UIScreenSpaceHealthBar>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UIScreenSpaceHealthBar <pygame_gui.elements.UIScreenSpaceHealthBar>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the health bar.

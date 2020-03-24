@@ -16,13 +16,14 @@ class UIVerticalScrollBar(UIElement):
 
     :param relative_rect: The size and position of the scroll bar.
     :param visible_percentage: The vertical percentage of the larger area that is visible,
-    between 0.0 and 1.0.
+                               between 0.0 and 1.0.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the
-    root window's container.
+                      root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
 
     def __init__(self,
@@ -195,7 +196,8 @@ class UIVerticalScrollBar(UIElement):
         """
         Returns True if the scroll bar was moved in the last call to the update function.
 
-        :return bool: True if we've recently moved the scroll bar, False otherwise.
+        :return: True if we've recently moved the scroll bar, False otherwise.
+
         """
         return self.has_moved_recently
 
@@ -234,7 +236,9 @@ class UIVerticalScrollBar(UIElement):
         the scroll bar will handle the required mouse click events.
 
         :param event: The event to process.
-        :return bool: Returns True if we've done something with the input event.
+
+        :return: Returns True if we've done something with the input event.
+
         """
 
         # pygame.MOUSEWHEEL only defined after pygame 1.9
@@ -260,6 +264,7 @@ class UIVerticalScrollBar(UIElement):
         Check if this scroll bar was the last one focused in the UI.
 
         :return: True if it was.
+
         """
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
         return (last_focused_scrollbar_element is not None and
@@ -278,7 +283,8 @@ class UIVerticalScrollBar(UIElement):
         dragging of the scroll bar itself.
 
         :param time_delta: A float, roughly representing the time in seconds between calls to this
-        method.
+                           method.
+
         """
         super().update(time_delta)
         self.has_moved_recently = False
@@ -374,6 +380,7 @@ class UIVerticalScrollBar(UIElement):
         'scrollable area' or the vertical size of the visible area change.
 
         :param percentage: A float between 0.0 and 1.0 representing the percentage that is visible.
+
         """
         self.visible_percentage = max(0.0, min(1.0, percentage))
         if 1.0 - self.start_percentage < self.visible_percentage:
@@ -449,6 +456,7 @@ class UIVerticalScrollBar(UIElement):
         elements at the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
 
@@ -466,6 +474,7 @@ class UIVerticalScrollBar(UIElement):
         elements at the same time.
 
         :param position: The relative screen position to set.
+
         """
         super().set_relative_position(position)
 
@@ -482,6 +491,7 @@ class UIVerticalScrollBar(UIElement):
         Method to directly set the dimensions of an element.
 
         :param dimensions: The new dimensions to set.
+
         """
         super().set_dimensions(dimensions)
 

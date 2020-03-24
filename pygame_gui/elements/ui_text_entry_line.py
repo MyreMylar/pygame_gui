@@ -27,10 +27,11 @@ class UITextEntryLine(UIElement):
     :param relative_rect: A rectangle describing the position and width of the text entry element.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the
-    root window's container.
+                      root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
 
     _number_character_set = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -161,6 +162,7 @@ class UITextEntryLine(UIElement):
         limit on the number of characters that can be entered.
 
         :param limit: The character limit as an integer.
+
         """
         self.length_limit = limit
 
@@ -168,7 +170,8 @@ class UITextEntryLine(UIElement):
         """
         Gets the text in the entry line element.
 
-        :return: A string .
+        :return: A string.
+
         """
         return self.text
 
@@ -180,6 +183,7 @@ class UITextEntryLine(UIElement):
         The string to set must be valid for the text entry element for this to work.
 
         :param text: The text string to set.
+
         """
         if self.validate_text_string(text):
             within_length_limit = True
@@ -330,7 +334,9 @@ class UITextEntryLine(UIElement):
 
         :param text: The text to render.
         :param col_or_grad: A colour or a colour gradient.
+
         :return: A surface with the text on.
+
         """
         if isinstance(col_or_grad, ColourGradient):
             text_surface = self.font.render(text, True, pygame.Color('#FFFFFFFF'))
@@ -368,7 +374,7 @@ class UITextEntryLine(UIElement):
         making sure our edit cursor blinks on and off.
 
         :param time_delta: The time in seconds between this update method call and the previous one.
-        :return:
+
         """
         super().update(time_delta)
 
@@ -441,7 +447,8 @@ class UITextEntryLine(UIElement):
 
         :param event: The current event to consider reacting to.
 
-        :return bool: Returns True if we've done something with the input event.
+        :return: Returns True if we've done something with the input event.
+
         """
         consumed_event = False
         if self._process_mouse_button_event(event):
@@ -505,6 +512,7 @@ class UITextEntryLine(UIElement):
         :param event: The event to check.
 
         :return: True if event is consumed.
+
         """
         consumed_event = False
         if event.key == pygame.K_RETURN:
@@ -554,6 +562,7 @@ class UITextEntryLine(UIElement):
         :param event: The event to process.
 
         :return: True if event is consumed.
+
         """
         consumed_event = False
         if event.key == pygame.K_LEFT:
@@ -583,6 +592,7 @@ class UITextEntryLine(UIElement):
         :param event: event to process.
 
         :return: True if event consumed.
+
         """
         consumed_event = False
         if event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
@@ -617,6 +627,7 @@ class UITextEntryLine(UIElement):
         :param event: The event to process.
 
         :return: True if the event is consumed.
+
         """
         consumed_event = False
         if event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
@@ -655,6 +666,7 @@ class UITextEntryLine(UIElement):
         :param event: Event to process.
 
         :return: True if we consumed the mouse event.
+
         """
         consumed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
@@ -695,7 +707,7 @@ class UITextEntryLine(UIElement):
         """
         If we double clicked on a word in the text, select that word.
 
-    """
+        """
         if self.edit_position != self.select_range[0]:
             return
         index = min(self.edit_position, len(self.text) - 1)
@@ -736,7 +748,8 @@ class UITextEntryLine(UIElement):
         inside the text entry element.
 
         :param pixel_pos: The x position of our click after being adjusted for text in our box
-        scrolling off-screen.
+                          scrolling off-screen.
+
         """
         start_pos = (self.rect.x + self.border_width + self.shadow_width +
                      self.shape_corner_radius + self.horiz_line_padding)
@@ -761,7 +774,8 @@ class UITextEntryLine(UIElement):
         - 'numbers'
 
         :param allowed_characters: The characters to allow, either in a list form or one of the
-        supported string ids.
+                                   supported string ids.
+
         """
         if isinstance(allowed_characters, str):
             if allowed_characters == 'numbers':
@@ -783,7 +797,8 @@ class UITextEntryLine(UIElement):
         - 'forbidden_file_path'
 
         :param forbidden_characters: The characters to forbid, either in a list form or one of
-        the supported string ids.
+                                     the supported string ids.
+
         """
         if isinstance(forbidden_characters, str):
             if forbidden_characters == 'numbers':
@@ -803,6 +818,7 @@ class UITextEntryLine(UIElement):
         the allowed and forbidden character sets.
 
         :param text_to_validate: The text string to check.
+
         """
         is_valid = True
         if self.forbidden_characters is not None:
@@ -876,6 +892,7 @@ class UITextEntryLine(UIElement):
         Check if any colours have changed in the theme.
 
         :return: colour has changed.
+
         """
         has_any_changed = False
         background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
@@ -918,6 +935,7 @@ class UITextEntryLine(UIElement):
         determined by the height of the font.
 
         :param dimensions: The dimensions to set. Only the first, the width, will actually be used.
+
         """
         corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
         line_height = self.font.size(' ')[1]

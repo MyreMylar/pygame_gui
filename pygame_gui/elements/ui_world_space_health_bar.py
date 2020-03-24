@@ -19,10 +19,11 @@ class UIWorldSpaceHealthBar(UIElement):
     :param sprite_to_monitor: The sprite we are displaying the health of.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
 
     class ExampleHealthSprite(pygame.sprite.Sprite):
@@ -30,6 +31,7 @@ class UIWorldSpaceHealthBar(UIElement):
         An example sprite with health instance attributes.
 
         :param groups: Sprite groups to put the sprite in.
+
         """
         def __init__(self, *groups):
             super().__init__(*groups)
@@ -129,6 +131,7 @@ class UIWorldSpaceHealthBar(UIElement):
         data from the sprite we are monitoring
 
         :param time_delta: time passed in seconds between one call to this method and the next.
+
         """
         super().update(time_delta)
         if self.alive():

@@ -75,7 +75,7 @@ class ColourGradient:
 
         :param input_surface:
         :param rect: The rectangle on the surface to apply the gradient to. If None, applies to the
-        whole surface.
+                     whole surface.
         """
         # scale the gradient up to the right size
         input_surface_size = input_surface.get_size()

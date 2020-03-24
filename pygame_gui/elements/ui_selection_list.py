@@ -24,24 +24,25 @@ class UISelectionList(UIElement):
     A rectangular element that holds any number of selectable text items displayed as a list.
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout guide
-    for details.
+                          for details.
     :param item_list: A list of items as strings (item name only), or tuples of two strings (name,
-    theme_object_id).
+                      theme_object_id).
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
-    between elements.
+                    between elements.
     :param allow_multi_select: True if we are allowed to pick multiple things from the selection
-    list.
+                               list.
     :param allow_double_clicks: True if we can double click on items in the selection list.
     :param container: The container this element is inside of (by default the root container)
-    distinct from this panel's container.
+                      distinct from this panel's container.
     :param starting_height: The starting height up from it's container where this list is placed
-    into a layer.
+                            into a layer.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in
-    theming and events.
+                           theming and events.
     :param object_id: An identifier that can be used to help distinguish this particular element
-    from others with the same hierarchy.
+                      from others with the same hierarchy.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
-    Defaults to the top left.
+                    Defaults to the top left.
+
     """
 
     def __init__(self,
@@ -113,6 +114,7 @@ class UISelectionList(UIElement):
         Get the selected item in a list, if any. Only works if this is a single-selection list.
 
         :return: A single item name as a string or None.
+
         """
         if not self.allow_multi_select:
             selected_list = [item['text'] for item in self.item_list if item['selected']]
@@ -133,7 +135,8 @@ class UISelectionList(UIElement):
         multi-selection list.
 
         :return: A list of the selected items in our selection list. May be empty if nothing
-        selected.
+                 selected.
+
         """
         if self.allow_multi_select:
             return [item['text'] for item in self.item_list if item['selected']]
@@ -147,6 +150,7 @@ class UISelectionList(UIElement):
         'thickness' is accurate and to handle window resizing.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
+
         """
         super().update(time_delta)
 
@@ -198,6 +202,7 @@ class UISelectionList(UIElement):
          - object_ID: used for theming and events
 
         :param new_item_list: The new list to switch to. Can be a list of strings or tuples.
+
         """
         self._raw_item_list = new_item_list
         self.item_list = []  # type: List[Dict]
@@ -302,7 +307,9 @@ class UISelectionList(UIElement):
         Currently just blocks mouse click down events from passing through the panel.
 
         :param event: The event to process.
-        :return bool: Should return True if this element makes use of this event.
+
+        :return: Should return True if this element makes use of this event.
+
         """
         consumed_event = False
         if (event.type == USEREVENT and event.user_type in [UI_BUTTON_PRESSED,
@@ -356,7 +363,8 @@ class UISelectionList(UIElement):
         Set the size of this panel and then resizes and shifts the contents of the panel container
         to fit the new size.
 
-        :param dimensions:
+        :param dimensions: The new dimensions to set.
+
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
         # different size to the window
@@ -374,6 +382,7 @@ class UISelectionList(UIElement):
         Method to directly set the relative rect position of an element.
 
         :param position: The new position to set.
+
         """
         super().set_relative_position(position)
         border_and_shadow = self.border_width + self.shadow_width
@@ -389,6 +398,7 @@ class UISelectionList(UIElement):
         elements at the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
         border_and_shadow = self.border_width + self.shadow_width

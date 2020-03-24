@@ -10,7 +10,7 @@ UITextEntryLine Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UITextEntryLine <.UITextEntryLine>` theming block id is 'text_entry_line'.
+The :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` theming block id is 'text_entry_line'.
 
 Colours
 -------
@@ -19,7 +19,7 @@ Colours
 
    A diagram of which part of the element is themed by which colour parameter.
 
-:class:`UITextEntryLine <.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
+:class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
  - "**dark_bg**" -  The default colour/gradient of the background to the entry line element.
@@ -31,7 +31,7 @@ also be a colour gradient:
 Font
 -----
 
-:class:`UITextEntryLine <.UITextEntryLine>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the text entry line.
@@ -48,7 +48,7 @@ Only specify paths if this is the first use of this font name in the GUI:
 Misc
 ----
 
-:class:`UITextEntryLine <.UITextEntryLine>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.

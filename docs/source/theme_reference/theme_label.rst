@@ -3,7 +3,7 @@
 UILabel Theming Parameters
 ==========================
 
-The :class:`UILabel <.UILabel>` theming block id is 'label'.
+The :class:`UILabel <pygame_gui.elements.UILabel>` theming block id is 'label'.
 
 Colours
 -------
@@ -13,7 +13,7 @@ Colours
    A diagram of which part of the element is themed by which colour parameter. The text shadow **cannot** be themed
    with a colour gradient.
 
-:class:`UILabel <.UILabel>` makes use of these colour parameters in a 'colours' block. Most of these colours can
+:class:`UILabel <pygame_gui.elements.UILabel>` makes use of these colour parameters in a 'colours' block. Most of these colours can
 also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the label text.
@@ -23,7 +23,7 @@ also be a colour gradient:
 Font
 -----
 
-:class:`UILabel <.UILabel>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UILabel <pygame_gui.elements.UILabel>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the label.
@@ -41,7 +41,7 @@ Only specify paths if this is the first use of this font name in the GUI:
 Misc
 -----
 
-:class:`UILabel <.UILabel>` has the following miscellaneous parameters in a 'misc' block:
+:class:`UILabel <pygame_gui.elements.UILabel>` has the following miscellaneous parameters in a 'misc' block:
 
  - "**text_shadow**" - Set to "1" to enable, or "0" to disable a shadow/outline behind the text. Defaults to "0".
  - "**text_shadow_size**" - The increased size in pixels of the shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together.

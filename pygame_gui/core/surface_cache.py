@@ -224,7 +224,9 @@ class SurfaceCache:
         Looks for a surface in the cache by an ID and returns it if found.
 
         :param lookup_id: ID of the surface to look for in the cache.
+
         :return The found surface, or None.
+
         """
         # check short term
         if lookup_id in self.cache_short_term_lookup:

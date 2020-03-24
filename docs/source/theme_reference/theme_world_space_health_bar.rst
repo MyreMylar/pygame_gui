@@ -3,7 +3,7 @@
 UIWorldSpaceHealthBar Theming Parameters
 =========================================
 
-The :class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` theming block id is 'world_space_health_bar'.
+The :class:`UIWorldSpaceHealthBar <pygame_gui.elements.UIWorldSpaceHealthBar>` theming block id is 'world_space_health_bar'.
 
 Colours
 -------
@@ -12,7 +12,7 @@ Colours
 
    A diagram of which part of the element is themed by which colour parameter.
 
-:class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
+:class:`UIWorldSpaceHealthBar <pygame_gui.elements.UIWorldSpaceHealthBar>` makes use of these colour parameters in a 'colours' block:
 
  - "**normal_border**" - The colour/gradient of the health bar's border if it has one.
  - "**filled_bar**" - The colour/gradient of the actual bar itself, of the portion of it that is still full.
@@ -21,7 +21,7 @@ Colours
 Misc
 -----
 
-:class:`UIWorldSpaceHealthBar <.UIWorldSpaceHealthBar>` has the following miscellaneous parameters in a 'misc' block:
+:class:`UIWorldSpaceHealthBar <pygame_gui.elements.UIWorldSpaceHealthBar>` has the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.

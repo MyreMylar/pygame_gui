@@ -17,14 +17,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     A base class for window GUI elements, any windows should inherit from this class.
 
     :param rect: A rectangle, representing size and position of the window (including title bar,
-    shadow and borders).
+                 shadow and borders).
     :param manager: The UIManager that manages this UIWindow.
     :param window_display_title: A string that will appear in the windows title bar if it has one.
     :param element_id: An element ID for this window, if one is not supplied it defaults to
-    'window'.
+                       'window'.
     :param object_id: An optional object ID for this window, useful for distinguishing different
-    windows.
+                      windows.
     :param resizable: Whether this window is resizable or not, defaults to False.
+
     """
     def __init__(self,
                  rect: pygame.Rect,
@@ -146,6 +147,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Defaults to False.
 
         :param state: True if this window should block mouse clicks.
+
         """
         self.is_blocking = state
 
@@ -158,6 +160,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         'set_dimensions' is called.
 
         :param dimensions: The new minimum dimension for the window.
+
         """
         self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
                                    min(self.ui_container.rect.height, int(dimensions[1])))
@@ -176,6 +179,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         container to fit the new size.
 
         :param dimensions: The new dimensions to set.
+
         """
         # clamp to minimum dimensions and container size
         dimensions = (min(self.ui_container.rect.width,
@@ -205,6 +209,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Method to directly set the relative rect position of an element.
 
         :param position: The new position to set.
+
         """
         super().set_relative_position(position)
 
@@ -220,6 +225,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Method to directly set the absolute screen rect position of an element.
 
         :param position: The new position to set.
+
         """
         super().set_position(position)
 
@@ -236,7 +242,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param event: The event to process.
 
         :return bool: Return True if this element should consume this event and not pass it to the
-         rest of the UI.
+                      rest of the UI.
+
         """
         consumed_event = False
 
@@ -279,8 +286,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         :param event: The event to check.
 
-        :return bool: returns True if the event represents a click inside this window or the window
-         is blocking.
+        :return: returns True if the event represents a click inside this window or the window
+                 is blocking.
+
         """
         consumed_event = False
         if self.is_blocking and event.type == pygame.MOUSEBUTTONDOWN:
@@ -307,6 +315,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         'thickness' is accurate and to handle window resizing.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
+
         """
         super().update(time_delta)
 
@@ -388,6 +397,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Returns the container that should contain all the UI elements in this window.
 
         :return UIContainer: The window's container.
+
         """
         return self.window_element_container
 
@@ -404,6 +414,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         :param time_delta: time passed in seconds between one call to this method and the next.
         :param hovered_higher_element: Have we already hovered an element/window above this one.
+
         """
         hovered = False
         if not self.resizing_mode_active:
@@ -451,7 +462,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Returns the 'highest' layer used by this window so that we can correctly place other
         windows on top of it.
 
-        :return int: The top layer for this window as a number (greater numbers are higher layers).
+        :return: The top layer for this window as a number (greater numbers are higher layers).
+
         """
         return self._layer + self.layer_thickness
 
@@ -460,6 +472,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Move this window, and it's contents, to a new layer in the UI.
 
         :param new_layer: The layer to move to.
+
         """
         if new_layer != self._layer:
             super().change_layer(new_layer)

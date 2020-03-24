@@ -362,12 +362,13 @@ class UIAppearanceTheme:
 
         :param current_node: The current 'node' we are at in the recursive algorithm.
         :param element_ids: A hierarchical list of all element IDs that apply to our element,
-        this includes parents.
+                            this includes parents.
         :param object_ids: A hierarchical list of all object IDs that apply to our element,
-        this includes parents.
+                           this includes parents.
         :param index: The current index in the two ID lists.
         :param tree_size: The size of both lists.
         :param combined_ids: The final list of combined IDs.
+
         """
         if index < tree_size:
             if object_ids is not None and index < len(object_ids):
@@ -444,11 +445,12 @@ class UIAppearanceTheme:
         image display.
 
         :param image_id: The id identifying the particular image spot in the UI we are looking for
-        an image to add to.
+                         an image to add to.
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
 
         :return None or pygame.Surface:
+
         """
 
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)

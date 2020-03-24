@@ -11,6 +11,7 @@ class UIWindowStack:
 
     :param window_resolution: The resolution of the OS window.
     :param root_container: The root container for the whole UI.
+
     """
     def __init__(self, window_resolution: Tuple[int, int], root_container: UIContainer):
         self.window_resolution = window_resolution
@@ -30,6 +31,7 @@ class UIWindowStack:
         Adds a window to the top of the stack.
 
         :param window: The window to add.
+
         """
         new_layer = (self.stack[-1].get_top_layer()
                      if len(self.stack) > 0
@@ -43,6 +45,7 @@ class UIWindowStack:
         it's absence.
 
         :param window_to_remove: the window to remove.
+
         """
         if window_to_remove in self.stack:
             popped_windows_to_add_back = []
@@ -61,6 +64,7 @@ class UIWindowStack:
         to deal with the change.
 
         :param window_to_front: the window to move to the front.
+
         """
         if window_to_front not in self.stack or window_to_front == self.stack[-1]:
             return
@@ -81,6 +85,8 @@ class UIWindowStack:
         Checks if a window is at the top of the window stack or not.
 
         :param window: The window to check.
-        :return bool: returns True if this window is at the top of the stack.
+
+        :return: returns True if this window is at the top of the stack.
+
         """
         return window is self.stack[-1]

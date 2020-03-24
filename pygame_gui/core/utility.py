@@ -154,6 +154,7 @@ def clipboard_copy(data: str):
     Hopefully cross platform, copy to a clipboard.
 
     :return: A platform specific copy function.
+
     """
     current_platform = platform.system().upper()
     if current_platform == 'WINDOWS':
@@ -169,6 +170,7 @@ def clipboard_paste():
     Hopefully cross platform, paste from a clipboard.
 
     :return: A platform specific paste function.
+
     """
     current_platform = platform.system().upper()
     if current_platform == 'WINDOWS':
@@ -184,6 +186,7 @@ def create_resource_path(relative_path: Union[str, Path]):
     Get absolute path to resource, works for dev and for PyInstaller's 'onefile' mode
 
     :param relative_path: A relative path to a file of some kind.
+
     """
 
     try:

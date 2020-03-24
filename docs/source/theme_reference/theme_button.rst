@@ -10,7 +10,7 @@ UIButton Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UIButton <.UIButton>` theming block id is 'button'.
+The :class:`UIButton <pygame_gui.elements.UIButton>` theming block id is 'button'.
 
 Colours
 -------
@@ -21,8 +21,8 @@ Colours
    parameters named for the different button states e.g. the parameter 'hovered_bg' themes the same area as 'normal_bg'
    when the button is in the hovered state.
 
-:class:`UIButton <.UIButton>` makes use of these colour parameters in a 'colours' block. All of these colours can
-also be a colour gradient:
+:class:`UIButton <pygame_gui.elements.UIButton>` makes use of these colour parameters in a 'colours' block. All of
+these colours can also be a colour gradient:
 
  - "**normal_bg**" - The background colour/gradient of the button in the default state.
  - "**hovered_bg**" - The background colour/gradient of the button when the mouse pointer is over it.
@@ -43,7 +43,8 @@ also be a colour gradient:
 Font
 -----
 
-:class:`UIButton <.UIButton>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
+:class:`UIButton <pygame_gui.elements.UIButton>` accepts a font specified in the theme via a 'font' block. A 'font'
+block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the button.
@@ -60,7 +61,8 @@ Only specify paths if this is the first use of this font name in the GUI:
 Images
 -------
 
-:class:`UIButton <.UIButton>` accepts images specified in the theme via an 'images' block. An 'images' block has these parameters:
+:class:`UIButton <pygame_gui.elements.UIButton>` accepts images specified in the theme via an 'images' block. An
+'images' block has these parameters:
 
  - "**normal_image**" - The image displayed in the buttons default state. It has the following block of sub-parameters:
 
@@ -86,7 +88,7 @@ Images
 Misc
 ----
 
-:class:`UIButton <.UIButton>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIButton <pygame_gui.elements.UIButton>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle', 'rounded_rectangle' or 'ellipse'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.

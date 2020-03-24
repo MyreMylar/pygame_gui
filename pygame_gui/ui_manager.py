@@ -286,12 +286,12 @@ class UIManager(IUIManagerInterface):
         usage to appear rather slowly as they are waiting for the fonts they need to load.
 
         :param font_name: The name of the font that will be used to reference it elsewhere in
-        the GUI.
+                          the GUI.
         :param regular_path: The path of the font file for this font with no styles applied.
         :param bold_path: The path of the font file for this font with just bold style applied.
         :param italic_path: The path of the font file for this font with just italic style applied.
         :param bold_italic_path: The path of the font file for this font with bold & italic style
-        applied.
+               applied.
 
         """
         self.get_theme().get_font_dictionary().add_font_path(font_name,

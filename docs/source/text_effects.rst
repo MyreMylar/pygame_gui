@@ -3,8 +3,8 @@
 Text Effects
 ============
 
-When using the :class:`UITextBox <.UITextBox>` element there is an option to add one of three preset effects that will
-control how all of the text in the element is displayed.
+When using the :class:`UITextBox <pygame_gui.elements.UITextBox>` element there is an option to add one of three preset
+effects that will control how all of the text in the element is displayed.
 
 These effects are:
 
@@ -16,7 +16,8 @@ These effects are:
 Applying an effect
 ------------------
 
-To apply an effect to a :class:`UITextBox <.UITextBox>` element call the set_active_effect method, with the id of the effect to apply:
+To apply an effect to a :class:`UITextBox <pygame_gui.elements.UITextBox>` element call the set_active_effect method,
+with the id of the effect to apply:
 
 .. code-block:: python
    :linenos:

@@ -16,8 +16,9 @@ class EllipseDrawableShape(DrawableShape):
     :param containing_rect: The layout rectangle that surrounds and controls the size of this shape.
     :param theming_parameters: Various styling parameters that control the final look of the shape.
     :param states: The different UI states the shape can be in. Shapes have different surfaces
-    for each state.
+                   for each state.
     :param manager: The UI manager.
+
     """
 
     def __init__(self, containing_rect: pygame.Rect,
@@ -89,7 +90,9 @@ class EllipseDrawableShape(DrawableShape):
         Checks collision between a point and this ellipse.
 
         :param point: The point to test against the shape.
+
         :return: True if the point is inside the shape.
+
         """
         collided = False
         x_val = ((point[0] - self.ellipse_center[0]) ** 2) / (self.ellipse_half_diameters[0] ** 2)
@@ -106,6 +109,7 @@ class EllipseDrawableShape(DrawableShape):
         Expensive size change of the ellipse shape.
 
         :param dimensions: The new size to set the shape to.
+
         """
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
@@ -124,6 +128,7 @@ class EllipseDrawableShape(DrawableShape):
         Move the shape. Only really impacts the position of the 'click_area' hot spot.
 
         :param point: The new position to move it to.
+
         """
         self.containing_rect.x = point[0]
         self.containing_rect.y = point[1]
@@ -137,6 +142,7 @@ class EllipseDrawableShape(DrawableShape):
         Redraws the shape's surface for a given UI state.
 
         :param state_str: The ID string of the state to rebuild.
+
         """
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
@@ -254,7 +260,9 @@ class EllipseDrawableShape(DrawableShape):
         :param overlap: The amount of overlap between this surface and the one below.
         :param aa_amount: The amount of Anti Aliasing to use for this shape.
         :param clear: Whether we should clear our surface.
+
         :return: The new shape surface.
+
         """
 
         # For the visible AA shape surface we only want to blend in the alpha channel

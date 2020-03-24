@@ -13,11 +13,11 @@ class UILabel(UIElement):
     rebuild and simple alternative to the text box element.
 
     :param relative_rect: The rectangle that contains and positions the label relative to it's
-    container.
+                          container.
     :param text: The text to display in the label.
     :param manager: The UIManager that manages this label.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -61,6 +61,7 @@ class UILabel(UIElement):
         Changes the string displayed by the label element. Labels do not support HTML styling.
 
         :param text: the text to set the label to.
+
         """
         if text != self.text:
             self.text = text
@@ -219,6 +220,7 @@ class UILabel(UIElement):
         Method to directly set the dimensions of a label.
 
         :param dimensions: The new dimensions to set.
+
         """
         super().set_dimensions(dimensions)
 

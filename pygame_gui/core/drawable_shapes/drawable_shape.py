@@ -12,6 +12,7 @@ class DrawableShapeState:
     Represents a single state of a drawable shape.
 
     :param state_id: The ID/name of this state.
+
     """
     def __init__(self, state_id: str):
 
@@ -27,6 +28,7 @@ class DrawableShapeState:
         if we are in a transition.
 
         :return: A pygame Surface for this state.
+
         """
         if self.transition is not None:
             return self.transition.produce_blended_result()
@@ -38,6 +40,7 @@ class DrawableShapeState:
         Updates any transitions this state is in
 
         :param time_delta: The time passed between frames, measured in seconds.
+
         """
         if self.transition is not None:
             self.transition.update(time_delta)
@@ -55,6 +58,7 @@ class DrawableStateTransition:
     :param target_state_id: The state to transition to.
     :param duration: The length of the transition
     :param progress: The initial progress along the transition.
+
     """
     def __init__(self, states: Dict[str, DrawableShapeState],
                  start_state_id: str, target_state_id: str,
@@ -74,6 +78,7 @@ class DrawableStateTransition:
         Updates the timer for this transition.
 
         :param time_delta: The time passed between frames, measured in seconds.
+
         """
         self.remaining_time -= time_delta
         if self.remaining_time > 0.0 and self.duration > 0.0:
@@ -88,6 +93,7 @@ class DrawableStateTransition:
         progression of the blend is dictated by the progress of time through the transition.
 
         :return: The blended surface.
+
         """
         result = self.states[self.start_stat_id].surface.copy()
         blended_target = self.states[self.target_state_id].surface.copy()
@@ -114,12 +120,13 @@ class DrawableShape:
     rectangles as their visual shape while having the same non-shape related functionality.
 
     :param containing_rect: The rectangle which this shape is entirely contained within (including
-    shadows, borders etc)
+                            shadows, borders etc)
     :param theming_parameters: A dictionary of user supplied data that alters the appearance of
-    the shape.
+                               the shape.
     :param states: Names for the different states the shape can be in, each may have different
-    sets of colours & images.
+                   sets of colours & images.
     :param manager: The UI manager for this UI.
+
     """
     def __init__(self,
                  containing_rect: pygame.Rect,
@@ -179,6 +186,7 @@ class DrawableShape:
         creates a transition blend from the previous state to the newly active one.
 
         :param state_id: the ID of the new state to make active.
+
         """
         if state_id in self.states and self.active_state.state_id != state_id:
             self.previous_state = self.active_state
@@ -214,6 +222,7 @@ class DrawableShape:
         Updates the drawable shape to process rebuilds and update blends between states.
 
         :param time_delta: amount fo time passed between now and the previous frame in seconds.
+
         """
         if len(self.states_to_redraw_queue) > 0:
             state = self.states_to_redraw_queue.popleft()
@@ -293,6 +302,7 @@ class DrawableShape:
         Get the main surface from the active state.
 
         :return: The surface asked for, or the best available substitute.
+
         """
         if self.active_state is not None:
             return self.active_state.get_surface()
@@ -304,7 +314,9 @@ class DrawableShape:
         Get the main surface from a specific state.
 
         :param state_name: The state we are trying to get the surface from.
+
         :return: The surface asked for, or the best available substitute.
+
         """
         if state_name in self.states and self.states[state_name].surface is not None:
             return self.states[state_name].surface
@@ -318,6 +330,7 @@ class DrawableShape:
         Gets the surface of the active state and resets the state's 'has_fresh_surface' variable.
 
         :return: The active state's main pygame.Surface.
+
         """
         self.active_state.has_fresh_surface = False
         return self.get_active_state_surface()
@@ -328,7 +341,8 @@ class DrawableShape:
         when we have to delay it for whatever reason.
 
         :return: True if there is a freshly built surface waiting, False if the shape has not
-        changed.
+                 changed.
+
         """
         return self.active_state.has_fresh_surface
 
@@ -343,6 +357,7 @@ class DrawableShape:
         :param colour: The colour to apply.
         :param shape_surface: The shape surface to apply the colour to.
         :param rect: A rectangle to apply the colour inside of.
+
         """
         if rect is not None:
             colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
@@ -367,7 +382,8 @@ class DrawableShape:
         :param image_state_str: image ID of the state we are going to be adding images and text to.
         :param state_str: normal ID of the state we are going to be adding images and text to.
         :param text_colour_state_str: text ID of the state we are going to be adding images and
-        text to.
+                                      text to.
+
         """
         # Draw any themed images
         if image_state_str in self.theming and self.theming[image_state_str] is not None:
@@ -413,6 +429,7 @@ class DrawableShape:
         This method is declared for derived classes to implement but has no default implementation.
 
         :param state_str: The ID/name of the state to redraw.
+
         """
 
     def clean_up_temp_shapes(self):
@@ -427,6 +444,7 @@ class DrawableShape:
         This method is declared for derived classes to implement but has no default implementation.
 
         :param point: A point to collide with this shape.
+
         """
 
     def set_position(self, point: Union[pygame.math.Vector2,
@@ -436,6 +454,7 @@ class DrawableShape:
         This method is declared for derived classes to implement but has no default implementation.
 
         :param point: A point to set this shapes position to.
+
         """
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
@@ -445,4 +464,5 @@ class DrawableShape:
         This method is declared for derived classes to implement but has no default implementation.
 
         :param dimensions: The new dimensions for our shape.
+
         """

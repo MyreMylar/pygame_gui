@@ -20,20 +20,21 @@ class UIButton(UIElement):
     very flexible interactive element.
 
     :param relative_rect: A rectangle describing the position (relative to its container) and
-    dimensions.
+                          dimensions.
     :param text: Text for the button.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
-    appear on hover.
+                          appear on hover.
     :param starting_height: The height in layers above it's container that this element will be
-    placed.
+                            placed.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param allow_double_clicks: Enables double clicking on buttons which will generate a
-    unique event.
+                                unique event.
+
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
@@ -116,6 +117,7 @@ class UIButton(UIElement):
         Grabs images for this button from the UI theme if any are set.
 
         :return: True if any of the images have changed since last time they were set.
+
         """
 
         changed = False
@@ -164,7 +166,9 @@ class UIButton(UIElement):
 
         :param hover_x: horizontal pixel co-ordinate to test.
         :param hover_y: vertical pixel co-ordinate to test
-        :return bool: Returns True if we are hovering.
+
+        :return: Returns True if we are hovering.
+
         """
         if self.held:
             return self.in_hold_range((hover_x, hover_y))
@@ -177,7 +181,8 @@ class UIButton(UIElement):
         Tests whether we can trigger the hover state for this button, other states take
         priority over it.
 
-        :return bool: True if we are able to hover this button.
+        :return: True if we are able to hover this button.
+
         """
         return not self.is_selected and self.is_enabled and not self.held
 
@@ -197,6 +202,7 @@ class UIButton(UIElement):
 
         :param time_delta: Time in seconds between calls to update.
         :param mouse_pos: The current position of the mouse.
+
         """
         if (self.tool_tip is None and self.tool_tip_text is not None and
                 self.hover_time > self.tool_tip_delay):
@@ -224,6 +230,7 @@ class UIButton(UIElement):
         Sets the pressed state for an update cycle if we've pressed this button recently.
 
         :param time_delta: the time in seconds between one call to update and the next.
+
         """
         super().update(time_delta)
         if self.alive():
@@ -245,8 +252,9 @@ class UIButton(UIElement):
 
         :param event: The event to process.
 
-        :return bool: Return True if we want to consume this event so it is not passed on to the
-        rest of the UI.
+        :return: Return True if we want to consume this event so it is not passed on to the
+                 rest of the UI.
+
         """
         consumed_event = False
         if self.is_enabled:
@@ -296,6 +304,7 @@ class UIButton(UIElement):
         A direct way to check if this button has been pressed in the last update cycle.
 
         :return: True if the button has been pressed.
+
         """
         return self.pressed
 
@@ -348,6 +357,7 @@ class UIButton(UIElement):
         Sets the text on the button. The button will rebuild.
 
         :param text: The new text to set.
+
         """
         if text != self.text:
             self.text = text
@@ -365,6 +375,7 @@ class UIButton(UIElement):
         values we specify here.
 
         :param xy_range: The x and y values used to create our larger 'holding' rectangle.
+
         """
         self.hold_range = xy_range
 
@@ -376,7 +387,9 @@ class UIButton(UIElement):
         hold of our button when moving the mouse. Makes it easier to use scrollbars.
 
         :param position: The position we are testing.
+
         :return bool: Returns True if our position is inside the hold range.
+
         """
         if self.drawable_shape.collide_point(position):
             return True
@@ -506,6 +519,7 @@ class UIButton(UIElement):
         Checks for any changes in the theming data related to text alignment.
 
         :return: True if changes found.
+
         """
         has_any_changed = False
         text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,

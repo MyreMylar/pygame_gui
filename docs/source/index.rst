@@ -73,6 +73,7 @@ Table of contents
    :maxdepth: 2
 
    quick_start
+   layout_guide
    theme_guide
    events
    text_effects

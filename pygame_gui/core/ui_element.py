@@ -12,17 +12,18 @@ class UIElement(pygame.sprite.Sprite):
     classes should derive from this class. Inherits from pygame.sprite.Sprite.
 
     :param relative_rect: A rectangle shape of the UI element, the position is relative to the
-    element's container.
+                          element's container.
     :param manager: The UIManager that manages this UIElement.
     :param container: A container that this element is contained in.
     :param starting_height: Used to record how many layers above it's container this element
-    should be. Normally 1.
+                            should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
     :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this
-    UIElement is part of.
+                       UIElement is part of.
     :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this
-    UIElement is part of.
+                        UIElement is part of.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -109,12 +110,13 @@ class UIElement(pygame.sprite.Sprite):
         system to identify what theming parameters to apply to which element.
 
         :param container: The container for this element. If parent is None the container will be
-        used as the parent.
+                          used as the parent.
         :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
-        colours from parents.
+                               colours from parents.
         :param object_id: An optional ID to help distinguish this element from other elements of
-        the same class.
+                          the same class.
         :param element_id: A string ID representing this element's class.
+
         """
         if parent_element is None and container is not None:
             id_parent = container
@@ -306,6 +308,7 @@ class UIElement(pygame.sprite.Sprite):
         Method to directly set the relative rect position of an element.
 
         :param position: The new position to set.
+
         """
         self.relative_rect.x = int(position[0])
         self.relative_rect.y = int(position[1])
@@ -324,6 +327,7 @@ class UIElement(pygame.sprite.Sprite):
         Method to directly set the absolute screen rect position of an element.
 
         :param position: The new position to set.
+
         """
         self.rect.x = int(position[0])
         self.rect.y = int(position[1])
@@ -344,6 +348,7 @@ class UIElement(pygame.sprite.Sprite):
         may make a mess of them.
 
         :param dimensions: The new dimensions to set.
+
         """
         self.relative_rect.width = int(dimensions[0])
         self.relative_rect.height = int(dimensions[1])
@@ -368,6 +373,7 @@ class UIElement(pygame.sprite.Sprite):
         Updates this element's drawable shape, if it has one.
 
         :param time_delta: The time passed between frames, measured in seconds.
+
         """
         if self.alive() and self.drawable_shape is not None:
             self.drawable_shape.update(time_delta)
@@ -379,6 +385,7 @@ class UIElement(pygame.sprite.Sprite):
         Changes the layer this element is on.
 
         :param new_layer: The layer to change this element to.
+
         """
         if new_layer != self._layer:
             self.ui_group.change_layer(self, new_layer)
@@ -397,12 +404,12 @@ class UIElement(pygame.sprite.Sprite):
         by the mouse.
 
         :param time_delta: A float, the time in seconds between the last call to this function
-        and now (roughly).
+                           and now (roughly).
         :param hovered_higher_element: A boolean, representing whether we have already hovered a
-        'higher' element.
+                                       'higher' element.
 
         :return bool: A boolean that is true if we have hovered a UI element, either just now or
-        before this method.
+                      before this method.
         """
         if self.alive() and self.can_hover():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
@@ -448,8 +455,9 @@ class UIElement(pygame.sprite.Sprite):
         A stub method to override. Called when this UI element is currently hovered.
 
         :param time_delta: A float, the time in seconds between the last call to this function
-        and now (roughly).
+                           and now (roughly).
         :param mouse_pos: The current position of the mouse as 2D Vector.
+
         """
 
     def can_hover(self) -> bool:
@@ -467,7 +475,9 @@ class UIElement(pygame.sprite.Sprite):
 
         :param hover_x: The x (horizontal) position of the point.
         :param hover_y: The y (vertical) position of the point.
-        :return bool: Returns True if we are hovering this element.
+
+        :return: Returns True if we are hovering this element.
+
         """
         if self.drawable_shape is not None:
             return (self.drawable_shape.collide_point((hover_x, hover_y)) and
@@ -483,7 +493,8 @@ class UIElement(pygame.sprite.Sprite):
 
         :param event: The event to process.
 
-        :return bool: Should return True if this element makes use of this event.
+        :return: Should return True if this element makes use of this event.
+
         """
         return False
 
@@ -522,6 +533,7 @@ class UIElement(pygame.sprite.Sprite):
         a tiny font.
 
         :param activate_mode: True or False to enable or disable the mode.
+
         """
         if activate_mode:
             font_dict = self.ui_manager.get_theme().get_font_dictionary()
@@ -563,6 +575,7 @@ class UIElement(pygame.sprite.Sprite):
         Set the current image clip based on the container.
 
         :param clip_rect: The clipping rectangle.
+
         """
         self.set_image_clip(clip_rect)
 
@@ -579,6 +592,7 @@ class UIElement(pygame.sprite.Sprite):
         actually be displayed when this element is blitted to the screen.
 
         :param rect: A clipping rectangle, or None to clear the clip.
+
         """
         if rect is not None and self._pre_clipped_image is None and self.image is not None:
             self._pre_clipped_image = self.image.copy()
@@ -599,6 +613,7 @@ class UIElement(pygame.sprite.Sprite):
         Obtain the current image clipping rect.
 
         :return: The current clipping rect. May be None.
+
         """
         return self._image_clip
 
@@ -608,6 +623,7 @@ class UIElement(pygame.sprite.Sprite):
         clip on the image at the same time.
 
         :param new_image: The new image to set.
+
         """
         if self.get_image_clipping_rect() is not None and new_image is not None:
             self._pre_clipped_image = new_image
@@ -632,6 +648,7 @@ class UIElement(pygame.sprite.Sprite):
         return the top of this element.
 
         :return int: An integer representing the current highest layer being used by this element.
+
         """
         return self._layer + self.layer_thickness
 

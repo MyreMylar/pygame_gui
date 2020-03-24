@@ -25,11 +25,12 @@ class UIFileDialog(UIWindow):
     TODO: This works fine for loading files, but can it be adjusted to allow for saving files?
 
     :param rect: The size and position of the file dialog window. Includes the size of shadow,
-    border and title bar.
+                 border and title bar.
     :param manager: The manager for the whole of the UI.
     :param window_title: The title for the window, defaults to 'File Dialog'
     :param initial_file_path: The initial path to open the file dialog at.
     :param object_id: The object ID for the window, used for theming - defaults to '#file_dialog'
+
     """
 
     def __init__(self,
@@ -183,6 +184,7 @@ class UIFileDialog(UIWindow):
         Checks the selected path is valid.
 
         :return: True if valid.
+
         """
         if self.selected_file_path is None:
             return False
@@ -194,8 +196,10 @@ class UIFileDialog(UIWindow):
         file dialog.
 
         :param event: The pygame Event to process.
+
         :return: True if event is consumed by this element and should not be passed on to other
-        elements.
+                 elements.
+
         """
         handled = super().process_event(event)
 
@@ -212,6 +216,7 @@ class UIFileDialog(UIWindow):
         Handle events coming from text entry element which displays the current file path.
 
         :param event: event to check.
+
         """
         if (event.type == pygame.USEREVENT and event.user_type == UI_TEXT_ENTRY_FINISHED
                 and event.ui_element == self.file_path_text_line):
@@ -231,6 +236,7 @@ class UIFileDialog(UIWindow):
         Handle events coming from the file/folder list.
 
         :param event: event to check.
+
         """
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_SELECTION_LIST_NEW_SELECTION and
@@ -262,6 +268,7 @@ class UIFileDialog(UIWindow):
         Handle any events coming from the confirmation dialog if that's up.
 
         :param event: event to check.
+
         """
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_CONFIRMATION_DIALOG_CONFIRMED and
@@ -281,6 +288,7 @@ class UIFileDialog(UIWindow):
         Handle what happens when you press one of the tiny file/folder operation buttons.
 
         :param event: event to check.
+
         """
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.delete_button):
@@ -328,6 +336,7 @@ class UIFileDialog(UIWindow):
         Handle what happens when you press OK and Cancel.
 
         :param event: event to check.
+
         """
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.cancel_button):

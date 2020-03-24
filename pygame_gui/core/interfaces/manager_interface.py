@@ -60,7 +60,9 @@ class IUIManagerInterface:
         :param shadow_width: The width of the shadowed edge.
         :param shape: The shape of the requested shadow.
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
+
         :return: A shadow as a pygame Surface.
+
         """
 
     def set_window_resolution(self, window_resolution: Tuple[int, int]):
@@ -110,12 +112,12 @@ class IUIManagerInterface:
         Add file paths for custom fonts you want to use in the UI.
 
         :param font_name: The name of the font that will be used to reference it elsewhere in
-        the GUI.
+                          the GUI.
         :param regular_path: The path of the font file for this font with no styles applied.
         :param bold_path: The path of the font file for this font with just bold style applied.
         :param italic_path: The path of the font file for this font with just italic style applied.
         :param bold_italic_path: The path of the font file for this font with bold & italic style
-        applied.
+                                 applied.
 
         """
 
@@ -198,6 +200,7 @@ class IUIManagerInterface:
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
         :return: An empty, and therefore invisible pygame.Surface
+
         """
 
     def create_tool_tip(self,
@@ -212,4 +215,5 @@ class IUIManagerInterface:
         :param hover_distance: The distance we should hover away from our target position.
 
         :return: A tool tip placed somewhere on the screen.
+
         """

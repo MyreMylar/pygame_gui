@@ -28,6 +28,7 @@ class UITooltip(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
     def __init__(self,
                  html_text: str,
@@ -102,7 +103,9 @@ class UITooltip(UIElement):
         set the position of the tool tip to our valid position.
 
         :param position: A 2D vector representing the position of the target this tool tip is for.
-        :return bool: returns True if we find a valid (visible) position and False if we do not.
+
+        :return: returns True if we find a valid (visible) position and False if we do not.
+
         """
 
         window_rect = self.ui_manager.get_root_container().rect
@@ -169,6 +172,7 @@ class UITooltip(UIElement):
         the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
         self.text_block.set_position(position)
@@ -181,6 +185,7 @@ class UITooltip(UIElement):
         the same time.
 
         :param position: The relative screen position to set.
+
         """
         super().set_relative_position(position)
         self.text_block.set_relative_position(position)
@@ -192,6 +197,7 @@ class UITooltip(UIElement):
         Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
 
         :param dimensions: The new dimensions to set
+
         """
         self.rect_width = dimensions[0]
 

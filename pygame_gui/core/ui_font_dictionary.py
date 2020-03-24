@@ -78,6 +78,7 @@ class UIFontDictionary:
 
         :param default_font_file_path: path to the font.
         :param module_root_path: root path to the module.
+
         """
         # Only use the 'stringified' data if we can't find the actual default font file
         # This is need for a working PyInstaller build
@@ -122,7 +123,9 @@ class UIFontDictionary:
         :param font_name: The name of the font to find.
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
+
         :return pygame.font.Font: Returns either the font we asked for, or the default font.
+
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
 
@@ -162,7 +165,9 @@ class UIFontDictionary:
         :param font_name: The name of the font.
         :param bold: Whether the font is bold styled or not.
         :param italic: Whether the font is italic styled or not.
+
         :return str: The finished font id.
+
         """
         if font_size <= 0:
             font_size = self.default_font_size
@@ -188,6 +193,7 @@ class UIFontDictionary:
         :param font_name: The name of the font to load.
         :param bold: Whether the font is bold styled or not.
         :param italic: Whether the font is italic styled or not.
+
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic)
         if font_id in self.loaded_fonts:    # font already loaded
@@ -240,6 +246,7 @@ class UIFontDictionary:
         :param font_id: id for the font in the loaded fonts dictionary.
         :param font_size: pygame font size.
         :param font_style: style dictionary (italic, bold, both or neither)
+
         """
         try:
             if isinstance(font_path, bytes):
@@ -263,6 +270,7 @@ class UIFontDictionary:
         :param bold_path: The path to the font's file with a bold style.
         :param italic_path: The path to the font's file with an italic style.
         :param bold_italic_path: The path to the font's file with a bold and an italic style.
+
         """
         if font_name not in self.known_font_paths:
             if bold_path is None:
@@ -286,7 +294,7 @@ class UIFontDictionary:
         explored all the code paths in a project that may use fonts.
         """
         unused_font_ids = [key for key in self.loaded_fonts if key not in self.used_font_ids]
-        if len(unused_font_ids) > 0:
+        if unused_font_ids:
             print('Unused font ids:')
             for font_id in unused_font_ids:
                 point_size = int(font_id.split('_')[-1])
@@ -297,8 +305,10 @@ class UIFontDictionary:
         """
         Takes in a HTML style font size and converts it into a point font size.
 
-        :param html_size:
+        :param html_size: Size in HTML style.
+
         :return int: A 'point' font size we can use with pygame.font
+
         """
         if html_size in UIFontDictionary._html_font_sizes:
             return UIFontDictionary._html_font_sizes[html_size]
@@ -310,6 +320,8 @@ class UIFontDictionary:
         Check if a font is already preloaded or not.
 
         :param font_id: The ID of the font to check for
+
         :return: True or False.
+
         """
         return font_id in self.loaded_fonts

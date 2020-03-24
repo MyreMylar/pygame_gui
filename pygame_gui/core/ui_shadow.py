@@ -165,6 +165,7 @@ class ShadowGenerator:
         :param height: The height of the base shadow to create.
         :param shadow_width_param: The width of the shadowed edge.
         :param corner_radius_param: The radius of the rectangular shadow's corners.
+
         """
 
         if width < corner_radius_param or height < corner_radius_param:
@@ -220,6 +221,7 @@ class ShadowGenerator:
         :param height: The height of the shadow to create.
         :param shadow_width_param: The width of the shadowed edge.
         :param aa_amount: The amount of anti-aliasing to use, defaults to 4.
+
         """
         shadow_surface = pygame.Surface((width * aa_amount, height * aa_amount),
                                         flags=pygame.SRCALPHA, depth=32)
@@ -258,14 +260,14 @@ class ShadowGenerator:
         This function searches through our dictionary of created shadows, grabs the closest one
         to the size we request and then scales that shadow to the exact size we need.
 
-
-
         :param size: The size of the element we are finding a shadow for.
         :param shadow_width: The width of the shadow to find.
         :param shape: The shape of the shadow to find.
         :param corner_radius: The radius of the corners if this is a rectangular shadow.
+
         :return: The shadow surface we asked for scaled to the size we requested, or None
-        if no shadows exist.
+                 if no shadows exist.
+
         """
         lowest_diff = 1000000000000
         closest_key = None

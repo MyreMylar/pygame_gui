@@ -47,14 +47,15 @@ class UITextBox(UIElement):
     :param relative_rect: The 'visible area' rectangle, positioned relative to it's container.
     :param manager: The UIManager that manages this element.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
-    match the text within.
+                           match the text within.
     :param layer_starting_height: Sets the height, above it's container, to start placing the text
-    box at.
+                                  box at.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
 
     def __init__(self,
@@ -270,6 +271,7 @@ class UITextBox(UIElement):
         over any text links (if there are any).
 
         :param time_delta: The time in seconds between calls to update. Useful for timing things.
+
         """
         super().update(time_delta)
         if not self.alive():
@@ -357,6 +359,7 @@ class UITextBox(UIElement):
         the same time.
 
         :param position: The relative screen position to set.
+
         """
         super().set_relative_position(position)
 
@@ -375,6 +378,7 @@ class UITextBox(UIElement):
         at the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
 
@@ -392,6 +396,7 @@ class UITextBox(UIElement):
         Method to directly set the dimensions of a text box.
 
         :param dimensions: The new dimensions to set.
+
         """
         self.relative_rect.width = int(dimensions[0])
         self.relative_rect.height = int(dimensions[1])
@@ -519,7 +524,9 @@ class UITextBox(UIElement):
         Deals with input events. In this case we just handle clicks on any links in the text.
 
         :param event: A pygame event to check for a reaction to.
-        :return bool: Returns True if we made use of this event.
+
+        :return: Returns True if we consumed this event.
+
         """
         consumed_event = False
         should_redraw_from_chunks = False
@@ -606,7 +613,8 @@ class UITextBox(UIElement):
         - 'fade_out' - The text will fade out to the background colour (only supported on Pygame 2)
 
         :param effect_name: The name fo the t to set. If set to None instead it will cancel any
-        active effect.
+                            active effect.
+
         """
         if effect_name is None:
             self.active_text_effect = None
@@ -687,6 +695,7 @@ class UITextBox(UIElement):
         Checks for any changes in hyper link related styling in the theme data.
 
         :return: True if changes detected.
+
         """
         has_any_changed = False
         # link styles

@@ -1,6 +1,14 @@
 pygame\_gui.core package
 ========================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   pygame_gui.core.drawable_shapes
+   pygame_gui.core.interfaces
+
 Submodules
 ----------
 
@@ -8,14 +16,6 @@ pygame\_gui.core.colour\_gradient module
 ----------------------------------------
 
 .. automodule:: pygame_gui.core.colour_gradient
-   :members:
-   :no-undoc-members:
-   :show-inheritance:
-
-pygame\_gui.core.container\_interface module
---------------------------------------------
-
-.. automodule:: pygame_gui.core.container_interface
    :members:
    :no-undoc-members:
    :show-inheritance:
@@ -32,14 +32,6 @@ pygame\_gui.core.ui\_appearance\_theme module
 ---------------------------------------------
 
 .. automodule:: pygame_gui.core.ui_appearance_theme
-   :members:
-   :no-undoc-members:
-   :show-inheritance:
-
-pygame\_gui.core.ui\_container module
--------------------------------------
-
-.. automodule:: pygame_gui.core.ui_container
    :members:
    :no-undoc-members:
    :show-inheritance:

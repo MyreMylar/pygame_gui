@@ -24,20 +24,21 @@ class UIPanel(UIElement, IContainerLikeInterface):
     we can ensure that all elements added to the panel are always above the fray.
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout
-    guide for details.
+                          guide for details.
     :param starting_layer_height: How many layers above its container to place this panel on.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
-    between elements.
+                    between elements.
     :param margins: Controls the distance between the edge of the panel and where it's
-    container should begin.
+                    container should begin.
     :param container: The container this panel is inside of distinct from this panel's own
-    container.
+                      container.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in
-    theming and events.
+                           theming and events.
     :param object_id: An identifier that can be used to help distinguish this particular panel
-    from others.
+                      from others.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
-    Defaults to the top left.
+                    Defaults to the top left.
+
     """
     def __init__(self,
                  relative_rect: Rect,
@@ -99,6 +100,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         accurate and to handle window resizing.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
+
         """
         super().update(time_delta)
         if self.get_container().layer_thickness != self.layer_thickness:
@@ -110,7 +112,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Currently just blocks mouse click down events from passing through the panel.
 
         :param event: The event to process.
-        :return bool: Should return True if this element makes use of this event.
+
+        :return: Should return True if this element consumes this event.
+
         """
         consumed_event = False
         if (self is not None and
@@ -131,6 +135,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Returns the container that should contain all the UI elements in this panel.
 
         :return UIContainer: The panel's container.
+
         """
         return self.panel_container
 
@@ -148,7 +153,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Set the size of this panel and then re-sizes and shifts the contents of the panel container
         to fit the new size.
 
-        :param dimensions:
+        :param dimensions: The new dimensions to set.
+
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
         # different size to the window
@@ -169,6 +175,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Method to directly set the relative rect position of an element.
 
         :param position: The new position to set.
+
         """
         super().set_relative_position(position)
         container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
@@ -180,6 +187,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Method to directly set the absolute screen rect position of an element.
 
         :param position: The new position to set.
+
         """
         super().set_position(position)
         container_rel_pos = (self.relative_rect.x + self.container_margins['left'],

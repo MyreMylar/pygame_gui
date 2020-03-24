@@ -22,10 +22,11 @@ class UIHorizontalSlider(UIElement):
     :param value_range: The full range of values.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -214,6 +215,7 @@ class UIHorizontalSlider(UIElement):
         based on movement of the mouse if we are gripping the slider itself.
 
         :param time_delta: the time in seconds between calls to update.
+
         """
         super().update(time_delta)
 
@@ -281,6 +283,7 @@ class UIHorizontalSlider(UIElement):
         Gets the current value the slider is set to.
 
         :return: The current value recorded by the slider.
+
         """
         self.has_moved_recently = False
         self.has_been_moved_by_user_recently = False
@@ -292,6 +295,7 @@ class UIHorizontalSlider(UIElement):
         issue a warning if the value set is not in the value range.
 
         :param value: The value to set.
+
         """
         if min(self.value_range[0],
                self.value_range[1]) <= value <= max(self.value_range[0],
@@ -384,6 +388,7 @@ class UIHorizontalSlider(UIElement):
         at the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
 
@@ -401,6 +406,7 @@ class UIHorizontalSlider(UIElement):
         at the same time.
 
         :param position: The relative screen position to set.
+
         """
         super().set_relative_position(position)
 
@@ -417,6 +423,7 @@ class UIHorizontalSlider(UIElement):
         Method to directly set the dimensions of an element.
 
         :param dimensions: The new dimensions to set.
+
         """
         super().set_dimensions(dimensions)
 

@@ -18,8 +18,9 @@ class RoundedRectangleShape(DrawableShape):
     :param containing_rect: The layout rectangle that surrounds and controls the size of this shape.
     :param theming_parameters: Various styling parameters that control the final look of the shape.
     :param states: The different UI states the shape can be in. Shapes have different surfaces for
-    each state.
+                   each state.
     :param manager: The UI manager.
+
     """
 
     def __init__(self, containing_rect: pygame.Rect,
@@ -165,6 +166,7 @@ class RoundedRectangleShape(DrawableShape):
         :param point: The point to test collision with.
 
         :return: True, if the point is inside the shape.
+
         """
         collided = False
         if self.click_area_shape.collidepoint(point[0], point[1]):
@@ -230,6 +232,7 @@ class RoundedRectangleShape(DrawableShape):
         Move the shape. Only really impacts the position of the 'click_area' hot spot.
 
         :param point: The new position to move it to.
+
         """
         self.containing_rect.x = point[0]
         self.containing_rect.y = point[1]
@@ -245,6 +248,7 @@ class RoundedRectangleShape(DrawableShape):
         frequently.
 
         :param dimensions: The new dimensions.
+
         """
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
@@ -288,6 +292,7 @@ class RoundedRectangleShape(DrawableShape):
         Redraws the shape's surface for a given UI state.
 
         :param state_str: The ID string of the state to rebuild.
+
         """
         text_colour_state_str = state_str + '_text'
         image_state_str = state_str + '_image'
@@ -394,6 +399,7 @@ class RoundedRectangleShape(DrawableShape):
 
         :param bg_col: the colour or gradient of the bar.
         :param shape_surface: the surface we are drawing on to.
+
         """
         filled_bar_width = int(self.background_rect.width *
                                self.theming['filled_bar_width_percentage'])
@@ -431,7 +437,9 @@ class RoundedRectangleShape(DrawableShape):
         :param corner_radius: The radius of the rounded corners.
         :param aa_amount: The amount of Anti Aliasing to use for this shape.
         :param clear: Whether we should clear our surface.
+
         :return: The new shape surface.
+
         """
 
         # lock the corner radius to a maximum size of half the smallest dimension and greater than 0
@@ -524,6 +532,7 @@ class RoundedRectangleShape(DrawableShape):
         :param large_shape_surface: The surface to draw onto, the shape fills the surface.
         :param clear_colour_string: The colour to clear the background to.
         :param corner_offset: Offsets the corners, used to help avoid overlaps that look bad.
+
         """
         pygame.draw.circle(large_shape_surface, pygame.Color('#FFFFFFFF'),
                            (large_corner_radius + corner_offset,

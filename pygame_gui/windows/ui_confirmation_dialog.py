@@ -17,13 +17,14 @@ class UIConfirmationDialog(UIWindow):
     :param rect: The size and position of the window, includes the menu bar across the top.
     :param manager: The UIManager that manages this UIElement.
     :param action_long_desc: Long-ish description of action. Can make use of HTML to
-    style the text.
+                             style the text.
     :param window_title: The title of the  window.
     :param action_short_name: Short, one or two word description of action for button.
     :param blocking: Whether this window should block all other mouse interactions with the GUI
-    until it is closed.
+                     until it is closed.
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to
-    '#confirmation_dialog'.
+                      '#confirmation_dialog'.
+
     """
 
     def __init__(self, rect: pygame.Rect,
@@ -88,8 +89,10 @@ class UIConfirmationDialog(UIWindow):
         (UI_CONFIRMATION_DIALOG_CONFIRMED) when the OK button is pressed, and also close the window.
 
         :param event: a pygame.Event.
+
         :return: Return True if we 'consumed' this event and don't want to pass it on to the rest
-        of the UI.
+                 of the UI.
+
         """
         consumed_event = super().process_event(event)
 

@@ -16,10 +16,11 @@ class UIScreenSpaceHealthBar(UIElement):
     :param manager: The UIManager that manages this element.
     :param sprite_to_monitor: The sprite we are displaying the health of.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -89,6 +90,7 @@ class UIScreenSpaceHealthBar(UIElement):
         attributes.
 
         :param sprite_to_monitor:
+
         """
         if not hasattr(sprite_to_monitor, 'health_capacity'):
             raise AttributeError('Sprite does not have health_capacity attribute')
@@ -159,6 +161,7 @@ class UIScreenSpaceHealthBar(UIElement):
         sprite we are monitoring. Only triggers a rebuild if the health values have changed.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
+
         """
         super().update(time_delta)
         if (self.alive() and self.sprite_to_monitor is not None and

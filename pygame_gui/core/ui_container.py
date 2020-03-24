@@ -15,15 +15,16 @@ class UIContainer(UIElement, IContainerLikeInterface):
     system develops.
 
     :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is
-    inside of, if any.
+                          inside of, if any.
     :param manager: The UIManager that manages this UIElement.
     :param starting_height: The starting layer height for this element above it's container.
     :param is_window_root_container: True/False flag for whether this container is the root
-    container for a UI window.
+                                     container for a UI window.
     :param container: The UIContainer that this UIElement is contained within.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -65,6 +66,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         container.
 
         :return: This container.
+
         """
         return self
 
@@ -74,6 +76,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         this container.
 
         :param element: A UIElement to add to this container.
+
         """
         element.change_layer(self._layer + element.starting_height)
         self.elements.append(element)
@@ -84,6 +87,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         Remove a UIElement from this container.
 
         :param element: A UIElement to remove from this container.
+
         """
         if element in self.elements:
             self.elements.remove(element)
@@ -119,6 +123,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         front of any others when it is moved to the front of the window stack.
 
         :param new_layer: The layer to move our container to.
+
         """
         if new_layer != self._layer:
             super().change_layer(new_layer)
@@ -144,6 +149,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         setting relative positions.
 
         :param position: the new absolute position to set.
+
         """
         super().set_position(position)
         self.update_containing_rect_position()
@@ -155,6 +161,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         Set the position of this container, relative to the container it is within.
 
         :param position: the new relative position to set.
+
         """
         super().set_relative_position(position)
         self.update_containing_rect_position()
@@ -167,6 +174,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         accordingly.
 
         :param dimensions: the new dimensions.
+
         """
         super().set_dimensions(dimensions)
         self.update_containing_rect_position()
@@ -176,7 +184,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         Assuming we have correctly calculated the 'thickness' of this container, this method will
         return the 'highest' layer in the LayeredUpdates UI Group.
 
-        :return int: An integer representing the current highest layer being used by this container.
+        :return: An integer representing the current highest layer being used by this container.
         """
         return self._layer + self.layer_thickness
 
@@ -202,11 +210,13 @@ class UIContainer(UIElement, IContainerLikeInterface):
         by the mouse.
 
         :param time_delta: A float, the time in seconds between the last call to this function
-        and now (roughly).
+                           and now (roughly).
         :param hovered_higher_element: A boolean, representing whether we have already hovered a
-        'higher' element.
-        :return bool: A boolean that is true if we have hovered a UI element, either just now or
-        before this method.
+                                       'higher' element.
+
+        :return: A boolean that is true if we have hovered a UI element, either just now or
+                 before this method.
+
         """
         if self.alive():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()

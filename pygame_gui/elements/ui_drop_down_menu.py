@@ -30,6 +30,7 @@ class UIExpandedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
+
     """
 
     def __init__(self,
@@ -225,8 +226,9 @@ class UIExpandedDropDownState:
 
         :param event: The event to process.
 
-        :return bool: Return True if we want to consume this event so it is not passed on to the
-        rest of the UI.
+        :return: Return True if we want to consume this event so it is not passed on to the
+                 rest of the UI.
+
         """
         consumed_event = False
 
@@ -348,6 +350,7 @@ class UIClosedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
+
     """
 
     def __init__(self,
@@ -468,8 +471,8 @@ class UIClosedDropDownState:
 
         :param event: The event to process.
 
-        :return bool: Return True if we want to consume this event so it is not passed on to the
-        rest of the UI.
+        :return: Return True if we want to consume this event so it is not passed on to the
+                 rest of the UI.
         """
         consumed_event = False
 
@@ -547,18 +550,18 @@ class UIDropDownMenu(UIElement):
     The drop down is implemented through two states, one representing the 'closed' menu state
     and one for when it has been 'expanded'.
 
-
     :param options_list: The list of of options to choose from. They must be strings.
     :param starting_option: The starting option, selected when the menu is first created.
     :param relative_rect: The size and position of the element when not expanded.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root
-    window's container.
+                      window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param expansion_height_limit: Limit on the height that this will expand to, defaults to the
-    container bounds.
+                                   container bounds.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+
     """
 
     def __init__(self,
@@ -641,6 +644,7 @@ class UIDropDownMenu(UIElement):
         then passes the rest of the work onto whichever state is active.
 
         :param time_delta: The time in second between calls to update.
+
         """
         super().update(time_delta)
         if self.alive() and self.current_state.should_transition:
@@ -656,8 +660,9 @@ class UIDropDownMenu(UIElement):
 
         :param event: The event to process.
 
-        :return bool: Return True if we want to consume this event so it is not passed on to the
-         rest of the UI.
+        :return: Return True if we want to consume this event so it is not passed on to the
+                 rest of the UI.
+
         """
         consumed_event = False
         if self.is_enabled:
@@ -740,6 +745,7 @@ class UIDropDownMenu(UIElement):
         elements at the same time.
 
         :param position: The absolute screen position to set.
+
         """
         super().set_position(position)
         self.current_state.update_position()
@@ -752,6 +758,7 @@ class UIDropDownMenu(UIElement):
         elements at the same time.
 
         :param position: The relative screen position to set.
+
         """
         super().set_relative_position(position)
         self.current_state.update_position()
@@ -764,6 +771,7 @@ class UIDropDownMenu(UIElement):
         elements at the same time.
 
         :param dimensions: The new dimensions to set.
+
         """
         super().set_dimensions(dimensions)
         self.current_state.update_dimensions()
@@ -785,7 +793,8 @@ class UIDropDownMenu(UIElement):
         :param hover_x: The x (horizontal) position of the point.
         :param hover_y: The y (vertical) position of the point.
 
-        :return bool: Returns True if we are hovering this element.
+        :return: Returns True if we are hovering this element.
+
         """
         return (bool(self.rect.collidepoint(hover_x, hover_y)) and
                 bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))

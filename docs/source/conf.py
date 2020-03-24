@@ -23,6 +23,8 @@ sys.path.insert(0, os.path.abspath('../../pygame_gui/windows/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/elements/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/elements/text/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/core/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/core/drawable_shapes/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/core/interfaces/'))
 
 
 # -- Project information -----------------------------------------------------

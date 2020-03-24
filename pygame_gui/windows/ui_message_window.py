@@ -16,6 +16,7 @@ class UIMessageWindow(UIWindow):
     :param manager: The UIManager that manages this UIElement.
     :param window_title: The title of the  window.
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#message_window'.
+
     """
     def __init__(self, rect: pygame.Rect,
                  html_message: str,
@@ -76,8 +77,10 @@ class UIMessageWindow(UIWindow):
         when the dismiss button is pressed.
 
         :param event: a pygame.Event.
+
         :return: Return True if we 'consumed' this event and don't want to pass it on to the rest
-        of the UI.
+                 of the UI.
+
         """
         consumed_event = super().process_event(event)
 
