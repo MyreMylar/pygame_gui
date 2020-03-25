@@ -67,7 +67,7 @@ Here is an example of a screen space health bar block in a JSON theme file using
    :linenos:
 
     {
-        "label":
+        "screen_space_health_bar":
         {
             "colours":
             {
