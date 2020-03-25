@@ -498,7 +498,8 @@ class UIButton(UIElement):
             has_any_changed = True
 
         state_transitions = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids, 'state_transitions')
+                                                        self.element_ids,
+                                                        'state_transitions')
         if state_transitions is not None and isinstance(state_transitions, dict):
             for key in state_transitions:
                 states = key.split('_')
