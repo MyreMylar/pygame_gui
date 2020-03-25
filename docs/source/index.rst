@@ -77,6 +77,7 @@ Table of contents
    theme_guide
    events
    text_effects
+   change_list
    modules
 
 

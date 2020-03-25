@@ -29,6 +29,21 @@ Misc
  - "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "2".
  - "**list_item_height**" - The pixel height of a the items in the list. Defaults to "20".
 
+Sub-elements
+--------------
+
+The selection list may also contain a :class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` which you
+can reference with the block id 'window.vertical_scroll_bar'. You can also reference all of the buttons that are sub
+elements of the scroll bar with a theming block id of 'window.vertical_scroll_bar.button'.
+
+You can further reference the individual buttons of the scroll bar by adding their object IDs:
+
+ - 'window.vertical_scroll_bar.#top_button'
+ - 'window.vertical_scroll_bar.#bottom_button'
+ - 'window.vertical_scroll_bar.#sliding_button'
+
+There is more information on theming the vertical scroll bar at :ref:`theme-vertical-scroll-bar`.
+
 
 Example
 -------
@@ -45,7 +60,7 @@ Here is an example of a panel block in a JSON theme file, using the parameters d
             "colours":
             {
                 "dark_bg":"#21282D",
-                "border": "#999999"
+                "normal_border": "#999999"
             },
 
             "background_image":

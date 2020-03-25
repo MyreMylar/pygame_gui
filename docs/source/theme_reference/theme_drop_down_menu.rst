@@ -46,9 +46,17 @@ You can reference all of the buttons that are sub elements of the drop down menu
 
  - 'drop_down_menu.#expand_button'
  - 'drop_down_menu.#selected_option'
- - 'drop_down_menu.#option'
 
-There is more information on theming buttons at :ref:`theme-button`.
+There is a also a selection list that manages the options when the drop down is expanded, you can reference that with:
+
+ - 'drop_down_menu.#drop_down_options_list'
+
+Or the individual option buttons with:
+
+- 'drop_down_menu.#drop_down_options_list.button'
+
+
+There is more information on theming buttons at :ref:`theme-button` and selection lists at :ref: `theme-selection-list`.
 
 Example
 -------

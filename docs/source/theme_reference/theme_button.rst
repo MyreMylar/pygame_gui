@@ -172,11 +172,11 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "text_horiz_alignment": "left",
                 "text_vert_alignment": "top",
                 "text_horiz_alignment_padding": "10",
-                "text_vert_alignment_padding": "5"
+                "text_vert_alignment_padding": "5",
                 "state_transitions":
                 {
                     "normal_hovered": "0.5",
-                    "hovered_normal": "0.5
+                    "hovered_normal": "0.5"
                 }
             }
         }

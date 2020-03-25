@@ -55,7 +55,7 @@ Here is an example of a panel block in a JSON theme file, using the parameters d
             "colours":
             {
                 "dark_bg":"#21282D",
-                "border": "#999999"
+                "normal_border": "#999999"
             },
 
             "background_image":

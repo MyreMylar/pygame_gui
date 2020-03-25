@@ -50,7 +50,7 @@ Here is an example of a tool tip block in a JSON theme file, using parameters fr
             "colours":
             {
                 "dark_bg":"#505050",
-                "border": "#FFFFFF"
+                "normal_border": "#FFFFFF"
             },
 
             "misc":

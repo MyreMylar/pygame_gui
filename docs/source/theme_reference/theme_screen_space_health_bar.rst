@@ -73,7 +73,7 @@ Here is an example of a screen space health bar block in a JSON theme file using
             {
                 "normal_text": "#c5cbd8",
                 "text_shadow": "#777777",
-                "border": "#DDDDDD",
+                "normal_border": "#DDDDDD",
                 "filled_bar": "#f4251b,#A4150b,180",
                 "unfilled_bar": "#CCCCCC"
             },

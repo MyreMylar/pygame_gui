@@ -73,7 +73,7 @@ Here is an example of a text box block in a JSON theme file, using the parameter
             "colours":
             {
                 "dark_bg":"#21282D",
-                "border": "#999999",
+                "normal_border": "#999999",
                 "link_text": "#FF0000",
                 "link_hover": "#FFFF00",
                 "link_selected": "#FFFFFF"

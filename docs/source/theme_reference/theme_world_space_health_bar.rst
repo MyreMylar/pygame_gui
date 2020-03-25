@@ -43,7 +43,7 @@ Here is an example of a world space health bar block in a JSON theme file using 
         {
             "colours":
             {
-                "border": "#AAAAAA",
+                "normal_border": "#AAAAAA",
                 "filled_bar": "#f4251b",
                 "unfilled_bar": "#CCCCCC"
             },
