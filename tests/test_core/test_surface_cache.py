@@ -9,10 +9,10 @@ from pygame_gui.core.surface_cache import SurfaceCache
 
 
 class TestSurfaceCache:
-    def test_creation(self, _init_pygame):
+    def test_creation(self, _init_pygame, _display_surface_return_none):
         SurfaceCache()
 
-    def test_add_surface_to_cache(self, _init_pygame):
+    def test_add_surface_to_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_cache(pygame.Surface((64, 64)), 'doop')
 
@@ -38,13 +38,14 @@ class TestSurfaceCache:
         assert len(cache.cache_long_term_lookup) == 0
         assert not cache.low_on_space
 
-    def test_add_surface_to_long_term_cache_too_large(self, _init_pygame):
+    def test_add_surface_to_long_term_cache_too_large(self, _init_pygame,
+                                                      _display_surface_return_none ):
         cache = SurfaceCache()
         with pytest.warns(UserWarning, match="Unable to cache surfaces larger than"):
             cache.add_surface_to_long_term_cache([pygame.Surface((2048, 2048)), 1],
                                                  string_id="test_surface")
 
-    def test_add_surface_to_long_term_cache(self, _init_pygame):
+    def test_add_surface_to_long_term_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_long_term_cache([pygame.Surface((256, 256)), 1],
                                              string_id="test_surface_1")
