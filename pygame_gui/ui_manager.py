@@ -242,7 +242,10 @@ class UIManager(IUIManagerInterface):
 
                 if new_cursor != self._active_cursor:
                     self._active_cursor = new_cursor
-                    pygame.mouse.set_cursor(*self._active_cursor)
+                    try:
+                        pygame.mouse.set_cursor(*self._active_cursor)
+                    except pygame.error:
+                        pass
 
         if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
             self._active_cursor = self.active_user_cursor
