@@ -30,7 +30,7 @@ class UIMessageWindow(UIWindow):
                          object_id=object_id,
                          resizable=True)
 
-        minimum_dimensions = (250, 250)
+        minimum_dimensions = (250, 160)
         if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
             warn_string = ("Initial size: " + str(rect.size) +
                            " is less than minimum dimensions: " + str(minimum_dimensions))
