@@ -35,6 +35,8 @@ Misc
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the slider. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the slider. Defaults to 1.
+ - "**enable_arrow_buttons**" - Enables or disables the arrow buttons for the slider. "1" is enabled, "0" is disabled. Defaults to "1".
+ - "**sliding_button_width**" - Sets the width of the sliding button. Defaults to "20".
 
 Sub-elements
 --------------
@@ -72,6 +74,12 @@ Here is an example of a horizontal slider block in a JSON theme file, using the 
                 "hovered_text": "#FFFFFF",
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f"
+            },
+            "misc":
+            {
+               "shape": "rectangle",
+               "enable_arrow_buttons": "0",
+               "sliding_button_width": "15"
             }
         },
         "horizontal_slider.button":

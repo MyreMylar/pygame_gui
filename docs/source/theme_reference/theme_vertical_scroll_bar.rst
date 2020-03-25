@@ -35,6 +35,7 @@ Misc
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
+ - "**enable_arrow_buttons**" - Enables or disables the arrow buttons for the scroll bar. "1" is enabled, "0" is disabled. Defaults to "1".
 
 Sub-elements
 --------------
@@ -72,6 +73,12 @@ Here is an example of some vertical scroll bar blocks in a JSON theme file, usin
                 "hovered_text": "#FFFFFF",
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f"
+            },
+            "misc":
+            {
+               "shape": "rectangle",
+               "border_width": "0",
+               "enable_arrow_buttons": "0"
             }
         },
         "vertical_scroll_bar.button":
