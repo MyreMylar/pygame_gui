@@ -18,20 +18,20 @@ class TestUIManager:
     """
     Testing the UIManager class
     """
-    def test_creation(self, _init_pygame):
+    def test_creation(self, _init_pygame, _display_surface_return_none):
         """
         Just test whether we can create a UIManager without raising any exceptions.
         """
         UIManager((800, 600))
 
-    def test_get_theme(self, _init_pygame, default_ui_manager):
+    def test_get_theme(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
         assert(type(theme) == UIAppearanceTheme)
 
-    def test_get_sprite_group(self, _init_pygame, default_ui_manager):
+    def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
@@ -45,7 +45,7 @@ class TestUIManager:
         window_stack = default_ui_manager.get_window_stack()
         assert(type(window_stack) == UIWindowStack)
 
-    def test_get_shadow(self, _init_pygame, default_ui_manager):
+    def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Try to get a shadow of a requested size.
         Tests that the returned object is a surface of the correct size.
@@ -64,7 +64,7 @@ class TestUIManager:
         default_ui_manager.set_window_resolution((640, 480))
         assert default_ui_manager.window_resolution == (640, 480)
 
-    def test_clear_and_reset(self, _init_pygame, default_ui_manager):
+    def test_clear_and_reset(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Check clear and reset is restoring manager to initial state with no extra, lingering, elements.
         """
@@ -79,7 +79,7 @@ class TestUIManager:
 
         assert should_be_one_sprite == 1 and should_be_two_sprites == 2 and should_be_one_sprite_again == 1
 
-    def test_process_events(self, _init_pygame, default_ui_manager):
+    def test_process_events(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Fake a click button event on a button to check they are going through the ui event manager properly/
         """
@@ -181,7 +181,7 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.active_user_cursor
 
-    def test_draw_ui(self, _init_pygame):
+    def test_draw_ui(self, _init_pygame, _display_surface_return_none):
         """
         Test that drawing the UI works.
         Note: the pygame comparison function here seems a little unreliable. Would not be surprised if it's behaviour
@@ -217,7 +217,7 @@ class TestUIManager:
         result_pixel_array.close()
         pygame.display.quit()
 
-    def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager):
+    def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Combined test of setting font paths and pre-loading.
 
@@ -232,7 +232,7 @@ class TestUIManager:
                   relative_rect=pygame.Rect(100, 100, 200, 100),
                   manager=default_ui_manager)
 
-    def test_print_unused_fonts(self, _init_pygame, default_ui_manager, capsys):
+    def test_print_unused_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none, capsys):
         """
         Test unused font printing, by creating a font we don't use and seeing if the print out reports it.
 
@@ -247,7 +247,7 @@ class TestUIManager:
 
         assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
 
-    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager):
+    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Test if we correctly select the focused element and unselect it with these functions.
         """
@@ -257,7 +257,7 @@ class TestUIManager:
         default_ui_manager.unset_focus_element()
         assert was_selected_correctly is True and test_button.is_selected is False
 
-    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager):
+    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                               visible_percentage=0.5,
                                               manager=default_ui_manager)

@@ -10,14 +10,16 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 
 
 class TestUIContainer:
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
-    def test_get_container(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_get_container(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                           _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         assert container.get_container() == container
 
-    def test_add_element(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_add_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                         _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
@@ -26,7 +28,8 @@ class TestUIContainer:
         container.add_element(button)
         assert len(container.elements) == 1
 
-    def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                            _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
@@ -36,7 +39,9 @@ class TestUIContainer:
         container.remove_element(button)
         assert len(container.elements) == 0
 
-    def test_recalculate_container_layer_thickness(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_recalculate_container_layer_thickness(self, _init_pygame,
+                                                   default_ui_manager: IUIManagerInterface,
+                                                   _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                  manager=default_ui_manager,
@@ -46,7 +51,8 @@ class TestUIContainer:
 
         assert container.layer_thickness == 2
 
-    def test_change_container_layer(self, _init_pygame, default_ui_manager):
+    def test_change_container_layer(self, _init_pygame, default_ui_manager,
+                                    _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
@@ -54,14 +60,16 @@ class TestUIContainer:
         container.change_layer(2)
         assert container.get_top_layer() == 4
 
-    def test_get_top_layer(self, _init_pygame, default_ui_manager):
+    def test_get_top_layer(self, _init_pygame, default_ui_manager,
+                           _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                  manager=default_ui_manager, container=container)
         assert container.get_top_layer() == 3
 
-    def test_update_containing_rect_position(self, _init_pygame, default_ui_manager):
+    def test_update_containing_rect_position(self, _init_pygame, default_ui_manager,
+                                             _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         container_2 = UIContainer(pygame.Rect(50, 50, 50, 50), manager=default_ui_manager, container=container)
 
@@ -74,14 +82,16 @@ class TestUIContainer:
 
         assert button.rect.topleft == (70, 70)
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         container.set_position((50, 50))
 
         assert container.rect.topleft == (50, 50)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         container_2 = UIContainer(pygame.Rect(50, 50, 50, 50), manager=default_ui_manager, container=container)
 
@@ -89,14 +99,16 @@ class TestUIContainer:
 
         assert container_2.rect.topleft == (125, 125)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, default_ui_manager,
+                            _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
         container.set_dimensions((50, 50))
 
         assert container.rect.size == (50, 50)
 
-    def test_kill(self, _init_pygame, default_ui_manager):
+    def test_kill(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         container_2 = UIContainer(pygame.Rect(50, 50, 50, 50), manager=default_ui_manager, container=container)
 
@@ -109,7 +121,8 @@ class TestUIContainer:
         assert not container_2.alive()
         assert not container.alive()
 
-    def test_clear(self, _init_pygame, default_ui_manager):
+    def test_clear(self, _init_pygame, default_ui_manager,
+                   _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         container_2 = UIContainer(pygame.Rect(50, 50, 50, 50), manager=default_ui_manager, container=container)
 
@@ -122,7 +135,8 @@ class TestUIContainer:
         assert not container_2.alive()
         assert len(container.elements) == 0
 
-    def test_check_hover_when_not_able_to_hover(self, _init_pygame, default_ui_manager):
+    def test_check_hover_when_not_able_to_hover(self, _init_pygame, default_ui_manager,
+                                                _display_surface_return_none):
         container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         container.hovered = True
         assert container.check_hover(0.5, True) is True  # already hovering
