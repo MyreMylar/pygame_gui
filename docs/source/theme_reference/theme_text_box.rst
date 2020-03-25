@@ -37,9 +37,9 @@ Misc
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
- - "**border_width**" - The width of the border around the element in pixels. Defaults to "0".
- - "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "0".
- - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
+ - "**border_width**" - The width of the border around the element in pixels. Defaults to "1".
+ - "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "2".
+ - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "5,5".
  - "**link_normal_underline**" - Set to either "1" or "0". Whether link text is normally underlined. Defaults to "0" (False).
  - "**link_hover_underline**" - Set to either "1" or "0". Whether link text is underlined when they are hovered over with the mouse. Defaults to "1" (True).
 
