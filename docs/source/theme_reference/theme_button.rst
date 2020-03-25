@@ -99,6 +99,9 @@ Misc
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the button text, if this button has any text. Default is "center".
  - "**text_horiz_alignment_padding**" - If horizontal alignment is set to 'left' or 'right' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".
  - "**text_vert_alignment_padding**" - If vertical alignment is set to 'top' or 'bottom' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".
+ - "**state_transitions**" - A block of parameters that define any fade transitions between button states. Normally buttons states visually change instantly, if you setup values here the button will instead fade from one state to the next. Transition definitions are one way, if you want to go in both directions, use two parameters. Transition parameters have this format:
+
+   - "**startstate_targetstate**" - Can be set to any positive floating point value, representing the transition time in seconds.
 
 Example
 -------
@@ -170,6 +173,11 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "text_vert_alignment": "top",
                 "text_horiz_alignment_padding": "10",
                 "text_vert_alignment_padding": "5"
+                "state_transitions":
+                {
+                    "normal_hovered": "0.5",
+                    "hovered_normal": "0.5
+                }
             }
         }
     }
