@@ -253,25 +253,19 @@ class TestUIColourPickerDialog:
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
 
-        pixel_array_colour_image = pygame.PixelArray(colour_picker.current_colour_image.image)
+        pixel_colour = colour_picker.current_colour_image.image.get_at((int(colour_picker.current_colour_image.rect.width/2),
+                                                                        int(colour_picker.current_colour_image.rect.height/2)))
 
-        pixel_colour = pixel_array_colour_image[int(colour_picker.current_colour_image.rect.width/2),
-                                                int(colour_picker.current_colour_image.rect.height/2)]
-
-        assert pixel_colour == colour_picker.current_colour_image.image.map_rgb(pygame.Color(200, 220, 50, 255))
-
-        pixel_array_colour_image.close()
+        assert pixel_colour == pygame.Color(200, 220, 50, 255)
 
         colour_picker.current_colour = pygame.Color(50, 180, 150, 255)
-
         colour_picker.update_current_colour_image()
 
-        pixel_array_colour_image = pygame.PixelArray(colour_picker.current_colour_image.image)
+        pixel_colour = colour_picker.current_colour_image.image.get_at(
+            (int(colour_picker.current_colour_image.rect.width / 2),
+             int(colour_picker.current_colour_image.rect.height / 2)))
 
-        pixel_colour = pixel_array_colour_image[int(colour_picker.current_colour_image.rect.width / 2),
-                                                int(colour_picker.current_colour_image.rect.height / 2)]
-
-        assert pixel_colour == colour_picker.current_colour_image.image.map_rgb(pygame.Color(50, 180, 150, 255))
+        assert pixel_colour == pygame.Color(50, 180, 150, 255)
 
     def test_changed_rgb_update_hsv(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),

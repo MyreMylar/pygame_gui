@@ -517,7 +517,8 @@ class TestUIElement:
         assert element.hover_point(25, 25) is True
         assert element.hover_point(100, 100) is False
 
-    def test_set_visual_debug_mode(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_set_visual_debug_mode(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                   _display_surface_return_none):
 
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 8, 'style': 'regular'}])
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),

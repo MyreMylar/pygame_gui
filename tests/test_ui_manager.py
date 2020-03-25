@@ -11,7 +11,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
 
 class TestUIManager:
@@ -91,7 +91,8 @@ class TestUIManager:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (125, 115)}))
         assert test_button.held
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, default_ui_manager: UIManager,
+                    _display_surface_return_none):
         """
         Test update does store button shapes in the long term cache
         """

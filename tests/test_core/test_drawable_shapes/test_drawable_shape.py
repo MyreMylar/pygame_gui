@@ -11,7 +11,8 @@ class TestDrawableShapeState:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
         DrawableShapeState('normal')
 
-    def test_get_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_surface(self, _init_pygame, default_ui_manager: UIManager,
+                         _display_surface_return_none):
         normal_state = DrawableShapeState('normal')
         selected_state = DrawableShapeState('selected')
         states = {'normal': normal_state,

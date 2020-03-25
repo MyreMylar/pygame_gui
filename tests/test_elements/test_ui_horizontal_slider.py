@@ -176,7 +176,7 @@ class TestUIHorizontalSlider:
 
         assert slider.rect.topleft == (250, 130) and slider.left_button.held is True
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
                                     value_range=(0, 200), manager=default_ui_manager)
 

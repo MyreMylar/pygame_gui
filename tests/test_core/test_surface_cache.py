@@ -2,7 +2,8 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.surface_cache import SurfaceCache
 
@@ -18,7 +19,7 @@ class TestSurfaceCache:
         assert isinstance(cache.find_surface_in_cache('doop'), pygame.Surface)
         assert cache.find_surface_in_cache('doop').get_width() == 64
 
-    def test_update(self, _init_pygame):
+    def test_update(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_cache(pygame.Surface((64, 64)), 'doop')
 
@@ -68,7 +69,7 @@ class TestSurfaceCache:
 
         assert type(cache.find_surface_in_cache("test_surface_1")) == pygame.Surface
 
-    def test_find_surface_in_cache(self, _init_pygame):
+    def test_find_surface_in_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_cache(pygame.Surface((64, 64)), 'doop')
 
@@ -79,7 +80,7 @@ class TestSurfaceCache:
 
         assert cache.find_surface_in_cache('derp') is None
 
-    def test_remove_user_from_cache_item(self, _init_pygame):
+    def test_remove_user_from_cache_item(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_cache(pygame.Surface((64, 64)), 'doop')
         cache.update()
@@ -91,7 +92,8 @@ class TestSurfaceCache:
         assert cache.cache_long_term_lookup['doop']['current_uses'] == 0
         assert len(cache.consider_purging_list) == 1
 
-    def test_remove_user_and_request_clean_up_of_cached_item(self, _init_pygame):
+    def test_remove_user_and_request_clean_up_of_cached_item(self, _init_pygame,
+                                                             _display_surface_return_none):
         cache = SurfaceCache()
         cache.add_surface_to_cache(pygame.Surface((64, 64)), 'doop')
         cache.update()
