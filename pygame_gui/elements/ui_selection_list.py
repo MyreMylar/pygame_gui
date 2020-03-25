@@ -71,6 +71,8 @@ class UISelectionList(UIElement):
                          element_ids=new_element_ids,
                          anchors=anchors)
 
+        self._parent_element = parent_element
+        self.list_and_scroll_bar_container = None
         self.item_list_container = None
         self._raw_item_list = item_list
         self.item_list = []
@@ -91,21 +93,6 @@ class UISelectionList(UIElement):
         self.list_item_height = 20
         self.scroll_bar_width = 20
         self.current_scroll_bar_width = 0
-
-        self.list_and_scroll_bar_container = UIContainer(
-            pygame.Rect(self.relative_rect.left + self.shadow_width + self.border_width,
-                        self.relative_rect.top + self.shadow_width + self.border_width,
-                        self.relative_rect.width -
-                        (2 * self.shadow_width) -
-                        (2 * self.border_width),
-                        self.relative_rect.height -
-                        (2 * self.shadow_width) -
-                        (2 * self.border_width)),
-            manager=self.ui_manager,
-            starting_height=starting_height,
-            container=self.ui_container,
-            parent_element=parent_element,
-            object_id='#selection_list_container')
 
         self.rebuild_from_changed_theme_data()
 
@@ -486,5 +473,34 @@ class UISelectionList(UIElement):
                                                         ['normal'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+        if self.list_and_scroll_bar_container is None:
+            self.list_and_scroll_bar_container = UIContainer(
+                pygame.Rect(self.relative_rect.left + self.shadow_width + self.border_width,
+                            self.relative_rect.top + self.shadow_width + self.border_width,
+                            self.relative_rect.width -
+                            (2 * self.shadow_width) -
+                            (2 * self.border_width),
+                            self.relative_rect.height -
+                            (2 * self.shadow_width) -
+                            (2 * self.border_width)),
+                manager=self.ui_manager,
+                starting_height=self.starting_height,
+                container=self.ui_container,
+                parent_element=self._parent_element,
+                object_id='#selection_list_container')
+        else:
+            self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
+                                                              (2 * self.shadow_width) -
+                                                              (2 * self.border_width),
+                                                               self.relative_rect.height -
+                                                              (2 * self.shadow_width) -
+                                                              (2 * self.border_width)))
+            self.list_and_scroll_bar_container.set_relative_position((self.relative_rect.left +
+                                                                      self.shadow_width +
+                                                                      self.border_width,
+                                                                      self.relative_rect.top +
+                                                                      self.shadow_width +
+                                                                      self.border_width))
 
         self.set_item_list(self._raw_item_list)
