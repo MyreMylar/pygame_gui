@@ -6,7 +6,7 @@ import pygame
 import pytest
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows import UIFileDialog
@@ -14,11 +14,13 @@ from pygame_gui.windows import UIFileDialog
 
 class TestUIUIFileDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
         UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                      manager=default_ui_manager)
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager):
+    def test_create_too_small(self, _init_pygame, default_ui_manager,
+                              _display_surface_return_none):
         with pytest.warns(UserWarning, match="Initial size"):
             UIFileDialog(rect=pygame.Rect(100, 100, 50, 50),
                          manager=default_ui_manager)
@@ -39,7 +41,8 @@ class TestUIUIFileDialog:
 
         assert file_dialog.current_file_list == [('splat.png', '#file_list_item')]
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager):
+    def test_press_cancel_button(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
@@ -57,7 +60,8 @@ class TestUIUIFileDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_press_ok_button(self, _init_pygame, default_ui_manager):
+    def test_press_ok_button(self, _init_pygame, default_ui_manager,
+                             _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
@@ -91,7 +95,8 @@ class TestUIUIFileDialog:
         assert confirm_event_fired
         assert event_path is not None and Path(event_path).name == 'splat.png'
 
-    def test_press_delete_button_and_cancel(self, _init_pygame, default_ui_manager):
+    def test_press_delete_button_and_cancel(self, _init_pygame, default_ui_manager,
+                                            _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
@@ -119,7 +124,8 @@ class TestUIUIFileDialog:
 
         assert (not file_dialog.delete_confirmation_dialog.alive())
 
-    def test_press_delete_button_and_ok(self, _init_pygame, default_ui_manager):
+    def test_press_delete_button_and_ok(self, _init_pygame, default_ui_manager,
+                                        _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
@@ -155,7 +161,8 @@ class TestUIUIFileDialog:
 
         assert (not exists(abspath('tests/data/for_delete.txt')))
 
-    def test_press_parent_button(self, _init_pygame, default_ui_manager):
+    def test_press_parent_button(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -169,7 +176,8 @@ class TestUIUIFileDialog:
 
         assert Path(file_dialog.current_directory_path).name == 'data'
 
-    def test_press_refresh_button(self, _init_pygame, default_ui_manager):
+    def test_press_refresh_button(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -183,7 +191,8 @@ class TestUIUIFileDialog:
 
         assert Path(file_dialog.current_directory_path).name == 'images'
 
-    def test_press_home_button(self, _init_pygame, default_ui_manager):
+    def test_press_home_button(self, _init_pygame, default_ui_manager,
+                               _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -197,7 +206,8 @@ class TestUIUIFileDialog:
 
         assert Path(file_dialog.current_directory_path).name == Path.home().name
 
-    def test_new_file_selection(self, _init_pygame, default_ui_manager):
+    def test_new_file_selection(self, _init_pygame, default_ui_manager,
+                                _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -222,7 +232,8 @@ class TestUIUIFileDialog:
 
         assert not file_dialog.ok_button.is_enabled
 
-    def test_directory_double_clicked(self, _init_pygame, default_ui_manager):
+    def test_directory_double_clicked(self, _init_pygame, default_ui_manager,
+                                      _display_surface_return_none):
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -240,7 +251,8 @@ class TestUIUIFileDialog:
         assert not file_dialog.delete_button.is_enabled
         assert file_dialog.file_path_text_line.text == abspath('tests/data/images')
 
-    def test_file_path_entry_finished(self, _init_pygame, default_ui_manager):
+    def test_file_path_entry_finished(self, _init_pygame, default_ui_manager,
+                                      _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 

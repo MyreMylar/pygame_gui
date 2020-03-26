@@ -12,7 +12,9 @@ from pygame_gui.elements.ui_text_box import UITextBox
 
 class TestUITextBox:
 
-    def test_creation(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame: None,
+                      default_ui_manager: UIManager,
+                      _display_surface_return_none):
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
@@ -21,7 +23,9 @@ class TestUITextBox:
                              manager=default_ui_manager)
         assert text_box.image is not None
 
-    def test_creation_grow_to_fit_width(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_creation_grow_to_fit_width(self, _init_pygame: None,
+                                        default_ui_manager: UIManager,
+                                        _display_surface_return_none):
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
@@ -31,7 +35,9 @@ class TestUITextBox:
                              manager=default_ui_manager)
         assert text_box.image is not None and text_box.rect.width == 984
 
-    def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None,
+                                                 default_ui_manager: UIManager,
+                                                 _display_surface_return_none):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
@@ -85,7 +91,9 @@ class TestUITextBox:
 
         assert text_box.image is not None
 
-    def test_create_too_narrow_textbox_for_font(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_create_too_narrow_textbox_for_font(self, _init_pygame: None,
+                                                default_ui_manager: UIManager,
+                                                _display_surface_return_none):
         with pytest.warns(UserWarning, match="Unable to split word into chunks because text box is too narrow"):
             text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                            'LLALAALALA ALALA ALAL ALA'
@@ -99,7 +107,8 @@ class TestUITextBox:
 
         assert text_box.image is not None
 
-    def test_kill(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_kill(self, _init_pygame: None, default_ui_manager: UIManager,
+                  _display_surface_return_none):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
@@ -163,7 +172,9 @@ class TestUITextBox:
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
 
-    def test_on_fresh_drawable_shape_ready(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame: None,
+                                           default_ui_manager: UIManager,
+                                           _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -177,7 +188,9 @@ class TestUITextBox:
 
         assert text_box.background_surf is not None
 
-    def test_set_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_position_with_scrollbar(self, _init_pygame: None,
+                                         default_ui_manager: UIManager,
+                                         _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -190,11 +203,15 @@ class TestUITextBox:
         text_box.set_position(pygame.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (92, 8)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': 1,
+                                                              'pos': (92, 8)}))
         # if we successfully clicked on the moved text box scroll bar then this button should be True
         assert text_box.scroll_bar.top_button.held is True
 
-    def test_set_relative_position_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_relative_position_with_scrollbar(self, _init_pygame: None,
+                                                  default_ui_manager: UIManager,
+                                                  _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -207,11 +224,16 @@ class TestUITextBox:
         text_box.set_relative_position(pygame.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (142, 8)}))
-        # if we successfully clicked on the moved text box scroll bar then this button should be True
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': 1,
+                                                              'pos': (142, 8)}))
+        # if we successfully clicked on the moved text box
+        # scroll bar then this button should be True
         assert text_box.scroll_bar.top_button.held is True
 
-    def test_update_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_update_with_scrollbar(self, _init_pygame: None,
+                                   default_ui_manager: UIManager,
+                                   _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -226,7 +248,8 @@ class TestUITextBox:
         text_box.update(5.0)
         assert text_box.image is not None
 
-    def test_update_without_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_update_without_scrollbar(self, _init_pygame: None,
+                                      default_ui_manager: UIManager,
                                       _display_surface_return_none: None):
         text_box = UITextBox(html_text='<a href=None>lalaLAlalala</a>',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
@@ -238,7 +261,9 @@ class TestUITextBox:
 
         assert text_box.image is not None
 
-    def test_redraw_from_text_block_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_redraw_from_text_block_with_scrollbar(self, _init_pygame: None,
+                                                   default_ui_manager: UIManager,
+                                                   _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -252,14 +277,18 @@ class TestUITextBox:
         text_box.redraw_from_text_block()
         assert text_box.image is not None
 
-    def test_redraw_from_text_block_no_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_redraw_from_text_block_no_scrollbar(self, _init_pygame: None,
+                                                 default_ui_manager: UIManager,
+                                                 _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.redraw_from_text_block()
         assert text_box.image is not None
 
-    def test_redraw_from_chunks_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_redraw_from_chunks_with_scrollbar(self, _init_pygame: None,
+                                               default_ui_manager: UIManager,
+                                               _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -273,7 +302,9 @@ class TestUITextBox:
         text_box.redraw_from_chunks()
         assert text_box.image is not None
 
-    def test_full_redraw_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_full_redraw_with_scrollbar(self, _init_pygame: None,
+                                        default_ui_manager: UIManager,
+                                        _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -287,7 +318,9 @@ class TestUITextBox:
         text_box.full_redraw()
         assert text_box.image is not None
 
-    def test_select_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_select_with_scrollbar(self, _init_pygame: None,
+                                   default_ui_manager: UIManager,
+                                   _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -350,7 +383,9 @@ class TestUITextBox:
         text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeOutEffect
 
-    def test_set_active_effect_invalid(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_active_effect_invalid(self, _init_pygame: None,
+                                       default_ui_manager: UIManager,
+                                       _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -364,7 +399,9 @@ class TestUITextBox:
         with pytest.warns(UserWarning, match="Unsupported effect name"):
             text_box.set_active_effect(pygame_gui.UI_BUTTON_PRESSED)
 
-    def test_set_active_effect_none(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_active_effect_none(self, _init_pygame: None,
+                                    default_ui_manager: UIManager,
+                                    _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -379,19 +416,24 @@ class TestUITextBox:
         text_box.set_active_effect(None)
         assert text_box.active_text_effect is None
 
-    def test_set_active_effect_with_word_split(self, _init_pygame: None):
+    def test_set_active_effect_with_word_split(self, _init_pygame: None,
+                                               _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_non_default.json"))
         manager.preload_fonts([{"name": "fira_code", "point_size": 10, "style": "regular"},
                                {'name': 'fira_code', 'point_size': 10, 'style': 'bold'},
                                {"name": "fira_code", "point_size": 10, "style": "italic"},
                                {"name": "fira_code", "point_size": 10, "style": "bold_italic"}])
-        htm_text_block_2 = UITextBox('<font face=fira_code size=2 color=#000000><b>Hey, What the heck!</b>'
+        htm_text_block_2 = UITextBox('<font face=fira_code size=2 color=#000000>'
+                                     '<b>Hey, What the heck!</b>'
                                      '<br><br>'
-                                     'This is some <a href="test">text</a> in a different box, hooray for variety - '
+                                     'This is some <a href="test">text</a> in a different box,'
+                                     ' hooray for variety - '
                                      'if you want then you should put a ring upon it. '
-                                     '<body bgcolor=#990000>What if we do a really long word?</body> '
-                                     '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp gosh</b></i></font>',
+                                     '<body bgcolor=#990000>What if we do a really long word?'
+                                     '</body> '
+                                     '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp'
+                                     ' gosh</b></i></font>',
                                      pygame.Rect((0, 0), (250, 200)),
                                      manager=manager,
                                      object_id="#text_box_2")
@@ -401,7 +443,8 @@ class TestUITextBox:
         htm_text_block_2.update(5.0)
         assert type(htm_text_block_2.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
 
-    def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None,
+                                                        default_ui_manager: UIManager,
                                                         _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
@@ -420,7 +463,8 @@ class TestUITextBox:
 
         assert processed_down_event is True
 
-    def test_process_event_mouse_buttons_no_scrollbar(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_process_event_mouse_buttons_no_scrollbar(self, _init_pygame: None,
+                                                      default_ui_manager: UIManager,
                                                       _display_surface_return_none: None):
         text_box = UITextBox(html_text='<a href=none>alalaadads<a/>',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
@@ -432,13 +476,15 @@ class TestUITextBox:
 
         assert processed_down_event is True
 
-    def test_rebuild_from_theme_data_non_default(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default(self, _init_pygame,
+                                                 _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_non_default.json"))
 
         manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                {"name": "fira_code", "size:": 14, "style": "italic"}])
-        text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some <font color=regular_text>text</font> "
+        text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some "
+                                       "<font color=regular_text>text</font> "
                                        "in a <b>bold box</b> using "
                                        "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
@@ -449,7 +495,8 @@ class TestUITextBox:
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
+                                                _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_bad_values.json"))
 
@@ -461,7 +508,8 @@ class TestUITextBox:
                              manager=manager)
         assert text_box.image is not None
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, default_ui_manager,
+                            _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -479,11 +527,14 @@ class TestUITextBox:
         text_box.set_dimensions((200, 80))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (195, 75)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': 1,
+                                                              'pos': (195, 75)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert text_box.scroll_bar.bottom_button.held is True
 
-    def test_create_very_short_text_box(self, _init_pygame, default_ui_manager):
+    def test_create_very_short_text_box(self, _init_pygame, default_ui_manager,
+                                        _display_surface_return_none):
         x = 640
         y = 360
         width = 320

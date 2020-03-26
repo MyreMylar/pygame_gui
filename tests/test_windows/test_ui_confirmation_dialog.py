@@ -3,7 +3,7 @@ import pygame
 import pytest
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows import UIConfirmationDialog
@@ -11,7 +11,8 @@ from pygame_gui.windows import UIConfirmationDialog
 
 class TestUIConfirmationDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
         UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                              manager=default_ui_manager,
@@ -20,7 +21,8 @@ class TestUIConfirmationDialog:
                              window_title="Confirm",
                              action_short_name="Confirm")
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager):
+    def test_create_too_small(self, _init_pygame, default_ui_manager,
+                              _display_surface_return_none):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
 
         with pytest.warns(UserWarning, match="Initial size"):
@@ -31,7 +33,8 @@ class TestUIConfirmationDialog:
                                  window_title="Confirm",
                                  action_short_name="Confirm")
 
-    def test_press_close_window_button(self, _init_pygame, default_ui_manager):
+    def test_press_close_window_button(self, _init_pygame, default_ui_manager,
+                                       _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a test of the confirmation "
@@ -45,13 +48,15 @@ class TestUIConfirmationDialog:
         close_button_y = confirm_dialog.close_window_button.rect.centery
 
         # initiate a button press by clicking the left mouse down and up on the close button
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': pygame.BUTTON_LEFT,
-                                                                                      'pos': (close_button_x,
-                                                                                              close_button_y)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': pygame.BUTTON_LEFT,
+                                                              'pos': (close_button_x,
+                                                                      close_button_y)}))
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': pygame.BUTTON_LEFT,
-                                                                                    'pos': (close_button_x,
-                                                                                            close_button_y)}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                             {'button': pygame.BUTTON_LEFT,
+                                                              'pos': (close_button_x,
+                                                                      close_button_y)}))
         # let the window process the 'close window' event
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
@@ -60,7 +65,8 @@ class TestUIConfirmationDialog:
 
         assert is_alive_pre_process_event is True and is_dead_post_process_event is True
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager):
+    def test_press_cancel_button(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a test of the confirmation "
@@ -81,7 +87,8 @@ class TestUIConfirmationDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_press_confirm_button(self, _init_pygame, default_ui_manager):
+    def test_press_confirm_button(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a test of the "
@@ -112,7 +119,8 @@ class TestUIConfirmationDialog:
         assert is_dead_post_events
         assert confirm_event_fired
 
-    def test_update_menu_bar_grab(self, _init_pygame, default_ui_manager):
+    def test_update_menu_bar_grab(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a "
@@ -127,7 +135,8 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.grabbed_window is True
 
-    def test_rebuild(self, _init_pygame, default_ui_manager):
+    def test_rebuild(self, _init_pygame, default_ui_manager,
+                     _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a test of the "
@@ -139,7 +148,8 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.image is not None
 
-    def test_rebuild_rounded_rectangle(self, _init_pygame, default_ui_manager):
+    def test_rebuild_rounded_rectangle(self, _init_pygame, default_ui_manager,
+                                       _display_surface_return_none):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               manager=default_ui_manager,
                                               action_long_desc="Confirm a test of the confirmation "
@@ -153,7 +163,8 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.image is not None
 
-    def test_non_default_theme_build(self, _init_pygame):
+    def test_non_default_theme_build(self, _init_pygame,
+                                     _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_confirmation_dialog_non_default.json"))
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
@@ -166,7 +177,8 @@ class TestUIConfirmationDialog:
         assert confirm_dialog.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
-    def test_bad_values_theme_build(self, _init_pygame):
+    def test_bad_values_theme_build(self, _init_pygame,
+                                    _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_confirmation_dialog_bad_values.json"))

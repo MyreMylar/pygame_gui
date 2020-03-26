@@ -13,7 +13,7 @@ from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
 
 
 class TestUIColourChannelEditor:
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                               manager=default_ui_manager,
                               name='H:',
@@ -21,7 +21,8 @@ class TestUIColourChannelEditor:
                               initial_value=0,
                               value_range=(0, 360))
 
-    def test_text_entry_finished(self, _init_pygame, default_ui_manager):
+    def test_text_entry_finished(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -48,7 +49,8 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.slider.current_value == 50
 
-    def test_slider_moved_finished(self, _init_pygame, default_ui_manager):
+    def test_slider_moved_finished(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -64,7 +66,8 @@ class TestUIColourChannelEditor:
                                                              ))
         assert channel_editor.entry.get_text() == '100'
 
-    def test_set_value(self, _init_pygame, default_ui_manager):
+    def test_set_value(self, _init_pygame, default_ui_manager,
+                       _display_surface_return_none):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -81,8 +84,10 @@ class TestUIColourChannelEditor:
         assert channel_editor.slider.get_current_value() == 200
         assert channel_editor.current_value == 200
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+    def test_set_position(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -95,8 +100,10 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.relative_rect.topleft == (50, -70)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+    def test_set_relative_position(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -109,8 +116,10 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.rect.topleft == (150, 150)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+    def test_set_dimensions(self, _init_pygame, default_ui_manager,
+                            _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -126,16 +135,19 @@ class TestUIColourChannelEditor:
 
 class TestUIColourPickerDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_creation(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
         UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                              manager=default_ui_manager)
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_create_too_small(self, _init_pygame, default_ui_manager,
+                              _display_surface_return_none):
         with pytest.warns(UserWarning, match="Initial size"):
             UIColourPickerDialog(rect=pygame.Rect(100, 100, 50, 50),
                                  manager=default_ui_manager)
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_press_cancel_button(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager)
 
