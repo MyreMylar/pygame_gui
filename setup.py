@@ -36,7 +36,7 @@ setup(
                 'pygame_gui.windows'],
       zip_safe=False,
       python_requires='>=3.5',
-      setup_requires=['stringify'],
+      setup_requires=[],
       install_requires=['pygame>=1.9.3'],
       include_package_data=True,
       classifiers=[
