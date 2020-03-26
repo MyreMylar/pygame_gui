@@ -9,7 +9,10 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.5, 3.6, 3.7]
-        pygame-version: [1.9.6, 2.0.0.dev6]
+        pygame-version: [1.9.3, 1.9.6, 2.0.0.dev6]
+        exclude:
+          - {python-version: "3.6", pygame-version: "1.9.3"}
+          - {python-version: "3.7", pygame-version: "1.9.3"}
 
     steps:
     - uses: actions/checkout@v1
