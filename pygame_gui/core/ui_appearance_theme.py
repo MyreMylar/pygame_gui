@@ -5,6 +5,7 @@ import base64
 import warnings
 
 from contextlib import contextmanager
+from collections import OrderedDict
 from typing import Union, List, Dict, Any
 
 import pygame
@@ -653,7 +654,8 @@ class UIAppearanceTheme:
             else:
                 try:
                     load_success = True
-                    theme_dict = json.load(theme_file)
+                    theme_dict = json.load(theme_file,
+                                           object_pairs_hook=OrderedDict)
                 except json.decoder.JSONDecodeError:
                     warnings.warn("Failed to load current theme file, check syntax", UserWarning)
                     load_success = False
@@ -740,7 +742,7 @@ class UIAppearanceTheme:
             found_prototypes.append(prototype_misc)
 
         if not found_prototypes:
-            warnings.warn("Failed to find any prototype data with ID:" + prototype_id, UserWarning)
+            warnings.warn("Failed to find any prototype data with ID: " + prototype_id, UserWarning)
 
     def load_element_misc_data_from_theme(self,
                                           data_type: str,
