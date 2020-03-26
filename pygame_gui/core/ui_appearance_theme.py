@@ -705,12 +705,15 @@ class UIAppearanceTheme:
             return
         prototype_id = theme_dict[element_name]['prototype']
 
+        found_prototypes = []
+
         if prototype_id in self.ui_element_fonts_info:
             prototype_font = self.ui_element_fonts_info[prototype_id]
             if element_name not in self.ui_element_fonts_info:
                 self.ui_element_fonts_info[element_name] = {}
             for data_key in prototype_font:
                 self.ui_element_fonts_info[element_name][data_key] = prototype_font[data_key]
+            found_prototypes.append(prototype_font)
 
         if prototype_id in self.ui_element_colours:
             prototype_colours = self.ui_element_colours[prototype_id]
@@ -718,6 +721,7 @@ class UIAppearanceTheme:
                 self.ui_element_colours[element_name] = {}
             for col_key in prototype_colours:
                 self.ui_element_colours[element_name][col_key] = prototype_colours[col_key]
+            found_prototypes.append(prototype_colours)
 
         if prototype_id in self.ui_element_image_paths:
             prototype_images = self.ui_element_image_paths[prototype_id]
@@ -725,6 +729,7 @@ class UIAppearanceTheme:
                 self.ui_element_image_paths[element_name] = {}
             for image_key in prototype_images:
                 self.ui_element_image_paths[element_name][image_key] = prototype_images[image_key]
+            found_prototypes.append(prototype_images)
 
         if prototype_id in self.ui_element_misc_data:
             prototype_misc = self.ui_element_misc_data[prototype_id]
@@ -732,6 +737,10 @@ class UIAppearanceTheme:
                 self.ui_element_misc_data[element_name] = {}
             for misc_key in prototype_misc:
                 self.ui_element_misc_data[element_name][misc_key] = prototype_misc[misc_key]
+            found_prototypes.append(prototype_misc)
+
+        if not found_prototypes:
+            warnings.warn("Failed to find any prototype data with ID:" + prototype_id, UserWarning)
 
     def load_element_misc_data_from_theme(self,
                                           data_type: str,

@@ -80,13 +80,13 @@ class TestUIWindow:
 
         assert button.rect.topright == (window.get_container().rect.right - 10,
                                         window.get_container().rect.top + 10)
-        assert button.rect.topright == (387, 240)
+        assert button.rect.topright == (374, 253)
 
         window.set_dimensions((300, 400))
 
         assert button.rect.topright == (window.get_container().rect.right - 10,
                                         window.get_container().rect.top + 10)
-        assert button.rect.topright == (487, 240)
+        assert button.rect.topright == (474, 253)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
@@ -105,9 +105,9 @@ class TestUIWindow:
                                    'top': 'top',
                                    'bottom': 'top'})
 
-        assert button.rect.topright == (387, 240)
+        assert button.rect.topright == (374, 253)
         window.set_relative_position((100, 100))
-        assert button.rect.topright == (287, 140)
+        assert button.rect.topright == (274, 153)
 
     def test_set_position(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
@@ -125,9 +125,9 @@ class TestUIWindow:
                                    'top': 'top',
                                    'bottom': 'top'})
 
-        assert button.rect.topright == (387, 240)
+        assert button.rect.topright == (374, 253)
         window.set_position((100, 100))
-        assert button.rect.topright == (287, 140)
+        assert button.rect.topright == (274, 153)
 
     def test_process_event(self, _init_pygame, default_ui_manager,
                            _display_surface_return_none: None):
@@ -239,22 +239,26 @@ class TestUIWindow:
                           manager=default_ui_manager, element_id='test_window',
                           resizable=True)
 
-        default_ui_manager.mouse_position = window.rect.midleft
+        default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
+                                             window.rect.centery)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[0]
 
-        default_ui_manager.mouse_position = window.rect.midright
+        default_ui_manager.mouse_position = (window.rect.right - window.shadow_width,
+                                             window.rect.centery)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[2]
 
-        default_ui_manager.mouse_position = window.rect.midtop
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.top + window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[1]
 
-        default_ui_manager.mouse_position = window.rect.midbottom
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.bottom - window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[3]

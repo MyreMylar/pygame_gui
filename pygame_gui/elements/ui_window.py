@@ -600,7 +600,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
-                                                       'shadow_width': 2,
+                                                       'shadow_width': 15,
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 

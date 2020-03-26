@@ -113,7 +113,8 @@ class TestUIManager:
                           manager=default_ui_manager, element_id='test_window',
                           resizable=True)
 
-        default_ui_manager.mouse_position = window.rect.topleft
+        default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
+                                             window.rect.top + window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[0]
@@ -124,7 +125,8 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xy']
 
-        default_ui_manager.mouse_position = window.rect.topright
+        default_ui_manager.mouse_position = (window.rect.right - window.shadow_width,
+                                             window.rect.top + window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[2]
@@ -135,7 +137,8 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yx']
 
-        default_ui_manager.mouse_position = window.rect.midleft
+        default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
+                                             window.rect.centery)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[0]
@@ -145,7 +148,8 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xl']
 
-        default_ui_manager.mouse_position = window.rect.midright
+        default_ui_manager.mouse_position = (window.rect.right - window.shadow_width,
+                                             window.rect.centery)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[2]
@@ -155,7 +159,8 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xr']
 
-        default_ui_manager.mouse_position = window.rect.midtop
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.top + window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[1]
@@ -165,7 +170,8 @@ class TestUIManager:
         default_ui_manager.update(0.05)
         assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yt']
 
-        default_ui_manager.mouse_position = window.rect.midbottom
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.bottom - window.shadow_width)
         window.resizing_mode_active = False
         window.check_hover(0.05, False)
         assert window.edge_hovering[3]
