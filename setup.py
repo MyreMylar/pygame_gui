@@ -23,7 +23,7 @@ setup(
                        "theme files to control the look and a system to manage multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_041.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_050.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
