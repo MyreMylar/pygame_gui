@@ -9,28 +9,29 @@ from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.windows.ui_message_window import UIMessageWindow
+from pygame_gui.elements.ui_window import UIWindow
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
 
 class TestUIManager:
     """
     Testing the UIManager class
     """
-    def test_creation(self, _init_pygame):
+    def test_creation(self, _init_pygame, _display_surface_return_none):
         """
         Just test whether we can create a UIManager without raising any exceptions.
         """
         UIManager((800, 600))
 
-    def test_get_theme(self, _init_pygame, default_ui_manager):
+    def test_get_theme(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
         assert(type(theme) == UIAppearanceTheme)
 
-    def test_get_sprite_group(self, _init_pygame, default_ui_manager):
+    def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
@@ -44,7 +45,7 @@ class TestUIManager:
         window_stack = default_ui_manager.get_window_stack()
         assert(type(window_stack) == UIWindowStack)
 
-    def test_get_shadow(self, _init_pygame, default_ui_manager):
+    def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Try to get a shadow of a requested size.
         Tests that the returned object is a surface of the correct size.
@@ -63,34 +64,35 @@ class TestUIManager:
         default_ui_manager.set_window_resolution((640, 480))
         assert default_ui_manager.window_resolution == (640, 480)
 
-    def test_clear_and_reset(self, _init_pygame, default_ui_manager):
+    def test_clear_and_reset(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Check clear and reset is restoring manager to initial state with no extra, lingering, elements.
         """
-        # start with just the root window, and the root window container
-        should_be_two_sprites = len(default_ui_manager.get_sprite_group().sprites())
+        # start with just the root window container
+        should_be_one_sprite = len(default_ui_manager.get_sprite_group().sprites())
 
         UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        should_be_three_sprites = len(default_ui_manager.get_sprite_group().sprites())
+        should_be_two_sprites = len(default_ui_manager.get_sprite_group().sprites())
 
         default_ui_manager.clear_and_reset()
-        should_be_two_sprites_again = len(default_ui_manager.get_sprite_group().sprites())
+        should_be_one_sprite_again = len(default_ui_manager.get_sprite_group().sprites())
 
-        assert should_be_two_sprites == 2 and should_be_three_sprites == 3 and should_be_two_sprites_again == 2
+        assert should_be_one_sprite == 1 and should_be_two_sprites == 2 and should_be_one_sprite_again == 1
 
-    def test_process_events(self, _init_pygame, default_ui_manager):
+    def test_process_events(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Fake a click button event on a button to check they are going through the ui event manager properly/
         """
         test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        UIMessageWindow(message_window_rect=pygame.Rect(500, 400, 200, 300),
-                        message_title="Test Message",
+        UIMessageWindow(rect=pygame.Rect(500, 400, 250, 300),
+                        window_title="Test Message",
                         html_message="This is a bold test of the message box functionality.",
                         manager=default_ui_manager)
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (125, 115)}))
-        assert test_button.is_selected
+        assert test_button.held
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, default_ui_manager: UIManager,
+                    _display_surface_return_none):
         """
         Test update does store button shapes in the long term cache
         """
@@ -107,7 +109,85 @@ class TestUIManager:
 
         assert long_term_cache_size_after_update > starting_long_term_cache_size
 
-    def test_draw_ui(self, _init_pygame):
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, element_id='test_window',
+                          resizable=True)
+
+        default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
+                                             window.rect.top + window.shadow_width)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[0]
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xy']
+
+        default_ui_manager.mouse_position = (window.rect.right - window.shadow_width,
+                                             window.rect.top + window.shadow_width)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[2]
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yx']
+
+        default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
+                                             window.rect.centery)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[0]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xl']
+
+        default_ui_manager.mouse_position = (window.rect.right - window.shadow_width,
+                                             window.rect.centery)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[2]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['xr']
+
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.top + window.shadow_width)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[1]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yt']
+
+        default_ui_manager.mouse_position = (window.rect.centerx,
+                                             window.rect.bottom - window.shadow_width)
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+        assert window.edge_hovering[3]
+        window.resizing_mode_active = True
+        window.start_resize_rect = pygame.Rect(100, 100, 200, 200)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.resizing_window_cursors['yb']
+
+        window.resizing_mode_active = False
+        window.check_hover(0.05, False)
+
+        default_ui_manager.update(0.05)
+        assert default_ui_manager._active_cursor == default_ui_manager.active_user_cursor
+
+    def test_draw_ui(self, _init_pygame, _display_surface_return_none):
         """
         Test that drawing the UI works.
         Note: the pygame comparison function here seems a little unreliable. Would not be surprised if it's behaviour
@@ -143,7 +223,7 @@ class TestUIManager:
         result_pixel_array.close()
         pygame.display.quit()
 
-    def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager):
+    def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Combined test of setting font paths and pre-loading.
 
@@ -158,7 +238,7 @@ class TestUIManager:
                   relative_rect=pygame.Rect(100, 100, 200, 100),
                   manager=default_ui_manager)
 
-    def test_print_unused_fonts(self, _init_pygame, default_ui_manager, capsys):
+    def test_print_unused_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none, capsys):
         """
         Test unused font printing, by creating a font we don't use and seeing if the print out reports it.
 
@@ -173,22 +253,22 @@ class TestUIManager:
 
         assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
 
-    def test_select_and_unselect_focus_element(self, _init_pygame, default_ui_manager):
+    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Test if we correctly select the focused element and unselect it with these functions.
         """
         test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
-        default_ui_manager.select_focus_element(test_button)
-        was_selected_correctly = test_button.is_selected
-        default_ui_manager.unselect_focus_element()
+        default_ui_manager.set_focus_element(test_button)
+        was_selected_correctly = test_button.is_focused
+        default_ui_manager.unset_focus_element()
         assert was_selected_correctly is True and test_button.is_selected is False
 
-    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager):
+    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                               visible_percentage=0.5,
                                               manager=default_ui_manager)
 
-        default_ui_manager.select_focus_element(test_scroll_bar)
+        default_ui_manager.set_focus_element(test_scroll_bar)
         found_bar = test_scroll_bar is default_ui_manager.get_last_focused_vert_scrollbar()
         default_ui_manager.clear_last_focused_from_vert_scrollbar(test_scroll_bar)
         no_last_focused_scroll_bar = default_ui_manager.get_last_focused_vert_scrollbar() is None

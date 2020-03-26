@@ -5,7 +5,7 @@
          {
              "normal_text": "5.0",
              "text_shadow": "grey",
-             "border": "black",
+             "normal_border": "black",
              "filled_bar": "red",
              "unfilled_bar": "slipper"
          },

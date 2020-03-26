@@ -39,8 +39,8 @@ class TestRoundedRectangleShape:
                                                           'text_horiz_alignment': 'center',
                                                           'text_vert_alignment': 'center'},
                                       states=['normal', 'hovered'], manager=default_ui_manager)
-        shape.update()
-        shape.update()
+        shape.update(0.2)
+        shape.update(0.4)
 
     def test_full_rebuild_on_size_change_negative_values(self, _init_pygame, default_ui_manager: UIManager):
         with pytest.warns(UserWarning, match='Clamping shadow_width'):

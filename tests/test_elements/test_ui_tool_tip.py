@@ -8,7 +8,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_tool_tip import UITooltip
 
 
-class TestUIButton:
+class TestUIToolTip:
 
     def test_creation(self, _init_pygame, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
@@ -56,7 +56,7 @@ class TestUIButton:
 
         found_position = tool_tip.find_valid_position(pygame.Vector2(300.0, 590.0))
 
-        root_window_rect = default_ui_manager.get_window_stack().get_root_window().get_container().rect
+        root_window_rect = default_ui_manager.get_root_container().rect
 
         assert found_position is True and bool(root_window_rect.contains(tool_tip.rect)) is True
 
@@ -67,7 +67,7 @@ class TestUIButton:
 
         found_position = tool_tip.find_valid_position(pygame.Vector2(799.0, 300.0))
 
-        root_window_rect = default_ui_manager.get_window_stack().get_root_window().get_container().rect
+        root_window_rect = default_ui_manager.get_root_container().rect
 
         assert found_position is True and bool(root_window_rect.contains(tool_tip.rect)) is True
 
@@ -78,7 +78,7 @@ class TestUIButton:
 
         found_position = tool_tip.find_valid_position(pygame.Vector2(1.0, 300.0))
 
-        root_window_rect = default_ui_manager.get_window_stack().get_root_window().get_container().rect
+        root_window_rect = default_ui_manager.get_root_container().rect
 
         assert found_position is True and bool(root_window_rect.contains(tool_tip.rect)) is True
 
@@ -91,7 +91,7 @@ class TestUIButton:
 
         found_position = tool_tip.find_valid_position(pygame.Vector2(25.0, 25.0))
 
-        root_window_rect = manager.get_window_stack().get_root_window().get_container().rect
+        root_window_rect = manager.get_root_container().rect
 
         assert found_position is False and bool(root_window_rect.contains(tool_tip.rect)) is False
 
@@ -111,3 +111,36 @@ class TestUIButton:
                              manager=manager)
 
         assert tool_tip.text_block.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+
+        tool_tip.set_position((150.0, 30.0))
+
+        assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+
+        tool_tip.set_relative_position((150.0, 30.0))
+
+        assert tool_tip.rect.topleft == (150, 30)
+
+        assert tool_tip.text_block.ui_container.rect.topleft == (0, 0)
+        assert tool_tip.text_block.relative_rect.bottom == 65
+
+        assert tool_tip.text_block.rect.topleft == (150, 30)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+
+        tool_tip.set_position((0.0, 0.0))
+        tool_tip.set_dimensions((100.0, 150.0))
+
+        assert tool_tip.rect.bottomright == (100, 150) and tool_tip.text_block.rect.bottomright == (100, 150)

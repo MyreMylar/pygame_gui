@@ -6,6 +6,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_label import UILabel
+from pygame_gui.core.ui_container import UIContainer
 
 
 class TestUILabel:
@@ -60,3 +61,36 @@ class TestUILabel:
                         text="Test Label",
                         manager=manager)
         assert label.image is not None
+
+    def test_set_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        container=test_container,
+                        manager=default_ui_manager)
+
+        label.set_position(pygame.math.Vector2(150.0, 30.0))
+
+        assert label.relative_rect.topleft == (50, -70)
+
+    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        container=test_container,
+                        manager=default_ui_manager)
+
+        label.set_relative_position((50, 50))
+
+        assert label.rect.topleft == (150, 150)
+
+    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        container=test_container,
+                        manager=default_ui_manager)
+
+        label.set_dimensions((200, 50))
+
+        assert label.rect.size == (200, 50)

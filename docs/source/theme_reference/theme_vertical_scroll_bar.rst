@@ -10,7 +10,7 @@ UIVerticalScrollBar Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UIVerticalScrollBar <.UIVerticalScrollBar>` theming block id is 'vertical_scroll_bar'.
+The :class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` theming block id is 'vertical_scroll_bar'.
 
 Colours
 -------
@@ -20,7 +20,7 @@ Colours
    A diagram of which part of the element is themed by which colour parameter. The scroll bar's buttons are themed in a
    separate block.
 
-:class:`UIVerticalScrollBar <.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block. All of these colours can
+:class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the 'back' of the scroll bar, the colour of the track that the scroll bar moves along.
@@ -29,12 +29,13 @@ also be a colour gradient:
 Misc
 ----
 
-:class:`UIVerticalScrollBar <.UIVerticalScrollBar>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
+ - "**enable_arrow_buttons**" - Enables or disables the arrow buttons for the scroll bar. "1" is enabled, "0" is disabled. Defaults to "1".
 
 Sub-elements
 --------------
@@ -72,6 +73,12 @@ Here is an example of some vertical scroll bar blocks in a JSON theme file, usin
                 "hovered_text": "#FFFFFF",
                 "selected_text": "#FFFFFF",
                 "disabled_text": "#6d736f"
+            },
+            "misc":
+            {
+               "shape": "rectangle",
+               "border_width": "0",
+               "enable_arrow_buttons": "0"
             }
         },
         "vertical_scroll_bar.button":

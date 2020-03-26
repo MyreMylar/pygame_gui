@@ -2,6 +2,7 @@ import os
 import pygame
 import pytest
 from pygame_gui.ui_manager import UIManager
+from pygame_gui.core.interfaces import IUIManagerInterface
 
 
 @pytest.fixture(scope="module")
@@ -13,7 +14,7 @@ def _init_pygame():
 
 
 @pytest.fixture()
-def default_ui_manager():
+def default_ui_manager() -> IUIManagerInterface:
     return UIManager((800, 600))
 
 

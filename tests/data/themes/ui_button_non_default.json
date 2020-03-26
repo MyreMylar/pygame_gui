@@ -60,7 +60,13 @@
              "text_horiz_alignment": "left",
              "text_vert_alignment": "top",
              "text_horiz_alignment_padding": "6",
-             "text_vert_alignment_padding": "7"
+             "text_vert_alignment_padding": "7",
+
+            "state_transitions":
+            {
+                "normal_hovered": "0.2",
+                "hovered_normal": "0.5"
+            }
          }
      }
  }

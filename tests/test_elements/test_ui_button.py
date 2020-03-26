@@ -1,8 +1,10 @@
 import os
 import pytest
 import pygame
+import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_button import UIButton
@@ -11,7 +13,8 @@ from pygame_gui.core.ui_container import UIContainer
 
 class TestUIButton:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -27,7 +30,8 @@ class TestUIButton:
                           manager=manager)
         assert button.normal_image is not None and button.image is not None
 
-    def test_kill(self, _init_pygame, default_ui_manager):
+    def test_kill(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -42,7 +46,8 @@ class TestUIButton:
 
         assert button.alive() is False and button.tool_tip.alive() is False
 
-    def test_hover_point_outside(self, _init_pygame, default_ui_manager):
+    def test_hover_point_outside(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -51,7 +56,8 @@ class TestUIButton:
         is_inside = button.hover_point(50, 50)
         assert is_inside is False
 
-    def test_hover_point_inside(self, _init_pygame, default_ui_manager):
+    def test_hover_point_inside(self, _init_pygame, default_ui_manager,
+                                _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -60,7 +66,8 @@ class TestUIButton:
         is_inside = button.hover_point(150, 115)
         assert is_inside is True
 
-    def test_hover_point_held(self, _init_pygame, default_ui_manager):
+    def test_hover_point_held(self, _init_pygame, default_ui_manager,
+                              _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -71,7 +78,8 @@ class TestUIButton:
         is_inside = button.hover_point(50, 50)
         assert is_inside is True
 
-    def test_hover_point_not_held(self, _init_pygame, default_ui_manager):
+    def test_hover_point_not_held(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -82,7 +90,8 @@ class TestUIButton:
         is_inside = button.hover_point(50, 50)
         assert is_inside is False
 
-    def test_can_hover(self, _init_pygame, default_ui_manager):
+    def test_can_hover(self, _init_pygame, default_ui_manager,
+                       _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -92,7 +101,8 @@ class TestUIButton:
 
         assert button.can_hover() is True
 
-    def test_cannot_hover(self, _init_pygame, default_ui_manager):
+    def test_cannot_hover(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
@@ -102,16 +112,17 @@ class TestUIButton:
 
         assert button.can_hover() is False
 
-    def test_on_hovered(self, _init_pygame, default_ui_manager):
+    def test_on_hovered(self, _init_pygame, default_ui_manager,
+                        _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           manager=default_ui_manager)
         button.on_hovered()
-        have_hovered_image = button.image == button.drawable_shape.get_surface("hovered")
 
-        assert have_hovered_image is True and button.hover_time == 0.0
+        assert button.hover_time == 0.0
 
-    def test_while_hovering(self, _init_pygame, default_ui_manager):
+    def test_while_hovering(self, _init_pygame, default_ui_manager,
+                            _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -123,7 +134,8 @@ class TestUIButton:
 
         assert button.tool_tip is not None
 
-    def test_while_not_hovering(self, _init_pygame, default_ui_manager):
+    def test_while_not_hovering(self, _init_pygame, default_ui_manager,
+                                _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -147,9 +159,10 @@ class TestUIButton:
 
         # stop hovering and kill the tool tip
         button.on_unhovered()
-        assert button.tool_tip is None and button.image == button.drawable_shape.get_surface("normal")
+        assert button.tool_tip is None
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, default_ui_manager,
+                    _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -164,7 +177,8 @@ class TestUIButton:
 
         assert button.pressed is True and redraw_queue_length_post_update == (redraw_queue_length_pre_update - 1)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 150, 30),
                           text="Test Button",
@@ -176,7 +190,8 @@ class TestUIButton:
 
         assert button.rect.topleft == (250, 130) and button.drawable_shape.containing_rect.topleft == (250, 130)
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 150, 30),
                           text="Test Button",
@@ -188,7 +203,8 @@ class TestUIButton:
 
         assert button.relative_rect.topleft == (50, -70) and button.drawable_shape.containing_rect.topleft == (150, 30)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, default_ui_manager,
+                            _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(0, 0, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -198,7 +214,8 @@ class TestUIButton:
 
         assert button.drawable_shape.containing_rect.width == 250 and button.drawable_shape.containing_rect.height == 60
 
-    def test_update_containing_rect_position(self, _init_pygame, default_ui_manager):
+    def test_update_containing_rect_position(self, _init_pygame, default_ui_manager,
+                                             _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
@@ -210,6 +227,32 @@ class TestUIButton:
         button.update_containing_rect_position()
 
         assert button.rect.topleft == (60, 60)
+
+    def test_process_event_double_click(self, _init_pygame: None, default_ui_manager: UIManager,
+                                        _display_surface_return_none: None):
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          allow_double_clicks=True)
+
+        # process a mouse button down event
+        consumed_event_1 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                       {'button': pygame.BUTTON_LEFT,
+                                                                        'pos': button.rect.center}))
+
+        consumed_event_2 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                       {'button': pygame.BUTTON_LEFT,
+                                                                        'pos': button.rect.center}))
+
+        confirm_double_click_event_fired = False
+        for event in pygame.event.get():
+            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
+                    event.ui_element == button):
+                confirm_double_click_event_fired = True
+
+        assert consumed_event_1 and consumed_event_2
+        assert confirm_double_click_event_fired
 
     def test_process_event_mouse_button_down(self, _init_pygame: None, default_ui_manager: UIManager,
                                              _display_surface_return_none: None):
@@ -248,7 +291,7 @@ class TestUIButton:
                                                                      {'button': 1, 'pos': (50, 25)}))
 
         assert (processed_down_event is True and processed_up_event is True and button.held is False and
-                button.pressed_event is True and default_ui_manager.select_focused_element is None)
+                button.pressed_event is True and default_ui_manager.focused_element is None)
 
     def test_process_event_mouse_button_up_outside(self, _init_pygame: None, default_ui_manager: UIManager,
                                                    _display_surface_return_none: None):
@@ -269,8 +312,7 @@ class TestUIButton:
         processed_up_event = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
                                                                      {'button': 1, 'pos': (1, 1)}))
 
-        assert (processed_down_event is True and processed_up_event is True and
-                button.held is False and button.is_selected is True)
+        assert (processed_down_event is True and processed_up_event is True and button.held is False)
 
     def test_check_pressed(self, _init_pygame: None, default_ui_manager: UIManager,
                            _display_surface_return_none: None):
@@ -329,7 +371,8 @@ class TestUIButton:
 
         assert button.check_pressed() is True and button.is_enabled is True
 
-    def test_set_active(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_active(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -345,9 +388,10 @@ class TestUIButton:
 
         button.set_active()
 
-        assert empty_queue == 0 and button.image == button.drawable_shape.get_surface('active')
+        assert empty_queue == 0
 
-    def test_set_inactive(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_inactive(self, _init_pygame: None, default_ui_manager: UIManager,
+                          _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -364,9 +408,10 @@ class TestUIButton:
         button.set_active()
         button.set_inactive()
 
-        assert empty_queue == 0 and button.image == button.drawable_shape.get_surface('normal')
+        assert empty_queue == 0
 
-    def test_select(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_select(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -382,10 +427,10 @@ class TestUIButton:
 
         button.select()
 
-        assert (empty_queue == 0 and button.is_selected is True and
-                button.image == button.drawable_shape.get_surface('selected'))
+        assert (empty_queue == 0 and button.is_selected is True)
 
-    def test_unselect(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_unselect(self, _init_pygame: None, default_ui_manager: UIManager,
+                      _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -402,10 +447,10 @@ class TestUIButton:
         button.select()
         button.unselect()
 
-        assert (empty_queue == 0 and button.is_selected is False and
-                button.image == button.drawable_shape.get_surface('normal'))
+        assert (empty_queue == 0 and button.is_selected is False)
 
-    def test_set_text(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_text(self, _init_pygame: None, default_ui_manager: UIManager,
+                      _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -429,7 +474,8 @@ class TestUIButton:
                 button.drawable_shape.aligned_text_rect != old_text_rect and
                 button.drawable_shape.theming['text'] == 'Ipsum' and button.text == 'Ipsum')
 
-    def test_set_text_same(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_text_same(self, _init_pygame: None, default_ui_manager: UIManager,
+                           _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -453,7 +499,8 @@ class TestUIButton:
                 button.drawable_shape.aligned_text_rect == old_text_rect and
                 button.drawable_shape.theming['text'] == 'Test Button' and button.text == 'Test Button')
 
-    def test_set_hold_range(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_set_hold_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                            _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -461,7 +508,8 @@ class TestUIButton:
 
         button.set_hold_range((50, 200))
 
-    def test_in_hold_range_inside_button(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_in_hold_range_inside_button(self, _init_pygame: None, default_ui_manager: UIManager,
+                                         _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -471,7 +519,8 @@ class TestUIButton:
 
         assert button.in_hold_range(pygame.math.Vector2(20.0, 25.0)) is True
 
-    def test_in_hold_range_outside_button(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_in_hold_range_outside_button(self, _init_pygame: None, default_ui_manager: UIManager,
+                                          _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -481,7 +530,8 @@ class TestUIButton:
 
         assert button.in_hold_range(pygame.math.Vector2(200.0, 50.0)) is True
 
-    def test_out_of_hold_range(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_out_of_hold_range(self, _init_pygame: None, default_ui_manager: UIManager,
+                               _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -491,7 +541,8 @@ class TestUIButton:
 
         assert button.in_hold_range(pygame.math.Vector2(400.0, 500.0)) is False
 
-    def test_out_of_hold_range_when_zeroed(self, _init_pygame: None, default_ui_manager: UIManager):
+    def test_out_of_hold_range_when_zeroed(self, _init_pygame: None, default_ui_manager: UIManager,
+                                           _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
@@ -501,7 +552,8 @@ class TestUIButton:
 
         assert button.in_hold_range(pygame.math.Vector2(400.0, 500.0)) is False
 
-    def test_rebuild_from_changed_theme_data_non_default(self, _init_pygame, _display_surface_return_none):
+    def test_rebuild_from_changed_theme_data_non_default(self, _init_pygame,
+                                                         _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
@@ -513,7 +565,8 @@ class TestUIButton:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid gradient")
-    def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
+    def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame,
+                                                        _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_button_bad_values.json"))
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
@@ -528,7 +581,7 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        button.rebuild_shape()
+        button.rebuild()
 
         assert button.image is not None
 
@@ -538,6 +591,6 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        button.rebuild_shape()
+        button.rebuild()
 
         assert button.image is not None

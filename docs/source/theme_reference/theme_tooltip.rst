@@ -10,12 +10,12 @@ UITooltip Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UIToolTip <.UIToolTip>` theming block id is 'tool_tip'.
+The :class:`UIToolTip <pygame_gui.elements.UIToolTip>` theming block id is 'tool_tip'.
 
 Misc
 ----
 
-:class:`UITooltip <.UITooltip>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UITooltip <pygame_gui.elements.UITooltip>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**rect_width**" - The width of the rectangle around the tool tip in pixels, including any shadows or borders. The height is determined dynamically.
 
@@ -23,7 +23,7 @@ Misc
 Sub-elements
 --------------
 
-The :class:`UIToolTip <.UIToolTip>` contains a :class:`UITextBox <.UITextBox>` so you can use the block ID 'tool_tip.text_box' to start styling
+The :class:`UIToolTip <pygame_gui.elements.UIToolTip>` contains a :class:`UITextBox <pygame_gui.elements.UITextBox>` so you can use the block ID 'tool_tip.text_box' to start styling
 it.
 
 There is more information on theming the text box at :ref:`theme-text-box`.
@@ -50,7 +50,7 @@ Here is an example of a tool tip block in a JSON theme file, using parameters fr
             "colours":
             {
                 "dark_bg":"#505050",
-                "border": "#FFFFFF"
+                "normal_border": "#FFFFFF"
             },
 
             "misc":

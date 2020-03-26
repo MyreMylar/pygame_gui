@@ -16,8 +16,8 @@ class TestStyledChunk:
         dictionary = UIFontDictionary()
         style = CharStyle()
         StyledChunk(font_size=14, font_name='fira_code',
-                    chunk='text', style=style, color=pygame.Color('#FFFF00'),
-                    bg_color=pygame.Color('#000000'),
+                    chunk='text', style=style, colour=pygame.Color('#FFFF00'),
+                    bg_colour=pygame.Color('#000000'),
                     is_link=False, link_href='test', link_style=CharStyle(),
                     position=(0, 0), font_dictionary=dictionary)
 
@@ -26,8 +26,8 @@ class TestStyledChunk:
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
-                            chunk='text', style=style, color=pygame.Color('#FFFF00'),
-                            bg_color=gradient,
+                            chunk='text', style=style, colour=pygame.Color('#FFFF00'),
+                            bg_colour=gradient,
                             is_link=False, link_href='test', link_style=CharStyle(),
                             position=(0, 0), font_dictionary=dictionary)
         chunk.redraw()
@@ -37,8 +37,8 @@ class TestStyledChunk:
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
-                            chunk='text', style=style, color=gradient,
-                            bg_color=pygame.Color('#FFFF00'),
+                            chunk='text', style=style, colour=gradient,
+                            bg_colour=pygame.Color('#FFFF00'),
                             is_link=False, link_href='test', link_style=CharStyle(),
                             position=(0, 0), font_dictionary=dictionary)
         chunk.redraw()
@@ -48,8 +48,8 @@ class TestStyledChunk:
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
-                            chunk='text', style=style, color=gradient,
-                            bg_color=gradient,
+                            chunk='text', style=style, colour=gradient,
+                            bg_colour=gradient,
                             is_link=False, link_href='test', link_style=CharStyle(),
                             position=(0, 0), font_dictionary=dictionary)
         chunk.redraw()
@@ -59,8 +59,8 @@ class TestStyledChunk:
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
-                            chunk='text', style=style, color=pygame.Color('#FFFF00'),
-                            bg_color=gradient,
+                            chunk='text', style=style, colour=pygame.Color('#FFFF00'),
+                            bg_colour=gradient,
                             is_link=False, link_href='test', link_style=CharStyle(),
                             position=(0, 0), font_dictionary=dictionary)
         chunk.chunk = 'testy'
@@ -71,8 +71,8 @@ class TestStyledChunk:
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
-                            chunk='text', style=style, color=pygame.Color('#FFFF00'),
-                            bg_color=gradient,
+                            chunk='text', style=style, colour=pygame.Color('#FFFF00'),
+                            bg_colour=gradient,
                             is_link=False, link_href='test', link_style=CharStyle(),
                             position=(0, 0), font_dictionary=dictionary)
         chunk.chunk = ''

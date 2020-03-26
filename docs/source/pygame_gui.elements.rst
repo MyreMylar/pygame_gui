@@ -44,10 +44,26 @@ pygame\_gui.elements.ui\_label module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.elements.ui\_panel module
+-------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_panel
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.elements.ui\_screen\_space\_health\_bar module
 ----------------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_screen_space_health_bar
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_selection\_list module
+-----------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_selection_list
    :members:
    :no-undoc-members:
    :show-inheritance:
@@ -80,6 +96,14 @@ pygame\_gui.elements.ui\_vertical\_scroll\_bar module
 -----------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_vertical_scroll_bar
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_window module
+--------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_window
    :members:
    :no-undoc-members:
    :show-inheritance:

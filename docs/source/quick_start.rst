@@ -213,7 +213,7 @@ When we click on it. To do that we need to check the pygame event queue:
                 is_running = False
 
             if event.type == pygame.USEREVENT:
-                if event.user_type == 'ui_button_pressed':
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == hello_button:
                         print('Hello World!')
 
@@ -235,5 +235,6 @@ can just compare the event's ui_element attribute with our hello_button variable
 Try running the code again and clicking on the button. If it's all worked you should see 'Hello World!' printed to the
 python console each time you click the button.
 
-Congratulations, you've learned the basics of using Pygame GUI! If you want to explore more check out the API Reference
-and try creating some of the other UI Elements, or head over to the :ref:`theme-guide`.
+Congratulations, you've learned the basics of using Pygame GUI! If you want to explore more, check out the API Reference
+and try creating some of the other UI Elements, have a look at how layout works with the :ref:`layout-guide` or head
+over to the :ref:`theme-guide` to learn how to style your elements.

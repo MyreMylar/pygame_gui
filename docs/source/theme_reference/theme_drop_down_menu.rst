@@ -10,7 +10,7 @@ UIDropDownMenu Theming Parameters
         Your browser does not support the video tag.
     </video>
 
-The :class:`UIDropDownMenu <.UIDropDownMenu>` theming block id is 'drop_down_menu'.
+The :class:`UIDropDownMenu <pygame_gui.elements.UIDropDownMenu>` theming block id is 'drop_down_menu'.
 
 Colours
 -------
@@ -21,7 +21,7 @@ Colours
    possible to see the 'dark_bg' themed regions when the buttons in the menu are themed to be transparent, or semi
    transparent themselves.
 
-:class:`UIDropDownMenu <.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block. All of these colours can
+:class:`UIDropDownMenu <pygame_gui.elements.UIDropDownMenu>` makes use of these colour parameters in a 'colours' block. All of these colours can
 also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the drop down menu. Probably not visible.
@@ -30,7 +30,7 @@ also be a colour gradient:
 Misc
 ----
 
-:class:`UIDropDownMenu <.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
+:class:`UIDropDownMenu <pygame_gui.elements.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
@@ -46,9 +46,17 @@ You can reference all of the buttons that are sub elements of the drop down menu
 
  - 'drop_down_menu.#expand_button'
  - 'drop_down_menu.#selected_option'
- - 'drop_down_menu.#option'
 
-There is more information on theming buttons at :ref:`theme-button`.
+There is a also a selection list that manages the options when the drop down is expanded, you can reference that with:
+
+ - 'drop_down_menu.#drop_down_options_list'
+
+Or the individual option buttons with:
+
+- 'drop_down_menu.#drop_down_options_list.button'
+
+
+There is more information on theming buttons at :ref:`theme-button` and selection lists at :ref: `theme-selection-list`.
 
 Example
 -------

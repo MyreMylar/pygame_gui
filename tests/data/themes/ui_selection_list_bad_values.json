@@ -1,0 +1,18 @@
+{
+    "selection_list":
+    {
+        "colours":
+        {
+            "normal_border": "dog",
+            "dark_bg": "flipping"
+        },
+        "misc":
+        {
+            "shape": "4",
+            "shape_corner_radius": "10.6666",
+            "border_width": "4.99",
+            "shadow_width": "potato",
+            "list_item_height": "ducks"
+        }
+    }
+}

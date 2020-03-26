@@ -23,6 +23,8 @@ sys.path.insert(0, os.path.abspath('../../pygame_gui/windows/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/elements/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/elements/text/'))
 sys.path.insert(0, os.path.abspath('../../pygame_gui/core/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/core/drawable_shapes/'))
+sys.path.insert(0, os.path.abspath('../../pygame_gui/core/interfaces/'))
 
 
 # -- Project information -----------------------------------------------------
@@ -32,9 +34,9 @@ copyright = '2019, Dan Lawrence'
 author = 'Dan Lawrence'
 
 # The short X.Y version
-version = '0.4.2'
+version = '0.5.0'
 # The full version, including alpha/beta/rc tags
-release = '0.4.2'
+release = '0.5.0'
 
 
 # -- General configuration ---------------------------------------------------
