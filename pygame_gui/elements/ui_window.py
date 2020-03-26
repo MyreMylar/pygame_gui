@@ -92,62 +92,6 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.rebuild_from_changed_theme_data()
 
-        self._window_root_container = UIContainer(pygame.Rect(self.relative_rect.x +
-                                                              self.shadow_width,
-                                                              self.relative_rect.y +
-                                                              self.shadow_width,
-                                                              self.relative_rect.width -
-                                                              (2 * self.shadow_width),
-                                                              self.relative_rect.height -
-                                                              (2 * self.shadow_width)),
-                                                  manager=manager,
-                                                  starting_height=1,
-                                                  is_window_root_container=True,
-                                                  container=None,
-                                                  parent_element=self,
-                                                  object_id="#window_root_container")
-        title_bar_rect = pygame.Rect(0,
-                                     0,
-                                     (self._window_root_container.relative_rect.width -
-                                      self.title_bar_button_width),
-                                     self.title_bar_height)
-        self.title_bar = UIButton(relative_rect=title_bar_rect,
-                                  text=self.window_display_title,
-                                  manager=self.ui_manager,
-                                  container=self._window_root_container,
-                                  parent_element=self,
-                                  object_id='#title_bar',
-                                  anchors={'top': 'top', 'bottom': 'top',
-                                           'left': 'left', 'right': 'right'}
-                                  )
-        self.title_bar.set_hold_range((100, 100))
-
-        close_button_rect = pygame.Rect((-self.title_bar_button_width, 0),
-                                        (self.title_bar_button_width, self.title_bar_height))
-        self.close_window_button = UIButton(relative_rect=close_button_rect,
-                                            text='╳',
-                                            manager=self.ui_manager,
-                                            container=self._window_root_container,
-                                            parent_element=self,
-                                            object_id='#close_button',
-                                            anchors={'top': 'top', 'bottom': 'top',
-                                                     'left': 'right', 'right': 'right'}
-                                            )
-
-        window_container_rect = pygame.Rect(self.border_width,
-                                            self.title_bar_height,
-                                            (self._window_root_container.relative_rect.width -
-                                             (2 * self.border_width)),
-                                            (self._window_root_container.relative_rect.height -
-                                             self.title_bar_height - self.border_width))
-        self.window_element_container = UIContainer(window_container_rect, manager,
-                                                    starting_height=0,
-                                                    container=self._window_root_container,
-                                                    parent_element=self,
-                                                    object_id="#window_element_container",
-                                                    anchors={'top': 'top', 'bottom': 'bottom',
-                                                             'left': 'left', 'right': 'right'}
-                                                    )
         self.window_stack = self.ui_manager.get_window_stack()
         self.window_stack.add_new_window(self)
 
@@ -332,25 +276,27 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         # This is needed to keep the window in sync with the container after adding elements to it
         if self._window_root_container.layer_thickness != self.layer_thickness:
             self.layer_thickness = self._window_root_container.layer_thickness
+        if self.title_bar is not None:
+            if self.title_bar.held:
+                mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+                if not self.grabbed_window:
+                    self.window_stack.move_window_to_front(self)
+                    self.grabbed_window = True
+                    self.starting_grab_difference = (mouse_x - self.rect.x,
+                                                     mouse_y - self.rect.y)
 
-        if self.title_bar.held:
-            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            if not self.grabbed_window:
-                self.window_stack.move_window_to_front(self)
-                self.grabbed_window = True
-                self.starting_grab_difference = (mouse_x - self.rect.x,
-                                                 mouse_y - self.rect.y)
+                current_grab_difference = (mouse_x - self.rect.x,
+                                           mouse_y - self.rect.y)
 
-            current_grab_difference = (mouse_x - self.rect.x,
-                                       mouse_y - self.rect.y)
+                adjustment_required = (current_grab_difference[0] -
+                                       self.starting_grab_difference[0],
+                                       current_grab_difference[1] -
+                                       self.starting_grab_difference[1])
 
-            adjustment_required = (current_grab_difference[0] - self.starting_grab_difference[0],
-                                   current_grab_difference[1] - self.starting_grab_difference[1])
-
-            self.set_relative_position((self.relative_rect.x + adjustment_required[0],
-                                        self.relative_rect.y + adjustment_required[1]))
-        else:
-            self.grabbed_window = False
+                self.set_relative_position((self.relative_rect.x + adjustment_required[0],
+                                            self.relative_rect.y + adjustment_required[1]))
+            else:
+                self.grabbed_window = False
 
         if self.resizing_mode_active:
             self._update_drag_resizing()
@@ -415,7 +361,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         Called to test if this window can be hovered.
         """
-        return not (self.resizing_mode_active or self.title_bar.held)
+        return not (self.resizing_mode_active or (self.title_bar is not None and
+                                                  self.title_bar.held))
 
     # noinspection PyUnusedLocal
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
@@ -512,6 +459,37 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Rebuilds the window when the theme has changed.
 
         """
+        if self._window_root_container is None:
+            self._window_root_container = UIContainer(pygame.Rect(self.relative_rect.x +
+                                                                  self.shadow_width,
+                                                                  self.relative_rect.y +
+                                                                  self.shadow_width,
+                                                                  self.relative_rect.width -
+                                                                  (2 * self.shadow_width),
+                                                                  self.relative_rect.height -
+                                                                  (2 * self.shadow_width)),
+                                                      manager=self.ui_manager,
+                                                      starting_height=1,
+                                                      is_window_root_container=True,
+                                                      container=None,
+                                                      parent_element=self,
+                                                      object_id="#window_root_container")
+        if self.window_element_container is None:
+            window_container_rect = pygame.Rect(self.border_width,
+                                                self.title_bar_height,
+                                                (self._window_root_container.relative_rect.width -
+                                                 (2 * self.border_width)),
+                                                (self._window_root_container.relative_rect.height -
+                                                 self.title_bar_height - self.border_width))
+            self.window_element_container = UIContainer(window_container_rect,
+                                                        self.ui_manager,
+                                                        starting_height=0,
+                                                        container=self._window_root_container,
+                                                        parent_element=self,
+                                                        object_id="#window_element_container",
+                                                        anchors={'top': 'top', 'bottom': 'bottom',
+                                                                 'left': 'left', 'right': 'right'})
+
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
@@ -585,11 +563,14 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 else:
                     if self.close_window_button is not None:
                         self.close_window_button.kill()
+                        self.close_window_button = None
             else:
                 if self.title_bar is not None:
                     self.title_bar.kill()
+                    self.title_bar = None
                 if self.close_window_button is not None:
                     self.close_window_button.kill()
+                    self.close_window_button = None
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -666,6 +647,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     self.title_bar_height = title_bar_height
                     self.title_bar_button_width = title_bar_height
                     has_any_changed = True
+        else:
+            self.title_bar_height = 0
 
         if has_any_changed:
             self.rebuild()

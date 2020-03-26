@@ -28,12 +28,12 @@ class TestUIWindow:
     def test_creation(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
         UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
-                 manager=default_ui_manager, element_id='test_window')
+                 manager=default_ui_manager, element_id='window')
 
     def test_set_blocking(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                           _display_surface_return_none):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager, element_id='window')
 
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
@@ -60,7 +60,7 @@ class TestUIWindow:
     def test_set_minimum_dimensions(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                     _display_surface_return_none):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         window.set_minimum_dimensions((200, 200))
         window.set_dimensions((100, 100))
@@ -74,7 +74,7 @@ class TestUIWindow:
     def test_set_dimensions(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                             _display_surface_return_none):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -101,7 +101,7 @@ class TestUIWindow:
     def test_set_relative_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -121,7 +121,7 @@ class TestUIWindow:
 
     def test_set_position(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -142,7 +142,7 @@ class TestUIWindow:
     def test_process_event(self, _init_pygame, default_ui_manager,
                            _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -173,7 +173,7 @@ class TestUIWindow:
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
         assert confirm_event_fired
-        assert event_object_id == 'test_window.#specific_id_test'
+        assert event_object_id == 'window.#specific_id_test'
 
         consumed_event = window.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                  {'button': pygame.BUTTON_RIGHT,
@@ -200,7 +200,7 @@ class TestUIWindow:
                                   default_ui_manager,
                                   _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
         clicked_inside = window.check_clicked_inside_or_blocking(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                                     {'button': 1,
                                                                                      'pos': (100, 100)}))
@@ -210,7 +210,7 @@ class TestUIWindow:
     def test_update(self, _init_pygame, default_ui_manager,
                     _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -246,7 +246,7 @@ class TestUIWindow:
     def test_check_hover(self, _init_pygame, default_ui_manager: UIManager,
                          _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window',
+                          manager=default_ui_manager,
                           resizable=True)
 
         default_ui_manager.mouse_position = (window.rect.left + window.shadow_width,
@@ -287,7 +287,7 @@ class TestUIWindow:
     def test_get_top_layer(self, _init_pygame, default_ui_manager,
                            _display_surface_return_none):
         window = UIWindow(pygame.Rect(0, 0, 400, 300), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
@@ -314,7 +314,7 @@ class TestUIWindow:
     def test_change_layer(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         assert window.get_top_layer() == 4
 
@@ -330,7 +330,7 @@ class TestUIWindow:
                   default_ui_manager: IUIManagerInterface,
                   _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         assert len(default_ui_manager.get_root_container().elements) == 2
         assert len(default_ui_manager.get_sprite_group().sprites()) == 6
@@ -351,7 +351,7 @@ class TestUIWindow:
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
         assert confirm_event_fired
-        assert event_object_id == 'test_window'
+        assert event_object_id == 'window'
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
@@ -361,7 +361,7 @@ class TestUIWindow:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_window_non_default.json"))
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=manager, element_id='test_window')
+                          manager=manager)
 
         assert window.image is not None
 
@@ -397,8 +397,10 @@ class TestUIWindow:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_window_no_title_bar.json"))
         window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
-                          manager=manager, element_id='test_window')
+                          manager=manager)
 
+        assert window.title_bar is None
+        assert window.close_window_button is None
         assert window.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
@@ -411,7 +413,7 @@ class TestUIWindow:
                                                      "themes", "ui_window_bad_values.json"))
         window = UIWindow(pygame.Rect(0, 0, 200, 200),
                           window_display_title="Test Window",
-                          manager=manager, element_id='test_window')
+                          manager=manager)
 
         assert window.image is not None
 
@@ -419,7 +421,7 @@ class TestUIWindow:
                           _display_surface_return_none):
         window = UIWindow(pygame.Rect(100, 100, 200, 200),
                           window_display_title="Test Window",
-                          manager=default_ui_manager, element_id='test_window')
+                          manager=default_ui_manager)
 
         window.focus()
         window.unfocus()
