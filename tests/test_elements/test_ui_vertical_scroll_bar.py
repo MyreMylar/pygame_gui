@@ -10,6 +10,11 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.interfaces import IUIManagerInterface
 
+try:
+    pygame.MOUSEWHEEL
+except AttributeError:
+    pygame.MOUSEWHEEL = -1
+
 
 class TestUIVerticalScrollBar:
 

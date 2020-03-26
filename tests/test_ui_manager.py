@@ -211,16 +211,21 @@ class TestUIManager:
         # just add a distance value to disable this test for now.
         result_pixel_array = test_pixel_array.compare(comparison_pixel_array, distance=0.05)
         result_surface = result_pixel_array.make_surface()
-        test_pixel_array.close()
-        comparison_pixel_array.close()
+        try:
+            test_pixel_array.close()
+            comparison_pixel_array.close()
+        except AttributeError:
+            pass
 
         no_mismatch_colour = pygame.Color(255, 255, 255, 255)
 
         for x in range(0, 150):
             for y in range(0, 30):
                 assert result_surface.unmap_rgb(result_pixel_array[x, y]) == no_mismatch_colour
-
-        result_pixel_array.close()
+        try:
+            result_pixel_array.close()
+        except AttributeError:
+            pass
         pygame.display.quit()
 
     def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none):

@@ -35,7 +35,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(400.0, 300.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(400.0, 300.0))
 
         assert found_position is True
 
@@ -45,7 +45,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(0.0, -600.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(0.0, -600.0))
 
         assert found_position is False
 
@@ -54,7 +54,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(300.0, 590.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(300.0, 590.0))
 
         root_window_rect = default_ui_manager.get_root_container().rect
 
@@ -65,7 +65,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(799.0, 300.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(799.0, 300.0))
 
         root_window_rect = default_ui_manager.get_root_container().rect
 
@@ -76,7 +76,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(1.0, 300.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(1.0, 300.0))
 
         root_window_rect = default_ui_manager.get_root_container().rect
 
@@ -89,7 +89,7 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=manager)
 
-        found_position = tool_tip.find_valid_position(pygame.Vector2(25.0, 25.0))
+        found_position = tool_tip.find_valid_position(pygame.math.Vector2(25.0, 25.0))
 
         root_window_rect = manager.get_root_container().rect
 

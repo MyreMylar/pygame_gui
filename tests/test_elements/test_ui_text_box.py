@@ -200,7 +200,7 @@ class TestUITextBox:
                                        'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 100, 100),
                              manager=default_ui_manager)
-        text_box.set_position(pygame.Vector2(0.0, 0.0))
+        text_box.set_position(pygame.math.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
@@ -221,7 +221,7 @@ class TestUITextBox:
                                        'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
-        text_box.set_relative_position(pygame.Vector2(0.0, 0.0))
+        text_box.set_relative_position(pygame.math.Vector2(0.0, 0.0))
         assert text_box.rect.topleft == (0, 0)
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,

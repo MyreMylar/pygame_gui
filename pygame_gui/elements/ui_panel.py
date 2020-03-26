@@ -129,9 +129,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         consumed_event = False
         if (self is not None and
                 event.type == MOUSEBUTTONDOWN and
-                event.button in [pygame.constants.BUTTON_LEFT,
-                                 pygame.constants.BUTTON_RIGHT,
-                                 pygame.constants.BUTTON_MIDDLE]):
+                event.button in [pygame.BUTTON_LEFT,
+                                 pygame.BUTTON_RIGHT,
+                                 pygame.BUTTON_MIDDLE]):
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 

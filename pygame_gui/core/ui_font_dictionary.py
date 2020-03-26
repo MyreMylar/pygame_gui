@@ -257,7 +257,7 @@ class UIFontDictionary:
             new_font.set_bold(font_style['bold'])
             new_font.set_italic(font_style['italic'])
             self.loaded_fonts[font_id] = new_font
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             warnings.warn("Failed to load font at path: " + font_path)
 
     def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,

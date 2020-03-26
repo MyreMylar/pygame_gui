@@ -220,7 +220,7 @@ class TestUIButton:
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=default_ui_manager)
 
-        button.set_dimensions(pygame.Vector2(250.0, 60.0))
+        button.set_dimensions(pygame.math.Vector2(250.0, 60.0))
 
         assert button.drawable_shape.containing_rect.width == 250 and button.drawable_shape.containing_rect.height == 60
 
