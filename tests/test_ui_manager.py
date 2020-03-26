@@ -193,7 +193,7 @@ class TestUIManager:
         Note: the pygame comparison function here seems a little unreliable. Would not be surprised if it's behaviour
         changes.
         """
-        test_surface = pygame.display.set_mode((150, 30), depth=32)
+        test_surface = pygame.display.set_mode((150, 30), 0, 32)
         manager = UIManager((150, 30))
         UIButton(relative_rect=pygame.Rect(0, 0, 150, 30), text="Test", manager=manager)
         # manager.update(0.01)

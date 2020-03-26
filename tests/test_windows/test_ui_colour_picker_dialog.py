@@ -11,6 +11,16 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
 
+try:
+    # mouse button constants not defined in pygame 1.9.3
+    pygame.BUTTON_LEFT
+    pygame.BUTTON_MIDDLE
+    pygame.BUTTON_RIGHT
+except AttributeError:
+    pygame.BUTTON_LEFT = 1
+    pygame.BUTTON_MIDDLE = 2
+    pygame.BUTTON_RIGHT = 3
+
 
 class TestUIColourChannelEditor:
     def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):

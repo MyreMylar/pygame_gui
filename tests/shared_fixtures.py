@@ -20,13 +20,13 @@ def default_ui_manager() -> IUIManagerInterface:
 
 @pytest.fixture()
 def default_display_surface():
-    display = pygame.display.set_mode((10, 10), depth=32)
+    display = pygame.display.set_mode((10, 10), 0, 32)
     yield display
     pygame.display.quit()
 
 
 @pytest.fixture()
 def _display_surface_return_none():
-    pygame.display.set_mode((10, 10), depth=32)
+    pygame.display.set_mode((10, 10), 0, 32)
     yield None
     pygame.display.quit()

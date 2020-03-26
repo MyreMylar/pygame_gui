@@ -13,6 +13,16 @@ from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.elements import UIWindow, UIButton, UIImage
 from pygame_gui.elements import UIHorizontalSlider, UILabel, UITextEntryLine
 
+try:
+    # mouse button constants not defined in pygame 1.9.3
+    pygame.BUTTON_LEFT
+    pygame.BUTTON_MIDDLE
+    pygame.BUTTON_RIGHT
+except AttributeError:
+    pygame.BUTTON_LEFT = 1
+    pygame.BUTTON_MIDDLE = 2
+    pygame.BUTTON_RIGHT = 3
+
 
 class UIColourChannelEditor(UIElement):
     """

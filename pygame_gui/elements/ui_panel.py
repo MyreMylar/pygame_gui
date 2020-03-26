@@ -11,6 +11,16 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
+try:
+    # mouse button constants not defined in pygame 1.9.3
+    pygame.BUTTON_LEFT
+    pygame.BUTTON_MIDDLE
+    pygame.BUTTON_RIGHT
+except AttributeError:
+    pygame.BUTTON_LEFT = 1
+    pygame.BUTTON_MIDDLE = 2
+    pygame.BUTTON_RIGHT = 3
+
 
 class UIPanel(UIElement, IContainerLikeInterface):
     """
@@ -119,9 +129,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         consumed_event = False
         if (self is not None and
                 event.type == MOUSEBUTTONDOWN and
-                event.button in [pygame.BUTTON_LEFT,
-                                 pygame.BUTTON_RIGHT,
-                                 pygame.BUTTON_MIDDLE]):
+                event.button in [pygame.constants.BUTTON_LEFT,
+                                 pygame.constants.BUTTON_RIGHT,
+                                 pygame.constants.BUTTON_MIDDLE]):
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
