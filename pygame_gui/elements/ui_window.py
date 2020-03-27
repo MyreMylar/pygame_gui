@@ -13,10 +13,10 @@ from pygame_gui.elements.ui_button import UIButton
 
 try:
     # mouse button constants not defined in pygame 1.9.3
-    pygame.BUTTON_LEFT
-    pygame.BUTTON_MIDDLE
-    pygame.BUTTON_RIGHT
-except AttributeError:
+    assert pygame.BUTTON_LEFT == 1
+    assert pygame.BUTTON_MIDDLE == 2
+    assert pygame.BUTTON_RIGHT == 3
+except (AttributeError, AssertionError):
     pygame.BUTTON_LEFT = 1
     pygame.BUTTON_MIDDLE = 2
     pygame.BUTTON_RIGHT = 3
@@ -83,7 +83,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.enable_title_bar = True
         self.enable_close_button = True
         self.title_bar_height = 28
-        self.title_bar_button_width = self.title_bar_height
+        self.title_bar_close_button_width = self.title_bar_height
 
         # UI elements
         self.window_element_container = None
@@ -520,11 +520,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             if self.enable_title_bar:
                 if self.title_bar is not None:
                     self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
-                                                   self.title_bar_button_width,
+                                                   self.title_bar_close_button_width,
                                                    self.title_bar_height))
                 else:
                     title_bar_width = (self._window_root_container.relative_rect.width -
-                                       self.title_bar_button_width)
+                                       self.title_bar_close_button_width)
                     self.title_bar = UIButton(relative_rect=pygame.Rect(0, 0,
                                                                         title_bar_width,
                                                                         self.title_bar_height),
@@ -540,13 +540,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
                 if self.enable_close_button:
                     if self.close_window_button is not None:
-                        close_button_pos = (-self.title_bar_button_width, 0)
-                        self.close_window_button.set_dimensions((self.title_bar_button_width,
+                        close_button_pos = (-self.title_bar_close_button_width, 0)
+                        self.close_window_button.set_dimensions((self.title_bar_close_button_width,
                                                                  self.title_bar_height))
                         self.close_window_button.set_relative_position(close_button_pos)
                     else:
-                        close_rect = pygame.Rect((-self.title_bar_button_width, 0),
-                                                 (self.title_bar_button_width,
+                        close_rect = pygame.Rect((-self.title_bar_close_button_width, 0),
+                                                 (self.title_bar_close_button_width,
                                                   self.title_bar_height))
                         self.close_window_button = UIButton(relative_rect=close_rect,
                                                             text='╳',
@@ -609,6 +609,20 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             self.border_colour = border_colour
             has_any_changed = True
 
+        if self._check_title_bar_theming_changed():
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+
+    def _check_title_bar_theming_changed(self):
+        """
+        Check to see if any theming parameters for the title bar have changed.
+
+        :return: True if any of the theming parameters have changed.
+
+        """
+        has_any_changed = False
         enable_title_bar_param = self.ui_theme.get_misc_data(self.object_ids,
                                                              self.element_ids,
                                                              'enable_title_bar')
@@ -620,8 +634,20 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             if enable_title_bar != self.enable_title_bar:
                 self.enable_title_bar = enable_title_bar
                 has_any_changed = True
-
         if self.enable_title_bar:
+
+            title_bar_height_string = self.ui_theme.get_misc_data(self.object_ids,
+                                                                  self.element_ids,
+                                                                  'title_bar_height')
+            if title_bar_height_string is not None:
+                try:
+                    title_bar_height = int(title_bar_height_string)
+                except ValueError:
+                    title_bar_height = 28
+                if title_bar_height != self.title_bar_height:
+                    self.title_bar_height = title_bar_height
+                    self.title_bar_close_button_width = title_bar_height
+                    has_any_changed = True
 
             enable_close_button_param = self.ui_theme.get_misc_data(self.object_ids,
                                                                     self.element_ids,
@@ -635,20 +661,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     self.enable_close_button = enable_close_button
                     has_any_changed = True
 
-            title_bar_height_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'title_bar_height')
-            if title_bar_height_string is not None:
-                try:
-                    title_bar_height = int(title_bar_height_string)
-                except ValueError:
-                    title_bar_height = 28
-                if title_bar_height != self.title_bar_height:
-                    self.title_bar_height = title_bar_height
-                    self.title_bar_button_width = title_bar_height
-                    has_any_changed = True
+            if not self.enable_close_button:
+                self.title_bar_close_button_width = 0
+
         else:
             self.title_bar_height = 0
-
-        if has_any_changed:
-            self.rebuild()
+        return has_any_changed

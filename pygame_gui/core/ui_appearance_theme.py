@@ -1,5 +1,4 @@
 import json
-import os
 import io
 import base64
 import warnings
@@ -7,6 +6,7 @@ import warnings
 from contextlib import contextmanager
 from collections import OrderedDict
 from typing import Union, List, Dict, Any
+from os import path, stat
 
 import pygame
 
@@ -18,9 +18,9 @@ from pygame_gui.core.colour_gradient import ColourGradient
 
 # Only import the 'stringified' data if we can't find the actual default theme file
 # This is need for working PyInstaller build
-ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-THEME_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/default_theme.json'))
-if not os.path.exists(THEME_PATH):
+ROOT_PATH = path.abspath(path.dirname(path.dirname(__file__)))
+THEME_PATH = path.normpath(path.join(ROOT_PATH, 'data/default_theme.json'))
+if not path.exists(THEME_PATH):
     from pygame_gui.core._string_data import default_theme
 
 try:
@@ -88,15 +88,11 @@ class UIAppearanceTheme:
         # these hardcoded paths should be OK for PyInstaller right now because they will never
         # actually used while fira_code is the default pre-loaded font. May need to
         # re-visit this later.
-        module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        reg_path = os.path.abspath(os.path.join(module_root_path,
-                                                'data/FiraCode-Regular.ttf'))
-        bold_path = os.path.abspath(os.path.join(module_root_path,
-                                                 'data/FiraCode-Bold.ttf'))
-        italic_path = os.path.abspath(os.path.join(module_root_path,
-                                                   'data/FiraMono-RegularItalic.ttf'))
-        bold_italic_path = os.path.abspath(os.path.join(module_root_path,
-                                                        'data/FiraMono-BoldItalic.ttf'))
+        module_root_path = path.abspath(path.dirname(path.dirname(__file__)))
+        reg_path = path.abspath(path.join(module_root_path, 'data/FiraCode-Regular.ttf'))
+        bold_path = path.abspath(path.join(module_root_path, 'data/FiraCode-Bold.ttf'))
+        italic_path = path.abspath(path.join(module_root_path, 'data/FiraMono-RegularItalic.ttf'))
+        bold_italic_path = path.abspath(path.join(module_root_path, 'data/FiraMono-BoldItalic.ttf'))
         self.base_font_info = {'name': 'fira_code',
                                'size': 14,
                                'bold': False,
@@ -127,8 +123,9 @@ class UIAppearanceTheme:
 
         # Only load the 'stringified' data if we can't find the actual default theme file
         # This is need for PyInstaller build
-        default_theme_file_path = os.path.normpath(os.path.join(module_root_path,
-                                                                'data', 'default_theme.json'))
+        default_theme_file_path = path.normpath(path.join(module_root_path,
+                                                          'data',
+                                                          'default_theme.json'))
         self.load_default_theme_file(default_theme_file_path)
 
     def load_default_theme_file(self, default_theme_file_path):
@@ -137,7 +134,7 @@ class UIAppearanceTheme:
         been turned into an exe by a program like PyInstaller.
 
         """
-        if os.path.exists(default_theme_file_path):
+        if path.exists(default_theme_file_path):
             self.load_theme(default_theme_file_path)
         else:
             self.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
@@ -161,7 +158,7 @@ class UIAppearanceTheme:
         """
         if self._theme_file_path is not None:
             try:
-                stamp = os.stat(self._theme_file_path).st_mtime
+                stamp = stat(self._theme_file_path).st_mtime
             except FileNotFoundError:
                 return False
 
@@ -259,17 +256,18 @@ class UIAppearanceTheme:
             for path_key in image_paths_dict:
                 image_path_data = image_paths_dict[path_key]
                 if image_path_data['changed']:
-                    path = image_path_data['path']
+                    image_path = image_path_data['path']
                     image = None
-                    if path in self.loaded_image_files:
-                        image = self.loaded_image_files[path]
+                    if image_path in self.loaded_image_files:
+                        image = self.loaded_image_files[image_path]
                     else:
                         try:
-                            image = pygame.image.load(create_resource_path(path)).convert_alpha()
+                            image_resource_path = create_resource_path(image_path)
+                            image = pygame.image.load(image_resource_path).convert_alpha()
                             self.loaded_image_files[path] = image
                         except pygame.error:
                             warnings.warn('Unable to load image at path: ' +
-                                          str(create_resource_path(path)))
+                                          str(create_resource_path(image_path)))
 
                     if image is not None:
                         if 'sub_surface_rect' in image_path_data:
@@ -640,7 +638,7 @@ class UIAppearanceTheme:
         if not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)
             try:
-                self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+                self._theme_file_last_modified = stat(self._theme_file_path).st_mtime
             except FileNotFoundError:
                 self._theme_file_last_modified = 0
             used_file_path = self._theme_file_path

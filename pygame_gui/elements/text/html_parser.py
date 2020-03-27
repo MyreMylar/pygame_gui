@@ -127,8 +127,6 @@ class TextStyleData:
                  element_ids: List[str],
                  object_id: List[Union[str, None]]):
 
-        super().__init__()
-
         self.ui_theme = theme
         self.len_text = 0
 
@@ -176,7 +174,7 @@ class TextStyleData:
         styling block is closed
         :param styles: The styling dictionary that contains the actual styling.
         """
-        old_styles = {name: self.current_style.get(name) for name in styles.keys()}
+        old_styles = {name: self.current_style.get(name) for name in styles}
         self.style_stack.append((key, old_styles))
         self.current_style.update(styles)
         # self.next_style.update(styles)
@@ -307,7 +305,8 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
                  element_ids: List[str],
                  object_id: List[Union[str, None]]):
 
-        super().__init__(ui_theme, element_ids, object_id)
+        TextStyleData.__init__(self, ui_theme, element_ids, object_id)
+        html.parser.HTMLParser.__init__(self)
 
         self.ui_theme = ui_theme
         self.element_ids = element_ids

@@ -491,11 +491,11 @@ class UISelectionList(UIElement):
                 object_id='#selection_list_container')
         else:
             self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
-                                                              (2 * self.shadow_width) -
-                                                              (2 * self.border_width),
+                                                               (2 * self.shadow_width) -
+                                                               (2 * self.border_width),
                                                                self.relative_rect.height -
-                                                              (2 * self.shadow_width) -
-                                                              (2 * self.border_width)))
+                                                               (2 * self.shadow_width) -
+                                                               (2 * self.border_width)))
             self.list_and_scroll_bar_container.set_relative_position((self.relative_rect.left +
                                                                       self.shadow_width +
                                                                       self.border_width,

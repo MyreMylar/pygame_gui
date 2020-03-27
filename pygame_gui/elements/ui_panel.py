@@ -13,10 +13,10 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleS
 
 try:
     # mouse button constants not defined in pygame 1.9.3
-    pygame.BUTTON_LEFT
-    pygame.BUTTON_MIDDLE
-    pygame.BUTTON_RIGHT
-except AttributeError:
+    assert pygame.BUTTON_LEFT == 1
+    assert pygame.BUTTON_MIDDLE == 2
+    assert pygame.BUTTON_RIGHT == 3
+except (AttributeError, AssertionError):
     pygame.BUTTON_LEFT = 1
     pygame.BUTTON_MIDDLE = 2
     pygame.BUTTON_RIGHT = 3
