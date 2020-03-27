@@ -500,7 +500,8 @@ class UIColourPickerDialog(UIWindow):
             if event.ui_element in [self.hue_channel, self.sat_channel, self.value_channel]:
                 self.current_colour.hsva = (self.hue_channel.current_value,
                                             self.sat_channel.current_value,
-                                            self.value_channel.current_value)
+                                            self.value_channel.current_value,
+                                            100)
                 self.changed_hsv_update_rgb()
                 self.update_current_colour_image()
                 self.update_saturation_value_square()

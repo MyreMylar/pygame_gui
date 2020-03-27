@@ -313,7 +313,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         x_diff = mouse_x - self.start_resize_point[0]
         y_diff = mouse_y - self.start_resize_point[1]
-        if self.rect.height >= self.minimum_dimensions[1]:
+        if y_dimension >= self.minimum_dimensions[1]:
             y_pos = self.start_resize_rect.y
             y_dimension = self.start_resize_rect.height
             if self.edge_hovering[1]:
@@ -327,7 +327,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     y_pos = self.rect.bottom - self.minimum_dimensions[1]
                 else:
                     y_pos = self.rect.top
-        if self.rect.width >= self.minimum_dimensions[0]:
+        if x_dimension >= self.minimum_dimensions[0]:
             x_pos = self.start_resize_rect.x
             x_dimension = self.start_resize_rect.width
             if self.edge_hovering[0]:
