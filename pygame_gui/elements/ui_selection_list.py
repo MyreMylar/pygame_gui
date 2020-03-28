@@ -2,10 +2,6 @@ from typing import Union, Dict, Tuple, List
 
 import pygame
 
-from pygame import USEREVENT
-from pygame.event import Event, post
-from pygame.math import Vector2
-
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
@@ -288,7 +284,7 @@ class UISelectionList(UIElement):
             else:
                 break
 
-    def process_event(self, event: Event) -> bool:
+    def process_event(self, event: pygame.event.Event) -> bool:
         """
         Can be overridden, also handle resizing windows. Gives UI Windows access to pygame events.
         Currently just blocks mouse click down events from passing through the panel.
@@ -299,8 +295,8 @@ class UISelectionList(UIElement):
 
         """
         consumed_event = False
-        if (event.type == USEREVENT and event.user_type in [UI_BUTTON_PRESSED,
-                                                            UI_BUTTON_DOUBLE_CLICKED] and
+        if (event.type == pygame.USEREVENT and
+                event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED] and
                 event.ui_element in self.item_list_container.elements):
             for item in self.item_list:
                 if item['button_element'] == event.ui_element:
@@ -328,8 +324,8 @@ class UISelectionList(UIElement):
                                           'ui_element': self,
                                           'ui_object_id': self.most_specific_combined_id}
 
-                    selection_list_event = Event(USEREVENT, event_data)
-                    post(selection_list_event)
+                    selection_list_event = pygame.event.Event(pygame.USEREVENT, event_data)
+                    pygame.event.post(selection_list_event)
                 elif not self.allow_multi_select:
                     if item['selected']:
                         item['selected'] = False
@@ -340,12 +336,15 @@ class UISelectionList(UIElement):
                                           'text': item['text'],
                                           'ui_element': self,
                                           'ui_object_id': self.most_specific_combined_id}
-                            drop_down_changed_event = Event(USEREVENT, event_data)
-                            post(drop_down_changed_event)
+                            drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
+                                                                         event_data)
+                            pygame.event.post(drop_down_changed_event)
 
         return consumed_event
 
-    def set_dimensions(self, dimensions: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Set the size of this panel and then resizes and shifts the contents of the panel container
         to fit the new size.
@@ -362,7 +361,7 @@ class UISelectionList(UIElement):
         container_height = self.relative_rect.height - (2 * border_and_shadow)
         self.list_and_scroll_bar_container.set_dimensions((container_width, container_height))
 
-    def set_relative_position(self, position: Union[Vector2,
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
                                                     Tuple[float, float]]):
         """
@@ -377,7 +376,7 @@ class UISelectionList(UIElement):
         container_top = self.relative_rect.top + border_and_shadow
         self.list_and_scroll_bar_container.set_relative_position((container_left, container_top))
 
-    def set_position(self, position: Union[Vector2,
+    def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
                                            Tuple[float, float]]):
         """

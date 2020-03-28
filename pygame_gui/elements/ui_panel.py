@@ -2,11 +2,6 @@ from typing import Union, Dict, Tuple
 
 import pygame
 
-from pygame import Rect
-from pygame.math import Vector2
-from pygame.event import Event
-from pygame.constants import MOUSEBUTTONDOWN
-
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -51,7 +46,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     """
     def __init__(self,
-                 relative_rect: Rect,
+                 relative_rect: pygame.Rect,
                  starting_layer_height: int,
                  manager: IUIManagerInterface,
                  *,
@@ -92,12 +87,12 @@ class UIPanel(UIElement, IContainerLikeInterface):
         else:
             self.container_margins = margins
 
-        container_rect = Rect(self.relative_rect.left + self.container_margins['left'],
-                              self.relative_rect.top + self.container_margins['top'],
-                              self.relative_rect.width - (self.container_margins['left'] +
-                                                          self.container_margins['right']),
-                              self.relative_rect.height - (self.container_margins['top'] +
-                                                           self.container_margins['bottom']))
+        container_rect = pygame.Rect(self.relative_rect.left + self.container_margins['left'],
+                                     self.relative_rect.top + self.container_margins['top'],
+                                     self.relative_rect.width - (self.container_margins['left'] +
+                                                                 self.container_margins['right']),
+                                     self.relative_rect.height - (self.container_margins['top'] +
+                                                                  self.container_margins['bottom']))
 
         self.panel_container = UIContainer(container_rect, manager,
                                            starting_height=starting_layer_height,
@@ -116,7 +111,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if self.get_container().layer_thickness != self.layer_thickness:
             self.layer_thickness = self.get_container().layer_thickness
 
-    def process_event(self, event: Event) -> bool:
+    def process_event(self, event: pygame.event.Event) -> bool:
         """
         Can be overridden, also handle resizing windows. Gives UI Windows access to pygame events.
         Currently just blocks mouse click down events from passing through the panel.
@@ -128,7 +123,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         consumed_event = False
         if (self is not None and
-                event.type == MOUSEBUTTONDOWN and
+                event.type == pygame.MOUSEBUTTONDOWN and
                 event.button in [pygame.BUTTON_LEFT,
                                  pygame.BUTTON_RIGHT,
                                  pygame.BUTTON_MIDDLE]):
@@ -158,7 +153,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.get_container().kill()
         super().kill()
 
-    def set_dimensions(self, dimensions: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]]):
         """
         Set the size of this panel and then re-sizes and shifts the contents of the panel container
         to fit the new size.
@@ -180,7 +177,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
             self.get_container().set_dimensions(new_container_dimensions)
             self.get_container().set_relative_position(container_rel_pos)
 
-    def set_relative_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2,
+                                                    Tuple[int, int],
+                                                    Tuple[float, float]]):
         """
         Method to directly set the relative rect position of an element.
 
@@ -192,7 +191,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
                              self.relative_rect.y + self.container_margins['top'])
         self.get_container().set_relative_position(container_rel_pos)
 
-    def set_position(self, position: Union[Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2,
+                                           Tuple[int, int],
+                                           Tuple[float, float]]):
         """
         Method to directly set the absolute screen rect position of an element.
 
