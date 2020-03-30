@@ -157,6 +157,15 @@ class UIFontDictionary:
         else:
             return self.loaded_fonts[self.default_font_id]
 
+    def get_default_font(self) -> pygame.font.Font:
+        """
+        Grab the default font.
+
+        :return: The default font.
+
+        """
+        return self.find_font(self.default_font_size, self.default_font_name)
+
     def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
