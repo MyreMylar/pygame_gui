@@ -376,15 +376,17 @@ class RoundedRectangleShape(DrawableShape):
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
             self.states[state_str].surface.blit(bab_surface, (0, 0))
 
-            if shape_id is not None:
-                if self.states[state_str].cached_background_id is not None:
-                    cached_id = self.states[state_str].cached_background_id
-                    self.shape_cache.remove_user_from_cache_item(cached_id)
-                if not self.has_been_resized and ((self.containing_rect.width *
-                                                   self.containing_rect.height) < 40000):
-                    self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
-                                                          shape_id)
-                    self.states[state_str].cached_background_id = shape_id
+            if self.states[state_str].cached_background_id is not None:
+                cached_id = self.states[state_str].cached_background_id
+                self.shape_cache.remove_user_from_cache_item(cached_id)
+            if (not self.has_been_resized
+                    and ((self.containing_rect.width * self.containing_rect.height) < 40000)
+                    and (shape_id is not None
+                         and self.states[state_str].surface.get_width() <= 1024
+                         and self.states[state_str].surface.get_height() <= 1024)):
+                self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
+                                                      shape_id)
+                self.states[state_str].cached_background_id = shape_id
 
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 

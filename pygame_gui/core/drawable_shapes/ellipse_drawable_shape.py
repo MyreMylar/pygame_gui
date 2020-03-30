@@ -236,7 +236,9 @@ class EllipseDrawableShape(DrawableShape):
 
             self.states[state_str].surface.blit(bab_surface, (0, 0))
 
-            if shape_id is not None:
+            if (shape_id is not None and
+                    self.states[state_str].surface.get_width() <= 1024 and
+                    self.states[state_str].surface.get_height() <= 1024):
                 self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
                                                       shape_id)
 

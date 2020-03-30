@@ -220,8 +220,11 @@ class RectDrawableShape(DrawableShape):
             if self.states[state_str].cached_background_id is not None:
                 self.shape_cache.remove_user_from_cache_item(
                     self.states[state_str].cached_background_id)
-            if not self.has_been_resized and (
-                    (self.containing_rect.width * self.containing_rect.height) < 40000):
+            if (not self.has_been_resized
+                    and ((self.containing_rect.width * self.containing_rect.height) < 40000)
+                    and (shape_id is not None
+                         and self.states[state_str].surface.get_width() <= 1024
+                         and self.states[state_str].surface.get_height() <= 1024)):
                 self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
                                                       shape_id)
                 self.states[state_str].cached_background_id = shape_id
