@@ -293,7 +293,6 @@ class UIButton(UIElement):
                 if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
                     self.held = False
                     self.set_inactive()
-                    self.ui_manager.unset_focus_element()
                     consumed_event = True
                     self.pressed_event = True
 

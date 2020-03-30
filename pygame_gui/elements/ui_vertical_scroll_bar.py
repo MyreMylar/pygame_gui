@@ -226,7 +226,6 @@ class UIVerticalScrollBar(UIElement):
         'bar' part of the scroll bar.
         """
         if self.sliding_button is not None:
-            self.ui_manager.unset_focus_element()
             self.ui_manager.set_focus_element(self.sliding_button)
 
     def process_event(self, event: pygame.event.Event) -> bool:

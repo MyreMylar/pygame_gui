@@ -170,9 +170,8 @@ class UIManager(IUIManagerInterface):
                 for ui_element in sprites_in_layer:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_x, mouse_y = event.pos
-                        if (ui_element.hover_point(mouse_x, mouse_y) and
-                                ui_element is not self.focused_element):
-                            self.unset_focus_element()
+                        if ui_element.hover_point(mouse_x, mouse_y):
+                            # self.unset_focus_element()
                             self.set_focus_element(ui_element)
 
                     consumed_event = ui_element.process_event(event)
@@ -365,14 +364,6 @@ class UIManager(IUIManagerInterface):
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
 
-    def unset_focus_element(self):
-        """
-        Clear the currently focused element.
-        """
-        if self.focused_element is not None:
-            self.focused_element.unfocus()
-            self.focused_element = None
-
     def set_focus_element(self, ui_element: UIElement):
         """
         Set an element as the focused element.
@@ -381,12 +372,19 @@ class UIManager(IUIManagerInterface):
 
         :param ui_element: The element to focus on.
         """
+        if ui_element is self.focused_element:
+            return
+        if self.focused_element is not None:
+            self.focused_element.unfocus()
+            self.focused_element = None
+
         if self.focused_element is None:
             self.focused_element = ui_element
-            self.focused_element.focus()
+            if ui_element is not None:
+                self.focused_element.focus()
 
-            if 'vertical_scroll_bar' in ui_element.element_ids:
-                self.last_focused_vertical_scrollbar = ui_element
+                if 'vertical_scroll_bar' in ui_element.element_ids:
+                    self.last_focused_vertical_scrollbar = ui_element
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: UIElement):
         """

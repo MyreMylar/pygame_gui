@@ -258,17 +258,20 @@ class TestUIManager:
 
         assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
 
-    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager,
+                                             _display_surface_return_none):
         """
         Test if we correctly select the focused element and unselect it with these functions.
         """
-        test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30), text="Test", manager=default_ui_manager)
+        test_button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                               text="Test", manager=default_ui_manager)
         default_ui_manager.set_focus_element(test_button)
         was_selected_correctly = test_button.is_focused
-        default_ui_manager.unset_focus_element()
-        assert was_selected_correctly is True and test_button.is_selected is False
+        default_ui_manager.set_focus_element(None)
+        assert was_selected_correctly is True and test_button.is_focused is False
 
-    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager,
+                                       _display_surface_return_none):
         test_scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                               visible_percentage=0.5,
                                               manager=default_ui_manager)

@@ -135,11 +135,6 @@ class IUIManagerInterface:
 
         """
 
-    def unset_focus_element(self):
-        """
-        Clear the currently focused element.
-        """
-
     def set_focus_element(self, ui_element):
         """
         Set an element as the focused element.
