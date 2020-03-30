@@ -3,6 +3,7 @@ from typing import Union, Tuple, Dict
 import pygame
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
+from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
@@ -193,6 +194,10 @@ class UIButton(UIElement):
         """
         self.drawable_shape.set_active_state('hovered')
         self.hover_time = 0.0
+        event_data = {'user_type': UI_BUTTON_ON_HOVERED,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
     def while_hovering(self, time_delta: float,
                        mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -224,6 +229,11 @@ class UIButton(UIElement):
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
+
+        event_data = {'user_type': UI_BUTTON_ON_UNHOVERED,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
     def update(self, time_delta: float):
         """

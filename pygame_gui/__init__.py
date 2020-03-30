@@ -10,6 +10,7 @@ from pygame_gui import elements
 from pygame_gui import windows
 from pygame_gui.elements import text
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
+from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED, UI_TEXT_ENTRY_FINISHED
 from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED, UI_HORIZONTAL_SLIDER_MOVED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
@@ -27,6 +28,8 @@ __all__ = ['UIManager',
            'windows',
            'text',
            'UI_BUTTON_PRESSED',
+           'UI_BUTTON_ON_HOVERED',
+           'UI_BUTTON_ON_UNHOVERED',
            'UI_BUTTON_DOUBLE_CLICKED',
            'UI_TEXT_BOX_LINK_CLICKED',
            'UI_TEXT_ENTRY_FINISHED',

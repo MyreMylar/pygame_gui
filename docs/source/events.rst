@@ -61,6 +61,48 @@ Fired when a user double clicks on a button by left clicking on it with a mouse,
                 if event.ui_element == test_button:
                     print('Test button pressed')
 
+:class:`UIButton <pygame_gui.elements.UIButton>` - UI_BUTTON_ON_HOVERED
+...........................................................................
+
+Fired when a user starts hovering over a button with the mouse.
+
+ - **'type'** : pygame.USEREVENT
+ - **'user_type'** : pygame_gui.UI_BUTTON_ON_HOVERED
+ - **'ui_element'** : The :class:`UIButton <pygame_gui.elements.UIButton>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the button that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+        if event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
+                if event.ui_element == test_button:
+                    print('Test button hovered')
+
+:class:`UIButton <pygame_gui.elements.UIButton>` - UI_BUTTON_ON_UNHOVERED
+...........................................................................
+
+Fired when a user stops hovering over a button with the mouse.
+
+ - **'type'** : pygame.USEREVENT
+ - **'user_type'** : pygame_gui.UI_BUTTON_ON_UNHOVERED
+ - **'ui_element'** : The :class:`UIButton <pygame_gui.elements.UIButton>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the button that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+        if event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+                if event.ui_element == test_button:
+                    print('Test button unhovered')
+
 :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` - UI_TEXT_ENTRY_FINISHED
 .......................................................................................
 
