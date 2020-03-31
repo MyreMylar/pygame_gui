@@ -1,10 +1,12 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from pygame_gui.core.interfaces import IWindowInterface
 from pygame_gui.core.ui_container import UIContainer
 
+from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 
-class UIWindowStack:
+
+class UIWindowStack(IUIWindowStackInterface):
     """
     A class for managing a stack of GUI windows so that only one is 'in front' at a time and the
     rest are sorted based on the last time they were interacted with/created.
@@ -15,7 +17,7 @@ class UIWindowStack:
     """
     def __init__(self, window_resolution: Tuple[int, int], root_container: UIContainer):
         self.window_resolution = window_resolution
-        self.stack = []
+        self.stack = []  # type: List[IWindowInterface]
         self.root_container = root_container
 
     def clear(self):
@@ -90,3 +92,11 @@ class UIWindowStack:
 
         """
         return window is self.stack[-1]
+
+    def get_stack(self) -> List[IWindowInterface]:
+        """
+        Return the internal window stack directly.
+
+        :return: a list of Windows
+        """
+        return self.stack

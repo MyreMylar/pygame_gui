@@ -49,10 +49,10 @@ class UIButton(UIElement):
                  allow_double_clicks: bool = False
                  ):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='button')
+        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id='button')
 
         super().__init__(relative_rect, manager, container,
                          object_ids=new_object_ids,

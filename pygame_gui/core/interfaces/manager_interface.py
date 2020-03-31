@@ -3,6 +3,12 @@ from typing import Tuple, List, Union, Dict
 
 import pygame
 
+from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
+from pygame_gui.core.interfaces.element_interface import IUIElementInterface
+from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
+from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
+from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
+
 
 class IUIManagerInterface:
     """
@@ -20,7 +26,7 @@ class IUIManagerInterface:
         :return: A float, time measured in seconds.
         """
 
-    def get_root_container(self):
+    def get_root_container(self) -> IUIContainerInterface:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -28,7 +34,7 @@ class IUIManagerInterface:
         :return: A container.
         """
 
-    def get_theme(self):
+    def get_theme(self) -> IUIAppearanceThemeInterface:
         """
         Gets the theme so the data in it can be accessed.
 
@@ -43,7 +49,7 @@ class IUIManagerInterface:
         :return: The UI's sprite group.
         """
 
-    def get_window_stack(self):
+    def get_window_stack(self) -> IUIWindowStackInterface:
         """
         The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted
         and move windows we interact with to the top of the stack.
@@ -135,14 +141,14 @@ class IUIManagerInterface:
 
         """
 
-    def set_focus_element(self, ui_element):
+    def set_focus_element(self, ui_element: IUIElementInterface):
         """
         Set an element as the focused element.
 
         :param ui_element: The element to focus on.
         """
 
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar):
+    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
         Clears the last scrollbar that we used. Right now this may also be one of the buttons of
         the scroll bar.
@@ -201,7 +207,7 @@ class IUIManagerInterface:
     def create_tool_tip(self,
                         text: str,
                         position: Tuple[int, int],
-                        hover_distance: Tuple[int, int]):
+                        hover_distance: Tuple[int, int]) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it.
 

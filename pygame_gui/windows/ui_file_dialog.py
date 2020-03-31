@@ -134,7 +134,7 @@ class UIFileDialog(UIWindow):
                                                 'top': 'top',
                                                 'bottom': 'top'})
 
-        text_line_rect = pygame.Rect(10, 40, self.get_container().relative_rect.width - 20, 25)
+        text_line_rect = pygame.Rect(10, 40, self.get_container().get_size()[0] - 20, 25)
         self.file_path_text_line = UITextEntryLine(relative_rect=text_line_rect,
                                                    manager=self.ui_manager,
                                                    container=self,
@@ -146,8 +146,8 @@ class UIFileDialog(UIWindow):
                                                    )
         self.file_path_text_line.set_text(self.current_directory_path)
 
-        file_selection_rect = pygame.Rect(10, 80, self.get_container().relative_rect.width - 20,
-                                          self.get_container().relative_rect.height - 130)
+        file_selection_rect = pygame.Rect(10, 80, self.get_container().get_size()[0] - 20,
+                                          self.get_container().get_size()[1] - 130)
         self.file_selection_list = UISelectionList(relative_rect=file_selection_rect,
                                                    item_list=self.current_file_list,
                                                    manager=self.ui_manager,

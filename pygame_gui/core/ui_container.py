@@ -3,10 +3,11 @@ from typing import List, Union, Tuple, Dict
 import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IUIContainerInterface, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
 
 
-class UIContainer(UIElement, IContainerLikeInterface):
+class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     """
     A UI Container holds any number of other UI elements inside of a rectangle. When we move the
     UIContainer all the UI elements contained within it can be moved as well.
@@ -39,12 +40,12 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
         self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
-        self.elements = []  # type: List[UIElement]
+        self.elements = []  # type: List[IUIElementInterface]
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='container')
+        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id='container')
 
         super().__init__(relative_rect, manager, container,
                          object_ids=new_object_ids,
@@ -60,7 +61,15 @@ class UIContainer(UIElement, IContainerLikeInterface):
 
         self.hovered = False
 
-    def get_container(self) -> 'UIContainer':
+    def get_rect(self) -> pygame.Rect:
+        """
+        Access to the container's rect
+
+        :return: a pygame rectangle
+        """
+        return self.rect
+
+    def get_container(self) -> IUIContainerInterface:
         """
         Implements the container interface. In this case we just return this since it is a
         container.
@@ -70,7 +79,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         """
         return self
 
-    def add_element(self, element: UIElement):
+    def add_element(self, element: IUIElementInterface):
         """
         Add a UIElement to the container. The UI's relative_rect parameter will be relative to
         this container.
@@ -78,11 +87,11 @@ class UIContainer(UIElement, IContainerLikeInterface):
         :param element: A UIElement to add to this container.
 
         """
-        element.change_layer(self._layer + element.starting_height)
+        element.change_layer(self._layer + element.get_starting_height())
         self.elements.append(element)
         self.recalculate_container_layer_thickness()
 
-    def remove_element(self, element: UIElement):
+    def remove_element(self, element: IUIElementInterface):
         """
         Remove a UIElement from this container.
 
@@ -102,7 +111,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
         """
         max_element_top_layer = self._layer
         for element in self.elements:
-            if ((element not in self.ui_manager.get_window_stack().stack) and
+            if ((element not in self.ui_manager.get_window_stack().get_stack()) and
                     not (isinstance(element, UIContainer) and element.is_window_root_container) and
                     element.get_top_layer() > max_element_top_layer):
                 max_element_top_layer = element.get_top_layer()
@@ -129,7 +138,7 @@ class UIContainer(UIElement, IContainerLikeInterface):
             super().change_layer(new_layer)
 
             for element in self.elements:
-                element.change_layer(self._layer + element.starting_height)
+                element.change_layer(self._layer + element.get_starting_height())
 
     def update_containing_rect_position(self):
         """
@@ -187,6 +196,22 @@ class UIContainer(UIElement, IContainerLikeInterface):
         :return: An integer representing the current highest layer being used by this container.
         """
         return self._layer + self.layer_thickness
+
+    def get_thickness(self) -> int:
+        """
+        Get the container's layer thickness.
+
+        :return: the thickness as an integer.
+        """
+        return self.layer_thickness
+
+    def get_size(self) -> Tuple[int, int]:
+        """
+        Get the container's pixel size.
+
+        :return: the pixel size as tuple [x, y]
+        """
+        return self.relative_rect.size
 
     def kill(self):
         """

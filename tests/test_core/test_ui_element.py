@@ -24,7 +24,7 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
 
-        element_ids, object_ids = element.create_valid_ids(None, None, object_id="none", element_id="test")
+        element_ids, object_ids = element._create_valid_ids(None, None, object_id="none", element_id="test")
         assert len(element_ids) == 1
         assert element_ids == ["test"]
         assert len(object_ids) == 1
@@ -37,7 +37,7 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
         with pytest.raises(ValueError, match="Object ID cannot contain fullstops or spaces"):
-            element.create_valid_ids(None, None, ". .", 'none')
+            element._create_valid_ids(None, None, ". .", 'none')
 
     def test_update_containing_rect_position(self, _init_pygame, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)

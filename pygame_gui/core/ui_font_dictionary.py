@@ -7,6 +7,7 @@ from typing import Dict
 
 import pygame
 
+from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.utility import create_resource_path
 
 # Only import the 'stringified' data if we can't find the actual default font file
@@ -18,7 +19,7 @@ if not os.path.exists(FONT_PATH):
     from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
 
 
-class UIFontDictionary:
+class UIFontDictionary(IUIFontDictionaryInterface):
     """
     The font dictionary is used to store all the fonts that have been loaded into the UI system.
     """
@@ -68,11 +69,11 @@ class UIFontDictionary:
         module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         default_font_file_path = os.path.normpath(os.path.join(module_root_path,
                                                                'data/FiraCode-Regular.ttf'))
-        self.load_default_font(default_font_file_path, module_root_path)
+        self._load_default_font(default_font_file_path, module_root_path)
 
         self.used_font_ids = [self.default_font_id]
 
-    def load_default_font(self, default_font_file_path: str, module_root_path: str):
+    def _load_default_font(self, default_font_file_path: str, module_root_path: str):
         """
         Load the default font.
 
@@ -334,3 +335,14 @@ class UIFontDictionary:
 
         """
         return font_id in self.loaded_fonts
+
+    def ensure_debug_font_loaded(self):
+        """
+        Ensure the font we use for debugging purposes is loaded. Generally called after we start
+        a debugging mode.
+
+        """
+        if not self.check_font_preloaded(self.default_font_name + '_'
+                                         + self.default_font_style +
+                                         '_' + str(self.debug_font_size)):
+            self.preload_font(self.debug_font_size, self.default_font_name)

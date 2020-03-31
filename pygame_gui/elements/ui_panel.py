@@ -2,7 +2,9 @@ from typing import Union, Dict, Tuple
 
 import pygame
 
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -57,10 +59,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
                  ):
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id=element_id)
+        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id=element_id)
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -108,8 +110,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         super().update(time_delta)
-        if self.get_container().layer_thickness != self.layer_thickness:
-            self.layer_thickness = self.get_container().layer_thickness
+        if self.get_container().get_thickness() != self.layer_thickness:
+            self.layer_thickness = self.get_container().get_thickness()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -135,7 +137,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         return consumed_event
 
-    def get_container(self) -> UIContainer:
+    def get_container(self) -> IUIContainerInterface:
         """
         Returns the container that should contain all the UI elements in this panel.
 
@@ -171,7 +173,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                                 self.container_margins['right']),
                                     self.relative_rect.height - (self.container_margins['top'] +
                                                                  self.container_margins['bottom']))
-        if new_container_dimensions != self.get_container().relative_rect.size:
+        if new_container_dimensions != self.get_container().get_size():
             container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
                                  self.relative_rect.y + self.container_margins['top'])
             self.get_container().set_dimensions(new_container_dimensions)

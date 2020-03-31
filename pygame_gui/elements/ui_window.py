@@ -4,8 +4,8 @@ import pygame
 
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
 
-from pygame_gui.core.interfaces import IContainerLikeInterface, IWindowInterface
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -37,6 +37,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     :param resizable: Whether this window is resizable or not, defaults to False.
 
     """
+
     def __init__(self,
                  rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -48,10 +49,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if element_id is None:
             element_id = 'window'
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=None,
-                                                                parent_element=None,
-                                                                object_id=object_id,
-                                                                element_id=element_id)
+        new_element_ids, new_object_ids = self._create_valid_ids(container=None,
+                                                                 parent_element=None,
+                                                                 object_id=object_id,
+                                                                 element_id=element_id)
 
         self.window_display_title = window_display_title
         self._window_root_container = None
@@ -348,7 +349,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.set_position((x_pos, y_pos))
         self.set_dimensions((x_dimension, y_dimension))
 
-    def get_container(self) -> UIContainer:
+    def get_container(self) -> IUIContainerInterface:
         """
         Returns the container that should contain all the UI elements in this window.
 
@@ -667,3 +668,34 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         else:
             self.title_bar_height = 0
         return has_any_changed
+
+    def should_use_window_edge_resize_cursor(self) -> bool:
+        """
+        Returns true if this window is in a state where we should display one of the resizing
+        cursors
+
+        :return: True if a resizing cursor is needed.
+        """
+        return (self.hovered or self.resizing_mode_active) and any(self.edge_hovering)
+
+    def get_hovering_edge_id(self) -> str:
+        """
+        Gets the ID of the combination of edges we are hovering for use by the cursor system.
+
+        :return: a string containing the edge combination ID (e.g. xy,yx,xl,xr,yt,yb)
+
+        """
+        if ((self.edge_hovering[0] and self.edge_hovering[1]) or
+                (self.edge_hovering[2] and self.edge_hovering[3])):
+            return 'xy'
+        elif ((self.edge_hovering[0] and self.edge_hovering[3]) or
+              (self.edge_hovering[2] and self.edge_hovering[1])):
+            return 'yx'
+        elif self.edge_hovering[0]:
+            return 'xl'
+        elif self.edge_hovering[2]:
+            return 'xr'
+        elif self.edge_hovering[3]:
+            return 'yb'
+        else:
+            return 'yt'

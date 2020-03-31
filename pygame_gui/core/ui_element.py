@@ -3,10 +3,11 @@ from typing import List, Union, Tuple, Dict, Any
 
 import pygame
 
+from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 
 
-class UIElement(pygame.sprite.Sprite):
+class UIElement(pygame.sprite.Sprite, IUIElementInterface):
     """
     A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element
     classes should derive from this class. Inherits from pygame.sprite.Sprite.
@@ -99,11 +100,19 @@ class UIElement(pygame.sprite.Sprite):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
+    def get_element_ids(self) -> List[str]:
+        """
+        A list of all the element IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one ofr each element in the hierarchy.
+        """
+        return self.element_ids
+
     @staticmethod
-    def create_valid_ids(container: Union[IContainerLikeInterface, None],
-                         parent_element: Union[None, 'UIElement'],
-                         object_id: str,
-                         element_id: str) -> Tuple[List[str], List[Union[str, None]]]:
+    def _create_valid_ids(container: Union[IContainerLikeInterface, None],
+                          parent_element: Union[None, 'UIElement'],
+                          object_id: str,
+                          element_id: str) -> Tuple[List[str], List[Union[str, None]]]:
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
         won't work such as those containing full stops. These ID lists are used by the theming
@@ -143,39 +152,39 @@ class UIElement(pygame.sprite.Sprite):
         """
         new_top = 0
         if self.anchors['top'] == 'top':
-            new_top = self.relative_rect.top + self.ui_container.rect.top
+            new_top = self.relative_rect.top + self.ui_container.get_rect().top
         elif self.anchors['top'] == 'bottom':
-            new_top = self.relative_rect.top + self.ui_container.rect.bottom
+            new_top = self.relative_rect.top + self.ui_container.get_rect().bottom
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
 
         new_bottom = 0
         if self.anchors['bottom'] == 'top':
-            new_bottom = self.relative_rect.bottom + self.ui_container.rect.top
+            new_bottom = self.relative_rect.bottom + self.ui_container.get_rect().top
         elif self.anchors['bottom'] == 'bottom':
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = (self.ui_container.rect.bottom -
+                self.relative_bottom_margin = (self.ui_container.get_rect().bottom -
                                                (new_top + self.relative_rect.height))
-            new_bottom = self.ui_container.rect.bottom - self.relative_bottom_margin
+            new_bottom = self.ui_container.get_rect().bottom - self.relative_bottom_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
 
         new_left = 0
         if self.anchors['left'] == 'left':
-            new_left = self.relative_rect.left + self.ui_container.rect.left
+            new_left = self.relative_rect.left + self.ui_container.get_rect().left
         elif self.anchors['left'] == 'right':
-            new_left = self.relative_rect.left + self.ui_container.rect.right
+            new_left = self.relative_rect.left + self.ui_container.get_rect().right
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
 
         new_right = 0
         if self.anchors['right'] == 'left':
-            new_right = self.relative_rect.right + self.ui_container.rect.left
+            new_right = self.relative_rect.right + self.ui_container.get_rect().left
         elif self.anchors['right'] == 'right':
             if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = (self.ui_container.rect.right -
+                self.relative_right_margin = (self.ui_container.get_rect().right -
                                               (new_left + self.relative_rect.width))
-            new_right = self.ui_container.rect.right - self.relative_right_margin
+            new_right = self.ui_container.get_rect().right - self.relative_right_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
 
@@ -201,37 +210,37 @@ class UIElement(pygame.sprite.Sprite):
 
         new_top = 0
         if self.anchors['top'] == 'top':
-            new_top = self.rect.top - self.ui_container.rect.top
+            new_top = self.rect.top - self.ui_container.get_rect().top
         elif self.anchors['top'] == 'bottom':
-            new_top = self.rect.top - self.ui_container.rect.bottom
+            new_top = self.rect.top - self.ui_container.get_rect().bottom
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
 
         new_bottom = 0
         if self.anchors['bottom'] == 'top':
-            new_bottom = self.rect.bottom - self.ui_container.rect.top
+            new_bottom = self.rect.bottom - self.ui_container.get_rect().top
         elif self.anchors['bottom'] == 'bottom':
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
-            new_bottom = self.rect.bottom - self.ui_container.rect.bottom
+                self.relative_bottom_margin = self.ui_container.get_rect().bottom - self.rect.bottom
+            new_bottom = self.rect.bottom - self.ui_container.get_rect().bottom
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
 
         new_left = 0
         if self.anchors['left'] == 'left':
-            new_left = self.rect.left - self.ui_container.rect.left
+            new_left = self.rect.left - self.ui_container.get_rect().left
         elif self.anchors['left'] == 'right':
-            new_left = self.rect.left - self.ui_container.rect.right
+            new_left = self.rect.left - self.ui_container.get_rect().right
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
 
         new_right = 0
         if self.anchors['right'] == 'left':
-            new_right = self.rect.right - self.ui_container.rect.left
+            new_right = self.rect.right - self.ui_container.get_rect().left
         elif self.anchors['right'] == 'right':
             if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
-            new_right = self.rect.right - self.ui_container.rect.right
+                self.relative_right_margin = self.ui_container.get_rect().right - self.rect.right
+            new_right = self.rect.right - self.ui_container.get_rect().right
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
 
@@ -255,8 +264,8 @@ class UIElement(pygame.sprite.Sprite):
         """
         if self.ui_container.get_image_clipping_rect() is not None:
             container_clip_rect = self.ui_container.get_image_clipping_rect().copy()
-            container_clip_rect.left += self.ui_container.rect.left
-            container_clip_rect.top += self.ui_container.rect.top
+            container_clip_rect.left += self.ui_container.get_rect().left
+            container_clip_rect.top += self.ui_container.get_rect().top
             if not container_clip_rect.contains(self.rect):
                 left = max(0, container_clip_rect.left - self.rect.left)
                 right = max(0, self.rect.width - max(0,
@@ -273,15 +282,15 @@ class UIElement(pygame.sprite.Sprite):
             else:
                 self._restore_container_clipped_images()
 
-        elif not self.ui_container.rect.contains(self.rect):
-            left = max(0, self.ui_container.rect.left - self.rect.left)
+        elif not self.ui_container.get_rect().contains(self.rect):
+            left = max(0, self.ui_container.get_rect().left - self.rect.left)
             right = max(0, self.rect.width - max(0,
                                                  self.rect.right -
-                                                 self.ui_container.rect.right))
-            top = max(0, self.ui_container.rect.top - self.rect.top)
+                                                 self.ui_container.get_rect().right))
+            top = max(0, self.ui_container.get_rect().top - self.rect.top)
             bottom = max(0, self.rect.height - max(0,
                                                    self.rect.bottom -
-                                                   self.ui_container.rect.bottom))
+                                                   self.ui_container.get_rect().bottom))
             clip_rect = pygame.Rect(left, top,
                                     right - left,
                                     bottom - top)
@@ -356,10 +365,10 @@ class UIElement(pygame.sprite.Sprite):
 
         if dimensions[0] >= 0 and dimensions[1] >= 0:
             if self.relative_right_margin is not None:
-                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
+                self.relative_right_margin = self.ui_container.get_rect().right - self.rect.right
 
             if self.relative_bottom_margin is not None:
-                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
+                self.relative_bottom_margin = self.ui_container.get_rect().bottom - self.rect.bottom
 
             if self.drawable_shape is not None:
                 self.drawable_shape.set_dimensions(self.relative_rect.size)
@@ -481,10 +490,10 @@ class UIElement(pygame.sprite.Sprite):
         """
         if self.drawable_shape is not None:
             return (self.drawable_shape.collide_point((hover_x, hover_y)) and
-                    bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+                    bool(self.ui_container.get_rect().collidepoint(hover_x, hover_y)))
 
         return (bool(self.rect.collidepoint(hover_x, hover_y)) and
-                bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+                bool(self.ui_container.get_rect().collidepoint(hover_x, hover_y)))
 
     # pylint: disable=unused-argument,no-self-use
     def process_event(self, event: pygame.event.Event) -> bool:
@@ -536,9 +545,7 @@ class UIElement(pygame.sprite.Sprite):
 
         """
         if activate_mode:
-            font_dict = self.ui_manager.get_theme().get_font_dictionary()
-            default_font = font_dict.find_font(font_size=font_dict.debug_font_size,
-                                               font_name=font_dict.default_font_name)
+            default_font = self.ui_manager.get_theme().get_font_dictionary().get_default_font()
             layer_text_render = default_font.render("UI Layer: " + str(self._layer),
                                                     True, pygame.Color('#FFFFFFFF'))
 
@@ -644,13 +651,23 @@ class UIElement(pygame.sprite.Sprite):
 
     def get_top_layer(self) -> int:
         """
-        Assuming we have correctly calculated the 'thickness' of this container, this method will
+        Assuming we have correctly calculated the 'thickness' of it, this method will
         return the top of this element.
 
         :return int: An integer representing the current highest layer being used by this element.
 
         """
         return self._layer + self.layer_thickness
+
+    def get_starting_height(self) -> int:
+        """
+        Get the starting layer height of this element. (i.e. the layer we start placing it on
+        *above* it's container, it may use more layers above this layer)
+
+        :return: an integer representing the starting layer height.
+
+        """
+        return self.starting_height
 
     def _check_shape_theming_changed(self, defaults: Dict[str, Any]) -> bool:
         has_any_changed = False

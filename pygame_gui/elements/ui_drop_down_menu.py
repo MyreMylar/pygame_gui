@@ -576,10 +576,10 @@ class UIDropDownMenu(UIElement):
                  anchors: Dict[str, str] = None
                  ):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='drop_down_menu')
+        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id='drop_down_menu')
         super().__init__(relative_rect, manager, container,
                          element_ids=new_element_ids,
                          object_ids=new_object_ids,

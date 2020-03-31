@@ -4,13 +4,13 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface
 from pygame_gui.core.ui_element import UIElement
 
 from pygame_gui.elements.ui_text_box import UITextBox
 
 
-class UITooltip(UIElement):
+class UITooltip(UIElement, IUITooltipInterface):
     """
     A tool tip is a floating block of text that gives additional information after a user hovers
     over an interactive part of a GUI for a short time. In Pygame GUI the tooltip's text is
@@ -38,10 +38,10 @@ class UITooltip(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self.create_valid_ids(container=None,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='tool_tip')
+        new_element_ids, new_object_ids = self._create_valid_ids(container=None,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id='tool_tip')
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
                          container=None,

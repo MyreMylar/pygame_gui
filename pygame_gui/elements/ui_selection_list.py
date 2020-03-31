@@ -54,10 +54,10 @@ class UISelectionList(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
                  ):
-        new_element_ids, new_object_ids = self.create_valid_ids(container=container,
-                                                                parent_element=parent_element,
-                                                                object_id=object_id,
-                                                                element_id='selection_list')
+        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
+                                                                 parent_element=parent_element,
+                                                                 object_id=object_id,
+                                                                 element_id='selection_list')
         super().__init__(relative_rect,
                          manager,
                          container,

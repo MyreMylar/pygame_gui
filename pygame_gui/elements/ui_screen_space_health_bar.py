@@ -31,10 +31,10 @@ class UIScreenSpaceHealthBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        element_ids, object_ids = self.create_valid_ids(container=container,
-                                                        parent_element=parent_element,
-                                                        object_id=object_id,
-                                                        element_id='screen_space_health_bar')
+        element_ids, object_ids = self._create_valid_ids(container=container,
+                                                         parent_element=parent_element,
+                                                         object_id=object_id,
+                                                         element_id='screen_space_health_bar')
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,

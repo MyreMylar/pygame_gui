@@ -68,8 +68,8 @@ class UIConfirmationDialog(UIWindow):
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
 
-        text_width = self.get_container().relative_rect.width - 10
-        text_height = self.get_container().relative_rect.height - 50
+        text_width = self.get_container().get_size()[0] - 10
+        text_height = self.get_container().get_size()[1] - 50
         self.confirmation_text = UITextBox(html_text=action_long_desc,
                                            relative_rect=pygame.Rect(5, 5,
                                                                      text_width,

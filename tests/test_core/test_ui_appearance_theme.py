@@ -17,7 +17,7 @@ class TestUIAppearanceTheme:
 
     def test_load_default_theme_from_strings(self, _init_pygame):
         theme = UIAppearanceTheme()
-        theme.load_default_theme_file("load_from_file_instead")
+        theme._load_default_theme_file("load_from_file_instead")
 
     def test_get_colour_from_gradient(self, _init_pygame):
         theme = UIAppearanceTheme()
@@ -75,7 +75,7 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme()
         theme.ui_element_image_paths['button'] = {'regular_path': {'changed': True, 'path': 'not_an_image.png'}}
         with pytest.warns(UserWarning, match="Unable to load image at path"):
-            theme.load_images()
+            theme._load_images()
 
     def test_build_all_combined_ids(self, _init_pygame):
         theme = UIAppearanceTheme()

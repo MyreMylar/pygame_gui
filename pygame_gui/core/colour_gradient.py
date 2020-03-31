@@ -2,8 +2,10 @@ from typing import Union, Any
 
 import pygame
 
+from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 
-class ColourGradient:
+
+class ColourGradient(IColourGradientInterface):
     """
     Creates a small surface containing a smooth gradient between two or three colours.
 

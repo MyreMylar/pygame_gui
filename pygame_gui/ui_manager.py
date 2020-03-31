@@ -3,6 +3,10 @@ from typing import Tuple, List, Dict, Union
 import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
+from pygame_gui.core.interfaces import IUIElementInterface, IUIContainerInterface
+from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
+from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
@@ -70,7 +74,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.mouse_double_click_time
 
-    def get_root_container(self) -> UIContainer:
+    def get_root_container(self) -> IUIContainerInterface:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -79,7 +83,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.root_container
 
-    def get_theme(self) -> UIAppearanceTheme:
+    def get_theme(self) -> IUIAppearanceThemeInterface:
         """
         Gets the theme so the data in it can be accessed.
 
@@ -96,7 +100,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_group
 
-    def get_window_stack(self) -> UIWindowStack:
+    def get_window_stack(self) -> IUIWindowStackInterface:
         """
         The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted
         and move windows we interact with to the top of the stack.
@@ -222,22 +226,9 @@ class UIManager(IUIManagerInterface):
         # handle mouse cursors
         any_window_edge_hovered = False
         for window in self.ui_window_stack.stack:
-            if (window.hovered or window.resizing_mode_active) and any(window.edge_hovering):
+            if window.should_use_window_edge_resize_cursor():
                 any_window_edge_hovered = True
-                if (window.edge_hovering[0] and window.edge_hovering[1]) or (
-                        window.edge_hovering[2] and window.edge_hovering[3]):
-                    new_cursor = self.resizing_window_cursors['xy']
-                elif (window.edge_hovering[0] and window.edge_hovering[3]) or (
-                        window.edge_hovering[2] and window.edge_hovering[1]):
-                    new_cursor = self.resizing_window_cursors['yx']
-                elif window.edge_hovering[0]:
-                    new_cursor = self.resizing_window_cursors['xl']
-                elif window.edge_hovering[2]:
-                    new_cursor = self.resizing_window_cursors['xr']
-                elif window.edge_hovering[3]:
-                    new_cursor = self.resizing_window_cursors['yb']
-                else:
-                    new_cursor = self.resizing_window_cursors['yt']
+                new_cursor = self.resizing_window_cursors[window.get_hovering_edge_id()]
 
                 if new_cursor != self._active_cursor:
                     self._active_cursor = new_cursor
@@ -364,7 +355,7 @@ class UIManager(IUIManagerInterface):
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
 
-    def set_focus_element(self, ui_element: UIElement):
+    def set_focus_element(self, ui_element: IUIElementInterface):
         """
         Set an element as the focused element.
 
@@ -383,10 +374,10 @@ class UIManager(IUIManagerInterface):
             if ui_element is not None:
                 self.focused_element.focus()
 
-                if 'vertical_scroll_bar' in ui_element.element_ids:
+                if 'vertical_scroll_bar' in ui_element.get_element_ids():
                     self.last_focused_vertical_scrollbar = ui_element
 
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: UIElement):
+    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
         Clears the last scrollbar that we used. Right now this may also be one of the buttons of
         the scroll bar.
@@ -420,11 +411,8 @@ class UIManager(IUIManagerInterface):
         elif not self.visual_debug_active and is_active:
             self.visual_debug_active = True
             # preload the debug font if it's not already loaded
-            font_dict = self.get_theme().get_font_dictionary()
-            if not font_dict.check_font_preloaded(font_dict.default_font_name + '_'
-                                                  + font_dict.default_font_style +
-                                                  '_' + str(font_dict.debug_font_size)):
-                font_dict.preload_font(font_dict.debug_font_size, font_dict.default_font_name)
+            self.get_theme().get_font_dictionary().ensure_debug_font_loaded()
+
             for layer in self.ui_group.layers():
                 for element in self.ui_group.get_sprites_from_layer(layer):
                     element.set_visual_debug_mode(self.visual_debug_active)
@@ -475,7 +463,7 @@ class UIManager(IUIManagerInterface):
         return self.universal_empty_surface
 
     def create_tool_tip(self, text: str, position: Tuple[int, int],
-                        hover_distance: Tuple[int, int]) -> UITooltip:
+                        hover_distance: Tuple[int, int]) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it
         from other UI elements and create tool tips without creating cyclical import problems.

@@ -61,8 +61,8 @@ class UIMessageWindow(UIWindow):
                                        )
 
         text_block_rect = pygame.Rect(0, 0,
-                                      self.get_container().rect.width,
-                                      self.get_container().rect.height - button_vertical_space)
+                                      self.get_container().get_size()[0],
+                                      self.get_container().get_size()[1] - button_vertical_space)
         self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
                                     container=self,
                                     anchors={"left": "left",
