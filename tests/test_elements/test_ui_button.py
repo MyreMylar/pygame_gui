@@ -253,7 +253,7 @@ class TestUIButton:
                           container=test_container,
                           manager=default_ui_manager)
 
-        test_container.rect.topleft = (50, 50)
+        test_container.set_position((50, 50))
         button.update_containing_rect_position()
 
         assert button.rect.topleft == (60, 60)

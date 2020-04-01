@@ -2,7 +2,7 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
-from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -279,6 +279,10 @@ class UIButton(UIElement):
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
                     else:
+                        event_data = {'user_type': UI_BUTTON_START_PRESS,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
                         self.double_click_timer = 0.0
                         self.held = True
                         self.set_active()
