@@ -481,7 +481,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                 (self._window_root_container.relative_rect.width -
                                                  (2 * self.border_width)),
                                                 (self._window_root_container.relative_rect.height -
-                                                 self.title_bar_height - self.border_width))
+                                                 (self.title_bar_height + self.border_width)))
             self.window_element_container = UIContainer(window_container_rect,
                                                         self.ui_manager,
                                                         starting_height=0,
@@ -512,7 +512,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             element_container_width = (self._window_root_container.relative_rect.width -
                                        (2 * self.border_width))
             element_container_height = (self._window_root_container.relative_rect.height -
-                                        self.title_bar_height)
+                                        (self.title_bar_height + self.border_width))
             self.window_element_container.set_dimensions((element_container_width,
                                                           element_container_height))
             self.window_element_container.set_relative_position((self.border_width,
