@@ -487,7 +487,8 @@ class UISelectionList(UIElement):
                 starting_height=self.starting_height,
                 container=self.ui_container,
                 parent_element=self._parent_element,
-                object_id='#selection_list_container')
+                object_id='#selection_list_container',
+                anchors=self.anchors)
         else:
             self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
                                                                (2 * self.shadow_width) -
