@@ -98,7 +98,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         self.panel_container = UIContainer(container_rect, manager,
                                            starting_height=starting_layer_height,
-                                           parent_element=self, object_id='#panel_container')
+                                           container=container,
+                                           parent_element=self,
+                                           object_id='#panel_container',
+                                           anchors=anchors)
 
     def update(self, time_delta: float):
         """
