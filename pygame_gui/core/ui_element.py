@@ -39,7 +39,7 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self._layer = 0
         self.ui_manager = manager
         super().__init__(self.ui_manager.get_sprite_group())
-        self.relative_rect = relative_rect
+        self.relative_rect = relative_rect.copy()
         self.rect = self.relative_rect.copy()
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
