@@ -119,7 +119,8 @@ class TestUIWindow:
         window.set_relative_position((100, 100))
         assert button.rect.topright == (274, 153)
 
-    def test_set_position(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_set_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                          _display_surface_return_none):
         window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager)
 
