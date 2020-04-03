@@ -246,7 +246,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         if self.alive():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
 
-            if self.rect.collidepoint(mouse_x, mouse_y) and not hovered_higher_element:
+            if self.hover_point(mouse_x, mouse_y) and not hovered_higher_element:
                 if not self.hovered:
                     self.hovered = True
                 hovered_higher_element = True
