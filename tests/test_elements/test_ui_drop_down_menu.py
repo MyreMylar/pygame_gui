@@ -276,7 +276,8 @@ class TestUIDropDownMenu:
         assert not menu.hover_point(0, 0)
         assert menu.hover_point(150, 115)
 
-    def test_cropping_size_of_drop_down(self, _init_pygame, default_ui_manager):
+    def test_cropping_size_of_drop_down(self, _init_pygame, default_ui_manager,
+                                        _display_surface_return_none):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
                                             'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
                                             'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
