@@ -735,7 +735,7 @@ class TestUITextEntryLine:
                                      manager=manager)
         assert text_entry.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
                                      container=test_container,
@@ -746,7 +746,7 @@ class TestUITextEntryLine:
         assert (text_entry.relative_rect.topleft == (50, -70) and
                 text_entry.drawable_shape.containing_rect.topleft == (150, 30))
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250), manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
                                      container=test_container,
@@ -756,7 +756,7 @@ class TestUITextEntryLine:
 
         assert text_entry.rect.topleft == (100, 80)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
                                      container=test_container,
