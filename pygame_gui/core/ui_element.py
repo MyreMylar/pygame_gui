@@ -40,10 +40,42 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.ui_manager = manager
         super().__init__(self.ui_manager.get_sprite_group())
         self.relative_rect = relative_rect
+        self.rect = self.relative_rect.copy()
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
         self.object_ids = object_ids
         self.element_ids = element_ids
+        self.anchors = anchors
+        if self.anchors is None:
+            self.anchors = {'left': 'left',
+                            'top': 'top',
+                            'right': 'left',
+                            'bottom': 'top'}
+        self.drawable_shape = None  # type: Union['DrawableShape', None]
+        self.image = None
+
+        self.relative_bottom_margin = None
+        self.relative_right_margin = None
+
+        self.layer_thickness = layer_thickness
+        self.starting_height = starting_height
+
+        self.is_enabled = True
+        self.hovered = False
+        self.is_focused = False
+        self.hover_time = 0.0
+
+        self.pre_debug_image = None
+        self._pre_clipped_image = None
+
+        self._image_clip = None
+
+        self._visual_debug_mode = False
+
+        # Themed parameters
+        self.shadow_width = None  # type: Union[None, int]
+        self.border_width = None  # type: Union[None, int]
+        self.shape_corner_radius = None  # type: Union[None, int]
 
         combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids,
                                                                           self.object_ids)
@@ -51,9 +83,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
             self.most_specific_combined_id = combined_ids[0]
         else:
             self.most_specific_combined_id = 'no_id'
-
-        self.layer_thickness = layer_thickness
-        self.starting_height = starting_height
 
         if container is None:
             if self.ui_manager.get_root_container() is not None:
@@ -67,38 +96,27 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
-        self.anchors = anchors
-        if self.anchors is None:
-            self.anchors = {'left': 'left',
-                            'top': 'top',
-                            'right': 'left',
-                            'bottom': 'top'}
-
-        self.rect = self.relative_rect.copy()
-        self.drawable_shape = None  # type: Union['DrawableShape', None]
-        self.image = None
-
-        self.relative_bottom_margin = None
-        self.relative_right_margin = None
         self._update_absolute_rect_position_from_anchors()
 
-        self.is_enabled = True
-        self.hovered = False
-        self.is_focused = False
-        self.hover_time = 0.0
-
-        self.pre_debug_image = None
-        self._pre_clipped_image = None
-
-        self._image_clip = None
         self._update_container_clip()
 
-        self._visual_debug_mode = False
+    def get_relative_rect(self) -> pygame.Rect:
+        """
+        The relative positioning rect.
 
-        # Themed parameters
-        self.shadow_width = None  # type: Union[None, int]
-        self.border_width = None  # type: Union[None, int]
-        self.shape_corner_radius = None  # type: Union[None, int]
+        :return: A pygame rect.
+
+        """
+        return self.relative_rect
+
+    def get_abs_rect(self) -> pygame.Rect:
+        """
+        The absolute positioning rect.
+
+        :return: A pygame rect.
+
+        """
+        return self.rect
 
     def get_element_ids(self) -> List[str]:
         """
@@ -344,7 +362,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
 
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
-
         self._update_container_clip()
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
@@ -488,12 +505,19 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         :return: Returns True if we are hovering this element.
 
         """
+
+        container_clip_rect = self.ui_container.get_rect().copy()
+        if self.ui_container.get_image_clipping_rect() is not None:
+            container_clip_rect.size = self.ui_container.get_image_clipping_rect().size
+            container_clip_rect.left += self.ui_container.get_image_clipping_rect().left
+            container_clip_rect.top += self.ui_container.get_image_clipping_rect().top
+
         if self.drawable_shape is not None:
             return (self.drawable_shape.collide_point((hover_x, hover_y)) and
-                    bool(self.ui_container.get_rect().collidepoint(hover_x, hover_y)))
+                    bool(container_clip_rect.collidepoint(hover_x, hover_y)))
 
         return (bool(self.rect.collidepoint(hover_x, hover_y)) and
-                bool(self.ui_container.get_rect().collidepoint(hover_x, hover_y)))
+                bool(container_clip_rect.collidepoint(hover_x, hover_y)))
 
     # pylint: disable=unused-argument,no-self-use
     def process_event(self, event: pygame.event.Event) -> bool:
