@@ -11,7 +11,8 @@ class TestWindowStack:
                       _display_surface_return_none):
         UIWindowStack((800, 600), default_ui_manager.get_root_container())
 
-    def test_add_window(self, _init_pygame, default_ui_manager):
+    def test_add_window(self, _init_pygame, default_ui_manager,
+                        _display_surface_return_none):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
