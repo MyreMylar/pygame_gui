@@ -35,7 +35,8 @@ class TestUIUIFileDialog:
             UIFileDialog(rect=pygame.Rect(100, 100, 50, 50),
                          manager=default_ui_manager)
 
-    def test_update_current_file_list(self, _init_pygame, default_ui_manager):
+    def test_update_current_file_list(self, _init_pygame, default_ui_manager,
+                                      _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
