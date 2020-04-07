@@ -12,6 +12,22 @@ class IUIElementInterface:
     """
     __metaclass__ = ABCMeta
 
+    def get_relative_rect(self) -> pygame.Rect:
+        """
+        The relative positioning rect.
+
+        :return: A pygame rect.
+
+        """
+
+    def get_abs_rect(self) -> pygame.Rect:
+        """
+        The absolute positioning rect.
+
+        :return: A pygame rect.
+
+        """
+
     def get_element_ids(self) -> List[str]:
         """
         A list of all the element IDs in this element's theming/event hierarchy.
