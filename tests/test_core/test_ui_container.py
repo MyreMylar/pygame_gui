@@ -2,11 +2,13 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
+    _display_surface_return_none
 
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.elements import UIVerticalScrollBar
 
 
 class TestUIContainer:
@@ -147,3 +149,22 @@ class TestUIContainer:
         container.hovered = True
         container.kill()
         assert container.check_hover(0.5, False) is False  # dead so can't hover any more
+
+    def test_resizing_with_anchors(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
+        container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
+                                manager=default_ui_manager)
+
+        scroll_bar = UIVerticalScrollBar(
+            relative_rect=pygame.Rect(-20, 0, 20, 300),
+            visible_percentage=0.5,
+            manager=default_ui_manager,
+            container=container,
+            anchors={'left': 'right',
+                     'right': 'right',
+                     'top': 'top',
+                     'bottom': 'bottom'})
+
+        assert scroll_bar.top_button.rect.width == 14
+        container.set_dimensions((400, 400))
+        assert scroll_bar.top_button.rect.width == 14

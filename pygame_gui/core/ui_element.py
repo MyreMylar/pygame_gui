@@ -381,11 +381,7 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.rect.size = self.relative_rect.size
 
         if dimensions[0] >= 0 and dimensions[1] >= 0:
-            if self.relative_right_margin is not None:
-                self.relative_right_margin = self.ui_container.get_rect().right - self.rect.right
-
-            if self.relative_bottom_margin is not None:
-                self.relative_bottom_margin = self.ui_container.get_rect().bottom - self.rect.bottom
+            self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
             if self.drawable_shape is not None:
                 self.drawable_shape.set_dimensions(self.relative_rect.size)
