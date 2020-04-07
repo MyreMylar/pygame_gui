@@ -345,8 +345,6 @@ class UIVerticalScrollBar(UIElement):
         Redraws the 'scrollbar' portion of the whole UI element. Called when we change the
         visible percentage.
         """
-        self.sliding_button.kill()
-
         self.scrollable_height = self.background_rect.height - (2 * self.arrow_button_height)
         self.bottom_limit = self.scrollable_height
 
@@ -356,20 +354,24 @@ class UIVerticalScrollBar(UIElement):
         y_pos = (self.scroll_position + self.arrow_button_height)
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
-        self.sliding_button = UIButton(pygame.Rect(int(x_pos),
-                                                   int(y_pos),
-                                                   self.background_rect.width,
-                                                   scroll_bar_height),
-                                       '', self.ui_manager,
-                                       container=self.button_container,
-                                       starting_height=1,
-                                       parent_element=self,
-                                       object_id="#sliding_button",
-                                       anchors={'left': 'left',
-                                                'right': 'right',
-                                                'top': 'top',
-                                                'bottom': 'top'})
+        if self.sliding_button is None:
+            self.sliding_button = UIButton(pygame.Rect(int(x_pos),
+                                                       int(y_pos),
+                                                       self.background_rect.width,
+                                                       scroll_bar_height),
+                                           '', self.ui_manager,
+                                           container=self.button_container,
+                                           starting_height=1,
+                                           parent_element=self,
+                                           object_id="#sliding_button",
+                                           anchors={'left': 'left',
+                                                    'right': 'right',
+                                                    'top': 'top',
+                                                    'bottom': 'top'})
 
+        else:
+            self.sliding_button.set_relative_position(self.sliding_rect_position)
+            self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 
     def set_visible_percentage(self, percentage: float):
