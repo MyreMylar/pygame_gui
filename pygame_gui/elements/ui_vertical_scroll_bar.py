@@ -68,11 +68,11 @@ class UIVerticalScrollBar(UIElement):
         self.shape_type = 'rectangle'
         self.shape_corner_radius = None
 
-        self.background_rect = None
+        self.background_rect = None  # type: Union[None, pygame.Rect]
 
         self.scrollable_height = None  # type: Union[None, int, float]
         self.bottom_limit = None
-        self.sliding_rect_position = None
+        self.sliding_rect_position = None   # type: Union[None, pygame.math.Vector2]
 
         self.top_button = None
         self.bottom_button = None
