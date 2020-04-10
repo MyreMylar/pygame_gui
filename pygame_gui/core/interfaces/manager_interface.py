@@ -164,6 +164,22 @@ class IUIManagerInterface:
         :return: A UIElement.
         """
 
+    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
+        """
+        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
+
+        :param horiz_scrollbar: A scrollbar UIElement.
+        """
+
+    def get_last_focused_horiz_scrollbar(self):
+        """
+        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
+
+        :return: A UIElement.
+        """
+
     def set_visual_debug_mode(self, is_active: bool):
         """
         Loops through all our UIElements to turn visual debug mode on or off. Also calls

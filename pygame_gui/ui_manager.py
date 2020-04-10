@@ -43,6 +43,7 @@ class UIManager(IUIManagerInterface):
 
         self.focused_element = None
         self.last_focused_vertical_scrollbar = None
+        self.last_focused_horizontal_scrollbar = None
         self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
                                           self, starting_height=1,
@@ -376,6 +377,8 @@ class UIManager(IUIManagerInterface):
 
                 if 'vertical_scroll_bar' in ui_element.get_element_ids():
                     self.last_focused_vertical_scrollbar = ui_element
+                if 'horizontal_scroll_bar' in ui_element.get_element_ids():
+                    self.last_focused_horizontal_scrollbar = ui_element
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
@@ -395,6 +398,26 @@ class UIManager(IUIManagerInterface):
         :return: A UIElement.
         """
         return self.last_focused_vertical_scrollbar
+
+    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
+        """
+        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
+
+        :param horiz_scrollbar: A scrollbar UIElement.
+        """
+        if (horiz_scrollbar is not None and
+                horiz_scrollbar is self.last_focused_horizontal_scrollbar):
+            self.last_focused_horizontal_scrollbar = None
+
+    def get_last_focused_horiz_scrollbar(self) -> Union[UIElement, None]:
+        """
+        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
+        the scroll bar.
+
+        :return: A UIElement.
+        """
+        return self.last_focused_horizontal_scrollbar
 
     def set_visual_debug_mode(self, is_active: bool):
         """

@@ -179,6 +179,22 @@
             "shadow_width": "1"
         }
     },
+    "horizontal_scroll_bar":
+    {
+        "prototype": "#default_shape_style"
+    },
+    "horizontal_scroll_bar.button":
+    {
+        "prototype": "#no_frills_button"
+    },
+    "horizontal_scroll_bar.#sliding_button":
+    {
+        "misc":
+        {
+            "border_width": "1",
+            "shadow_width": "1"
+        }
+    },
     "window":
     {
         "misc":
