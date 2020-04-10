@@ -16,7 +16,8 @@ from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED, UI_HORIZONTAL_SLIDE
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
-from pygame_gui._constants import UI_WINDOW_CLOSE, UI_CONFIRMATION_DIALOG_CONFIRMED
+from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT
+from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED
 from pygame_gui._constants import UI_FILE_DIALOG_PATH_PICKED, UI_COLOUR_PICKER_COLOUR_PICKED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_FADE_IN
@@ -40,6 +41,7 @@ __all__ = ['UIManager',
            'UI_SELECTION_LIST_DROPPED_SELECTION',
            'UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION',
            'UI_WINDOW_CLOSE',
+           'UI_WINDOW_MOVED_TO_FRONT',
            'UI_CONFIRMATION_DIALOG_CONFIRMED',
            'UI_FILE_DIALOG_PATH_PICKED',
            'UI_COLOUR_PICKER_COLOUR_PICKED',

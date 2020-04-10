@@ -50,9 +50,7 @@ class UIMessageWindow(UIWindow):
                                        text="Dismiss",
                                        manager=manager,
                                        container=self,
-                                       tool_tip_text="<font face=fira_code "
-                                                     "color=normal_text size=2>"
-                                                     "Click to get rid of this message.</font>",
+                                       tool_tip_text="Click to get rid of this message.",
                                        object_id='#dismiss_button',
                                        anchors={"left": "right",
                                                 "top": "bottom",

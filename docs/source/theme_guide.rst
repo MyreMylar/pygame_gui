@@ -211,11 +211,13 @@ Theme Options Per Element
 .. toctree::
     theme_reference/theme_button
     theme_reference/theme_drop_down_menu
+    theme_reference/theme_horizontal_scroll_bar
     theme_reference/theme_horizontal_slider
     theme_reference/theme_image
     theme_reference/theme_label
     theme_reference/theme_panel
     theme_reference/theme_screen_space_health_bar
+    theme_reference/theme_scrolling_container
     theme_reference/theme_selection_list
     theme_reference/theme_text_box
     theme_reference/theme_text_entry_line

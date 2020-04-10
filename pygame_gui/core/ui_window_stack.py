@@ -40,6 +40,7 @@ class UIWindowStack(IUIWindowStackInterface):
                      else self.root_container.get_top_layer())
         window.change_layer(new_layer)
         self.stack.append(window)
+        window.on_moved_to_front()
 
     def remove_window(self, window_to_remove: IWindowInterface):
         """
@@ -81,6 +82,7 @@ class UIWindowStack(IUIWindowStackInterface):
             self.add_new_window(old_window)
 
         self.add_new_window(window_to_front)
+        window_to_front.on_moved_to_front()
 
     def is_window_at_top(self, window: IWindowInterface) -> bool:
         """

@@ -163,3 +163,8 @@ class IWindowInterface:
         :return: a string containing the edge combination ID (e.g. xy,yx,xl,xr,yt,yb)
 
         """
+
+    def on_moved_to_front(self):
+        """
+        Called when a window is moved to the front of the stack.
+        """

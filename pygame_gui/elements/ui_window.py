@@ -2,7 +2,7 @@ from typing import Union, Tuple
 
 import pygame
 
-from pygame_gui._constants import UI_WINDOW_CLOSE, UI_BUTTON_PRESSED
+from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_BUTTON_PRESSED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface
@@ -699,3 +699,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             return 'yb'
         else:
             return 'yt'
+
+    def on_moved_to_front(self):
+        """
+        Called when a window is moved to the front of the stack.
+        """
+        window_front_event = pygame.event.Event(pygame.USEREVENT,
+                                                {'user_type': UI_WINDOW_MOVED_TO_FRONT,
+                                                 'ui_element': self,
+                                                 'ui_object_id': self.most_specific_combined_id})
+        pygame.event.post(window_front_event)

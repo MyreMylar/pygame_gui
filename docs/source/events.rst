@@ -275,6 +275,28 @@ Fired when a window is closed.
             if event.ui_element == window:
                print("Window closed")
 
+:class:`UIWindow <pygame_gui.elements.UIWindow>` - UI_WINDOW_MOVED_TO_FRONT
+..................................................................
+
+Fired when a UI window is moved to the top of the stack. This happens when they are newly created and when they are
+clicked on by a user.
+
+ - **'type'** : pygame.USEREVENT
+ - **'user_type'** : pygame_gui.UI_WINDOW_MOVED_TO_FRONT,
+ - **'ui_element'** : The :class:`UIWindow <pygame_gui.elements.UIWindow>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the element that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+   for event in pygame.event.get():
+      if event.type == pygame.USEREVENT:
+         if event.user_type == pygame_gui.UI_WINDOW_CLOSE:
+            if event.ui_element == window:
+               print("Window closed")
+
 :class:`UIConfirmationDialog <pygame_gui.elements.UIConfirmationDialog>` - UI_CONFIRMATION_DIALOG_CONFIRMED
 ...........................................................................................................
 
