@@ -168,3 +168,10 @@ class IWindowInterface:
         """
         Called when a window is moved to the front of the stack.
         """
+
+    def set_display_title(self, new_title: str):
+        """
+        Set the title of the window.
+
+        :param new_title: The title to set.
+        """

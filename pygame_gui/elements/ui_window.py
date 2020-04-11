@@ -55,7 +55,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                                  element_id=element_id)
 
         self.window_display_title = window_display_title
-        self._window_root_container = None
+        self._window_root_container = None  # type: Union[UIContainer, None]
         self.resizable = resizable
         self.minimum_dimensions = (100, 100)
         self.edge_hovering = [False, False, False, False]
@@ -73,7 +73,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.resizing_mode_active = False
         self.start_resize_point = (0, 0)
-        self.start_resize_rect = None
+        self.start_resize_rect = None  # type: Union[pygame.Rect, None]
 
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
@@ -87,9 +87,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.title_bar_close_button_width = self.title_bar_height
 
         # UI elements
-        self.window_element_container = None
-        self.title_bar = None
-        self.close_window_button = None
+        self.window_element_container = None  # type: Union[UIContainer, None]
+        self.title_bar = None  # type: Union[UIButton, None]
+        self.close_window_button = None  # type: Union[UIButton, None]
 
         self.rebuild_from_changed_theme_data()
 
@@ -709,3 +709,12 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                  'ui_element': self,
                                                  'ui_object_id': self.most_specific_combined_id})
         pygame.event.post(window_front_event)
+
+    def set_display_title(self, new_title: str):
+        """
+        Set the title of the window.
+
+        :param new_title: The title to set.
+        """
+        self.window_display_title = new_title
+        self.title_bar.set_text(self.window_display_title)
