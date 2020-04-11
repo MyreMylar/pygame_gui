@@ -371,7 +371,7 @@ class UIFileDialog(UIWindow):
         self.update_current_file_list()
         self.file_selection_list.set_item_list(self.current_file_list)
 
-        if self.current_file_path is not None:
+        if self.current_file_path is not None and not self.allow_existing_files_only:
             self.current_file_path = (new_directory_path / self.current_file_path.name).resolve()
             self.file_path_text_line.set_text(str(self.current_file_path))
             self._highlight_file_name_for_editing()
@@ -382,6 +382,7 @@ class UIFileDialog(UIWindow):
             else:
                 self.delete_button.disable()
         else:
+            self.current_file_path = None
             self.file_path_text_line.set_text(self.current_directory_path)
             self.delete_button.disable()
             self.ok_button.disable()
