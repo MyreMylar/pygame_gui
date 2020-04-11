@@ -133,7 +133,7 @@ class TestUIUIFileDialog:
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
-        with open(Path('tests/data/for_delete.txt').resolve(), 'w') as file_to_delete:
+        with open(Path('tests/data/for_delete.txt').absolute(), 'w') as file_to_delete:
             file_to_delete.write('Some text')
 
         file_dialog.current_file_path = Path('tests/data/for_delete.txt').absolute()
