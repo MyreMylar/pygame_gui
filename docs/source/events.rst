@@ -103,6 +103,28 @@ Fired when a user stops hovering over a button with the mouse.
                 if event.ui_element == test_button:
                     print('Test button unhovered')
 
+:class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` - UI_TEXT_ENTRY_CHANGED
+.......................................................................................
+
+Fired when a user changes the text in a text entry element by entering of deleting text. Not fired when set_text() is
+used.
+
+ - **'type'** : pygame.USEREVENT
+ - **'user_type'** : pygame_gui.UI_TEXT_ENTRY_CHANGED,
+ - **'text'** : The user entered text in the text entry line.
+ - **'ui_element'** : The :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the text entry line that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+        if event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
+                print("Changed text:", event.text)
+
 :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` - UI_TEXT_ENTRY_FINISHED
 .......................................................................................
 
