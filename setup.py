@@ -8,7 +8,8 @@ class DevelopOnlyInstall(develop):
         def _post_install():
             from stringify import stringify_py
 
-            stringify_py(source_path='pygame_gui/data', destination_file='pygame_gui/core/_string_data.py')
+            stringify_py(source_path='pygame_gui/data',
+                         destination_file='pygame_gui/core/_string_data.py')
 
         atexit.register(_post_install)
         develop.run(self)
@@ -19,11 +20,13 @@ setup(
       name='pygame_gui',
       version='0.5.5',
       description='A GUI module for pygame 2',
-      long_description="Helps create GUIs for games made using pygame 2. Features HTML-style text formatting, "
-                       "theme files to control the look and a system to manage multiple windows of GUI stuff.",
+      long_description="Helps create GUIs for games made using pygame 2. "
+                       "Features HTML-style text formatting, "
+                       "theme files to control the look and a system to manage"
+                       " multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_051.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_055.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
@@ -50,5 +53,3 @@ setup(
           'Programming Language :: Python :: 3.8',
       ],
       )
-
-
