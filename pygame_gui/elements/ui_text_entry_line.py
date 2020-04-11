@@ -5,7 +5,7 @@ from typing import Union, List, Tuple, Dict
 
 import pygame
 
-from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED
+from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
@@ -461,6 +461,7 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
+        initial_text_state = self.text
         if self._process_mouse_button_event(event):
             consumed_event = True
         if self.focused and event.type == pygame.KEYDOWN:
@@ -470,6 +471,13 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
             elif self._process_text_entry_key(event):
                 consumed_event = True
+
+        if self.text != initial_text_state:
+            event_data = {'user_type': UI_TEXT_ENTRY_CHANGED,
+                          'text': self.text,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
         return consumed_event
 
     def _process_text_entry_key(self, event: pygame.event.Event) -> bool:
