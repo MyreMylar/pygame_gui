@@ -67,7 +67,7 @@ class UIScreenSpaceHealthBar(UIElement):
         self.current_health_rect = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         if sprite_to_monitor is not None:
@@ -146,10 +146,10 @@ class UIScreenSpaceHealthBar(UIElement):
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
                               }
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -190,15 +190,11 @@ class UIScreenSpaceHealthBar(UIElement):
             self.font = font
             has_any_changed = True
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,

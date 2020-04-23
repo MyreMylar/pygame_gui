@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Union, Tuple, Dict, Any
+from typing import List, Union, Tuple, Dict, Any, Callable
 
 import pygame
 
@@ -690,44 +690,55 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         return self.starting_height
 
     def _check_shape_theming_changed(self, defaults: Dict[str, Any]) -> bool:
+        """
+        Checks all the standard miscellaneous shape theming parameters.
+
+        :param defaults: A dictionary of default values
+        :return: True if any have changed.
+        """
         has_any_changed = False
-        border_width = defaults['border_width']
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = defaults['border_width']
-        if border_width != self.border_width:
-            self.border_width = border_width
+
+        if self._check_misc_theme_data_changed('border_width', defaults['border_width'], int):
             has_any_changed = True
 
-        shadow_width = defaults['shadow_width']
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = defaults['shadow_width']
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_misc_theme_data_changed('shadow_width', defaults['shadow_width'], int):
             has_any_changed = True
 
-        corner_radius = defaults['shape_corner_radius']
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = defaults['shape_corner_radius']
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
+        if self._check_misc_theme_data_changed('shape_corner_radius',
+                                               defaults['shape_corner_radius'], int):
             has_any_changed = True
 
         return has_any_changed
+
+    def _check_misc_theme_data_changed(self,
+                                       attribute_name: str,
+                                       default_value: Any,
+                                       casting_func: Callable[[Any], Any],
+                                       allowed_values: Union[List, None] = None) -> bool:
+        """
+        Checks if the value of a pieces of miscellaneous theming data has changed, and if it has,
+        updates the corresponding attribute on the element and returns True.
+
+        :param attribute_name: The name of the attribute.
+        :param default_value: The default value for the attribute.
+        :param casting_func: The function to cast to the type of the data.
+
+        :return: True if the attribute has changed.
+
+        """
+        has_changed = False
+        attribute_value = default_value
+        try:
+            attribute_value = casting_func(self.ui_theme.get_misc_data(self.object_ids,
+                                                                       self.element_ids,
+                                                                       attribute_name))
+        except (LookupError, ValueError):
+            attribute_value = default_value
+        finally:
+            if allowed_values and attribute_value not in allowed_values:
+                attribute_value = default_value
+
+            if attribute_value != getattr(self, attribute_name, default_value):
+                setattr(self, attribute_name, attribute_value)
+                has_changed = True
+        return has_changed

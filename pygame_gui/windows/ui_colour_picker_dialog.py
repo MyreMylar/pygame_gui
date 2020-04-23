@@ -154,20 +154,25 @@ class UIColourChannelEditor(UIElement):
                 event.user_type == UI_TEXT_ENTRY_FINISHED and
                 event.ui_element == self.entry):
 
+            int_value = self.current_value
             try:
                 int_value = int(self.entry.get_text())
             except ValueError:
                 int_value = 0
-            self._set_value_from_entry(int_value)
+            finally:
+                self._set_value_from_entry(int_value)
 
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_HORIZONTAL_SLIDER_MOVED and
                 event.ui_element == self.slider):
+
+            int_value = self.current_value
             try:
                 int_value = int(self.slider.get_current_value())
             except ValueError:
                 int_value = 0
-            self._set_value_from_slider(int_value)
+            finally:
+                self._set_value_from_slider(int_value)
 
         return consumed_event
 

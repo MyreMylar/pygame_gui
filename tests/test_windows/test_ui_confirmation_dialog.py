@@ -168,7 +168,7 @@ class TestUIConfirmationDialog:
                                               action_short_name="Confirm")
 
         confirm_dialog.shape_corner_radius = 15
-        confirm_dialog.shape_type = 'rounded_rectangle'
+        confirm_dialog.shape = 'rounded_rectangle'
         confirm_dialog.rebuild()
 
         assert confirm_dialog.image is not None

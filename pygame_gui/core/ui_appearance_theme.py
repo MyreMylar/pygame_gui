@@ -118,8 +118,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         # stores everything that doesn't have a specific place elsewhere and doesn't need any
         # time-consuming loading all will be stored as strings and will have to do any further
         # processing in their specific elements. Misc data that doesn't have a value defined in a
-        # theme will return None so elements should be prepared
-        # to handle that with a default behaviour
+        # theme will raise an exception so elements should handle that.
         self.ui_element_misc_data = {}
 
         self._theme_file_last_modified = None
@@ -160,18 +159,21 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return bool: True if we need to reload elements because the theme data has changed.
         """
-        if self._theme_file_path is not None:
-            try:
-                stamp = stat(self._theme_file_path).st_mtime
-            except FileNotFoundError:
-                return False
+        if self._theme_file_path is None:
+            return False
 
+        need_to_reload = False
+        try:
+            stamp = stat(self._theme_file_path).st_mtime
+        except FileNotFoundError:
+            need_to_reload = False
+        else:
             if stamp != self._theme_file_last_modified:
                 self._theme_file_last_modified = stamp
                 self.reload_theming()
-                return True
+                need_to_reload = True
 
-        return False
+        return need_to_reload
 
     def update_shape_cache(self):
         """
@@ -268,10 +270,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         try:
                             image_resource_path = create_resource_path(image_path)
                             image = pygame.image.load(image_resource_path).convert_alpha()
-                            self.loaded_image_files[path] = image
                         except pygame.error:
                             warnings.warn('Unable to load image at path: ' +
                                           str(create_resource_path(image_path)))
+                        else:
+                            self.loaded_image_files[path] = image
 
                     if image is not None:
                         if 'sub_surface_rect' in image_path_data:
@@ -432,7 +435,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         if found_full_stop_index == -1:
                             found_all_ids = True
                         else:
-                            current_ids[index] = current_id[found_full_stop_index+1:]
+                            current_ids[index] = current_id[found_full_stop_index + 1:]
                             combined_ids.append(current_ids[index])
                 else:
                     found_all_ids = True
@@ -442,18 +445,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def get_image(self,
                   object_ids: List[Union[str, None]],
                   element_ids: List[str],
-                  image_id: str) -> Union[pygame.Surface, None]:
+                  image_id: str) -> pygame.Surface:
         """
-        Will return None if no image is specified. There are UI elements that have an optional
-        image display.
+        Will raise an exception if no image with the ids specified is found. UI elements that have
+        an optional image display will need to handle the exception.
 
         :param image_id: The id identifying the particular image spot in the UI we are looking for
                          an image to add to.
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
 
-        :return None or pygame.Surface:
-
+        :return: A pygame.Surface
         """
 
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
@@ -463,7 +465,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     image_id in self.ui_element_image_surfaces[combined_element_id]):
                 return self.ui_element_image_surfaces[combined_element_id][image_id]
 
-        return None
+        raise LookupError('Unable to find any image with id: ' + str(image_id) +
+                          ' with object_ids: ' + str(object_ids) +
+                          ' and element_ids: ' + str(element_ids))
 
     def get_font_info(self,
                       object_ids: List[Union[str, None]],
@@ -515,16 +519,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def get_misc_data(self,
                       object_ids: List[Union[str, None]],
                       element_ids: List[str],
-                      misc_data_id: str) -> Union[str, None]:
+                      misc_data_id: str) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
-        theming data.
+        theming data. Raises an exception if it can't find the data requested, UI elements
+        requesting optional data will need to handle this exception.
 
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
 
-        :return None or str: Returns a string if we find the data, otherwise returns None.
+        :return Any: Returns a string or a Dict
         """
         combined_element_ids = self.build_all_combined_ids(element_ids, object_ids)
 
@@ -533,7 +538,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     misc_data_id in self.ui_element_misc_data[combined_element_id]):
                 return self.ui_element_misc_data[combined_element_id][misc_data_id]
 
-        return None
+        raise LookupError('Unable to find any data with id: ' + str(misc_data_id) +
+                          ' with object_ids: ' + str(object_ids) +
+                          ' and element_ids: ' + str(element_ids))
 
     def get_colour(self,
                    object_ids: Union[None, List[Union[str, None]]],
@@ -656,12 +663,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 load_success = False
             else:
                 try:
-                    load_success = True
-                    theme_dict = json.load(theme_file,
-                                           object_pairs_hook=OrderedDict)
+                    theme_dict = json.load(theme_file, object_pairs_hook=OrderedDict)
                 except json.decoder.JSONDecodeError:
                     warnings.warn("Failed to load current theme file, check syntax", UserWarning)
                     load_success = False
+                else:
+                    load_success = True
 
                 if load_success:
 
@@ -804,11 +811,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         top = int(rect_list[1].strip())
                         width = int(rect_list[2].strip())
                         height = int(rect_list[3].strip())
-                        rect = pygame.Rect((left, top), (width, height))
                     except (ValueError, TypeError):
                         rect = pygame.Rect((0, 0), (10, 10))
                         warnings.warn("Unable to create subsurface rectangle from string: "
                                       "" + images_dict[image_key]['sub_surface_rect'])
+                    else:
+                        rect = pygame.Rect((left, top), (width, height))
 
                     image_block = self.ui_element_image_paths[element_name][image_key]
                     if ('sub_surface_rect' in image_block and
@@ -912,40 +920,40 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if ',' in string_data:
             # expecting some type of gradient description in string data
             string_data_list = string_data.split(',')
-            gradient_direction = None
+
             try:
                 gradient_direction = int(string_data_list[-1])
             except ValueError:
                 warnings.warn("Invalid gradient: " + string_data +
                               " for id:" + colour_id + " in theme file")
-
-            if gradient_direction is not None and len(string_data_list) == 3:
-                # two colour gradient
-                try:
-                    colour_1 = pygame.Color(string_data_list[0])
-                    colour_2 = pygame.Color(string_data_list[1])
-                    loaded_colour_or_gradient = ColourGradient(gradient_direction,
-                                                               colour_1,
-                                                               colour_2)
-                except ValueError:
-                    warnings.warn("Invalid gradient: " + string_data +
-                                  " for id:" + colour_id + " in theme file")
-            elif gradient_direction is not None and len(string_data_list) == 4:
-                # three colour gradient
-                try:
-                    colour_1 = pygame.Color(string_data_list[0])
-                    colour_2 = pygame.Color(string_data_list[1])
-                    colour_3 = pygame.Color(string_data_list[2])
-                    loaded_colour_or_gradient = ColourGradient(gradient_direction,
-                                                               colour_1,
-                                                               colour_2,
-                                                               colour_3)
-                except ValueError:
-                    warnings.warn("Invalid gradient: " + string_data +
-                                  " for id:" + colour_id + " in theme file")
             else:
-                warnings.warn("Invalid gradient: " + string_data +
-                              " for id:" + colour_id + " in theme file")
+                if len(string_data_list) == 3:
+                    # two colour gradient
+                    try:
+                        colour_1 = pygame.Color(string_data_list[0])
+                        colour_2 = pygame.Color(string_data_list[1])
+                        loaded_colour_or_gradient = ColourGradient(gradient_direction,
+                                                                   colour_1,
+                                                                   colour_2)
+                    except ValueError:
+                        warnings.warn("Invalid gradient: " + string_data +
+                                      " for id:" + colour_id + " in theme file")
+                elif len(string_data_list) == 4:
+                    # three colour gradient
+                    try:
+                        colour_1 = pygame.Color(string_data_list[0])
+                        colour_2 = pygame.Color(string_data_list[1])
+                        colour_3 = pygame.Color(string_data_list[2])
+                        loaded_colour_or_gradient = ColourGradient(gradient_direction,
+                                                                   colour_1,
+                                                                   colour_2,
+                                                                   colour_3)
+                    except ValueError:
+                        warnings.warn("Invalid gradient: " + string_data +
+                                      " for id:" + colour_id + " in theme file")
+                else:
+                    warnings.warn("Invalid gradient: " + string_data +
+                                  " for id:" + colour_id + " in theme file")
         else:
             # expecting a regular hex colour in string data
             try:

@@ -264,11 +264,12 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             else:
                 file_loc = create_resource_path(font_path)
             new_font = pygame.font.Font(file_loc, font_size)
+        except (FileNotFoundError, OSError):
+            warnings.warn("Failed to load font at path: " + font_path)
+        else:
             new_font.set_bold(font_style['bold'])
             new_font.set_italic(font_style['italic'])
             self.loaded_fonts[font_id] = new_font
-        except (FileNotFoundError, OSError):
-            warnings.warn("Failed to load font at path: " + font_path)
 
     def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,
                       italic_path: str = None, bold_italic_path: str = None):

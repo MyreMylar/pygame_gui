@@ -50,9 +50,9 @@ class UILabel(UIElement):
         self.text_colour = None
         self.text_shadow_colour = None
 
-        self.shadow_enabled = False
-        self.shadow_size = 1
-        self.shadow_offset = [0, 0]
+        self.text_shadow = False
+        self.text_shadow_size = 1
+        self.text_shadow_offset = (0, 0)
 
         self.rebuild_from_changed_theme_data()
 
@@ -98,39 +98,41 @@ class UILabel(UIElement):
             self.text_colour.apply_gradient_to_surface(text_render)
         else:
             new_image.fill(self.bg_colour)
-            if self.bg_colour.a != 255 or self.shadow_enabled:
+            if self.bg_colour.a != 255 or self.text_shadow:
                 text_render = self.font.render(self.text, True, self.text_colour)
             else:
                 text_render = self.font.render(self.text, True, self.text_colour, self.bg_colour)
         text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
                                                 centery=int(self.rect.height / 2))
 
-        if self.shadow_enabled:
+        if self.text_shadow:
             shadow_text_render = self.font.render(self.text, True, self.text_shadow_colour)
 
-            for y_pos in range(-self.shadow_size, self.shadow_size + 1):
-                shadow_text_rect = pygame.Rect((text_render_rect.x + self.shadow_offset[0],
-                                                text_render_rect.y + self.shadow_offset[1] + y_pos),
+            for y_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+                shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0],
+                                                text_render_rect.y + self.text_shadow_offset[1]
+                                                + y_pos),
                                                text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)
 
-            for x_pos in range(-self.shadow_size, self.shadow_size + 1):
-                shadow_text_rect = pygame.Rect((text_render_rect.x + self.shadow_offset[0] + x_pos,
-                                                text_render_rect.y + self.shadow_offset[1]),
+            for x_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+                shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0]
+                                                + x_pos,
+                                                text_render_rect.y + self.text_shadow_offset[1]),
                                                text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)
 
-            for x_and_y in range(-self.shadow_size, self.shadow_size + 1):
+            for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
-                    (text_render_rect.x + self.shadow_offset[0] + x_and_y,
-                     text_render_rect.y + self.shadow_offset[1] + x_and_y),
+                    (text_render_rect.x + self.text_shadow_offset[0] + x_and_y,
+                     text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
                     text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)
 
-            for x_and_y in range(-self.shadow_size, self.shadow_size + 1):
+            for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
-                    (text_render_rect.x + self.shadow_offset[0] - x_and_y,
-                     text_render_rect.y + self.shadow_offset[1] + x_and_y),
+                    (text_render_rect.x + self.text_shadow_offset[0] - x_and_y,
+                     text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
                     text_render_rect.size)
                 new_image.blit(shadow_text_render, shadow_text_rect)
 
@@ -172,43 +174,31 @@ class UILabel(UIElement):
             self.text_shadow_colour = text_shadow_colour
             any_changed = True
 
-        shadow_enable_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'text_shadow')
-        if shadow_enable_param is not None:
-            try:
-                shadow_enabled = bool(int(shadow_enable_param))
-            except ValueError:
-                shadow_enabled = False
-            if shadow_enabled != self.shadow_enabled:
-                self.shadow_enabled = shadow_enabled
-                any_changed = True
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
 
-        shadow_size_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'text_shadow_size')
-        if shadow_size_param is not None:
-            try:
-                shadow_size = int(shadow_size_param)
-            except ValueError:
-                shadow_size = 1
-            if shadow_size != self.shadow_size:
-                self.shadow_size = shadow_size
-                any_changed = True
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow',
+                                               default_value=False,
+                                               casting_func=parse_to_bool):
+            any_changed = True
 
-        shadow_offset_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'text_shadow_offset')
-        if shadow_offset_param is not None:
-            offset_string_list = shadow_offset_param.split(',')
-            if len(offset_string_list) == 2:
-                try:
-                    shadow_offset = [int(offset_string_list[0]), int(offset_string_list[1])]
-                except ValueError:
-                    shadow_offset = [1, 1]
-                if shadow_offset != self.shadow_offset:
-                    self.shadow_offset = shadow_offset
-                    any_changed = True
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
+                                               default_value=1,
+                                               casting_func=int):
+            any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
+                                               default_value=1,
+                                               casting_func=int):
+            any_changed = True
+
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_offset',
+                                               default_value=(0, 0),
+                                               casting_func=tuple_extract):
+            any_changed = True
 
         if any_changed:
             self.rebuild()

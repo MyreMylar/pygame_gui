@@ -147,18 +147,9 @@ class UITooltip(UIElement, IUITooltipInterface):
         """
         has_any_changed = False
 
-        rect_width = 170
-        rect_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'rect_width')
-        if rect_width_string is not None:
-            try:
-                rect_width = int(rect_width_string)
-            except ValueError:
-                rect_width = 170
-
-        if rect_width != self.rect_width:
-            self.rect_width = rect_width
+        if self._check_misc_theme_data_changed(attribute_name='rect_width',
+                                               default_value=170,
+                                               casting_func=int):
             has_any_changed = True
 
         if has_any_changed:

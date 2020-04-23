@@ -92,7 +92,7 @@ class UITextBox(UIElement):
 
         self.border_width = None
         self.shadow_width = None
-        self.padding = None
+        self.padding = (5, 5)
         self.background_colour = None
         self.border_colour = None
 
@@ -109,7 +109,7 @@ class UITextBox(UIElement):
         self.background_surf = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         self.should_trigger_full_rebuild = True
@@ -226,10 +226,10 @@ class UITextBox(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -642,13 +642,11 @@ class UITextBox(UIElement):
         has_any_changed = False
 
         # misc parameters
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -656,17 +654,12 @@ class UITextBox(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        padding = (5, 5)
-        padding_str = self.ui_theme.get_misc_data(self.object_ids,
-                                                  self.element_ids,
-                                                  'padding')
-        if padding_str is not None:
-            try:
-                padding = (int(padding_str.split(',')[0]), int(padding_str.split(',')[1]))
-            except ValueError:
-                padding = (5, 5)
-        if padding != self.padding:
-            self.padding = padding
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
+
+        if self._check_misc_theme_data_changed(attribute_name='padding',
+                                               default_value=(5, 5),
+                                               casting_func=tuple_extract):
             has_any_changed = True
 
         # colour parameters
@@ -698,29 +691,17 @@ class UITextBox(UIElement):
 
         """
         has_any_changed = False
-        # link styles
-        link_normal_underline = True
-        link_normal_underline_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids,
-                                                                   'link_normal_underline')
-        if link_normal_underline_string is not None:
-            try:
-                link_normal_underline = bool(int(link_normal_underline_string))
-            except ValueError:
-                link_normal_underline = True
-        if link_normal_underline != self.link_normal_underline:
-            self.link_normal_underline = link_normal_underline
-        link_hover_underline = True
-        link_hover_underline_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'link_hover_underline')
-        if link_hover_underline_string is not None:
-            try:
-                link_hover_underline = bool(int(link_hover_underline_string))
-            except ValueError:
-                link_hover_underline = True
-        if link_hover_underline != self.link_hover_underline:
-            self.link_hover_underline = link_hover_underline
+
+        if self._check_misc_theme_data_changed(attribute_name='link_normal_underline',
+                                               default_value=True,
+                                               casting_func=bool):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='link_hover_underline',
+                                               default_value=True,
+                                               casting_func=bool):
+            has_any_changed = True
+
         link_normal_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
                                                                   self.element_ids,
                                                                   'link_text')

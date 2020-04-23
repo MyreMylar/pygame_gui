@@ -81,7 +81,7 @@ class UISelectionList(UIElement):
         self.border_width = 1
         self.shadow_width = 2
         self.shape_corner_radius = 0
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
 
         self.scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
         self.lowest_list_pos = 0
@@ -423,13 +423,11 @@ class UISelectionList(UIElement):
             has_any_changed = True
 
         # misc
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                    'rounded_rectangle'] and
-                shape_type_string != self.shape_type):
-            self.shape_type = shape_type_string
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -437,17 +435,10 @@ class UISelectionList(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        list_item_height_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                              self.element_ids,
-                                                              'list_item_height')
-        if list_item_height_string is not None:
-            try:
-                list_item_height = int(list_item_height_string)
-            except ValueError:
-                list_item_height = 20
-            if list_item_height != self.list_item_height:
-                self.list_item_height = list_item_height
-                has_any_changed = True
+        if self._check_misc_theme_data_changed(attribute_name='list_item_height',
+                                               default_value=20,
+                                               casting_func=int):
+            has_any_changed = True
 
         if has_any_changed:
             self.rebuild()
@@ -464,10 +455,10 @@ class UISelectionList(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 

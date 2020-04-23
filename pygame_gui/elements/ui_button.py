@@ -107,7 +107,7 @@ class UIButton(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
 
         self.state_transitions = {}
 
@@ -122,30 +122,52 @@ class UIButton(UIElement):
         """
 
         changed = False
-        normal_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'normal_image')
-        if normal_image is not None and normal_image != self.normal_image:
-            self.normal_image = normal_image
-            self.hovered_image = normal_image
-            self.selected_image = normal_image
-            self.disabled_image = normal_image
-            changed = True
+        normal_image = None
+        try:
+            normal_image = self.ui_theme.get_image(self.object_ids,
+                                                   self.element_ids, 'normal_image')
+        except LookupError:
+            normal_image = None
+        finally:
+            if normal_image != self.normal_image:
+                self.normal_image = normal_image
+                self.hovered_image = normal_image
+                self.selected_image = normal_image
+                self.disabled_image = normal_image
+                changed = True
 
-        hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'hovered_image')
-        if hovered_image is not None and hovered_image != self.hovered_image:
-            self.hovered_image = hovered_image
-            changed = True
+        hovered_image = None
+        try:
+            hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids,
+                                                    'hovered_image')
+        except LookupError:
+            hovered_image = self.normal_image
+        finally:
+            if hovered_image != self.hovered_image:
+                self.hovered_image = hovered_image
+                changed = True
 
-        selected_image = self.ui_theme.get_image(self.object_ids,
-                                                 self.element_ids, 'selected_image')
-        if selected_image is not None and selected_image != self.selected_image:
-            self.selected_image = selected_image
-            changed = True
+        selected_image = None
+        try:
+            selected_image = self.ui_theme.get_image(self.object_ids, self.element_ids,
+                                                     'selected_image')
+        except LookupError:
+            selected_image = self.normal_image
+        finally:
+            if selected_image != self.selected_image:
+                self.selected_image = selected_image
+                changed = True
 
-        disabled_image = self.ui_theme.get_image(self.object_ids,
-                                                 self.element_ids, 'disabled_image')
-        if disabled_image is not None and disabled_image != self.disabled_image:
-            self.disabled_image = disabled_image
-            changed = True
+        disabled_image = None
+        try:
+            disabled_image = self.ui_theme.get_image(self.object_ids, self.element_ids,
+                                                     'disabled_image')
+        except LookupError:
+            disabled_image = self.normal_image
+        finally:
+            if disabled_image != self.disabled_image:
+                self.disabled_image = disabled_image
+                changed = True
 
         return changed
 
@@ -481,12 +503,12 @@ class UIButton(UIElement):
             has_any_changed = True
 
         # misc
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                    'ellipse',
-                                                                    'rounded_rectangle'] and
-                shape_type_string != self.shape_type):
-            self.shape_type = shape_type_string
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle',
+                                                               'ellipse']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -494,36 +516,32 @@ class UIButton(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                            self.element_ids,
-                                                            'tool_tip_delay')
-        if tool_tip_delay_string is not None:
-            try:
-                tool_tip_delay = float(tool_tip_delay_string)
-            except ValueError:
-                tool_tip_delay = 1.0
-
-            if tool_tip_delay != self.tool_tip_delay:
-                self.tool_tip_delay = tool_tip_delay
-                has_any_changed = True
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
 
         if self._check_text_alignment_theming():
             has_any_changed = True
 
-        state_transitions = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'state_transitions')
-        if state_transitions is not None and isinstance(state_transitions, dict):
-            for key in state_transitions:
-                states = key.split('_')
-                if len(states) == 2:
-                    start_state = states[0]
-                    target_state = states[1]
-                    try:
-                        duration = float(state_transitions[key])
-                    except ValueError:
-                        duration = 0.0
-                    self.state_transitions[(start_state, target_state)] = duration
+        try:
+            state_transitions = self.ui_theme.get_misc_data(self.object_ids,
+                                                            self.element_ids,
+                                                            'state_transitions')
+        except LookupError:
+            self.state_transitions = {}
+        else:
+            if isinstance(state_transitions, dict):
+                for key in state_transitions:
+                    states = key.split('_')
+                    if len(states) == 2:
+                        start_state = states[0]
+                        target_state = states[1]
+                        try:
+                            duration = float(state_transitions[key])
+                        except ValueError:
+                            duration = 0.0
+                        self.state_transitions[(start_state, target_state)] = duration
 
         if has_any_changed:
             self.rebuild()
@@ -536,40 +554,27 @@ class UIButton(UIElement):
 
         """
         has_any_changed = False
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                           self.element_ids,
-                                                           'text_horiz_alignment')
-        if text_horiz_alignment != self.text_horiz_alignment:
-            self.text_horiz_alignment = text_horiz_alignment
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
+                                               default_value='center',
+                                               casting_func=str):
             has_any_changed = True
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids,
-                                                                   'text_horiz_alignment_padding')
-        if text_horiz_alignment_padding is not None:
-            try:
-                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
-            except ValueError:
-                text_horiz_alignment_padding = 1
-            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
-                self.text_horiz_alignment_padding = text_horiz_alignment_padding
-                has_any_changed = True
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'text_vert_alignment')
-        if text_vert_alignment != self.text_vert_alignment:
-            self.text_vert_alignment = text_vert_alignment
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
+                                               default_value=1,
+                                               casting_func=int):
             has_any_changed = True
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'text_vert_alignment_padding')
-        if text_vert_alignment_padding is not None:
-            try:
-                text_vert_alignment_padding = int(text_vert_alignment_padding)
-            except ValueError:
-                text_vert_alignment_padding = 1
-            if text_vert_alignment_padding != self.text_vert_alignment_padding:
-                self.text_vert_alignment_padding = text_vert_alignment_padding
-                has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
+                                               default_value='center',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
+                                               default_value=1,
+                                               casting_func=int):
+            has_any_changed = True
+
         return has_any_changed
 
     def rebuild(self):
@@ -608,15 +613,15 @@ class UIButton(UIElement):
                               'shape_corner_radius': self.shape_corner_radius,
                               'transitions': self.state_transitions}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal', 'hovered', 'disabled',
                                                      'selected', 'active'], self.ui_manager)
-        elif self.shape_type == 'ellipse':
+        elif self.shape == 'ellipse':
             self.drawable_shape = EllipseDrawableShape(self.rect, theming_parameters,
                                                        ['normal', 'hovered', 'disabled',
                                                         'selected', 'active'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)

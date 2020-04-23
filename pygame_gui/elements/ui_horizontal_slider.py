@@ -72,7 +72,7 @@ class UIHorizontalSlider(UIElement):
         self.shadow_width = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         self.background_rect = None
@@ -84,7 +84,7 @@ class UIHorizontalSlider(UIElement):
         self.left_button = None
         self.right_button = None
         self.sliding_button = None
-        self.arrow_buttons_enabled = True
+        self.enable_arrow_buttons = True
 
         self.button_container = None
 
@@ -126,10 +126,10 @@ class UIHorizontalSlider(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -146,7 +146,7 @@ class UIHorizontalSlider(UIElement):
             self.button_container.set_relative_position(self.background_rect.topleft)
 
         # Things below here depend on theme data so need to be updated on a rebuild
-        if self.arrow_buttons_enabled:
+        if self.enable_arrow_buttons:
             self.arrow_button_width = self.default_button_width
 
             if self.left_button is None:
@@ -322,15 +322,11 @@ class UIHorizontalSlider(UIElement):
         """
         has_any_changed = False
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -352,29 +348,17 @@ class UIHorizontalSlider(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
-        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                           self.element_ids,
-                                                           'enable_arrow_buttons')
-        if buttons_enable_param is not None:
-            try:
-                buttons_enable = bool(int(buttons_enable_param))
-            except ValueError:
-                buttons_enable = True
-            if buttons_enable != self.arrow_buttons_enabled:
-                self.arrow_buttons_enabled = buttons_enable
-                has_any_changed = True
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
 
-        sliding_button_width = self.default_button_width
-        sliding_button_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'sliding_button_width')
-        if sliding_button_width_string is not None:
-            try:
-                sliding_button_width = int(sliding_button_width_string)
-            except ValueError:
-                sliding_button_width = self.default_button_width
-        if sliding_button_width != self.sliding_button_width:
-            self.sliding_button_width = sliding_button_width
+        if self._check_misc_theme_data_changed(attribute_name='enable_arrow_buttons',
+                                               default_value=True,
+                                               casting_func=parse_to_bool):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='sliding_button_width',
+                                               default_value=self.default_button_width,
+                                               casting_func=int):
             has_any_changed = True
 
         if has_any_changed:

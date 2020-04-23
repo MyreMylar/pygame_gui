@@ -89,7 +89,7 @@ class UIWorldSpaceHealthBar(UIElement):
         self.current_health_rect = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         self.set_image(None)
@@ -165,10 +165,10 @@ class UIWorldSpaceHealthBar(UIElement):
                               'filled_bar': self.bar_filled_colour,
                               'filled_bar_width_percentage': self.health_percentage}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -181,13 +181,11 @@ class UIWorldSpaceHealthBar(UIElement):
         """
         has_any_changed = False
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -195,18 +193,9 @@ class UIWorldSpaceHealthBar(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        hover_height = 1
-        hover_height_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'hover_height')
-        if hover_height_string is not None:
-            try:
-                hover_height = int(hover_height_string)
-            except ValueError:
-                hover_height = 1
-
-        if hover_height != self.hover_height:
-            self.hover_height = hover_height
+        if self._check_misc_theme_data_changed(attribute_name='hover_height',
+                                               default_value=1,
+                                               casting_func=int):
             has_any_changed = True
 
         border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,

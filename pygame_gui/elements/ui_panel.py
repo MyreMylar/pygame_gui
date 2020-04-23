@@ -77,7 +77,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.border_width = 1
         self.shadow_width = 2
         self.shape_corner_radius = 0
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
 
         self.rebuild_from_changed_theme_data()
 
@@ -231,19 +231,24 @@ class UIPanel(UIElement, IContainerLikeInterface):
             self.border_colour = border_colour
             has_any_changed = True
 
-        background_image = self.ui_theme.get_image(self.object_ids,
-                                                   self.element_ids,
-                                                   'background_image')
-        if background_image is not None and background_image != self.background_image:
-            self.background_image = background_image
-            has_any_changed = True
+        background_image = None
+        try:
+            background_image = self.ui_theme.get_image(self.object_ids,
+                                                       self.element_ids,
+                                                       'background_image')
+        except LookupError:
+            background_image = None
+        finally:
+            if background_image != self.background_image:
+                self.background_image = background_image
+                has_any_changed = True
 
         # misc
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                    'rounded_rectangle'] and
-                shape_type_string != self.shape_type):
-            self.shape_type = shape_type_string
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -266,10 +271,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 

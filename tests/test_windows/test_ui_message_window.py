@@ -131,7 +131,7 @@ class TestUIMessageWindow:
                                          manager=default_ui_manager)
 
         message_window.shape_corner_radius = 15
-        message_window.shape_type = 'rounded_rectangle'
+        message_window.shape = 'rounded_rectangle'
         message_window.rebuild()
 
         assert message_window.image is not None

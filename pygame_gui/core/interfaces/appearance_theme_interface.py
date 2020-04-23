@@ -73,18 +73,17 @@ class IUIAppearanceThemeInterface:
     def get_image(self,
                   object_ids: List[Union[str, None]],
                   element_ids: List[str],
-                  image_id: str) -> Union[pygame.Surface, None]:
+                  image_id: str) -> pygame.Surface:
         """
-        Will return None if no image is specified. There are UI elements that have an optional
-        image display.
+        Will raise an exception if no image with the ids specified is found. UI elements that have
+        an optional image display will need to handle the exception.
 
         :param image_id: The id identifying the particular image spot in the UI we are looking for
                          an image to add to.
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
 
-        :return None or pygame.Surface:
-
+        :return: A pygame.Surface
         """
 
     def get_font_info(self,
@@ -113,16 +112,17 @@ class IUIAppearanceThemeInterface:
     def get_misc_data(self,
                       object_ids: List[Union[str, None]],
                       element_ids: List[str],
-                      misc_data_id: str) -> Union[str, None]:
+                      misc_data_id: str) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
-        theming data.
+        theming data. Raises an exception if it can't find the data requested, UI elements
+        requesting optional data will need to handle this exception.
 
         :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
         :param element_ids: A list of element IDs representing an element's location in a hierarchy.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
 
-        :return None or str: Returns a string if we find the data, otherwise returns None.
+        :return Any: Returns a string or a Dict
         """
 
     def get_colour(self,

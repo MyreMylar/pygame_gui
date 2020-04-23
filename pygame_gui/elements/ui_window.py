@@ -80,7 +80,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.background_colour = None
         self.border_colour = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.enable_title_bar = True
         self.enable_close_button = True
         self.title_bar_height = 28
@@ -497,10 +497,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -580,15 +580,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         has_any_changed = False
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -624,43 +620,27 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         """
         has_any_changed = False
-        enable_title_bar_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                             self.element_ids,
-                                                             'enable_title_bar')
-        if enable_title_bar_param is not None:
-            try:
-                enable_title_bar = bool(int(enable_title_bar_param))
-            except ValueError:
-                enable_title_bar = True
-            if enable_title_bar != self.enable_title_bar:
-                self.enable_title_bar = enable_title_bar
-                has_any_changed = True
+
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
+        if self._check_misc_theme_data_changed(attribute_name='enable_title_bar',
+                                               default_value=True,
+                                               casting_func=parse_to_bool):
+            has_any_changed = True
+
         if self.enable_title_bar:
 
-            title_bar_height_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'title_bar_height')
-            if title_bar_height_string is not None:
-                try:
-                    title_bar_height = int(title_bar_height_string)
-                except ValueError:
-                    title_bar_height = 28
-                if title_bar_height != self.title_bar_height:
-                    self.title_bar_height = title_bar_height
-                    self.title_bar_close_button_width = title_bar_height
-                    has_any_changed = True
+            if self._check_misc_theme_data_changed(attribute_name='title_bar_height',
+                                                   default_value=28,
+                                                   casting_func=int):
+                has_any_changed = True
+                self.title_bar_close_button_width = self.title_bar_height
 
-            enable_close_button_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                                    self.element_ids,
-                                                                    'enable_close_button')
-            if enable_close_button_param is not None:
-                try:
-                    enable_close_button = bool(int(enable_close_button_param))
-                except ValueError:
-                    enable_close_button = True
-                if enable_close_button != self.enable_close_button:
-                    self.enable_close_button = enable_close_button
-                    has_any_changed = True
+            if self._check_misc_theme_data_changed(attribute_name='enable_close_button',
+                                                   default_value=True,
+                                                   casting_func=parse_to_bool):
+                has_any_changed = True
 
             if not self.enable_close_button:
                 self.title_bar_close_button_width = 0
