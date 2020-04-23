@@ -88,6 +88,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         # shape cache
         self.shape_cache = SurfaceCache()
 
+        self.unique_theming_ids = {}
+
         # the font to use if no other font is specified
         # these hardcoded paths should be OK for PyInstaller right now because they will never
         # actually used while fira_code is the default pre-loaded font. May need to
@@ -412,6 +414,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return: A list of IDs that reference this element in order of decreasing specificity.
         """
+        combined_id = ''.join(str(element_ids)).join(str(object_ids))
+        if combined_id in self.unique_theming_ids:
+            return self.unique_theming_ids[combined_id]
+
         combined_ids = []
         if object_ids is not None and element_ids is not None:
             if len(object_ids) != len(element_ids):
@@ -440,6 +446,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 else:
                     found_all_ids = True
 
+        self.unique_theming_ids[combined_id] = combined_ids
         return combined_ids
 
     def get_image(self,
