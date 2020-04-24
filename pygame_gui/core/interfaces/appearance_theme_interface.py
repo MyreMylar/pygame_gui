@@ -39,9 +39,9 @@ class IUIAppearanceThemeInterface:
         :return bool: True if we need to reload elements because the theme data has changed.
         """
 
-    def update_shape_cache(self):
+    def update_caching(self, time_delta: float):
         """
-        Updates the shape cache.
+        Updates the various surface caches.
 
         """
 

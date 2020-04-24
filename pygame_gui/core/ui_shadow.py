@@ -19,6 +19,15 @@ class ShadowGenerator:
         self.created_ellipse_shadows = {}
         self.preloaded_shadow_corners = {}
 
+        self.short_term_rect_cache = {}
+
+    def clear_short_term_caches(self):
+        """
+        Empties short term caches so we aren't hanging on to so many surfaces.
+        """
+        self.short_term_rect_cache.clear()
+        self.created_ellipse_shadows.clear()
+
     def create_shadow_corners(self,
                               shadow_width_param: int,
                               corner_radius_param: int,
@@ -170,6 +179,10 @@ class ShadowGenerator:
 
         if width < corner_radius_param or height < corner_radius_param:
             return None
+        params = [width, height, shadow_width_param, corner_radius_param]
+        shadow_id = '_'.join(str(param) for param in params)
+        if shadow_id in self.short_term_rect_cache:
+            return self.short_term_rect_cache[shadow_id]
         final_surface = pygame.Surface((width, height), flags=pygame.SRCALPHA, depth=32)
 
         corner_index_id = str(shadow_width_param) + 'x' + str(corner_radius_param)
@@ -208,6 +221,7 @@ class ShadowGenerator:
             final_surface.blit(right_edge, (width - shadow_width_param,
                                             corner_radius_param))
 
+        self.short_term_rect_cache[shadow_id] = final_surface
         return final_surface
 
     def create_new_ellipse_shadow(self, width: int,

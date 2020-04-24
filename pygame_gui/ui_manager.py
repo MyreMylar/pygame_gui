@@ -211,7 +211,7 @@ class UIManager(IUIManagerInterface):
                     for sprite in self.ui_group.sprites():
                         sprite.rebuild_from_changed_theme_data()
 
-        self.ui_theme.update_shape_cache()
+        self.ui_theme.update_caching(time_delta)
 
         self._update_mouse_position()
         hover_handled = False

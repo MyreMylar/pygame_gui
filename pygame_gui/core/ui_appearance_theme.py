@@ -133,6 +133,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                           'default_theme.json'))
         self._load_default_theme_file(default_theme_file_path)
 
+        self.st_cache_duration = 10.0
+        self.st_cache_clear_timer = 0.0
+
     def _load_default_theme_file(self, default_theme_file_path):
         """
         Loads the default theme file, either from the file directly or from string data if we have
@@ -177,11 +180,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         return need_to_reload
 
-    def update_shape_cache(self):
+    def update_caching(self, time_delta: float):
         """
-        Updates the shape cache.
+        Updates the various surface caches.
 
         """
+        if self.st_cache_clear_timer > self.st_cache_duration:
+            self.st_cache_clear_timer = 0.0
+            self.shadow_generator.clear_short_term_caches()
+        else:
+            self.st_cache_clear_timer += time_delta
+
         self.shape_cache.update()
 
     def reload_theming(self):
