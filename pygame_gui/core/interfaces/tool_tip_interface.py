@@ -1,30 +1,32 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union
 
 import pygame
 
 
-class IUITooltipInterface:
+class IUITooltipInterface(metaclass=ABCMeta):
     """
        A meta class that defines the interface that a UI Tool tip uses.
 
        Interfaces like this help us evade cyclical import problems by allowing us to define the
        actual manager class later on and have it make use of the classes that use the interface.
        """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def rebuild(self):
         """
         Rebuild anything that might need rebuilding.
 
         """
 
+    @abstractmethod
     def kill(self):
         """
         Overrides the UIElement's default kill method to also kill the text block element that
         helps make up the complete tool tip.
         """
 
+    @abstractmethod
     def find_valid_position(self, position: pygame.math.Vector2) -> bool:
         """
         Finds a valid position for the tool tip inside the root container of the UI.
@@ -43,12 +45,14 @@ class IUITooltipInterface:
 
         """
 
+    @abstractmethod
     def rebuild_from_changed_theme_data(self):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for
         this element when the theme data has changed.
         """
 
+    @abstractmethod
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
                                            Tuple[float, float]]):
@@ -60,6 +64,7 @@ class IUITooltipInterface:
 
         """
 
+    @abstractmethod
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
                                                     Tuple[float, float]]):
@@ -71,6 +76,7 @@ class IUITooltipInterface:
 
         """
 
+    @abstractmethod
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]]):

@@ -1,6 +1,6 @@
 import io
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import List, Union, Dict, Any
 try:
     from os import PathLike  # for Python 3.6
@@ -13,15 +13,15 @@ from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictiona
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 
 
-class IUIAppearanceThemeInterface:
+class IUIAppearanceThemeInterface(metaclass=ABCMeta):
     """
     A meta class that defines the interface that a UI Appearance Theme uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def get_font_dictionary(self) -> IUIFontDictionaryInterface:
         """
         Lets us grab the font dictionary, which is created by the theme object, so we can access
@@ -30,6 +30,7 @@ class IUIAppearanceThemeInterface:
         :return UIFontDictionary: The font dictionary.
         """
 
+    @abstractmethod
     def check_need_to_reload(self) -> bool:
         """
         Check if we need to reload our theme file because it's been modified. If so, trigger a
@@ -39,12 +40,14 @@ class IUIAppearanceThemeInterface:
         :return bool: True if we need to reload elements because the theme data has changed.
         """
 
+    @abstractmethod
     def update_caching(self, time_delta: float):
         """
         Updates the various surface caches.
 
         """
 
+    @abstractmethod
     def reload_theming(self):
         """
         We need to load our theme file to see if anything expensive has changed, if so trigger
@@ -52,12 +55,7 @@ class IUIAppearanceThemeInterface:
 
         """
 
-    def load_fonts(self):
-        """
-        Loads all fonts specified in our loaded theme.
-
-        """
-
+    @abstractmethod
     def build_all_combined_ids(self,
                                element_ids: Union[None, List[str]],
                                object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
@@ -70,6 +68,7 @@ class IUIAppearanceThemeInterface:
         :return: A list of IDs that reference this element in order of decreasing specificity.
         """
 
+    @abstractmethod
     def get_image(self, combined_element_ids: List[str], image_id: str) -> pygame.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
@@ -83,6 +82,7 @@ class IUIAppearanceThemeInterface:
         :return: A pygame.Surface
         """
 
+    @abstractmethod
     def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
         """
         Uses some data about a UIElement to get font data as dictionary
@@ -93,6 +93,7 @@ class IUIAppearanceThemeInterface:
         :return dictionary: Data about the font requested
         """
 
+    @abstractmethod
     def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
         """
         Uses some data about a UIElement to get a font object.
@@ -103,6 +104,7 @@ class IUIAppearanceThemeInterface:
         :return pygame.font.Font: A pygame font object.
         """
 
+    @abstractmethod
     def get_misc_data(self, combined_element_ids: List[str], misc_data_id: str) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
@@ -116,6 +118,7 @@ class IUIAppearanceThemeInterface:
         :return Any: Returns a string or a Dict
         """
 
+    @abstractmethod
     def get_colour(self, combined_element_ids: List[str], colour_id: str) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
@@ -126,6 +129,7 @@ class IUIAppearanceThemeInterface:
         :return pygame.Color: A pygame colour.
         """
 
+    @abstractmethod
     def get_colour_or_gradient(self, combined_element_ids: List[str],
                                colour_id: str) -> Union[pygame.Color, IColourGradientInterface]:
         """
@@ -139,6 +143,7 @@ class IUIAppearanceThemeInterface:
         :return pygame.Color or ColourGradient: A colour or a gradient object.
         """
 
+    @abstractmethod
     def load_theme(self, file_path: Union[str, PathLike, io.StringIO]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required

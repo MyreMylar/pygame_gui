@@ -1,10 +1,10 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union
 
 import pygame
 
 
-class IWindowInterface:
+class IWindowInterface(metaclass=ABCMeta):
     """
     A meta class that defines the interface that the window stack uses to interface with the
     UIWindow class.
@@ -12,8 +12,8 @@ class IWindowInterface:
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual window class later on and have it make use of the window stack.
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def set_blocking(self, state: bool):
         """
         Sets whether this window being open should block clicks to the rest of the UI or not.
@@ -23,6 +23,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                        Tuple[int, int],
                                                        Tuple[float, float]]):
@@ -35,6 +36,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]]):
@@ -46,6 +48,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
                                                     Tuple[float, float]]):
@@ -56,6 +59,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
                                            Tuple[float, float]]):
@@ -66,6 +70,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles resizing & closing windows. Gives UI Windows access to pygame events. Derived
@@ -78,6 +83,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def check_clicked_inside_or_blocking(self, event: pygame.event.Event) -> bool:
         """
         A quick event check outside of the normal event processing so that this window is brought
@@ -90,6 +96,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def update(self, time_delta: float):
         """
         A method called every update cycle of our application. Designed to be overridden by
@@ -100,11 +107,13 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def can_hover(self) -> bool:
         """
         Called to test if this window can be hovered.
         """
 
+    @abstractmethod
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
         For the window the only hovering we care about is the edges if this is a resizable window.
@@ -114,6 +123,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def get_top_layer(self) -> int:
         """
         Returns the 'highest' layer used by this window so that we can correctly place other
@@ -123,6 +133,7 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def change_layer(self, layer: int):
         """
         Change the drawing layer of this window.
@@ -130,24 +141,28 @@ class IWindowInterface:
         :param layer: the new layer to move to.
         """
 
+    @abstractmethod
     def kill(self):
         """
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI
         elements in this window, and remove if from the window stack.
         """
 
+    @abstractmethod
     def rebuild(self):
         """
         Rebuilds the window when the theme has changed.
 
         """
 
+    @abstractmethod
     def rebuild_from_changed_theme_data(self):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
 
+    @abstractmethod
     def should_use_window_edge_resize_cursor(self) -> bool:
         """
         Returns true if this window is in a state where we should display one of the resizing
@@ -156,6 +171,7 @@ class IWindowInterface:
         :return: True if a resizing cursor is needed.
         """
 
+    @abstractmethod
     def get_hovering_edge_id(self) -> str:
         """
         Gets the ID of the combination of edges we are hovering for use by the cursor system.
@@ -164,11 +180,13 @@ class IWindowInterface:
 
         """
 
+    @abstractmethod
     def on_moved_to_front(self):
         """
         Called when a window is moved to the front of the stack.
         """
 
+    @abstractmethod
     def set_display_title(self, new_title: str):
         """
         Set the title of the window.

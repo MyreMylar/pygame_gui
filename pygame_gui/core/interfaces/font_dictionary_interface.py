@@ -1,17 +1,17 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 import pygame
 
 
-class IUIFontDictionaryInterface:
+class IUIFontDictionaryInterface(metaclass=ABCMeta):
     """
     A meta class that defines the interface that a font dictionary uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def find_font(self, font_size: int, font_name: str,
                   bold: bool = False, italic: bool = False) -> pygame.font.Font:
         """
@@ -32,6 +32,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def get_default_font(self) -> pygame.font.Font:
         """
         Grab the default font.
@@ -40,6 +41,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
@@ -53,6 +55,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False):
         """
@@ -67,6 +70,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,
                       italic_path: str = None, bold_italic_path: str = None):
         """
@@ -79,6 +83,8 @@ class IUIFontDictionaryInterface:
         :param bold_italic_path: The path to the font's file with a bold and an italic style.
 
         """
+
+    @abstractmethod
     def print_unused_loaded_fonts(self):
         """
         Can be called to check if the UI is loading any fonts that we haven't used by the point
@@ -89,6 +95,7 @@ class IUIFontDictionaryInterface:
         explored all the code paths in a project that may use fonts.
         """
 
+    @abstractmethod
     def convert_html_to_point_size(self, html_size: float) -> int:
         """
         Takes in a HTML style font size and converts it into a point font size.
@@ -99,6 +106,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def check_font_preloaded(self, font_id: str) -> bool:
         """
         Check if a font is already preloaded or not.
@@ -109,6 +117,7 @@ class IUIFontDictionaryInterface:
 
         """
 
+    @abstractmethod
     def ensure_debug_font_loaded(self):
         """
         Ensure the font we use for debugging purposes is loaded. Generally called after we start
