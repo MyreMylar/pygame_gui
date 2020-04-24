@@ -22,7 +22,7 @@ class TestUIAppearanceTheme:
     def test_get_colour_from_gradient(self, _init_pygame):
         theme = UIAppearanceTheme()
         theme.load_theme(os.path.join("tests", "data", "themes", "ui_text_box_non_default.json"))
-        colour = theme.get_colour(object_ids=[''], element_ids=['text_box'], colour_id='dark_bg')
+        colour = theme.get_colour(combined_element_ids=['text_box'], colour_id='dark_bg')
         assert colour == pygame.Color('#25f92e')
 
     def test_load_theme_invalid_colour_gradients(self, _init_pygame):
@@ -34,7 +34,7 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme()
         with pytest.warns(UserWarning, match="Invalid gradient"):
             theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
-        colour = theme.get_colour(object_ids=['#test_parent', '#test_child'], element_ids=['good_window','text_box'],
+        colour = theme.get_colour(combined_element_ids=['#test_parent'],
                                   colour_id='dark_bg')
         assert colour == pygame.Color('#25f92e')
 
@@ -69,7 +69,8 @@ class TestUIAppearanceTheme:
 
     def test_update_shape_cache(self, _init_pygame):
         theme = UIAppearanceTheme()
-        theme.update_shape_cache()
+        theme.update_caching(0.1)
+        theme.update_caching(10.0)
 
     def test_load_images_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme()

@@ -128,7 +128,7 @@ class TestDrawableShape:
     def test_compute_aligned_text_rect(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'doop doop',
-                                                  'font': default_ui_manager.get_theme().get_font([], []),
+                                                  'font': default_ui_manager.get_theme().get_font([]),
                                                   'shadow_width': 0,
                                                   'border_width': 0},
                               states=['normal', 'hovered'], manager=default_ui_manager)
@@ -219,7 +219,7 @@ class TestDrawableShape:
     def test_rebuild_images_and_text(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'doop doop',
-                                                  'font': default_ui_manager.get_theme().get_font([], []),
+                                                  'font': default_ui_manager.get_theme().get_font([]),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'normal_image': pygame.image.load('tests/data/images/splat.png'),
