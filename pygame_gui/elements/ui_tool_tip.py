@@ -38,18 +38,17 @@ class UITooltip(UIElement, IUITooltipInterface):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=None,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='tool_tip')
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
                          container=None,
                          starting_height=manager.get_sprite_group().get_top_layer()+1,
                          layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=None,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='tool_tip')
 
         self.text_block = None
         self.rect_width = None
@@ -145,6 +144,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for
         this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='rect_width',

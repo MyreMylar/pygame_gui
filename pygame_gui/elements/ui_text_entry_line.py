@@ -58,15 +58,15 @@ class UITextEntryLine(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='text_entry_line')
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='text_entry_line')
+
         self.focused = False
 
         self.text = ""
@@ -854,9 +854,10 @@ class UITextEntryLine(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             has_any_changed = True
@@ -895,32 +896,27 @@ class UITextEntryLine(UIElement):
 
         """
         has_any_changed = False
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                           self.element_ids,
+        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                            'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True
-        selected_text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                    self.element_ids,
+        selected_text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                     'selected_text')
         if selected_text_colour != self.selected_text_colour:
             self.selected_text_colour = selected_text_colour
             has_any_changed = True
-        selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                  self.element_ids,
+        selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                   'selected_bg')
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour

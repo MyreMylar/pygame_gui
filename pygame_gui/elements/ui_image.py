@@ -31,17 +31,16 @@ class UIImage(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='image')
-
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
+
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='image')
 
         self.original_image = None
         image_surface = image_surface.convert_alpha()  # GUI images must support an alpha channel

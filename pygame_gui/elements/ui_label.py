@@ -31,16 +31,15 @@ class UILabel(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='label')
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='label')
         self.text = text
 
         # initialise theme params
@@ -146,29 +145,27 @@ class UILabel(UIElement):
         the element.
 
         """
+        super().rebuild_from_changed_theme_data()
         any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                           self.element_ids,
+        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                            'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             any_changed = True
 
-        bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                         self.element_ids,
+        bg_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                          'dark_bg')
         if bg_colour != self.bg_colour:
             self.bg_colour = bg_colour
             any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.object_ids,
-                                                      self.element_ids,
+        text_shadow_colour = self.ui_theme.get_colour(self.combined_element_ids,
                                                       'text_shadow')
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour

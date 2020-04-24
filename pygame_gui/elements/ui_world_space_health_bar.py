@@ -48,16 +48,15 @@ class UIWorldSpaceHealthBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        element_ids, object_ids = self._create_valid_ids(container=container,
-                                                         parent_element=parent_element,
-                                                         object_id=object_id,
-                                                         element_id='world_space_health_bar')
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=element_ids,
-                         object_ids=object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='world_space_health_bar')
 
         if sprite_to_monitor is not None:
             if not hasattr(sprite_to_monitor, 'health_capacity'):
@@ -179,6 +178,8 @@ class UIWorldSpaceHealthBar(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
+
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='shape',
@@ -198,22 +199,19 @@ class UIWorldSpaceHealthBar(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                   self.element_ids,
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                    'unfilled_bar')
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'filled_bar')
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour

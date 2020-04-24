@@ -31,17 +31,15 @@ class UIScreenSpaceHealthBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        element_ids, object_ids = self._create_valid_ids(container=container,
-                                                         parent_element=parent_element,
-                                                         object_id=object_id,
-                                                         element_id='screen_space_health_bar')
-
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=element_ids,
-                         object_ids=object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='screen_space_health_bar')
 
         self.current_health = 50
         self.health_capacity = 100
@@ -183,9 +181,10 @@ class UIScreenSpaceHealthBar(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             has_any_changed = True
@@ -202,36 +201,31 @@ class UIScreenSpaceHealthBar(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                   self.element_ids,
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                    'unfilled_bar')
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'filled_bar')
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.object_ids,
-                                                      self.element_ids,
+        text_shadow_colour = self.ui_theme.get_colour(self.combined_element_ids,
                                                       'text_shadow')
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
             has_any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                           self.element_ids,
+        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                            'normal_text')
         if text_colour != self.text_colour:
             self.text_colour = text_colour

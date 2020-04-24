@@ -39,16 +39,15 @@ class UIHorizontalSlider(UIElement):
                  anchors: Dict[str, str] = None
                  ):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='horizontal_slider')
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='horizontal_slider')
 
         self.default_button_width = 20
         self.arrow_button_width = self.default_button_width
@@ -320,6 +319,7 @@ class UIHorizontalSlider(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding for
         this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='shape',
@@ -334,15 +334,13 @@ class UIHorizontalSlider(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour

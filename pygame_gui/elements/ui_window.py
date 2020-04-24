@@ -46,14 +46,6 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  object_id: Union[str, None] = None,
                  resizable: bool = False):
 
-        if element_id is None:
-            element_id = 'window'
-
-        new_element_ids, new_object_ids = self._create_valid_ids(container=None,
-                                                                 parent_element=None,
-                                                                 object_id=object_id,
-                                                                 element_id=element_id)
-
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Union[UIContainer, None]
         self.resizable = resizable
@@ -62,9 +54,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         super().__init__(rect, manager, container=None,
                          starting_height=1,
-                         layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids)
+                         layer_thickness=1)
+
+        if element_id is None:
+            element_id = 'window'
+
+        self._create_valid_ids(container=None,
+                               parent_element=None,
+                               object_id=object_id,
+                               element_id=element_id)
 
         self.set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True
@@ -578,6 +576,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='shape',
@@ -592,15 +591,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour

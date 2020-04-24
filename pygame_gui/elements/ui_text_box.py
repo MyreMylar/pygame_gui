@@ -69,17 +69,17 @@ class UITextBox(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='text_box')
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
                          layer_thickness=2,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors
                          )
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='text_box')
+
         self.html_text = html_text
         self.font_dict = self.ui_theme.get_font_dictionary()
 
@@ -442,7 +442,7 @@ class UITextBox(UIElement):
         Parses HTML styled string text into a format more useful for styling pygame.font
         rendered text.
         """
-        parser = TextHTMLParser(self.ui_theme, self.element_ids, self.object_ids)
+        parser = TextHTMLParser(self.ui_theme, self.combined_element_ids)
         parser.push_style('body', {"bg_colour": self.background_colour})
         parser.feed(self.html_text)
 
@@ -639,6 +639,7 @@ class UITextBox(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
         # misc parameters
@@ -663,15 +664,13 @@ class UITextBox(UIElement):
             has_any_changed = True
 
         # colour parameters
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
@@ -702,18 +701,15 @@ class UITextBox(UIElement):
                                                casting_func=bool):
             has_any_changed = True
 
-        link_normal_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                  self.element_ids,
+        link_normal_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                   'link_text')
         if link_normal_colour != self.link_normal_colour:
             self.link_normal_colour = link_normal_colour
-        link_hover_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        link_hover_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'link_hover')
         if link_hover_colour != self.link_hover_colour:
             self.link_hover_colour = link_hover_colour
-        link_selected_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                    self.element_ids,
+        link_selected_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                     'link_selected')
         if link_selected_colour != self.link_selected_colour:
             self.link_selected_colour = link_selected_colour

@@ -54,18 +54,18 @@ class UISelectionList(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
                  ):
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='selection_list')
+
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='selection_list')
 
         self._parent_element = parent_element
         self.list_and_scroll_bar_container = None
@@ -406,17 +406,16 @@ class UISelectionList(UIElement):
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
         button's drawable shape
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour

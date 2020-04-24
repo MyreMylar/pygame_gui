@@ -19,10 +19,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
     :param starting_height: Used to record how many layers above it's container this element
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this
-                       UIElement is part of.
-    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this
-                        UIElement is part of.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
 
     """
@@ -32,8 +28,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 object_ids: Union[List[Union[str, None]], None] = None,
-                 element_ids: Union[List[str], None] = None,
                  anchors: Dict[str, str] = None):
 
         self._layer = 0
@@ -43,8 +37,12 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.rect = self.relative_rect.copy()
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
-        self.object_ids = object_ids
-        self.element_ids = element_ids
+
+        self.object_ids = None
+        self.element_ids = None
+        self.combined_element_ids = None
+        self.most_specific_combined_id = 'no_id'
+
         self.anchors = anchors
         if self.anchors is None:
             self.anchors = {'left': 'left',
@@ -76,13 +74,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.shadow_width = None  # type: Union[None, int]
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
-
-        combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids,
-                                                                          self.object_ids)
-        if combined_ids is not None and len(combined_ids) > 0:
-            self.most_specific_combined_id = combined_ids[0]
-        else:
-            self.most_specific_combined_id = 'no_id'
 
         if container is None:
             if self.ui_manager.get_root_container() is not None:
@@ -126,11 +117,11 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         """
         return self.element_ids
 
-    @staticmethod
-    def _create_valid_ids(container: Union[IContainerLikeInterface, None],
+    def _create_valid_ids(self,
+                          container: Union[IContainerLikeInterface, None],
                           parent_element: Union[None, 'UIElement'],
                           object_id: str,
-                          element_id: str) -> Tuple[List[str], List[Union[str, None]]]:
+                          element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
         won't work such as those containing full stops. These ID lists are used by the theming
@@ -153,16 +144,22 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
             raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
 
         if id_parent is not None:
-            new_element_ids = id_parent.element_ids.copy()
-            new_element_ids.append(element_id)
+            self.element_ids = id_parent.element_ids.copy()
+            self.element_ids.append(element_id)
 
-            new_object_ids = id_parent.object_ids.copy()
-            new_object_ids.append(object_id)
+            self.object_ids = id_parent.object_ids.copy()
+            self.object_ids.append(object_id)
         else:
-            new_element_ids = [element_id]
-            new_object_ids = [object_id]
+            self.element_ids = [element_id]
+            self.object_ids = [object_id]
 
-        return new_element_ids, new_object_ids
+        self.combined_element_ids = self.ui_manager.get_theme().build_all_combined_ids(
+            self.element_ids,
+            self.object_ids)
+        if self.combined_element_ids is not None and len(self.combined_element_ids) > 0:
+            self.most_specific_combined_id = self.combined_element_ids[0]
+        else:
+            self.most_specific_combined_id = 'no_id'
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -541,10 +538,10 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
 
     def rebuild_from_changed_theme_data(self):
         """
-        A stub to override. Used to test if the theming data for this element has changed and
-        rebuild the element if so.
-
+        A stub to override when we want to rebuild from theme data.
         """
+        # self.combined_element_ids = self.ui_theme.build_all_combined_ids(self.element_ids,
+        #                                                                  self.object_ids)
 
     def rebuild(self):
         """
@@ -729,8 +726,7 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         has_changed = False
         attribute_value = default_value
         try:
-            attribute_value = casting_func(self.ui_theme.get_misc_data(self.object_ids,
-                                                                       self.element_ids,
+            attribute_value = casting_func(self.ui_theme.get_misc_data(self.combined_element_ids,
                                                                        attribute_name))
         except (LookupError, ValueError):
             attribute_value = default_value

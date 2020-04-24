@@ -111,8 +111,7 @@ class TextStyleData:
        current text position.
 
     :param theme:
-    :param element_ids:
-    :param object_id:
+    :param combined_ids:
     """
 
     default_style = {
@@ -124,8 +123,7 @@ class TextStyleData:
 
     def __init__(self,
                  theme: UIAppearanceTheme,
-                 element_ids: List[str],
-                 object_id: List[Union[str, None]]):
+                 combined_ids: List[str]):
 
         self.ui_theme = theme
         self.len_text = 0
@@ -139,16 +137,14 @@ class TextStyleData:
 
         self.char_style = CharStyle()
 
-        font_info = self.ui_theme.get_font_info(object_id, element_ids)
+        font_info = self.ui_theme.get_font_info(combined_ids)
 
         self.default_style['font_name'] = font_info['name']
         self.default_style['font_size'] = int(font_info['size'])
 
-        self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient(object_id,
-                                                                                 element_ids,
+        self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient(combined_ids,
                                                                                  'normal_text')
-        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient(object_id,
-                                                                               element_ids,
+        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient(combined_ids,
                                                                                'dark_bg')
         self.font_name = self.default_style['font_name']
         self.font_size = self.default_style['font_size']
@@ -302,15 +298,13 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
 
     def __init__(self,
                  ui_theme: UIAppearanceTheme,
-                 element_ids: List[str],
-                 object_id: List[Union[str, None]]):
+                 combined_ids: List[str]):
 
-        TextStyleData.__init__(self, ui_theme, element_ids, object_id)
+        TextStyleData.__init__(self, ui_theme, combined_ids)
         html.parser.HTMLParser.__init__(self)
 
         self.ui_theme = ui_theme
-        self.element_ids = element_ids
-        self.object_id = object_id
+        self.combined_ids = combined_ids
 
         self.element_stack = []
 
@@ -355,16 +349,14 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
                 if attributes['color'][0] == '#':
                     style["font_colour"] = pygame.color.Color(attributes['color'])
                 else:
-                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(self.object_id,
-                                                                                self.element_ids,
+                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(self.combined_ids,
                                                                                 attributes['color'])
         elif element == 'body':
             if 'bgcolor' in attributes:
                 if len(attributes['bgcolor']) > 0:
                     if ',' in attributes['bgcolor']:
                         col_id = attributes['bgcolor']
-                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(self.object_id,
-                                                                                  self.element_ids,
+                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(self.combined_ids,
                                                                                   col_id)
                     else:
                         style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])

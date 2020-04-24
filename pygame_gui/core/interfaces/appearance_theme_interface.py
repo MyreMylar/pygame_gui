@@ -70,84 +70,70 @@ class IUIAppearanceThemeInterface:
         :return: A list of IDs that reference this element in order of decreasing specificity.
         """
 
-    def get_image(self,
-                  object_ids: List[Union[str, None]],
-                  element_ids: List[str],
-                  image_id: str) -> pygame.Surface:
+    def get_image(self, combined_element_ids: List[str], image_id: str) -> pygame.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
         an optional image display will need to handle the exception.
 
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
         :param image_id: The id identifying the particular image spot in the UI we are looking for
                          an image to add to.
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
 
         :return: A pygame.Surface
         """
 
-    def get_font_info(self,
-                      object_ids: List[Union[str, None]],
-                      element_ids: List[str]) -> Dict[str, Any]:
+    def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
         """
         Uses some data about a UIElement to get font data as dictionary
 
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     interleaved hierarchy of elements.
 
         :return dictionary: Data about the font requested
         """
 
-    def get_font(self,
-                 object_ids: List[Union[str, None]],
-                 element_ids: List[str]) -> pygame.font.Font:
+    def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
         """
         Uses some data about a UIElement to get a font object.
 
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     interleaved hierarchy of elements.
+
         :return pygame.font.Font: A pygame font object.
         """
 
-    def get_misc_data(self,
-                      object_ids: List[Union[str, None]],
-                      element_ids: List[str],
-                      misc_data_id: str) -> Union[str, Dict]:
+    def get_misc_data(self, combined_element_ids: List[str], misc_data_id: str) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
         theming data. Raises an exception if it can't find the data requested, UI elements
         requesting optional data will need to handle this exception.
 
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     interleaved hierarchy of elements.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
 
         :return Any: Returns a string or a Dict
         """
 
-    def get_colour(self,
-                   object_ids: Union[None, List[Union[str, None]]],
-                   element_ids: Union[None, List[str]],
-                   colour_id: str) -> pygame.Color:
+    def get_colour(self, combined_element_ids: List[str], colour_id: str) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
 
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
         :param colour_id: The id for the specific colour we are looking for.
         :return pygame.Color: A pygame colour.
         """
 
-    def get_colour_or_gradient(self,
-                               object_ids: Union[None, List[Union[str, None]]],
-                               element_ids: Union[None, List[str]],
+    def get_colour_or_gradient(self, combined_element_ids: List[str],
                                colour_id: str) -> Union[pygame.Color, IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,
         from our theme. Use this function if the UIElement can handle either type.
 
-        :param object_ids: A list of custom IDs representing an element's location in a hierarchy.
-        :param element_ids: A list of element IDs representing an element's location in a hierarchy.
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
         :param colour_id: The id for the specific colour we are looking for.
 
         :return pygame.Color or ColourGradient: A colour or a gradient object.

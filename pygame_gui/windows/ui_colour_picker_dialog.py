@@ -60,18 +60,17 @@ class UIColourChannelEditor(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='colour_channel_editor')
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='colour_channel_editor')
 
         self.range = value_range
         self.current_value = initial_value

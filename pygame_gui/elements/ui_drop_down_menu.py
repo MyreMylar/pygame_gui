@@ -133,16 +133,17 @@ class UIExpandedDropDownState:
         list_element_ids = self.drop_down_menu_ui.element_ids[:]
         list_element_ids.append('selection_list')
 
+        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_element_ids,
+                                                                       list_object_ids)
+
         try:
-            list_shadow_width = int(self.ui_manager.get_theme().get_misc_data(list_object_ids,
-                                                                              list_element_ids,
+            list_shadow_width = int(self.ui_manager.get_theme().get_misc_data(final_ids,
                                                                               'shadow_width'))
         except (LookupError, ValueError):
             list_shadow_width = 2
 
         try:
-            list_border_width = int(self.ui_manager.get_theme().get_misc_data(list_object_ids,
-                                                                              list_element_ids,
+            list_border_width = int(self.ui_manager.get_theme().get_misc_data(final_ids,
                                                                               'border_width'))
         except (LookupError, ValueError):
             list_border_width = 1
@@ -567,15 +568,15 @@ class UIDropDownMenu(UIElement):
                  anchors: Dict[str, str] = None
                  ):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='drop_down_menu')
         super().__init__(relative_rect, manager, container,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          layer_thickness=3, starting_height=1,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='drop_down_menu')
+
         self.options_list = options_list
         self.selected_option = starting_option
         self.open_button_width = 20
@@ -667,6 +668,7 @@ class UIDropDownMenu(UIElement):
         lot of checking and validating it's theming data.
 
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='expand_direction',
@@ -687,15 +689,13 @@ class UIDropDownMenu(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour

@@ -59,17 +59,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
                  ):
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id=element_id)
+
         super().__init__(relative_rect,
                          manager,
                          container,
-                         starting_height=starting_layer_height, layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
+                         starting_height=starting_layer_height,
+                         layer_thickness=1,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id=element_id)
 
         self.background_colour = None
         self.border_colour = None
@@ -215,17 +216,16 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
         button's drawable shape.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
+        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                                  'dark_bg')
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
+        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
                                                              'normal_border')
         if border_colour != self.border_colour:
             self.border_colour = border_colour
@@ -233,8 +233,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         background_image = None
         try:
-            background_image = self.ui_theme.get_image(self.object_ids,
-                                                       self.element_ids,
+            background_image = self.ui_theme.get_image(self.combined_element_ids,
                                                        'background_image')
         except LookupError:
             background_image = None
