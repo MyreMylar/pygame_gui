@@ -20,17 +20,27 @@ from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 
-# Only import the 'stringified' data if we can't find the actual default theme file
-# This is need for working PyInstaller build
-ROOT_PATH = path.abspath(path.dirname(path.dirname(__file__)))
-THEME_PATH = path.normpath(path.join(ROOT_PATH, 'data/default_theme.json'))
-if not path.exists(THEME_PATH):
-    from pygame_gui.core._string_data import default_theme
-
 try:
     from os import PathLike  # for Python 3.6
 except ImportError:
     PathLike = None
+
+# First try importlib
+# If that fails fall back to __file__
+# Finally fall back to stringified data
+try:
+    from importlib.resources import read_text
+    USE_IMPORT_LIB_RESOURCE = True
+except ImportError:
+    # Only import the 'stringified' data if we can't find the actual default theme file
+    # This is need for working PyInstaller build
+    ROOT_PATH = path.abspath(path.dirname(path.dirname(__file__)))
+    THEME_PATH = path.normpath(path.join(ROOT_PATH, 'data/default_theme.json'))
+    if not path.exists(THEME_PATH):
+        USE_STRINGIFIED_DATA = True
+        from pygame_gui.core._string_data import default_theme
+    else:
+        USE_FILE_PATH = True
 
 
 class UIAppearanceTheme(IUIAppearanceThemeInterface):
@@ -142,9 +152,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         been turned into an exe by a program like PyInstaller.
 
         """
-        if path.exists(default_theme_file_path):
+        if USE_IMPORT_LIB_RESOURCE:
+            self.load_theme(io.StringIO(read_text('pygame_gui.data', 'default_theme.json')))
+        elif USE_FILE_PATH:
             self.load_theme(default_theme_file_path)
-        else:
+        elif USE_STRINGIFIED_DATA:
             self.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
 
     def get_font_dictionary(self) -> IUIFontDictionaryInterface:
@@ -206,22 +218,22 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         Loads all fonts specified in our loaded theme.
 
         """
-        self.font_dictionary.add_font_path(self.base_font_info['name'],
-                                           self.base_font_info['regular_path'],
-                                           self.base_font_info['bold_path'],
-                                           self.base_font_info['italic_path'],
-                                           self.base_font_info['bold_italic_path'])
-
-        font_id = self.font_dictionary.create_font_id(self.base_font_info['size'],
-                                                      self.base_font_info['name'],
-                                                      self.base_font_info['bold'],
-                                                      self.base_font_info['italic'])
-
-        if font_id not in self.font_dictionary.loaded_fonts:
-            self.font_dictionary.preload_font(self.base_font_info['size'],
-                                              self.base_font_info['name'],
-                                              self.base_font_info['bold'],
-                                              self.base_font_info['italic'])
+        # self.font_dictionary.add_font_path(self.base_font_info['name'],
+        #                                    self.base_font_info['regular_path'],
+        #                                    self.base_font_info['bold_path'],
+        #                                    self.base_font_info['italic_path'],
+        #                                    self.base_font_info['bold_italic_path'])
+        #
+        # font_id = self.font_dictionary.create_font_id(self.base_font_info['size'],
+        #                                               self.base_font_info['name'],
+        #                                               self.base_font_info['bold'],
+        #                                               self.base_font_info['italic'])
+        #
+        # if font_id not in self.font_dictionary.loaded_fonts:
+        #     self.font_dictionary.preload_font(self.base_font_info['size'],
+        #                                       self.base_font_info['name'],
+        #                                       self.base_font_info['bold'],
+        #                                       self.base_font_info['italic'])
 
         for element_key in self.ui_element_fonts_info:
             font_info = self.ui_element_fonts_info[element_key]
@@ -572,18 +584,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             if (combined_element_id in self.ui_element_colours and
                     colour_id in self.ui_element_colours[combined_element_id]):
                 return self.ui_element_colours[combined_element_id][colour_id]
-
-        # if object_ids is not None:
-        #     for object_id in object_ids:
-        #         if (object_id is not None and object_id in self.ui_element_colours and
-        #                 colour_id in self.ui_element_colours[object_id]):
-        #             return self.ui_element_colours[object_id][colour_id]
-        #
-        # if element_ids is not None:
-        #     for element_id in element_ids:
-        #         if (element_id in self.ui_element_colours and
-        #                 colour_id in self.ui_element_colours[element_id]):
-        #             return self.ui_element_colours[element_id][colour_id]
 
         # then fall back on default colour with same id
         if colour_id in self.base_colours:

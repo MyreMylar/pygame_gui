@@ -3,20 +3,34 @@ import io
 import base64
 import warnings
 
-from typing import Dict
+from typing import Dict, Union
+from collections import namedtuple
 
 import pygame
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.utility import create_resource_path
 
-# Only import the 'stringified' data if we can't find the actual default font file
-# This is need for a working PyInstaller build
-ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-FONT_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/FiraCode-Regular.ttf'))
-if not os.path.exists(FONT_PATH):
-    from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
-    from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
+
+# First try importlib
+# If that fails fall back to __file__
+# Finally fall back to stringified data
+try:
+    from importlib.resources import read_binary
+    USE_IMPORT_LIB_RESOURCE = True
+except ImportError:
+    # Only import the 'stringified' data if we can't find the actual default theme file
+    # This is need for working PyInstaller build
+    ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    FONT_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/FiraCode-Regular.ttf'))
+    if not os.path.exists(FONT_PATH):
+        USE_STRINGIFIED_DATA = True
+        from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
+        from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
+    else:
+        USE_FILE_PATH = True
+
+PackageResource = namedtuple('PackageResource', ('package', 'resource'))
 
 
 class UIFontDictionary(IUIFontDictionaryInterface):
@@ -66,39 +80,51 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         self.loaded_fonts = None
         self.known_font_paths = None
-        module_root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        default_font_file_path = os.path.normpath(os.path.join(module_root_path,
-                                                               'data/FiraCode-Regular.ttf'))
-        self._load_default_font(default_font_file_path, module_root_path)
+
+        self._load_default_font()
 
         self.used_font_ids = [self.default_font_id]
 
-    def _load_default_font(self, default_font_file_path: str, module_root_path: str):
+    def _load_default_font(self):
         """
         Load the default font.
 
-        :param default_font_file_path: path to the font.
-        :param module_root_path: root path to the module.
-
         """
+
+        if USE_IMPORT_LIB_RESOURCE:
+            fira_code_regular_file_object = io.BytesIO(read_binary('pygame_gui.data',
+                                                                   'FiraCode-Regular.ttf'))
+            self.loaded_fonts = {self.default_font_id:
+                                 pygame.font.Font(fira_code_regular_file_object,
+                                                  self.default_font_size)}
+
+            self.known_font_paths = {'fira_code':
+                                     [PackageResource(package='pygame_gui.data',
+                                                      resource='FiraCode-Regular.ttf'),
+                                      PackageResource(package='pygame_gui.data',
+                                                      resource='FiraCode-Bold.ttf'),
+                                      PackageResource(package='pygame_gui.data',
+                                                      resource='FiraMono-RegularItalic.ttf'),
+                                      PackageResource(package='pygame_gui.data',
+                                                      resource='FiraMono-BoldItalic.ttf')]}
         # Only use the 'stringified' data if we can't find the actual default font file
         # This is need for a working PyInstaller build
-        if os.path.exists(default_font_file_path):
-            self.loaded_fonts = {self.default_font_id: pygame.font.Font(default_font_file_path,
+        elif USE_FILE_PATH:
+            self.loaded_fonts = {self.default_font_id: pygame.font.Font(FONT_PATH,
                                                                         self.default_font_size)}
-            regular_path = os.path.abspath(os.path.join(module_root_path,
+            regular_path = os.path.abspath(os.path.join(ROOT_PATH,
                                                         'data/FiraCode-Regular.ttf'))
-            bold_path = os.path.abspath(os.path.join(module_root_path,
+            bold_path = os.path.abspath(os.path.join(ROOT_PATH,
                                                      'data/FiraCode-Bold.ttf'))
-            italic_path = os.path.abspath(os.path.join(module_root_path,
+            italic_path = os.path.abspath(os.path.join(ROOT_PATH,
                                                        'data/FiraMono-RegularItalic.ttf'))
-            bold_italic_path = os.path.abspath(os.path.join(module_root_path,
+            bold_italic_path = os.path.abspath(os.path.join(ROOT_PATH,
                                                             'data/FiraMono-BoldItalic.ttf'))
             self.known_font_paths = {'fira_code': [regular_path,
                                                    bold_path,
                                                    italic_path,
                                                    bold_italic_path]}
-        else:
+        elif USE_STRINGIFIED_DATA:
             fira_code_regular_file_object = io.BytesIO(base64.standard_b64decode(FiraCode_Regular))
             self.loaded_fonts = {self.default_font_id:
                                  pygame.font.Font(fira_code_regular_file_object,
@@ -245,34 +271,41 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
 
     def _load_single_font_style(self,
-                                font_path: str,
+                                font_loc: Union[str, PackageResource, bytes],
                                 font_id: str,
                                 font_size: int,
                                 font_style: Dict[str, bool]):
         """
         Load a single font file with a given style.
 
-        :param font_path: Path to the font file.
+        :param font_loc: Path to the font file.
         :param font_id: id for the font in the loaded fonts dictionary.
         :param font_size: pygame font size.
         :param font_style: style dictionary (italic, bold, both or neither)
 
         """
         try:
-            if isinstance(font_path, bytes):
-                file_loc = io.BytesIO(base64.standard_b64decode(font_path))
+            if isinstance(font_loc, PackageResource):
+                file_loc = io.BytesIO(read_binary(package=font_loc.package,
+                                                  resource=font_loc.resource))
+            elif isinstance(font_loc, bytes):
+                file_loc = io.BytesIO(base64.standard_b64decode(font_loc))
             else:
-                file_loc = create_resource_path(font_path)
+                file_loc = create_resource_path(font_loc)
             new_font = pygame.font.Font(file_loc, font_size)
         except (FileNotFoundError, OSError):
-            warnings.warn("Failed to load font at path: " + font_path)
+            warnings.warn("Failed to load font at path: " + str(font_loc))
         else:
             new_font.set_bold(font_style['bold'])
             new_font.set_italic(font_style['italic'])
             self.loaded_fonts[font_id] = new_font
 
-    def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,
-                      italic_path: str = None, bold_italic_path: str = None):
+    def add_font_path(self,
+                      font_name: str,
+                      font_path: str,
+                      bold_path: str = None,
+                      italic_path: str = None,
+                      bold_italic_path: str = None):
         """
         Adds paths to different font files for a font name.
 

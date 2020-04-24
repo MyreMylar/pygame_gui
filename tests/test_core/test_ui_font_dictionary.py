@@ -23,7 +23,7 @@ class TestUIFontDictionary:
 
     def test_load_default_font_from_strings(self, _init_pygame):
         font_dictionary = UIFontDictionary()
-        font_dictionary._load_default_font('fake_font.ttf', 'fake_path')
+        font_dictionary._load_default_font()
         font_dictionary.preload_font(font_size=14, font_name='fira_code', bold=True)
         font_dictionary.preload_font(font_size=14, font_name='fira_code', italic=True)
         font_dictionary.preload_font(font_size=14, font_name='fira_code', bold=True, italic=True)
