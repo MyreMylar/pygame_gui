@@ -142,10 +142,10 @@ class TextStyleData:
         self.default_style['font_name'] = font_info['name']
         self.default_style['font_size'] = int(font_info['size'])
 
-        self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient(combined_ids,
-                                                                                 'normal_text')
-        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient(combined_ids,
-                                                                               'dark_bg')
+        self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient('normal_text',
+                                                                                 combined_ids)
+        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                               combined_ids)
         self.font_name = self.default_style['font_name']
         self.font_size = self.default_style['font_size']
         self.font_colour = self.default_style['font_colour']
@@ -349,15 +349,15 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
                 if attributes['color'][0] == '#':
                     style["font_colour"] = pygame.color.Color(attributes['color'])
                 else:
-                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(self.combined_ids,
-                                                                                attributes['color'])
+                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(attributes['color'],
+                                                                                self.combined_ids)
         elif element == 'body':
             if 'bgcolor' in attributes:
                 if len(attributes['bgcolor']) > 0:
                     if ',' in attributes['bgcolor']:
                         col_id = attributes['bgcolor']
-                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(self.combined_ids,
-                                                                                  col_id)
+                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(col_id,
+                                                                                  self.combined_ids)
                     else:
                         style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
                 else:

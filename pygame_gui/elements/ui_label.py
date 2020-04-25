@@ -153,20 +153,17 @@ class UILabel(UIElement):
             self.font = font
             any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                           'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             any_changed = True
 
-        bg_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                         'dark_bg')
+        bg_colour = self.ui_theme.get_colour_or_gradient('dark_bg', self.combined_element_ids)
         if bg_colour != self.bg_colour:
             self.bg_colour = bg_colour
             any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.combined_element_ids,
-                                                      'text_shadow')
+        text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
             any_changed = True

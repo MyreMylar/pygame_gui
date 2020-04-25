@@ -409,14 +409,14 @@ class UISelectionList(UIElement):
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True

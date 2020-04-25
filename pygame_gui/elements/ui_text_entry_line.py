@@ -896,28 +896,27 @@ class UITextEntryLine(UIElement):
 
         """
         has_any_changed = False
-        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
-        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
-        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                           'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True
-        selected_text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'selected_text')
+        selected_text_colour = self.ui_theme.get_colour_or_gradient('selected_text',
+                                                                    self.combined_element_ids)
         if selected_text_colour != self.selected_text_colour:
             self.selected_text_colour = selected_text_colour
             has_any_changed = True
-        selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                  'selected_bg')
+        selected_bg_colour = self.ui_theme.get_colour_or_gradient('selected_bg',
+                                                                  self.combined_element_ids)
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour
             has_any_changed = True

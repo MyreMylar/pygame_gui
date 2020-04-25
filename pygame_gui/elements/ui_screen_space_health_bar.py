@@ -201,32 +201,30 @@ class UIScreenSpaceHealthBar(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                   'unfilled_bar')
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient('unfilled_bar',
+                                                                   self.combined_element_ids)
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'filled_bar')
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient('filled_bar',
+                                                                 self.combined_element_ids)
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.combined_element_ids,
-                                                      'text_shadow')
+        text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
             has_any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                           'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True

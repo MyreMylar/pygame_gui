@@ -199,20 +199,20 @@ class UIWorldSpaceHealthBar(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                   'unfilled_bar')
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient('unfilled_bar',
+                                                                   self.combined_element_ids)
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'filled_bar')
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient('filled_bar',
+                                                                 self.combined_element_ids)
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True

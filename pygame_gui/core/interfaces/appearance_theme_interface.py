@@ -69,7 +69,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_image(self, combined_element_ids: List[str], image_id: str) -> pygame.Surface:
+    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
         an optional image display will need to handle the exception.
@@ -105,7 +105,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_misc_data(self, combined_element_ids: List[str], misc_data_id: str) -> Union[str, Dict]:
+    def get_misc_data(self, misc_data_id: str, combined_element_ids: List[str]) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
         theming data. Raises an exception if it can't find the data requested, UI elements
@@ -119,7 +119,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_colour(self, combined_element_ids: List[str], colour_id: str) -> pygame.Color:
+    def get_colour(self, colour_id: str, combined_element_ids: List[str] = None) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
 
@@ -130,14 +130,15 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_colour_or_gradient(self, combined_element_ids: List[str],
-                               colour_id: str) -> Union[pygame.Color, IColourGradientInterface]:
+    def get_colour_or_gradient(self, colour_id: str,
+                               combined_ids: List[str] = None) -> Union[pygame.Color,
+                                                                        IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,
         from our theme. Use this function if the UIElement can handle either type.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
-                                     hierarchy of elements.
+        :param combined_ids: A list of IDs representing an element's location in a
+                             hierarchy of elements.
         :param colour_id: The id for the specific colour we are looking for.
 
         :return pygame.Color or ColourGradient: A colour or a gradient object.

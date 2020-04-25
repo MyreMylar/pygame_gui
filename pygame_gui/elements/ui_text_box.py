@@ -664,14 +664,14 @@ class UITextBox(UIElement):
             has_any_changed = True
 
         # colour parameters
-        background_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
@@ -701,16 +701,16 @@ class UITextBox(UIElement):
                                                casting_func=bool):
             has_any_changed = True
 
-        link_normal_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                  'link_text')
+        link_normal_colour = self.ui_theme.get_colour_or_gradient('link_text',
+                                                                  self.combined_element_ids)
         if link_normal_colour != self.link_normal_colour:
             self.link_normal_colour = link_normal_colour
-        link_hover_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                 'link_hover')
+        link_hover_colour = self.ui_theme.get_colour_or_gradient('link_hover',
+                                                                 self.combined_element_ids)
         if link_hover_colour != self.link_hover_colour:
             self.link_hover_colour = link_hover_colour
-        link_selected_colour = self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'link_selected')
+        link_selected_colour = self.ui_theme.get_colour_or_gradient('link_selected',
+                                                                    self.combined_element_ids)
         if link_selected_colour != self.link_selected_colour:
             self.link_selected_colour = link_selected_colour
         link_style = {'link_text': self.link_normal_colour,

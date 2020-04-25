@@ -122,7 +122,7 @@ class UIButton(UIElement):
         changed = False
         normal_image = None
         try:
-            normal_image = self.ui_theme.get_image(self.combined_element_ids, 'normal_image')
+            normal_image = self.ui_theme.get_image('normal_image', self.combined_element_ids)
         except LookupError:
             normal_image = None
         finally:
@@ -135,7 +135,7 @@ class UIButton(UIElement):
 
         hovered_image = None
         try:
-            hovered_image = self.ui_theme.get_image(self.combined_element_ids, 'hovered_image')
+            hovered_image = self.ui_theme.get_image('hovered_image', self.combined_element_ids)
         except LookupError:
             hovered_image = self.normal_image
         finally:
@@ -145,7 +145,7 @@ class UIButton(UIElement):
 
         selected_image = None
         try:
-            selected_image = self.ui_theme.get_image(self.combined_element_ids, 'selected_image')
+            selected_image = self.ui_theme.get_image('selected_image', self.combined_element_ids)
         except LookupError:
             selected_image = self.normal_image
         finally:
@@ -155,7 +155,7 @@ class UIButton(UIElement):
 
         disabled_image = None
         try:
-            disabled_image = self.ui_theme.get_image(self.combined_element_ids, 'disabled_image')
+            disabled_image = self.ui_theme.get_image('disabled_image', self.combined_element_ids)
         except LookupError:
             disabled_image = self.normal_image
         finally:
@@ -444,36 +444,36 @@ class UIButton(UIElement):
             self.font = font
             has_any_changed = True
 
-        cols = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                  'normal_bg'),
-                'hovered_bg': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                   'hovered_bg'),
-                'disabled_bg': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'disabled_bg'),
-                'selected_bg': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'selected_bg'),
-                'active_bg': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                  'active_bg'),
-                'normal_text': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'normal_text'),
-                'hovered_text': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                     'hovered_text'),
-                'disabled_text': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                      'disabled_text'),
-                'selected_text': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                      'selected_text'),
-                'active_text': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                    'active_text'),
-                'normal_border': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                      'normal_border'),
-                'hovered_border': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                       'hovered_border'),
-                'disabled_border': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                        'disabled_border'),
-                'selected_border': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                        'selected_border'),
-                'active_border': self.ui_theme.get_colour_or_gradient(self.combined_element_ids,
-                                                                      'active_border')}
+        cols = {'normal_bg': self.ui_theme.get_colour_or_gradient('normal_bg',
+                                                                  self.combined_element_ids),
+                'hovered_bg': self.ui_theme.get_colour_or_gradient('hovered_bg',
+                                                                   self.combined_element_ids),
+                'disabled_bg': self.ui_theme.get_colour_or_gradient('disabled_bg',
+                                                                    self.combined_element_ids),
+                'selected_bg': self.ui_theme.get_colour_or_gradient('selected_bg',
+                                                                    self.combined_element_ids),
+                'active_bg': self.ui_theme.get_colour_or_gradient('active_bg',
+                                                                  self.combined_element_ids),
+                'normal_text': self.ui_theme.get_colour_or_gradient('normal_text',
+                                                                    self.combined_element_ids),
+                'hovered_text': self.ui_theme.get_colour_or_gradient('hovered_text',
+                                                                     self.combined_element_ids),
+                'disabled_text': self.ui_theme.get_colour_or_gradient('disabled_text',
+                                                                      self.combined_element_ids),
+                'selected_text': self.ui_theme.get_colour_or_gradient('selected_text',
+                                                                      self.combined_element_ids),
+                'active_text': self.ui_theme.get_colour_or_gradient('active_text',
+                                                                    self.combined_element_ids),
+                'normal_border': self.ui_theme.get_colour_or_gradient('normal_border',
+                                                                      self.combined_element_ids),
+                'hovered_border': self.ui_theme.get_colour_or_gradient('hovered_border',
+                                                                       self.combined_element_ids),
+                'disabled_border': self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                        self.combined_element_ids),
+                'selected_border': self.ui_theme.get_colour_or_gradient('selected_border',
+                                                                        self.combined_element_ids),
+                'active_border': self.ui_theme.get_colour_or_gradient('active_border',
+                                                                      self.combined_element_ids)}
 
         if cols != self.colours:
             self.colours = cols
@@ -505,8 +505,8 @@ class UIButton(UIElement):
             has_any_changed = True
 
         try:
-            state_transitions = self.ui_theme.get_misc_data(self.combined_element_ids,
-                                                            'state_transitions')
+            state_transitions = self.ui_theme.get_misc_data('state_transitions',
+                                                            self.combined_element_ids)
         except LookupError:
             self.state_transitions = {}
         else:

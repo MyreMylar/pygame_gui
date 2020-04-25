@@ -11,6 +11,7 @@ import sys
 
 from pathlib import Path
 from typing import Union
+from collections import namedtuple
 
 
 PLATFORM = platform.system().upper()
@@ -196,3 +197,7 @@ def create_resource_path(relative_path: Union[str, Path]):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+
+# class to handle data for importlib.resources as single parameter
+PackageResource = namedtuple('PackageResource', ('package', 'resource'))

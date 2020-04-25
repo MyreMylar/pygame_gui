@@ -14,6 +14,7 @@ from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 
 from pygame_gui.elements import UITooltip
+from pygame_gui.core.utility import PackageResource
 
 
 class UIManager(IUIManagerInterface):
@@ -30,7 +31,7 @@ class UIManager(IUIManagerInterface):
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: str = None,
+                 theme_path: Union[str, PackageResource] = None,
                  enable_live_theme_updates=True):
 
         self.window_resolution = window_resolution

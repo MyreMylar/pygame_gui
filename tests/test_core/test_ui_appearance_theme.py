@@ -1,4 +1,6 @@
 import os
+import io
+import base64
 import pytest
 import pygame
 import pygame_gui
@@ -7,6 +9,8 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.core._string_data import default_theme
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
+from pygame_gui import PackageResource
+
 
 pygame_gui.core.ui_appearance_theme.default_theme = default_theme
 
@@ -17,12 +21,30 @@ class TestUIAppearanceTheme:
 
     def test_load_default_theme_from_strings(self, _init_pygame):
         theme = UIAppearanceTheme()
-        theme._load_default_theme_file("load_from_file_instead")
+        theme.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
+
+    def test_load_non_default_theme_from_package(self, _init_pygame):
+        theme = UIAppearanceTheme()
+        theme.load_theme(PackageResource('tests.data.themes', 'ui_text_box_non_default.json'))
+        colour = theme.get_colour(colour_id='dark_bg', combined_element_ids=['text_box'])
+        assert colour == pygame.Color('#25f92e')
+
+    def test_load_images_from_package(self, _init_pygame, _display_surface_return_none: None):
+        theme = UIAppearanceTheme()
+        theme.load_theme(PackageResource('tests.data.themes', 'appearance_theme_package_test.json'))
+        image = theme.get_image(image_id='normal_image', combined_element_ids=['button'])
+        assert isinstance(image, pygame.Surface)
+
+    def test_load_fonts_from_package(self, _init_pygame, _display_surface_return_none: None):
+        theme = UIAppearanceTheme()
+        theme.load_theme(PackageResource('tests.data.themes', 'appearance_theme_package_test.json'))
+        font = theme.get_font(combined_element_ids=['button'])
+        assert isinstance(font, pygame.font.Font)
 
     def test_get_colour_from_gradient(self, _init_pygame):
         theme = UIAppearanceTheme()
         theme.load_theme(os.path.join("tests", "data", "themes", "ui_text_box_non_default.json"))
-        colour = theme.get_colour(combined_element_ids=['text_box'], colour_id='dark_bg')
+        colour = theme.get_colour(colour_id='dark_bg', combined_element_ids=['text_box'])
         assert colour == pygame.Color('#25f92e')
 
     def test_load_theme_invalid_colour_gradients(self, _init_pygame):
@@ -34,8 +56,7 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme()
         with pytest.warns(UserWarning, match="Invalid gradient"):
             theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
-        colour = theme.get_colour(combined_element_ids=['#test_parent'],
-                                  colour_id='dark_bg')
+        colour = theme.get_colour(colour_id='dark_bg', combined_element_ids=['#test_parent'])
         assert colour == pygame.Color('#25f92e')
 
     def test_load_theme_bad_font_data(self, _init_pygame):
@@ -74,7 +95,7 @@ class TestUIAppearanceTheme:
 
     def test_load_images_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme()
-        theme.ui_element_image_paths['button'] = {'regular_path': {'changed': True, 'path': 'not_an_image.png'}}
+        theme.ui_element_image_locs['button'] = {'regular_path': {'changed': True, 'path': 'not_an_image.png'}}
         with pytest.warns(UserWarning, match="Unable to load image at path"):
             theme._load_images()
 

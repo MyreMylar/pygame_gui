@@ -726,8 +726,8 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         has_changed = False
         attribute_value = default_value
         try:
-            attribute_value = casting_func(self.ui_theme.get_misc_data(self.combined_element_ids,
-                                                                       attribute_name))
+            attribute_value = casting_func(
+                self.ui_theme.get_misc_data(attribute_name, self.combined_element_ids))
         except (LookupError, ValueError):
             attribute_value = default_value
         finally:

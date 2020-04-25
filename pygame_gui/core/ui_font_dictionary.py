@@ -4,12 +4,11 @@ import base64
 import warnings
 
 from typing import Dict, Union
-from collections import namedtuple
 
 import pygame
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
-from pygame_gui.core.utility import create_resource_path
+from pygame_gui.core.utility import create_resource_path, PackageResource
 
 
 # First try importlib
@@ -29,8 +28,6 @@ except ImportError:
         from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
     else:
         USE_FILE_PATH = True
-
-PackageResource = namedtuple('PackageResource', ('package', 'resource'))
 
 
 class UIFontDictionary(IUIFontDictionaryInterface):
@@ -302,10 +299,10 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
     def add_font_path(self,
                       font_name: str,
-                      font_path: str,
-                      bold_path: str = None,
-                      italic_path: str = None,
-                      bold_italic_path: str = None):
+                      font_path: Union[str, PackageResource],
+                      bold_path: Union[str, PackageResource] = None,
+                      italic_path: Union[str, PackageResource] = None,
+                      bold_italic_path: Union[str, PackageResource] = None):
         """
         Adds paths to different font files for a font name.
 
@@ -316,17 +313,25 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold_italic_path: The path to the font's file with a bold and an italic style.
 
         """
-        if font_name not in self.known_font_paths:
-            if bold_path is None:
-                bold_path = font_path
-            if italic_path is None:
-                italic_path = font_path
-            if bold_italic_path is None:
-                bold_italic_path = font_path
-            self.known_font_paths[font_name] = [os.path.abspath(font_path),
-                                                os.path.abspath(bold_path),
-                                                os.path.abspath(italic_path),
-                                                os.path.abspath(bold_italic_path)]
+        if font_name in self.known_font_paths:
+            return
+
+        if isinstance(font_path, PackageResource):
+            regular_font_loc = font_path
+        else:
+            regular_font_loc = os.path.abspath(font_path)
+
+        style_locations = [bold_path, italic_path, bold_italic_path]
+        for index, location in enumerate(style_locations):
+            if location is None:
+                style_locations[index] = regular_font_loc
+            elif not isinstance(location, PackageResource):
+                style_locations[index] = os.path.abspath(location)
+
+            self.known_font_paths[font_name] = [regular_font_loc,
+                                                style_locations[0],
+                                                style_locations[1],
+                                                style_locations[2]]
 
     def print_unused_loaded_fonts(self):
         """
