@@ -432,7 +432,7 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        button.set_active()
+        button._set_active()
 
         assert empty_queue == 0
 
@@ -451,8 +451,8 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        button.set_active()
-        button.set_inactive()
+        button._set_active()
+        button._set_inactive()
 
         assert empty_queue == 0
 

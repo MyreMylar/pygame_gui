@@ -111,7 +111,7 @@ class UIButton(UIElement):
 
         self.rebuild_from_changed_theme_data()
 
-    def set_any_images_from_theme(self) -> bool:
+    def _set_any_images_from_theme(self) -> bool:
         """
         Grabs images for this button from the UI theme if any are set.
 
@@ -301,7 +301,7 @@ class UIButton(UIElement):
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
                         self.double_click_timer = 0.0
                         self.held = True
-                        self.set_active()
+                        self._set_active()
                         self.hover_time = 0.0
                         if self.tool_tip is not None:
                             self.tool_tip.kill()
@@ -312,7 +312,7 @@ class UIButton(UIElement):
                                     int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
                     self.held = False
-                    self.set_inactive()
+                    self._set_inactive()
                     consumed_event = True
                     self.pressed_event = True
 
@@ -323,7 +323,7 @@ class UIButton(UIElement):
 
                 if self.held:
                     self.held = False
-                    self.set_inactive()
+                    self._set_inactive()
                     consumed_event = True
 
         return consumed_event
@@ -351,14 +351,14 @@ class UIButton(UIElement):
         self.is_enabled = True
         self.drawable_shape.set_active_state('normal')
 
-    def set_active(self):
+    def _set_active(self):
         """
         Called when we are actively clicking on the button. Changes the colours to the appropriate
         ones for the new state then redraws the button.
         """
         self.drawable_shape.set_active_state('active')
 
-    def set_inactive(self):
+    def _set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
@@ -479,7 +479,7 @@ class UIButton(UIElement):
             self.colours = cols
             has_any_changed = True
 
-        if self.set_any_images_from_theme():
+        if self._set_any_images_from_theme():
             has_any_changed = True
 
         # misc
