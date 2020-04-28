@@ -37,18 +37,17 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  object_id: Union[str, None] = None,
                  anchors: Union[Dict[str, str], None] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='scrolling_container')
         super().__init__(relative_rect,
                          manager,
                          container,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
                          starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='scrolling_container')
 
         # self.parent_element = parent_element
         self.scroll_bar_width = 0

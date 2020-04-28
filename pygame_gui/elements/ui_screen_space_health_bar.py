@@ -31,17 +31,15 @@ class UIScreenSpaceHealthBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        element_ids, object_ids = self._create_valid_ids(container=container,
-                                                         parent_element=parent_element,
-                                                         object_id=object_id,
-                                                         element_id='screen_space_health_bar')
-
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=element_ids,
-                         object_ids=object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='screen_space_health_bar')
 
         self.current_health = 50
         self.health_capacity = 100
@@ -67,7 +65,7 @@ class UIScreenSpaceHealthBar(UIElement):
         self.current_health_rect = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         if sprite_to_monitor is not None:
@@ -146,10 +144,10 @@ class UIScreenSpaceHealthBar(UIElement):
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
                               }
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -183,22 +181,19 @@ class UIScreenSpaceHealthBar(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             has_any_changed = True
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -206,37 +201,30 @@ class UIScreenSpaceHealthBar(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                   self.element_ids,
-                                                                   'unfilled_bar')
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient('unfilled_bar',
+                                                                   self.combined_element_ids)
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'filled_bar')
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient('filled_bar',
+                                                                 self.combined_element_ids)
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
 
-        text_shadow_colour = self.ui_theme.get_colour(self.object_ids,
-                                                      self.element_ids,
-                                                      'text_shadow')
+        text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
             has_any_changed = True
 
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                           self.element_ids,
-                                                           'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True

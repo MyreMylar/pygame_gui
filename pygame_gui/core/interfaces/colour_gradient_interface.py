@@ -1,18 +1,18 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Union
 
 import pygame
 
 
-class IColourGradientInterface:
+class IColourGradientInterface(metaclass=ABCMeta):
     """
     A meta class that defines the interface that a colour gradient uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def apply_gradient_to_surface(self, input_surface: pygame.Surface,
                                   rect: Union[pygame.Rect, None] = None):
         """

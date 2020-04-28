@@ -7,6 +7,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.elements.text.html_parser import CharStyle, TextHTMLParser, TextLineContext, TextStyleData
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
+from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 
 
 class TestCharStyle:
@@ -57,22 +58,22 @@ class TestTextLineContext:
 
 class TestHtmlParser:
     def test_creation(self, _init_pygame):
-        theme = UIAppearanceTheme()
-        parser = TextHTMLParser(theme, [], [])
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        parser = TextHTMLParser(theme, [])
         parser.feed('<b>text</b>')
 
     def test_invalid_tag(self, _init_pygame):
-        theme = UIAppearanceTheme()
-        parser = TextHTMLParser(theme, [], [])
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        parser = TextHTMLParser(theme, [])
         with pytest.warns(UserWarning, match='Unsupported HTML Tag'):
             parser.feed('</font><video>text</video>')
 
     def test_body_gradient(self, _init_pygame):
-        theme = UIAppearanceTheme()
-        parser = TextHTMLParser(theme, [], [])
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        parser = TextHTMLParser(theme, [])
         parser.feed('<body bgcolor=#FF0000,#FFFF00,0>text</body></body>')
 
     def test_weird_html(self, _init_pygame):
-        theme = UIAppearanceTheme()
-        parser = TextHTMLParser(theme, [], [])
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        parser = TextHTMLParser(theme, [])
         parser.feed('<body bgcolor="" > <font size="" face="" >text</font></body>')

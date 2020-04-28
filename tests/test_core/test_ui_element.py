@@ -24,11 +24,11 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
 
-        element_ids, object_ids = element._create_valid_ids(None, None, object_id="none", element_id="test")
-        assert len(element_ids) == 1
-        assert element_ids == ["test"]
-        assert len(object_ids) == 1
-        assert object_ids == ["none"]
+        element._create_valid_ids(None, None, object_id="none", element_id="test")
+        assert len(element.element_ids) == 1
+        assert element.element_ids == ["test"]
+        assert len(element.object_ids) == 1
+        assert element.object_ids == ["none"]
 
     def test_create_invalid_id(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -289,7 +289,8 @@ class TestUIElement:
         assert element_5.relative_bottom_margin == 240
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
+        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
+                                     manager=default_ui_manager)
 
         element_1 = UIElement(relative_rect=pygame.Rect(30, 30, 50, 50),
                               manager=default_ui_manager,

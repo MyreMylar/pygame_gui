@@ -1,4 +1,4 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Tuple, List, Union, Dict
 
 import pygame
@@ -10,15 +10,15 @@ from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInte
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
 
-class IUIManagerInterface:
+class IUIManagerInterface(metaclass=ABCMeta):
     """
     A meta class that defines the interface that a UI Manager uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def get_double_click_time(self) -> float:
         """
         Returns time between clicks that counts as a double click.
@@ -26,6 +26,7 @@ class IUIManagerInterface:
         :return: A float, time measured in seconds.
         """
 
+    @abstractmethod
     def get_root_container(self) -> IUIContainerInterface:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
@@ -34,6 +35,7 @@ class IUIManagerInterface:
         :return: A container.
         """
 
+    @abstractmethod
     def get_theme(self) -> IUIAppearanceThemeInterface:
         """
         Gets the theme so the data in it can be accessed.
@@ -41,6 +43,7 @@ class IUIManagerInterface:
         :return: The theme data used by this UIManager
         """
 
+    @abstractmethod
     def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
@@ -49,6 +52,7 @@ class IUIManagerInterface:
         :return: The UI's sprite group.
         """
 
+    @abstractmethod
     def get_window_stack(self) -> IUIWindowStackInterface:
         """
         The UIWindowStack organises any windows in the UI Manager so that they are correctly sorted
@@ -57,6 +61,7 @@ class IUIManagerInterface:
         :return: The stack of windows.
         """
 
+    @abstractmethod
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
                    shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
         """
@@ -71,6 +76,7 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def set_window_resolution(self, window_resolution: Tuple[int, int]):
         """
         Sets the window resolution.
@@ -78,11 +84,13 @@ class IUIManagerInterface:
         :param window_resolution: the resolution to set.
         """
 
+    @abstractmethod
     def clear_and_reset(self):
         """
         Clear the whole UI.
         """
 
+    @abstractmethod
     def process_events(self, event: pygame.event.Event):
         """
         This is the top level method through which all input to UI elements is processed and
@@ -91,6 +99,7 @@ class IUIManagerInterface:
         :param event:  pygame.event.Event - the event to process.
         """
 
+    @abstractmethod
     def update(self, time_delta: float):
         """
         Update the UIManager.
@@ -98,11 +107,13 @@ class IUIManagerInterface:
         :param time_delta: The time passed since the last call to update, in seconds.
         """
 
+    @abstractmethod
     def get_mouse_position(self) -> Tuple[int, int]:
         """
         Get the position of the mouse in the UI.
         """
 
+    @abstractmethod
     def draw_ui(self, window_surface: pygame.Surface):
         """
         Draws the UI.
@@ -112,6 +123,7 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def add_font_paths(self, font_name: str, regular_path: str, bold_path: str = None,
                        italic_path: str = None, bold_italic_path: str = None):
         """
@@ -127,6 +139,7 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def preload_fonts(self, font_list: List[Dict[str, Union[str, int, float]]]):
         """
         Pre-loads a list of fonts.
@@ -135,12 +148,14 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def print_unused_fonts(self):
         """
         Prints a list of fonts that have been loaded but are not being used.
 
         """
 
+    @abstractmethod
     def set_focus_element(self, ui_element: IUIElementInterface):
         """
         Set an element as the focused element.
@@ -148,6 +163,7 @@ class IUIManagerInterface:
         :param ui_element: The element to focus on.
         """
 
+    @abstractmethod
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
         Clears the last scrollbar that we used. Right now this may also be one of the buttons of
@@ -156,6 +172,7 @@ class IUIManagerInterface:
         :param vert_scrollbar: A scrollbar UIElement.
         """
 
+    @abstractmethod
     def get_last_focused_vert_scrollbar(self):
         """
         Gets the last scrollbar that we used. Right now this may also be one of the buttons of
@@ -164,6 +181,7 @@ class IUIManagerInterface:
         :return: A UIElement.
         """
 
+    @abstractmethod
     def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
         """
         Clears the last scrollbar that we used. Right now this may also be one of the buttons of
@@ -172,6 +190,7 @@ class IUIManagerInterface:
         :param horiz_scrollbar: A scrollbar UIElement.
         """
 
+    @abstractmethod
     def get_last_focused_horiz_scrollbar(self):
         """
         Gets the last scrollbar that we used. Right now this may also be one of the buttons of
@@ -180,6 +199,7 @@ class IUIManagerInterface:
         :return: A UIElement.
         """
 
+    @abstractmethod
     def set_visual_debug_mode(self, is_active: bool):
         """
         Loops through all our UIElements to turn visual debug mode on or off. Also calls
@@ -188,6 +208,7 @@ class IUIManagerInterface:
         :param is_active: True to activate visual debug and False to turn it off.
         """
 
+    @abstractmethod
     def print_layer_debug(self):
         """
         Print some formatted information on the current state of the UI Layers.
@@ -195,6 +216,7 @@ class IUIManagerInterface:
         Handy for debugging layer problems.
         """
 
+    @abstractmethod
     def set_active_cursor(self, cursor: Tuple[Tuple[int, int],
                                               Tuple[int, int],
                                               Tuple[int, ...],
@@ -211,6 +233,7 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def get_universal_empty_surface(self) -> pygame.Surface:
         """
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
@@ -220,6 +243,7 @@ class IUIManagerInterface:
 
         """
 
+    @abstractmethod
     def create_tool_tip(self,
                         text: str,
                         position: Tuple[int, int],

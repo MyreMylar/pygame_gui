@@ -8,10 +8,31 @@ import time
 import contextlib
 import os
 import sys
+import io
+import base64
 
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict
 
+from threading import Thread
+from queue import Queue
+
+import pygame
+from pygame import Rect, Surface
+
+USE_IMPORT_LIB_RESOURCE = False
+USE_FILE_PATH = False
+try:
+    from importlib.resources import open_binary, read_binary
+    USE_IMPORT_LIB_RESOURCE = True
+except ImportError:
+    try:
+        from importlib_resources import open_binary, read_binary
+        USE_IMPORT_LIB_RESOURCE = True
+    except ImportError:
+        USE_FILE_PATH = True
+
+ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 PLATFORM = platform.system().upper()
 if PLATFORM == 'WINDOWS':
@@ -196,3 +217,265 @@ def create_resource_path(relative_path: Union[str, Path]):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+
+class PackageResource:
+    """
+    A data class to handle input for importlib.resources as single parameter.
+
+    :param package: The python package our resource is located in (e.g. 'pygame_gui.data')
+    :param resource: The name of the resource (e.g. 'default_theme.json')
+    """
+    def __init__(self, package: str, resource: str):
+        self.package = package
+        self.resource = resource
+
+    def to_path(self) -> str:
+        """
+        If we don't have any importlib module to use, we can try to turn the resource into a file
+        path.
+
+        :return: A string path.
+        """
+        root_path = ''
+        relative_path = self.package.replace('.', '/') + '/' + self.resource
+        if self.package.find('pygame_gui') == 0:
+            # This is default data from pygame_gui so relative to pygame_gui rather than app
+            root_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        return create_resource_path(os.path.join(root_path, relative_path))
+
+
+class FontResource:
+    """
+    A resource class to handle all the data we need to load a python font object from a
+    file.
+
+    :param font_id: A string ID for the font so we can find it again.
+    :param size: The font size.
+    :param style: A Style dictionary for bold and italic styling.
+    :param location: A location for the font file - a PackageResource, or a file path.
+    """
+    def __init__(self,
+                 font_id: str,
+                 size: int,
+                 style: Dict[str, bool],
+                 location: Union[PackageResource, str]):
+
+        self.font_id = font_id
+        self.size = size
+        self.style = style
+        self.location = location
+        self.loaded_font = None  # type: Union[pygame.font.Font, None]
+
+    def load(self):
+        """
+        Load the font from wherever it is located.
+
+        :return: An exception. We don't handle this here because exception handling in threads
+                 seems to be a bit of a mess.
+        """
+        error = None
+        if isinstance(self.location, PackageResource):
+            if USE_IMPORT_LIB_RESOURCE:
+                try:
+                    self.loaded_font = pygame.font.Font(
+                        io.BytesIO(read_binary(self.location.package,
+                                               self.location.resource)), self.size)
+                    self.loaded_font.set_bold(self.style['bold'])
+                    self.loaded_font.set_italic(self.style['italic'])
+                except (pygame.error, FileNotFoundError, OSError):
+                    error = FileNotFoundError('Unable to load resource with path: ' +
+                                              str(self.location))
+            elif USE_FILE_PATH:
+                try:
+                    self.loaded_font = pygame.font.Font(self.location.to_path(), self.size)
+                    self.loaded_font.set_bold(self.style['bold'])
+                    self.loaded_font.set_italic(self.style['italic'])
+                except (pygame.error, FileNotFoundError, OSError):
+                    error = FileNotFoundError('Unable to load resource with path: ' +
+                                              str(self.location.to_path()))
+
+        elif isinstance(self.location, str):
+            try:
+                self.loaded_font = pygame.font.Font(self.location, self.size)
+                self.loaded_font.set_bold(self.style['bold'])
+                self.loaded_font.set_italic(self.style['italic'])
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
+
+        elif isinstance(self.location, bytes):
+            try:
+                file_obj = io.BytesIO(base64.standard_b64decode(self.location))
+                self.loaded_font = pygame.font.Font(file_obj, self.size)
+                self.loaded_font.set_bold(self.style['bold'])
+                self.loaded_font.set_italic(self.style['italic'])
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
+
+        return error
+
+
+class ImageResource:
+    """
+    Resource representing an image to be loaded into memory.
+
+    This is an intermediate state for our final Surface resources because many sub surfaces may
+    refer to a single Image surface.
+
+    :param image_id: A string ID for identifying this image in particular.
+    :param location: A location for this image, a PackageResource, or a file path.
+    """
+    def __init__(self,
+                 image_id: str,
+                 location: Union[PackageResource, str]):
+        self.image_id = image_id
+        self.location = location
+        self.loaded_surface = None
+
+    def load(self) -> Union[Exception, None]:
+        """
+        Load the image from wherever it is located.
+
+        :return: An exception. We don't handle this here because exception handling in threads
+                 seems to be a bit of a mess.
+        """
+        error = None
+        if isinstance(self.location, PackageResource):
+            if USE_IMPORT_LIB_RESOURCE:
+                try:
+                    with open_binary(self.location.package,
+                                     self.location.resource) as open_resource:
+                        self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
+                except (pygame.error, FileNotFoundError, OSError):
+                    error = FileNotFoundError('Unable to load resource with path: ' +
+                                              str(self.location))
+
+            elif USE_FILE_PATH:
+                try:
+                    self.loaded_surface = pygame.image.load(self.location.to_path()).convert_alpha()
+                except (pygame.error, FileNotFoundError, OSError):
+                    error = FileNotFoundError('Unable to load resource with path: ' +
+                                              str(self.location))
+
+        elif isinstance(self.location, str):
+            try:
+                self.loaded_surface = pygame.image.load(self.location).convert_alpha()
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
+
+        return error
+
+
+class SurfaceResource:
+    """
+    Resource representing a finished, ready-for-use surface.
+
+    Because a surface may be a sub-surface of another one, these SurfaceResource are
+    'loaded' after images are loaded from files.
+
+    :param image_resource: The parent ImageResource of this surface.
+    :param sub_surface_rect: An optional Rect for sub-surfacing.
+    """
+    def __init__(self,
+                 image_resource: ImageResource,
+                 sub_surface_rect: Rect = None):
+
+        self.image_resource = image_resource
+        self.sub_surface_rect = sub_surface_rect
+        self._surface = None
+
+    def load(self) -> Union[Exception, None]:
+        """
+        'Load' the surface. Basically performs the subsurface operation, if it is required.
+        :return: An Exception if something went wrong, we bubble it out of the danger zone of
+                 Threads to handle neatly later.
+        """
+        error = None
+        if self.sub_surface_rect:
+            try:
+                self.surface = self.image_resource.loaded_surface.subsurface(self.sub_surface_rect)
+            except(pygame.error, OSError) as err:
+                error = err
+        return error
+
+    @property
+    def surface(self) -> Surface:
+        """
+        Get the Pygame Surface
+        """
+        return self._surface if self._surface is not None else self.image_resource.loaded_surface
+
+    @surface.setter
+    def surface(self, surface: Surface):
+        """
+        Set the Pygame surface.
+
+        :param surface: The Surface to set to.
+        """
+        self._surface = surface
+
+
+class ClosableQueue(Queue):
+    """
+    A synchronised Queue for loading resources in (sort-of) parallel.
+
+    The idea is that there is some time spent waiting for OS's to respond to file loading requests
+    and it is worth firing off a bunch of them in different threads to improve loading performance.
+
+    It seems to work OK.
+    """
+    SENTINEL = object()
+
+    def close(self):
+        """
+        Close this queue to new items.
+        """
+        self.put(self.SENTINEL)
+
+    def __iter__(self):
+        while True:
+            item = self.get()
+            try:
+                if item is self.SENTINEL:
+                    return  # Cause the thread to exit
+                yield item
+            finally:
+                self.task_done()
+
+
+class StoppableOutputWorker(Thread):
+    """
+    A worker thread that loads resources.
+
+    :param func: The loading function.
+    :param in_queue: Queue of resources to load.
+    :param out_queue: Queue of resources finished loading.
+    :param error_queue: A Queue of any errors generated while loading to display at the end.
+    """
+    def __init__(self,
+                 func,
+                 in_queue: ClosableQueue,
+                 out_queue: ClosableQueue,
+                 error_queue: ClosableQueue):
+
+        super().__init__()
+        self.func = func
+        self.in_queue = in_queue
+        self.out_list = out_queue
+        self.errors = error_queue
+
+    def run(self):
+        """
+        Runs the thread, taking resources off the load queue, loading them and then putting
+        them onto the out queue.
+
+        The queues are shared between multiple threads.
+        """
+        for item in self.in_queue:
+            result, error = self.func(item)
+            self.out_list.put(result)
+            if error:
+                self.errors.put(error)

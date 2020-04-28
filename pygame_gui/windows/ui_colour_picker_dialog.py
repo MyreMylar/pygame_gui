@@ -60,18 +60,17 @@ class UIColourChannelEditor(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='colour_channel_editor')
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=1,
                          layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='colour_channel_editor')
 
         self.range = value_range
         self.current_value = initial_value
@@ -154,20 +153,25 @@ class UIColourChannelEditor(UIElement):
                 event.user_type == UI_TEXT_ENTRY_FINISHED and
                 event.ui_element == self.entry):
 
+            int_value = self.current_value
             try:
                 int_value = int(self.entry.get_text())
             except ValueError:
                 int_value = 0
-            self._set_value_from_entry(int_value)
+            finally:
+                self._set_value_from_entry(int_value)
 
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_HORIZONTAL_SLIDER_MOVED and
                 event.ui_element == self.slider):
+
+            int_value = self.current_value
             try:
                 int_value = int(self.slider.get_current_value())
             except ValueError:
                 int_value = 0
-            self._set_value_from_slider(int_value)
+            finally:
+                self._set_value_from_slider(int_value)
 
         return consumed_event
 

@@ -37,17 +37,17 @@ class TestUIUIFileDialog:
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
-        assert file_dialog.current_file_list != [('splat.png', '#file_list_item')]
+        assert ('splat.png', '#file_list_item') not in file_dialog.current_file_list
 
         file_dialog.current_directory_path = str(Path('tests/data/images').resolve())
         file_dialog.update_current_file_list()
 
-        assert file_dialog.current_file_list == [('splat.png', '#file_list_item')]
+        assert ('splat.png', '#file_list_item') in file_dialog.current_file_list
 
         file_dialog.current_directory_path = 'nonsense/path/that/does/not/exist'
         file_dialog.update_current_file_list()
 
-        assert file_dialog.current_file_list == [('splat.png', '#file_list_item')]
+        assert ('splat.png', '#file_list_item') in file_dialog.current_file_list
 
     def test_press_cancel_button(self, _init_pygame, default_ui_manager,
                                  _display_surface_return_none):
@@ -273,4 +273,4 @@ class TestUIUIFileDialog:
         assert file_dialog.current_file_path is None
         assert str(Path(file_dialog.current_directory_path).parts[-1]) == 'images'
 
-        assert file_dialog.current_file_list == [('splat.png', '#file_list_item')]
+        assert ('splat.png', '#file_list_item') in file_dialog.current_file_list

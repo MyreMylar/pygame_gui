@@ -82,13 +82,13 @@ class UIExpandedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         shape_rect = self.drop_down_menu_ui.relative_rect
-        if self.drop_down_menu_ui.shape_type == 'rectangle':
+        if self.drop_down_menu_ui.shape == 'rectangle':
             self.drop_down_menu_ui.drawable_shape = RectDrawableShape(shape_rect,
                                                                       theming_parameters,
                                                                       ['normal'],
                                                                       self.ui_manager)
 
-        elif self.drop_down_menu_ui.shape_type == 'rounded_rectangle':
+        elif self.drop_down_menu_ui.shape == 'rounded_rectangle':
             self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(shape_rect,
                                                                           theming_parameters,
                                                                           ['normal'],
@@ -127,34 +127,28 @@ class UIExpandedDropDownState:
 
         expand_button_symbol = '▼'
 
-        options_list_object_id = '#drop_down_options_list'
-        options_list_object_ids = self.drop_down_menu_ui.object_ids[:]
-        options_list_object_ids.append(options_list_object_id)
-        options_list_element_ids = self.drop_down_menu_ui.element_ids[:]
-        options_list_element_ids.append('selection_list')
-        list_shadow_width_str = self.ui_manager.get_theme().get_misc_data(options_list_object_ids,
-                                                                          options_list_element_ids,
-                                                                          'shadow_width')
-        list_border_width_str = self.ui_manager.get_theme().get_misc_data(options_list_object_ids,
-                                                                          options_list_element_ids,
-                                                                          'border_width')
-        if list_shadow_width_str is not None:
-            try:
-                options_list_shadow_width = int(list_shadow_width_str)
-            except ValueError:
-                options_list_shadow_width = 2
-        else:
-            options_list_shadow_width = 2
+        list_object_id = '#drop_down_options_list'
+        list_object_ids = self.drop_down_menu_ui.object_ids[:]
+        list_object_ids.append(list_object_id)
+        list_element_ids = self.drop_down_menu_ui.element_ids[:]
+        list_element_ids.append('selection_list')
 
-        if list_border_width_str is not None:
-            try:
-                options_list_border_width = int(list_border_width_str)
-            except ValueError:
-                options_list_border_width = 1
-        else:
-            options_list_border_width = 1
+        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_element_ids,
+                                                                       list_object_ids)
 
-        options_list_border_and_shadow = options_list_shadow_width + options_list_border_width
+        try:
+            list_shadow_width = int(
+                self.ui_manager.get_theme().get_misc_data('shadow_width', final_ids))
+        except (LookupError, ValueError):
+            list_shadow_width = 2
+
+        try:
+            list_border_width = int(
+                self.ui_manager.get_theme().get_misc_data('border_width', final_ids))
+        except (LookupError, ValueError):
+            list_border_width = 1
+
+        options_list_border_and_shadow = list_shadow_width + list_border_width
         self.options_list_height = ((20 * len(self.options_list)) +
                                     (2 * options_list_border_and_shadow))
         self.option_list_y_pos = 0
@@ -375,8 +369,6 @@ class UIClosedDropDownState:
         self.element_ids = element_ids
         self.object_ids = object_ids
 
-        self.shape_type = None
-
         self.open_button_width = open_button_width
 
         self.should_transition = False
@@ -393,12 +385,12 @@ class UIClosedDropDownState:
                               'shadow_width': self.drop_down_menu_ui.shadow_width,
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
-        if self.drop_down_menu_ui.shape_type == 'rectangle':
+        if self.drop_down_menu_ui.shape == 'rectangle':
             self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect,
                                                                       theming_parameters,
                                                                       ['normal'],
                                                                       self.ui_manager)
-        elif self.drop_down_menu_ui.shape_type == 'rounded_rectangle':
+        elif self.drop_down_menu_ui.shape == 'rounded_rectangle':
             shape_rect = self.drop_down_menu_ui.rect
             self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(shape_rect,
                                                                           theming_parameters,
@@ -576,15 +568,15 @@ class UIDropDownMenu(UIElement):
                  anchors: Dict[str, str] = None
                  ):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='drop_down_menu')
         super().__init__(relative_rect, manager, container,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          layer_thickness=3, starting_height=1,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='drop_down_menu')
+
         self.options_list = options_list
         self.selected_option = starting_option
         self.open_button_width = 20
@@ -595,7 +587,7 @@ class UIDropDownMenu(UIElement):
         self.shadow_width = None
         self.background_colour = None
         self.border_colour = None
-        self.shape_type = "rectangle"
+        self.shape = "rectangle"
         self.shape_corner_radius = 2
 
         self.current_state = None
@@ -676,26 +668,20 @@ class UIDropDownMenu(UIElement):
         lot of checking and validating it's theming data.
 
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        expand_direction_string = self.ui_manager.get_theme().get_misc_data(self.object_ids,
-                                                                            self.element_ids,
-                                                                            'expand_direction')
-        expand_direction = 'down'
-        if expand_direction_string is not None and expand_direction_string in ['up', 'down']:
-            expand_direction = expand_direction_string
-
-        if expand_direction != self.expand_direction:
-            self.expand_direction = expand_direction
+        if self._check_misc_theme_data_changed(attribute_name='expand_direction',
+                                               default_value='down',
+                                               casting_func=str,
+                                               allowed_values=['up', 'down']):
             has_any_changed = True
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -703,16 +689,14 @@ class UIDropDownMenu(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True

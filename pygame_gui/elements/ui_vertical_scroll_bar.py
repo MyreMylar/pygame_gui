@@ -35,16 +35,15 @@ class UIVerticalScrollBar(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='vertical_scroll_bar')
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='vertical_scroll_bar')
 
         self.button_height = 20
         self.arrow_button_height = self.button_height
@@ -65,7 +64,7 @@ class UIVerticalScrollBar(UIElement):
         self.shadow_width = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         self.background_rect = None  # type: Union[None, pygame.Rect]
@@ -77,7 +76,7 @@ class UIVerticalScrollBar(UIElement):
         self.top_button = None
         self.bottom_button = None
         self.sliding_button = None
-        self.arrow_buttons_enabled = True
+        self.enable_arrow_buttons = True
 
         self.button_container = None
 
@@ -117,10 +116,10 @@ class UIVerticalScrollBar(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -136,7 +135,7 @@ class UIVerticalScrollBar(UIElement):
             self.button_container.set_dimensions(self.background_rect.size)
             self.button_container.set_relative_position(self.background_rect.topleft)
 
-        if self.arrow_buttons_enabled:
+        if self.enable_arrow_buttons:
             self.arrow_button_height = self.button_height
 
             if self.top_button is None:
@@ -402,17 +401,14 @@ class UIVerticalScrollBar(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -420,31 +416,25 @@ class UIVerticalScrollBar(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        buttons_enable_param = self.ui_theme.get_misc_data(self.object_ids,
-                                                           self.element_ids,
-                                                           'enable_arrow_buttons')
-        if buttons_enable_param is not None:
-            try:
-                buttons_enable = bool(int(buttons_enable_param))
-            except ValueError:
-                buttons_enable = True
-            if buttons_enable != self.arrow_buttons_enabled:
-                self.arrow_buttons_enabled = buttons_enable
-                has_any_changed = True
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
+        if self._check_misc_theme_data_changed(attribute_name='enable_arrow_buttons',
+                                               default_value=True,
+                                               casting_func=parse_to_bool):
+            has_any_changed = True
 
         if has_any_changed:
             self.rebuild()

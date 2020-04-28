@@ -10,6 +10,7 @@ from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
+from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
@@ -282,3 +283,14 @@ class TestUIManager:
         no_last_focused_scroll_bar = default_ui_manager.get_last_focused_vert_scrollbar() is None
 
         assert found_bar is True and no_last_focused_scroll_bar is True
+
+    def test_incremental_loading_nothing(self, _init_pygame, _display_surface_return_none):
+        incremental_loader = IncrementalThreadedResourceLoader()
+
+        UIManager((800, 600), resource_loader=incremental_loader)
+
+        incremental_loader.start()
+        finished = False
+        while not finished:
+            finished, progress = incremental_loader.update()
+        assert finished

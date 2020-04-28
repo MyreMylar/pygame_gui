@@ -1,0 +1,44 @@
+{
+    "button":
+    {
+        "colours":
+        {
+            "normal_bg": "#25f92e,#FF0000,120",
+            "hovered_bg": "#25f92e,#FF0000,#25f92e,120"
+        },
+        "images":
+        {
+            "normal_image": {
+                "package": "tests.data.images",
+                "resource": "splat.png",
+                "sub_surface_rect": "0,0,32,32"
+            },
+            "hovered_image": {
+                "package": "tests.data.images",
+                "resource": "splat.png",
+                "sub_surface_rect": "32,0,32,32"
+            },
+            "selected_image": {
+                "package": "tests.data.images",
+                "resource": "splat.png",
+                "sub_surface_rect": "64,0,32,32"
+            },
+            "disabled_image": {
+                "package": "tests.data.images",
+                "resource": "splat.png",
+                "sub_surface_rect": "96,0,32,32"
+            }
+        },
+        "font":
+        {
+            "name": "roboto",
+            "size": "12",
+            "bold": "0",
+            "italic": "0",
+            "regular_resource": {
+                "package": "tests.data",
+                "resource": "Roboto-Regular.ttf"
+            }
+        }
+    }
+}

@@ -1,22 +1,23 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import List
 
 from pygame_gui.core.interfaces.window_interface import IWindowInterface
 
 
-class IUIWindowStackInterface:
+class IUIWindowStackInterface(metaclass=ABCMeta):
     """
     A class for managing a stack of GUI windows so that only one is 'in front' at a time and the
     rest are sorted based on the last time they were interacted with/created.
 
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def clear(self):
         """
         Empties the whole stack removing and killing all windows.
         """
 
+    @abstractmethod
     def add_new_window(self, window: IWindowInterface):
         """
         Adds a window to the top of the stack.
@@ -25,6 +26,7 @@ class IUIWindowStackInterface:
 
         """
 
+    @abstractmethod
     def remove_window(self, window_to_remove: IWindowInterface):
         """
         Removes a window from the stack and resorts the remaining windows to adjust for
@@ -34,6 +36,7 @@ class IUIWindowStackInterface:
 
         """
 
+    @abstractmethod
     def move_window_to_front(self, window_to_front: IWindowInterface):
         """
         Moves the passed in window to the top of the window stack and resorts the other windows
@@ -43,6 +46,7 @@ class IUIWindowStackInterface:
 
         """
 
+    @abstractmethod
     def is_window_at_top(self, window: IWindowInterface) -> bool:
         """
         Checks if a window is at the top of the window stack or not.
@@ -53,6 +57,7 @@ class IUIWindowStackInterface:
 
         """
 
+    @abstractmethod
     def get_stack(self) -> List[IWindowInterface]:
         """
         Return the internal window stack directly.

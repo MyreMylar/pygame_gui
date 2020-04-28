@@ -8,6 +8,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui import core
 from pygame_gui import elements
 from pygame_gui import windows
+from pygame_gui import data
 from pygame_gui.elements import text
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
@@ -23,12 +24,15 @@ from pygame_gui._constants import UI_FILE_DIALOG_PATH_PICKED, UI_COLOUR_PICKER_C
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_FADE_IN
 from pygame_gui._constants import TEXT_EFFECT_FADE_OUT
+from pygame_gui.core.utility import PackageResource
 
 __all__ = ['UIManager',
            'core',
            'elements',
            'windows',
+           'data',
            'text',
+           'PackageResource',
            'UI_BUTTON_PRESSED',
            'UI_BUTTON_START_PRESS',
            'UI_BUTTON_ON_HOVERED',

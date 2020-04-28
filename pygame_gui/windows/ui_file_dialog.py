@@ -187,7 +187,7 @@ class UIFileDialog(UIWindow):
             self.file_path_text_line.edit_position = highlight_end
 
             text_clip_width = (self.file_path_text_line.rect.width -
-                               (self.file_path_text_line.horiz_line_padding * 2) -
+                               (self.file_path_text_line.padding[0] * 2) -
                                (self.file_path_text_line.shape_corner_radius * 2) -
                                (self.file_path_text_line.border_width * 2) -
                                (self.file_path_text_line.shadow_width * 2))
@@ -400,6 +400,9 @@ class UIFileDialog(UIWindow):
             return
         try:
             self.current_file_path.unlink()
+        except (PermissionError, FileNotFoundError):
+            pass
+        else:
             self.current_file_path = None
             self.delete_button.disable()
             self.ok_button.disable()
@@ -407,9 +410,6 @@ class UIFileDialog(UIWindow):
             self.update_current_file_list()
             self.file_path_text_line.set_text(self.current_directory_path)
             self.file_selection_list.set_item_list(self.current_file_list)
-
-        except (PermissionError, FileNotFoundError):
-            pass
 
     def _process_mini_file_operation_button_events(self, event):
         """

@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Union, Tuple, Dict, Any
+from typing import List, Union, Tuple, Dict, Any, Callable
 
 import pygame
 
@@ -19,10 +19,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
     :param starting_height: Used to record how many layers above it's container this element
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this
-                       UIElement is part of.
-    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this
-                        UIElement is part of.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
 
     """
@@ -32,8 +28,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 object_ids: Union[List[Union[str, None]], None] = None,
-                 element_ids: Union[List[str], None] = None,
                  anchors: Dict[str, str] = None):
 
         self._layer = 0
@@ -43,8 +37,12 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.rect = self.relative_rect.copy()
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
-        self.object_ids = object_ids
-        self.element_ids = element_ids
+
+        self.object_ids = None
+        self.element_ids = None
+        self.combined_element_ids = None
+        self.most_specific_combined_id = 'no_id'
+
         self.anchors = anchors
         if self.anchors is None:
             self.anchors = {'left': 'left',
@@ -76,13 +74,6 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         self.shadow_width = None  # type: Union[None, int]
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
-
-        combined_ids = self.ui_manager.get_theme().build_all_combined_ids(self.element_ids,
-                                                                          self.object_ids)
-        if combined_ids is not None and len(combined_ids) > 0:
-            self.most_specific_combined_id = combined_ids[0]
-        else:
-            self.most_specific_combined_id = 'no_id'
 
         if container is None:
             if self.ui_manager.get_root_container() is not None:
@@ -126,11 +117,11 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         """
         return self.element_ids
 
-    @staticmethod
-    def _create_valid_ids(container: Union[IContainerLikeInterface, None],
+    def _create_valid_ids(self,
+                          container: Union[IContainerLikeInterface, None],
                           parent_element: Union[None, 'UIElement'],
                           object_id: str,
-                          element_id: str) -> Tuple[List[str], List[Union[str, None]]]:
+                          element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
         won't work such as those containing full stops. These ID lists are used by the theming
@@ -153,16 +144,22 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
             raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
 
         if id_parent is not None:
-            new_element_ids = id_parent.element_ids.copy()
-            new_element_ids.append(element_id)
+            self.element_ids = id_parent.element_ids.copy()
+            self.element_ids.append(element_id)
 
-            new_object_ids = id_parent.object_ids.copy()
-            new_object_ids.append(object_id)
+            self.object_ids = id_parent.object_ids.copy()
+            self.object_ids.append(object_id)
         else:
-            new_element_ids = [element_id]
-            new_object_ids = [object_id]
+            self.element_ids = [element_id]
+            self.object_ids = [object_id]
 
-        return new_element_ids, new_object_ids
+        self.combined_element_ids = self.ui_manager.get_theme().build_all_combined_ids(
+            self.element_ids,
+            self.object_ids)
+        if self.combined_element_ids is not None and len(self.combined_element_ids) > 0:
+            self.most_specific_combined_id = self.combined_element_ids[0]
+        else:
+            self.most_specific_combined_id = 'no_id'
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -541,10 +538,10 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
 
     def rebuild_from_changed_theme_data(self):
         """
-        A stub to override. Used to test if the theming data for this element has changed and
-        rebuild the element if so.
-
+        A stub to override when we want to rebuild from theme data.
         """
+        # self.combined_element_ids = self.ui_theme.build_all_combined_ids(self.element_ids,
+        #                                                                  self.object_ids)
 
     def rebuild(self):
         """
@@ -690,44 +687,54 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
         return self.starting_height
 
     def _check_shape_theming_changed(self, defaults: Dict[str, Any]) -> bool:
+        """
+        Checks all the standard miscellaneous shape theming parameters.
+
+        :param defaults: A dictionary of default values
+        :return: True if any have changed.
+        """
         has_any_changed = False
-        border_width = defaults['border_width']
-        border_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'border_width')
-        if border_width_string is not None:
-            try:
-                border_width = int(border_width_string)
-            except ValueError:
-                border_width = defaults['border_width']
-        if border_width != self.border_width:
-            self.border_width = border_width
+
+        if self._check_misc_theme_data_changed('border_width', defaults['border_width'], int):
             has_any_changed = True
 
-        shadow_width = defaults['shadow_width']
-        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'shadow_width')
-        if shadow_width_string is not None:
-            try:
-                shadow_width = int(shadow_width_string)
-            except ValueError:
-                shadow_width = defaults['shadow_width']
-        if shadow_width != self.shadow_width:
-            self.shadow_width = shadow_width
+        if self._check_misc_theme_data_changed('shadow_width', defaults['shadow_width'], int):
             has_any_changed = True
 
-        corner_radius = defaults['shape_corner_radius']
-        shape_corner_radius_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'shape_corner_radius')
-        if shape_corner_radius_string is not None:
-            try:
-                corner_radius = int(shape_corner_radius_string)
-            except ValueError:
-                corner_radius = defaults['shape_corner_radius']
-        if corner_radius != self.shape_corner_radius:
-            self.shape_corner_radius = corner_radius
+        if self._check_misc_theme_data_changed('shape_corner_radius',
+                                               defaults['shape_corner_radius'], int):
             has_any_changed = True
 
         return has_any_changed
+
+    def _check_misc_theme_data_changed(self,
+                                       attribute_name: str,
+                                       default_value: Any,
+                                       casting_func: Callable[[Any], Any],
+                                       allowed_values: Union[List, None] = None) -> bool:
+        """
+        Checks if the value of a pieces of miscellaneous theming data has changed, and if it has,
+        updates the corresponding attribute on the element and returns True.
+
+        :param attribute_name: The name of the attribute.
+        :param default_value: The default value for the attribute.
+        :param casting_func: The function to cast to the type of the data.
+
+        :return: True if the attribute has changed.
+
+        """
+        has_changed = False
+        attribute_value = default_value
+        try:
+            attribute_value = casting_func(
+                self.ui_theme.get_misc_data(attribute_name, self.combined_element_ids))
+        except (LookupError, ValueError):
+            attribute_value = default_value
+        finally:
+            if allowed_values and attribute_value not in allowed_values:
+                attribute_value = default_value
+
+            if attribute_value != getattr(self, attribute_name, default_value):
+                setattr(self, attribute_name, attribute_value)
+                has_changed = True
+        return has_changed

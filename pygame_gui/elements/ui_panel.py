@@ -59,17 +59,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None
                  ):
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id=element_id)
+
         super().__init__(relative_rect,
                          manager,
                          container,
-                         starting_height=starting_layer_height, layer_thickness=1,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
+                         starting_height=starting_layer_height,
+                         layer_thickness=1,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id=element_id)
 
         self.background_colour = None
         self.border_colour = None
@@ -77,7 +78,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.border_width = 1
         self.shadow_width = 2
         self.shape_corner_radius = 0
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
 
         self.rebuild_from_changed_theme_data()
 
@@ -215,35 +216,38 @@ class UIPanel(UIElement, IContainerLikeInterface):
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
         button's drawable shape.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        background_image = self.ui_theme.get_image(self.object_ids,
-                                                   self.element_ids,
-                                                   'background_image')
-        if background_image is not None and background_image != self.background_image:
-            self.background_image = background_image
-            has_any_changed = True
+        background_image = None
+        try:
+            background_image = self.ui_theme.get_image('background_image',
+                                                       self.combined_element_ids)
+        except LookupError:
+            background_image = None
+        finally:
+            if background_image != self.background_image:
+                self.background_image = background_image
+                has_any_changed = True
 
         # misc
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                    'rounded_rectangle'] and
-                shape_type_string != self.shape_type):
-            self.shape_type = shape_type_string
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -266,10 +270,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 

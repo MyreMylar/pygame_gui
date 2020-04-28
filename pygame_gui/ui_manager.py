@@ -12,6 +12,8 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
+from pygame_gui.core.utility import PackageResource
 
 from pygame_gui.elements import UITooltip
 
@@ -30,11 +32,21 @@ class UIManager(IUIManagerInterface):
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: str = None,
-                 enable_live_theme_updates=True):
+                 theme_path: Union[str, PackageResource] = None,
+                 enable_live_theme_updates: bool = True,
+                 resource_loader: IResourceLoader = None):
+
+        # Threaded loading
+
+        if resource_loader is None:
+            auto_load = True
+            self.resource_loader = BlockingThreadedResourceLoader()
+        else:
+            auto_load = False
+            self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme()
+        self.ui_theme = UIAppearanceTheme(self.resource_loader)
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
@@ -66,6 +78,11 @@ class UIManager(IUIManagerInterface):
         self._load_default_cursors()
         self.active_user_cursor = pygame.cursors.arrow
         self._active_cursor = self.active_user_cursor
+
+        if auto_load:
+            self.resource_loader.start()
+            # If we are using a blocking loader this will only return when loading is complete
+            self.resource_loader.update()
 
     def get_double_click_time(self) -> float:
         """
@@ -211,7 +228,7 @@ class UIManager(IUIManagerInterface):
                     for sprite in self.ui_group.sprites():
                         sprite.rebuild_from_changed_theme_data()
 
-        self.ui_theme.update_shape_cache()
+        self.ui_theme.update_caching(time_delta)
 
         self._update_mouse_position()
         hover_handled = False

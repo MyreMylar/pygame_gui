@@ -42,21 +42,20 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         self.is_window_root_container = is_window_root_container
         self.elements = []  # type: List[IUIElementInterface]
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='container')
-
         super().__init__(relative_rect, manager, container,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors)
 
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='container')
+
         self.sprite_group = self.ui_manager.get_sprite_group()
         self.set_image(self.ui_manager.get_universal_empty_surface())
 
+        self.max_element_top_layer = 0  # default to top layer 0
         self.layer_thickness = 0  # default to 0 thickness for an empty container
 
         self.hovered = False
@@ -89,7 +88,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         """
         element.change_layer(self._layer + element.get_starting_height())
         self.elements.append(element)
-        self.recalculate_container_layer_thickness()
+        self.calc_add_element_changes_thickness(element)
 
     def remove_element(self, element: IUIElementInterface):
         """
@@ -100,7 +99,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         """
         if element in self.elements:
             self.elements.remove(element)
-        self.recalculate_container_layer_thickness()
+        if element.get_top_layer() == self.max_element_top_layer:
+            self.recalculate_container_layer_thickness()
 
     def recalculate_container_layer_thickness(self):
         """
@@ -111,16 +111,33 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         """
         max_element_top_layer = self._layer
         for element in self.elements:
-            if ((element not in self.ui_manager.get_window_stack().get_stack()) and
-                    not (isinstance(element, UIContainer) and element.is_window_root_container) and
-                    element.get_top_layer() > max_element_top_layer):
+            if (element.get_top_layer() > max_element_top_layer
+                    and element not in self.ui_manager.get_window_stack().get_stack()
+                    and (not isinstance(element, UIContainer) or
+                         not element.is_window_root_container)):
                 max_element_top_layer = element.get_top_layer()
-
-        new_thickness = max_element_top_layer - self._layer
+        self.max_element_top_layer = max_element_top_layer
+        new_thickness = self.max_element_top_layer - self._layer
         if new_thickness != self.layer_thickness:
             self.layer_thickness = new_thickness
             if self.ui_container is not None and self.ui_container != self:
                 self.ui_container.recalculate_container_layer_thickness()
+
+    def calc_add_element_changes_thickness(self, element: IUIElementInterface):
+        """
+        This function checks if a single added element will increase the containers thickness
+        and if so updates containers recursively.
+
+        :param element: the element to check.
+        """
+        if (element.get_top_layer() > self.max_element_top_layer
+                and element not in self.ui_manager.get_window_stack().get_stack()
+                and (not isinstance(element, UIContainer) or not element.is_window_root_container)):
+
+            self.max_element_top_layer = element.get_top_layer()
+            self.layer_thickness = self.max_element_top_layer - self._layer
+            if self.ui_container is not None and self.ui_container != self:
+                self.ui_container.calc_add_element_changes_thickness(self)
 
     def change_layer(self, new_layer: int):
         """

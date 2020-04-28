@@ -49,17 +49,15 @@ class UIButton(UIElement):
                  allow_double_clicks: bool = False
                  ):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='button')
-
         super().__init__(relative_rect, manager, container,
-                         object_ids=new_object_ids,
-                         element_ids=new_element_ids,
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='button')
 
         self.text = text
 
@@ -107,13 +105,13 @@ class UIButton(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
 
         self.state_transitions = {}
 
         self.rebuild_from_changed_theme_data()
 
-    def set_any_images_from_theme(self) -> bool:
+    def _set_any_images_from_theme(self) -> bool:
         """
         Grabs images for this button from the UI theme if any are set.
 
@@ -122,30 +120,48 @@ class UIButton(UIElement):
         """
 
         changed = False
-        normal_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'normal_image')
-        if normal_image is not None and normal_image != self.normal_image:
-            self.normal_image = normal_image
-            self.hovered_image = normal_image
-            self.selected_image = normal_image
-            self.disabled_image = normal_image
-            changed = True
+        normal_image = None
+        try:
+            normal_image = self.ui_theme.get_image('normal_image', self.combined_element_ids)
+        except LookupError:
+            normal_image = None
+        finally:
+            if normal_image != self.normal_image:
+                self.normal_image = normal_image
+                self.hovered_image = normal_image
+                self.selected_image = normal_image
+                self.disabled_image = normal_image
+                changed = True
 
-        hovered_image = self.ui_theme.get_image(self.object_ids, self.element_ids, 'hovered_image')
-        if hovered_image is not None and hovered_image != self.hovered_image:
-            self.hovered_image = hovered_image
-            changed = True
+        hovered_image = None
+        try:
+            hovered_image = self.ui_theme.get_image('hovered_image', self.combined_element_ids)
+        except LookupError:
+            hovered_image = self.normal_image
+        finally:
+            if hovered_image != self.hovered_image:
+                self.hovered_image = hovered_image
+                changed = True
 
-        selected_image = self.ui_theme.get_image(self.object_ids,
-                                                 self.element_ids, 'selected_image')
-        if selected_image is not None and selected_image != self.selected_image:
-            self.selected_image = selected_image
-            changed = True
+        selected_image = None
+        try:
+            selected_image = self.ui_theme.get_image('selected_image', self.combined_element_ids)
+        except LookupError:
+            selected_image = self.normal_image
+        finally:
+            if selected_image != self.selected_image:
+                self.selected_image = selected_image
+                changed = True
 
-        disabled_image = self.ui_theme.get_image(self.object_ids,
-                                                 self.element_ids, 'disabled_image')
-        if disabled_image is not None and disabled_image != self.disabled_image:
-            self.disabled_image = disabled_image
-            changed = True
+        disabled_image = None
+        try:
+            disabled_image = self.ui_theme.get_image('disabled_image', self.combined_element_ids)
+        except LookupError:
+            disabled_image = self.normal_image
+        finally:
+            if disabled_image != self.disabled_image:
+                self.disabled_image = disabled_image
+                changed = True
 
         return changed
 
@@ -285,7 +301,7 @@ class UIButton(UIElement):
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
                         self.double_click_timer = 0.0
                         self.held = True
-                        self.set_active()
+                        self._set_active()
                         self.hover_time = 0.0
                         if self.tool_tip is not None:
                             self.tool_tip.kill()
@@ -296,7 +312,7 @@ class UIButton(UIElement):
                                     int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
                 if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
                     self.held = False
-                    self.set_inactive()
+                    self._set_inactive()
                     consumed_event = True
                     self.pressed_event = True
 
@@ -307,7 +323,7 @@ class UIButton(UIElement):
 
                 if self.held:
                     self.held = False
-                    self.set_inactive()
+                    self._set_inactive()
                     consumed_event = True
 
         return consumed_event
@@ -335,14 +351,14 @@ class UIButton(UIElement):
         self.is_enabled = True
         self.drawable_shape.set_active_state('normal')
 
-    def set_active(self):
+    def _set_active(self):
         """
         Called when we are actively clicking on the button. Changes the colours to the appropriate
         ones for the new state then redraws the button.
         """
         self.drawable_shape.set_active_state('active')
 
-    def set_inactive(self):
+    def _set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
@@ -420,73 +436,59 @@ class UIButton(UIElement):
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
         button's drawable shape
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             has_any_changed = True
 
-        colours = {'normal_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                     self.element_ids,
-                                                                     'normal_bg'),
-                   'hovered_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                      self.element_ids,
-                                                                      'hovered_bg'),
-                   'disabled_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids,
-                                                                       'disabled_bg'),
-                   'selected_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids,
-                                                                       'selected_bg'),
-                   'active_bg': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                     self.element_ids,
-                                                                     'active_bg'),
-                   'normal_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids,
-                                                                       'normal_text'),
-                   'hovered_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                        self.element_ids,
-                                                                        'hovered_text'),
-                   'disabled_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids,
-                                                                         'disabled_text'),
-                   'selected_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids,
-                                                                         'selected_text'),
-                   'active_text': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                       self.element_ids,
-                                                                       'active_text'),
-                   'normal_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids,
-                                                                         'normal_border'),
-                   'hovered_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                          self.element_ids,
-                                                                          'hovered_border'),
-                   'disabled_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                           self.element_ids,
-                                                                           'disabled_border'),
-                   'selected_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                           self.element_ids,
-                                                                           'selected_border'),
-                   'active_border': self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                         self.element_ids,
-                                                                         'active_border')}
+        cols = {'normal_bg': self.ui_theme.get_colour_or_gradient('normal_bg',
+                                                                  self.combined_element_ids),
+                'hovered_bg': self.ui_theme.get_colour_or_gradient('hovered_bg',
+                                                                   self.combined_element_ids),
+                'disabled_bg': self.ui_theme.get_colour_or_gradient('disabled_bg',
+                                                                    self.combined_element_ids),
+                'selected_bg': self.ui_theme.get_colour_or_gradient('selected_bg',
+                                                                    self.combined_element_ids),
+                'active_bg': self.ui_theme.get_colour_or_gradient('active_bg',
+                                                                  self.combined_element_ids),
+                'normal_text': self.ui_theme.get_colour_or_gradient('normal_text',
+                                                                    self.combined_element_ids),
+                'hovered_text': self.ui_theme.get_colour_or_gradient('hovered_text',
+                                                                     self.combined_element_ids),
+                'disabled_text': self.ui_theme.get_colour_or_gradient('disabled_text',
+                                                                      self.combined_element_ids),
+                'selected_text': self.ui_theme.get_colour_or_gradient('selected_text',
+                                                                      self.combined_element_ids),
+                'active_text': self.ui_theme.get_colour_or_gradient('active_text',
+                                                                    self.combined_element_ids),
+                'normal_border': self.ui_theme.get_colour_or_gradient('normal_border',
+                                                                      self.combined_element_ids),
+                'hovered_border': self.ui_theme.get_colour_or_gradient('hovered_border',
+                                                                       self.combined_element_ids),
+                'disabled_border': self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                        self.combined_element_ids),
+                'selected_border': self.ui_theme.get_colour_or_gradient('selected_border',
+                                                                        self.combined_element_ids),
+                'active_border': self.ui_theme.get_colour_or_gradient('active_border',
+                                                                      self.combined_element_ids)}
 
-        if colours != self.colours:
-            self.colours = colours
+        if cols != self.colours:
+            self.colours = cols
             has_any_changed = True
 
-        if self.set_any_images_from_theme():
+        if self._set_any_images_from_theme():
             has_any_changed = True
 
         # misc
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shape')
-        if (shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                    'ellipse',
-                                                                    'rounded_rectangle'] and
-                shape_type_string != self.shape_type):
-            self.shape_type = shape_type_string
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle',
+                                                               'ellipse']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -494,36 +496,31 @@ class UIButton(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        tool_tip_delay_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                            self.element_ids,
-                                                            'tool_tip_delay')
-        if tool_tip_delay_string is not None:
-            try:
-                tool_tip_delay = float(tool_tip_delay_string)
-            except ValueError:
-                tool_tip_delay = 1.0
-
-            if tool_tip_delay != self.tool_tip_delay:
-                self.tool_tip_delay = tool_tip_delay
-                has_any_changed = True
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
 
         if self._check_text_alignment_theming():
             has_any_changed = True
 
-        state_transitions = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'state_transitions')
-        if state_transitions is not None and isinstance(state_transitions, dict):
-            for key in state_transitions:
-                states = key.split('_')
-                if len(states) == 2:
-                    start_state = states[0]
-                    target_state = states[1]
-                    try:
-                        duration = float(state_transitions[key])
-                    except ValueError:
-                        duration = 0.0
-                    self.state_transitions[(start_state, target_state)] = duration
+        try:
+            state_transitions = self.ui_theme.get_misc_data('state_transitions',
+                                                            self.combined_element_ids)
+        except LookupError:
+            self.state_transitions = {}
+        else:
+            if isinstance(state_transitions, dict):
+                for key in state_transitions:
+                    states = key.split('_')
+                    if len(states) == 2:
+                        start_state = states[0]
+                        target_state = states[1]
+                        try:
+                            duration = float(state_transitions[key])
+                        except ValueError:
+                            duration = 0.0
+                        self.state_transitions[(start_state, target_state)] = duration
 
         if has_any_changed:
             self.rebuild()
@@ -536,40 +533,27 @@ class UIButton(UIElement):
 
         """
         has_any_changed = False
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                           self.element_ids,
-                                                           'text_horiz_alignment')
-        if text_horiz_alignment != self.text_horiz_alignment:
-            self.text_horiz_alignment = text_horiz_alignment
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
+                                               default_value='center',
+                                               casting_func=str):
             has_any_changed = True
-        text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                   self.element_ids,
-                                                                   'text_horiz_alignment_padding')
-        if text_horiz_alignment_padding is not None:
-            try:
-                text_horiz_alignment_padding = int(text_horiz_alignment_padding)
-            except ValueError:
-                text_horiz_alignment_padding = 1
-            if text_horiz_alignment_padding != self.text_horiz_alignment_padding:
-                self.text_horiz_alignment_padding = text_horiz_alignment_padding
-                has_any_changed = True
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids,
-                                                          self.element_ids,
-                                                          'text_vert_alignment')
-        if text_vert_alignment != self.text_vert_alignment:
-            self.text_vert_alignment = text_vert_alignment
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
+                                               default_value=1,
+                                               casting_func=int):
             has_any_changed = True
-        text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'text_vert_alignment_padding')
-        if text_vert_alignment_padding is not None:
-            try:
-                text_vert_alignment_padding = int(text_vert_alignment_padding)
-            except ValueError:
-                text_vert_alignment_padding = 1
-            if text_vert_alignment_padding != self.text_vert_alignment_padding:
-                self.text_vert_alignment_padding = text_vert_alignment_padding
-                has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
+                                               default_value='center',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
+                                               default_value=1,
+                                               casting_func=int):
+            has_any_changed = True
+
         return has_any_changed
 
     def rebuild(self):
@@ -608,15 +592,15 @@ class UIButton(UIElement):
                               'shape_corner_radius': self.shape_corner_radius,
                               'transitions': self.state_transitions}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal', 'hovered', 'disabled',
                                                      'selected', 'active'], self.ui_manager)
-        elif self.shape_type == 'ellipse':
+        elif self.shape == 'ellipse':
             self.drawable_shape = EllipseDrawableShape(self.rect, theming_parameters,
                                                        ['normal', 'hovered', 'disabled',
                                                         'selected', 'active'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)

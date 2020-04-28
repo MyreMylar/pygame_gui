@@ -1,17 +1,17 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union, List
 
 import pygame
 
 
-class IUIElementInterface:
+class IUIElementInterface(metaclass=ABCMeta):
     """
     Interface for the ui element class. This is so we can refer to ui elements in other classes
     before the UIElement has itself been defined.
 
     """
-    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def get_relative_rect(self) -> pygame.Rect:
         """
         The relative positioning rect.
@@ -20,6 +20,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def get_abs_rect(self) -> pygame.Rect:
         """
         The absolute positioning rect.
@@ -28,6 +29,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def get_element_ids(self) -> List[str]:
         """
         A list of all the element IDs in this element's theming/event hierarchy.
@@ -35,12 +37,14 @@ class IUIElementInterface:
         :return: a list of strings, one ofr each element in the hierarchy.
         """
 
+    @abstractmethod
     def update_containing_rect_position(self):
         """
         Updates the position of this element based on the position of it's container. Usually
         called when the container has moved.
         """
 
+    @abstractmethod
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
                                                     Tuple[float, float]]):
@@ -51,6 +55,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
                                            Tuple[float, float]]):
@@ -61,6 +66,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]]):
@@ -74,6 +80,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def update(self, time_delta: float):
         """
         Updates this element's drawable shape, if it has one.
@@ -82,6 +89,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def change_layer(self, new_layer: int):
         """
         Changes the layer this element is on.
@@ -90,11 +98,13 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def kill(self):
         """
         Overriding regular sprite kill() method to remove the element from it's container.
         """
 
+    @abstractmethod
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         """
         A method that helps us to determine which, if any, UI Element is currently being hovered
@@ -109,22 +119,26 @@ class IUIElementInterface:
                       before this method.
         """
 
+    @abstractmethod
     def on_fresh_drawable_shape_ready(self):
         """
         Called when our drawable shape has finished rebuilding the active surface. This is needed
         because sometimes we defer rebuilding until a more advantageous (read quieter) moment.
         """
 
+    @abstractmethod
     def on_hovered(self):
         """
         A stub to override. Called when this UI element first enters the 'hovered' state.
         """
 
+    @abstractmethod
     def on_unhovered(self):
         """
         A stub to override. Called when this UI element leaves the 'hovered' state.
         """
 
+    @abstractmethod
     def while_hovering(self, time_delta: float, mouse_pos: pygame.math.Vector2):
         """
         A stub method to override. Called when this UI element is currently hovered.
@@ -134,11 +148,14 @@ class IUIElementInterface:
         :param mouse_pos: The current position of the mouse as 2D Vector.
 
         """
+
+    @abstractmethod
     def can_hover(self) -> bool:
         """
         A stub method to override. Called to test if this method can be hovered.
         """
 
+    @abstractmethod
     def hover_point(self, hover_x: float, hover_y: float) -> bool:
         """
         Test if a given point counts as 'hovering' this UI element. Normally that is a
@@ -153,6 +170,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         A stub to override. Gives UI Elements access to pygame events.
@@ -163,16 +181,19 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def focus(self):
         """
         A stub to override. Called when we focus this UI element.
         """
 
+    @abstractmethod
     def unfocus(self):
         """
         A stub to override. Called when we stop focusing this UI element.
         """
 
+    @abstractmethod
     def rebuild_from_changed_theme_data(self):
         """
         A stub to override. Used to test if the theming data for this element has changed and
@@ -180,6 +201,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def rebuild(self):
         """
         Takes care of rebuilding this element. Most derived elements are going to override this,
@@ -187,6 +209,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def set_visual_debug_mode(self, activate_mode: bool):
         """
         Enables a debug mode for the element which displays layer information on top of it in
@@ -196,6 +219,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def set_image_clip(self, rect: Union[pygame.Rect, None]):
         """
         Sets a clipping rectangle on this element's image determining what portion of it will
@@ -205,6 +229,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def get_image_clipping_rect(self) -> Union[pygame.Rect, None]:
         """
         Obtain the current image clipping rect.
@@ -213,6 +238,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def set_image(self, new_image: Union[pygame.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
@@ -222,6 +248,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def get_top_layer(self) -> int:
         """
         Assuming we have correctly calculated the 'thickness' of it, this method will
@@ -231,6 +258,7 @@ class IUIElementInterface:
 
         """
 
+    @abstractmethod
     def get_starting_height(self) -> int:
         """
         Get the starting layer height of this element. (i.e. the layer we start placing it on

@@ -58,15 +58,15 @@ class UITextEntryLine(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None):
 
-        new_element_ids, new_object_ids = self._create_valid_ids(container=container,
-                                                                 parent_element=parent_element,
-                                                                 object_id=object_id,
-                                                                 element_id='text_entry_line')
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
-                         element_ids=new_element_ids,
-                         object_ids=new_object_ids,
                          anchors=anchors)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='text_entry_line')
+
         self.focused = False
 
         self.text = ""
@@ -76,8 +76,7 @@ class UITextEntryLine(UIElement):
 
         self.shadow_width = None
         self.border_width = None
-        self.horiz_line_padding = None
-        self.vert_line_padding = None
+        self.padding = None
         self.text_surface = None
         self.cursor = None
         self.background_and_border = None
@@ -93,7 +92,7 @@ class UITextEntryLine(UIElement):
         self.padding = None
 
         self.drawable_shape = None
-        self.shape_type = 'rectangle'
+        self.shape = 'rectangle'
         self.shape_corner_radius = None
 
         # input timings - I expect nobody really wants to mess with these that much
@@ -135,10 +134,10 @@ class UITextEntryLine(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
-        if self.shape_type == 'rectangle':
+        if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
-        elif self.shape_type == 'rounded_rectangle':
+        elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
@@ -159,9 +158,9 @@ class UITextEntryLine(UIElement):
 
         line_height = self.font.size(' ')[1]
         self.cursor = pygame.Rect((self.text_image_rect.x +
-                                   self.horiz_line_padding - self.start_text_offset,
+                                   self.padding[0] - self.start_text_offset,
                                    self.text_image_rect.y +
-                                   self.vert_line_padding), (1, line_height))
+                                   self.padding[1]), (1, line_height))
 
         # setup for drawing
         self.redraw()
@@ -225,7 +224,7 @@ class UITextEntryLine(UIElement):
             self._redraw_selected_text()
 
         text_clip_width = (self.rect.width -
-                           (self.horiz_line_padding * 2) -
+                           (self.padding[0] * 2) -
                            (self.shape_corner_radius * 2) -
                            (self.border_width * 2) -
                            (self.shadow_width * 2))
@@ -241,12 +240,11 @@ class UITextEntryLine(UIElement):
 
         if len(self.text) > 0:
             self.text_image.blit(self.text_surface,
-                                 (self.horiz_line_padding,
-                                  self.vert_line_padding),
+                                 self.padding,
                                  pygame.Rect((self.start_text_offset, 0),
                                              (text_clip_width,
                                               (self.rect.height -
-                                               (self.vert_line_padding * 2) -
+                                               (self.padding[1] * 2) -
                                                (self.border_width * 2) -
                                                (self.shadow_width * 2)))))
 
@@ -366,7 +364,7 @@ class UITextEntryLine(UIElement):
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
             self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
-                             self.horiz_line_padding - self.start_text_offset)
+                             self.padding[0] - self.start_text_offset)
 
             if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
@@ -770,7 +768,7 @@ class UITextEntryLine(UIElement):
 
         """
         start_pos = (self.rect.x + self.border_width + self.shadow_width +
-                     self.shape_corner_radius + self.horiz_line_padding)
+                     self.shape_corner_radius + self.padding[0])
         acc_pos = start_pos
         index = 0
         for char in self.text:
@@ -856,22 +854,19 @@ class UITextEntryLine(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
         """
+        super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        font = self.ui_theme.get_font(self.object_ids, self.element_ids)
+        font = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             has_any_changed = True
 
-        shape_type = 'rectangle'
-        shape_type_string = self.ui_theme.get_misc_data(self.object_ids,
-                                                        self.element_ids,
-                                                        'shape')
-        if shape_type_string is not None and shape_type_string in ['rectangle',
-                                                                   'rounded_rectangle']:
-            shape_type = shape_type_string
-        if shape_type != self.shape_type:
-            self.shape_type = shape_type
+        if self._check_misc_theme_data_changed(attribute_name='shape',
+                                               default_value='rectangle',
+                                               casting_func=str,
+                                               allowed_values=['rectangle',
+                                                               'rounded_rectangle']):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -879,24 +874,12 @@ class UITextEntryLine(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        padding_str = self.ui_theme.get_misc_data(self.object_ids,
-                                                  self.element_ids,
-                                                  'padding')
-        if padding_str is None:
-            horiz_line_padding = 2
-            vert_line_padding = 2
-        else:
-            try:
-                horiz_line_padding = int(padding_str.split(',')[0])
-                vert_line_padding = int(padding_str.split(',')[1])
-            except ValueError:
-                horiz_line_padding = 2
-                vert_line_padding = 2
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
 
-        if (horiz_line_padding != self.horiz_line_padding or
-                vert_line_padding != self.vert_line_padding):
-            self.vert_line_padding = vert_line_padding
-            self.horiz_line_padding = horiz_line_padding
+        if self._check_misc_theme_data_changed(attribute_name='padding',
+                                               default_value=(2, 2),
+                                               casting_func=tuple_extract):
             has_any_changed = True
 
         if self._check_theme_colours_changed():
@@ -913,33 +896,27 @@ class UITextEntryLine(UIElement):
 
         """
         has_any_changed = False
-        background_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                 self.element_ids,
-                                                                 'dark_bg')
+        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
+                                                                 self.combined_element_ids)
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
-        border_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                             self.element_ids,
-                                                             'normal_border')
+        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
+                                                             self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
-        text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                           self.element_ids,
-                                                           'normal_text')
+        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
         if text_colour != self.text_colour:
             self.text_colour = text_colour
             has_any_changed = True
-        selected_text_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                    self.element_ids,
-                                                                    'selected_text')
+        selected_text_colour = self.ui_theme.get_colour_or_gradient('selected_text',
+                                                                    self.combined_element_ids)
         if selected_text_colour != self.selected_text_colour:
             self.selected_text_colour = selected_text_colour
             has_any_changed = True
-        selected_bg_colour = self.ui_theme.get_colour_or_gradient(self.object_ids,
-                                                                  self.element_ids,
-                                                                  'selected_bg')
+        selected_bg_colour = self.ui_theme.get_colour_or_gradient('selected_bg',
+                                                                  self.combined_element_ids)
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour
             has_any_changed = True
@@ -957,7 +934,7 @@ class UITextEntryLine(UIElement):
         """
         corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
         line_height = self.font.size(' ')[1]
-        corrected_dimensions[1] = int(line_height + (2 * self.vert_line_padding) +
+        corrected_dimensions[1] = int(line_height + (2 * self.padding[1]) +
                                       (2 * self.border_width) + (2 * self.shadow_width))
         super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))
 
