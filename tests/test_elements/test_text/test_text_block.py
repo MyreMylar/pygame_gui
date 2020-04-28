@@ -11,11 +11,11 @@ from pygame_gui.elements.text.html_parser import CharStyle
 from pygame_gui.elements.text.styled_chunk import StyledChunk
 from pygame_gui.elements.text.text_block import TextBlock
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
-
+from pygame_gui.core import BlockingThreadedResourceLoader
 
 class TestTextBlock:
     def test_creation(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
                                    chunk='text', style=style, colour=pygame.Color('#FFFF00'),
@@ -28,7 +28,7 @@ class TestTextBlock:
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
     def test_creation_scale_to_text(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
                                    chunk='text', style=style, colour=pygame.Color('#FFFF00'),
@@ -41,7 +41,7 @@ class TestTextBlock:
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
     def test_creation_scale_vert_to_text(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
                                    chunk='text', style=style, colour=pygame.Color('#FFFF00'),
@@ -54,8 +54,11 @@ class TestTextBlock:
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
     def test_word_split(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        loader = BlockingThreadedResourceLoader()
+        dictionary = UIFontDictionary(loader)
         dictionary.preload_font(font_size=25, font_name='fira_code')
+        loader.start()
+        loader.update()
         style = CharStyle()
         styled_chunk_1 = StyledChunk(font_size=14, font_name='fira_code',
                                      chunk='text_text_text_text ', style=style,

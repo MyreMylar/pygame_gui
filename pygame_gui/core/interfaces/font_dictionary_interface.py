@@ -57,7 +57,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def preload_font(self, font_size: int, font_name: str,
-                     bold: bool = False, italic: bool = False):
+                     bold: bool = False, italic: bool = False,
+                     force_immediate_load: bool = False):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
@@ -67,6 +68,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param font_name: The name of the font to load.
         :param bold: Whether the font is bold styled or not.
         :param italic: Whether the font is italic styled or not.
+        :param force_immediate_load: bypasses any asynchronous threaded loading setup to immediately
+                                     load the font on the main thread.
 
         """
 

@@ -9,11 +9,12 @@ from pygame_gui.elements.text.styled_chunk import StyledChunk
 from pygame_gui.elements.text.html_parser import CharStyle
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.colour_gradient import ColourGradient
+from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 
 
 class TestStyledChunk:
     def test_creation(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         StyledChunk(font_size=14, font_name='fira_code',
                     chunk='text', style=style, colour=pygame.Color('#FFFF00'),
@@ -22,7 +23,7 @@ class TestStyledChunk:
                     position=(0, 0), font_dictionary=dictionary)
 
     def test_redraw_bg_gradient(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -33,7 +34,7 @@ class TestStyledChunk:
         chunk.redraw()
 
     def test_redraw_fg_gradient(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -44,7 +45,7 @@ class TestStyledChunk:
         chunk.redraw()
 
     def test_redraw_bg_and_fg_gradient(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -55,7 +56,7 @@ class TestStyledChunk:
         chunk.redraw()
 
     def test_redraw_changed_metrics(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -67,7 +68,7 @@ class TestStyledChunk:
         chunk.redraw()
 
     def test_redraw_empty_chunk(self, _init_pygame):
-        dictionary = UIFontDictionary()
+        dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         gradient = ColourGradient(0, pygame.Color('#FFFF00'), pygame.Color('#FF0000'))
         chunk = StyledChunk(font_size=14, font_name='fira_code',
