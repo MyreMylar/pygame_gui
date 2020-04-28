@@ -264,18 +264,24 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 image_resource_data = image_ids_dict[image_id]
                 if image_resource_data['changed']:
 
-                    if ('package' in image_resource_data and 'resource' in image_resource_data and
-                            USE_IMPORT_LIB_RESOURCE):
+                    if 'package' in image_resource_data and 'resource' in image_resource_data:
 
                         resource_id = (str(image_resource_data['package']) + '/' +
                                        str(image_resource_data['resource']))
                         if resource_id in self.image_resources:
                             image_resource = self.image_resources[resource_id]
                         else:
-                            image_resource = ImageResource(
-                                image_id=resource_id,
-                                location=PackageResource(package=image_resource_data['package'],
-                                                         resource=image_resource_data['resource']))
+                            package_resource = PackageResource(
+                                package=image_resource_data['package'],
+                                resource=image_resource_data['resource'])
+                            if USE_IMPORT_LIB_RESOURCE:
+                                image_resource = ImageResource(
+                                    image_id=resource_id,
+                                    location=package_resource)
+                            else:
+                                image_resource = ImageResource(
+                                    image_id=resource_id,
+                                    location=package_resource.to_path())
 
                             self._resource_loader.add_resource(image_resource)
                             self.image_resources[resource_id] = image_resource
