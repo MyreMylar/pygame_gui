@@ -640,10 +640,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param file_path: The path to the theme we want to load.
         """
         if isinstance(file_path, PackageResource):
-            used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
-            self._theme_file_path = file_path
-            with path(file_path.package, file_path.resource) as package_file_path:
-                self._theme_file_last_modified = os.stat(package_file_path).st_mtime
+            if USE_IMPORT_LIB_RESOURCE:
+                used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
+                self._theme_file_path = file_path
+                with path(file_path.package, file_path.resource) as package_file_path:
+                    self._theme_file_last_modified = os.stat(package_file_path).st_mtime
+            elif USE_FILE_PATH:
+                used_file_path = file_path.to_path()
 
         elif not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)
