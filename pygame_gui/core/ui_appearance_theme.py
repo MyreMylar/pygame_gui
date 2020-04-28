@@ -164,7 +164,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     stamp = os.stat(package_file_path).st_mtime
             else:
                 stamp = os.stat(self._theme_file_path).st_mtime
-        except FileNotFoundError:
+        except(pygame.error, FileNotFoundError, OSError):
             need_to_reload = False
         else:
             if stamp != self._theme_file_last_modified:
@@ -658,7 +658,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self._theme_file_path = create_resource_path(file_path)
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
-            except FileNotFoundError:
+            except(pygame.error, FileNotFoundError, OSError):
                 self._theme_file_last_modified = 0
             used_file_path = self._theme_file_path
         else:

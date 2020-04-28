@@ -283,7 +283,7 @@ class FontResource:
                                                self.location.resource)), self.size)
                     self.loaded_font.set_bold(self.style['bold'])
                     self.loaded_font.set_italic(self.style['italic'])
-                except (pygame.error, FileNotFoundError):
+                except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
             elif USE_FILE_PATH:
@@ -291,7 +291,7 @@ class FontResource:
                     self.loaded_font = pygame.font.Font(self.location.to_path(), self.size)
                     self.loaded_font.set_bold(self.style['bold'])
                     self.loaded_font.set_italic(self.style['italic'])
-                except (pygame.error, FileNotFoundError):
+                except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location.to_path()))
 
@@ -300,7 +300,7 @@ class FontResource:
                 self.loaded_font = pygame.font.Font(self.location, self.size)
                 self.loaded_font.set_bold(self.style['bold'])
                 self.loaded_font.set_italic(self.style['italic'])
-            except (pygame.error, FileNotFoundError):
+            except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
 
@@ -310,7 +310,7 @@ class FontResource:
                 self.loaded_font = pygame.font.Font(file_obj, self.size)
                 self.loaded_font.set_bold(self.style['bold'])
                 self.loaded_font.set_italic(self.style['italic'])
-            except (pygame.error, FileNotFoundError):
+            except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
 
@@ -348,21 +348,21 @@ class ImageResource:
                     with open_binary(self.location.package,
                                      self.location.resource) as open_resource:
                         self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
-                except (pygame.error, FileNotFoundError):
+                except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
 
             elif USE_FILE_PATH:
                 try:
                     self.loaded_surface = pygame.image.load(self.location.to_path()).convert_alpha()
-                except (pygame.error, FileNotFoundError):
+                except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
 
         elif isinstance(self.location, str):
             try:
                 self.loaded_surface = pygame.image.load(self.location).convert_alpha()
-            except (pygame.error, FileNotFoundError):
+            except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
 
@@ -397,7 +397,7 @@ class SurfaceResource:
         if self.sub_surface_rect:
             try:
                 self.surface = self.image_resource.loaded_surface.subsurface(self.sub_surface_rect)
-            except pygame.error as err:
+            except(pygame.error, OSError) as err:
                 error = err
         return error
 
