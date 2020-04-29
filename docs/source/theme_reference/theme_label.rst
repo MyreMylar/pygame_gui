@@ -30,12 +30,29 @@ Font
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
 
-Only specify paths if this is the first use of this font name in the GUI:
+There are two methods to refer to font resource locations. First, using packaged resources:
+
+ - "**regular_resource** - The location of this font's file with no particular style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraCode-Regular.ttf'
+ - "**bold_resource**" - The location of this font's file with bold style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraCode-Bold.ttf'
+ - "**italic_resource**" - The location of this font's file with italic style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraMono-Italic.ttf'
+ - "**bold_italic_resource**" - The location of this font's file with bold and italic style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraMono-BoldItalic.ttf'
+
+Second using paths:
 
  - "**regular_path**" - The path to this font's file with no particular style applied.
  - "**bold_path**" - The path to this font's file with bold style applied.
  - "**italic_path**" - The path to this font's file with italic style applied.
  - "**bold_italic_path**" - The path to this font's file with bold and italic style applied.
+
+You only need to specify locations if this is the first use of this font name in the GUI.
 
 
 Misc

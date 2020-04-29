@@ -26,7 +26,9 @@ Images
 
  - "**background_image**" - The image displayed on the panel. It has the following block of sub-parameters:
 
-    - "**path**" - The path to the image to be displayed.
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
 
 Misc
@@ -60,7 +62,8 @@ Here is an example of a panel block in a JSON theme file, using the parameters d
 
             "background_image":
             {
-                "path": "data/images/splat.png",
+                "package": "data.images",
+                "resource": "splat.png",
                 "sub_surface_rect": "0,0,32,32"
             },
 

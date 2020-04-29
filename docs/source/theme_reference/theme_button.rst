@@ -51,12 +51,29 @@ block has these parameters:
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
 
-Only specify paths if this is the first use of this font name in the GUI:
+There are two methods to refer to font resource locations. First, using packaged resources:
+
+ - "**regular_resource** - The location of this font's file with no particular style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraCode-Regular.ttf'
+ - "**bold_resource**" - The location of this font's file with bold style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraCode-Bold.ttf'
+ - "**italic_resource**" - The location of this font's file with italic style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraMono-Italic.ttf'
+ - "**bold_italic_resource**" - The location of this font's file with bold and italic style applied.
+    - **package** - The name of the python package containing this resource - e.g. 'data.fonts'
+    - **resource** - The file name of the resource - e.g. 'FiraMono-BoldItalic.ttf'
+
+Second using paths:
 
  - "**regular_path**" - The path to this font's file with no particular style applied.
  - "**bold_path**" - The path to this font's file with bold style applied.
  - "**italic_path**" - The path to this font's file with italic style applied.
  - "**bold_italic_path**" - The path to this font's file with bold and italic style applied.
+
+You only need to specify locations if this is the first use of this font name in the GUI.
 
 Images
 -------
@@ -66,22 +83,30 @@ Images
 
  - "**normal_image**" - The image displayed in the buttons default state. It has the following block of sub-parameters:
 
-    - "**path**" - The path to the image to be displayed.
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
 
  - "**hovered_image**" - The image displayed in the buttons hovered state. It has the following block of sub-parameters:
 
-    - "**path**" - The path to the image to be displayed.
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
 
  - "**selected_image**" - The image displayed in the buttons select focused state. It has the following block of sub-parameters:
 
-    - "**path**" - The path to the image to be displayed.
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
 
  - "**disabled_image**" - The image displayed in the buttons disabled state. It has the following block of sub-parameters:
 
-    - "**path**" - The path to the image to be displayed.
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
 
 
@@ -139,27 +164,43 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "size": "12",
                 "bold": "0",
                 "italic": "1",
-                "regular_path": "data/fonts/Montserrat-Regular.ttf",
-                "bold_path": "data/fonts/Montserrat-Bold.ttf",
-                "italic_path": "data/fonts/Montserrat-Italic.ttf",
-                "bold_italic_path": "data/fonts/Montserrat-BoldItalic.ttf"
+                "regular_resource": {
+                     "package": "data.fonts",
+                     "resource": "Montserrat-Regular.ttf"
+                },
+                "bold_resource": {
+                     "package": "data.fonts",
+                     "resource": "Montserrat-Bold.ttf"
+                },
+                "italic_resource": {
+                     "package": "data.fonts",
+                     "resource": "Montserrat-Italic.ttf"
+                },
+                "bold_italic_resource": {
+                     "package": "data.fonts",
+                     "resource": "Montserrat-BoldItalic.ttf"
+                },
             },
             "images":
             {
                 "normal_image": {
-                    "path": "data/images/buttons.png",
+                    "package": "data.images",
+                    "resource": "buttons.png",
                     "sub_surface_rect": "0,0,32,32"
                 },
                 "hovered_image": {
-                    "path": "data/images/buttons.png",
+                    "package": "data.images",
+                    "resource": "buttons.png",
                     "sub_surface_rect": "32,0,32,32"
                 },
                 "selected_image": {
-                    "path": "data/images/buttons.png",
+                    "package": "data.images",
+                    "resource": "buttons.png",
                     "sub_surface_rect": "64,0,32,32"
                 },
                 "disabled_image": {
-                    "path": "data/images/buttons.png",
+                    "package": "data.images",
+                    "resource": "buttons.png",
                     "sub_surface_rect": "96,0,32,32"
                 }
 
