@@ -18,7 +18,6 @@ from threading import Thread
 from queue import Queue
 
 import pygame
-from pygame import Rect, Surface
 
 USE_IMPORT_LIB_RESOURCE = False
 USE_FILE_PATH = False
@@ -381,7 +380,7 @@ class SurfaceResource:
     """
     def __init__(self,
                  image_resource: ImageResource,
-                 sub_surface_rect: Rect = None):
+                 sub_surface_rect: pygame.Rect = None):
 
         self.image_resource = image_resource
         self.sub_surface_rect = sub_surface_rect
@@ -402,14 +401,14 @@ class SurfaceResource:
         return error
 
     @property
-    def surface(self) -> Surface:
+    def surface(self) -> pygame.Surface:
         """
         Get the Pygame Surface
         """
         return self._surface if self._surface is not None else self.image_resource.loaded_surface
 
     @surface.setter
-    def surface(self, surface: Surface):
+    def surface(self, surface: pygame.Surface):
         """
         Set the Pygame surface.
 

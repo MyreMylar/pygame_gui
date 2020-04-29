@@ -263,7 +263,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             for image_id in image_ids_dict:
                 image_resource_data = image_ids_dict[image_id]
                 if image_resource_data['changed']:
-
+                    image_resource = None
                     if 'package' in image_resource_data and 'resource' in image_resource_data:
 
                         resource_id = (str(image_resource_data['package']) + '/' +
@@ -298,7 +298,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             self.image_resources[resource_id] = image_resource
 
                     else:
-                        raise warnings.warn('Unable to find image with id: ' + str(image_id))
+                        warnings.warn('Unable to find image with id: ' + str(image_id))
 
                     if image_resource is not None:
                         if 'sub_surface_rect' in image_resource_data:
@@ -645,6 +645,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :param file_path: The path to the theme we want to load.
         """
+        used_file_path = None
         if isinstance(file_path, PackageResource):
             if USE_IMPORT_LIB_RESOURCE:
                 used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
