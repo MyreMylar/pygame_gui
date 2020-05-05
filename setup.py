@@ -18,7 +18,7 @@ class DevelopOnlyInstall(develop):
 setup(
       cmdclass={'develop': DevelopOnlyInstall},
       name='pygame_gui',
-      version='0.5.6',
+      version='0.5.7',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. "
                        "Features HTML-style text formatting, "

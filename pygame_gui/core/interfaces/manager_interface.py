@@ -44,7 +44,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
+    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -111,6 +111,12 @@ class IUIManagerInterface(metaclass=ABCMeta):
     def get_mouse_position(self) -> Tuple[int, int]:
         """
         Get the position of the mouse in the UI.
+        """
+
+    @abstractmethod
+    def calculate_scaled_mouse_position(self, position: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Scaling an input mouse position by a scale factor.
         """
 
     @abstractmethod

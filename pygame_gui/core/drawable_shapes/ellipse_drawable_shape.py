@@ -6,6 +6,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
+from pygame_gui.core.utility import apply_colour_to_surface
 
 
 class EllipseDrawableShape(DrawableShape):
@@ -70,6 +71,7 @@ class EllipseDrawableShape(DrawableShape):
             self.click_area_shape = self.containing_rect.copy()
             self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA,
                                                depth=32)
+            self.base_surface.fill(pygame.Color('#00000000'))
 
         self.compute_aligned_text_rect()
 
@@ -198,10 +200,11 @@ class EllipseDrawableShape(DrawableShape):
                                                                         self.border_rect,
                                                                         0, aa_amount=aa_amount,
                                                                         clear=False)
-                    self.apply_colour_to_surface(self.theming[border_colour_state_str],
-                                                 shape_surface)
+                    apply_colour_to_surface(self.theming[border_colour_state_str],
+                                            shape_surface)
 
-                bab_surface.blit(shape_surface, self.border_rect)
+                bab_surface.blit(shape_surface, self.border_rect,
+                                 special_flags=pygame.BLEND_PREMULTIPLIED)
             if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect, 1,
@@ -211,9 +214,10 @@ class EllipseDrawableShape(DrawableShape):
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect, 1,
                                                                     aa_amount=aa_amount)
-                self.apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
+                apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 
-            bab_surface.blit(shape_surface, self.background_rect)
+            bab_surface.blit(shape_surface, self.background_rect,
+                             special_flags=pygame.BLEND_PREMULTIPLIED)
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
@@ -234,7 +238,8 @@ class EllipseDrawableShape(DrawableShape):
                                                                        sub_surface.get_size()),
                                                 special_flags=pygame.BLEND_RGBA_SUB)
 
-            self.states[state_str].surface.blit(bab_surface, (0, 0))
+            self.states[state_str].surface.blit(bab_surface, (0, 0),
+                                                special_flags=pygame.BLEND_PREMULTIPLIED)
 
             if (shape_id is not None and
                     self.states[state_str].surface.get_width() <= 1024 and
@@ -270,7 +275,7 @@ class EllipseDrawableShape(DrawableShape):
         # For the visible AA shape surface we only want to blend in the alpha channel
         large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA,
                                              depth=32)
-        large_shape_surface.fill(pygame.Color('#FFFFFF00'))
+        large_shape_surface.fill(pygame.Color('#00000000'))
         pygame.draw.ellipse(large_shape_surface, pygame.Color("#FFFFFFFF"),
                             large_shape_surface.get_rect())
 

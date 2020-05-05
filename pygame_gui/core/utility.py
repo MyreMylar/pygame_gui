@@ -218,6 +218,81 @@ def create_resource_path(relative_path: Union[str, Path]):
     return os.path.join(base_path, relative_path)
 
 
+    def premul_col(original_colour: pygame.Color) -> pygame.Color:
+        """
+        Perform a pre-multiply alpha operation on a pygame colour
+        """
+        alpha_mul = original_colour.a / 255
+        return pygame.Color(int(original_colour.r * alpha_mul),
+                            int(original_colour.g * alpha_mul),
+                            int(original_colour.b * alpha_mul),
+                            original_colour.a)
+
+
+    def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
+        """
+        Restore a pre-multiplied alpha colour back to an approximation of it's initial value.
+
+        NOTE: Because of the rounding to integers this cannot be exact.
+        """
+        inverse_alpha_mul = 1.0 / max(0.001, (premul_colour.a / 255))
+
+        return pygame.Color(int(premul_colour.r * inverse_alpha_mul),
+                            int(premul_colour.g * inverse_alpha_mul),
+                            int(premul_colour.b * inverse_alpha_mul),
+                            premul_colour.a)
+
+
+    def premul_alpha_surface(surface: pygame.Surface) -> pygame.Surface:
+        """
+        Perform a pre-multiply alpha operation on a pygame surface's colours.
+        """
+        surf_copy = surface.copy()
+        surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
+        manipulate_surf = pygame.Surface(surf_copy.get_size(), pygame.SRCALPHA)
+        # Can't be exactly transparent black or we trigger SDL1 'bug'
+        manipulate_surf.fill(pygame.Color('#00000001'))
+        manipulate_surf.blit(surf_copy, (0, 0))
+        surface.blit(manipulate_surf, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+        return surface
+
+
+    def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.Surface:
+        """
+        Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
+        use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
+        """
+        text_render = font.render(text, True, pygame.Color('#FFFFFFFF'))
+        final_surface = pygame.Surface(text_render.get_size(), pygame.SRCALPHA)
+        # Can't be exactly transparent black or we trigger SDL1 'bug'
+        final_surface.fill(pygame.Color('#00000001'))
+        final_surface.blit(text_render, (0, 0))
+        return final_surface
+
+
+    def apply_colour_to_surface(colour: pygame.Color,
+                                shape_surface: pygame.Surface,
+                                rect: Union[pygame.Rect, None] = None):
+        """
+        Apply a colour to a shape surface by multiplication blend. This works best when the shape
+        surface is predominantly white.
+
+        :param colour: The colour to apply.
+        :param shape_surface: The shape surface to apply the colour to.
+        :param rect: A rectangle to apply the colour inside of.
+
+        """
+        if rect is not None:
+            colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
+            colour_surface.fill(colour)
+            shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
+        else:
+            colour_surface = pygame.Surface(shape_surface.get_size(),
+                                            flags=pygame.SRCALPHA, depth=32)
+            colour_surface.fill(colour)
+            shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+
+
 class PackageResource:
     """
     A data class to handle input for importlib.resources as single parameter.
@@ -364,6 +439,10 @@ class ImageResource:
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
+
+        # perform pre-multiply alpha operation
+        if error is None:
+            premul_alpha_surface(self.loaded_surface)
 
         return error
 

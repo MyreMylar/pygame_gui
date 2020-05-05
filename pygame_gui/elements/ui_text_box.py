@@ -249,13 +249,14 @@ class UITextBox(UIElement):
                                      self.text_wrap_rect[3]))
         new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
-        new_image.blit(self.background_surf, (0, 0))
+        new_image.blit(self.background_surf, (0, 0), special_flags=pygame.BLEND_PREMULTIPLIED)
         new_image.blit(self.formatted_text_block.block_sprite,
                        (self.padding[0] + self.border_width +
                         self.shadow_width + self.rounded_corner_offset,
                         self.padding[1] + self.border_width +
                         self.shadow_width + self.rounded_corner_offset),
-                       drawable_area)
+                       drawable_area,
+                       special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.set_image(new_image)
 
@@ -287,7 +288,8 @@ class UITextBox(UIElement):
 
             new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.fill(pygame.Color(0, 0, 0, 0))
-            new_image.blit(self.background_surf, (0, 0))
+            new_image.blit(self.background_surf, (0, 0),
+                           special_flags=pygame.BLEND_PREMULTIPLIED)
             new_image.blit(self.formatted_text_block.block_sprite,
                            (self.padding[0] + self.border_width +
                             self.shadow_width +
@@ -295,7 +297,8 @@ class UITextBox(UIElement):
                             self.padding[1] + self.border_width +
                             self.shadow_width +
                             self.rounded_corner_offset),
-                           drawable_area)
+                           drawable_area,
+                           special_flags=pygame.BLEND_PREMULTIPLIED)
             self.set_image(new_image)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
@@ -420,7 +423,9 @@ class UITextBox(UIElement):
                     new_image = pygame.Surface(self.relative_rect.size,
                                                flags=pygame.SRCALPHA,
                                                depth=32)
-                    new_image.blit(self.image, (0, 0))
+                    new_image.fill(pygame.Color('#00000000'))
+                    new_image.blit(self.image, (0, 0),
+                                   special_flags=pygame.BLEND_PREMULTIPLIED)
                     self.set_image(new_image)
 
                     if self.scroll_bar is not None:
@@ -473,13 +478,15 @@ class UITextBox(UIElement):
                                     (self.text_wrap_rect[2], self.text_wrap_rect[3]))
         new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
-        new_image.blit(self.background_surf, (0, 0))
+        new_image.blit(self.background_surf, (0, 0),
+                       special_flags=pygame.BLEND_PREMULTIPLIED)
         new_image.blit(self.formatted_text_block.block_sprite,
                        (self.padding[0] + self.border_width +
                         self.shadow_width + self.rounded_corner_offset,
                         self.padding[1] + self.border_width +
                         self.shadow_width + self.rounded_corner_offset),
-                       drawable_area)
+                       drawable_area,
+                       special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.set_image(new_image)
 

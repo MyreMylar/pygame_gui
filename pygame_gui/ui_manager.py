@@ -51,7 +51,7 @@ class UIManager(IUIManagerInterface):
             self.ui_theme.load_theme(theme_path)
 
         self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
-        self.ui_group = pygame.sprite.LayeredUpdates()
+        self.ui_group = pygame.sprite.LayeredDirty()
 
         self.focused_element = None
         self.last_focused_vertical_scrollbar = None
@@ -109,7 +109,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_theme
 
-    def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
+    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -522,10 +522,14 @@ class UIManager(IUIManagerInterface):
         """
         Wrapping pygame mouse position so we can mess with it.
         """
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.mouse_position = self.calculate_scaled_mouse_position(pygame.mouse.get_pos())
 
-        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * mouse_x),
-                               int(self.mouse_pos_scale_factor[1] * mouse_y))
+    def calculate_scaled_mouse_position(self, position: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Scaling an input mouse position by a scale factor.
+        """
+        return (int(self.mouse_pos_scale_factor[0] * position[0]),
+                int(self.mouse_pos_scale_factor[1] * position[1]))
 
     def _load_default_cursors(self):
         """

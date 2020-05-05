@@ -154,7 +154,8 @@ class SurfaceCache:
                 found_rectangle_to_split = free_rectangle
                 found_rectangle_cache = pygame.Rect(free_rectangle.topleft,
                                                     surface_size)
-                current_surface.blit(new_item[0], free_rectangle.topleft)
+                current_surface.blit(new_item[0], free_rectangle.topleft,
+                                     special_flags=pygame.BLEND_PREMULTIPLIED)
                 self.cache_long_term_lookup[string_id] = {
                     'surface': current_surface.subsurface(found_rectangle_cache),
                     'current_uses': new_item[1],

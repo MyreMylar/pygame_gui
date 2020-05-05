@@ -182,7 +182,8 @@ class RectDrawableShape(DrawableShape):
                                                         special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(
                         border_shape_surface)
-                    self.states[state_str].surface.blit(border_shape_surface, self.border_rect)
+                    self.states[state_str].surface.blit(border_shape_surface, self.border_rect,
+                                                        special_flags=pygame.BLEND_PREMULTIPLIED)
                 else:
                     self.states[state_str].surface.fill(self.theming[border_colour_state_str],
                                                         self.border_rect)
@@ -196,7 +197,8 @@ class RectDrawableShape(DrawableShape):
                                                     special_flags=pygame.BLEND_RGBA_SUB)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(
                     background_shape_surface)
-                self.states[state_str].surface.blit(background_shape_surface, self.background_rect)
+                self.states[state_str].surface.blit(background_shape_surface, self.background_rect,
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
             else:
                 self.states[state_str].surface.fill(self.theming[bg_colour_state_str],
                                                     self.background_rect)
@@ -213,7 +215,8 @@ class RectDrawableShape(DrawableShape):
                     self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
                                                         special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)
-                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect)
+                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
+                                                        special_flags=pygame.BLEND_PREMULTIPLIED)
                 else:
                     self.states[state_str].surface.fill(self.theming['filled_bar'], bar_rect)
 

@@ -4,6 +4,7 @@ import pygame
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
+from pygame_gui.core.utility import premul_alpha_surface
 
 
 class UIImage(UIElement):
@@ -43,7 +44,9 @@ class UIImage(UIElement):
                                element_id='image')
 
         self.original_image = None
-        image_surface = image_surface.convert_alpha()  # GUI images must support an alpha channel
+        # GUI images must support an alpha channel & must have their alpha channel pre-multiplied
+        # with their colours.
+        image_surface = premul_alpha_surface(image_surface.convert_alpha())
         if (image_surface.get_width() != self.rect.width or
                 image_surface.get_height() != self.rect.height):
             self.original_image = image_surface

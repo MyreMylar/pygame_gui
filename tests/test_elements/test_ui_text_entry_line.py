@@ -403,7 +403,9 @@ class TestUITextEntryLine:
         processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
                                                                          {'button': 1, 'pos': (80, 15)}))
 
-        assert (processed_down_event and processed_up_event and text_entry.select_range == [3, 9])
+        assert processed_down_event
+        assert processed_up_event
+        assert text_entry.select_range == [3, 9]
 
     def test_process_event_mouse_button_double_click(self, _init_pygame: None, default_ui_manager: UIManager,
                                                      _display_surface_return_none: None):

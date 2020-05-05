@@ -5,6 +5,7 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
+from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
 
 
 class DrawableShapeState:
@@ -346,29 +347,6 @@ class DrawableShape:
         """
         return self.active_state.has_fresh_surface
 
-    @staticmethod
-    def apply_colour_to_surface(colour: pygame.Color,
-                                shape_surface: pygame.Surface,
-                                rect: Union[pygame.Rect, None] = None):
-        """
-        Apply a colour to a shape surface by multiplication blend. This works best when the shape
-        surface is predominantly white.
-
-        :param colour: The colour to apply.
-        :param shape_surface: The shape surface to apply the colour to.
-        :param rect: A rectangle to apply the colour inside of.
-
-        """
-        if rect is not None:
-            colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
-            colour_surface.fill(colour)
-            shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
-        else:
-            colour_surface = pygame.Surface(shape_surface.get_size(),
-                                            flags=pygame.SRCALPHA, depth=32)
-            colour_surface.fill(colour)
-            shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-
     def rebuild_images_and_text(self,
                                 image_state_str: str,
                                 state_str: str,
@@ -390,39 +368,45 @@ class DrawableShape:
             image_rect = self.theming[image_state_str].get_rect()
             image_rect.center = (int(self.containing_rect.width / 2),
                                  int(self.containing_rect.height / 2))
-            self.states[state_str].surface.blit(self.theming[image_state_str], image_rect)
+            self.states[state_str].surface.blit(self.theming[image_state_str], image_rect,
+                                                special_flags=pygame.BLEND_PREMULTIPLIED)
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-                if not isinstance(self.theming[text_colour_state_str], ColourGradient):
-                    text_surface = self.theming['font'].render(self.theming['text'], True,
-                                                               self.theming[text_colour_state_str])
-                else:
-                    text_surface = self.theming['font'].render(self.theming['text'], True,
-                                                               pygame.Color('#FFFFFFFF'))
+                text_surface = render_white_text_alpha_black_bg(font=self.theming['font'],
+                                                                text=self.theming['text'])
+                if isinstance(self.theming[text_colour_state_str], ColourGradient):
                     self.theming[text_colour_state_str].apply_gradient_to_surface(text_surface)
+                else:
+                    apply_colour_to_surface(self.theming[text_colour_state_str], text_surface)
             else:
                 text_surface = None
 
             if 'text_shadow' in self.theming:
-                text_shadow = self.theming['font'].render(self.theming['text'],
-                                                          True, self.theming['text_shadow'])
+                text_shadow = render_white_text_alpha_black_bg(font=self.theming['font'],
+                                                               text=self.theming['text'])
+                apply_colour_to_surface(self.theming['text_shadow'], text_shadow)
 
                 self.states[state_str].surface.blit(text_shadow,
                                                     (self.aligned_text_rect.x,
-                                                     self.aligned_text_rect.y + 1))
+                                                     self.aligned_text_rect.y + 1),
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
                 self.states[state_str].surface.blit(text_shadow,
                                                     (self.aligned_text_rect.x,
-                                                     self.aligned_text_rect.y - 1))
+                                                     self.aligned_text_rect.y - 1),
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
                 self.states[state_str].surface.blit(text_shadow,
                                                     (self.aligned_text_rect.x + 1,
-                                                     self.aligned_text_rect.y))
+                                                     self.aligned_text_rect.y),
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
                 self.states[state_str].surface.blit(text_shadow,
                                                     (self.aligned_text_rect.x - 1,
-                                                     self.aligned_text_rect.y))
+                                                     self.aligned_text_rect.y),
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
 
             if text_surface is not None and self.aligned_text_rect is not None:
-                self.states[state_str].surface.blit(text_surface, self.aligned_text_rect)
+                self.states[state_str].surface.blit(text_surface, self.aligned_text_rect,
+                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
 
     def redraw_state(self, state_str: str):
         """

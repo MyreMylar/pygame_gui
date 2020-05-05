@@ -5,6 +5,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape, DrawableShapeState, DrawableStateTransition
 from pygame_gui.ui_manager import UIManager
+from pygame_gui.core.utility import apply_colour_to_surface
 
 
 class TestDrawableShapeState:
@@ -193,8 +194,7 @@ class TestDrawableShape:
         test_surface = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         test_surface.fill(pygame.Color(255,255,255,255))
 
-        shape.apply_colour_to_surface(pygame.Color(50, 100, 50, 255),
-                                      test_surface)
+        apply_colour_to_surface(pygame.Color(50, 100, 50, 255), test_surface)
 
         after_application_colour = test_surface.get_at((0, 0))
 
@@ -204,9 +204,8 @@ class TestDrawableShape:
         test_surface_2 = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         test_surface_2.fill(pygame.Color(255, 255, 255, 255))
 
-        shape.apply_colour_to_surface(pygame.Color(150, 100, 150, 255),
-                                      test_surface_2,
-                                      pygame.Rect(0, 0, 25, 50))
+        apply_colour_to_surface(pygame.Color(150, 100, 150, 255), test_surface_2,
+                                pygame.Rect(0, 0, 25, 50))
 
         after_application_colour = test_surface_2.get_at((0, 0))
 

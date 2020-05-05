@@ -338,6 +338,7 @@ class TextBlock:
         if self.height != -1 and self.width != -1:
             self.block_sprite = pygame.Surface((self.width, self.height),
                                                pygame.SRCALPHA, depth=32)
+            self.block_sprite.fill(pygame.Color('#00000000'))
         position = [0, 0]
         line_height_acc = 0
         max_line_length = 0
@@ -364,7 +365,8 @@ class TextBlock:
                 if self.block_sprite is not None:
                     # need to adjust y start pos based on ascents
                     new_chunk.rect.y += (line['line_ascent'] - new_chunk.ascent)
-                    self.block_sprite.blit(new_chunk.rendered_chunk, new_chunk.rect)
+                    self.block_sprite.blit(new_chunk.rendered_chunk, new_chunk.rect,
+                                           special_flags=pygame.BLEND_PREMULTIPLIED)
 
             text_line = TextBlock.TextLine()
             text_line.chunks = line_chunks
@@ -381,12 +383,14 @@ class TextBlock:
             self.height = line_height_acc if self.height == -1 else self.height
             self.block_sprite = pygame.Surface((self.width, self.height),
                                                pygame.SRCALPHA, depth=32)
+            self.block_sprite.fill(pygame.Color('#00000000'))
 
             for line in self.lines:
                 for chunk in line.chunks:
                     # need to adjust y start pos based on ascents
                     chunk.rect.y += line.max_line_ascent - chunk.ascent
-                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
+                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect,
+                                           special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.final_dimensions = (self.width, self.height)
 
@@ -400,6 +404,7 @@ class TextBlock:
         final_alpha = text_effect.get_final_alpha() if text_effect else 255
         self.block_sprite = pygame.Surface((self.width, self.height),
                                            flags=pygame.SRCALPHA, depth=32)
+        self.block_sprite.fill(pygame.Color('#00000000'))
 
         if isinstance(self.bg_colour, ColourGradient):
             self.block_sprite.fill(pygame.Color("#FFFFFFFF"))
@@ -410,7 +415,8 @@ class TextBlock:
         for text_line in self.lines:
             for chunk in text_line.chunks:
                 if self.block_sprite is not None:
-                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect)
+                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect,
+                                           special_flags=pygame.BLEND_PREMULTIPLIED)
         self.block_sprite.set_alpha(final_alpha)
 
     def add_chunks_to_hover_group(self, hover_group: List[StyledChunk]):
