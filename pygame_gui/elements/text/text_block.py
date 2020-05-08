@@ -5,6 +5,7 @@ import pygame
 
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
+from pygame_gui.core.utility import basic_blit
 
 from pygame_gui.elements.text.text_effects import TextBoxEffect
 from pygame_gui.elements.text.styled_chunk import StyledChunk
@@ -346,27 +347,27 @@ class TextBlock:
             line_chunks = []
             max_line_char_height = 0
             for chunk in line['chunks']:
-                new_chunk = StyledChunk(chunk['style'].font_size,
-                                        chunk['style'].font_name,
-                                        chunk['text'],
-                                        chunk['style'].style,
-                                        chunk['style'].colour,
-                                        chunk['style'].bg_colour,
-                                        chunk['style'].is_link,
-                                        chunk['style'].link_href,
-                                        self.link_style,
-                                        (position[0], position[1]),
-                                        self.font_dict)
-                position[0] += new_chunk.advance
-                if new_chunk.height > max_line_char_height:
-                    max_line_char_height = new_chunk.height
-                line_chunks.append(new_chunk)
+                if len(chunk['text']) > 0:
+                    new_chunk = StyledChunk(chunk['style'].font_size,
+                                            chunk['style'].font_name,
+                                            chunk['text'],
+                                            chunk['style'].style,
+                                            chunk['style'].colour,
+                                            chunk['style'].bg_colour,
+                                            chunk['style'].is_link,
+                                            chunk['style'].link_href,
+                                            self.link_style,
+                                            (position[0], position[1]),
+                                            self.font_dict)
+                    position[0] += new_chunk.advance
+                    if new_chunk.height > max_line_char_height:
+                        max_line_char_height = new_chunk.height
+                    line_chunks.append(new_chunk)
 
-                if self.block_sprite is not None:
-                    # need to adjust y start pos based on ascents
-                    new_chunk.rect.y += (line['line_ascent'] - new_chunk.ascent)
-                    self.block_sprite.blit(new_chunk.rendered_chunk, new_chunk.rect,
-                                           special_flags=pygame.BLEND_PREMULTIPLIED)
+                    if self.block_sprite is not None:
+                        # need to adjust y start pos based on ascents
+                        new_chunk.rect.y += (line['line_ascent'] - new_chunk.ascent)
+                        basic_blit(self.block_sprite, new_chunk.rendered_chunk, new_chunk.rect)
 
             text_line = TextBlock.TextLine()
             text_line.chunks = line_chunks
@@ -389,8 +390,7 @@ class TextBlock:
                 for chunk in line.chunks:
                     # need to adjust y start pos based on ascents
                     chunk.rect.y += line.max_line_ascent - chunk.ascent
-                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect,
-                                           special_flags=pygame.BLEND_PREMULTIPLIED)
+                    basic_blit(self.block_sprite, chunk.rendered_chunk, chunk.rect)
 
         self.final_dimensions = (self.width, self.height)
 
@@ -415,8 +415,7 @@ class TextBlock:
         for text_line in self.lines:
             for chunk in text_line.chunks:
                 if self.block_sprite is not None:
-                    self.block_sprite.blit(chunk.rendered_chunk, chunk.rect,
-                                           special_flags=pygame.BLEND_PREMULTIPLIED)
+                    basic_blit(self.block_sprite, chunk.rendered_chunk, chunk.rect)
         self.block_sprite.set_alpha(final_alpha)
 
     def add_chunks_to_hover_group(self, hover_group: List[StyledChunk]):

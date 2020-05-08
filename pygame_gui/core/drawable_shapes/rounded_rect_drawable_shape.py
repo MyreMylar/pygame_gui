@@ -8,7 +8,7 @@ from pygame.math import Vector2
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
-from pygame_gui.core.utility import apply_colour_to_surface
+from pygame_gui.core.utility import apply_colour_to_surface, basic_blit, USE_PREMULTIPLIED_ALPHA
 
 
 class RoundedRectangleShape(DrawableShape):
@@ -271,10 +271,11 @@ class RoundedRectangleShape(DrawableShape):
             grad_surf = pygame.Surface(self.click_area_shape.size, flags=pygame.SRCALPHA, depth=32)
             grad_surf.fill(pygame.Color('#FFFFFFFF'))
             self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
-            quick_surf.blit(grad_surf, pygame.Rect((self.shadow_width,
-                                                    self.shadow_width),
-                                                   self.click_area_shape.size),
-                            special_flags=pygame.BLEND_PREMULTIPLIED)
+
+            basic_blit(quick_surf, grad_surf,
+                       pygame.Rect((self.shadow_width,
+                                    self.shadow_width),
+                                   self.click_area_shape.size))
         else:
             quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
                                                                     self.shadow_width),
@@ -356,8 +357,7 @@ class RoundedRectangleShape(DrawableShape):
                 else:
                     apply_colour_to_surface(border_col, shape_surface)
 
-                bab_surface.blit(shape_surface, self.border_rect,
-                                 special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(bab_surface, shape_surface, self.border_rect)
 
             shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                 self.background_rect,
@@ -373,13 +373,12 @@ class RoundedRectangleShape(DrawableShape):
                 else:
                     apply_colour_to_surface(bg_col, shape_surface)
 
-            bab_surface.blit(shape_surface, self.background_rect,
-                             special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(bab_surface, shape_surface, self.background_rect)
 
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
-            self.states[state_str].surface.blit(bab_surface, (0, 0),
-                                                special_flags=pygame.BLEND_PREMULTIPLIED)
+
+            basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
             if self.states[state_str].cached_background_id is not None:
                 cached_id = self.states[state_str].cached_background_id
@@ -460,9 +459,11 @@ class RoundedRectangleShape(DrawableShape):
         if self.temp_additive_shape is None:
             large_shape_surface = pygame.Surface((rect.width, rect.height),
                                                  flags=pygame.SRCALPHA, depth=32)
-            large_shape_surface.fill(pygame.Color('#00000000'))  # was:
+            clear_colour = '#00000000' if USE_PREMULTIPLIED_ALPHA else '#FFFFFF00'
+            large_shape_surface.fill(pygame.Color(clear_colour))  # was:
             RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius,
-                                                                    large_shape_surface)
+                                                                    large_shape_surface,
+                                                                    clear_colour_string=clear_colour)
             self.temp_additive_shape = large_shape_surface.copy()
         else:
             large_shape_surface = pygame.transform.scale(self.temp_additive_shape,

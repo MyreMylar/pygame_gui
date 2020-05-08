@@ -4,6 +4,7 @@ from typing import List, Union, Tuple
 
 import pygame
 
+from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.colour_gradient import ColourGradient
 
 
@@ -154,8 +155,7 @@ class SurfaceCache:
                 found_rectangle_to_split = free_rectangle
                 found_rectangle_cache = pygame.Rect(free_rectangle.topleft,
                                                     surface_size)
-                current_surface.blit(new_item[0], free_rectangle.topleft,
-                                     special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(current_surface, new_item[0], free_rectangle.topleft)
                 self.cache_long_term_lookup[string_id] = {
                     'surface': current_surface.subsurface(found_rectangle_cache),
                     'current_uses': new_item[1],

@@ -5,7 +5,8 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.utility import render_white_text_alpha_black_bg
+from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
+from pygame_gui.core.utility import basic_blit
 
 
 class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
@@ -55,7 +56,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
 
         self.dirty = 2
         self.visible = 1
-        self.blendmode = pygame.BLEND_PREMULTIPLIED
+        self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
         self.source_rect = None
 
         self.relative_bottom_margin = None
@@ -90,7 +91,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         if isinstance(container, IContainerLikeInterface):
             self.ui_container = container.get_container()
 
-        if self.ui_container is not None and self.ui_container is not self:
+        if not (self.ui_container is None or self.ui_container is self):
             self.ui_container.add_element(self)
 
         self._update_absolute_rect_position_from_anchors()
@@ -590,11 +591,9 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                     new_surface = pygame.Surface((surf_width, surf_height),
                                                  flags=pygame.SRCALPHA,
                                                  depth=32)
-                    new_surface.blit(self.image, (0, 0),
-                                     special_flags=pygame.BLEND_PREMULTIPLIED)
+                    basic_blit(new_surface, self.image, (0, 0))
                     self.set_image(new_surface)
-                self.image.blit(layer_text_render, (0, 0),
-                                special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.image, layer_text_render, (0, 0))
             else:
                 self.set_image(layer_text_render)
             self._visual_debug_mode = True
@@ -636,8 +635,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
             self._image_clip = rect
             if self.image is not None:
                 self.image.fill(pygame.Color('#00000000'))
-                self.image.blit(self._pre_clipped_image, self._image_clip, self._image_clip,
-                                special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.image, self._pre_clipped_image, self._image_clip, self._image_clip)
         else:
             self._image_clip = None
 
@@ -668,10 +666,10 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                                             flags=pygame.SRCALPHA,
                                             depth=32)
                 self.image.fill(pygame.Color('#00000000'))
-                self.image.blit(self._pre_clipped_image,
-                                self.get_image_clipping_rect(),
-                                self.get_image_clipping_rect(),
-                                special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.image,
+                           self._pre_clipped_image,
+                           self.get_image_clipping_rect(),
+                           self.get_image_clipping_rect())
         else:
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None

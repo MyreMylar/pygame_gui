@@ -7,6 +7,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
+from pygame_gui.core.utility import basic_blit
 
 
 class RectDrawableShape(DrawableShape):
@@ -182,8 +183,8 @@ class RectDrawableShape(DrawableShape):
                                                         special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming[border_colour_state_str].apply_gradient_to_surface(
                         border_shape_surface)
-                    self.states[state_str].surface.blit(border_shape_surface, self.border_rect,
-                                                        special_flags=pygame.BLEND_PREMULTIPLIED)
+                    basic_blit(self.states[state_str].surface,
+                               border_shape_surface, self.border_rect)
                 else:
                     self.states[state_str].surface.fill(self.theming[border_colour_state_str],
                                                         self.border_rect)
@@ -197,8 +198,8 @@ class RectDrawableShape(DrawableShape):
                                                     special_flags=pygame.BLEND_RGBA_SUB)
                 self.theming[bg_colour_state_str].apply_gradient_to_surface(
                     background_shape_surface)
-                self.states[state_str].surface.blit(background_shape_surface, self.background_rect,
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.states[state_str].surface,
+                           background_shape_surface, self.background_rect)
             else:
                 self.states[state_str].surface.fill(self.theming[bg_colour_state_str],
                                                     self.background_rect)
@@ -215,8 +216,8 @@ class RectDrawableShape(DrawableShape):
                     self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
                                                         special_flags=pygame.BLEND_RGBA_SUB)
                     self.theming['filled_bar'].apply_gradient_to_surface(bar_shape_surface)
-                    self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
-                                                        special_flags=pygame.BLEND_PREMULTIPLIED)
+                    basic_blit(self.states[state_str].surface,
+                               bar_shape_surface, bar_rect)
                 else:
                     self.states[state_str].surface.fill(self.theming['filled_bar'], bar_rect)
 

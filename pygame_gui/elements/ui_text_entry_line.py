@@ -10,6 +10,7 @@ from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
+from pygame_gui.core.utility import basic_blit
 from pygame_gui.core import ColourGradient, UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -240,15 +241,15 @@ class UITextEntryLine(UIElement):
             self.start_text_offset = 0
 
         if len(self.text) > 0:
-            self.text_image.blit(self.text_surface,
-                                 self.padding,
-                                 pygame.Rect((self.start_text_offset, 0),
-                                             (text_clip_width,
-                                              (self.rect.height -
-                                               (self.padding[1] * 2) -
-                                               (self.border_width * 2) -
-                                               (self.shadow_width * 2)))),
-                                 special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(self.text_image,
+                       self.text_surface,
+                       self.padding,
+                       pygame.Rect((self.start_text_offset, 0),
+                                   (text_clip_width,
+                                    (self.rect.height -
+                                     (self.padding[1] * 2) -
+                                     (self.border_width * 2) -
+                                     (self.shadow_width * 2)))))
 
         self.redraw_cursor()
 
@@ -295,8 +296,7 @@ class UITextEntryLine(UIElement):
             alpha_text = self._draw_text_with_grad_or_col(select_area_text,
                                                           self.selected_text_colour)
 
-            select_area_surface.blit(alpha_text, (0, 0),
-                                     special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(select_area_surface, alpha_text, (0, 0))
         else:
             if isinstance(self.selected_text_colour, ColourGradient):
                 select_area_surface = pygame.Surface((select_area_width,
@@ -308,13 +308,12 @@ class UITextEntryLine(UIElement):
                 alpha_text = render_white_text_alpha_black_bg(font=self.font,
                                                               text=select_area_text)
                 self.selected_text_colour.apply_gradient_to_surface(alpha_text)
-                select_area_surface.blit(alpha_text, (0, 0),
-                                         special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(select_area_surface, alpha_text, (0, 0))
 
             else:
                 select_area_surface = self.font.render(select_area_text, True,
                                                        self.selected_text_colour,
-                                                       self.selected_bg_colour)
+                                                       self.selected_bg_colour).convert_alpha()
         if len(post_select_area_text) > 0:
             post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
                                                                         self.text_colour)
@@ -330,14 +329,13 @@ class UITextEntryLine(UIElement):
             self.text_image.fill(self.background_colour)
 
         if pre_select_area_surface is not None:
-            self.text_surface.blit(pre_select_area_surface, (0, 0),
-                                   special_flags=pygame.BLEND_PREMULTIPLIED)
-        self.text_surface.blit(select_area_surface, (pre_select_width, 0),
-                               special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(self.text_surface, pre_select_area_surface, (0, 0))
+
+        basic_blit(self.text_surface, select_area_surface, (pre_select_width, 0))
+
         if post_select_area_surface is not None:
-            self.text_surface.blit(post_select_area_surface,
-                                   (pre_select_width + select_area_width, 0),
-                                   special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(self.text_surface, post_select_area_surface,
+                       (pre_select_width + select_area_width, 0))
 
     def _draw_text_with_grad_or_col(self,
                                     text: str,
@@ -366,8 +364,7 @@ class UITextEntryLine(UIElement):
         without spending time redrawing all the text.
         """
         new_image = self.background_and_border.copy()
-        new_image.blit(self.text_image, self.text_image_rect,
-                       special_flags=pygame.BLEND_PREMULTIPLIED)
+        basic_blit(new_image, self.text_image, self.text_image_rect)
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
@@ -377,11 +374,11 @@ class UITextEntryLine(UIElement):
             if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
-                cursor_surface = pygame.Surface(self.cursor.size)
+                cursor_surface = pygame.Surface(self.cursor.size,
+                                                flags=pygame.SRCALPHA, depth=32)
                 cursor_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(cursor_surface)
-                new_image.blit(cursor_surface, self.cursor,
-                               special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(new_image, cursor_surface, self.cursor)
 
         self.set_image(new_image)
 

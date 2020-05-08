@@ -6,6 +6,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
+from pygame_gui.core.utility import basic_blit
 
 
 class DrawableShapeState:
@@ -18,7 +19,7 @@ class DrawableShapeState:
     def __init__(self, state_id: str):
 
         self.state_id = state_id
-        self.surface = pygame.Surface((0, 0))  # type: pygame.Surface
+        self.surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)  # type: pygame.Surface
         self.has_fresh_surface = False
         self.cached_background_id = None  # type: Union[str, None]
         self.transition = None  # type: Union[DrawableStateTransition, None]
@@ -324,7 +325,7 @@ class DrawableShape:
         elif state_name in self.states and self.states['normal'].surface is not None:
             return self.states['normal'].surface
         else:
-            return pygame.Surface((0, 0))
+            return pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
 
     def get_fresh_surface(self) -> pygame.Surface:
         """
@@ -368,8 +369,8 @@ class DrawableShape:
             image_rect = self.theming[image_state_str].get_rect()
             image_rect.center = (int(self.containing_rect.width / 2),
                                  int(self.containing_rect.height / 2))
-            self.states[state_str].surface.blit(self.theming[image_state_str], image_rect,
-                                                special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(self.states[state_str].surface,
+                       self.theming[image_state_str], image_rect)
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
@@ -387,26 +388,23 @@ class DrawableShape:
                                                                text=self.theming['text'])
                 apply_colour_to_surface(self.theming['text_shadow'], text_shadow)
 
-                self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x,
-                                                     self.aligned_text_rect.y + 1),
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
-                self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x,
-                                                     self.aligned_text_rect.y - 1),
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
-                self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x + 1,
-                                                     self.aligned_text_rect.y),
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
-                self.states[state_str].surface.blit(text_shadow,
-                                                    (self.aligned_text_rect.x - 1,
-                                                     self.aligned_text_rect.y),
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.states[state_str].surface, text_shadow,
+                           (self.aligned_text_rect.x,
+                            self.aligned_text_rect.y + 1))
+                basic_blit(self.states[state_str].surface, text_shadow,
+                           (self.aligned_text_rect.x,
+                            self.aligned_text_rect.y - 1))
+                basic_blit(self.states[state_str].surface, text_shadow,
+                           (self.aligned_text_rect.x + 1,
+                            self.aligned_text_rect.y))
+                basic_blit(self.states[state_str].surface, text_shadow,
+                           (self.aligned_text_rect.x - 1,
+                            self.aligned_text_rect.y))
 
             if text_surface is not None and self.aligned_text_rect is not None:
-                self.states[state_str].surface.blit(text_surface, self.aligned_text_rect,
-                                                    special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(self.states[state_str].surface,
+                           text_surface,
+                           self.aligned_text_rect)
 
     def redraw_state(self, state_str: str):
         """

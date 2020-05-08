@@ -331,7 +331,8 @@ class UIColourPickerDialog(UIWindow):
                          'channel_spacing': 11,
                          'channel_height': 29}
 
-        current_colour_surface = pygame.Surface((64, 64))
+        current_colour_surface = pygame.Surface((64, 64),
+                                                flags=pygame.SRCALPHA, depth=32)
         current_colour_surface.fill(self.current_colour)
 
         self.current_colour_image = UIImage(pygame.Rect(default_sizes['element_spacing'],
@@ -347,7 +348,7 @@ class UIColourPickerDialog(UIWindow):
                                                      'bottom': 'bottom'}
                                             )
 
-        mini_colour_surf = pygame.Surface((2, 2))
+        mini_colour_surf = pygame.Surface((2, 2), flags=pygame.SRCALPHA, depth=32)
         mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
         mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
 
@@ -543,7 +544,7 @@ class UIColourPickerDialog(UIWindow):
         Updates the 'current colour' image when the current colour has been changed.
 
         """
-        current_colour_surface = pygame.Surface((64, 64))
+        current_colour_surface = pygame.Surface((64, 64), flags=pygame.SRCALPHA, depth=32)
         current_colour_surface.fill(self.current_colour)
         self.current_colour_image.set_image(current_colour_surface)
 
@@ -559,7 +560,7 @@ class UIColourPickerDialog(UIWindow):
         And then using the smoothscale transform to enlarge it so that the colours blend smoothly
         from one to the other.
         """
-        mini_colour_surf = pygame.Surface((2, 2))
+        mini_colour_surf = pygame.Surface((2, 2), flags=pygame.SRCALPHA, depth=32)
         mini_colour_surf.fill(pygame.Color(0, 0, 0, 255), pygame.Rect(0, 0, 1, 2))
         mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
 

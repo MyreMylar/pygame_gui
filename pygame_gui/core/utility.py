@@ -12,12 +12,15 @@ import io
 import base64
 
 from pathlib import Path
-from typing import Union, Dict
+from typing import Union, Dict, Tuple
 
 from threading import Thread
 from queue import Queue
 
 import pygame
+
+# Only use pre-multiplied alpha if we are using SDL2 where it is decently fast.
+USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2
 
 USE_IMPORT_LIB_RESOURCE = False
 USE_FILE_PATH = False
@@ -218,79 +221,101 @@ def create_resource_path(relative_path: Union[str, Path]):
     return os.path.join(base_path, relative_path)
 
 
-    def premul_col(original_colour: pygame.Color) -> pygame.Color:
-        """
-        Perform a pre-multiply alpha operation on a pygame colour
-        """
+def premul_col(original_colour: pygame.Color) -> pygame.Color:
+    """
+    Perform a pre-multiply alpha operation on a pygame colour
+    """
+    if USE_PREMULTIPLIED_ALPHA:
         alpha_mul = original_colour.a / 255
         return pygame.Color(int(original_colour.r * alpha_mul),
                             int(original_colour.g * alpha_mul),
                             int(original_colour.b * alpha_mul),
                             original_colour.a)
+    else:
+        return original_colour
 
 
-    def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
-        """
-        Restore a pre-multiplied alpha colour back to an approximation of it's initial value.
+def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
+    """
+    Restore a pre-multiplied alpha colour back to an approximation of it's initial value.
 
-        NOTE: Because of the rounding to integers this cannot be exact.
-        """
+    NOTE: Because of the rounding to integers this cannot be exact.
+    """
+    if USE_PREMULTIPLIED_ALPHA:
         inverse_alpha_mul = 1.0 / max(0.001, (premul_colour.a / 255))
 
         return pygame.Color(int(premul_colour.r * inverse_alpha_mul),
                             int(premul_colour.g * inverse_alpha_mul),
                             int(premul_colour.b * inverse_alpha_mul),
                             premul_colour.a)
+    else:
+        return premul_colour
 
 
-    def premul_alpha_surface(surface: pygame.Surface) -> pygame.Surface:
-        """
-        Perform a pre-multiply alpha operation on a pygame surface's colours.
-        """
+def premul_alpha_surface(surface: pygame.Surface) -> pygame.Surface:
+    """
+    Perform a pre-multiply alpha operation on a pygame surface's colours.
+    """
+    if USE_PREMULTIPLIED_ALPHA:
         surf_copy = surface.copy()
         surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
-        manipulate_surf = pygame.Surface(surf_copy.get_size(), pygame.SRCALPHA)
+        manipulate_surf = pygame.Surface(surf_copy.get_size(),
+                                         flags=pygame.SRCALPHA, depth=32)
         # Can't be exactly transparent black or we trigger SDL1 'bug'
         manipulate_surf.fill(pygame.Color('#00000001'))
         manipulate_surf.blit(surf_copy, (0, 0))
         surface.blit(manipulate_surf, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
-        return surface
+    return surface
 
 
-    def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.Surface:
-        """
-        Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
-        use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
-        """
+def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.Surface:
+    """
+    Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
+    use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
+    """
+    if USE_PREMULTIPLIED_ALPHA:
         text_render = font.render(text, True, pygame.Color('#FFFFFFFF'))
-        final_surface = pygame.Surface(text_render.get_size(), pygame.SRCALPHA)
+        final_surface = pygame.Surface(text_render.get_size(),
+                                       flags=pygame.SRCALPHA, depth=32)
         # Can't be exactly transparent black or we trigger SDL1 'bug'
         final_surface.fill(pygame.Color('#00000001'))
         final_surface.blit(text_render, (0, 0))
         return final_surface
+    else:
+        return font.render(text, True, pygame.Color('#FFFFFFFF'))
 
 
-    def apply_colour_to_surface(colour: pygame.Color,
-                                shape_surface: pygame.Surface,
-                                rect: Union[pygame.Rect, None] = None):
-        """
-        Apply a colour to a shape surface by multiplication blend. This works best when the shape
-        surface is predominantly white.
+def basic_blit(destination: pygame.Surface,
+               source: pygame.Surface,
+               pos: Union[Tuple[int, int], pygame.Rect],
+               area: Union[pygame.Rect, None] = None):
+    if USE_PREMULTIPLIED_ALPHA:
+        destination.blit(source, pos, area, special_flags=pygame.BLEND_PREMULTIPLIED)
+    else:
+        destination.blit(source, pos, area)
 
-        :param colour: The colour to apply.
-        :param shape_surface: The shape surface to apply the colour to.
-        :param rect: A rectangle to apply the colour inside of.
 
-        """
-        if rect is not None:
-            colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
-            colour_surface.fill(colour)
-            shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
-        else:
-            colour_surface = pygame.Surface(shape_surface.get_size(),
-                                            flags=pygame.SRCALPHA, depth=32)
-            colour_surface.fill(colour)
-            shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+def apply_colour_to_surface(colour: pygame.Color,
+                            shape_surface: pygame.Surface,
+                            rect: Union[pygame.Rect, None] = None):
+    """
+    Apply a colour to a shape surface by multiplication blend. This works best when the shape
+    surface is predominantly white.
+
+    :param colour: The colour to apply.
+    :param shape_surface: The shape surface to apply the colour to.
+    :param rect: A rectangle to apply the colour inside of.
+
+    """
+    if rect is not None:
+        colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
+        colour_surface.fill(colour)
+        shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
+    else:
+        colour_surface = pygame.Surface(shape_surface.get_size(),
+                                        flags=pygame.SRCALPHA, depth=32)
+        colour_surface.fill(colour)
+        shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
 
 class PackageResource:

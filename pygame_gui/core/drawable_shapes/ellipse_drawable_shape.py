@@ -6,7 +6,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
-from pygame_gui.core.utility import apply_colour_to_surface
+from pygame_gui.core.utility import apply_colour_to_surface, basic_blit
 
 
 class EllipseDrawableShape(DrawableShape):
@@ -202,9 +202,7 @@ class EllipseDrawableShape(DrawableShape):
                                                                         clear=False)
                     apply_colour_to_surface(self.theming[border_colour_state_str],
                                             shape_surface)
-
-                bab_surface.blit(shape_surface, self.border_rect,
-                                 special_flags=pygame.BLEND_PREMULTIPLIED)
+                basic_blit(bab_surface, shape_surface, self.border_rect)
             if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect, 1,
@@ -216,8 +214,7 @@ class EllipseDrawableShape(DrawableShape):
                                                                     aa_amount=aa_amount)
                 apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 
-            bab_surface.blit(shape_surface, self.background_rect,
-                             special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(bab_surface, shape_surface, self.background_rect)
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
@@ -237,9 +234,7 @@ class EllipseDrawableShape(DrawableShape):
                                                                         self.shadow_width),
                                                                        sub_surface.get_size()),
                                                 special_flags=pygame.BLEND_RGBA_SUB)
-
-            self.states[state_str].surface.blit(bab_surface, (0, 0),
-                                                special_flags=pygame.BLEND_PREMULTIPLIED)
+            basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
             if (shape_id is not None and
                     self.states[state_str].surface.get_width() <= 1024 and
