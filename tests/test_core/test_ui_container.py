@@ -168,3 +168,70 @@ class TestUIContainer:
         assert scroll_bar.top_button.rect.width == 14
         container.set_dimensions((400, 400))
         assert scroll_bar.top_button.rect.width == 14
+
+    def test_container_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                            _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=False)
+        assert container.is_visible is False
+        container.show()
+        assert container.is_visible is True
+
+    def test_container_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                            _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=True)
+        assert container.is_visible is True
+        container.hide()
+        assert container.is_visible is False
+
+    def test_container_children_inheriting_hidden_status(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                         _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=False)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=default_ui_manager, container=container, is_visible=True)
+        assert container.is_visible is False
+        assert button.is_visible is False
+
+    def test_hidden_container_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                         _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=False)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=default_ui_manager, container=container)
+        assert container.is_visible is False
+        assert button.is_visible is False
+        container.show()
+        assert container.is_visible is True
+        assert button.is_visible is True
+
+    def test_visible_container_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                          _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=True)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=default_ui_manager, container=container, is_visible=False)
+        assert container.is_visible is True
+        assert button.is_visible is False
+        container.show()
+        assert container.is_visible is True
+        assert button.is_visible is False
+
+    def test_visible_container_children_behaviour_on_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                          _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=True)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=default_ui_manager, container=container)
+        assert container.is_visible is True
+        assert button.is_visible is True
+        container.hide()
+        assert container.is_visible is False
+        assert button.is_visible is False
+
+    def test_hidden_container_children_behaviour_on_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                         _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, is_visible=False)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=default_ui_manager, container=container)
+        button.show()
+        assert container.is_visible is False
+        assert button.is_visible is True
+        container.hide()
+        assert container.is_visible is False
+        assert button.is_visible is True

@@ -20,7 +20,7 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param is_visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -28,10 +28,13 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, str] = None,
+                 is_visible: bool = True):
 
         self._layer = 0
         self.ui_manager = manager
+        self.is_visible = is_visible
+
         super().__init__(self.ui_manager.get_sprite_group())
         self.relative_rect = relative_rect.copy()
         self.rect = self.relative_rect.copy()
@@ -86,6 +89,9 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
 
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
+
+        if self.ui_container is not None and not self.ui_container.is_visible:
+            self.is_visible = False
 
         self._update_absolute_rect_position_from_anchors()
 
@@ -738,3 +744,16 @@ class UIElement(pygame.sprite.Sprite, IUIElementInterface):
                 setattr(self, attribute_name, attribute_value)
                 has_changed = True
         return has_changed
+
+    def show(self):
+        """
+        Shows the widget, which means the widget will get drawn and will process events.
+        """
+        self.is_visible = True
+
+    def hide(self):
+        """
+        Hides the widget, which means the widget will not get drawn and will not process events.
+        """
+        self.is_visible = False
+

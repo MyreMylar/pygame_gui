@@ -57,7 +57,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 is_visible: bool = True
                  ):
 
         super().__init__(relative_rect,
@@ -65,7 +66,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                          container,
                          starting_height=starting_layer_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         is_visible=is_visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -102,7 +104,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                            container=container,
                                            parent_element=self,
                                            object_id='#panel_container',
-                                           anchors=anchors)
+                                           anchors=anchors,
+                                           is_visible=self.is_visible)
 
     def update(self, time_delta: float):
         """
@@ -278,3 +281,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                         ['normal'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+    def show(self):
+        self.is_visible = True
+        self.panel_container.show()
+
+    def hide(self):
+        self.panel_container.hide()
+        self.is_visible = False

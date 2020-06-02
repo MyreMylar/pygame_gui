@@ -36,7 +36,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
-                 anchors: Union[Dict[str, str], None] = None):
+                 anchors: Union[Dict[str, str], None] = None,
+                 is_visible: bool = True):
 
         self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
@@ -45,7 +46,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         is_visible=is_visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -275,3 +277,28 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         elif self.hovered:
             self.hovered = False
         return hovered_higher_element
+
+    def show(self):
+        """
+        Shows the container, which means the container will get drawn and will process events.
+        Should also show all the children elements.
+        If the container was visible before - ignore.
+        """
+        if not self.is_visible:
+            self.is_visible = True
+
+            for element in self.elements:
+                if hasattr(element, 'show'):
+                    element.show()
+
+    def hide(self):
+        """
+        Hides the container, which means the container will not get drawn and will not process events.
+        Should also hide all the children elements.
+        If the container was hidden before - ignore.
+        """
+        if self.is_visible:
+            self.is_visible = False
+            for element in self.elements:
+                if hasattr(element, 'hide'):
+                    element.hide()

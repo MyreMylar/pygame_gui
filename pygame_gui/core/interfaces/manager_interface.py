@@ -8,6 +8,7 @@ from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
+from pygame_gui.core.ui_layered_updates import UILayeredUpdates
 
 
 class IUIManagerInterface(metaclass=ABCMeta):
@@ -44,7 +45,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_sprite_group(self) -> pygame.sprite.LayeredUpdates:
+    def get_sprite_group(self) -> UILayeredUpdates:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.

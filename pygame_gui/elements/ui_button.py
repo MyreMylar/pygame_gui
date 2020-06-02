@@ -46,13 +46,15 @@ class UIButton(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None,
-                 allow_double_clicks: bool = False
+                 allow_double_clicks: bool = False,
+                 is_visible: bool = True
                  ):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         is_visible=is_visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
