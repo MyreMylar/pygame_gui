@@ -19,7 +19,7 @@ class DrawableShapeState:
     def __init__(self, state_id: str):
 
         self.state_id = state_id
-        self.surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)  # type: pygame.Surface
+        self.surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
         self.has_fresh_surface = False
         self.cached_background_id = None  # type: Union[str, None]
         self.transition = None  # type: Union[DrawableStateTransition, None]

@@ -46,7 +46,7 @@ class TestUITextEntryLine:
 
         assert text_entry.get_text() == "GOLD"
 
-    def test_set_text_forbidden_characters(self, _init_pygame, default_ui_manager):
+    def test_set_text_forbidden_characters(self, _init_pygame, default_ui_manager,):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -54,7 +54,8 @@ class TestUITextEntryLine:
         with pytest.warns(UserWarning, match="Tried to set text string with invalid characters on text entry element"):
             text_entry.set_text("1,2,3,4,5")
 
-    def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager):
+    def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -64,7 +65,8 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_set_text_rebuild_select_area_2(self, _init_pygame):
+    def test_set_text_rebuild_select_area_2(self, _init_pygame,
+                                            _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_entry_line_non_default.json"))
 
@@ -117,7 +119,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_focus(self, _init_pygame, default_ui_manager):
+    def test_focus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -125,7 +127,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_unfocus(self, _init_pygame, default_ui_manager):
+    def test_unfocus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 

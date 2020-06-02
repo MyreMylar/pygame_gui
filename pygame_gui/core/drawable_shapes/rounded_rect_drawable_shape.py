@@ -463,7 +463,7 @@ class RoundedRectangleShape(DrawableShape):
             large_shape_surface.fill(pygame.Color(clear_colour))  # was:
             RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius,
                                                                     large_shape_surface,
-                                                                    clear_colour_string=clear_colour)
+                                                                    clear_colour)
             self.temp_additive_shape = large_shape_surface.copy()
         else:
             large_shape_surface = pygame.transform.scale(self.temp_additive_shape,

@@ -9,6 +9,7 @@ import contextlib
 import os
 import sys
 import io
+import re
 import base64
 
 from pathlib import Path
@@ -19,8 +20,13 @@ from queue import Queue
 
 import pygame
 
-# Only use pre-multiplied alpha if we are using SDL2 where it is decently fast.
-USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2
+# Only use pre-multiplied alpha if we are using SDL2 past dev 10 where it is decently fast.
+if 'dev' in pygame.ver.split('.')[-1]:
+    PYGAME_DEV_NUM = int(re.findall(r'\d+', pygame.ver.split('.')[-1])[0])
+else:
+    PYGAME_DEV_NUM = 10
+
+USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 10
 
 USE_IMPORT_LIB_RESOURCE = False
 USE_FILE_PATH = False
@@ -289,6 +295,16 @@ def basic_blit(destination: pygame.Surface,
                source: pygame.Surface,
                pos: Union[Tuple[int, int], pygame.Rect],
                area: Union[pygame.Rect, None] = None):
+    """
+    The basic blitting function to use. WE need to wrap this so we can support pre-multiplied alpha
+    on post 2.0.0.dev10 versions of pygame and regular blitting on earlier versions.
+
+    :param destination: Destination surface to blit on to.
+    :param source: Source surface to blit from.
+    :param pos: The position of our blit.
+    :param area: The area of the source to blit from.
+
+    """
     if USE_PREMULTIPLIED_ALPHA:
         destination.blit(source, pos, area, special_flags=pygame.BLEND_PREMULTIPLIED)
     else:

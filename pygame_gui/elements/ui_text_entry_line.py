@@ -91,7 +91,7 @@ class UITextEntryLine(UIElement):
         self.selected_text_colour = None
         self.selected_bg_colour = None
         self.border_colour = None
-        self.padding = None
+        self.padding = (0, 0)
 
         self.drawable_shape = None
         self.shape = 'rectangle'
