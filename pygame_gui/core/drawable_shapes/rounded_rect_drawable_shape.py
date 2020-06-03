@@ -8,7 +8,8 @@ from pygame.math import Vector2
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
-from pygame_gui.core.utility import apply_colour_to_surface, basic_blit, USE_PREMULTIPLIED_ALPHA
+from pygame_gui.core.utility import apply_colour_to_surface, basic_blit
+from pygame_gui.core.utility import USE_PREMULTIPLIED_ALPHA, PYGAME_DEV_NUM
 
 
 class RoundedRectangleShape(DrawableShape):
@@ -533,16 +534,13 @@ class RoundedRectangleShape(DrawableShape):
         Draw a rounded rectangle shape in pure white so it is ready to be multiplied by a colour
         or gradient.
 
-        TODO: We should be able to make this faster in Pygame 2 with the planned rounded
-              rectangle drawing functions.
-
         :param large_corner_radius: The radius of the corners.
         :param large_shape_surface: The surface to draw onto, the shape fills the surface.
         :param clear_colour_string: The colour to clear the background to.
         :param corner_offset: Offsets the corners, used to help avoid overlaps that look bad.
 
         """
-        if pygame.version.vernum[0] >= 2:
+        if pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 8:
             pygame.draw.rect(large_shape_surface, pygame.Color('#FFFFFFFF'),
                              pygame.Rect((corner_offset, corner_offset),
                                          (large_shape_surface.get_width() - corner_offset,
