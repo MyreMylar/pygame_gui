@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, List, Union, Dict
+from typing import Tuple, List, Union, Dict, Set
 
 import pygame
 
@@ -162,11 +162,21 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_focus_element(self, ui_element: IUIElementInterface):
+    def get_focus_set(self) -> Set[IUIElementInterface]:
         """
-        Set an element as the focused element.
+        Gets the focused set.
 
-        :param ui_element: The element to focus on.
+        :return: The set of elements that currently have interactive focus.
+        """
+
+    @abstractmethod
+    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
+        """
+        Set a set of element as the focused set.
+
+        If the set is a scroll bar we also keep track of that.
+
+        :param focus: The set of element to focus on.
         """
 
     @abstractmethod
