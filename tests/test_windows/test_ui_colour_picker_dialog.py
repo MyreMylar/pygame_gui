@@ -10,6 +10,7 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
+from pygame_gui.core.utility import restore_premul_col
 
 try:
     # mouse button constants not defined in pygame 1.9.3
@@ -278,7 +279,12 @@ class TestUIColourPickerDialog:
         pixel_colour = colour_picker.current_colour_image.image.get_at((int(colour_picker.current_colour_image.rect.width/2),
                                                                         int(colour_picker.current_colour_image.rect.height/2)))
 
-        assert pixel_colour == pygame.Color(200, 220, 50, 255)
+        pixel_colour = restore_premul_col(pixel_colour)  # this is going to be slightly inaccurate
+
+        assert 201 >= pixel_colour.r >= 199
+        assert 221 >= pixel_colour.g >= 219
+        assert 51 >= pixel_colour.b >= 49
+        assert pixel_colour.a == 255
 
         colour_picker.current_colour = pygame.Color(50, 180, 150, 255)
         colour_picker.update_current_colour_image()
@@ -287,7 +293,12 @@ class TestUIColourPickerDialog:
             (int(colour_picker.current_colour_image.rect.width / 2),
              int(colour_picker.current_colour_image.rect.height / 2)))
 
-        assert pixel_colour == pygame.Color(50, 180, 150, 255)
+        pixel_colour = restore_premul_col(pixel_colour)
+
+        assert 51 >= pixel_colour.r >= 49
+        assert 181 >= pixel_colour.g >= 179
+        assert 151 >= pixel_colour.b >= 149
+        assert pixel_colour.a == 255
 
     def test_changed_rgb_update_hsv(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),

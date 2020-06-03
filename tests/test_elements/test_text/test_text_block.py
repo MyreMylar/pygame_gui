@@ -13,8 +13,9 @@ from pygame_gui.elements.text.text_block import TextBlock
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core import BlockingThreadedResourceLoader
 
+
 class TestTextBlock:
-    def test_creation(self, _init_pygame):
+    def test_creation(self, _init_pygame, _display_surface_return_none):
         dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -27,7 +28,7 @@ class TestTextBlock:
                   indexed_styles={0: styled_chunk}, font_dict=dictionary, link_style=style,
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
-    def test_creation_scale_to_text(self, _init_pygame):
+    def test_creation_scale_to_text(self, _init_pygame, _display_surface_return_none):
         dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -40,7 +41,7 @@ class TestTextBlock:
                   indexed_styles={0: styled_chunk}, font_dict=dictionary, link_style=style,
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
-    def test_creation_scale_vert_to_text(self, _init_pygame):
+    def test_creation_scale_vert_to_text(self, _init_pygame, _display_surface_return_none):
         dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         styled_chunk = StyledChunk(font_size=14, font_name='fira_code',
@@ -53,7 +54,7 @@ class TestTextBlock:
                   indexed_styles={0: styled_chunk}, font_dict=dictionary, link_style=style,
                   bg_colour=pygame.Color('#FF0000'), wrap_to_height=True)
 
-    def test_word_split(self, _init_pygame):
+    def test_word_split(self, _init_pygame, _display_surface_return_none):
         loader = BlockingThreadedResourceLoader()
         dictionary = UIFontDictionary(loader)
         dictionary.preload_font(font_size=25, font_name='fira_code')

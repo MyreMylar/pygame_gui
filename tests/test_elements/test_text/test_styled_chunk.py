@@ -13,7 +13,7 @@ from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 
 
 class TestStyledChunk:
-    def test_creation(self, _init_pygame):
+    def test_creation(self, _init_pygame, _display_surface_return_none):
         dictionary = UIFontDictionary(BlockingThreadedResourceLoader())
         style = CharStyle()
         StyledChunk(font_size=14, font_name='fira_code',

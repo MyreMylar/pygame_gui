@@ -37,7 +37,7 @@ class TestUIManager:
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
-        assert(type(sprite_group) == pygame.sprite.LayeredUpdates)
+        assert(type(sprite_group) == pygame.sprite.LayeredDirty)
 
     def test_get_window_stack(self, _init_pygame, default_ui_manager):
         """
