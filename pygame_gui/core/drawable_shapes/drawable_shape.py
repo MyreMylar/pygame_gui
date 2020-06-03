@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque, OrderedDict
 from typing import Dict, List, Union, Tuple
 
 import pygame
@@ -147,7 +147,7 @@ class DrawableShape:
         self.shadow_width = 0
         self.border_width = 0
 
-        self.states = {}
+        self.states = OrderedDict()
         for state in states:
             self.states[state] = DrawableShapeState(state)
 
