@@ -46,7 +46,7 @@ except ImportError:
             USE_FILE_PATH = True
         else:
             USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import default_theme  # pylint: disable=ungrouped-imports
+            from pygame_gui.core._string_data import default_theme  # noqa: E501 pylint: disable=ungrouped-imports
     else:
         USE_IMPORT_LIB_RESOURCE = True
 

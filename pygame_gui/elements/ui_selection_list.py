@@ -164,6 +164,7 @@ class UISelectionList(UIElement):
                                                    'right': 'right',
                                                    'top': 'top',
                                                    'bottom': 'top'})
+                        self.join_focus_sets(button)
                         item['button_element'] = button
                         if item['selected']:
                             item['button_element'].select()
@@ -232,6 +233,7 @@ class UISelectionList(UIElement):
                                                                'right': 'right',
                                                                'top': 'top',
                                                                'bottom': 'bottom'})
+                self.join_focus_sets(self.scroll_bar)
         else:
             if self.scroll_bar is not None:
                 self.scroll_bar.kill()
@@ -263,6 +265,7 @@ class UISelectionList(UIElement):
                          'right': 'right',
                          'top': 'top',
                          'bottom': 'bottom'})
+            self.join_focus_sets(self.item_list_container)
         item_y_height = 0
         for item in self.item_list:
             if item_y_height <= self.item_list_container.relative_rect.height:
@@ -280,6 +283,7 @@ class UISelectionList(UIElement):
                                                            'right': 'right',
                                                            'top': 'top',
                                                            'bottom': 'top'})
+                self.join_focus_sets(item['button_element'])
                 item_y_height += self.list_item_height
             else:
                 break
@@ -479,6 +483,7 @@ class UISelectionList(UIElement):
                 parent_element=self._parent_element,
                 object_id='#selection_list_container',
                 anchors=self.anchors)
+            self.join_focus_sets(self.list_and_scroll_bar_container)
         else:
             self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
                                                                (2 * self.shadow_width) -
