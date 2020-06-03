@@ -12,6 +12,7 @@ from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.utility import basic_blit
 
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.elements.text import TextBlock, TextHTMLParser
@@ -249,13 +250,13 @@ class UITextBox(UIElement):
                                      self.text_wrap_rect[3]))
         new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
-        new_image.blit(self.background_surf, (0, 0))
-        new_image.blit(self.formatted_text_block.block_sprite,
-                       (self.padding[0] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset,
-                        self.padding[1] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset),
-                       drawable_area)
+        basic_blit(new_image, self.background_surf, (0, 0))
+        basic_blit(new_image, self.formatted_text_block.block_sprite,
+                   (self.padding[0] + self.border_width +
+                    self.shadow_width + self.rounded_corner_offset,
+                    self.padding[1] + self.border_width +
+                    self.shadow_width + self.rounded_corner_offset),
+                   drawable_area)
 
         self.set_image(new_image)
 
@@ -287,15 +288,15 @@ class UITextBox(UIElement):
 
             new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.fill(pygame.Color(0, 0, 0, 0))
-            new_image.blit(self.background_surf, (0, 0))
-            new_image.blit(self.formatted_text_block.block_sprite,
-                           (self.padding[0] + self.border_width +
-                            self.shadow_width +
-                            self.rounded_corner_offset,
-                            self.padding[1] + self.border_width +
-                            self.shadow_width +
-                            self.rounded_corner_offset),
-                           drawable_area)
+            basic_blit(new_image, self.background_surf, (0, 0))
+            basic_blit(new_image, self.formatted_text_block.block_sprite,
+                       (self.padding[0] + self.border_width +
+                        self.shadow_width +
+                        self.rounded_corner_offset,
+                        self.padding[1] + self.border_width +
+                        self.shadow_width +
+                        self.rounded_corner_offset),
+                       drawable_area)
             self.set_image(new_image)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
@@ -420,7 +421,8 @@ class UITextBox(UIElement):
                     new_image = pygame.Surface(self.relative_rect.size,
                                                flags=pygame.SRCALPHA,
                                                depth=32)
-                    new_image.blit(self.image, (0, 0))
+                    new_image.fill(pygame.Color('#00000000'))
+                    basic_blit(new_image, self.image, (0, 0))
                     self.set_image(new_image)
 
                     if self.scroll_bar is not None:
@@ -473,14 +475,13 @@ class UITextBox(UIElement):
                                     (self.text_wrap_rect[2], self.text_wrap_rect[3]))
         new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
-        new_image.blit(self.background_surf, (0, 0))
-        new_image.blit(self.formatted_text_block.block_sprite,
-                       (self.padding[0] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset,
-                        self.padding[1] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset),
-                       drawable_area)
-
+        basic_blit(new_image, self.background_surf, (0, 0))
+        basic_blit(new_image, self.formatted_text_block.block_sprite,
+                   (self.padding[0] + self.border_width +
+                    self.shadow_width + self.rounded_corner_offset,
+                    self.padding[1] + self.border_width +
+                    self.shadow_width + self.rounded_corner_offset),
+                   drawable_area)
         self.set_image(new_image)
 
     def redraw_from_chunks(self):

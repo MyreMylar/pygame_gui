@@ -13,7 +13,6 @@ from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
-from pygame_gui.core.ui_layered_updates import UILayeredUpdates
 from pygame_gui.core.utility import PackageResource
 
 from pygame_gui.elements import UITooltip
@@ -52,7 +51,7 @@ class UIManager(IUIManagerInterface):
             self.ui_theme.load_theme(theme_path)
 
         self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
-        self.ui_group = UILayeredUpdates()
+        self.ui_group = pygame.sprite.LayeredDirty()
 
         self.focused_element = None
         self.last_focused_vertical_scrollbar = None
@@ -110,7 +109,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_theme
 
-    def get_sprite_group(self) -> UILayeredUpdates:
+    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -191,21 +190,20 @@ class UIManager(IUIManagerInterface):
                         sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
             if not consumed_event:
                 for ui_element in sprites_in_layer:
-                    if not hasattr(ui_element, 'is_visible') or ui_element.is_visible:
-                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                            mouse_x, mouse_y = event.pos
-                            if ui_element.hover_point(mouse_x, mouse_y):
-                                # self.unset_focus_element()
-                                self.set_focus_element(ui_element)
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        mouse_x, mouse_y = event.pos
+                        if ui_element.hover_point(mouse_x, mouse_y):
+                            # self.unset_focus_element()
+                            self.set_focus_element(ui_element)
 
-                        consumed_event = ui_element.process_event(event)
-                        if consumed_event:
-                            # Generally clicks should only be handled by the top layer of whatever
-                            # GUI thing we are  clicking on. I am trusting UIElments to decide whether
-                            # they need to consume the events they respond to. Hopefully this is not
-                            # a mistake.
+                    consumed_event = ui_element.process_event(event)
+                    if consumed_event:
+                        # Generally clicks should only be handled by the top layer of whatever
+                        # GUI thing we are  clicking on. I am trusting UIElments to decide whether
+                        # they need to consume the events they respond to. Hopefully this is not
+                        # a mistake.
 
-                            break
+                        break
 
     def update(self, time_delta: float):
         """
@@ -237,10 +235,9 @@ class UIManager(IUIManagerInterface):
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             for ui_element in self.ui_group.get_sprites_from_layer(layer):
-                if not hasattr(ui_element, 'is_visible') or ui_element.is_visible:
-                    element_handled_hover = ui_element.check_hover(time_delta, hover_handled)
-                    if element_handled_hover:
-                        hover_handled = True
+                element_handled_hover = ui_element.check_hover(time_delta, hover_handled)
+                if element_handled_hover:
+                    hover_handled = True
 
         self.ui_group.update(time_delta)
 
@@ -525,10 +522,14 @@ class UIManager(IUIManagerInterface):
         """
         Wrapping pygame mouse position so we can mess with it.
         """
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.mouse_position = self.calculate_scaled_mouse_position(pygame.mouse.get_pos())
 
-        self.mouse_position = (int(self.mouse_pos_scale_factor[0] * mouse_x),
-                               int(self.mouse_pos_scale_factor[1] * mouse_y))
+    def calculate_scaled_mouse_position(self, position: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Scaling an input mouse position by a scale factor.
+        """
+        return (int(self.mouse_pos_scale_factor[0] * position[0]),
+                int(self.mouse_pos_scale_factor[1] * position[1]))
 
     def _load_default_cursors(self):
         """

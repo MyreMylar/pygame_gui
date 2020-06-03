@@ -8,7 +8,6 @@ from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
-from pygame_gui.core.ui_layered_updates import UILayeredUpdates
 
 
 class IUIManagerInterface(metaclass=ABCMeta):
@@ -45,7 +44,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_sprite_group(self) -> UILayeredUpdates:
+    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -112,6 +111,12 @@ class IUIManagerInterface(metaclass=ABCMeta):
     def get_mouse_position(self) -> Tuple[int, int]:
         """
         Get the position of the mouse in the UI.
+        """
+
+    @abstractmethod
+    def calculate_scaled_mouse_position(self, position: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Scaling an input mouse position by a scale factor.
         """
 
     @abstractmethod

@@ -23,7 +23,6 @@
             "link_hover": "#84bfed",
             "link_selected": "#84bfed",
             "text_shadow": "#777777",
-            "border": "#5e6060",
             "filled_bar": "#f4251b",
             "unfilled_bar": "#CCCCCC"
         }

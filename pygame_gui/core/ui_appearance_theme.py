@@ -13,7 +13,7 @@ import pygame
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
-from pygame_gui.core.utility import create_resource_path, PackageResource
+from pygame_gui.core.utility import create_resource_path, PackageResource, premul_col
 from pygame_gui.core.utility import ImageResource, SurfaceResource
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
@@ -46,7 +46,7 @@ except ImportError:
             USE_FILE_PATH = True
         else:
             USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import default_theme
+            from pygame_gui.core._string_data import default_theme  # pylint: disable=ungrouped-imports
     else:
         USE_IMPORT_LIB_RESOURCE = True
 
@@ -76,28 +76,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element
-        self.base_colours = {'normal_bg': pygame.Color('#25292e'),
-                             'hovered_bg': pygame.Color('#35393e'),
-                             'disabled_bg': pygame.Color('#25292e'),
-                             'selected_bg': pygame.Color('#193754'),
-                             'active_bg': pygame.Color('#193754'),
-                             'dark_bg': pygame.Color('#15191e'),
-                             'normal_text': pygame.Color('#c5cbd8'),
-                             'hovered_text': pygame.Color('#FFFFFF'),
-                             'selected_text': pygame.Color('#FFFFFF'),
-                             'active_text': pygame.Color('#FFFFFF'),
-                             'disabled_text': pygame.Color('#6d736f'),
-                             'normal_border': pygame.Color('#DDDDDD'),
-                             'hovered_border': pygame.Color('#EDEDED'),
-                             'disabled_border': pygame.Color('#909090'),
-                             'selected_border': pygame.Color('#294764'),
-                             'active_border': pygame.Color('#294764'),
-                             'link_text': pygame.Color('#c5cbFF'),
-                             'link_hover': pygame.Color('#a5abDF'),
-                             'link_selected': pygame.Color('#DFabDF'),
-                             'text_shadow': pygame.Color('#777777'),
-                             'filled_bar': pygame.Color("#f4251b"),
-                             'unfilled_bar': pygame.Color("#CCCCCC")}
+        self.base_colours = {}
 
         # colours for specific elements stored by element id then colour id
         self.ui_element_colours = {}
@@ -962,8 +941,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 if len(string_data_list) == 3:
                     # two colour gradient
                     try:
-                        colour_1 = pygame.Color(string_data_list[0])
-                        colour_2 = pygame.Color(string_data_list[1])
+                        colour_1 = premul_col(pygame.Color(string_data_list[0]))
+                        colour_2 = premul_col(pygame.Color(string_data_list[1]))
                         loaded_colour_or_gradient = ColourGradient(gradient_direction,
                                                                    colour_1,
                                                                    colour_2)
@@ -973,9 +952,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 elif len(string_data_list) == 4:
                     # three colour gradient
                     try:
-                        colour_1 = pygame.Color(string_data_list[0])
-                        colour_2 = pygame.Color(string_data_list[1])
-                        colour_3 = pygame.Color(string_data_list[2])
+                        colour_1 = premul_col(pygame.Color(string_data_list[0]))
+                        colour_2 = premul_col(pygame.Color(string_data_list[1]))
+                        colour_3 = premul_col(pygame.Color(string_data_list[2]))
                         loaded_colour_or_gradient = ColourGradient(gradient_direction,
                                                                    colour_1,
                                                                    colour_2,
@@ -989,7 +968,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         else:
             # expecting a regular hex colour in string data
             try:
-                loaded_colour_or_gradient = pygame.Color(string_data)
+                loaded_colour_or_gradient = premul_col(pygame.Color(string_data))
             except ValueError:
                 warnings.warn("Colour hex code: " +
                               string_data +

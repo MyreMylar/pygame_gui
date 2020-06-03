@@ -13,7 +13,7 @@ jobs:
   include:
     - os: osx
       language: generic
-      env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0.dev6
+      env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0.dev10
       before_install:
         - brew update
         - brew install openssl readline
@@ -52,29 +52,29 @@ jobs:
         - choco install python3 --params "/InstallDir:C:\\Python"
         - export PATH="/c/Python:/c/Python/Scripts:$PATH"
         - python --version
-      env: PYGAME_VERSION=2.0.0.dev6
+      env: PYGAME_VERSION=2.0.0.dev10
     - os: linux
       python: 3.5
       env: PYGAME_VERSION=1.9.6
     - os: linux
       python: 3.5
-      env: PYGAME_VERSION=2.0.0.dev6
+      env: PYGAME_VERSION=2.0.0.dev10
     - os: linux
       python: 3.6
       env: PYGAME_VERSION=1.9.6
     - os: linux
       python: 3.6
-      env: PYGAME_VERSION=2.0.0.dev6
+      env: PYGAME_VERSION=2.0.0.dev10
     - os: linux
       python: 3.7
       env: PYGAME_VERSION=1.9.6
     - os: linux
       python: 3.7
-      env: PYGAME_VERSION=2.0.0.dev6
+      env: PYGAME_VERSION=2.0.0.dev10
     # No Travis version of 1.9.6 on Python 3.8 yet
     - os: linux
       python: 3.8
-      env: PYGAME_VERSION=2.0.0.dev6
+      env: PYGAME_VERSION=2.0.0.dev10
 
 install:
   - python -m pip install -U pip

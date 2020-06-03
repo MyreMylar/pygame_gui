@@ -109,7 +109,7 @@ class IUIContainerInterface(metaclass=ABCMeta):
     def get_top_layer(self) -> int:
         """
         Assuming we have correctly calculated the 'thickness' of this container, this method will
-        return the 'highest' layer in the LayeredUpdates UI Group.
+        return the 'highest' layer in the LayeredDirty UI Group.
 
         :return: An integer representing the current highest layer being used by this container.
         """

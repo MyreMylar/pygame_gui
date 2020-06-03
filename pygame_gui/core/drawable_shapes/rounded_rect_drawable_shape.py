@@ -8,6 +8,8 @@ from pygame.math import Vector2
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
+from pygame_gui.core.utility import apply_colour_to_surface, basic_blit
+from pygame_gui.core.utility import USE_PREMULTIPLIED_ALPHA, PYGAME_DEV_NUM
 
 
 class RoundedRectangleShape(DrawableShape):
@@ -265,14 +267,16 @@ class RoundedRectangleShape(DrawableShape):
                                                     corner_radius=self.shadow_width + 2)
         else:
             quick_surf = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA, depth=32)
-            # quick_surf.fill('#FFFFFF00')
+            quick_surf.fill(pygame.Color('#00000000'))
         if isinstance(self.theming['normal_bg'], ColourGradient):
             grad_surf = pygame.Surface(self.click_area_shape.size, flags=pygame.SRCALPHA, depth=32)
             grad_surf.fill(pygame.Color('#FFFFFFFF'))
             self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
-            quick_surf.blit(grad_surf, pygame.Rect((self.shadow_width,
-                                                    self.shadow_width),
-                                                   self.click_area_shape.size))
+
+            basic_blit(quick_surf, grad_surf,
+                       pygame.Rect((self.shadow_width,
+                                    self.shadow_width),
+                                   self.click_area_shape.size))
         else:
             quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
                                                                     self.shadow_width),
@@ -352,9 +356,9 @@ class RoundedRectangleShape(DrawableShape):
                 if isinstance(border_col, ColourGradient):
                     border_col.apply_gradient_to_surface(shape_surface)
                 else:
-                    self.apply_colour_to_surface(border_col, shape_surface)
+                    apply_colour_to_surface(border_col, shape_surface)
 
-                bab_surface.blit(shape_surface, self.border_rect)
+                basic_blit(bab_surface, shape_surface, self.border_rect)
 
             shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                 self.background_rect,
@@ -368,13 +372,14 @@ class RoundedRectangleShape(DrawableShape):
                 if isinstance(bg_col, ColourGradient):
                     bg_col.apply_gradient_to_surface(shape_surface)
                 else:
-                    self.apply_colour_to_surface(bg_col, shape_surface)
+                    apply_colour_to_surface(bg_col, shape_surface)
 
-            bab_surface.blit(shape_surface, self.background_rect)
+            basic_blit(bab_surface, shape_surface, self.background_rect)
 
             # apply AA to background
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
-            self.states[state_str].surface.blit(bab_surface, (0, 0))
+
+            basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
             if self.states[state_str].cached_background_id is not None:
                 cached_id = self.states[state_str].cached_background_id
@@ -415,11 +420,11 @@ class RoundedRectangleShape(DrawableShape):
         if isinstance(bg_col, ColourGradient):
             bg_col.apply_gradient_to_surface(shape_surface, unfilled_bar_rect)
         else:
-            self.apply_colour_to_surface(bg_col, shape_surface, unfilled_bar_rect)
+            apply_colour_to_surface(bg_col, shape_surface, unfilled_bar_rect)
         if isinstance(self.theming['filled_bar'], ColourGradient):
             self.theming['filled_bar'].apply_gradient_to_surface(shape_surface, bar_rect)
         else:
-            self.apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
+            apply_colour_to_surface(self.theming['filled_bar'], shape_surface, bar_rect)
 
     def clear_and_create_shape_surface(self,
                                        surface: pygame.Surface,
@@ -455,9 +460,11 @@ class RoundedRectangleShape(DrawableShape):
         if self.temp_additive_shape is None:
             large_shape_surface = pygame.Surface((rect.width, rect.height),
                                                  flags=pygame.SRCALPHA, depth=32)
-            large_shape_surface.fill(pygame.Color('#FFFFFF00'))  # was:
+            clear_colour = '#00000000' if USE_PREMULTIPLIED_ALPHA else '#FFFFFF00'
+            large_shape_surface.fill(pygame.Color(clear_colour))  # was:
             RoundedRectangleShape.draw_colourless_rounded_rectangle(large_corner_radius,
-                                                                    large_shape_surface)
+                                                                    large_shape_surface,
+                                                                    clear_colour)
             self.temp_additive_shape = large_shape_surface.copy()
         else:
             large_shape_surface = pygame.transform.scale(self.temp_additive_shape,
@@ -521,14 +528,11 @@ class RoundedRectangleShape(DrawableShape):
     @staticmethod
     def draw_colourless_rounded_rectangle(large_corner_radius: int,
                                           large_shape_surface: pygame.Surface,
-                                          clear_colour_string: str = '#FFFFFF00',
+                                          clear_colour_string: str = '#00000000',
                                           corner_offset: int = 0):
         """
         Draw a rounded rectangle shape in pure white so it is ready to be multiplied by a colour
         or gradient.
-
-        TODO: We should be able to make this faster in Pygame 2 with the planned rounded
-              rectangle drawing functions.
 
         :param large_corner_radius: The radius of the corners.
         :param large_shape_surface: The surface to draw onto, the shape fills the surface.
@@ -536,32 +540,39 @@ class RoundedRectangleShape(DrawableShape):
         :param corner_offset: Offsets the corners, used to help avoid overlaps that look bad.
 
         """
-        pygame.draw.circle(large_shape_surface, pygame.Color('#FFFFFFFF'),
-                           (large_corner_radius + corner_offset,
-                            large_corner_radius + corner_offset), large_corner_radius)
-        if corner_offset > 0:
-            large_shape_surface.fill(pygame.Color(clear_colour_string),
-                                     pygame.Rect(0,
-                                                 int(large_shape_surface.get_height() / 2),
-                                                 large_shape_surface.get_width(),
-                                                 int(large_shape_surface.get_height() / 2)))
-            large_shape_surface.fill(pygame.Color(clear_colour_string),
-                                     pygame.Rect(int(large_shape_surface.get_width() / 2),
-                                                 0,
-                                                 int(large_shape_surface.get_width() / 2),
-                                                 large_shape_surface.get_height()))
+        if pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 8:
+            pygame.draw.rect(large_shape_surface, pygame.Color('#FFFFFFFF'),
+                             pygame.Rect((corner_offset, corner_offset),
+                                         (large_shape_surface.get_width() - corner_offset,
+                                          large_shape_surface.get_height() - corner_offset)),
+                             border_radius=large_corner_radius)
+        else:
+            pygame.draw.circle(large_shape_surface, pygame.Color('#FFFFFFFF'),
+                               (large_corner_radius + corner_offset,
+                                large_corner_radius + corner_offset), large_corner_radius)
+            if corner_offset > 0:
+                large_shape_surface.fill(pygame.Color(clear_colour_string),
+                                         pygame.Rect(0,
+                                                     int(large_shape_surface.get_height() / 2),
+                                                     large_shape_surface.get_width(),
+                                                     int(large_shape_surface.get_height() / 2)))
+                large_shape_surface.fill(pygame.Color(clear_colour_string),
+                                         pygame.Rect(int(large_shape_surface.get_width() / 2),
+                                                     0,
+                                                     int(large_shape_surface.get_width() / 2),
+                                                     large_shape_surface.get_height()))
 
-        x_flip = pygame.transform.flip(large_shape_surface, True, False)
-        large_shape_surface.blit(x_flip, (0, 0))
-        y_flip = pygame.transform.flip(large_shape_surface, False, True)
-        large_shape_surface.blit(y_flip, (0, 0))
-        large_shape_surface.fill(pygame.Color("#FFFFFFFF"),
-                                 pygame.Rect((large_corner_radius, 0),
-                                             (large_shape_surface.get_width() -
-                                              (2 * large_corner_radius),
-                                              large_shape_surface.get_height())))
-        large_shape_surface.fill(pygame.Color("#FFFFFFFF"),
-                                 pygame.Rect((0, large_corner_radius),
-                                             (large_shape_surface.get_width(),
-                                              large_shape_surface.get_height() -
-                                              (2 * large_corner_radius))))
+            x_flip = pygame.transform.flip(large_shape_surface, True, False)
+            large_shape_surface.blit(x_flip, (0, 0))
+            y_flip = pygame.transform.flip(large_shape_surface, False, True)
+            large_shape_surface.blit(y_flip, (0, 0))
+            large_shape_surface.fill(pygame.Color("#FFFFFFFF"),
+                                     pygame.Rect((large_corner_radius, 0),
+                                                 (large_shape_surface.get_width() -
+                                                  (2 * large_corner_radius),
+                                                  large_shape_surface.get_height())))
+            large_shape_surface.fill(pygame.Color("#FFFFFFFF"),
+                                     pygame.Rect((0, large_corner_radius),
+                                                 (large_shape_surface.get_width(),
+                                                  large_shape_surface.get_height() -
+                                                  (2 * large_corner_radius))))

@@ -9,6 +9,8 @@ from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
+from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
+from pygame_gui.core.utility import basic_blit
 from pygame_gui.core import ColourGradient, UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -89,7 +91,7 @@ class UITextEntryLine(UIElement):
         self.selected_text_colour = None
         self.selected_bg_colour = None
         self.border_colour = None
-        self.padding = None
+        self.padding = (0, 0)
 
         self.drawable_shape = None
         self.shape = 'rectangle'
@@ -239,14 +241,15 @@ class UITextEntryLine(UIElement):
             self.start_text_offset = 0
 
         if len(self.text) > 0:
-            self.text_image.blit(self.text_surface,
-                                 self.padding,
-                                 pygame.Rect((self.start_text_offset, 0),
-                                             (text_clip_width,
-                                              (self.rect.height -
-                                               (self.padding[1] * 2) -
-                                               (self.border_width * 2) -
-                                               (self.shadow_width * 2)))))
+            basic_blit(self.text_image,
+                       self.text_surface,
+                       self.padding,
+                       pygame.Rect((self.start_text_offset, 0),
+                                   (text_clip_width,
+                                    (self.rect.height -
+                                     (self.padding[1] * 2) -
+                                     (self.border_width * 2) -
+                                     (self.shadow_width * 2)))))
 
         self.redraw_cursor()
 
@@ -254,12 +257,12 @@ class UITextEntryLine(UIElement):
         """
         Redraw text where none has been selected by a user.
         """
+        self.text_surface = render_white_text_alpha_black_bg(font=self.font,
+                                                             text=self.text)
         if isinstance(self.text_colour, ColourGradient):
-            self.text_surface = self.font.render(self.text, True, pygame.Color('#FFFFFFFF'))
             self.text_colour.apply_gradient_to_surface(self.text_surface)
-
         else:
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
+            apply_colour_to_surface(self.text_colour, self.text_surface)
 
     def _redraw_selected_text(self):
         """
@@ -293,7 +296,7 @@ class UITextEntryLine(UIElement):
             alpha_text = self._draw_text_with_grad_or_col(select_area_text,
                                                           self.selected_text_colour)
 
-            select_area_surface.blit(alpha_text, (0, 0))
+            basic_blit(select_area_surface, alpha_text, (0, 0))
         else:
             if isinstance(self.selected_text_colour, ColourGradient):
                 select_area_surface = pygame.Surface((select_area_width,
@@ -302,16 +305,15 @@ class UITextEntryLine(UIElement):
                                                      depth=32)
                 select_area_surface.fill(self.selected_bg_colour)
 
-                alpha_text = self.font.render(select_area_text,
-                                              True,
-                                              pygame.Color('#FFFFFFFF'))
+                alpha_text = render_white_text_alpha_black_bg(font=self.font,
+                                                              text=select_area_text)
                 self.selected_text_colour.apply_gradient_to_surface(alpha_text)
-                select_area_surface.blit(alpha_text, (0, 0))
+                basic_blit(select_area_surface, alpha_text, (0, 0))
 
             else:
                 select_area_surface = self.font.render(select_area_text, True,
                                                        self.selected_text_colour,
-                                                       self.selected_bg_colour)
+                                                       self.selected_bg_colour).convert_alpha()
         if len(post_select_area_text) > 0:
             post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
                                                                         self.text_colour)
@@ -327,11 +329,13 @@ class UITextEntryLine(UIElement):
             self.text_image.fill(self.background_colour)
 
         if pre_select_area_surface is not None:
-            self.text_surface.blit(pre_select_area_surface, (0, 0))
-        self.text_surface.blit(select_area_surface, (pre_select_width, 0))
+            basic_blit(self.text_surface, pre_select_area_surface, (0, 0))
+
+        basic_blit(self.text_surface, select_area_surface, (pre_select_width, 0))
+
         if post_select_area_surface is not None:
-            self.text_surface.blit(post_select_area_surface,
-                                   (pre_select_width + select_area_width, 0))
+            basic_blit(self.text_surface, post_select_area_surface,
+                       (pre_select_width + select_area_width, 0))
 
     def _draw_text_with_grad_or_col(self,
                                     text: str,
@@ -346,11 +350,12 @@ class UITextEntryLine(UIElement):
         :return: A surface with the text on.
 
         """
+        text_surface = render_white_text_alpha_black_bg(font=self.font,
+                                                        text=text)
         if isinstance(col_or_grad, ColourGradient):
-            text_surface = self.font.render(text, True, pygame.Color('#FFFFFFFF'))
             col_or_grad.apply_gradient_to_surface(text_surface)
         else:
-            text_surface = self.font.render(text, True, col_or_grad)
+            apply_colour_to_surface(col_or_grad, text_surface)
         return text_surface
 
     def redraw_cursor(self):
@@ -359,7 +364,7 @@ class UITextEntryLine(UIElement):
         without spending time redrawing all the text.
         """
         new_image = self.background_and_border.copy()
-        new_image.blit(self.text_image, self.text_image_rect)
+        basic_blit(new_image, self.text_image, self.text_image_rect)
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
@@ -369,10 +374,11 @@ class UITextEntryLine(UIElement):
             if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
-                cursor_surface = pygame.Surface(self.cursor.size)
+                cursor_surface = pygame.Surface(self.cursor.size,
+                                                flags=pygame.SRCALPHA, depth=32)
                 cursor_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(cursor_surface)
-                new_image.blit(cursor_surface, self.cursor)
+                basic_blit(new_image, cursor_surface, self.cursor)
 
         self.set_image(new_image)
 
@@ -430,7 +436,7 @@ class UITextEntryLine(UIElement):
         Called when this element is no longer the current focus.
         """
         self.focused = False
-        pygame.key.set_repeat()
+        pygame.key.set_repeat(0)
         self.select_range = [0, 0]
         self.edit_position = 0
         self.cursor_on = False
@@ -686,8 +692,7 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
 
                 pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
@@ -706,8 +711,7 @@ class UITextEntryLine(UIElement):
         if (event.type == pygame.MOUSEBUTTONUP and
                 event.button == pygame.BUTTON_LEFT and
                 self.selection_in_progress):
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.drawable_shape.collide_point(scaled_mouse_pos):
                 consumed_event = True
                 pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]

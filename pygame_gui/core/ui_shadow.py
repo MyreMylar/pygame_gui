@@ -184,6 +184,7 @@ class ShadowGenerator:
         if shadow_id in self.short_term_rect_cache:
             return self.short_term_rect_cache[shadow_id]
         final_surface = pygame.Surface((width, height), flags=pygame.SRCALPHA, depth=32)
+        final_surface.fill(pygame.Color('#00000000'))
 
         corner_index_id = str(shadow_width_param) + 'x' + str(corner_radius_param)
         if corner_index_id in self.preloaded_shadow_corners:
