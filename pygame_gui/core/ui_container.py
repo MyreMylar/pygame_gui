@@ -37,7 +37,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
                  anchors: Union[Dict[str, str], None] = None,
-                 is_visible: bool = True):
+                 visible: int = 1):
 
         self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
@@ -47,7 +47,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         is_visible=is_visible)
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -284,8 +284,9 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         Should also show all the children elements.
         If the container was visible before - ignore.
         """
-        if not self.is_visible:
-            self.is_visible = True
+        if not self.visible:
+            self.visible = 1
+            self.dirty = 2
 
             for element in self.elements:
                 if hasattr(element, 'show'):
@@ -297,8 +298,10 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         Should also hide all the children elements.
         If the container was hidden before - ignore.
         """
-        if self.is_visible:
-            self.is_visible = False
+        if self.visible:
             for element in self.elements:
                 if hasattr(element, 'hide'):
                     element.hide()
+
+            self.visible = 0
+            self.dirty = 1

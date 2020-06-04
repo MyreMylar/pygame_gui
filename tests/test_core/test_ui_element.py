@@ -606,11 +606,13 @@ class TestUIElement:
                             container=None,
                             starting_height=0,
                             layer_thickness=1,
-                            is_visible=False)
+                            visible=0)
 
-        assert element.is_visible is False
+        assert element.visible == 0
+        assert element.dirty == 1
         element.show()
-        assert element.is_visible is True
+        assert element.visible == 1
+        assert element.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -619,6 +621,8 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
 
-        assert element.is_visible is True
+        assert element.visible == 1
+        assert element.dirty == 2
         element.hide()
-        assert element.is_visible is False
+        assert element.visible == 0
+        assert element.dirty == 1

@@ -9,7 +9,6 @@ from pygame_gui.core.interfaces.window_interface import IWindowInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
-from pygame_gui.core.ui_layered_updates import UILayeredUpdates
 
 __all__ = ['UIAppearanceTheme',
            'UIContainer',
@@ -21,5 +20,4 @@ __all__ = ['UIAppearanceTheme',
            'IWindowInterface',
            'ColourGradient',
            'BlockingThreadedResourceLoader',
-           'IncrementalThreadedResourceLoader',
-           'UILayeredUpdates']
+           'IncrementalThreadedResourceLoader']

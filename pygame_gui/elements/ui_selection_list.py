@@ -52,7 +52,8 @@ class UISelectionList(UIElement):
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect,
@@ -60,7 +61,8 @@ class UISelectionList(UIElement):
                          container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,

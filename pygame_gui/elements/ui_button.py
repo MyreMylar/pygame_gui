@@ -47,14 +47,14 @@ class UIButton(UIElement):
                  object_id: Union[str, None] = None,
                  anchors: Dict[str, str] = None,
                  allow_double_clicks: bool = False,
-                 is_visible: bool = True
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         is_visible=is_visible)
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
