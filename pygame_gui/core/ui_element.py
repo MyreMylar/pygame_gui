@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Union, Tuple, Dict, Any, Callable
+from typing import List, Union, Tuple, Dict, Any, Callable, Set
 
 import pygame
 
@@ -108,6 +108,24 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self._update_absolute_rect_position_from_anchors()
 
         self._update_container_clip()
+
+        self._focus_set = {self}
+
+    def get_focus_set(self) -> Set[Any]:
+        return self._focus_set
+
+    def set_focus_set(self, focus_set: Set[Any]):
+        if self.ui_manager.get_focus_set() is self._focus_set:
+            self.ui_manager.set_focus_set(focus_set)
+        self._focus_set = focus_set
+
+    def join_focus_sets(self, element):
+        union_of_sets = set(self._focus_set | element.get_focus_set())
+        for item in union_of_sets:
+            item.set_focus_set(union_of_sets)
+
+    def remove_element_from_focus_set(self, element):
+        self._focus_set.discard(element)
 
     def get_relative_rect(self) -> pygame.Rect:
         """
@@ -433,6 +451,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         Overriding regular sprite kill() method to remove the element from it's container.
         """
         self.ui_container.remove_element(self)
+        self.remove_element_from_focus_set(self)
         super().kill()
 
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:

@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Set, Any
 
 import pygame
 
@@ -266,4 +266,34 @@ class IUIElementInterface(metaclass=ABCMeta):
 
         :return: an integer representing the starting layer height.
 
+        """
+
+    @abstractmethod
+    def get_focus_set(self) -> Set[Any]:
+        """
+        Return the set of elements to focus when we focus this element.
+        """
+
+    @abstractmethod
+    def set_focus_set(self, focus_set: Set[Any]):
+        """
+        Set the focus set to a specific set of elements.
+
+        :param focus_set: The focus set to set.
+        """
+
+    @abstractmethod
+    def join_focus_sets(self, element):
+        """
+        Join this element's focus set with another's.
+
+        :param element: The other element whose focus set we are joining with.
+        """
+
+    @abstractmethod
+    def remove_element_from_focus_set(self, element):
+        """
+        remove an element from this sets focus group.
+
+        :param element: The element to remove.
         """

@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict, Union
+from typing import Tuple, List, Dict, Union, Set
 
 import pygame
 
@@ -53,7 +53,7 @@ class UIManager(IUIManagerInterface):
         self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
         self.ui_group = pygame.sprite.LayeredDirty()
 
-        self.focused_element = None
+        self.focused_set = None
         self.last_focused_vertical_scrollbar = None
         self.last_focused_horizontal_scrollbar = None
         self.root_container = None
@@ -195,7 +195,7 @@ class UIManager(IUIManagerInterface):
                             mouse_x, mouse_y = event.pos
                             if ui_element.hover_point(mouse_x, mouse_y):
                                 # self.unset_focus_element()
-                                self.set_focus_element(ui_element)
+                                self.set_focus_set(ui_element.get_focus_set())
 
                         consumed_event = ui_element.process_event(event)
                         if consumed_event:
@@ -375,29 +375,47 @@ class UIManager(IUIManagerInterface):
         """
         self.ui_theme.get_font_dictionary().print_unused_loaded_fonts()
 
-    def set_focus_element(self, ui_element: IUIElementInterface):
-        """
-        Set an element as the focused element.
+    def get_focus_set(self):
+        return self.focused_set
 
-        If the element is a scroll bar we also keep track of that.
-
-        :param ui_element: The element to focus on.
+    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
         """
-        if ui_element is self.focused_element:
+        Set a set of element as the focused set.
+
+        If the set is a scroll bar we also keep track of that.
+
+        :param focus: The set of element to focus on.
+        """
+        if focus is self.focused_set:
             return
-        if self.focused_element is not None:
-            self.focused_element.unfocus()
-            self.focused_element = None
+        if self.focused_set is not None:
+            for item in self.focused_set:
+                if isinstance(focus, set):
+                    if item not in focus:
+                        item.unfocus()
+                    else:
+                        pass  # do nothing in this case because the item is also in new focus set
+                else:
+                    item.unfocus()
+            self.focused_set = None
 
-        if self.focused_element is None:
-            self.focused_element = ui_element
-            if ui_element is not None:
-                self.focused_element.focus()
+        if self.focused_set is None:
+            if focus is not None:
+                if isinstance(focus, IUIElementInterface):
+                    self.focused_set = focus.get_focus_set()
+                elif isinstance(focus, set):
+                    self.focused_set = focus
+            else:
+                self.focused_set = None
 
-                if 'vertical_scroll_bar' in ui_element.get_element_ids():
-                    self.last_focused_vertical_scrollbar = ui_element
-                if 'horizontal_scroll_bar' in ui_element.get_element_ids():
-                    self.last_focused_horizontal_scrollbar = ui_element
+            if self.focused_set is not None:
+                for item in self.focused_set:
+                    item.focus()
+
+                    if 'vertical_scroll_bar' in item.get_element_ids():
+                        self.last_focused_vertical_scrollbar = item
+                    if 'horizontal_scroll_bar' in item.get_element_ids():
+                        self.last_focused_horizontal_scrollbar = item
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
