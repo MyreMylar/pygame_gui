@@ -461,7 +461,8 @@ class UIClosedDropDownState:
                                     self.ui_container,
                                     starting_height=2,
                                     parent_element=self.drop_down_menu_ui,
-                                    object_id='#expand_button')
+                                    object_id='#expand_button',
+                                    visible=self.visible)
         self.drop_down_menu_ui.join_focus_sets(self.open_button)
 
     def finish(self):
@@ -819,3 +820,14 @@ class UIDropDownMenu(UIElement):
         """
         return (bool(self.rect.collidepoint(hover_x, hover_y)) and
                 bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+
+    def show(self):
+        super().show()
+
+        self.menu_states['closed'].show()
+
+    def hide(self):
+        super().hide()
+
+        self.menu_states['closed'].hide()
+        self.menu_states['expanded'].hide()

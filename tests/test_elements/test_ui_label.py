@@ -107,3 +107,26 @@ class TestUILabel:
         label.set_dimensions((200, 50))
 
         assert label.rect.size == (200, 50)
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager,
+                        visible=0)
+
+        assert label.visible == 0
+        assert label.dirty == 1
+        label.show()
+        assert label.visible == 1
+        assert label.dirty == 2
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+
+        assert label.visible == 1
+        assert label.dirty == 2
+        label.hide()
+        assert label.visible == 0
+        assert label.dirty == 1
