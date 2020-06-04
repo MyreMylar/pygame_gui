@@ -43,8 +43,7 @@ class UIExpandedDropDownState:
                  manager: IUIManagerInterface,
                  container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
-                 element_ids: Union[List[str], None],
-                 visible: int = 1):
+                 element_ids: Union[List[str], None]):
 
         self.drop_down_menu_ui = drop_down_menu_ui
         self.options_list = options_list
@@ -70,7 +69,6 @@ class UIExpandedDropDownState:
         # state transitioning
         self.should_transition = False
         self.target_state = 'closed'
-        self.visible = visible
 
     def rebuild(self):
         """
@@ -192,8 +190,7 @@ class UIExpandedDropDownState:
                                      self.ui_container,
                                      starting_height=2,
                                      parent_element=self.drop_down_menu_ui,
-                                     object_id='#expand_button',
-                                     visible=self.visible)
+                                     object_id='#expand_button')
         list_rect = pygame.Rect(self.drop_down_menu_ui.relative_rect.left,
                                 self.option_list_y_pos,
                                 (self.drop_down_menu_ui.relative_rect.width -
@@ -332,21 +329,8 @@ class UIExpandedDropDownState:
         image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
         self.drop_down_menu_ui.set_image(image)
 
-    def show(self):
-        self.visible = 1
-
-        if self.close_button is not None:
-            self.close_button.show()
-        if self.options_selection_list is not None:
-            self.options_selection_list.show()
-
     def hide(self):
-        self.visible = 0
-
-        if self.close_button is not None:
-            self.close_button.hide()
-        if self.options_selection_list is not None:
-            self.options_selection_list.hide()
+        self.should_transition = True
 
 
 class UIClosedDropDownState:
@@ -658,7 +642,6 @@ class UIDropDownMenu(UIElement):
                                                                 self.ui_container,
                                                                 self.element_ids,
                                                                 self.object_ids,
-                                                                self.visible
                                                                 )}
         self.current_state = self.menu_states['closed']
         self.current_state.start()
@@ -829,7 +812,6 @@ class UIDropDownMenu(UIElement):
         super().show()
 
         self.menu_states['closed'].show()
-        self.menu_states['expanded'].show()
 
     def hide(self):
         super().hide()

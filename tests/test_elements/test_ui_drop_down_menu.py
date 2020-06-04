@@ -367,3 +367,68 @@ class TestUIDropDownMenu:
             default_ui_manager.process_events(event)
 
         assert menu.selected_option == 'flour'
+
+    def test_show_of_dropdown(self, _init_pygame, default_ui_manager):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager,
+                              visible=0)
+
+        assert menu.visible == 0
+        assert menu.current_state == menu.menu_states['closed']
+        assert menu.menu_states["closed"].visible == 0
+        assert menu.menu_states["closed"].selected_option_button.visible == 0
+        assert menu.menu_states["closed"].open_button.visible == 0
+
+        menu.show()
+
+        assert menu.visible == 1
+        assert menu.current_state == menu.menu_states['closed']
+        assert menu.menu_states["closed"].visible == 1
+        assert menu.menu_states["closed"].selected_option_button.visible == 1
+        assert menu.menu_states["closed"].open_button.visible == 1
+
+    def test_hide_of_closed_dropdown(self, _init_pygame, default_ui_manager,
+                                     _display_surface_return_none):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager)
+
+        assert menu.visible == 1
+        assert menu.current_state == menu.menu_states['closed']
+        assert menu.menu_states["closed"].visible == 1
+        assert menu.menu_states["closed"].selected_option_button.visible == 1
+        assert menu.menu_states["closed"].open_button.visible == 1
+
+        menu.hide()
+        assert menu.visible == 0
+        assert menu.current_state == menu.menu_states['closed']
+        assert menu.menu_states["closed"].visible == 0
+        assert menu.menu_states["closed"].selected_option_button.visible == 0
+        assert menu.menu_states["closed"].open_button.visible == 0
+
+    def test_hide_of_expanded_dropdown(self, _init_pygame, default_ui_manager,
+                                       _display_surface_return_none):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager)
+
+        menu.process_event(pygame.event.Event(pygame.USEREVENT,
+                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                                               'ui_element': menu.menu_states['closed'].open_button}))
+        menu.update(0.01)
+
+        assert menu.visible == 1
+        assert menu.current_state == menu.menu_states['expanded']
+
+        menu.hide()
+        menu.update(0.01)
+
+        assert menu.visible == 0
+        assert menu.current_state == menu.menu_states['closed']
+        assert menu.menu_states["closed"].visible == 0
+        assert menu.menu_states["closed"].selected_option_button.visible == 0
+        assert menu.menu_states["closed"].open_button.visible == 0

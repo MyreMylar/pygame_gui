@@ -305,16 +305,23 @@ class TestUIManager:
 
     def test_hover_of_hidden_elements(self,  _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
-        button = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="Test", manager=manager)
+        button1 = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="Lower button test",
+                           manager=manager, starting_height=1)
+        button2 = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="Higher button test",
+                           manager=manager, starting_height=2)
 
         # override of default manager _update_mouse_position method to simulate hovering over the button
         manager._update_mouse_position = update_mouse_position_override_factory(manager, 150, 150)
 
-        assert button.hovered is False
+        assert button1.hovered is False
+        assert button2.hovered is False
         manager.update(0.01)
-        assert button.hovered is True
+        assert button1.hovered is False
+        assert button2.hovered is True
 
-        button.hide()
-        assert button.hovered is False
+        button2.hide()
+        assert button1.hovered is False
+        assert button2.hovered is False
         manager.update(0.01)
-        assert button.hovered is False
+        assert button1.hovered is True
+        assert button2.hovered is False
