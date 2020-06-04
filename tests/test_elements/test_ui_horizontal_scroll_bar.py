@@ -252,8 +252,8 @@ class TestUIHorizontalScrollBar:
         assert scroll_bar.visible == 0
         assert scroll_bar.dirty == 1
 
-        assert scroll_bar.sliding_button.visible == 0
         assert scroll_bar.button_container.visible == 0
+        assert scroll_bar.sliding_button.visible == 0
         assert scroll_bar.left_button.visible == 0
         assert scroll_bar.right_button.visible == 0
 
@@ -262,8 +262,8 @@ class TestUIHorizontalScrollBar:
         assert scroll_bar.visible == 1
         assert scroll_bar.dirty == 2
 
-        assert scroll_bar.sliding_button.visible == 1
         assert scroll_bar.button_container.visible == 1
+        assert scroll_bar.sliding_button.visible == 1
         assert scroll_bar.left_button.visible == 1
         assert scroll_bar.right_button.visible == 1
 
@@ -274,8 +274,8 @@ class TestUIHorizontalScrollBar:
         assert scroll_bar.visible == 1
         assert scroll_bar.dirty == 2
 
-        assert scroll_bar.sliding_button.visible == 1
         assert scroll_bar.button_container.visible == 1
+        assert scroll_bar.sliding_button.visible == 1
         assert scroll_bar.left_button.visible == 1
         assert scroll_bar.right_button.visible == 1
 
@@ -284,7 +284,7 @@ class TestUIHorizontalScrollBar:
         assert scroll_bar.visible == 0
         assert scroll_bar.dirty == 1
 
-        assert scroll_bar.sliding_button.visible == 0
         assert scroll_bar.button_container.visible == 0
+        assert scroll_bar.sliding_button.visible == 0
         assert scroll_bar.left_button.visible == 0
         assert scroll_bar.right_button.visible == 0

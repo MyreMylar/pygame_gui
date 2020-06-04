@@ -35,14 +35,16 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
-                 anchors: Union[Dict[str, str], None] = None):
+                 anchors: Union[Dict[str, str], None] = None,
+                 visible: int = 1):
 
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=starting_height,
                          layer_thickness=2,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -66,7 +68,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            container=container,
                                            parent_element=parent_element,
                                            object_id='#root_container',
-                                           anchors=anchors)
+                                           anchors=anchors,
+                                           visible=self.visible)
 
         # This container is the view on to the scrollable container it's size is determined by
         # the size of the root container and whether there are any scroll bars or not.
@@ -394,3 +397,14 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             if self.vert_scroll_bar is not None:
                 self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
                                                      self._view_container.rect.height))
+
+    def show(self):
+        self.visible = 1
+        self.dirty = 2
+
+        self._root_container.show()
+
+    def hide(self):
+        self._root_container.hide()
+        self.visible = 0
+        self.dirty = 1

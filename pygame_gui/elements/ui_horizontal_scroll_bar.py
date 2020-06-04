@@ -98,8 +98,7 @@ class UIHorizontalScrollBar(UIElement):
                                        anchors={'left': 'left',
                                                 'right': 'left',
                                                 'top': 'top',
-                                                'bottom': 'bottom'},
-                                       visible=self.visible)
+                                                'bottom': 'bottom'})
 
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
 
@@ -155,8 +154,7 @@ class UIHorizontalScrollBar(UIElement):
                                             anchors={'left': 'left',
                                                      'right': 'left',
                                                      'top': 'top',
-                                                     'bottom': 'bottom'},
-                                            visible=self.visible
+                                                     'bottom': 'bottom'}
                                             )
 
             if self.right_button is None:
@@ -171,8 +169,8 @@ class UIHorizontalScrollBar(UIElement):
                                              anchors={'left': 'right',
                                                       'right': 'right',
                                                       'top': 'top',
-                                                      'bottom': 'bottom'},
-                                             visible=self.visible)
+                                                      'bottom': 'bottom'}
+                                             )
         else:
             self.arrow_button_width = 0
             if self.left_button is not None:
@@ -521,13 +519,9 @@ class UIHorizontalScrollBar(UIElement):
     def show(self):
         super().show()
 
-        self.sliding_button.show()
-        if self.button_container is not None:
-            self.button_container.show()
+        self.button_container.show()
 
     def hide(self):
         super().hide()
 
-        self.sliding_button.hide()
-        if self.button_container is not None:
-            self.button_container.hide()
+        self.button_container.hide()

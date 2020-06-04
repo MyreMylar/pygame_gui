@@ -243,3 +243,48 @@ class TestUIVerticalScrollBar:
                                                              {'button': 1, 'pos': (40, 195)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert scroll_bar.bottom_button.held is True
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 0, 200, 30),
+                                         visible_percentage=0.25, manager=default_ui_manager,
+                                         visible=0)
+
+        assert scroll_bar.visible == 0
+        assert scroll_bar.dirty == 1
+
+        assert scroll_bar.button_container.visible == 0
+        assert scroll_bar.sliding_button.visible == 0
+        assert scroll_bar.top_button.visible == 0
+        assert scroll_bar.bottom_button.visible == 0
+
+        scroll_bar.show()
+
+        assert scroll_bar.visible == 1
+        assert scroll_bar.dirty == 2
+
+        assert scroll_bar.button_container.visible == 1
+        assert scroll_bar.sliding_button.visible == 1
+        assert scroll_bar.top_button.visible == 1
+        assert scroll_bar.bottom_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 0, 200, 30),
+                                         visible_percentage=0.25, manager=default_ui_manager)
+
+        assert scroll_bar.visible == 1
+        assert scroll_bar.dirty == 2
+
+        assert scroll_bar.button_container.visible == 1
+        assert scroll_bar.sliding_button.visible == 1
+        assert scroll_bar.top_button.visible == 1
+        assert scroll_bar.bottom_button.visible == 1
+
+        scroll_bar.hide()
+
+        assert scroll_bar.visible == 0
+        assert scroll_bar.dirty == 1
+
+        assert scroll_bar.button_container.visible == 0
+        assert scroll_bar.sliding_button.visible == 0
+        assert scroll_bar.top_button.visible == 0
+        assert scroll_bar.bottom_button.visible == 0
