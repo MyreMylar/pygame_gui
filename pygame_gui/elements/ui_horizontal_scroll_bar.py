@@ -97,6 +97,7 @@ class UIHorizontalScrollBar(UIElement):
                                                 'right': 'left',
                                                 'top': 'top',
                                                 'bottom': 'bottom'})
+        self.join_focus_sets(self.sliding_button)
 
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
 
@@ -132,6 +133,7 @@ class UIHorizontalScrollBar(UIElement):
                                                 container=self.ui_container,
                                                 anchors=self.anchors,
                                                 object_id='#horiz_scrollbar_buttons_container')
+            self.join_focus_sets(self.button_container)
         else:
             self.button_container.set_dimensions(self.background_rect.size)
             self.button_container.set_relative_position(self.background_rect.topleft)
@@ -153,6 +155,7 @@ class UIHorizontalScrollBar(UIElement):
                                                      'top': 'top',
                                                      'bottom': 'bottom'}
                                             )
+                self.join_focus_sets(self.left_button)
 
             if self.right_button is None:
                 self.right_button = UIButton(pygame.Rect((-self.arrow_button_width, 0),
@@ -167,6 +170,7 @@ class UIHorizontalScrollBar(UIElement):
                                                       'right': 'right',
                                                       'top': 'top',
                                                       'bottom': 'bottom'})
+                self.join_focus_sets(self.right_button)
         else:
             self.arrow_button_width = 0
             if self.left_button is not None:
@@ -219,14 +223,6 @@ class UIHorizontalScrollBar(UIElement):
 
         self.button_container.kill()
         super().kill()
-
-    def focus(self):
-        """
-        When we focus  the scroll bar as a whole for any reason we pass that status down to the
-        'bar' part of the scroll bar.
-        """
-        if self.sliding_button is not None:
-            self.ui_manager.set_focus_set(self.sliding_button)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -289,9 +285,8 @@ class UIHorizontalScrollBar(UIElement):
         self.has_moved_recently = False
         if self.alive():
             moved_this_frame = False
-            if (self.left_button is not None and
-                    (self.left_button.held or self.scroll_wheel_left) and
-                    self.scroll_position > self.left_limit):
+            if ((self.left_button is not None and self.left_button.held) or
+                    (self.scroll_wheel_left and self.scroll_position > self.left_limit)):
                 self.scroll_wheel_left = False
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.left_limit)
@@ -299,9 +294,8 @@ class UIHorizontalScrollBar(UIElement):
                 y_pos = 0
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
-            elif (self.right_button is not None and
-                  (self.right_button.held or self.scroll_wheel_right) and
-                  self.scroll_position < self.right_limit):
+            elif ((self.right_button is not None and self.right_button.held) or
+                  (self.scroll_wheel_right and self.scroll_position < self.right_limit)):
                 self.scroll_wheel_right = False
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
@@ -369,6 +363,7 @@ class UIHorizontalScrollBar(UIElement):
                                                     'right': 'left',
                                                     'top': 'top',
                                                     'bottom': 'bottom'})
+            self.join_focus_sets(self.sliding_button)
 
         else:
             self.sliding_button.set_relative_position(self.sliding_rect_position)

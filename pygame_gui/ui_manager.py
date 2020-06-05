@@ -408,12 +408,12 @@ class UIManager(IUIManagerInterface):
 
             if self.focused_set is not None:
                 for item in self.focused_set:
-                    item.focus()
-
-                    if 'vertical_scroll_bar' in item.get_element_ids():
-                        self.last_focused_vertical_scrollbar = item
-                    if 'horizontal_scroll_bar' in item.get_element_ids():
-                        self.last_focused_horizontal_scrollbar = item
+                    if not item.is_focused:
+                        item.focus()
+                        if item.get_element_ids()[-1] == 'vertical_scroll_bar':
+                            self.last_focused_vertical_scrollbar = item
+                        if item.get_element_ids()[-1] == 'horizontal_scroll_bar':
+                            self.last_focused_horizontal_scrollbar = item
 
     def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
         """
