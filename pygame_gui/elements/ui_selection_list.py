@@ -484,7 +484,9 @@ class UISelectionList(UIElement):
                 container=self.ui_container,
                 parent_element=self._parent_element,
                 object_id='#selection_list_container',
-                anchors=self.anchors)
+                anchors=self.anchors,
+                visible=self.visible
+            )
             self.join_focus_sets(self.list_and_scroll_bar_container)
         else:
             self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
@@ -501,3 +503,13 @@ class UISelectionList(UIElement):
                                                                       self.border_width))
 
         self.set_item_list(self._raw_item_list)
+
+    def show(self):
+        super().show()
+
+        self.list_and_scroll_bar_container.show()
+
+    def hide(self):
+        super().hide()
+
+        self.list_and_scroll_bar_container.hide()

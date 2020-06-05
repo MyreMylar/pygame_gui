@@ -627,3 +627,73 @@ class TestUISelectionList:
                                          allow_multi_select=True)
 
         assert selection_list.image is not None
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
+                                         item_list=['item 1', 'item 2', 'item 3', 'item 4',
+                                                    'item 5', 'item 6', 'item 7', 'item 8',
+                                                    'item 9', 'item 10', 'item 11', 'item 12',
+                                                    'item 13', 'item 14', 'item 15', 'item 16'],
+                                         manager=default_ui_manager,
+                                         allow_multi_select=True, visible=0)
+
+        assert selection_list.visible == 0
+        assert selection_list.dirty == 1
+
+        assert selection_list.list_and_scroll_bar_container.visible == 0
+        assert selection_list.item_list_container.visible == 0
+
+        assert selection_list.scroll_bar.visible == 0
+        assert selection_list.scroll_bar.button_container.visible == 0
+        assert selection_list.scroll_bar.bottom_button.visible == 0
+        assert selection_list.scroll_bar.top_button.visible == 0
+        assert selection_list.scroll_bar.sliding_button.visible == 0
+
+        selection_list.show()
+
+        assert selection_list.visible == 1
+        assert selection_list.dirty == 2
+
+        assert selection_list.list_and_scroll_bar_container.visible == 1
+        assert selection_list.item_list_container.visible == 1
+
+        assert selection_list.scroll_bar.visible == 1
+        assert selection_list.scroll_bar.button_container.visible == 1
+        assert selection_list.scroll_bar.bottom_button.visible == 1
+        assert selection_list.scroll_bar.top_button.visible == 1
+        assert selection_list.scroll_bar.sliding_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
+                                         item_list=['item 1', 'item 2', 'item 3', 'item 4',
+                                                    'item 5', 'item 6', 'item 7', 'item 8',
+                                                    'item 9', 'item 10', 'item 11', 'item 12',
+                                                    'item 13', 'item 14', 'item 15', 'item 16'],
+                                         manager=default_ui_manager,
+                                         allow_multi_select=True)
+
+        assert selection_list.visible == 1
+        assert selection_list.dirty == 2
+
+        assert selection_list.list_and_scroll_bar_container.visible == 1
+        assert selection_list.item_list_container.visible == 1
+
+        assert selection_list.scroll_bar.visible == 1
+        assert selection_list.scroll_bar.button_container.visible == 1
+        assert selection_list.scroll_bar.bottom_button.visible == 1
+        assert selection_list.scroll_bar.top_button.visible == 1
+        assert selection_list.scroll_bar.sliding_button.visible == 1
+
+        selection_list.hide()
+
+        assert selection_list.visible == 0
+        assert selection_list.dirty == 1
+
+        assert selection_list.list_and_scroll_bar_container.visible == 0
+        assert selection_list.item_list_container.visible == 0
+
+        assert selection_list.scroll_bar.visible == 0
+        assert selection_list.scroll_bar.button_container.visible == 0
+        assert selection_list.scroll_bar.bottom_button.visible == 0
+        assert selection_list.scroll_bar.top_button.visible == 0
+        assert selection_list.scroll_bar.sliding_button.visible == 0
