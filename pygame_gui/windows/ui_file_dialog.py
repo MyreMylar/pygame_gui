@@ -178,22 +178,24 @@ class UIFileDialog(UIWindow):
 
     def _highlight_file_name_for_editing(self):
         # try highlighting the file name
-        if self.current_file_path is not None and not self.allow_existing_files_only:
-            highlight_start = self.file_path_text_line.get_text().find(self.current_file_path.stem)
-            highlight_end = highlight_start + len(self.current_file_path.stem)
-            self.file_path_text_line.select_range[0] = highlight_start
-            self.file_path_text_line.select_range[1] = highlight_end
-            self.file_path_text_line.cursor_has_moved_recently = True
-            self.file_path_text_line.edit_position = highlight_end
+        if self.current_file_path is None or self.allow_existing_files_only:
+            return
+        highlight_start = self.file_path_text_line.get_text().find(self.current_file_path.stem)
+        highlight_end = highlight_start + len(self.current_file_path.stem)
+        self.file_path_text_line.select_range[0] = highlight_start
+        self.file_path_text_line.select_range[1] = highlight_end
+        self.file_path_text_line.cursor_has_moved_recently = True
+        self.file_path_text_line.edit_position = highlight_end
 
-            text_clip_width = (self.file_path_text_line.rect.width -
-                               (self.file_path_text_line.padding[0] * 2) -
-                               (self.file_path_text_line.shape_corner_radius * 2) -
-                               (self.file_path_text_line.border_width * 2) -
-                               (self.file_path_text_line.shadow_width * 2))
+        text_clip_width = (self.file_path_text_line.rect.width -
+                           (self.file_path_text_line.padding[0] * 2) -
+                           (self.file_path_text_line.shape_corner_radius * 2) -
+                           (self.file_path_text_line.border_width * 2) -
+                           (self.file_path_text_line.shadow_width * 2))
 
-            text_width = self.file_path_text_line.font.size(self.file_path_text_line.get_text())[0]
-            self.file_path_text_line.start_text_offset = max(0, text_width - text_clip_width)
+        text_width = self.file_path_text_line.font.size(self.file_path_text_line.get_text())[0]
+        self.file_path_text_line.start_text_offset = max(0, text_width - text_clip_width)
+        if not self.file_path_text_line.is_focused:
             self.file_path_text_line.focus()
 
     def update_current_file_list(self):

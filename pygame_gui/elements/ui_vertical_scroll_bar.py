@@ -96,7 +96,7 @@ class UIVerticalScrollBar(UIElement):
                                                 'right': 'right',
                                                 'top': 'top',
                                                 'bottom': 'top'})
-
+        self.join_focus_sets(self.sliding_button)
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 
     def rebuild(self):
@@ -131,6 +131,7 @@ class UIVerticalScrollBar(UIElement):
                                                 container=self.ui_container,
                                                 anchors=self.anchors,
                                                 object_id='#vert_scrollbar_buttons_container')
+            self.join_focus_sets(self.button_container)
         else:
             self.button_container.set_dimensions(self.background_rect.size)
             self.button_container.set_relative_position(self.background_rect.topleft)
@@ -152,6 +153,7 @@ class UIVerticalScrollBar(UIElement):
                                                     'top': 'top',
                                                     'bottom': 'top'}
                                            )
+                self.join_focus_sets(self.top_button)
 
             if self.bottom_button is None:
                 self.bottom_button = UIButton(pygame.Rect((0, -self.arrow_button_height),
@@ -166,6 +168,7 @@ class UIVerticalScrollBar(UIElement):
                                                        'right': 'right',
                                                        'top': 'bottom',
                                                        'bottom': 'bottom'})
+                self.join_focus_sets(self.bottom_button)
         else:
             self.arrow_button_height = 0
             if self.top_button is not None:
@@ -219,14 +222,6 @@ class UIVerticalScrollBar(UIElement):
         self.button_container.kill()
         super().kill()
 
-    def focus(self):
-        """
-        When we focus  the scroll bar as a whole for any reason we pass that status down to the
-        'bar' part of the scroll bar.
-        """
-        if self.sliding_button is not None:
-            self.ui_manager.set_focus_set(self.sliding_button)
-
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Checks an event from pygame's event queue to see if the scroll bar needs to react to it.
@@ -266,10 +261,7 @@ class UIVerticalScrollBar(UIElement):
         """
         last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
         return (last_focused_scrollbar_element is not None and
-                ((last_focused_scrollbar_element is self) or
-                 (last_focused_scrollbar_element is self.sliding_button) or
-                 (last_focused_scrollbar_element is self.top_button) or
-                 (last_focused_scrollbar_element is self.bottom_button)))
+                last_focused_scrollbar_element is self)
 
     def update(self, time_delta: float):
         """
@@ -288,8 +280,8 @@ class UIVerticalScrollBar(UIElement):
         self.has_moved_recently = False
         if self.alive():
             moved_this_frame = False
-            if (self.top_button is not None and (self.top_button.held or self.scroll_wheel_up) and
-                    self.scroll_position > self.top_limit):
+            if ((self.top_button is not None and self.top_button.held) or
+                    (self.scroll_wheel_up and self.scroll_position > self.top_limit)):
                 self.scroll_wheel_up = False
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.top_limit)
@@ -297,9 +289,8 @@ class UIVerticalScrollBar(UIElement):
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
-            elif (self.bottom_button is not None and
-                  (self.bottom_button.held or self.scroll_wheel_down) and
-                  self.scroll_position < self.bottom_limit):
+            elif ((self.bottom_button is not None and self.bottom_button.held) or
+                  (self.scroll_wheel_down and self.scroll_position < self.bottom_limit)):
                 self.scroll_wheel_down = False
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
@@ -367,7 +358,7 @@ class UIVerticalScrollBar(UIElement):
                                                     'right': 'right',
                                                     'top': 'top',
                                                     'bottom': 'top'})
-
+            self.join_focus_sets(self.sliding_button)
         else:
             self.sliding_button.set_relative_position(self.sliding_rect_position)
             self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))

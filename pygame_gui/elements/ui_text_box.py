@@ -217,6 +217,7 @@ class UITextBox(UIElement):
                                                       self.ui_manager,
                                                       self.ui_container,
                                                       parent_element=self)
+                self.join_focus_sets(self.scroll_bar)
             else:
                 new_dimensions = (self.rect[2], self.rect[3])
                 self.set_dimensions(new_dimensions)
@@ -510,15 +511,6 @@ class UITextBox(UIElement):
         self.redraw_from_text_block()
         self.link_hover_chunks = []
         self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
-
-    def focus(self):
-        """
-        Called when we focus the text box (usually by clicking on it). In this case we just pass
-        the focus over to the box's scroll bar, if it has one, so that some input events will be
-        directed that way.
-        """
-        if self.scroll_bar is not None:
-            self.scroll_bar.focus()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
