@@ -150,6 +150,11 @@ class TestUIDropDownMenu:
         menu.update(0.01)
         manager.ui_theme.ui_element_misc_data['drop_down_menu']['expand_direction'] = 'down'
         menu.rebuild_from_changed_theme_data()
+
+        border_and_shadow_width = 3
+        item_list_height = 15
+        assert menu.menu_states['expanded'].options_list_height == (3 * item_list_height +
+                                                                    2 * border_and_shadow_width)
         assert menu.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
