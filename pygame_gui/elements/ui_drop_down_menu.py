@@ -149,8 +149,14 @@ class UIExpandedDropDownState:
         except (LookupError, ValueError):
             list_border_width = 1
 
+        try:
+            list_item_height = int(
+                self.ui_manager.get_theme().get_misc_data('list_item_height', final_ids))
+        except (LookupError, ValueError):
+            list_item_height = 20
+
         options_list_border_and_shadow = list_shadow_width + list_border_width
-        self.options_list_height = ((20 * len(self.options_list)) +
+        self.options_list_height = ((list_item_height * len(self.options_list)) +
                                     (2 * options_list_border_and_shadow))
         self.option_list_y_pos = 0
         if self.expand_direction is not None:
