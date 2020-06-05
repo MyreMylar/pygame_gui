@@ -331,8 +331,8 @@ class TestUITextBox:
                                        'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
-        text_box.focus()
-        assert text_box.scroll_bar.sliding_button.is_focused is True
+        default_ui_manager.set_focus_set(text_box.get_focus_set())
+        assert text_box.scroll_bar.is_focused is True
 
     def test_set_active_effect_typing(self, _init_pygame: None, default_ui_manager: UIManager,
                                       _display_surface_return_none: None):

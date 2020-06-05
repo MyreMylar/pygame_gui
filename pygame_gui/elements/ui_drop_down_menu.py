@@ -674,6 +674,7 @@ class UIDropDownMenu(UIElement):
         super().kill()
 
     def unfocus(self):
+        super().unfocus()
         if self.current_state is self.menu_states['expanded']:
             self.current_state.should_transition = True
 

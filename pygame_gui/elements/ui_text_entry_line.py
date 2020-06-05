@@ -70,8 +70,6 @@ class UITextEntryLine(UIElement):
                                object_id=object_id,
                                element_id='text_entry_line')
 
-        self.focused = False
-
         self.text = ""
 
         # theme font
@@ -424,7 +422,7 @@ class UITextEntryLine(UIElement):
                 if self.cursor_on:
                     self.cursor_on = False
                     self.redraw_cursor()
-                elif self.focused:
+                elif self.is_focused:
                     self.cursor_on = True
                     self.redraw_cursor()
             else:
@@ -436,7 +434,7 @@ class UITextEntryLine(UIElement):
         """
         Called when this element is no longer the current focus.
         """
-        self.focused = False
+        super().unfocus()
         pygame.key.set_repeat(0)
         self.select_range = [0, 0]
         self.edit_position = 0
@@ -448,7 +446,7 @@ class UITextEntryLine(UIElement):
         Called when we 'select focus' on this element. In this case it sets up the keyboard to
         repeat held key presses, useful for natural feeling keyboard input.
         """
-        self.focused = True
+        super().focus()
         pygame.key.set_repeat(500, 25)
         self.redraw()
 
@@ -469,7 +467,7 @@ class UITextEntryLine(UIElement):
         initial_text_state = self.text
         if self._process_mouse_button_event(event):
             consumed_event = True
-        if self.focused and event.type == pygame.KEYDOWN:
+        if self.is_focused and event.type == pygame.KEYDOWN:
             if self._process_keyboard_shortcut_event(event):
                 consumed_event = True
             elif self._process_action_key_event(event):
