@@ -568,3 +568,133 @@ class TestUITextBox:
                              object_id="screen_message")
 
         assert text_box.rect.height != 0
+
+    def test_show_without_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        x = 640
+        y = 360
+        width = 320
+        height = 100
+        text = "this is a test"
+
+        rect = pygame.Rect((x, y), (width, height))
+
+        text_box = UITextBox(html_text=text,
+                             relative_rect=rect,
+                             manager=default_ui_manager,
+                             wrap_to_height=False,
+                             layer_starting_height=100,
+                             object_id="screen_message",
+                             visible=0)
+
+        assert text_box.visible == 0
+        assert text_box.dirty == 1
+
+        assert text_box.scroll_bar is None
+
+        text_box.show()
+
+        assert text_box.visible == 1
+        assert text_box.dirty == 2
+
+        assert text_box.scroll_bar is None
+
+    def test_show_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        x = 640
+        y = 360
+        width = 320
+        height = 10
+        text = "this is a test"
+
+        rect = pygame.Rect((x, y), (width, height))
+
+        text_box = UITextBox(html_text=text,
+                             relative_rect=rect,
+                             manager=default_ui_manager,
+                             wrap_to_height=False,
+                             layer_starting_height=100,
+                             object_id="screen_message",
+                             visible=0)
+
+        assert text_box.visible == 0
+        assert text_box.dirty == 1
+
+        assert text_box.scroll_bar.visible == 0
+        assert text_box.scroll_bar.button_container.visible == 0
+        assert text_box.scroll_bar.sliding_button.visible == 0
+        assert text_box.scroll_bar.top_button.visible == 0
+        assert text_box.scroll_bar.bottom_button.visible == 0
+
+        text_box.show()
+
+        assert text_box.visible == 1
+        assert text_box.dirty == 2
+
+        assert text_box.scroll_bar.visible == 1
+        assert text_box.scroll_bar.button_container.visible == 1
+        assert text_box.scroll_bar.sliding_button.visible == 1
+        assert text_box.scroll_bar.top_button.visible == 1
+        assert text_box.scroll_bar.bottom_button.visible == 1
+
+    def test_hide_without_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        x = 640
+        y = 360
+        width = 320
+        height = 100
+        text = "this is a test"
+
+        rect = pygame.Rect((x, y), (width, height))
+
+        text_box = UITextBox(html_text=text,
+                             relative_rect=rect,
+                             manager=default_ui_manager,
+                             wrap_to_height=False,
+                             layer_starting_height=100,
+                             object_id="screen_message")
+
+        assert text_box.visible == 1
+        assert text_box.dirty == 2
+
+        assert text_box.scroll_bar is None
+
+        text_box.hide()
+
+        assert text_box.visible == 0
+        assert text_box.dirty == 1
+
+        assert text_box.scroll_bar is None
+
+    def test_hide_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        x = 640
+        y = 360
+        width = 320
+        height = 10
+        text = "this is a test"
+
+        rect = pygame.Rect((x, y), (width, height))
+
+        text_box = UITextBox(html_text=text,
+                             relative_rect=rect,
+                             manager=default_ui_manager,
+                             wrap_to_height=False,
+                             layer_starting_height=100,
+                             object_id="screen_message")
+
+        assert text_box.visible == 1
+        assert text_box.dirty == 2
+
+        assert text_box.scroll_bar.visible == 1
+        assert text_box.scroll_bar.button_container.visible == 1
+        assert text_box.scroll_bar.sliding_button.visible == 1
+        assert text_box.scroll_bar.top_button.visible == 1
+        assert text_box.scroll_bar.bottom_button.visible == 1
+
+        text_box.hide()
+
+        assert text_box.visible == 0
+        assert text_box.dirty == 1
+
+        assert text_box.scroll_bar.visible == 0
+        assert text_box.scroll_bar.button_container.visible == 0
+        assert text_box.scroll_bar.sliding_button.visible == 0
+        assert text_box.scroll_bar.top_button.visible == 0
+        assert text_box.scroll_bar.bottom_button.visible == 0

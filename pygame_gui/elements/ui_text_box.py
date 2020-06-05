@@ -68,12 +68,14 @@ class UITextBox(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
                          layer_thickness=2,
-                         anchors=anchors
+                         anchors=anchors,
+                         visible=visible
                          )
 
         self._create_valid_ids(container=container,
@@ -216,7 +218,8 @@ class UITextBox(UIElement):
                                                       percentage_visible,
                                                       self.ui_manager,
                                                       self.ui_container,
-                                                      parent_element=self)
+                                                      parent_element=self,
+                                                      visible=self.visible)
             else:
                 new_dimensions = (self.rect[2], self.rect[3])
                 self.set_dimensions(new_dimensions)
@@ -723,3 +726,15 @@ class UITextBox(UIElement):
             self.link_style = link_style
             has_any_changed = True
         return has_any_changed
+
+    def show(self):
+        super().show()
+
+        if self.scroll_bar is not None:
+            self.scroll_bar.show()
+
+    def hide(self):
+        super().hide()
+
+        if self.scroll_bar is not None:
+            self.scroll_bar.hide()
