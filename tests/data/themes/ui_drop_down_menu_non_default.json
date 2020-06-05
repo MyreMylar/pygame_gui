@@ -12,8 +12,16 @@
              "shape_corner_radius": "6",
              "expand_direction": "up",
              "border_width": "0",
-             "shadow_width": "3"
+             "shadow_width": "3",
+
          }
+    },
+    "drop_down_menu.#drop_down_options_list":
+    {
+        "misc":
+        {
+            "list_item_height": "15"
+        }
     }
 }
 
