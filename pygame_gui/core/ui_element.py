@@ -327,8 +327,8 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                                                        self.rect.bottom -
                                                        container_clip_rect.bottom))
                 clip_rect = pygame.Rect(left, top,
-                                        right - left,
-                                        bottom - top)
+                                        max(0, right - left),
+                                        max(0, bottom - top))
                 self._clip_images_for_container(clip_rect)
             else:
                 self._restore_container_clipped_images()
@@ -343,8 +343,8 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                                                    self.rect.bottom -
                                                    self.ui_container.get_rect().bottom))
             clip_rect = pygame.Rect(left, top,
-                                    right - left,
-                                    bottom - top)
+                                    max(0, right - left),
+                                    max(0, bottom - top))
             self._clip_images_for_container(clip_rect)
         else:
             self._restore_container_clipped_images()
@@ -655,17 +655,23 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         :param rect: A clipping rectangle, or None to clear the clip.
 
         """
-        if rect is not None and self._pre_clipped_image is None and self.image is not None:
-            self._pre_clipped_image = self.image.copy()
+        if rect is not None:
+            if rect.width < 0:
+                rect.width = 0
+            if rect.height < 0:
+                rect.height = 0
 
-        if self._image_clip is not None and rect is None:
-            self._image_clip = None
-            self.set_image(self._pre_clipped_image)
-        elif rect is not None:
+            if self._pre_clipped_image is None and self.image is not None:
+                self._pre_clipped_image = self.image.copy()
+
             self._image_clip = rect
             if self.image is not None:
                 self.image.fill(pygame.Color('#00000000'))
                 basic_blit(self.image, self._pre_clipped_image, self._image_clip, self._image_clip)
+
+        elif self._image_clip is not None:
+            self._image_clip = None
+            self.set_image(self._pre_clipped_image)
         else:
             self._image_clip = None
 
