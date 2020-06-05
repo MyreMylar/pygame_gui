@@ -44,7 +44,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  window_display_title: str = "",
                  element_id: Union[str, None] = None,
                  object_id: Union[str, None] = None,
-                 resizable: bool = False):
+                 resizable: bool = False,
+                 visible: int = 1):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Union[UIContainer, None]
@@ -54,7 +55,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         super().__init__(rect, manager, container=None,
                          starting_height=1,
-                         layer_thickness=1)
+                         layer_thickness=1,
+                         visible=visible)
 
         if element_id is None:
             element_id = 'window'
@@ -472,7 +474,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                       is_window_root_container=True,
                                                       container=None,
                                                       parent_element=self,
-                                                      object_id="#window_root_container")
+                                                      object_id="#window_root_container",
+                                                      visible=self.visible)
         if self.window_element_container is None:
             window_container_rect = pygame.Rect(self.border_width,
                                                 self.title_bar_height,
@@ -695,3 +698,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         self.window_display_title = new_title
         self.title_bar.set_text(self.window_display_title)
+
+    def show(self):
+        super().show()
+
+        self._window_root_container.show()
+
+    def hide(self):
+        super().hide()
+
+        self._window_root_container.hide()

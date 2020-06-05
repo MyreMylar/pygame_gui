@@ -426,3 +426,52 @@ class TestUIWindow:
 
         window.focus()
         window.unfocus()
+
+    def test_show(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
+        window = UIWindow(pygame.Rect(100, 100, 200, 200),
+                          window_display_title="Test Window",
+                          manager=default_ui_manager,
+                          visible=0)
+
+        assert window.visible == 0
+        assert window.dirty == 1
+
+        assert window._window_root_container.visible == 0
+        assert window.title_bar.visible == 0
+        assert window.window_element_container.visible == 0
+        assert window.close_window_button.visible == 0
+
+        window.show()
+
+        assert window.visible == 1
+        assert window.dirty == 2
+
+        assert window._window_root_container.visible == 1
+        assert window.title_bar.visible == 1
+        assert window.window_element_container.visible == 1
+        assert window.close_window_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
+        window = UIWindow(pygame.Rect(100, 100, 200, 200),
+                          window_display_title="Test Window",
+                          manager=default_ui_manager)
+
+        assert window.visible == 1
+        assert window.dirty == 2
+
+        assert window._window_root_container.visible == 1
+        assert window.title_bar.visible == 1
+        assert window.window_element_container.visible == 1
+        assert window.close_window_button.visible == 1
+
+        window.hide()
+
+        assert window.visible == 0
+        assert window.dirty == 1
+
+        assert window._window_root_container.visible == 0
+        assert window.title_bar.visible == 0
+        assert window.window_element_container.visible == 0
+        assert window.close_window_button.visible == 0
