@@ -460,3 +460,13 @@ class UIFileDialog(UIWindow):
             new_file_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(new_file_chosen_event)
             self.kill()
+
+    def show(self):
+        super().show()
+
+        warnings.warn("Use of show() and hide() methods of UIFileDialog objects is not supported.")
+
+    def hide(self):
+        super().hide()
+
+        warnings.warn("Use of show() and hide() methods of UIFileDialog objects is not supported.")

@@ -109,3 +109,28 @@ class TestUIWorldSpaceHealthBar:
         assert health_bar.drawable_shape.containing_rect.size == (250, 60)
         assert health_bar.rect.size == (250, 60)
         assert health_bar.relative_rect.size == (250, 60)
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
+        health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                           sprite_to_monitor=healthy_sprite,
+                                           manager=default_ui_manager,
+                                           visible=0)
+
+        assert health_bar.visible == 0
+        assert health_bar.dirty == 1
+        health_bar.show()
+        assert health_bar.visible == 1
+        assert health_bar.dirty == 2
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
+        health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                           sprite_to_monitor=healthy_sprite,
+                                           manager=default_ui_manager)
+
+        assert health_bar.visible == 1
+        assert health_bar.dirty == 2
+        health_bar.hide()
+        assert health_bar.visible == 0
+        assert health_bar.dirty == 1
