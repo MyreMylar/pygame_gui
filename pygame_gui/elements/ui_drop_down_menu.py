@@ -30,7 +30,7 @@ class UIExpandedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -335,6 +335,9 @@ class UIExpandedDropDownState:
         self.drop_down_menu_ui.set_image(image)
 
     def hide(self):
+        """
+        Transition from expanded state to closed state.
+        """
         self.should_transition = True
 
 
@@ -352,7 +355,7 @@ class UIClosedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -547,6 +550,9 @@ class UIClosedDropDownState:
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
     def show(self):
+        """
+        Show all the existing child UIElement
+        """
         self.visible = 1
 
         if self.open_button is not None:
@@ -555,6 +561,9 @@ class UIClosedDropDownState:
             self.selected_option_button.show()
 
     def hide(self):
+        """
+        Hide all the existing child UIElement
+        """
         self.visible = 0
 
         if self.open_button is not None:
@@ -827,7 +836,13 @@ class UIDropDownMenu(UIElement):
         self.menu_states['closed'].show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - if the current state is 'expanded' call it's hide() method, which
+        begins a transition of the UIDropDownMenu to the 'closed' state, and call the hide() method of the 'closed'
+        state which hides all it's children widgets.
+        """
         super().hide()
 
+        if self.current_state == self.menu_states['expanded']:
+            self.menu_states['expanded'].hide()
         self.menu_states['closed'].hide()
-        self.menu_states['expanded'].hide()

@@ -646,7 +646,7 @@ class TestUIButton:
 
         assert button.image is not None
 
-    def test_show(self, _init_pygame, default_ui_manager):
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Label",
                           manager=default_ui_manager,
@@ -658,7 +658,7 @@ class TestUIButton:
         assert button.visible == 1
         assert button.dirty == 2
 
-    def test_hide(self, _init_pygame, default_ui_manager):
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Label",
                           manager=default_ui_manager)

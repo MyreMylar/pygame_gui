@@ -35,7 +35,7 @@ class UIButton(UIElement):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param allow_double_clicks: Enables double clicking on buttons which will generate a
                                 unique event.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
@@ -608,3 +608,11 @@ class UIButton(UIElement):
                                                          'selected', 'active'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - Change the hovered state to a normal state.
+        """
+        super().hide()
+
+        self.on_unhovered()

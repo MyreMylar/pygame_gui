@@ -793,7 +793,10 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
     def hide(self):
         """
         Hides the widget, which means the widget will not get drawn and will not process events.
+        Clear hovered state.
         """
         self.visible = 0
         self.dirty = 1
+
         self.hovered = False
+        self.hover_time = 0.0
