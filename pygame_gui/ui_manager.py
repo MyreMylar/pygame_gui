@@ -36,8 +36,13 @@ class UIManager(IUIManagerInterface):
                  enable_live_theme_updates: bool = True,
                  resource_loader: IResourceLoader = None):
 
-        # Threaded loading
+        # Pygame compat
+        try:
+            pygame.MOUSEWHEEL
+        except AttributeError:
+            pygame.MOUSEWHEEL = -1
 
+        # Threaded loading
         if resource_loader is None:
             auto_load = True
             self.resource_loader = BlockingThreadedResourceLoader()

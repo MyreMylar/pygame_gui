@@ -139,12 +139,6 @@ class TestUIHorizontalScrollBar:
 
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': -0.5})) is True
 
-        del pygame.MOUSEWHEEL
-
-        scroll_bar.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'x': -0.5}))
-
-        assert pygame.MOUSEWHEEL == -1
-
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",

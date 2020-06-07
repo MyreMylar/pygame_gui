@@ -8,9 +8,6 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleS
 
 from pygame_gui.elements.ui_button import UIButton
 
-if pygame.version.vernum[0] < 2:
-    pygame.MOUSEWHEEL = -1
-
 
 class UIVerticalScrollBar(UIElement):
     """
