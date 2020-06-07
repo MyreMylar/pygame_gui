@@ -69,7 +69,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.Surface:
+    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.surface.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
         an optional image display will need to handle the exception.
@@ -79,7 +79,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         :param image_id: The id identifying the particular image spot in the UI we are looking for
                          an image to add to.
 
-        :return: A pygame.Surface
+        :return: A pygame.surface.Surface
         """
 
     @abstractmethod

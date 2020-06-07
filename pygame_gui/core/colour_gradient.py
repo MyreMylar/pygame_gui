@@ -26,12 +26,14 @@ class ColourGradient(IColourGradientInterface):
 
         if self.colour_3 is None:
             pixel_width = 2
-            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA, depth=32)
+            colour_pixels_surf = pygame.surface.Surface((pixel_width, 1),
+                                                        flags=pygame.SRCALPHA, depth=32)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
         else:
             pixel_width = 3
-            colour_pixels_surf = pygame.Surface((pixel_width, 1), flags=pygame.SRCALPHA, depth=32)
+            colour_pixels_surf = pygame.surface.Surface((pixel_width, 1),
+                                                        flags=pygame.SRCALPHA, depth=32)
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
@@ -68,7 +70,7 @@ class ColourGradient(IColourGradientInterface):
 
         return result
 
-    def apply_gradient_to_surface(self, input_surface: pygame.Surface,
+    def apply_gradient_to_surface(self, input_surface: pygame.surface.Surface,
                                   rect: Union[pygame.Rect, None] = None):
         """
         Applies this gradient to a specified input surface using blending multiplication.
@@ -83,7 +85,7 @@ class ColourGradient(IColourGradientInterface):
         input_surface_size = input_surface.get_size()
         inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
         gradient_size = inverse_rotated_input.get_rect().size
-        gradient_surf = pygame.Surface(gradient_size, flags=pygame.SRCALPHA, depth=32)
+        gradient_surf = pygame.surface.Surface(gradient_size, flags=pygame.SRCALPHA, depth=32)
 
         pygame.transform.scale(self.gradient_surface, gradient_size, gradient_surf)
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)

@@ -258,15 +258,15 @@ def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
         return premul_colour
 
 
-def premul_alpha_surface(surface: pygame.Surface) -> pygame.Surface:
+def premul_alpha_surface(surface: pygame.surface.Surface) -> pygame.surface.Surface:
     """
     Perform a pre-multiply alpha operation on a pygame surface's colours.
     """
     if USE_PREMULTIPLIED_ALPHA:
         surf_copy = surface.copy()
         surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
-        manipulate_surf = pygame.Surface(surf_copy.get_size(),
-                                         flags=pygame.SRCALPHA, depth=32)
+        manipulate_surf = pygame.surface.Surface(surf_copy.get_size(),
+                                                 flags=pygame.SRCALPHA, depth=32)
         # Can't be exactly transparent black or we trigger SDL1 'bug'
         manipulate_surf.fill(pygame.Color('#00000001'))
         manipulate_surf.blit(surf_copy, (0, 0))
@@ -274,15 +274,15 @@ def premul_alpha_surface(surface: pygame.Surface) -> pygame.Surface:
     return surface
 
 
-def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.Surface:
+def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.surface.Surface:
     """
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
     """
     if USE_PREMULTIPLIED_ALPHA:
         text_render = font.render(text, True, pygame.Color('#FFFFFFFF'))
-        final_surface = pygame.Surface(text_render.get_size(),
-                                       flags=pygame.SRCALPHA, depth=32)
+        final_surface = pygame.surface.Surface(text_render.get_size(),
+                                               flags=pygame.SRCALPHA, depth=32)
         # Can't be exactly transparent black or we trigger SDL1 'bug'
         final_surface.fill(pygame.Color('#00000001'))
         final_surface.blit(text_render, (0, 0))
@@ -291,8 +291,8 @@ def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygam
         return font.render(text, True, pygame.Color('#FFFFFFFF'))
 
 
-def basic_blit(destination: pygame.Surface,
-               source: pygame.Surface,
+def basic_blit(destination: pygame.surface.Surface,
+               source: pygame.surface.Surface,
                pos: Union[Tuple[int, int], pygame.Rect],
                area: Union[pygame.Rect, None] = None):
     """
@@ -312,7 +312,7 @@ def basic_blit(destination: pygame.Surface,
 
 
 def apply_colour_to_surface(colour: pygame.Color,
-                            shape_surface: pygame.Surface,
+                            shape_surface: pygame.surface.Surface,
                             rect: Union[pygame.Rect, None] = None):
     """
     Apply a colour to a shape surface by multiplication blend. This works best when the shape
@@ -324,12 +324,12 @@ def apply_colour_to_surface(colour: pygame.Color,
 
     """
     if rect is not None:
-        colour_surface = pygame.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
+        colour_surface = pygame.surface.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
         colour_surface.fill(colour)
         shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
     else:
-        colour_surface = pygame.Surface(shape_surface.get_size(),
-                                        flags=pygame.SRCALPHA, depth=32)
+        colour_surface = pygame.surface.Surface(shape_surface.get_size(),
+                                                flags=pygame.SRCALPHA, depth=32)
         colour_surface.fill(colour)
         shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
@@ -521,14 +521,14 @@ class SurfaceResource:
         return error
 
     @property
-    def surface(self) -> pygame.Surface:
+    def surface(self) -> pygame.surface.Surface:
         """
         Get the Pygame Surface
         """
         return self._surface if self._surface is not None else self.image_resource.loaded_surface
 
     @surface.setter
-    def surface(self, surface: pygame.Surface):
+    def surface(self, surface: pygame.surface.Surface):
         """
         Set the Pygame surface.
 

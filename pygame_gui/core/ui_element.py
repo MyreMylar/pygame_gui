@@ -607,9 +607,9 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                     surf_height = layer_text_render.get_height()
 
                 if make_new_larger_surface:
-                    new_surface = pygame.Surface((surf_width, surf_height),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+                    new_surface = pygame.surface.Surface((surf_width, surf_height),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
                     basic_blit(new_surface, self.image, (0, 0))
                     self.set_image(new_surface)
                 basic_blit(self.image, layer_text_render, (0, 0))
@@ -673,7 +673,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         """
         return self._image_clip
 
-    def set_image(self, new_image: Union[pygame.Surface, None]):
+    def set_image(self, new_image: Union[pygame.surface.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
         clip on the image at the same time.
@@ -687,9 +687,9 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                     self.get_image_clipping_rect().height == 0):
                 self.image = self.ui_manager.get_universal_empty_surface()
             else:
-                self.image = pygame.Surface(self._pre_clipped_image.get_size(),
-                                            flags=pygame.SRCALPHA,
-                                            depth=32)
+                self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
+                                                    flags=pygame.SRCALPHA,
+                                                    depth=32)
                 self.image.fill(pygame.Color('#00000000'))
                 basic_blit(self.image,
                            self._pre_clipped_image,

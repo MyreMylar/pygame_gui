@@ -239,7 +239,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_image(self, new_image: Union[pygame.Surface, None]):
+    def set_image(self, new_image: Union[pygame.surface.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
         clip on the image at the same time.

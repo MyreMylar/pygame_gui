@@ -87,9 +87,9 @@ class StyledChunk:
                 self.rendered_chunk = render_white_text_alpha_black_bg(self.font, self.chunk)
                 self.colour.apply_gradient_to_surface(self.rendered_chunk)
         else:
-            self.rendered_chunk = pygame.Surface((0, 0),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+            self.rendered_chunk = pygame.surface.Surface((0, 0),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
         metrics = self.font.metrics(self.chunk)
         self.ascent = self.font.get_ascent()
         self.width = self.font.size(self.chunk)[0]
@@ -135,9 +135,9 @@ class StyledChunk:
                                                            self.colour,
                                                            self.bg_colour).convert_alpha()
         else:
-            self.rendered_chunk = pygame.Surface((0, 0),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+            self.rendered_chunk = pygame.surface.Surface((0, 0),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
 
         self.font.set_underline(False)
 

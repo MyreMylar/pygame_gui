@@ -249,7 +249,7 @@ class UITextBox(UIElement):
         drawable_area = pygame.Rect((0, height_adjustment),
                                     (self.text_wrap_rect[2],
                                      self.text_wrap_rect[3]))
-        new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+        new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))
         basic_blit(new_image, self.formatted_text_block.block_sprite,
@@ -287,7 +287,7 @@ class UITextBox(UIElement):
             if self.rect.width <= 0 or self.rect.height <= 0:
                 return
 
-            new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+            new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.fill(pygame.Color(0, 0, 0, 0))
             basic_blit(new_image, self.background_surf, (0, 0))
             basic_blit(new_image, self.formatted_text_block.block_sprite,
@@ -419,9 +419,9 @@ class UITextBox(UIElement):
                 if (self.full_rebuild_countdown > 0.0 and
                         (self.relative_rect.width > 0 and
                          self.relative_rect.height > 0)):
-                    new_image = pygame.Surface(self.relative_rect.size,
-                                               flags=pygame.SRCALPHA,
-                                               depth=32)
+                    new_image = pygame.surface.Surface(self.relative_rect.size,
+                                                       flags=pygame.SRCALPHA,
+                                                       depth=32)
                     new_image.fill(pygame.Color('#00000000'))
                     basic_blit(new_image, self.image, (0, 0))
                     self.set_image(new_image)
@@ -474,7 +474,7 @@ class UITextBox(UIElement):
 
         drawable_area = pygame.Rect((0, height_adjustment),
                                     (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        new_image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+        new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))
         basic_blit(new_image, self.formatted_text_block.block_sprite,

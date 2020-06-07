@@ -13,7 +13,7 @@ class IColourGradientInterface(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def apply_gradient_to_surface(self, input_surface: pygame.Surface,
+    def apply_gradient_to_surface(self, input_surface: pygame.surface.Surface,
                                   rect: Union[pygame.Rect, None] = None):
         """
         Applies this gradient to a specified input surface using blending multiplication.

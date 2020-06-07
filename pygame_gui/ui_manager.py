@@ -50,7 +50,9 @@ class UIManager(IUIManagerInterface):
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
-        self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
+        self.universal_empty_surface = pygame.surface.Surface((0, 0),
+                                                              flags=pygame.SRCALPHA,
+                                                              depth=32)
         self.ui_group = pygame.sprite.LayeredDirty()
 
         self.focused_set = None
@@ -128,7 +130,7 @@ class UIManager(IUIManagerInterface):
         return self.ui_window_stack
 
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
+                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -268,7 +270,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.mouse_position
 
-    def draw_ui(self, window_surface: pygame.Surface):
+    def draw_ui(self, window_surface: pygame.surface.Surface):
         """
         Draws all the UI elements on the screen. Generally you want this to be after the rest of
         your game sprites have been drawn.
@@ -511,12 +513,12 @@ class UIManager(IUIManagerInterface):
 
         self.active_user_cursor = cursor
 
-    def get_universal_empty_surface(self) -> pygame.Surface:
+    def get_universal_empty_surface(self) -> pygame.surface.Surface:
         """
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.Surface
+        :return: An empty, and therefore invisible pygame.surface.Surface
         """
         return self.universal_empty_surface
 
