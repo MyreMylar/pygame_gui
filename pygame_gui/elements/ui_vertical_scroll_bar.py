@@ -233,13 +233,6 @@ class UIVerticalScrollBar(UIElement):
         :return: Returns True if we've done something with the input event.
 
         """
-
-        # pygame.MOUSEWHEEL only defined after pygame 1.9
-        try:
-            pygame.MOUSEWHEEL
-        except AttributeError:
-            pygame.MOUSEWHEEL = -1
-
         consumed_event = False
 
         if self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:

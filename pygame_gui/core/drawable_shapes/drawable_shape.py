@@ -19,15 +19,15 @@ class DrawableShapeState:
     def __init__(self, state_id: str):
 
         self.state_id = state_id
-        self.surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
+        self.surface = pygame.surface.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
         self.has_fresh_surface = False
         self.cached_background_id = None  # type: Union[str, None]
         self.transition = None  # type: Union[DrawableStateTransition, None]
 
-    def get_surface(self) -> pygame.Surface:
+    def get_surface(self) -> pygame.surface.Surface:
         """
-        Gets the pygame.Surface of this state. Will be a blend of this state and the previous one
-        if we are in a transition.
+        Gets the pygame.surface.Surface of this state. Will be a blend of this state and
+        the previous one if we are in a transition.
 
         :return: A pygame Surface for this state.
 
@@ -89,7 +89,7 @@ class DrawableStateTransition:
         else:
             self.finished = True
 
-    def produce_blended_result(self) -> pygame.Surface:
+    def produce_blended_result(self) -> pygame.surface.Surface:
         """
         Produces a blend between the images of our start state and our target state. The
         progression of the blend is dictated by the progress of time through the transition.
@@ -99,8 +99,8 @@ class DrawableStateTransition:
         """
         result = self.states[self.start_stat_id].surface.copy()
         blended_target = self.states[self.target_state_id].surface.copy()
-        start_multiply_surface = pygame.Surface(self.states[self.start_stat_id].surface.get_size(),
-                                                flags=pygame.SRCALPHA, depth=32)
+        start_multiply_surface = pygame.surface.Surface(
+            self.states[self.start_stat_id].surface.get_size(), flags=pygame.SRCALPHA, depth=32)
         target_multiply_surface = start_multiply_surface.copy()
 
         start_alpha = int(round(255.0*self.percentage_start_state))
@@ -299,7 +299,7 @@ class DrawableShape:
                                         - self.theming['text_vert_alignment_padding'] -
                                         self.shadow_width - self.border_width)
 
-    def get_active_state_surface(self) -> pygame.Surface:
+    def get_active_state_surface(self) -> pygame.surface.Surface:
         """
         Get the main surface from the active state.
 
@@ -311,7 +311,7 @@ class DrawableShape:
         else:
             return self.ui_manager.get_universal_empty_surface()
 
-    def get_surface(self, state_name: str) -> pygame.Surface:
+    def get_surface(self, state_name: str) -> pygame.surface.Surface:
         """
         Get the main surface from a specific state.
 
@@ -325,13 +325,13 @@ class DrawableShape:
         elif state_name in self.states and self.states['normal'].surface is not None:
             return self.states['normal'].surface
         else:
-            return pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
+            return pygame.surface.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
 
-    def get_fresh_surface(self) -> pygame.Surface:
+    def get_fresh_surface(self) -> pygame.surface.Surface:
         """
         Gets the surface of the active state and resets the state's 'has_fresh_surface' variable.
 
-        :return: The active state's main pygame.Surface.
+        :return: The active state's main pygame.surface.Surface.
 
         """
         self.active_state.has_fresh_surface = False

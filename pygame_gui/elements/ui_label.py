@@ -82,7 +82,9 @@ class UILabel(UIElement):
                          '' + self.text + ' - size diff: ' + str((width_overlap, height_overlap)))
             warnings.warn(warn_text, UserWarning)
 
-        new_image = pygame.Surface(self.relative_rect.size, flags=pygame.SRCALPHA, depth=32)
+        new_image = pygame.surface.Surface(self.relative_rect.size,
+                                           flags=pygame.SRCALPHA,
+                                           depth=32)
 
         if isinstance(self.bg_colour, ColourGradient):
             new_image.fill(pygame.Color('#FFFFFFFF'))

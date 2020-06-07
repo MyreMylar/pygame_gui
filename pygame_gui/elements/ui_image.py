@@ -25,7 +25,7 @@ class UIImage(UIElement):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 image_surface: pygame.Surface,
+                 image_surface: pygame.surface.Surface,
                  manager: IUIManagerInterface,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,

@@ -63,7 +63,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
+                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -120,7 +120,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def draw_ui(self, window_surface: pygame.Surface):
+    def draw_ui(self, window_surface: pygame.surface.Surface):
         """
         Draws the UI.
 
@@ -250,12 +250,12 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_universal_empty_surface(self) -> pygame.Surface:
+    def get_universal_empty_surface(self) -> pygame.surface.Surface:
         """
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.Surface
+        :return: An empty, and therefore invisible pygame.surface.Surface
 
         """
 

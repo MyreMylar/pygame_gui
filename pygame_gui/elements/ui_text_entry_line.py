@@ -144,9 +144,9 @@ class UITextEntryLine(UIElement):
         self.background_and_border = self.drawable_shape.get_surface('normal')
 
         if self.text_image is None:
-            self.text_image = pygame.Surface(self.text_image_rect.size,
-                                             flags=pygame.SRCALPHA,
-                                             depth=32)
+            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
 
         if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
@@ -284,10 +284,10 @@ class UITextEntryLine(UIElement):
                                                                        self.text_colour)
 
         if isinstance(self.selected_bg_colour, ColourGradient):
-            select_area_surface = pygame.Surface((select_area_width,
-                                                  overall_size[1]),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+            select_area_surface = pygame.surface.Surface((select_area_width,
+                                                          overall_size[1]),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
             select_area_surface.fill(pygame.Color('#FFFFFFFF'))
             self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
 
@@ -297,10 +297,10 @@ class UITextEntryLine(UIElement):
             basic_blit(select_area_surface, alpha_text, (0, 0))
         else:
             if isinstance(self.selected_text_colour, ColourGradient):
-                select_area_surface = pygame.Surface((select_area_width,
-                                                      overall_size[1]),
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
+                select_area_surface = pygame.surface.Surface((select_area_width,
+                                                              overall_size[1]),
+                                                             flags=pygame.SRCALPHA,
+                                                             depth=32)
                 select_area_surface.fill(self.selected_bg_colour)
 
                 alpha_text = render_white_text_alpha_black_bg(font=self.font,
@@ -316,9 +316,9 @@ class UITextEntryLine(UIElement):
             post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
                                                                         self.text_colour)
 
-        self.text_surface = pygame.Surface(overall_size,
-                                           flags=pygame.SRCALPHA,
-                                           depth=32)
+        self.text_surface = pygame.surface.Surface(overall_size,
+                                                   flags=pygame.SRCALPHA,
+                                                   depth=32)
 
         if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
@@ -338,7 +338,7 @@ class UITextEntryLine(UIElement):
     def _draw_text_with_grad_or_col(self,
                                     text: str,
                                     col_or_grad: Union[ColourGradient,
-                                                       pygame.Color]) -> pygame.Surface:
+                                                       pygame.Color]) -> pygame.surface.Surface:
         """
         Draw text to a surface using either a colour or gradient.
 
@@ -372,8 +372,8 @@ class UITextEntryLine(UIElement):
             if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
-                cursor_surface = pygame.Surface(self.cursor.size,
-                                                flags=pygame.SRCALPHA, depth=32)
+                cursor_surface = pygame.surface.Surface(self.cursor.size,
+                                                        flags=pygame.SRCALPHA, depth=32)
                 cursor_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(cursor_surface)
                 basic_blit(new_image, cursor_surface, self.cursor)
@@ -955,7 +955,7 @@ class UITextEntryLine(UIElement):
 
         if self.drawable_shape is not None:
             self.background_and_border = self.drawable_shape.get_fresh_surface()
-            self.text_image = pygame.Surface(self.text_image_rect.size,
-                                             flags=pygame.SRCALPHA,
-                                             depth=32)
+            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
             self.redraw()

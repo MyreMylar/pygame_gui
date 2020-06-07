@@ -1,5 +1,6 @@
 import json
 import io
+import sys
 import os
 import base64
 import warnings
@@ -21,10 +22,10 @@ from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
 
-try:
-    from os import PathLike  # for Python 3.6
-except ImportError:
-    PathLike = None
+
+if sys.version_info.minor < 6:
+    os.PathLike = None
+
 
 # First try importlib
 # Then importlib_resources
@@ -465,7 +466,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         self.unique_theming_ids[combined_id] = combined_ids
         return combined_ids
 
-    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.Surface:
+    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.surface.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
         an optional image display will need to handle the exception.
@@ -475,7 +476,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param image_id: The id identifying the particular image spot in the UI we are looking for
                          an image to add to.
 
-        :return: A pygame.Surface
+        :return: A pygame.surface.Surface
         """
 
         for combined_element_id in combined_element_ids:
@@ -617,7 +618,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             finally:
                 file.close()
 
-    def load_theme(self, file_path: Union[str, PathLike, io.StringIO, PackageResource]):
+    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]):
         """
         Loads a theme file, and currently, all associated data like fonts and images required
         by the theme.

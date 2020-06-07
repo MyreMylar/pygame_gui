@@ -17,7 +17,8 @@ class SurfaceCache:
     def __init__(self):
         self.cache_surface_size = (1024, 1024)
         self.cache_surfaces = []
-        starting_surface = pygame.Surface(self.cache_surface_size, flags=pygame.SRCALPHA, depth=32)
+        starting_surface = pygame.surface.Surface(self.cache_surface_size,
+                                                  flags=pygame.SRCALPHA, depth=32)
         starting_surface.fill(pygame.Color('#00000000'))
         self.cache_surfaces.append({'surface': starting_surface,
                                     'free_space_rectangles':
@@ -30,7 +31,7 @@ class SurfaceCache:
 
         self.low_on_space = False
 
-    def add_surface_to_cache(self, surface: pygame.Surface, string_id: str):
+    def add_surface_to_cache(self, surface: pygame.surface.Surface, string_id: str):
         """
         Adds a surface to the cache. There are two levels to the cache, the short term level
         just keeps hold of the surface until we have time to add it to the long term level.
@@ -61,7 +62,7 @@ class SurfaceCache:
             self.consider_purging_list.clear()
 
     def add_surface_to_long_term_cache(self,
-                                       cached_item: List[Union[pygame.Surface, int]],
+                                       cached_item: List[Union[pygame.surface.Surface, int]],
                                        string_id: str):
         """
         Move a surface from the short term cache into the long term one.
@@ -169,9 +170,9 @@ class SurfaceCache:
         """
         if len(self.cache_surfaces) < 3:
             # create a new cache surface
-            new_surface = pygame.Surface(self.cache_surface_size,
-                                         flags=pygame.SRCALPHA,
-                                         depth=32)
+            new_surface = pygame.surface.Surface(self.cache_surface_size,
+                                                 flags=pygame.SRCALPHA,
+                                                 depth=32)
             new_surface.fill(pygame.Color('#00000000'))
             self.cache_surfaces.append({'surface': new_surface,
                                         'free_space_rectangles':
@@ -220,7 +221,7 @@ class SurfaceCache:
                                  found_rectangle_to_split.height)
             free_space_rectangles.append(rect_4)
 
-    def find_surface_in_cache(self, lookup_id: str) -> Union[pygame.Surface, None]:
+    def find_surface_in_cache(self, lookup_id: str) -> Union[pygame.surface.Surface, None]:
         """
         Looks for a surface in the cache by an ID and returns it if found.
 
