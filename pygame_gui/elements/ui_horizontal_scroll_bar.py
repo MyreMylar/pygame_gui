@@ -235,17 +235,14 @@ class UIHorizontalScrollBar(UIElement):
         :return: Returns True if we've done something with the input event.
 
         """
-        consumed_event = False
-
         if self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
             if event.x > 0:
                 self.scroll_wheel_left = True
-                consumed_event = True
             elif event.x < 0:
                 self.scroll_wheel_right = True
-                consumed_event = True
+            return True
 
-        return consumed_event
+        return False
 
     def _check_was_last_focused(self) -> bool:
         """
