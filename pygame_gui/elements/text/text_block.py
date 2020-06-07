@@ -338,7 +338,7 @@ class TextBlock:
         self.block_sprite = None
         if self.height != -1 and self.width != -1:
             self.block_sprite = pygame.surface.Surface((self.width, self.height),
-                                               pygame.SRCALPHA, depth=32)
+                                                       pygame.SRCALPHA, depth=32)
             self.block_sprite.fill(pygame.Color('#00000000'))
         position = [0, 0]
         line_height_acc = 0

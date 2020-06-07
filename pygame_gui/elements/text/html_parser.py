@@ -124,7 +124,7 @@ class TextStyleData:
     def __init__(self,
                  theme: UIAppearanceTheme,
                  combined_ids: List[str]):
-
+        super().__init__()
         self.ui_theme = theme
         self.len_text = 0
 
@@ -277,8 +277,7 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
     Parse a subset of HTML tags into styling data for our text.
 
     :param ui_theme: The UI theming data.
-    :param element_ids: The element IDs used to look up theming data.
-    :param object_id: The object IDs used to look up theming data.
+    :param combined_ids: The element IDs used to look up theming data.
     """
     font_sizes = {
         1: 8,
@@ -299,9 +298,7 @@ class TextHTMLParser(TextStyleData, html.parser.HTMLParser):
     def __init__(self,
                  ui_theme: UIAppearanceTheme,
                  combined_ids: List[str]):
-
-        TextStyleData.__init__(self, ui_theme, combined_ids)
-        html.parser.HTMLParser.__init__(self)
+        super().__init__(ui_theme, combined_ids)
 
         self.ui_theme = ui_theme
         self.combined_ids = combined_ids
