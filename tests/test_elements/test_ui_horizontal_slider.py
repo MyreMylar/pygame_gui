@@ -285,7 +285,7 @@ class TestUIHorizontalSlider:
         assert slider.get_current_value() != 50 and slider.is_enabled is True
 
     def test_ints_in_ints_out(self, _init_pygame: None, default_ui_manager: UIManager,
-                    _display_surface_return_none: None):
+                              _display_surface_return_none: None):
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
                                     value_range=(0, 200), manager=default_ui_manager)
 

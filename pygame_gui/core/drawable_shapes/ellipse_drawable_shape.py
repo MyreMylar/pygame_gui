@@ -246,6 +246,7 @@ class EllipseDrawableShape(DrawableShape):
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
+        self.states[state_str].generated = True
 
     @staticmethod
     def clear_and_create_shape_surface(surface: pygame.surface.Surface,
