@@ -568,3 +568,68 @@ class TestUITextBox:
                              object_id="screen_message")
 
         assert text_box.rect.height != 0
+
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        text_box.disable()
+
+        assert text_box.is_enabled is False
+        assert text_box.scroll_bar.is_enabled is False
+
+        # process a mouse button down event
+        text_box.scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': text_box.scroll_bar.bottom_button.rect.center}))
+
+        text_box.scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        text_box.scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': text_box.scroll_bar.bottom_button.rect.center}))
+
+        assert text_box.scroll_bar.scroll_position == 0.0
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        text_box.disable()
+        text_box.enable()
+
+        assert text_box.is_enabled is True
+        assert text_box.scroll_bar.is_enabled is True
+
+        # process a mouse button down event
+        text_box.scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': text_box.scroll_bar.bottom_button.rect.center}))
+
+        text_box.scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        text_box.scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': text_box.scroll_bar.bottom_button.rect.center}))
+
+        assert text_box.scroll_bar.scroll_position != 0.0

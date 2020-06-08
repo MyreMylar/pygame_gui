@@ -19,6 +19,8 @@ also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the 'back' of the scroll bar, the colour of the track that the scroll bar moves along.
  - "**normal_border**" - The colour/gradient of the border around the scroll bar.
+ - "**disabled_dark_bg**" - The colour/gradient of the track when disabled.
+ - "**disabled_border**" - The border colour/gradient of the slider when disabled.
 
 Misc
 ----

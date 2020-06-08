@@ -394,3 +394,19 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             if self.vert_scroll_bar is not None:
                 self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
                                                      self._view_container.rect.height))
+
+    def disable(self):
+        """
+        Disables all elements in the container so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self._root_container.disable()
+
+    def enable(self):
+        """
+        Enables all elements in the container so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self._root_container.enable()

@@ -771,3 +771,21 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                 setattr(self, attribute_name, attribute_value)
                 has_changed = True
         return has_changed
+
+    def disable(self):
+        """
+        Disables elements so they are no longer interactive.
+        This is just a default fallback implementation for elements that don't define their own.
+
+        Elements should handle their own enabling and disabling.
+        """
+        self.is_enabled = False
+
+    def enable(self):
+        """
+        Enables elements so they are interactive again.
+        This is just a default fallback implementation for elements that don't define their own.
+
+        Elements should handle their own enabling and disabling.
+        """
+        self.is_enabled = True

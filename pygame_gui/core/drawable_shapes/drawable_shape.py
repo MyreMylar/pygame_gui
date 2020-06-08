@@ -24,6 +24,9 @@ class DrawableShapeState:
         self.cached_background_id = None  # type: Union[str, None]
         self.transition = None  # type: Union[DrawableStateTransition, None]
 
+        self.should_auto_pregen = self.state_id != 'disabled'
+        self.generated = False
+
     def get_surface(self) -> pygame.surface.Surface:
         """
         Gets the pygame.surface.Surface of this state. Will be a blend of this state and
@@ -190,6 +193,14 @@ class DrawableShape:
         :param state_id: the ID of the new state to make active.
 
         """
+
+        # make sure this state is generated before we set it.
+        # should ensure that some more rarely used states are only generated if we use them
+        if not self.states[state_id].generated:
+            if state_id in self.states_to_redraw_queue:
+                self.states_to_redraw_queue.remove(state_id)
+            self.redraw_state(state_id)
+
         if state_id in self.states and self.active_state.state_id != state_id:
             self.previous_state = self.active_state
             self.active_state = self.states[state_id]
@@ -257,11 +268,12 @@ class DrawableShape:
 
     def redraw_all_states(self):
         """
-        Starts the redrawing process for all states of this shape. Redrawing is done one state at
-        a time so will take a few loops of the game to complete if this shape has many states.
-
+        Starts the redrawing process for all states of this shape that auto pre-generate.
+        Redrawing is done one state at a time so will take a few loops of the game to
+        complete if this shape has many states.
         """
-        self.states_to_redraw_queue = deque(self.states)
+        self.states_to_redraw_queue = deque([state_id for state_id, state in self.states.items()
+                                             if state.should_auto_pregen])
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 

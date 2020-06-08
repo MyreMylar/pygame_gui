@@ -517,8 +517,7 @@ class UIColourPickerDialog(UIWindow):
                 self.update_saturation_value_square()
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.sat_value_square.rect.collidepoint(scaled_mouse_pos):
                 relative_click_pos = [scaled_mouse_pos[0] - self.sat_value_square.rect.left,
                                       scaled_mouse_pos[1] - self.sat_value_square.rect.top]

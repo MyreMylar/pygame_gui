@@ -400,6 +400,7 @@ class RoundedRectangleShape(DrawableShape):
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
+        self.states[state_str].generated = True
 
     def _redraw_filled_bar(self,
                            bg_col: Union[pygame.Color, ColourGradient],

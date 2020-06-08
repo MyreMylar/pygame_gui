@@ -26,6 +26,8 @@ also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the drop down menu. Probably not visible.
  - "**normal_border**" - The border colour/gradient of the drop down menu.
+ - "**disabled_dark_bg**" - The colour/gradient of the menu background when disabled.
+ - "**disabled_border**" - The border colour/gradient of the menu when disabled.
 
 Misc
 ----
