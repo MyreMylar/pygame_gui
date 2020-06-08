@@ -299,50 +299,51 @@ class UISelectionList(UIElement):
 
         """
         consumed_event = False
-        if (event.type == pygame.USEREVENT and
-                event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED] and
-                event.ui_element in self.item_list_container.elements):
-            for item in self.item_list:
-                if item['button_element'] == event.ui_element:
-                    if event.user_type == UI_BUTTON_DOUBLE_CLICKED:
-                        event_data = {'user_type': UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
-                                      'text': event.ui_element.text,
-                                      'ui_element': self,
-                                      'ui_object_id': self.most_specific_combined_id}
-                    else:
+        if self.is_enabled:
+            if (event.type == pygame.USEREVENT and
+                    event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED] and
+                    event.ui_element in self.item_list_container.elements):
+                for item in self.item_list:
+                    if item['button_element'] == event.ui_element:
+                        if event.user_type == UI_BUTTON_DOUBLE_CLICKED:
+                            event_data = {'user_type': UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
+                                          'text': event.ui_element.text,
+                                          'ui_element': self,
+                                          'ui_object_id': self.most_specific_combined_id}
+                        else:
+                            if item['selected']:
+                                item['selected'] = False
+                                event.ui_element.unselect()
+
+                                event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
+                                              'text': event.ui_element.text,
+                                              'ui_element': self,
+                                              'ui_object_id': self.most_specific_combined_id}
+
+                            else:
+                                item['selected'] = True
+                                event.ui_element.select()
+
+                                event_data = {'user_type': UI_SELECTION_LIST_NEW_SELECTION,
+                                              'text': event.ui_element.text,
+                                              'ui_element': self,
+                                              'ui_object_id': self.most_specific_combined_id}
+
+                        selection_list_event = pygame.event.Event(pygame.USEREVENT, event_data)
+                        pygame.event.post(selection_list_event)
+                    elif not self.allow_multi_select:
                         if item['selected']:
                             item['selected'] = False
-                            event.ui_element.unselect()
+                            if item['button_element'] is not None:
+                                item['button_element'].unselect()
 
-                            event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
-                                          'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-
-                        else:
-                            item['selected'] = True
-                            event.ui_element.select()
-
-                            event_data = {'user_type': UI_SELECTION_LIST_NEW_SELECTION,
-                                          'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-
-                    selection_list_event = pygame.event.Event(pygame.USEREVENT, event_data)
-                    pygame.event.post(selection_list_event)
-                elif not self.allow_multi_select:
-                    if item['selected']:
-                        item['selected'] = False
-                        if item['button_element'] is not None:
-                            item['button_element'].unselect()
-
-                            event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
-                                          'text': item['text'],
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-                            drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
-                                                                         event_data)
-                            pygame.event.post(drop_down_changed_event)
+                                event_data = {'user_type': UI_SELECTION_LIST_DROPPED_SELECTION,
+                                              'text': item['text'],
+                                              'ui_element': self,
+                                              'ui_object_id': self.most_specific_combined_id}
+                                drop_down_changed_event = pygame.event.Event(pygame.USEREVENT,
+                                                                             event_data)
+                                pygame.event.post(drop_down_changed_event)
 
         return consumed_event
 

@@ -283,11 +283,12 @@ class UIButton(UIElement):
 
         """
         consumed_event = False
-        if self.is_enabled:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                if self.is_enabled:
                     if (self.allow_double_clicks and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
                         event_data = {'user_type': UI_BUTTON_DOUBLE_CLICKED,
@@ -306,25 +307,27 @@ class UIButton(UIElement):
                         if self.tool_tip is not None:
                             self.tool_tip.kill()
                             self.tool_tip = None
-                    consumed_event = True
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                    int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-                if self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
-                    self.held = False
-                    self._set_inactive()
-                    consumed_event = True
-                    self.pressed_event = True
+                consumed_event = True
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
+                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            if (self.is_enabled and
+                    self.drawable_shape.collide_point(scaled_mouse_pos) and
+                    self.held):
+                self.held = False
+                self._set_inactive()
+                consumed_event = True
+                self.pressed_event = True
 
-                    event_data = {'user_type': UI_BUTTON_PRESSED,
-                                  'ui_element': self,
-                                  'ui_object_id': self.most_specific_combined_id}
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+                event_data = {'user_type': UI_BUTTON_PRESSED,
+                              'ui_element': self,
+                              'ui_object_id': self.most_specific_combined_id}
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
-                if self.held:
-                    self.held = False
-                    self._set_inactive()
-                    consumed_event = True
+            if self.is_enabled and self.held:
+                self.held = False
+                self._set_inactive()
+                consumed_event = True
 
         return consumed_event
 
@@ -341,15 +344,23 @@ class UIButton(UIElement):
         """
         Disables the button so that it is no longer interactive.
         """
-        self.is_enabled = False
-        self.drawable_shape.set_active_state('disabled')
+        if self.is_enabled:
+            self.is_enabled = False
+            self.drawable_shape.set_active_state('disabled')
+
+            # clear other button state
+            self.held = False
+            self.pressed = False
+            self.is_selected = False
+            self.pressed_event = False
 
     def enable(self):
         """
         Re-enables the button so we can once again interact with it.
         """
-        self.is_enabled = True
-        self.drawable_shape.set_active_state('normal')
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.drawable_shape.set_active_state('normal')
 
     def _set_active(self):
         """

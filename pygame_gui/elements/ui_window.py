@@ -211,10 +211,12 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
                                 int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
 
-            if event.button == pygame.BUTTON_LEFT and (self.edge_hovering[0] or
-                                                       self.edge_hovering[1] or
-                                                       self.edge_hovering[2] or
-                                                       self.edge_hovering[3]):
+            if (self.is_enabled and
+                    event.button == pygame.BUTTON_LEFT and
+                    (self.edge_hovering[0] or
+                     self.edge_hovering[1] or
+                     self.edge_hovering[2] or
+                     self.edge_hovering[3])):
                 self.resizing_mode_active = True
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
@@ -255,7 +257,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                          self.edge_hovering[1] or
                                                          self.edge_hovering[2] or
                                                          self.edge_hovering[3]):
-                if self.bring_to_front_on_focused:
+                if self.is_enabled and self.bring_to_front_on_focused:
                     self.window_stack.move_window_to_front(self)
                 consumed_event = True
 
@@ -711,4 +713,3 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if not self.is_enabled:
             self.is_enabled = True
             self._window_root_container.enable()
-

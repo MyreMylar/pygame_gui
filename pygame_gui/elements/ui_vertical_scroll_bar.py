@@ -240,7 +240,7 @@ class UIVerticalScrollBar(UIElement):
         """
         consumed_event = False
 
-        if self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
+        if self.is_enabled and self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
             if event.y > 0:
                 self.scroll_wheel_up = True
                 consumed_event = True
