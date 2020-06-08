@@ -508,6 +508,10 @@ class UISelectionList(UIElement):
             self.is_enabled = False
             self.list_and_scroll_bar_container.disable()
 
+            # clear selections
+            for item in self.item_list:
+                item['selected'] = False
+
     def enable(self):
         """
         Enables all elements in the selection list so they are interactive again.
