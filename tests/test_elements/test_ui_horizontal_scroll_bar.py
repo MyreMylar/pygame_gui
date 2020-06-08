@@ -237,3 +237,46 @@ class TestUIHorizontalScrollBar:
                                                              {'button': 1, 'pos': (195, 40)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert scroll_bar.right_button.held is True
+
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                           visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.disable()
+
+        # process a mouse button down event
+        scroll_bar.right_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': scroll_bar.right_button.rect.center}))
+
+        scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        scroll_bar.right_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': scroll_bar.right_button.rect.center}))
+
+        assert scroll_bar.scroll_position == 0.0 and scroll_bar.is_enabled is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                           visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.disable()
+        scroll_bar.enable()
+
+        # process a mouse button down event
+        scroll_bar.right_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': scroll_bar.right_button.rect.center}))
+
+        scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        scroll_bar.right_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': scroll_bar.right_button.rect.center}))
+
+        assert scroll_bar.scroll_position != 0.0 and scroll_bar.is_enabled is True

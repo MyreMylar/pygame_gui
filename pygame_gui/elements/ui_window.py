@@ -706,7 +706,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     def enable(self):
         """
-        Disables the window and it's contents so it is no longer interactive.
+        Enables the window and it's contents so it is interactive again.
         """
         if not self.is_enabled:
             self.is_enabled = True
