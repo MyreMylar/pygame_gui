@@ -9,6 +9,7 @@
             "selected_bg": "#365880",
             "active_bg": "#365880",
             "dark_bg": "#21282d",
+            "disabled_dark_bg": "#181818",
             "normal_text": "#bbbbbb",
             "hovered_text": "#bbbbbb",
             "disabled_text": "#808080",

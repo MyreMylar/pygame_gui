@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
@@ -56,10 +56,18 @@ class UIHorizontalSlider(UIElement):
         self.left_limit_position = 0.0
         self.starting_grab_x_difference = 0
 
+        if (isinstance(start_value, int) and
+                isinstance(value_range[0], int) and
+                isinstance(value_range[1], int)):
+            self.use_integers_for_value = True
+        else:
+            self.use_integers_for_value = False
         self.value_range = value_range
         value_range_length = self.value_range[1] - self.value_range[0]
-        self.current_value = int(self.value_range[0] +
-                                 (self.current_percentage * value_range_length))
+
+        self.current_value = self.value_range[0] + (self.current_percentage * value_range_length)
+        if self.use_integers_for_value:
+            self.current_value = int(self.current_value)
 
         self.grabbed_slider = False
         self.has_moved_recently = False
@@ -67,6 +75,9 @@ class UIHorizontalSlider(UIElement):
 
         self.background_colour = None
         self.border_colour = None
+        self.disabled_border_colour = None
+        self.disabled_background_colour = None
+
         self.border_width = None
         self.shadow_width = None
 
@@ -74,7 +85,7 @@ class UIHorizontalSlider(UIElement):
         self.shape = 'rectangle'
         self.shape_corner_radius = None
 
-        self.background_rect = None
+        self.background_rect = None  # type: Optional[pygame.Rect]
 
         self.scrollable_width = None
         self.right_limit_position = None
@@ -121,16 +132,18 @@ class UIHorizontalSlider(UIElement):
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
+                              'disabled_bg': self.disabled_background_colour,
+                              'disabled_border': self.disabled_border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
+                                                    ['normal', 'disabled'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+                                                        ['normal', 'disabled'], self.ui_manager)
 
         self.set_image(self.drawable_shape.get_surface('normal'))
 
@@ -218,7 +231,7 @@ class UIHorizontalSlider(UIElement):
         """
         super().update(time_delta)
 
-        if not self.alive():
+        if not (self.alive() and self.is_enabled):
             return
         moved_this_frame = False
         if self.left_button is not None and (self.left_button.held and
@@ -264,6 +277,8 @@ class UIHorizontalSlider(UIElement):
             self.current_percentage = self.scroll_position / self.scrollable_width
             self.current_value = self.value_range[0] + (self.current_percentage *
                                                         (self.value_range[1] - self.value_range[0]))
+            if self.use_integers_for_value:
+                self.current_value = int(self.current_value)
             if not self.has_moved_recently:
                 self.has_moved_recently = True
 
@@ -296,13 +311,16 @@ class UIHorizontalSlider(UIElement):
         :param value: The value to set.
 
         """
+        if self.use_integers_for_value:
+            value = int(value)
         if min(self.value_range[0],
                self.value_range[1]) <= value <= max(self.value_range[0],
                                                     self.value_range[1]):
-            self.current_value = float(value)
+
+            self.current_value = value
             value_range_size = (self.value_range[1] - self.value_range[0])
             if value_range_size != 0:
-                self.current_percentage = (self.current_value -
+                self.current_percentage = (float(self.current_value) -
                                            self.value_range[0])/value_range_size
                 self.scroll_position = self.scrollable_width * self.current_percentage
 
@@ -344,6 +362,18 @@ class UIHorizontalSlider(UIElement):
                                                              self.combined_element_ids)
         if border_colour != self.border_colour:
             self.border_colour = border_colour
+            has_any_changed = True
+
+        disabled_background_colour = self.ui_theme.get_colour_or_gradient('disabled_dark_bg',
+                                                                          self.combined_element_ids)
+        if disabled_background_colour != self.disabled_background_colour:
+            self.disabled_background_colour = disabled_background_colour
+            has_any_changed = True
+
+        disabled_border_colour = self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                      self.combined_element_ids)
+        if disabled_border_colour != self.disabled_border_colour:
+            self.disabled_border_colour = disabled_border_colour
             has_any_changed = True
 
         def parse_to_bool(str_data: str):
@@ -427,3 +457,29 @@ class UIHorizontalSlider(UIElement):
 
         self.sliding_button.set_dimensions((self.sliding_button_width, self.background_rect.height))
         self.sliding_button.set_relative_position((slider_x_pos, slider_y_pos))
+
+    def disable(self):
+        """
+        Disable the slider. It should not be interactive and will use the disabled theme colours.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.sliding_button.disable()
+            if self.left_button:
+                self.left_button.disable()
+            if self.right_button:
+                self.right_button.disable()
+            self.drawable_shape.set_active_state('disabled')
+
+    def enable(self):
+        """
+        Enable the slider. It should become interactive and will use the normal theme colours.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.sliding_button.enable()
+            if self.left_button:
+                self.left_button.enable()
+            if self.right_button:
+                self.right_button.enable()
+            self.drawable_shape.set_active_state('normal')
