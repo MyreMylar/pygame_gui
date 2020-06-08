@@ -715,3 +715,22 @@ class UITextBox(UIElement):
             self.link_style = link_style
             has_any_changed = True
         return has_any_changed
+
+    def disable(self):
+        """
+        Disable the text box. Basically just disables the scroll bar if one exists.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            if self.scroll_bar:
+                self.scroll_bar.disable()
+
+    def enable(self):
+        """
+        Enable the text box. Renables the scroll bar if one exists.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            if self.scroll_bar:
+                self.scroll_bar.enable()
+
