@@ -499,3 +499,20 @@ class UISelectionList(UIElement):
                                                                       self.border_width))
 
         self.set_item_list(self._raw_item_list)
+
+    def disable(self):
+        """
+        Disables all elements in the selection list so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.list_and_scroll_bar_container.disable()
+
+    def enable(self):
+        """
+        Enables all elements in the selection list so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.list_and_scroll_bar_container.enable()
+
