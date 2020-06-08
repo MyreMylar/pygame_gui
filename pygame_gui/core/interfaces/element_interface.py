@@ -313,4 +313,3 @@ class IUIElementInterface(metaclass=ABCMeta):
 
         Elements should handle their own enabling and disabling.
         """
-

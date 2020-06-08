@@ -208,15 +208,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 event.button in [pygame.BUTTON_LEFT,
                                  pygame.BUTTON_MIDDLE,
                                  pygame.BUTTON_RIGHT]):
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
 
+            edge_hovered = (self.edge_hovering[0] or self.edge_hovering[1] or
+                            self.edge_hovering[2] or self.edge_hovering[3])
             if (self.is_enabled and
                     event.button == pygame.BUTTON_LEFT and
-                    (self.edge_hovering[0] or
-                     self.edge_hovering[1] or
-                     self.edge_hovering[2] or
-                     self.edge_hovering[3])):
+                    edge_hovered):
                 self.resizing_mode_active = True
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
@@ -250,8 +248,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             consumed_event = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0],
                                 scaled_mouse_pos[1]) or (self.edge_hovering[0] or
                                                          self.edge_hovering[1] or

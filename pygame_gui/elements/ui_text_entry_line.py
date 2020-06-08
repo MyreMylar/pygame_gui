@@ -942,9 +942,8 @@ class UITextEntryLine(UIElement):
             self.selected_bg_colour = selected_bg_colour
             has_any_changed = True
 
-        disabled_background_colour = self.ui_theme.get_colour_or_gradient(
-                                                        'disabled_dark_bg',
-                                                        self.combined_element_ids)
+        disabled_background_colour = self.ui_theme.get_colour_or_gradient('disabled_dark_bg',
+                                                                          self.combined_element_ids)
         if disabled_background_colour != self.disabled_background_colour:
             self.disabled_background_colour = disabled_background_colour
             has_any_changed = True

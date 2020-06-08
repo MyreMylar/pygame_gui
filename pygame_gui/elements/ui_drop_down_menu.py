@@ -235,8 +235,6 @@ class UIExpandedDropDownState:
                  rest of the UI.
 
         """
-        consumed_event = False
-
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.close_button, self.selected_option_button]):
@@ -257,7 +255,7 @@ class UIExpandedDropDownState:
             drop_down_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(drop_down_changed_event)
 
-        return consumed_event
+        return False  # don't consume any events
 
     def update_position(self):
         """
@@ -498,14 +496,12 @@ class UIClosedDropDownState:
         :return: Return True if we want to consume this event so it is not passed on to the
                  rest of the UI.
         """
-        consumed_event = False
-
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.open_button, self.selected_option_button]):
 
             self.should_transition = True
 
-        return consumed_event
+        return False
 
     def update_position(self):
         """

@@ -131,40 +131,39 @@ class UILabel(UIElement):
                                                 centery=int(self.rect.height / 2))
 
         if self.text_shadow:
-            shadow_text_render = render_white_text_alpha_black_bg(self.font, self.text)
-            apply_colour_to_surface(self.text_shadow_colour, shadow_text_render)
-
-            for y_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
-                shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0],
-                                                text_render_rect.y + self.text_shadow_offset[1]
-                                                + y_pos),
-                                               text_render_rect.size)
-                basic_blit(new_image, shadow_text_render, shadow_text_rect)
-
-            for x_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
-                shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0]
-                                                + x_pos,
-                                                text_render_rect.y + self.text_shadow_offset[1]),
-                                               text_render_rect.size)
-                basic_blit(new_image, shadow_text_render, shadow_text_rect)
-
-            for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
-                shadow_text_rect = pygame.Rect(
-                    (text_render_rect.x + self.text_shadow_offset[0] + x_and_y,
-                     text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
-                    text_render_rect.size)
-                basic_blit(new_image, shadow_text_render, shadow_text_rect)
-
-            for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
-                shadow_text_rect = pygame.Rect(
-                    (text_render_rect.x + self.text_shadow_offset[0] - x_and_y,
-                     text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
-                    text_render_rect.size)
-                basic_blit(new_image, shadow_text_render, shadow_text_rect)
+            self._rebuild_shadow(new_image, text_render_rect)
 
         basic_blit(new_image, text_render, text_render_rect)
 
         self.set_image(new_image)
+
+    def _rebuild_shadow(self, new_image, text_render_rect):
+        shadow_text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        apply_colour_to_surface(self.text_shadow_colour, shadow_text_render)
+        for y_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+            shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0],
+                                            text_render_rect.y + self.text_shadow_offset[1]
+                                            + y_pos),
+                                           text_render_rect.size)
+            basic_blit(new_image, shadow_text_render, shadow_text_rect)
+        for x_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+            shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0]
+                                            + x_pos,
+                                            text_render_rect.y + self.text_shadow_offset[1]),
+                                           text_render_rect.size)
+            basic_blit(new_image, shadow_text_render, shadow_text_rect)
+        for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
+            shadow_text_rect = pygame.Rect(
+                (text_render_rect.x + self.text_shadow_offset[0] + x_and_y,
+                 text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
+                text_render_rect.size)
+            basic_blit(new_image, shadow_text_render, shadow_text_rect)
+        for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
+            shadow_text_rect = pygame.Rect(
+                (text_render_rect.x + self.text_shadow_offset[0] - x_and_y,
+                 text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
+                text_render_rect.size)
+            basic_blit(new_image, shadow_text_render, shadow_text_rect)
 
     def rebuild_from_changed_theme_data(self):
         """

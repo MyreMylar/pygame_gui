@@ -525,8 +525,7 @@ class UITextBox(UIElement):
         should_redraw_from_chunks = False
         should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
@@ -565,8 +564,7 @@ class UITextBox(UIElement):
                          self.shadow_width + self.rounded_corner_offset)
             base_y = int(self.rect[1] + self.padding[1] + self.border_width +
                          self.shadow_width + self.rounded_corner_offset - height_adjustment)
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             for chunk in self.link_hover_chunks:
 
                 hover_rect = pygame.Rect((base_x + chunk.rect.x,
@@ -736,4 +734,3 @@ class UITextBox(UIElement):
             self.is_enabled = True
             if self.scroll_bar:
                 self.scroll_bar.enable()
-

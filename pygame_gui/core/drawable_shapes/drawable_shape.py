@@ -24,7 +24,7 @@ class DrawableShapeState:
         self.cached_background_id = None  # type: Union[str, None]
         self.transition = None  # type: Union[DrawableStateTransition, None]
 
-        self.should_auto_pregen = False if self.state_id == 'disabled' else True
+        self.should_auto_pregen = self.state_id != 'disabled'
         self.generated = False
 
     def get_surface(self) -> pygame.surface.Surface:
