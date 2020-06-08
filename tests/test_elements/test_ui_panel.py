@@ -72,7 +72,8 @@ class TestUIPanel:
                           container=panel)
 
         assert button.layer_thickness == 1
-        assert panel.get_container().layer_thickness == 2  # happens 'cause elements added to container hover 1 layer up
+        # happens 'cause elements added to container hover 1 layer up
+        assert panel.get_container().layer_thickness == 2
         panel.update(0.05)
         assert panel.layer_thickness == 2
 
@@ -85,17 +86,17 @@ class TestUIPanel:
                                  'top': 5,
                                  'bottom': 5})
 
-        consumed_event_left = panel.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                     {'button': pygame.BUTTON_LEFT,
-                                                                      'pos': panel.rect.center}))
+        consumed_event_left = panel.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': pygame.BUTTON_LEFT, 'pos': panel.rect.center}))
 
-        consumed_event_right = panel.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                      {'button': pygame.BUTTON_RIGHT,
-                                                                       'pos': panel.rect.center}))
+        consumed_event_right = panel.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': pygame.BUTTON_RIGHT, 'pos': panel.rect.center}))
 
-        consumed_event_middle = panel.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                                       {'button': pygame.BUTTON_MIDDLE,
-                                                                        'pos': panel.rect.center}))
+        consumed_event_middle = panel.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': pygame.BUTTON_MIDDLE, 'pos': panel.rect.center}))
 
         assert consumed_event_left and consumed_event_right and consumed_event_middle
 
@@ -116,17 +117,20 @@ class TestUIPanel:
 
         assert len(default_ui_manager.get_root_container().elements) == 2
         assert len(default_ui_manager.get_sprite_group().sprites()) == 4
-        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
-                                                                   panel,
-                                                                   panel.get_container(),
-                                                                   button]
+        assert (default_ui_manager.get_sprite_group().sprites() ==
+                [default_ui_manager.get_root_container(),
+                 panel,
+                 panel.get_container(),
+                 button])
         panel.kill()
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
-        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
+        assert (default_ui_manager.get_sprite_group().sprites() ==
+                [default_ui_manager.get_root_container()])
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300),
+                                     manager=default_ui_manager)
         element_1 = UIPanel(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=test_container,
@@ -203,7 +207,8 @@ class TestUIPanel:
         assert element_5.relative_bottom_margin == 230
 
     def test_set_position(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
+        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
+                                     manager=default_ui_manager)
         element = UIPanel(relative_rect=pygame.Rect(100, 100, 50, 50),
                           manager=default_ui_manager,
                           container=test_container,
@@ -289,7 +294,8 @@ class TestUIPanel:
         assert element_5.relative_bottom_margin == 240
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager):
-        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
+        test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
+                                     manager=default_ui_manager)
 
         element_1 = UIPanel(relative_rect=pygame.Rect(30, 30, 50, 50),
                             manager=default_ui_manager,
@@ -398,8 +404,10 @@ class TestUIPanel:
         assert element_5.relative_right_margin == 200
         assert element_5.relative_bottom_margin == 200
 
-    def test_rebuild_from_changed_theme_data_non_default(self, _init_pygame, _display_surface_return_none):
-        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_panel_non_default.json"))
+    def test_rebuild_from_changed_theme_data_non_default(self, _init_pygame,
+                                                         _display_surface_return_none):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes", "ui_panel_non_default.json"))
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=manager,
@@ -414,8 +422,10 @@ class TestUIPanel:
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid gradient")
     @pytest.mark.filterwarnings("ignore:Unable to load")
-    def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
-        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_panel_bad_values.json"))
+    def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame,
+                                                        _display_surface_return_none):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
+                                                     "ui_panel_bad_values.json"))
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=manager,
@@ -425,3 +435,72 @@ class TestUIPanel:
                                  'bottom': 5})
 
         assert panel.image is not None
+
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        panel = UIPanel(relative_rect=pygame.Rect(0, 0, 150, 400),
+                        starting_layer_height=5,
+                        manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=panel)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=panel)
+
+        panel.disable()
+
+        assert panel.is_enabled is False
+        assert button_1.is_enabled is False
+        assert button_2.is_enabled is False
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (50, 25)}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        panel = UIPanel(relative_rect=pygame.Rect(0, 0, 150, 400),
+                        starting_layer_height=5,
+                        manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=panel)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=panel)
+
+        panel.disable()
+        panel.enable()
+
+        assert panel.is_enabled is True
+        assert button_1.is_enabled is True
+        assert button_2.is_enabled is True
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (50, 25)}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is True

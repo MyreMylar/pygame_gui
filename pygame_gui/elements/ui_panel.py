@@ -278,3 +278,20 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                         ['normal'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+    def disable(self):
+        """
+        Disables all elements in the panel so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.panel_container.disable()
+
+    def enable(self):
+        """
+        Enables all elements in the panel so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.panel_container.enable()
+

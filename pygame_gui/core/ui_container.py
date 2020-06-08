@@ -275,3 +275,21 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         elif self.hovered:
             self.hovered = False
         return hovered_higher_element
+
+    def disable(self):
+        """
+        Disables all elements in the container so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            for element in self.elements:
+                element.disable()
+
+    def enable(self):
+        """
+        Enables all elements in the container so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            for element in self.elements:
+                element.enable()

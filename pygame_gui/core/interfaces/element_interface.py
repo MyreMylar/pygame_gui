@@ -297,3 +297,20 @@ class IUIElementInterface(metaclass=ABCMeta):
 
         :param element: The element to remove.
         """
+
+    @abstractmethod
+    def disable(self):
+        """
+        Disables elements so they are no longer interactive.
+
+        Elements should handle their own enabling and disabling.
+        """
+
+    @abstractmethod
+    def enable(self):
+        """
+        Enables elements so they are interactive again.
+
+        Elements should handle their own enabling and disabling.
+        """
+
