@@ -426,3 +426,72 @@ class TestUIWindow:
 
         window.focus()
         window.unfocus()
+
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=window)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=window)
+
+        window.disable()
+
+        assert window.is_enabled is False
+        assert window.title_bar.is_enabled is False
+        assert button_1.is_enabled is False
+        assert button_2.is_enabled is False
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=window)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=window)
+
+        window.disable()
+        window.enable()
+
+        assert window.is_enabled is True
+        assert window.title_bar.is_enabled is True
+        assert button_1.is_enabled is True
+        assert button_2.is_enabled is True
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is True

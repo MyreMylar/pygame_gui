@@ -695,3 +695,20 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         self.window_display_title = new_title
         self.title_bar.set_text(self.window_display_title)
+
+    def disable(self):
+        """
+        Disables the window and it's contents so it is no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self._window_root_container.disable()
+
+    def enable(self):
+        """
+        Disables the window and it's contents so it is no longer interactive.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self._window_root_container.enable()
+

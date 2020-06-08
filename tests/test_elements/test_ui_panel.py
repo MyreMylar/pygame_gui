@@ -460,11 +460,11 @@ class TestUIPanel:
 
         # process a mouse button down event
         button_1.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
 
         # process a mouse button up event
         button_1.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (50, 25)}))
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
 
         button_1.update(0.01)
 
@@ -495,11 +495,11 @@ class TestUIPanel:
 
         # process a mouse button down event
         button_1.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
 
         # process a mouse button up event
         button_1.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (50, 25)}))
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
 
         button_1.update(0.01)
 
