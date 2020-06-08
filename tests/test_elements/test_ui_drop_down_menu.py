@@ -372,3 +372,85 @@ class TestUIDropDownMenu:
             default_ui_manager.process_events(event)
 
         assert menu.selected_option == 'flour'
+
+    def test_disable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
+                                     manager=default_ui_manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state == menu.menu_states['expanded']
+        assert menu.selected_option == 'eggs'
+
+        menu.disable()
+        assert menu.is_enabled is False
+        assert menu.current_state == menu.menu_states['closed']
+
+        expand_button = menu.current_state.open_button
+
+        expand_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                       {'button': pygame.BUTTON_LEFT,
+                                                        'pos': expand_button.rect.center}))
+
+        expand_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                       {'button': pygame.BUTTON_LEFT,
+                                                        'pos': expand_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert menu.current_state.should_transition is False
+
+    def test_enable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
+                                     manager=default_ui_manager)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=default_ui_manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state == menu.menu_states['expanded']
+        assert menu.selected_option == 'eggs'
+
+        menu.disable()
+        assert menu.is_enabled is False
+
+        menu.enable()
+        assert menu.is_enabled is True
+        assert menu.current_state == menu.menu_states['closed']
+
+        expand_button = menu.current_state.open_button
+
+        expand_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                       {'button': pygame.BUTTON_LEFT,
+                                                        'pos': expand_button.rect.center}))
+
+        expand_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                       {'button': pygame.BUTTON_LEFT,
+                                                        'pos': expand_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert menu.current_state.should_transition is True
+
+        menu.update(0.01)
+
+        assert menu.current_state == menu.menu_states['expanded']
+        assert menu.selected_option == 'eggs'
