@@ -174,45 +174,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
         Set a set of element as the focused set.
 
-        If the set is a scroll bar we also keep track of that.
-
         :param focus: The set of element to focus on.
-        """
-
-    @abstractmethod
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param vert_scrollbar: A scrollbar UIElement.
-        """
-
-    @abstractmethod
-    def get_last_focused_vert_scrollbar(self):
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-
-    @abstractmethod
-    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param horiz_scrollbar: A scrollbar UIElement.
-        """
-
-    @abstractmethod
-    def get_last_focused_horiz_scrollbar(self):
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
         """
 
     @abstractmethod

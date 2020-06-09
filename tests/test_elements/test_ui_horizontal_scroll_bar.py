@@ -134,7 +134,7 @@ class TestUIHorizontalScrollBar:
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            visible_percentage=0.7,
                                            manager=default_ui_manager)
-        default_ui_manager.set_focus_set(scroll_bar.get_focus_set())
+        scroll_bar.hovered = True
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 0.5})) is True
 
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': -0.5})) is True

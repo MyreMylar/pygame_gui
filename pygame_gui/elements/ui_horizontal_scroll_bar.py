@@ -221,11 +221,6 @@ class UIHorizontalScrollBar(UIElement):
         This seems to be consistent with the most common mousewheel/scrollbar interactions
         used elsewhere.
         """
-        self.ui_manager.clear_last_focused_from_horiz_scrollbar(self)
-        self.ui_manager.clear_last_focused_from_horiz_scrollbar(self.sliding_button)
-        self.ui_manager.clear_last_focused_from_horiz_scrollbar(self.left_button)
-        self.ui_manager.clear_last_focused_from_horiz_scrollbar(self.right_button)
-
         self.button_container.kill()
         super().kill()
 
@@ -240,7 +235,9 @@ class UIHorizontalScrollBar(UIElement):
         :return: Returns True if we've done something with the input event.
 
         """
-        if self.is_enabled and self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
+        if (self.is_enabled and
+                self._check_is_focus_set_hovered() and
+                event.type == pygame.MOUSEWHEEL):
             if event.x > 0:
                 self.scroll_wheel_left = True
             elif event.x < 0:
@@ -249,19 +246,14 @@ class UIHorizontalScrollBar(UIElement):
 
         return False
 
-    def _check_was_last_focused(self) -> bool:
+    def _check_is_focus_set_hovered(self) -> bool:
         """
-        Check if this scroll bar was the last one focused in the UI.
+        Check if this scroll bar's focus set is currently hovered in the UI.
 
         :return: True if it was.
 
         """
-        last_focused_scrollbar_element = self.ui_manager.get_last_focused_horiz_scrollbar()
-        return (last_focused_scrollbar_element is not None and
-                ((last_focused_scrollbar_element is self) or
-                 (last_focused_scrollbar_element is self.sliding_button) or
-                 (last_focused_scrollbar_element is self.left_button) or
-                 (last_focused_scrollbar_element is self.right_button)))
+        return any(element.hovered for element in self.get_focus_set())
 
     def update(self, time_delta: float):
         """
