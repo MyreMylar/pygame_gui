@@ -57,7 +57,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self.dirty = 2
         self.visible = 1
         self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
-        self.source_rect = None
+        # self.source_rect = None
 
         self.relative_bottom_margin = None
         self.relative_right_margin = None
@@ -91,7 +91,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         if isinstance(container, IContainerLikeInterface):
             self.ui_container = container.get_container()
 
-        if not (self.ui_container is None or self.ui_container is self):
+        if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
         self._update_absolute_rect_position_from_anchors()
@@ -100,15 +100,15 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
 
         self._focus_set = {self}
 
-    def get_focus_set(self) -> Set[Any]:
+    def get_focus_set(self) -> Set['UIElement']:
         return self._focus_set
 
-    def set_focus_set(self, focus_set: Set[Any]):
+    def set_focus_set(self, focus_set: Set['UIElement']):
         if self.ui_manager.get_focus_set() is self._focus_set:
             self.ui_manager.set_focus_set(focus_set)
         self._focus_set = focus_set
 
-    def join_focus_sets(self, element):
+    def join_focus_sets(self, element: 'UIElement'):
         union_of_sets = set(self._focus_set | element.get_focus_set())
         for item in union_of_sets:
             item.set_focus_set(union_of_sets)

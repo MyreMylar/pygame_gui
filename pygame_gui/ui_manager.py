@@ -10,7 +10,6 @@ from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
-from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
 from pygame_gui.core.utility import PackageResource
@@ -61,8 +60,6 @@ class UIManager(IUIManagerInterface):
         self.ui_group = pygame.sprite.LayeredDirty()
 
         self.focused_set = None
-        self.last_focused_vertical_scrollbar = None
-        self.last_focused_horizontal_scrollbar = None
         self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
                                           self, starting_height=1,
@@ -387,8 +384,6 @@ class UIManager(IUIManagerInterface):
         """
         Set a set of element as the focused set.
 
-        If the set is a scroll bar we also keep track of that.
-
         :param focus: The set of element to focus on.
         """
         if focus is self.focused_set:
@@ -417,49 +412,6 @@ class UIManager(IUIManagerInterface):
                 for item in self.focused_set:
                     if not item.is_focused:
                         item.focus()
-                        if item.get_element_ids()[-1] == 'vertical_scroll_bar':
-                            self.last_focused_vertical_scrollbar = item
-                        if item.get_element_ids()[-1] == 'horizontal_scroll_bar':
-                            self.last_focused_horizontal_scrollbar = item
-
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param vert_scrollbar: A scrollbar UIElement.
-        """
-        if vert_scrollbar is not None and vert_scrollbar is self.last_focused_vertical_scrollbar:
-            self.last_focused_vertical_scrollbar = None
-
-    def get_last_focused_vert_scrollbar(self) -> Union[UIElement, None]:
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-        return self.last_focused_vertical_scrollbar
-
-    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param horiz_scrollbar: A scrollbar UIElement.
-        """
-        if (horiz_scrollbar is not None and
-                horiz_scrollbar is self.last_focused_horizontal_scrollbar):
-            self.last_focused_horizontal_scrollbar = None
-
-    def get_last_focused_horiz_scrollbar(self) -> Union[UIElement, None]:
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-        return self.last_focused_horizontal_scrollbar
 
     def set_visual_debug_mode(self, is_active: bool):
         """
