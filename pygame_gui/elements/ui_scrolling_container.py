@@ -26,6 +26,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                            container if you've set that.
     :param object_id: An object ID for this element.
     :param anchors: Layout anchors in a dictionary.
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -399,12 +400,19 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                      self._view_container.rect.height))
 
     def show(self):
-        self.visible = 1
-        self.dirty = 2
-
+        """
+        In addition to the base UIElement.show() - call show() of owned container - _root_container.
+        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
+        propagate to them - there is no need to call their show() methods separately.
+        """
+        super().show()
         self._root_container.show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of owned container - _root_container.
+        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
+        propagate to them - there is no need to call their hide() methods separately.
+        """
         self._root_container.hide()
-        self.visible = 0
-        self.dirty = 1
+        super().hide()

@@ -56,7 +56,7 @@ class UITextBox(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -720,12 +720,18 @@ class UITextBox(UIElement):
         return has_any_changed
 
     def show(self):
+        """
+        In addition to the base UIElement.show() - call show() of scroll_bar if it exists.
+        """
         super().show()
 
         if self.scroll_bar is not None:
             self.scroll_bar.show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of scroll_bar if it exists.
+        """
         super().hide()
 
         if self.scroll_bar is not None:

@@ -35,7 +35,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     :param object_id: An optional object ID for this window, useful for distinguishing different
                       windows.
     :param resizable: Whether this window is resizable or not, defaults to False.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -700,11 +700,19 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.title_bar.set_text(self.window_display_title)
 
     def show(self):
+        """
+        In addition to the base UIElement.show() - show the _window_root_container which will
+        propagate and show all the children.
+        """
         super().show()
 
         self._window_root_container.show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - hide the _window_root_container which will
+        propagate and hide all the children.
+        """
         super().hide()
 
         self._window_root_container.hide()

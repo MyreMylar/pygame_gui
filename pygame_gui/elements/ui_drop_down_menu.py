@@ -30,7 +30,6 @@ class UIExpandedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -557,7 +556,7 @@ class UIClosedDropDownState:
 
     def show(self):
         """
-        Show all the existing child UIElement
+        Show selected_option_button and open_button.
         """
         self.visible = 1
 
@@ -568,7 +567,7 @@ class UIClosedDropDownState:
 
     def hide(self):
         """
-        Hide all the existing child UIElement
+        Hide selected_option_button and open_button.
         """
         self.visible = 0
 
@@ -599,7 +598,7 @@ class UIDropDownMenu(UIElement):
     :param expansion_height_limit: Limit on the height that this will expand to, defaults to the
                                    container bounds.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -838,6 +837,9 @@ class UIDropDownMenu(UIElement):
                 bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
 
     def show(self):
+        """
+        In addition to the base UIElement.show() - call show() on the closed state - showing it's buttons.
+        """
         super().show()
 
         self.menu_states['closed'].show()

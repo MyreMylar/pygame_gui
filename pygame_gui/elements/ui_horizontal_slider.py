@@ -26,7 +26,7 @@ class UIHorizontalSlider(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -436,6 +436,10 @@ class UIHorizontalSlider(UIElement):
         self.sliding_button.set_relative_position((slider_x_pos, slider_y_pos))
 
     def show(self):
+        """
+        In addition to the base UIElement.show() - show the sliding button and show the button_container which will
+        propagate and show the left and right buttons.
+        """
         super().show()
 
         self.sliding_button.show()
@@ -443,6 +447,10 @@ class UIHorizontalSlider(UIElement):
             self.button_container.show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - hide the sliding button and hide the button_container which will
+        propagate and hide the left and right buttons.
+        """
         super().hide()
 
         self.sliding_button.hide()

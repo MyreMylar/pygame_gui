@@ -45,7 +45,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                       from others.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -283,12 +283,16 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.on_fresh_drawable_shape_ready()
 
     def show(self):
-        self.visible = 1
-        self.dirty = 2
+        """
+        In addition to the base UIElement.show() - call show() of owned container - panel_container.
+        """
+        super().show()
 
         self.panel_container.show()
 
     def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of owned container - panel_container.
+        """
         self.panel_container.hide()
-        self.visible = 0
-        self.dirty = 1
+        super().hide()
