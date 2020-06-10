@@ -38,7 +38,7 @@ class UISelectionList(UIElement):
                       from others with the same hierarchy.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -52,7 +52,8 @@ class UISelectionList(UIElement):
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect,
@@ -60,7 +61,8 @@ class UISelectionList(UIElement):
                          container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -482,7 +484,9 @@ class UISelectionList(UIElement):
                 container=self.ui_container,
                 parent_element=self._parent_element,
                 object_id='#selection_list_container',
-                anchors=self.anchors)
+                anchors=self.anchors,
+                visible=self.visible
+            )
             self.join_focus_sets(self.list_and_scroll_bar_container)
         else:
             self.list_and_scroll_bar_container.set_dimensions((self.relative_rect.width -
@@ -519,3 +523,23 @@ class UISelectionList(UIElement):
         if not self.is_enabled:
             self.is_enabled = True
             self.list_and_scroll_bar_container.enable()
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - call show() of owned container - list_and_scroll_bar_container.
+        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
+        visibility will propagate to them - there is no need to call their show() methods separately.
+        """
+        super().show()
+
+        self.list_and_scroll_bar_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of owned container - list_and_scroll_bar_container.
+        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
+        visibility will propagate to them - there is no need to call their hide() methods separately.
+        """
+        super().hide()
+
+        self.list_and_scroll_bar_container.hide()

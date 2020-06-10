@@ -26,6 +26,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                            container if you've set that.
     :param object_id: An object ID for this element.
     :param anchors: Layout anchors in a dictionary.
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -35,14 +36,16 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
-                 anchors: Union[Dict[str, str], None] = None):
+                 anchors: Union[Dict[str, str], None] = None,
+                 visible: int = 1):
 
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=starting_height,
                          layer_thickness=2,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -66,7 +69,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            container=container,
                                            parent_element=parent_element,
                                            object_id='#root_container',
-                                           anchors=anchors)
+                                           anchors=anchors,
+                                           visible=self.visible)
 
         # This container is the view on to the scrollable container it's size is determined by
         # the size of the root container and whether there are any scroll bars or not.
@@ -410,3 +414,21 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if not self.is_enabled:
             self.is_enabled = True
             self._root_container.enable()
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - call show() of owned container - _root_container.
+        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
+        propagate to them - there is no need to call their show() methods separately.
+        """
+        super().show()
+        self._root_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of owned container - _root_container.
+        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
+        propagate to them - there is no need to call their hide() methods separately.
+        """
+        self._root_container.hide()
+        super().hide()

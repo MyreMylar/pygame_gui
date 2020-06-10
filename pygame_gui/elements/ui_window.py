@@ -35,7 +35,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     :param object_id: An optional object ID for this window, useful for distinguishing different
                       windows.
     :param resizable: Whether this window is resizable or not, defaults to False.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -44,7 +44,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  window_display_title: str = "",
                  element_id: Union[str, None] = None,
                  object_id: Union[str, None] = None,
-                 resizable: bool = False):
+                 resizable: bool = False,
+                 visible: int = 1):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Union[UIContainer, None]
@@ -54,7 +55,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         super().__init__(rect, manager, container=None,
                          starting_height=1,
-                         layer_thickness=1)
+                         layer_thickness=1,
+                         visible=visible)
 
         if element_id is None:
             element_id = 'window'
@@ -471,7 +473,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                       is_window_root_container=True,
                                                       container=None,
                                                       parent_element=self,
-                                                      object_id="#window_root_container")
+                                                      object_id="#window_root_container",
+                                                      visible=self.visible)
         if self.window_element_container is None:
             window_container_rect = pygame.Rect(self.border_width,
                                                 self.title_bar_height,
@@ -710,3 +713,21 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if not self.is_enabled:
             self.is_enabled = True
             self._window_root_container.enable()
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - show the _window_root_container which will
+        propagate and show all the children.
+        """
+        super().show()
+
+        self._window_root_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - hide the _window_root_container which will
+        propagate and hide all the children.
+        """
+        super().hide()
+
+        self._window_root_container.hide()

@@ -194,3 +194,21 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         super().set_dimensions(dimensions)
         self.text_block.set_dimensions(dimensions)
+
+    def show(self):
+        """
+        This is a base method show() of a UIElement, but since it's not intended to be used on a UIToolTip -
+        display a warning.
+        """
+        super().show()
+
+        warnings.warn("Use of show() and hide() methods of UIToolTip objects is not supported.")
+
+    def hide(self):
+        """
+        This is a base method hide() of a UIElement, but since it's not intended to be used on a UIToolTip -
+        display a warning.
+        """
+        super().hide()
+
+        warnings.warn("Use of show() and hide() methods of UIToolTip objects is not supported.")

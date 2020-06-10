@@ -45,7 +45,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                       from others.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -57,7 +57,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect,
@@ -65,7 +66,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                          container,
                          starting_height=starting_layer_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -102,7 +104,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                            container=container,
                                            parent_element=self,
                                            object_id='#panel_container',
-                                           anchors=anchors)
+                                           anchors=anchors,
+                                           visible=self.visible)
 
     def update(self, time_delta: float):
         """
@@ -292,3 +295,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if not self.is_enabled:
             self.is_enabled = True
             self.panel_container.enable()
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - call show() of owned container - panel_container.
+        """
+        super().show()
+
+        self.panel_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of owned container - panel_container.
+        """
+        self.panel_container.hide()
+        super().hide()

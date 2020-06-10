@@ -183,3 +183,19 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         """
         Gets an actual container from this container-like UI element.
         """
+
+    @abstractmethod
+    def show(self):
+        """
+        Shows the container, which means the container will get drawn and will process events.
+        Should also show all the children elements.
+        If the container was visible before - ignore.
+        """
+
+    @abstractmethod
+    def hide(self):
+        """
+        Hides the container, which means the container will not get drawn and will not process events.
+        Should also hide all the children elements.
+        If the container was hidden before - ignore.
+        """

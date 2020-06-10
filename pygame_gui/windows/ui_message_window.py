@@ -87,3 +87,13 @@ class UIMessageWindow(UIWindow):
             self.kill()
 
         return consumed_event
+
+    def show(self):
+        super().show()
+
+        warnings.warn("Use of show() and hide() methods of UIMessageWindow objects is not supported.")
+
+    def hide(self):
+        super().hide()
+
+        warnings.warn("Use of show() and hide() methods of UIMessageWindow objects is not supported.")

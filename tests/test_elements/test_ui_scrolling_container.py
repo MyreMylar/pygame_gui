@@ -188,3 +188,55 @@ class TestUIScrollingContainer:
         button_1.update(0.01)
 
         assert button_1.check_pressed() is True
+
+    def test_show(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
+        container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                         manager=default_ui_manager, visible=0)
+        container.set_scrollable_area_dimensions((500, 600))
+
+        assert container.visible == 0
+        assert container.dirty == 1
+
+        assert container._root_container.visible == 0
+        assert container._view_container.visible == 0
+        assert container.horiz_scroll_bar.visible == 0
+        assert container.vert_scroll_bar.visible == 0
+        assert container.scrollable_container.visible == 0
+
+        container.show()
+
+        assert container.visible == 1
+        assert container.dirty == 2
+
+        assert container._root_container.visible == 1
+        assert container._view_container.visible == 1
+        assert container.horiz_scroll_bar.visible == 1
+        assert container.vert_scroll_bar.visible == 1
+        assert container.scrollable_container.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager,
+                  _display_surface_return_none):
+        container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                         manager=default_ui_manager)
+        container.set_scrollable_area_dimensions((500, 600))
+
+        assert container.visible == 1
+        assert container.dirty == 2
+
+        assert container._root_container.visible == 1
+        assert container._view_container.visible == 1
+        assert container.horiz_scroll_bar.visible == 1
+        assert container.vert_scroll_bar.visible == 1
+        assert container.scrollable_container.visible == 1
+
+        container.hide()
+
+        assert container.visible == 0
+        assert container.dirty == 1
+
+        assert container._root_container.visible == 0
+        assert container._view_container.visible == 0
+        assert container.horiz_scroll_bar.visible == 0
+        assert container.vert_scroll_bar.visible == 0
+        assert container.scrollable_container.visible == 0

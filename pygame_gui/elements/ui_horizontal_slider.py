@@ -26,7 +26,7 @@ class UIHorizontalSlider(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -36,13 +36,15 @@ class UIHorizontalSlider(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -112,7 +114,8 @@ class UIHorizontalSlider(UIElement):
                                        anchors={'left': 'left',
                                                 'right': 'left',
                                                 'top': 'top',
-                                                'bottom': 'bottom'}
+                                                'bottom': 'bottom'},
+                                       visible=self.visible
                                        )
 
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
@@ -152,7 +155,8 @@ class UIHorizontalSlider(UIElement):
                                                 manager=self.ui_manager,
                                                 container=self.ui_container,
                                                 anchors=self.anchors,
-                                                object_id='#horiz_scrollbar_buttons_container')
+                                                object_id='#horiz_scrollbar_buttons_container',
+                                                visible=self.visible)
         else:
             self.button_container.set_dimensions(self.background_rect.size)
             self.button_container.set_relative_position(self.background_rect.topleft)
@@ -173,7 +177,8 @@ class UIHorizontalSlider(UIElement):
                                             anchors={'left': 'left',
                                                      'right': 'left',
                                                      'top': 'top',
-                                                     'bottom': 'bottom'}
+                                                     'bottom': 'bottom'},
+                                            visible=self.visible
                                             )
 
             if self.right_button is None:
@@ -188,7 +193,9 @@ class UIHorizontalSlider(UIElement):
                                              anchors={'left': 'right',
                                                       'right': 'right',
                                                       'top': 'top',
-                                                      'bottom': 'bottom'})
+                                                      'bottom': 'bottom'},
+                                             visible=self.visible
+                                             )
 
         else:
             self.arrow_button_width = 0
@@ -483,3 +490,25 @@ class UIHorizontalSlider(UIElement):
             if self.right_button:
                 self.right_button.enable()
             self.drawable_shape.set_active_state('normal')
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - show the sliding button and show the button_container which will
+        propagate and show the left and right buttons.
+        """
+        super().show()
+
+        self.sliding_button.show()
+        if self.button_container is not None:
+            self.button_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - hide the sliding button and hide the button_container which will
+        propagate and hide the left and right buttons.
+        """
+        super().hide()
+
+        self.sliding_button.hide()
+        if self.button_container is not None:
+            self.button_container.hide()

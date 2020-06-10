@@ -600,3 +600,37 @@ class TestUIElement:
         element.set_image(None)
         assert element.image is None
 
+    def test_show(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=None,
+                            starting_height=0,
+                            layer_thickness=1,
+                            visible=0)
+
+        assert element.visible == 0
+        assert element.dirty == 1
+        element.show()
+        assert element.visible == 1
+        assert element.dirty == 2
+
+    def test_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=None,
+                            starting_height=0,
+                            layer_thickness=1)
+
+        element.hovered = True
+        element.hover_time = 1.0
+
+        assert element.visible == 1
+        assert element.dirty == 2
+
+        element.hide()
+
+        assert element.visible == 0
+        assert element.dirty == 1
+
+        assert element.hovered is False
+        assert element.hover_time == 0.0

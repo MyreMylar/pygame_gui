@@ -25,7 +25,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the container and its children are visible by default.
+                    Warning - it's parent container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -36,7 +37,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[str, None] = None,
-                 anchors: Union[Dict[str, str], None] = None):
+                 anchors: Union[Dict[str, str], None] = None,
+                 visible: int = 1):
 
         self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
@@ -45,7 +47,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -293,3 +296,31 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
             self.is_enabled = True
             for element in self.elements:
                 element.enable()
+
+    def show(self):
+        """
+        Shows the container, which means the container will get drawn and will process events.
+        Should also show all the children elements and containers.
+        If the container was visible before - ignore.
+        """
+        if not self.visible:
+            self.visible = 1
+            self.dirty = 2
+
+            for element in self.elements:
+                if hasattr(element, 'show'):
+                    element.show()
+
+    def hide(self):
+        """
+        Hides the container, which means the container will not get drawn and will not process events.
+        Should also hide all the children elements and containers.
+        If the container was hidden before - ignore.
+        """
+        if self.visible:
+            for element in self.elements:
+                if hasattr(element, 'hide'):
+                    element.hide()
+
+            self.visible = 0
+            self.dirty = 1

@@ -323,3 +323,47 @@ class TestUIHorizontalSlider:
                                                       'pos': slider.left_button.rect.center}))
 
         assert isinstance(slider.get_current_value(), float)
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
+                                    value_range=(0, 200), manager=default_ui_manager, visible=0)
+
+        assert slider.visible == 0
+        assert slider.dirty == 1
+
+        assert slider.sliding_button.visible == 0
+        assert slider.button_container.visible == 0
+        assert slider.left_button.visible == 0
+        assert slider.right_button.visible == 0
+
+        slider.show()
+
+        assert slider.visible == 1
+        assert slider.dirty == 2
+
+        assert slider.sliding_button.visible == 1
+        assert slider.button_container.visible == 1
+        assert slider.left_button.visible == 1
+        assert slider.right_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
+                                    value_range=(0, 200), manager=default_ui_manager)
+
+        assert slider.visible == 1
+        assert slider.dirty == 2
+
+        assert slider.sliding_button.visible == 1
+        assert slider.button_container.visible == 1
+        assert slider.left_button.visible == 1
+        assert slider.right_button.visible == 1
+
+        slider.hide()
+
+        assert slider.visible == 0
+        assert slider.dirty == 1
+
+        assert slider.sliding_button.visible == 0
+        assert slider.button_container.visible == 0
+        assert slider.left_button.visible == 0
+        assert slider.right_button.visible == 0

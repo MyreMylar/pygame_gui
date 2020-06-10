@@ -22,7 +22,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -30,10 +30,12 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1):
 
         self._layer = 0
         self.ui_manager = manager
+
         super().__init__(self.ui_manager.get_sprite_group())
         self.relative_rect = relative_rect.copy()
         self.rect = self.relative_rect.copy()
@@ -54,8 +56,13 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
 
-        self.dirty = 2
-        self.visible = 1
+        if visible:
+            self.dirty = 2
+            self.visible = 1
+        else:
+            self.dirty = 1
+            self.visible = 0
+
         self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
         # self.source_rect = None
 
@@ -93,6 +100,10 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
 
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
+
+        if self.ui_container is not None and not self.ui_container.visible:
+            self.dirty = 1
+            self.visible = 0
 
         self._update_absolute_rect_position_from_anchors()
 
@@ -789,3 +800,21 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         Elements should handle their own enabling and disabling.
         """
         self.is_enabled = True
+
+    def show(self):
+        """
+        Shows the widget, which means the widget will get drawn and will process events.
+        """
+        self.visible = 1
+        self.dirty = 2
+
+    def hide(self):
+        """
+        Hides the widget, which means the widget will not get drawn and will not process events.
+        Clear hovered state.
+        """
+        self.visible = 0
+        self.dirty = 1
+
+        self.hovered = False
+        self.hover_time = 0.0

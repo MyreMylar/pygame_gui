@@ -586,3 +586,13 @@ class UIColourPickerDialog(UIWindow):
         self.hue_channel.set_value(int(self.current_colour.hsva[0]))
         self.sat_channel.set_value(int(self.current_colour.hsva[1]))
         self.value_channel.set_value(int(self.current_colour.hsva[2]))
+
+    def show(self):
+        super().show()
+
+        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects is not supported.")
+
+    def hide(self):
+        super().hide()
+
+        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects is not supported.")

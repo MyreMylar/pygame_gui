@@ -30,7 +30,6 @@ class UIExpandedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-
     """
 
     def __init__(self,
@@ -338,6 +337,12 @@ class UIExpandedDropDownState:
         image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
         self.drop_down_menu_ui.set_image(image)
 
+    def hide(self):
+        """
+        Transition from expanded state to closed state.
+        """
+        self.should_transition = True
+
 
 class UIClosedDropDownState:
     """
@@ -353,7 +358,7 @@ class UIClosedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -365,7 +370,8 @@ class UIClosedDropDownState:
                  manager: IUIManagerInterface,
                  container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
-                 element_ids: Union[List[str], None]):
+                 element_ids: Union[List[str], None],
+                 visible: int = 1):
 
         self.drop_down_menu_ui = drop_down_menu_ui
         self.selected_option_button = None
@@ -382,6 +388,7 @@ class UIClosedDropDownState:
 
         self.should_transition = False
         self.target_state = 'expanded'
+        self.visible = visible
 
     def disable(self):
         """
@@ -454,7 +461,8 @@ class UIClosedDropDownState:
                                                self.ui_container,
                                                starting_height=2,
                                                parent_element=self.drop_down_menu_ui,
-                                               object_id='#selected_option')
+                                               object_id='#selected_option',
+                                               visible=self.visible)
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
 
         open_button_x = (self.base_position_rect.x +
@@ -477,7 +485,8 @@ class UIClosedDropDownState:
                                     self.ui_container,
                                     starting_height=2,
                                     parent_element=self.drop_down_menu_ui,
-                                    object_id='#expand_button')
+                                    object_id='#expand_button',
+                                    visible=self.visible)
         self.drop_down_menu_ui.join_focus_sets(self.open_button)
 
     def finish(self):
@@ -559,6 +568,28 @@ class UIClosedDropDownState:
         """
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
+    def show(self):
+        """
+        Show selected_option_button and open_button.
+        """
+        self.visible = 1
+
+        if self.open_button is not None:
+            self.open_button.show()
+        if self.selected_option_button is not None:
+            self.selected_option_button.show()
+
+    def hide(self):
+        """
+        Hide selected_option_button and open_button.
+        """
+        self.visible = 0
+
+        if self.open_button is not None:
+            self.open_button.hide()
+        if self.selected_option_button is not None:
+            self.selected_option_button.hide()
+
 
 class UIDropDownMenu(UIElement):
     """
@@ -581,7 +612,7 @@ class UIDropDownMenu(UIElement):
     :param expansion_height_limit: Limit on the height that this will expand to, defaults to the
                                    container bounds.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -593,12 +624,14 @@ class UIDropDownMenu(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
                  expansion_height_limit: Union[int, None] = None,
-                 anchors: Dict[str, str] = None
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1
                  ):
 
         super().__init__(relative_rect, manager, container,
                          layer_thickness=3, starting_height=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -638,7 +671,8 @@ class UIDropDownMenu(UIElement):
                                                             self.ui_manager,
                                                             self.ui_container,
                                                             self.element_ids,
-                                                            self.object_ids),
+                                                            self.object_ids,
+                                                            self.visible),
                             'expanded': UIExpandedDropDownState(self,
                                                                 self.options_list,
                                                                 self.selected_option,
@@ -853,3 +887,23 @@ class UIDropDownMenu(UIElement):
         if not self.is_enabled:
             self.is_enabled = True
             self.current_state.enable()
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - call show() on the closed state - showing it's buttons.
+        """
+        super().show()
+
+        self.menu_states['closed'].show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - if the current state is 'expanded' call it's hide() method, which
+        begins a transition of the UIDropDownMenu to the 'closed' state, and call the hide() method of the 'closed'
+        state which hides all it's children widgets.
+        """
+        super().hide()
+
+        if self.current_state == self.menu_states['expanded']:
+            self.menu_states['expanded'].hide()
+        self.menu_states['closed'].hide()

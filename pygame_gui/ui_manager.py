@@ -194,20 +194,23 @@ class UIManager(IUIManagerInterface):
                         sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
             if not consumed_event:
                 for ui_element in sprites_in_layer:
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        mouse_x, mouse_y = event.pos
-                        if ui_element.hover_point(mouse_x, mouse_y):
-                            # self.unset_focus_element()
-                            self.set_focus_set(ui_element.get_focus_set())
+                    if ui_element.visible:
+                        # Only process events for visible elements - ignore hidden elements
 
-                    consumed_event = ui_element.process_event(event)
-                    if consumed_event:
-                        # Generally clicks should only be handled by the top layer of whatever
-                        # GUI thing we are  clicking on. I am trusting UIElments to decide whether
-                        # they need to consume the events they respond to. Hopefully this is not
-                        # a mistake.
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            mouse_x, mouse_y = event.pos
+                            if ui_element.hover_point(mouse_x, mouse_y):
+                                # self.unset_focus_element()
+                                self.set_focus_set(ui_element.get_focus_set())
 
-                        break
+                        consumed_event = ui_element.process_event(event)
+                        if consumed_event:
+                            # Generally clicks should only be handled by the top layer of whatever
+                            # GUI thing we are  clicking on. I am trusting UIElments to decide whether
+                            # they need to consume the events they respond to. Hopefully this is not
+                            # a mistake.
+
+                            break
 
     def update(self, time_delta: float):
         """
@@ -239,9 +242,12 @@ class UIManager(IUIManagerInterface):
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             for ui_element in self.ui_group.get_sprites_from_layer(layer):
-                element_handled_hover = ui_element.check_hover(time_delta, hover_handled)
-                if element_handled_hover:
-                    hover_handled = True
+                if ui_element.visible:
+                    # Only check hover for visible elements - ignore hidden elements
+
+                    element_handled_hover = ui_element.check_hover(time_delta, hover_handled)
+                    if element_handled_hover:
+                        hover_handled = True
 
         self.ui_group.update(time_delta)
 

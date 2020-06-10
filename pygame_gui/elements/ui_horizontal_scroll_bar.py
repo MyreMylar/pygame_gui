@@ -23,7 +23,7 @@ class UIHorizontalScrollBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
 
     def __init__(self,
@@ -33,13 +33,15 @@ class UIHorizontalScrollBar(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1):
 
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
 
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -137,7 +139,8 @@ class UIHorizontalScrollBar(UIElement):
                                                 manager=self.ui_manager,
                                                 container=self.ui_container,
                                                 anchors=self.anchors,
-                                                object_id='#horiz_scrollbar_buttons_container')
+                                                object_id='#horiz_scrollbar_buttons_container',
+                                                visible=self.visible)
             self.join_focus_sets(self.button_container)
         else:
             self.button_container.set_dimensions(self.background_rect.size)
@@ -349,7 +352,8 @@ class UIHorizontalScrollBar(UIElement):
                                            anchors={'left': 'left',
                                                     'right': 'left',
                                                     'top': 'top',
-                                                    'bottom': 'bottom'})
+                                                    'bottom': 'bottom'},
+                                           visible=self.visible)
             self.join_focus_sets(self.sliding_button)
 
         else:
@@ -524,3 +528,21 @@ class UIHorizontalScrollBar(UIElement):
             self.button_container.enable()
 
             self.drawable_shape.set_active_state('normal')
+
+    def show(self):
+        """
+        In addition to the base UIElement.show() - show the self.button_container which will propagate and show all
+        the buttons.
+        """
+        super().show()
+
+        self.button_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - hide the self.button_container which will propagate and hide all
+        the buttons.
+        """
+        super().hide()
+
+        self.button_container.hide()
