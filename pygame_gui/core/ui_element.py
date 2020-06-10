@@ -64,7 +64,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
             self.visible = 0
 
         self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
-        self.source_rect = None
+        # self.source_rect = None
 
         self.relative_bottom_margin = None
         self.relative_right_margin = None
@@ -98,7 +98,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         if isinstance(container, IContainerLikeInterface):
             self.ui_container = container.get_container()
 
-        if not (self.ui_container is None or self.ui_container is self):
+        if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
         if self.ui_container is not None and not self.ui_container.visible:
@@ -111,15 +111,15 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
 
         self._focus_set = {self}
 
-    def get_focus_set(self) -> Set[Any]:
+    def get_focus_set(self) -> Set['UIElement']:
         return self._focus_set
 
-    def set_focus_set(self, focus_set: Set[Any]):
+    def set_focus_set(self, focus_set: Set['UIElement']):
         if self.ui_manager.get_focus_set() is self._focus_set:
             self.ui_manager.set_focus_set(focus_set)
         self._focus_set = focus_set
 
-    def join_focus_sets(self, element):
+    def join_focus_sets(self, element: 'UIElement'):
         union_of_sets = set(self._focus_set | element.get_focus_set())
         for item in union_of_sets:
             item.set_focus_set(union_of_sets)
@@ -618,9 +618,9 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                     surf_height = layer_text_render.get_height()
 
                 if make_new_larger_surface:
-                    new_surface = pygame.Surface((surf_width, surf_height),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+                    new_surface = pygame.surface.Surface((surf_width, surf_height),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
                     basic_blit(new_surface, self.image, (0, 0))
                     self.set_image(new_surface)
                 basic_blit(self.image, layer_text_render, (0, 0))
@@ -684,7 +684,7 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         """
         return self._image_clip
 
-    def set_image(self, new_image: Union[pygame.Surface, None]):
+    def set_image(self, new_image: Union[pygame.surface.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
         clip on the image at the same time.
@@ -698,9 +698,9 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                     self.get_image_clipping_rect().height == 0):
                 self.image = self.ui_manager.get_universal_empty_surface()
             else:
-                self.image = pygame.Surface(self._pre_clipped_image.get_size(),
-                                            flags=pygame.SRCALPHA,
-                                            depth=32)
+                self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
+                                                    flags=pygame.SRCALPHA,
+                                                    depth=32)
                 self.image.fill(pygame.Color('#00000000'))
                 basic_blit(self.image,
                            self._pre_clipped_image,
@@ -782,6 +782,24 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
                 setattr(self, attribute_name, attribute_value)
                 has_changed = True
         return has_changed
+
+    def disable(self):
+        """
+        Disables elements so they are no longer interactive.
+        This is just a default fallback implementation for elements that don't define their own.
+
+        Elements should handle their own enabling and disabling.
+        """
+        self.is_enabled = False
+
+    def enable(self):
+        """
+        Enables elements so they are interactive again.
+        This is just a default fallback implementation for elements that don't define their own.
+
+        Elements should handle their own enabling and disabling.
+        """
+        self.is_enabled = True
 
     def show(self):
         """

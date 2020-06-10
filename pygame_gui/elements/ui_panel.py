@@ -136,9 +136,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 event.button in [pygame.BUTTON_LEFT,
                                  pygame.BUTTON_RIGHT,
                                  pygame.BUTTON_MIDDLE]):
-            scaled_mouse_pos = (int(event.pos[0] * self.ui_manager.mouse_pos_scale_factor[0]),
-                                int(event.pos[1] * self.ui_manager.mouse_pos_scale_factor[1]))
-
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
@@ -281,6 +279,22 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                         ['normal'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+    def disable(self):
+        """
+        Disables all elements in the panel so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.panel_container.disable()
+
+    def enable(self):
+        """
+        Enables all elements in the panel so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.panel_container.enable()
 
     def show(self):
         """

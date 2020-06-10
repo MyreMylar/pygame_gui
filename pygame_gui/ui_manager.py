@@ -10,7 +10,6 @@ from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
-from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
 from pygame_gui.core.utility import PackageResource
@@ -36,8 +35,13 @@ class UIManager(IUIManagerInterface):
                  enable_live_theme_updates: bool = True,
                  resource_loader: IResourceLoader = None):
 
-        # Threaded loading
+        # Pygame compat
+        try:
+            pygame.MOUSEWHEEL
+        except AttributeError:
+            pygame.MOUSEWHEEL = -1
 
+        # Threaded loading
         if resource_loader is None:
             auto_load = True
             self.resource_loader = BlockingThreadedResourceLoader()
@@ -50,12 +54,12 @@ class UIManager(IUIManagerInterface):
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
-        self.universal_empty_surface = pygame.Surface((0, 0), flags=pygame.SRCALPHA, depth=32)
+        self.universal_empty_surface = pygame.surface.Surface((0, 0),
+                                                              flags=pygame.SRCALPHA,
+                                                              depth=32)
         self.ui_group = pygame.sprite.LayeredDirty()
 
         self.focused_set = None
-        self.last_focused_vertical_scrollbar = None
-        self.last_focused_horizontal_scrollbar = None
         self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
                                           self, starting_height=1,
@@ -128,7 +132,7 @@ class UIManager(IUIManagerInterface):
         return self.ui_window_stack
 
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
+                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -274,7 +278,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.mouse_position
 
-    def draw_ui(self, window_surface: pygame.Surface):
+    def draw_ui(self, window_surface: pygame.surface.Surface):
         """
         Draws all the UI elements on the screen. Generally you want this to be after the rest of
         your game sprites have been drawn.
@@ -386,8 +390,6 @@ class UIManager(IUIManagerInterface):
         """
         Set a set of element as the focused set.
 
-        If the set is a scroll bar we also keep track of that.
-
         :param focus: The set of element to focus on.
         """
         if focus is self.focused_set:
@@ -416,49 +418,6 @@ class UIManager(IUIManagerInterface):
                 for item in self.focused_set:
                     if not item.is_focused:
                         item.focus()
-                        if item.get_element_ids()[-1] == 'vertical_scroll_bar':
-                            self.last_focused_vertical_scrollbar = item
-                        if item.get_element_ids()[-1] == 'horizontal_scroll_bar':
-                            self.last_focused_horizontal_scrollbar = item
-
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param vert_scrollbar: A scrollbar UIElement.
-        """
-        if vert_scrollbar is not None and vert_scrollbar is self.last_focused_vertical_scrollbar:
-            self.last_focused_vertical_scrollbar = None
-
-    def get_last_focused_vert_scrollbar(self) -> Union[UIElement, None]:
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-        return self.last_focused_vertical_scrollbar
-
-    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param horiz_scrollbar: A scrollbar UIElement.
-        """
-        if (horiz_scrollbar is not None and
-                horiz_scrollbar is self.last_focused_horizontal_scrollbar):
-            self.last_focused_horizontal_scrollbar = None
-
-    def get_last_focused_horiz_scrollbar(self) -> Union[UIElement, None]:
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-        return self.last_focused_horizontal_scrollbar
 
     def set_visual_debug_mode(self, is_active: bool):
         """
@@ -517,12 +476,12 @@ class UIManager(IUIManagerInterface):
 
         self.active_user_cursor = cursor
 
-    def get_universal_empty_surface(self) -> pygame.Surface:
+    def get_universal_empty_surface(self) -> pygame.surface.Surface:
         """
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.Surface
+        :return: An empty, and therefore invisible pygame.surface.Surface
         """
         return self.universal_empty_surface
 

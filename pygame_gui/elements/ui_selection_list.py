@@ -300,10 +300,10 @@ class UISelectionList(UIElement):
         :return: Should return True if this element makes use of this event.
 
         """
-        consumed_event = False
-        if (event.type == pygame.USEREVENT and
-                event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED] and
-                event.ui_element in self.item_list_container.elements):
+        if self.is_enabled and (
+                event.type == pygame.USEREVENT
+                and event.user_type in [UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED]
+                and event.ui_element in self.item_list_container.elements):
             for item in self.item_list:
                 if item['button_element'] == event.ui_element:
                     if event.user_type == UI_BUTTON_DOUBLE_CLICKED:
@@ -346,7 +346,7 @@ class UISelectionList(UIElement):
                                                                          event_data)
                             pygame.event.post(drop_down_changed_event)
 
-        return consumed_event
+        return False  # Don't consume any events
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -503,6 +503,26 @@ class UISelectionList(UIElement):
                                                                       self.border_width))
 
         self.set_item_list(self._raw_item_list)
+
+    def disable(self):
+        """
+        Disables all elements in the selection list so they are no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.list_and_scroll_bar_container.disable()
+
+            # clear selections
+            for item in self.item_list:
+                item['selected'] = False
+
+    def enable(self):
+        """
+        Enables all elements in the selection list so they are interactive again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.list_and_scroll_bar_container.enable()
 
     def show(self):
         """

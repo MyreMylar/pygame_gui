@@ -25,6 +25,8 @@ also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the 'back' of the slider, the colour of the track that the sliding part moves along.
  - "**normal_border**" - The border colour/gradient of the slider.
+ - "**disabled_dark_bg**" - The colour/gradient of the track when disabled.
+ - "**disabled_border**" - The border colour/gradient of the slider when disabled.
 
 Misc
 ----

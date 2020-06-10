@@ -1,6 +1,6 @@
 import warnings
 
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
@@ -51,7 +51,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                                element_id='tool_tip')
 
         self.text_block = None
-        self.rect_width = None
+        self.rect_width = None  # type: Optional[int]
         self.hover_distance_from_target = hover_distance
 
         self.rebuild_from_changed_theme_data()

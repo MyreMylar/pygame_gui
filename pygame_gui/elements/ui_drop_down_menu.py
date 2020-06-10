@@ -234,8 +234,6 @@ class UIExpandedDropDownState:
                  rest of the UI.
 
         """
-        consumed_event = False
-
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.close_button, self.selected_option_button]):
@@ -256,7 +254,7 @@ class UIExpandedDropDownState:
             drop_down_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(drop_down_changed_event)
 
-        return consumed_event
+        return False  # don't consume any events
 
     def update_position(self):
         """
@@ -392,6 +390,22 @@ class UIClosedDropDownState:
         self.target_state = 'expanded'
         self.visible = visible
 
+    def disable(self):
+        """
+        Disables the closed state so that it is no longer interactive.
+        """
+        self.selected_option_button.disable()
+        self.open_button.disable()
+        self.drop_down_menu_ui.drawable_shape.set_active_state('disabled')
+
+    def enable(self):
+        """
+        Re-enables the closed state so we can once again interact with it.
+        """
+        self.selected_option_button.enable()
+        self.open_button.enable()
+        self.drop_down_menu_ui.drawable_shape.set_active_state('normal')
+
     def rebuild(self):
         """
         Rebuild the closed state from theming parameters and dimensions.
@@ -399,6 +413,8 @@ class UIClosedDropDownState:
         """
         theming_parameters = {'normal_bg': self.drop_down_menu_ui.background_colour,
                               'normal_border': self.drop_down_menu_ui.border_colour,
+                              'disabled_bg': self.drop_down_menu_ui.disabled_background_colour,
+                              'disabled_border': self.drop_down_menu_ui.disabled_border_colour,
                               'border_width': self.drop_down_menu_ui.border_width,
                               'shadow_width': self.drop_down_menu_ui.shadow_width,
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
@@ -406,13 +422,13 @@ class UIClosedDropDownState:
         if self.drop_down_menu_ui.shape == 'rectangle':
             self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect,
                                                                       theming_parameters,
-                                                                      ['normal'],
+                                                                      ['normal', 'disabled'],
                                                                       self.ui_manager)
         elif self.drop_down_menu_ui.shape == 'rounded_rectangle':
             shape_rect = self.drop_down_menu_ui.rect
             self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(shape_rect,
                                                                           theming_parameters,
-                                                                          ['normal'],
+                                                                          ['normal', 'disabled'],
                                                                           self.ui_manager)
 
         self.drop_down_menu_ui.image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
@@ -489,14 +505,12 @@ class UIClosedDropDownState:
         :return: Return True if we want to consume this event so it is not passed on to the
                  rest of the UI.
         """
-        consumed_event = False
-
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element in [self.open_button, self.selected_option_button]):
 
             self.should_transition = True
 
-        return consumed_event
+        return False
 
     def update_position(self):
         """
@@ -632,8 +646,12 @@ class UIDropDownMenu(UIElement):
 
         self.border_width = None
         self.shadow_width = None
+
         self.background_colour = None
         self.border_colour = None
+        self.disabled_background_colour = None
+        self.disabled_border_colour = None
+
         self.shape = "rectangle"
         self.shape_corner_radius = 2
 
@@ -754,6 +772,18 @@ class UIDropDownMenu(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
+        disabled_background_colour = self.ui_theme.get_colour_or_gradient('disabled_dark_bg',
+                                                                          self.combined_element_ids)
+        if disabled_background_colour != self.disabled_background_colour:
+            self.disabled_background_colour = disabled_background_colour
+            has_any_changed = True
+
+        disabled_border_colour = self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                      self.combined_element_ids)
+        if disabled_border_colour != self.disabled_border_colour:
+            self.disabled_border_colour = disabled_border_colour
+            has_any_changed = True
+
         if has_any_changed:
             border_and_shadow = self.border_width + self.shadow_width
             self.background_rect = pygame.Rect(self.relative_rect.x + border_and_shadow,
@@ -835,6 +865,28 @@ class UIDropDownMenu(UIElement):
         """
         return (bool(self.rect.collidepoint(hover_x, hover_y)) and
                 bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+
+    def disable(self):
+        """
+        Disables the button so that it is no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            # switch back to the closed state if we are in the expanded state
+            if self.current_state is self.menu_states['expanded']:
+                self.current_state.finish()
+                self.current_state = self.menu_states['closed']
+                self.current_state.selected_option = self.selected_option
+                self.current_state.start()
+            self.current_state.disable()
+
+    def enable(self):
+        """
+        Re-enables the button so we can once again interact with it.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.current_state.enable()
 
     def show(self):
         """

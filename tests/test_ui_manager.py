@@ -279,19 +279,6 @@ class TestUIManager:
         default_ui_manager.set_focus_set(None)
         assert was_selected_correctly is True and test_button.is_focused is False
 
-    def test_last_focus_vert_scrollbar(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
-        test_scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
-                                              visible_percentage=0.5,
-                                              manager=default_ui_manager)
-
-        default_ui_manager.set_focus_set(test_scroll_bar)
-        found_bar = test_scroll_bar is default_ui_manager.get_last_focused_vert_scrollbar()
-        default_ui_manager.clear_last_focused_from_vert_scrollbar(test_scroll_bar)
-        no_last_focused_scroll_bar = default_ui_manager.get_last_focused_vert_scrollbar() is None
-
-        assert found_bar is True and no_last_focused_scroll_bar is True
-
     def test_incremental_loading_nothing(self, _init_pygame, _display_surface_return_none):
         incremental_loader = IncrementalThreadedResourceLoader()
 

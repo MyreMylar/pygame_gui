@@ -90,6 +90,9 @@ class UITextEntryLine(UIElement):
         self.selected_text_colour = None
         self.selected_bg_colour = None
         self.border_colour = None
+        self.disabled_background_colour = None
+        self.disabled_border_colour = None
+        self.disabled_text_colour = None
         self.padding = (0, 0)
 
         self.drawable_shape = None
@@ -131,23 +134,25 @@ class UITextEntryLine(UIElement):
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
+                              'disabled_bg': self.disabled_background_colour,
+                              'disabled_border': self.disabled_border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
+                                                    ['normal', 'disabled'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+                                                        ['normal', 'disabled'], self.ui_manager)
 
         self.background_and_border = self.drawable_shape.get_surface('normal')
 
         if self.text_image is None:
-            self.text_image = pygame.Surface(self.text_image_rect.size,
-                                             flags=pygame.SRCALPHA,
-                                             depth=32)
+            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
 
         if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
@@ -213,11 +218,18 @@ class UITextEntryLine(UIElement):
         Redraws the entire text entry element onto the underlying sprite image. Usually called
         when the displayed text has been edited or changed in some fashion.
         """
-        if isinstance(self.background_colour, ColourGradient):
-            self.text_image.fill(pygame.Color("#FFFFFFFF"))
-            self.background_colour.apply_gradient_to_surface(self.text_image)
+        if self.is_enabled:
+            if isinstance(self.background_colour, ColourGradient):
+                self.text_image.fill(pygame.Color("#FFFFFFFF"))
+                self.background_colour.apply_gradient_to_surface(self.text_image)
+            else:
+                self.text_image.fill(self.background_colour)
         else:
-            self.text_image.fill(self.background_colour)
+            if isinstance(self.disabled_background_colour, ColourGradient):
+                self.text_image.fill(pygame.Color("#FFFFFFFF"))
+                self.disabled_background_colour.apply_gradient_to_surface(self.text_image)
+            else:
+                self.text_image.fill(self.disabled_background_colour)
 
         if self.select_range[0] == self.select_range[1]:
             self._redraw_unselected_text()
@@ -258,10 +270,16 @@ class UITextEntryLine(UIElement):
         """
         self.text_surface = render_white_text_alpha_black_bg(font=self.font,
                                                              text=self.text)
-        if isinstance(self.text_colour, ColourGradient):
-            self.text_colour.apply_gradient_to_surface(self.text_surface)
+        if self.is_enabled:
+            if isinstance(self.text_colour, ColourGradient):
+                self.text_colour.apply_gradient_to_surface(self.text_surface)
+            else:
+                apply_colour_to_surface(self.text_colour, self.text_surface)
         else:
-            apply_colour_to_surface(self.text_colour, self.text_surface)
+            if isinstance(self.disabled_text_colour, ColourGradient):
+                self.disabled_text_colour.apply_gradient_to_surface(self.text_surface)
+            else:
+                apply_colour_to_surface(self.disabled_text_colour, self.text_surface)
 
     def _redraw_selected_text(self):
         """
@@ -285,10 +303,10 @@ class UITextEntryLine(UIElement):
                                                                        self.text_colour)
 
         if isinstance(self.selected_bg_colour, ColourGradient):
-            select_area_surface = pygame.Surface((select_area_width,
-                                                  overall_size[1]),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
+            select_area_surface = pygame.surface.Surface((select_area_width,
+                                                          overall_size[1]),
+                                                         flags=pygame.SRCALPHA,
+                                                         depth=32)
             select_area_surface.fill(pygame.Color('#FFFFFFFF'))
             self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
 
@@ -298,10 +316,10 @@ class UITextEntryLine(UIElement):
             basic_blit(select_area_surface, alpha_text, (0, 0))
         else:
             if isinstance(self.selected_text_colour, ColourGradient):
-                select_area_surface = pygame.Surface((select_area_width,
-                                                      overall_size[1]),
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
+                select_area_surface = pygame.surface.Surface((select_area_width,
+                                                              overall_size[1]),
+                                                             flags=pygame.SRCALPHA,
+                                                             depth=32)
                 select_area_surface.fill(self.selected_bg_colour)
 
                 alpha_text = render_white_text_alpha_black_bg(font=self.font,
@@ -317,9 +335,9 @@ class UITextEntryLine(UIElement):
             post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
                                                                         self.text_colour)
 
-        self.text_surface = pygame.Surface(overall_size,
-                                           flags=pygame.SRCALPHA,
-                                           depth=32)
+        self.text_surface = pygame.surface.Surface(overall_size,
+                                                   flags=pygame.SRCALPHA,
+                                                   depth=32)
 
         if isinstance(self.background_colour, ColourGradient):
             self.text_image.fill(pygame.Color("#FFFFFFFF"))
@@ -339,7 +357,7 @@ class UITextEntryLine(UIElement):
     def _draw_text_with_grad_or_col(self,
                                     text: str,
                                     col_or_grad: Union[ColourGradient,
-                                                       pygame.Color]) -> pygame.Surface:
+                                                       pygame.Color]) -> pygame.surface.Surface:
         """
         Draw text to a surface using either a colour or gradient.
 
@@ -364,7 +382,7 @@ class UITextEntryLine(UIElement):
         """
         new_image = self.background_and_border.copy()
         basic_blit(new_image, self.text_image, self.text_image_rect)
-        if self.cursor_on:
+        if self.cursor_on and self.is_enabled:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
             self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
@@ -373,8 +391,8 @@ class UITextEntryLine(UIElement):
             if not isinstance(self.text_colour, ColourGradient):
                 pygame.draw.rect(new_image, self.text_colour, self.cursor)
             else:
-                cursor_surface = pygame.Surface(self.cursor.size,
-                                                flags=pygame.SRCALPHA, depth=32)
+                cursor_surface = pygame.surface.Surface(self.cursor.size,
+                                                        flags=pygame.SRCALPHA, depth=32)
                 cursor_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.text_colour.apply_gradient_to_surface(cursor_surface)
                 basic_blit(new_image, cursor_surface, self.cursor)
@@ -464,10 +482,11 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
+
         initial_text_state = self.text
         if self._process_mouse_button_event(event):
             consumed_event = True
-        if self.is_focused and event.type == pygame.KEYDOWN:
+        if self.is_enabled and self.is_focused and event.type == pygame.KEYDOWN:
             if self._process_keyboard_shortcut_event(event):
                 consumed_event = True
             elif self._process_action_key_event(event):
@@ -693,18 +712,18 @@ class UITextEntryLine(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                if self.is_enabled:
+                    pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
+                    self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
 
-                pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
-                self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
-
-                if self.double_click_timer < self.ui_manager.get_double_click_time():
-                    self._calculate_double_click_word_selection()
-                else:
-                    self.select_range[0] = self.edit_position
-                    self.select_range[1] = self.edit_position
-                    self.cursor_has_moved_recently = True
-                    self.selection_in_progress = True
-                    self.double_click_timer = 0.0
+                    if self.double_click_timer < self.ui_manager.get_double_click_time():
+                        self._calculate_double_click_word_selection()
+                    else:
+                        self.select_range[0] = self.edit_position
+                        self.select_range[1] = self.edit_position
+                        self.cursor_has_moved_recently = True
+                        self.selection_in_progress = True
+                        self.double_click_timer = 0.0
 
                 consumed_event = True
         if (event.type == pygame.MOUSEBUTTONUP and
@@ -923,6 +942,25 @@ class UITextEntryLine(UIElement):
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour
             has_any_changed = True
+
+        disabled_background_colour = self.ui_theme.get_colour_or_gradient('disabled_dark_bg',
+                                                                          self.combined_element_ids)
+        if disabled_background_colour != self.disabled_background_colour:
+            self.disabled_background_colour = disabled_background_colour
+            has_any_changed = True
+
+        disabled_border_colour = self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                      self.combined_element_ids)
+        if disabled_border_colour != self.disabled_border_colour:
+            self.disabled_border_colour = disabled_border_colour
+            has_any_changed = True
+
+        disabled_text_colour = self.ui_theme.get_colour_or_gradient('disabled_text',
+                                                                    self.combined_element_ids)
+        if disabled_text_colour != self.disabled_text_colour:
+            self.disabled_text_colour = disabled_text_colour
+            has_any_changed = True
+
         return has_any_changed
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
@@ -956,7 +994,36 @@ class UITextEntryLine(UIElement):
 
         if self.drawable_shape is not None:
             self.background_and_border = self.drawable_shape.get_fresh_surface()
-            self.text_image = pygame.Surface(self.text_image_rect.size,
-                                             flags=pygame.SRCALPHA,
-                                             depth=32)
+            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
+            self.redraw()
+
+    def disable(self):
+        """
+        Disables the button so that it is no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+
+            # clear state
+            self.is_focused = False
+            self.selection_in_progress = False
+            self.cursor_on = False
+            self.cursor_has_moved_recently = False
+
+            self.drawable_shape.set_active_state('disabled')
+            self.background_and_border = self.drawable_shape.get_surface('disabled')
+            self.edit_position = 0
+            self.select_range = [0, 0]
+            self.redraw()
+
+    def enable(self):
+        """
+        Re-enables the button so we can once again interact with it.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.drawable_shape.set_active_state('normal')
+            self.background_and_border = self.drawable_shape.get_surface('normal')
             self.redraw()

@@ -628,6 +628,63 @@ class TestUISelectionList:
 
         assert selection_list.image is not None
 
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager)
+
+        assert selection_list.get_single_selection() is None
+
+        selection_list.disable()
+        assert selection_list.is_enabled is False
+        assert selection_list.item_list_container.is_enabled is False
+
+        # process a mouse button down event
+        list_button = selection_list.item_list_container.elements[0]
+        list_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
+                                                        'pos': list_button.rect.center}))
+
+        # process a mouse button up event
+        list_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
+                                                      'pos': list_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert selection_list.get_single_selection() is None
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager)
+
+        assert selection_list.get_single_selection() is None
+
+        selection_list.disable()
+        selection_list.enable()
+        assert selection_list.is_enabled is True
+        assert selection_list.item_list_container.is_enabled is True
+
+        # process a mouse button down event
+        list_button = selection_list.item_list_container.elements[0]
+        list_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
+                                                        'pos': list_button.rect.center}))
+
+        # process a mouse button up event
+        list_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
+                                                      'pos': list_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert selection_list.get_single_selection() == 'green'
+
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',

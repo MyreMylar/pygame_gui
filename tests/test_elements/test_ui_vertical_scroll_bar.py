@@ -134,16 +134,10 @@ class TestUIVerticalScrollBar:
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),
                                          visible_percentage=0.7,
                                          manager=default_ui_manager)
-        default_ui_manager.set_focus_set(scroll_bar.get_focus_set())
+        scroll_bar.hovered = True
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': 0.5})) is True
 
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5})) is True
-
-        del pygame.MOUSEWHEEL
-
-        scroll_bar.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'y': -0.5}))
-
-        assert pygame.MOUSEWHEEL == -1
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
@@ -243,6 +237,49 @@ class TestUIVerticalScrollBar:
                                                              {'button': 1, 'pos': (40, 195)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert scroll_bar.bottom_button.held is True
+
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(0, 100, 30, 200),
+                                         visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.disable()
+
+        # process a mouse button down event
+        scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': scroll_bar.bottom_button.rect.center}))
+
+        scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': scroll_bar.bottom_button.rect.center}))
+
+        assert scroll_bar.scroll_position == 0.0 and scroll_bar.is_enabled is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(0, 100, 30, 200),
+                                         visible_percentage=0.25, manager=default_ui_manager)
+
+        scroll_bar.disable()
+        scroll_bar.enable()
+
+        # process a mouse button down event
+        scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                               {'button': 1, 'pos': scroll_bar.bottom_button.rect.center}))
+
+        scroll_bar.update(0.1)
+
+        # process a mouse button up event
+        scroll_bar.bottom_button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP,
+                               {'button': 1, 'pos': scroll_bar.bottom_button.rect.center}))
+
+        assert scroll_bar.scroll_position != 0.0 and scroll_bar.is_enabled is True
 
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 0, 200, 30),

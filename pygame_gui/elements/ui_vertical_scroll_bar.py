@@ -62,6 +62,9 @@ class UIVerticalScrollBar(UIElement):
 
         self.background_colour = None
         self.border_colour = None
+        self.disabled_border_colour = None
+        self.disabled_background_colour = None
+
         self.border_width = None
         self.shadow_width = None
 
@@ -114,16 +117,18 @@ class UIVerticalScrollBar(UIElement):
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_border': self.border_colour,
+                              'disabled_bg': self.disabled_background_colour,
+                              'disabled_border': self.disabled_border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
+                                                    ['normal', 'disabled'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+                                                        ['normal', 'disabled'], self.ui_manager)
 
         self.set_image(self.drawable_shape.get_surface('normal'))
 
@@ -217,11 +222,6 @@ class UIVerticalScrollBar(UIElement):
         This seems to be consistent with the most common mousewheel/scrollbar interactions
         used elsewhere.
         """
-        self.ui_manager.clear_last_focused_from_vert_scrollbar(self)
-        self.ui_manager.clear_last_focused_from_vert_scrollbar(self.sliding_button)
-        self.ui_manager.clear_last_focused_from_vert_scrollbar(self.top_button)
-        self.ui_manager.clear_last_focused_from_vert_scrollbar(self.bottom_button)
-
         self.button_container.kill()
         super().kill()
 
@@ -236,16 +236,11 @@ class UIVerticalScrollBar(UIElement):
         :return: Returns True if we've done something with the input event.
 
         """
-
-        # pygame.MOUSEWHEEL only defined after pygame 1.9
-        try:
-            pygame.MOUSEWHEEL
-        except AttributeError:
-            pygame.MOUSEWHEEL = -1
-
         consumed_event = False
 
-        if self._check_was_last_focused() and event.type == pygame.MOUSEWHEEL:
+        if (self.is_enabled and
+                self._check_is_focus_set_hovered() and
+                event.type == pygame.MOUSEWHEEL):
             if event.y > 0:
                 self.scroll_wheel_up = True
                 consumed_event = True
@@ -255,16 +250,14 @@ class UIVerticalScrollBar(UIElement):
 
         return consumed_event
 
-    def _check_was_last_focused(self) -> bool:
+    def _check_is_focus_set_hovered(self) -> bool:
         """
-        Check if this scroll bar was the last one focused in the UI.
+        Check if this scroll bar's focus set is currently hovered in the UI.
 
         :return: True if it was.
 
         """
-        last_focused_scrollbar_element = self.ui_manager.get_last_focused_vert_scrollbar()
-        return (last_focused_scrollbar_element is not None and
-                last_focused_scrollbar_element is self)
+        return any(element.hovered for element in self.get_focus_set())
 
     def update(self, time_delta: float):
         """
@@ -422,6 +415,18 @@ class UIVerticalScrollBar(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
+        disabled_background_colour = self.ui_theme.get_colour_or_gradient('disabled_dark_bg',
+                                                                          self.combined_element_ids)
+        if disabled_background_colour != self.disabled_background_colour:
+            self.disabled_background_colour = disabled_background_colour
+            has_any_changed = True
+
+        disabled_border_colour = self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                                      self.combined_element_ids)
+        if disabled_border_colour != self.disabled_border_colour:
+            self.disabled_border_colour = disabled_border_colour
+            has_any_changed = True
+
         def parse_to_bool(str_data: str):
             return bool(int(str_data))
 
@@ -502,6 +507,26 @@ class UIVerticalScrollBar(UIElement):
 
         self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
         self.sliding_button.set_relative_position(self.sliding_rect_position)
+
+    def disable(self):
+        """
+        Disables the scroll bar so it is no longer interactive.
+        """
+        if self.is_enabled:
+            self.is_enabled = False
+            self.button_container.disable()
+
+            self.drawable_shape.set_active_state('disabled')
+
+    def enable(self):
+        """
+        Enables the scroll bar so it is interactive once again.
+        """
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.button_container.enable()
+
+            self.drawable_shape.set_active_state('normal')
 
     def show(self):
         """

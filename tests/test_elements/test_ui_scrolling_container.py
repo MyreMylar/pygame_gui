@@ -122,6 +122,73 @@ class TestUIScrollingContainer:
 
         assert container.get_container().relative_rect.x == -18
 
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=container)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=container)
+
+        container.disable()
+
+        assert container.is_enabled is False
+        assert button_1.is_enabled is False
+        assert button_2.is_enabled is False
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=container)
+
+        button_2 = UIButton(relative_rect=pygame.Rect(10, 50, 150, 30),
+                            text="Test Button 2",
+                            manager=default_ui_manager,
+                            container=container)
+
+        container.disable()
+        container.enable()
+
+        assert container.is_enabled is True
+        assert button_1.is_enabled is True
+        assert button_2.is_enabled is True
+
+        # process a mouse button down event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': button_1.rect.center}))
+
+        # process a mouse button up event
+        button_1.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': button_1.rect.center}))
+
+        button_1.update(0.01)
+
+        assert button_1.check_pressed() is True
+
     def test_show(self, _init_pygame, default_ui_manager,
                   _display_surface_return_none):
         container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),

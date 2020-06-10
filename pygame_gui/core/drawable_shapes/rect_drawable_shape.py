@@ -78,12 +78,14 @@ class RectDrawableShape(DrawableShape):
             else:
                 warnings.warn(
                     "shape created too small to fit in selected shadow width and corner radius")
-                self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA,
-                                                   depth=32)
+                self.base_surface = pygame.surface.Surface(self.containing_rect.size,
+                                                           flags=pygame.SRCALPHA,
+                                                           depth=32)
         else:
             self.click_area_shape = self.containing_rect.copy()
-            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA,
-                                               depth=32)
+            self.base_surface = pygame.surface.Surface(self.containing_rect.size,
+                                                       flags=pygame.SRCALPHA,
+                                                       depth=32)
 
         self.compute_aligned_text_rect()
 
@@ -175,8 +177,8 @@ class RectDrawableShape(DrawableShape):
             if self.border_width > 0:
 
                 if isinstance(self.theming[border_colour_state_str], ColourGradient):
-                    border_shape_surface = pygame.Surface(self.border_rect.size,
-                                                          flags=pygame.SRCALPHA, depth=32)
+                    border_shape_surface = pygame.surface.Surface(self.border_rect.size,
+                                                                  flags=pygame.SRCALPHA, depth=32)
                     border_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                     self.states[state_str].surface.blit(border_shape_surface,
                                                         self.border_rect,
@@ -190,8 +192,8 @@ class RectDrawableShape(DrawableShape):
                                                         self.border_rect)
 
             if isinstance(self.theming[bg_colour_state_str], ColourGradient):
-                background_shape_surface = pygame.Surface(self.background_rect.size,
-                                                          flags=pygame.SRCALPHA, depth=32)
+                background_shape_surface = pygame.surface.Surface(self.background_rect.size,
+                                                                  flags=pygame.SRCALPHA, depth=32)
                 background_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                 self.states[state_str].surface.blit(background_shape_surface,
                                                     self.background_rect,
@@ -210,8 +212,9 @@ class RectDrawableShape(DrawableShape):
                                             self.background_rect.width),
                                         self.background_rect.height))
                 if isinstance(self.theming['filled_bar'], ColourGradient):
-                    bar_shape_surface = pygame.Surface(bar_rect.size, flags=pygame.SRCALPHA,
-                                                       depth=32)
+                    bar_shape_surface = pygame.surface.Surface(bar_rect.size,
+                                                               flags=pygame.SRCALPHA,
+                                                               depth=32)
                     bar_shape_surface.fill(pygame.Color('#FFFFFFFF'))
                     self.states[state_str].surface.blit(bar_shape_surface, bar_rect,
                                                         special_flags=pygame.BLEND_RGBA_SUB)
@@ -236,3 +239,4 @@ class RectDrawableShape(DrawableShape):
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
+        self.states[state_str].generated = True

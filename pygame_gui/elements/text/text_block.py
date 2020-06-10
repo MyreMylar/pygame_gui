@@ -337,8 +337,8 @@ class TextBlock:
         """
         self.block_sprite = None
         if self.height != -1 and self.width != -1:
-            self.block_sprite = pygame.Surface((self.width, self.height),
-                                               pygame.SRCALPHA, depth=32)
+            self.block_sprite = pygame.surface.Surface((self.width, self.height),
+                                                       pygame.SRCALPHA, depth=32)
             self.block_sprite.fill(pygame.Color('#00000000'))
         position = [0, 0]
         line_height_acc = 0
@@ -382,8 +382,8 @@ class TextBlock:
         if self.block_sprite is None:
             self.width = max_line_length if self.width == -1 else self.width
             self.height = line_height_acc if self.height == -1 else self.height
-            self.block_sprite = pygame.Surface((self.width, self.height),
-                                               pygame.SRCALPHA, depth=32)
+            self.block_sprite = pygame.surface.Surface((self.width, self.height),
+                                                       pygame.SRCALPHA, depth=32)
             self.block_sprite.fill(pygame.Color('#00000000'))
 
             for line in self.lines:
@@ -402,8 +402,8 @@ class TextBlock:
         :param text_effect: The text effect to use when redrawing.
         """
         final_alpha = text_effect.get_final_alpha() if text_effect else 255
-        self.block_sprite = pygame.Surface((self.width, self.height),
-                                           flags=pygame.SRCALPHA, depth=32)
+        self.block_sprite = pygame.surface.Surface((self.width, self.height),
+                                                   flags=pygame.SRCALPHA, depth=32)
         self.block_sprite.fill(pygame.Color('#00000000'))
 
         if isinstance(self.bg_colour, ColourGradient):

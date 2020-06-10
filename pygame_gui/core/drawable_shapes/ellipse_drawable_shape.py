@@ -69,8 +69,9 @@ class EllipseDrawableShape(DrawableShape):
                                                            self.shadow_width, 'ellipse')
         else:
             self.click_area_shape = self.containing_rect.copy()
-            self.base_surface = pygame.Surface(self.containing_rect.size, flags=pygame.SRCALPHA,
-                                               depth=32)
+            self.base_surface = pygame.surface.Surface(self.containing_rect.size,
+                                                       flags=pygame.SRCALPHA,
+                                                       depth=32)
             self.base_surface.fill(pygame.Color('#00000000'))
 
         self.compute_aligned_text_rect()
@@ -183,10 +184,10 @@ class EllipseDrawableShape(DrawableShape):
                                                 self.border_rect.height -
                                                 (2 * self.border_width * aa_amount)))
 
-            bab_surface = pygame.Surface((self.containing_rect.width * aa_amount,
-                                          self.containing_rect.height * aa_amount),
-                                         flags=pygame.SRCALPHA,
-                                         depth=32)
+            bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
+                                                  self.containing_rect.height * aa_amount),
+                                                 flags=pygame.SRCALPHA,
+                                                 depth=32)
             bab_surface.fill(pygame.Color('#00000000'))
             if self.border_width > 0:
                 if isinstance(self.theming[border_colour_state_str], ColourGradient):
@@ -219,7 +220,7 @@ class EllipseDrawableShape(DrawableShape):
             bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
             # cut a hole in shadow, then blit background into it
-            sub_surface = pygame.Surface(
+            sub_surface = pygame.surface.Surface(
                 ((self.containing_rect.width - (2 * self.shadow_width)) * aa_amount,
                  (self.containing_rect.height - (2 * self.shadow_width)) * aa_amount),
                 flags=pygame.SRCALPHA, depth=32)
@@ -245,13 +246,14 @@ class EllipseDrawableShape(DrawableShape):
         self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
+        self.states[state_str].generated = True
 
     @staticmethod
-    def clear_and_create_shape_surface(surface: pygame.Surface,
+    def clear_and_create_shape_surface(surface: pygame.surface.Surface,
                                        rect: pygame.Rect,
                                        overlap: int,
                                        aa_amount: int,
-                                       clear: bool = True) -> pygame.Surface:
+                                       clear: bool = True) -> pygame.surface.Surface:
         """
         Clear a space for a new shape surface on the main state surface for this state. The
         surface created will be plain white so that it can be easily multiplied with a colour
@@ -268,8 +270,9 @@ class EllipseDrawableShape(DrawableShape):
         """
 
         # For the visible AA shape surface we only want to blend in the alpha channel
-        large_shape_surface = pygame.Surface((rect.width, rect.height), flags=pygame.SRCALPHA,
-                                             depth=32)
+        large_shape_surface = pygame.surface.Surface((rect.width, rect.height),
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
         large_shape_surface.fill(pygame.Color('#00000000'))
         pygame.draw.ellipse(large_shape_surface, pygame.Color("#FFFFFFFF"),
                             large_shape_surface.get_rect())
@@ -284,8 +287,9 @@ class EllipseDrawableShape(DrawableShape):
                                         max(0, rect.height - 2 * (overlap * aa_amount)))
             # for the subtract surface we want to blend in all RGBA channels to clear correctly
             # for our new shape
-            large_sub_surface = pygame.Surface((subtract_rect.width, subtract_rect.height),
-                                               flags=pygame.SRCALPHA, depth=32)
+            large_sub_surface = pygame.surface.Surface((subtract_rect.width,
+                                                        subtract_rect.height),
+                                                       flags=pygame.SRCALPHA, depth=32)
             large_sub_surface.fill(pygame.Color('#00000000'))
             pygame.draw.ellipse(large_sub_surface, pygame.Color("#FFFFFFFF"),
                                 large_sub_surface.get_rect())

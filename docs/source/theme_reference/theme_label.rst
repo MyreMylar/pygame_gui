@@ -18,6 +18,7 @@ also be a colour gradient:
 
  - "**dark_bg**" - The background colour/gradient of the label text.
  - "**normal_text**" - The colour/gradient of the text itself.
+ - "**disabled_text**" - The colour/gradient of the text when the label has been disabled.
  - "**text_shadow**" - The colour of the shadow behind the text, if any exists.
 
 Font

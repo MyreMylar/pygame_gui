@@ -63,7 +63,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.Surface:
+                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -120,7 +120,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def draw_ui(self, window_surface: pygame.Surface):
+    def draw_ui(self, window_surface: pygame.surface.Surface):
         """
         Draws the UI.
 
@@ -174,45 +174,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
         Set a set of element as the focused set.
 
-        If the set is a scroll bar we also keep track of that.
-
         :param focus: The set of element to focus on.
-        """
-
-    @abstractmethod
-    def clear_last_focused_from_vert_scrollbar(self, vert_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param vert_scrollbar: A scrollbar UIElement.
-        """
-
-    @abstractmethod
-    def get_last_focused_vert_scrollbar(self):
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
-        """
-
-    @abstractmethod
-    def clear_last_focused_from_horiz_scrollbar(self, horiz_scrollbar: IUIElementInterface):
-        """
-        Clears the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :param horiz_scrollbar: A scrollbar UIElement.
-        """
-
-    @abstractmethod
-    def get_last_focused_horiz_scrollbar(self):
-        """
-        Gets the last scrollbar that we used. Right now this may also be one of the buttons of
-        the scroll bar.
-
-        :return: A UIElement.
         """
 
     @abstractmethod
@@ -250,12 +212,12 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_universal_empty_surface(self) -> pygame.Surface:
+    def get_universal_empty_surface(self) -> pygame.surface.Surface:
         """
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.Surface
+        :return: An empty, and therefore invisible pygame.surface.Surface
 
         """
 

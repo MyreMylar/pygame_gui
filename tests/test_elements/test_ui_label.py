@@ -108,6 +108,27 @@ class TestUILabel:
 
         assert label.rect.size == (200, 50)
 
+    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
+                     _display_surface_return_none: None):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+
+        label.disable()
+
+        assert label.is_enabled is False
+
+    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
+                    _display_surface_return_none: None):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+
+        label.disable()
+        label.enable()
+
+        assert label.is_enabled is True
+
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
