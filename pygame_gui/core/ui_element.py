@@ -1,3 +1,4 @@
+from sys import version_info
 import warnings
 from collections import namedtuple
 from typing import List, Union, Tuple, Dict, Any, Callable, Set
@@ -10,7 +11,12 @@ from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMUL
 from pygame_gui.core.utility import basic_blit
 
 
-ObjectID = namedtuple('ThemeID', field_names=('object_id', 'class_id'))
+if version_info.minor >= 7:
+    ObjectID = namedtuple('ObjectID',
+                          field_names=('object_id', 'class_id'),
+                          defaults=(None, None))
+else:
+    ObjectID = namedtuple('ObjectID', field_names=('object_id', 'class_id'))
 
 
 class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
