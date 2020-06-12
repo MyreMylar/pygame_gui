@@ -2,6 +2,7 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -32,7 +33,7 @@ class UIVerticalScrollBar(UIElement):
                  manager: IUIManagerInterface,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1):
 
@@ -155,7 +156,7 @@ class UIVerticalScrollBar(UIElement):
                                            container=self.button_container,
                                            starting_height=1,
                                            parent_element=self,
-                                           object_id="#top_button",
+                                           object_id=ObjectID("#top_button", "@arrow_button"),
                                            anchors={'left': 'left',
                                                     'right': 'right',
                                                     'top': 'top',
@@ -171,7 +172,7 @@ class UIVerticalScrollBar(UIElement):
                                               container=self.button_container,
                                               starting_height=1,
                                               parent_element=self,
-                                              object_id="#bottom_button",
+                                              object_id=ObjectID("#bottom_button", "@arrow_button"),
                                               anchors={'left': 'left',
                                                        'right': 'right',
                                                        'top': 'bottom',

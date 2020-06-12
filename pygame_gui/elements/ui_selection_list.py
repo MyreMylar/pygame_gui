@@ -2,6 +2,7 @@ from typing import Union, Dict, Tuple, List
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
@@ -51,7 +52,7 @@ class UISelectionList(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1
                  ):

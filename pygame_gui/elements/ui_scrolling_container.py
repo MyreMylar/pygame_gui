@@ -2,6 +2,7 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
@@ -35,7 +36,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  starting_height: int = 1,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Union[Dict[str, str], None] = None,
                  visible: int = 1):
 

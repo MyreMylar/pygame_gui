@@ -2,6 +2,7 @@ from typing import List, Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core.ui_element import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.interfaces import IUIContainerInterface, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
@@ -36,7 +37,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  is_window_root_container: bool = False,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Union[Dict[str, str], None] = None,
                  visible: int = 1):
 
@@ -52,7 +53,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
-                               object_id=object_id,
+                               object_id=ObjectID(object_id, None),
                                element_id='container')
 
         self.sprite_group = self.ui_manager.get_sprite_group()

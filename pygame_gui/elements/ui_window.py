@@ -4,6 +4,7 @@ import pygame
 
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_BUTTON_PRESSED
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
@@ -43,7 +44,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  manager: IUIManagerInterface,
                  window_display_title: str = "",
                  element_id: Union[str, None] = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  resizable: bool = False,
                  visible: int = 1):
 

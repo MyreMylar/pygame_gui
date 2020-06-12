@@ -4,6 +4,7 @@ from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface
 from pygame_gui.core.ui_element import UIElement
 
@@ -35,7 +36,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  hover_distance: Tuple[int, int],
                  manager: IUIManagerInterface,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),

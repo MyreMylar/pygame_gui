@@ -2,6 +2,7 @@ from typing import Union, Dict, Tuple
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 
@@ -56,7 +57,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  margins: Dict[str, int] = None,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1
                  ):

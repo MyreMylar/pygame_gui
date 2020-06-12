@@ -1,7 +1,9 @@
 import warnings
+from typing import Union
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIButton, UITextBox, UIWindow
@@ -23,7 +25,7 @@ class UIMessageWindow(UIWindow):
                  manager: IUIManagerInterface,
                  *,
                  window_title: str = 'Message',
-                 object_id: str = '#message_window'):
+                 object_id: Union[ObjectID, str] = ObjectID('#message_window', None)):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,

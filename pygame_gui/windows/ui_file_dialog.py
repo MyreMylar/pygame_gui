@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
@@ -35,7 +36,7 @@ class UIFileDialog(UIWindow):
                  manager: IUIManagerInterface,
                  window_title: str = 'File Dialog',
                  initial_file_path: Union[str, None] = None,
-                 object_id: str = '#file_dialog',
+                 object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
                  allow_picking_directories: bool = False
                  ):

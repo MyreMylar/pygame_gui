@@ -103,7 +103,8 @@ class TestUIAppearanceTheme:
     def test_load_images_bad_path(self, _init_pygame):
         loader = BlockingThreadedResourceLoader()
         theme = UIAppearanceTheme(loader)
-        theme.ui_element_image_locs['button'] = {'regular_path': {'changed': True, 'path': 'not_an_image.png'}}
+        theme.ui_element_image_locs['button'] = {'regular_path': {'changed': True,
+                                                                  'path': 'not_an_image.png'}}
         with pytest.warns(UserWarning, match="Unable to load resource"):
             theme._load_images()
             loader.start()
@@ -111,8 +112,11 @@ class TestUIAppearanceTheme:
 
     def test_build_all_combined_ids(self, _init_pygame):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
-        with pytest.raises(ValueError, match="Object ID hierarchy is not equal in length to Element ID hierarchy"):
-            theme.build_all_combined_ids(object_ids=['whut', 'the', 'heck'], element_ids=['button'])
+        with pytest.raises(ValueError, match="Object & class ID hierarchy is not "
+                                             "equal in length to Element ID hierarchy"):
+            theme.build_all_combined_ids(element_ids=['button'],
+                                         class_ids=[None],
+                                         object_ids=['whut', 'the', 'heck'])
 
     def test_load_theme_bad_path(self, _init_pygame):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
@@ -123,3 +127,58 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
         with pytest.warns(UserWarning, match='Failed to load current theme file, check syntax'):
             theme.load_theme(os.path.join("tests", "data", "themes", "bad_syntax_theme.json"))
+
+    def test_use_class_id_simple(self, _init_pygame):
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        theme.load_theme(PackageResource('tests.data.themes',
+                                         'appearance_theme_class_id_test.json'))
+        border_width = theme.get_misc_data(misc_data_id='border_width',
+                                           combined_element_ids=['#test_object_2',
+                                                                 '@test_class',
+                                                                 'button'])
+        assert border_width == '3'
+
+    def test_use_class_id_generated(self, _init_pygame, _display_surface_return_none: None):
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader())
+        theme.load_theme(PackageResource('tests.data.themes',
+                                         'appearance_theme_class_id_test.json'))
+
+        combined_ids = theme.build_all_combined_ids(element_ids=['button'],
+                                                    class_ids=['@test_class'],
+                                                    object_ids=['#test_object_2'])
+
+        assert combined_ids == ['#test_object_2', '@test_class', 'button']
+
+        border_width = theme.get_misc_data(misc_data_id='border_width',
+                                           combined_element_ids=combined_ids)
+        shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
+                                           combined_element_ids=combined_ids)
+        assert shadow_width == '0'
+        assert border_width == '3'
+
+        combined_ids = theme.build_all_combined_ids(element_ids=['button'],
+                                                    class_ids=['@test_class'],
+                                                    object_ids=['#test_object_1'])
+
+        assert combined_ids == ['#test_object_1', '@test_class', 'button']
+
+        border_width = theme.get_misc_data(misc_data_id='border_width',
+                                           combined_element_ids=combined_ids)
+
+        shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
+                                           combined_element_ids=combined_ids)
+        assert border_width == '1'
+        assert shadow_width == '3'
+
+        combined_ids = theme.build_all_combined_ids(element_ids=['button'], class_ids=[None],
+                                                    object_ids=['#test_object_2'])
+
+        assert combined_ids == ['#test_object_2', 'button']
+
+        border_width = theme.get_misc_data(misc_data_id='border_width',
+                                           combined_element_ids=combined_ids)
+
+        shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
+                                           combined_element_ids=combined_ids)
+        assert border_width == '2'
+        assert shadow_width == '0'

@@ -1,0 +1,31 @@
+{
+    "button":
+    {
+        "misc":
+        {
+            "border_width": "2",
+            "shadow_width": "3"
+        }
+    },
+    "@test_class":
+    {
+        "misc":
+        {
+            "border_width": "3"
+        }
+    },
+    "#test_object_1":
+    {
+        "misc":
+        {
+            "border_width": "1"
+        }
+    },
+    "#test_object_2":
+    {
+        "misc":
+        {
+            "shadow_width": "0"
+        }
+    }
+}
