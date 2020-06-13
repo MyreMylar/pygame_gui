@@ -531,9 +531,10 @@ class UISelectionList(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - call show() of owned container - list_and_scroll_bar_container.
-        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
-        visibility will propagate to them - there is no need to call their show() methods separately.
+        In addition to the base UIElement.show() - call show() of owned container -
+        list_and_scroll_bar_container. All other subelements (item_list_container, scrollbar) are
+        children of list_and_scroll_bar_container, so it's visibility will propagate to them -
+        there is no need to call their show() methods separately.
         """
         super().show()
 
@@ -541,9 +542,10 @@ class UISelectionList(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - call hide() of owned container - list_and_scroll_bar_container.
-        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
-        visibility will propagate to them - there is no need to call their hide() methods separately.
+        In addition to the base UIElement.hide() - call hide() of owned container -
+        list_and_scroll_bar_container. All other subelements (item_list_container, scrollbar) are
+        children of list_and_scroll_bar_container, so it's visibility will propagate to them -
+        there is no need to call their hide() methods separately.
         """
         super().hide()
 

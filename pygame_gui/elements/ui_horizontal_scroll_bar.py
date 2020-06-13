@@ -24,7 +24,8 @@ class UIHorizontalScrollBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -532,8 +533,8 @@ class UIHorizontalScrollBar(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - show the self.button_container which will propagate and show all
-        the buttons.
+        In addition to the base UIElement.show() - show the self.button_container which
+        will propagate and show all the buttons.
         """
         super().show()
 
@@ -541,8 +542,8 @@ class UIHorizontalScrollBar(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - hide the self.button_container which will propagate and hide all
-        the buttons.
+        In addition to the base UIElement.hide() - hide the self.button_container which
+        will propagate and hide all the buttons.
         """
         super().hide()
 

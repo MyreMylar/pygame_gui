@@ -196,7 +196,6 @@ class UIManager(IUIManagerInterface):
                 for ui_element in sprites_in_layer:
                     if ui_element.visible:
                         # Only process events for visible elements - ignore hidden elements
-
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                             mouse_x, mouse_y = event.pos
                             if ui_element.hover_point(mouse_x, mouse_y):
@@ -206,9 +205,9 @@ class UIManager(IUIManagerInterface):
                         consumed_event = ui_element.process_event(event)
                         if consumed_event:
                             # Generally clicks should only be handled by the top layer of whatever
-                            # GUI thing we are  clicking on. I am trusting UIElments to decide whether
-                            # they need to consume the events they respond to. Hopefully this is not
-                            # a mistake.
+                            # GUI thing we are  clicking on. I am trusting UIElments to decide
+                            # whether they need to consume the events they respond to. Hopefully
+                            # this is not a mistake.
 
                             break
 

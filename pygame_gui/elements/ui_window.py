@@ -36,7 +36,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     :param object_id: An optional object ID for this window, useful for distinguishing different
                       windows.
     :param resizable: Whether this window is resizable or not, defaults to False.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility may
+                    override this.
     """
 
     def __init__(self,

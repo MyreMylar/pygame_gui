@@ -314,8 +314,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def hide(self):
         """
-        Hides the container, which means the container will not get drawn and will not process events.
-        Should also hide all the children elements and containers.
+        Hides the container, which means the container will not get drawn and will not process
+        events. Should also hide all the children elements and containers.
         If the container was hidden before - ignore.
         """
         if self.visible:

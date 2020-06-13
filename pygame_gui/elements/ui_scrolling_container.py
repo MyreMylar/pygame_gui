@@ -27,7 +27,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                            container if you've set that.
     :param object_id: An object ID for this element.
     :param anchors: Layout anchors in a dictionary.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -69,7 +70,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            starting_height=starting_height,
                                            container=container,
                                            parent_element=parent_element,
-                                           object_id='#root_container',
+                                           object_id=ObjectID(object_id='#root_container',
+                                                              class_id=None),
                                            anchors=anchors,
                                            visible=self.visible)
 
@@ -81,7 +83,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            starting_height=0,
                                            container=self._root_container,
                                            parent_element=parent_element,
-                                           object_id='#view_container',
+                                           object_id=ObjectID(object_id='#view_container',
+                                                              class_id=None),
                                            anchors={'left': 'left',
                                                     'right': 'right',
                                                     'top': 'top',
@@ -96,7 +99,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                 starting_height=0,
                                                 container=self._view_container,
                                                 parent_element=parent_element,
-                                                object_id='#scrollable_container',
+                                                object_id=ObjectID(
+                                                    object_id='#scrollable_container',
+                                                    class_id=None),
                                                 anchors={'left': 'left',
                                                          'right': 'left',
                                                          'top': 'top',
@@ -419,8 +424,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     def show(self):
         """
         In addition to the base UIElement.show() - call show() of owned container - _root_container.
-        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
-        propagate to them - there is no need to call their show() methods separately.
+        All other subelements (view_container, scrollbars) are children of _root_container, so
+        it's visibility will propagate to them - there is no need to call their show() methods
+        separately.
         """
         super().show()
         self._root_container.show()
@@ -428,8 +434,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     def hide(self):
         """
         In addition to the base UIElement.hide() - call hide() of owned container - _root_container.
-        All other subelements (view_container, scrollbars) are children of _root_container, so it's visibility will
-        propagate to them - there is no need to call their hide() methods separately.
+        All other subelements (view_container, scrollbars) are children of _root_container, so
+        it's visibility will propagate to them - there is no need to call their hide() methods
+        separately.
         """
         self._root_container.hide()
         super().hide()

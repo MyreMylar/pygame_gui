@@ -590,9 +590,11 @@ class UIColourPickerDialog(UIWindow):
     def show(self):
         super().show()
 
-        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects is not supported.")
+        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog "
+                      "objects is not supported.")
 
     def hide(self):
         super().hide()
 
-        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects is not supported.")
+        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects "
+                      "is not supported.")

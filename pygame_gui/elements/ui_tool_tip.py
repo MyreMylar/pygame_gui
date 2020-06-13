@@ -198,8 +198,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def show(self):
         """
-        This is a base method show() of a UIElement, but since it's not intended to be used on a UIToolTip -
-        display a warning.
+        This is a base method show() of a UIElement, but since it's not intended to be used on a
+        UIToolTip - display a warning.
         """
         super().show()
 
@@ -207,8 +207,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def hide(self):
         """
-        This is a base method hide() of a UIElement, but since it's not intended to be used on a UIToolTip -
-        display a warning.
+        This is a base method hide() of a UIElement, but since it's not intended to be used
+        on a UIToolTip - display a warning.
         """
         super().hide()
 
