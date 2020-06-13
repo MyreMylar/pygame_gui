@@ -9,6 +9,7 @@ from tests.shared_fixtures import _init_pygame, default_ui_manager, default_disp
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.core.ui_container import UIContainer
+from pygame_gui import PackageResource
 
 try:
     # mouse button constants not defined in pygame 1.9.3
@@ -519,3 +520,45 @@ class TestUIDropDownMenu:
         assert menu.menu_states["closed"].visible == 0
         assert menu.menu_states["closed"].selected_option_button.visible == 0
         assert menu.menu_states["closed"].open_button.visible == 0
+
+    def test_class_theming_id(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600),
+                            PackageResource('tests.data.themes',
+                                            'appearance_theme_class_id_test.json'))
+
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=manager,
+                              object_id=pygame_gui.core.ObjectID(object_id=None,
+                                                                 class_id='@test_class')
+                              )
+
+        assert menu.combined_element_ids == ['@test_class', 'drop_down_menu']
+
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              manager=manager,
+                              object_id=pygame_gui.core.ObjectID(object_id='#test_object_1',
+                                                                 class_id='@test_class'))
+
+        assert menu.combined_element_ids == ['#test_object_1', '@test_class', 'drop_down_menu']
+
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=manager)
+
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(10, 10, 200, 30),
+                              container=test_container,
+                              manager=manager,
+                              object_id=pygame_gui.core.ObjectID(object_id='#test_object_1',
+                                                                 class_id='@test_class'))
+
+        assert menu.combined_element_ids == ['container.#test_object_1',
+                                             'container.@test_class',
+                                             'container.drop_down_menu',
+                                             '#test_object_1',
+                                             '@test_class',
+                                             'drop_down_menu']
