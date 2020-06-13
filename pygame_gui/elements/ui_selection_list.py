@@ -39,7 +39,8 @@ class UISelectionList(UIElement):
                       from others with the same hierarchy.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -161,7 +162,8 @@ class UISelectionList(UIElement):
                                           manager=self.ui_manager,
                                           parent_element=self,
                                           container=self.item_list_container,
-                                          object_id=item['object_id'],
+                                          object_id=ObjectID(object_id=item['object_id'],
+                                                             class_id='@selection_list_item'),
                                           allow_double_clicks=self.allow_double_clicks,
                                           anchors={'left': 'left',
                                                    'right': 'right',
@@ -280,7 +282,9 @@ class UISelectionList(UIElement):
                                                   manager=self.ui_manager,
                                                   parent_element=self,
                                                   container=self.item_list_container,
-                                                  object_id=item['object_id'],
+                                                  object_id=ObjectID(
+                                                      object_id=item['object_id'],
+                                                      class_id='@selection_list_item'),
                                                   allow_double_clicks=self.allow_double_clicks,
                                                   anchors={'left': 'left',
                                                            'right': 'right',
