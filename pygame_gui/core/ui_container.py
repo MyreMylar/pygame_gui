@@ -53,7 +53,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
-                               object_id=ObjectID(object_id, None),
+                               object_id=object_id,
                                element_id='container')
 
         self.sprite_group = self.ui_manager.get_sprite_group()
