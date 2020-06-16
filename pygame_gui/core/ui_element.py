@@ -68,13 +68,6 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
 
-        if visible:
-            self.dirty = 2
-            self.visible = 1
-        else:
-            self.dirty = 1
-            self.visible = 0
-
         self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
         # self.source_rect = None
 
@@ -101,27 +94,37 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
-        if container is None:
-            if self.ui_manager.get_root_container() is not None:
-                container = self.ui_manager.get_root_container()
-            else:
-                container = self
+        self._setup_container(container)
 
-        if isinstance(container, IContainerLikeInterface):
-            self.ui_container = container.get_container()
-
-        if self.ui_container is not None and self.ui_container is not self:
-            self.ui_container.add_element(self)
-
-        if self.ui_container is not None and not self.ui_container.visible:
-            self.dirty = 1
-            self.visible = 0
+        self.dirty = 1
+        self.visible = 0
+        self._setup_visibility(visible)
 
         self._update_absolute_rect_position_from_anchors()
 
         self._update_container_clip()
 
         self._focus_set = {self}
+
+    def _setup_visibility(self, visible):
+        if visible:
+            self.dirty = 2
+            self.visible = 1
+
+        if self.ui_container is not None and not self.ui_container.visible:
+            self.dirty = 1
+            self.visible = 0
+
+    def _setup_container(self, container):
+        if container is None:
+            if self.ui_manager.get_root_container() is not None:
+                container = self.ui_manager.get_root_container()
+            else:
+                container = self
+        if isinstance(container, IContainerLikeInterface):
+            self.ui_container = container.get_container()
+        if self.ui_container is not None and self.ui_container is not self:
+            self.ui_container.add_element(self)
 
     def get_focus_set(self) -> Set['UIElement']:
         return self._focus_set

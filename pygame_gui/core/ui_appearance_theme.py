@@ -400,22 +400,21 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         if index < tree_size:
             # add any Object IDs first...
-            if object_ids is not None and index < len(object_ids):
-                object_id = object_ids[index]
-                if object_id is not None:
-                    next_node = {'id': object_id, 'parent': current_node}
-                    self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
-                                           index + 1, tree_size, combined_ids)
+            if (object_ids is not None
+                    and index < len(object_ids)
+                    and object_ids[index] is not None):
+                next_node = {'id': object_ids[index], 'parent': current_node}
+                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                                       index + 1, tree_size, combined_ids)
             # then any class IDs...
-            if class_ids is not None and index < len(class_ids):
-                class_id = class_ids[index]
-                if class_id is not None:
-                    next_node = {'id': class_id, 'parent': current_node}
-                    self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
-                                           index + 1, tree_size, combined_ids)
+            if (class_ids is not None
+                    and index < len(class_ids)
+                    and class_ids[index] is not None):
+                next_node = {'id': class_ids[index], 'parent': current_node}
+                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                                       index + 1, tree_size, combined_ids)
             # Finally add the required element IDs.
-            element_id = element_ids[index]
-            next_node_2 = {'id': element_id, 'parent': current_node}
+            next_node_2 = {'id': element_ids[index], 'parent': current_node}
             self._get_next_id_node(next_node_2, element_ids, class_ids, object_ids, index + 1,
                                    tree_size, combined_ids)
         else:
