@@ -43,7 +43,8 @@ Sub-elements
 --------------
 
 You can reference all three of the buttons that are sub elements of the scroll bar with a theming block id of
-'vertical_scroll_bar.button'. You can also reference the three buttons individually by adding their object IDs:
+'vertical_scroll_bar.button'. You can reference both of the arrow buttons with the class_id: '@arrow_button'.
+You can also reference the three buttons individually by adding their object IDs:
 
  - 'vertical_scroll_bar.#top_button'
  - 'vertical_scroll_bar.#bottom_button'

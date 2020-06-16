@@ -34,7 +34,8 @@ Sub-elements
 
 The selection list may also contain a :class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` which you
 can reference with the block id 'window.vertical_scroll_bar'. You can also reference all of the buttons that are sub
-elements of the scroll bar with a theming block id of 'window.vertical_scroll_bar.button'.
+elements of the scroll bar with a theming block id of 'window.vertical_scroll_bar.button', or pick out the list item
+buttons specifically with a class_id of '@selection_list_item'.
 
 You can further reference the individual buttons of the scroll bar by adding their object IDs:
 
@@ -76,6 +77,13 @@ Here is an example of a panel block in a JSON theme file, using the parameters d
                 "border_width": "1",
                 "shadow_width": "15",
                 "list_item_height": "30"
+            }
+        },
+        "selection_list.@selection_list_item":
+        {
+            "misc":
+            {
+               "border_width": "2"
             }
         }
     }
