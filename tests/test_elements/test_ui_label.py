@@ -161,8 +161,8 @@ class TestUILabel:
         surface = empty_surface.copy()
         manager = UIManager(resolution)
         label = UILabel(relative_rect=pygame.Rect(25, 25, 375, 150),
-                         text="Test Button",
-                         manager=manager, visible=0)
+                        text="Test Button",
+                        manager=manager, visible=0)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 

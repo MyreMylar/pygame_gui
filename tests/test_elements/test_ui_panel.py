@@ -4,6 +4,7 @@ import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.comparing_functions import compare_surfaces
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.ui_container import UIContainer
@@ -575,3 +576,29 @@ class TestUIPanel:
         assert panel.dirty == 1
         assert button.visible == 1
         assert button.dirty == 2
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        panel = UIPanel(pygame.Rect(25, 25, 375, 150), manager=manager, visible=0, starting_layer_height=1)
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                          manager=manager, container=panel)
+
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        panel.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        panel.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
