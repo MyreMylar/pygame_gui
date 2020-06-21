@@ -5,6 +5,7 @@ import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.comparing_functions import compare_surfaces
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.ui_container import UIContainer
@@ -754,3 +755,33 @@ class TestUISelectionList:
         assert selection_list.scroll_bar.bottom_button.visible == 0
         assert selection_list.scroll_bar.top_button.visible == 0
         assert selection_list.scroll_bar.sliding_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        selection_list = UISelectionList(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                         item_list=['item 1', 'item 2', 'item 3', 'item 4',
+                                                    'item 5', 'item 6', 'item 7', 'item 8',
+                                                    'item 9', 'item 10', 'item 11', 'item 12',
+                                                    'item 13', 'item 14', 'item 15', 'item 16'],
+                                         manager=manager,
+                                         allow_multi_select=True,
+                                         visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        selection_list.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        selection_list.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

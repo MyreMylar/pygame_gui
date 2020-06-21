@@ -4,6 +4,7 @@ import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface , _display_surface_return_none
+from tests.comparing_functions import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
@@ -240,3 +241,29 @@ class TestUIScrollingContainer:
         assert container.horiz_scroll_bar.visible == 0
         assert container.vert_scroll_bar.visible == 0
         assert container.scrollable_container.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                         manager=manager,
+                                         visible=0)
+        container.set_scrollable_area_dimensions((500, 600))
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        container.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        container.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
