@@ -3,7 +3,7 @@ import pytest
 import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
-from tests.comparing_functions import compare_surfaces
+from tests.comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_label import UILabel
