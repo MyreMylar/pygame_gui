@@ -157,10 +157,8 @@ class TestUIScreenSpaceHealthBar:
                                             visible=0)
 
         assert health_bar.visible == 0
-        assert health_bar.dirty == 1
         health_bar.show()
         assert health_bar.visible == 1
-        assert health_bar.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         healthy_sprite = HealthySprite()
@@ -169,7 +167,5 @@ class TestUIScreenSpaceHealthBar:
                                             manager=default_ui_manager)
 
         assert health_bar.visible == 1
-        assert health_bar.dirty == 2
         health_bar.hide()
         assert health_bar.visible == 0
-        assert health_bar.dirty == 1

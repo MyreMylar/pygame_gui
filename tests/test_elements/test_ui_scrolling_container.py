@@ -196,7 +196,6 @@ class TestUIScrollingContainer:
         container.set_scrollable_area_dimensions((500, 600))
 
         assert container.visible == 0
-        assert container.dirty == 1
 
         assert container._root_container.visible == 0
         assert container._view_container.visible == 0
@@ -207,7 +206,6 @@ class TestUIScrollingContainer:
         container.show()
 
         assert container.visible == 1
-        assert container.dirty == 2
 
         assert container._root_container.visible == 1
         assert container._view_container.visible == 1
@@ -222,7 +220,6 @@ class TestUIScrollingContainer:
         container.set_scrollable_area_dimensions((500, 600))
 
         assert container.visible == 1
-        assert container.dirty == 2
 
         assert container._root_container.visible == 1
         assert container._view_container.visible == 1
@@ -233,7 +230,6 @@ class TestUIScrollingContainer:
         container.hide()
 
         assert container.visible == 0
-        assert container.dirty == 1
 
         assert container._root_container.visible == 0
         assert container._view_container.visible == 0

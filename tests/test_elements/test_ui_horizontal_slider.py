@@ -329,7 +329,6 @@ class TestUIHorizontalSlider:
                                     value_range=(0, 200), manager=default_ui_manager, visible=0)
 
         assert slider.visible == 0
-        assert slider.dirty == 1
 
         assert slider.sliding_button.visible == 0
         assert slider.button_container.visible == 0
@@ -339,7 +338,6 @@ class TestUIHorizontalSlider:
         slider.show()
 
         assert slider.visible == 1
-        assert slider.dirty == 2
 
         assert slider.sliding_button.visible == 1
         assert slider.button_container.visible == 1
@@ -351,7 +349,6 @@ class TestUIHorizontalSlider:
                                     value_range=(0, 200), manager=default_ui_manager)
 
         assert slider.visible == 1
-        assert slider.dirty == 2
 
         assert slider.sliding_button.visible == 1
         assert slider.button_container.visible == 1
@@ -361,7 +358,6 @@ class TestUIHorizontalSlider:
         slider.hide()
 
         assert slider.visible == 0
-        assert slider.dirty == 1
 
         assert slider.sliding_button.visible == 0
         assert slider.button_container.visible == 0
