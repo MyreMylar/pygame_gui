@@ -4,6 +4,7 @@ import pytest
 import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows import UIConfirmationDialog
@@ -200,3 +201,72 @@ class TestUIConfirmationDialog:
                                               action_short_name="Confirm")
 
         assert confirm_dialog.image is not None
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
+                                              manager=default_ui_manager,
+                                              action_long_desc="Confirm a test of the "
+                                                               "confirmation dialog.",
+                                              window_title="Confirm",
+                                              action_short_name="Confirm",
+                                              visible=0)
+
+        assert confirm_dialog.visible == 0
+
+        assert confirm_dialog.confirm_button.visible == 0
+        assert confirm_dialog.cancel_button.visible == 0
+
+        confirm_dialog.show()
+
+        assert confirm_dialog.visible == 1
+
+        assert confirm_dialog.confirm_button.visible == 1
+        assert confirm_dialog.cancel_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
+                                              manager=default_ui_manager,
+                                              action_long_desc="Confirm a test of the "
+                                                               "confirmation dialog.",
+                                              window_title="Confirm",
+                                              action_short_name="Confirm",
+                                              visible=1)
+
+        assert confirm_dialog.visible == 1
+
+        assert confirm_dialog.confirm_button.visible == 1
+        assert confirm_dialog.cancel_button.visible == 1
+
+        confirm_dialog.hide()
+
+        assert confirm_dialog.visible == 0
+
+        assert confirm_dialog.confirm_button.visible == 0
+        assert confirm_dialog.cancel_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none):
+        resolution = (500, 500)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = pygame_gui.UIManager(resolution)
+        confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
+                                              manager=manager,
+                                              action_long_desc="Confirm a test of the "
+                                                               "confirmation dialog.",
+                                              window_title="Confirm",
+                                              action_short_name="Confirm",
+                                              visible=0)
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        confirm_dialog.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        confirm_dialog.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

@@ -46,7 +46,7 @@ class UIColourChannelEditor(UIElement):
     :param object_id: A specific theming/event ID for this element.
     :param anchors: A dictionary of anchors used for setting up what this element's relative_rect
                     is relative to.
-
+    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -58,14 +58,16 @@ class UIColourChannelEditor(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, str] = None,
+                 visible: int = 1):
 
         super().__init__(relative_rect,
                          manager,
                          container,
                          starting_height=1,
                          layer_thickness=1,
-                         anchors=anchors)
+                         anchors=anchors,
+                         visible=visible)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
@@ -82,7 +84,8 @@ class UIColourChannelEditor(UIElement):
                                              self.ui_manager,
                                              container=self.ui_container,
                                              parent_element=self,
-                                             anchors=anchors)
+                                             anchors=anchors,
+                                             visible=self.visible)
 
         default_sizes = {'space_between': 5,
                          'label_width': 17,
@@ -272,6 +275,24 @@ class UIColourChannelEditor(UIElement):
         super().set_dimensions(dimensions)
         self.element_container.set_dimensions(self.relative_rect.size)
 
+    def show(self):
+        """
+        In addition to the base UIElement.show() - call show() of the element_container - which will propagate to the
+        subelements - label, entry and slider.
+        """
+        super().show()
+
+        self.element_container.show()
+
+    def hide(self):
+        """
+        In addition to the base UIElement.hide() - call hide() of the element_container - which will propagate to the
+        subelements - label, entry and slider.
+        """
+        super().hide()
+
+        self.element_container.hide()
+
 
 class UIColourPickerDialog(UIWindow):
     """
@@ -284,19 +305,21 @@ class UIColourPickerDialog(UIWindow):
     :param window_title: The title for the window, defaults to 'Colour Picker'
     :param object_id: The object ID for the window, used for theming - defaults to
                       '#colour_picker_dialog'
-
+    :param visible: Whether the element is visible by default.
     """
     def __init__(self, rect: pygame.Rect,
                  manager: IUIManagerInterface,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "Colour Picker",
-                 object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None)):
+                 object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None)),
+                 visible: int = 1):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          object_id=object_id,
-                         resizable=True)
+                         resizable=True,
+                         visible=visible)
 
         minimum_dimensions = (390, 390)
         if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
@@ -586,15 +609,3 @@ class UIColourPickerDialog(UIWindow):
         self.hue_channel.set_value(int(self.current_colour.hsva[0]))
         self.sat_channel.set_value(int(self.current_colour.hsva[1]))
         self.value_channel.set_value(int(self.current_colour.hsva[2]))
-
-    def show(self):
-        super().show()
-
-        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog "
-                      "objects is not supported.")
-
-    def hide(self):
-        super().hide()
-
-        warnings.warn("Use of show() and hide() methods of UIColourPickerDialog objects "
-                      "is not supported.")

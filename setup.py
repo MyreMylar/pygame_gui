@@ -41,7 +41,7 @@ setup(
       zip_safe=False,
       python_requires='>=3.5',
       setup_requires=[],
-      install_requires=['pygame>=1.9.3'],
+      install_requires=['pygame>=1.9.5'],
       include_package_data=True,
       classifiers=[
           'Development Status :: 3 - Alpha',

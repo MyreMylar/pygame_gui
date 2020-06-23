@@ -13,6 +13,7 @@ from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
 from pygame_gui.core.utility import PackageResource
+from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
 from pygame_gui.elements import UITooltip
 
@@ -57,7 +58,7 @@ class UIManager(IUIManagerInterface):
         self.universal_empty_surface = pygame.surface.Surface((0, 0),
                                                               flags=pygame.SRCALPHA,
                                                               depth=32)
-        self.ui_group = pygame.sprite.LayeredDirty()
+        self.ui_group = LayeredGUIGroup()
 
         self.focused_set = None
         self.root_container = None

@@ -2,7 +2,9 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
@@ -329,7 +331,6 @@ class TestUIHorizontalSlider:
                                     value_range=(0, 200), manager=default_ui_manager, visible=0)
 
         assert slider.visible == 0
-        assert slider.dirty == 1
 
         assert slider.sliding_button.visible == 0
         assert slider.button_container.visible == 0
@@ -339,7 +340,6 @@ class TestUIHorizontalSlider:
         slider.show()
 
         assert slider.visible == 1
-        assert slider.dirty == 2
 
         assert slider.sliding_button.visible == 1
         assert slider.button_container.visible == 1
@@ -351,7 +351,6 @@ class TestUIHorizontalSlider:
                                     value_range=(0, 200), manager=default_ui_manager)
 
         assert slider.visible == 1
-        assert slider.dirty == 2
 
         assert slider.sliding_button.visible == 1
         assert slider.button_container.visible == 1
@@ -361,9 +360,31 @@ class TestUIHorizontalSlider:
         slider.hide()
 
         assert slider.visible == 0
-        assert slider.dirty == 1
 
         assert slider.sliding_button.visible == 0
         assert slider.button_container.visible == 0
         assert slider.left_button.visible == 0
         assert slider.right_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(25, 25, 375, 150), start_value=50,
+                                    value_range=(0, 200), manager=manager, visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        slider.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        slider.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

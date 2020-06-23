@@ -5,6 +5,7 @@ import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.ui_container import UIContainer
@@ -142,6 +143,100 @@ class TestUIColourChannelEditor:
         channel_editor.set_dimensions((200, 29))
 
         assert channel_editor.rect.size == (200, 29)
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=default_ui_manager)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=default_ui_manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container,
+                                               visible=0)
+
+        channel_editor.set_dimensions((200, 29))
+
+        assert channel_editor.visible == 0
+
+        assert channel_editor.element_container.visible == 0
+        assert channel_editor.label.visible == 0
+        assert channel_editor.entry.visible == 0
+        assert channel_editor.slider.visible == 0
+
+        channel_editor.show()
+
+        assert channel_editor.visible == 1
+
+        assert channel_editor.element_container.visible == 1
+        assert channel_editor.label.visible == 1
+        assert channel_editor.entry.visible == 1
+        assert channel_editor.slider.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=default_ui_manager)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=default_ui_manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container,
+                                               visible=1)
+
+        channel_editor.set_dimensions((200, 29))
+
+        assert channel_editor.visible == 1
+
+        assert channel_editor.element_container.visible == 1
+        assert channel_editor.label.visible == 1
+        assert channel_editor.entry.visible == 1
+        assert channel_editor.slider.visible == 1
+
+        channel_editor.hide()
+
+        assert channel_editor.visible == 0
+
+        assert channel_editor.element_container.visible == 0
+        assert channel_editor.label.visible == 0
+        assert channel_editor.entry.visible == 0
+        assert channel_editor.slider.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = pygame_gui.UIManager(resolution)
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
+                                     manager=manager)
+        manager.draw_ui(empty_surface)
+        channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
+                                               manager=manager,
+                                               name='H:',
+                                               channel_index=0,
+                                               initial_value=0,
+                                               value_range=(0, 360),
+                                               container=test_container,
+                                               visible=0)
+
+        channel_editor.set_dimensions((200, 29))
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        channel_editor.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        channel_editor.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
 
 
 class TestUIColourPickerDialog:
@@ -354,3 +449,104 @@ class TestUIColourPickerDialog:
         assert colour_picker.red_channel.current_value == 99
         assert colour_picker.green_channel.current_value == 81
         assert colour_picker.blue_channel.current_value == 188
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
+                                             manager=default_ui_manager,
+                                             initial_colour=pygame.Color(200, 220, 50, 255),
+                                             visible=0)
+
+        assert colour_picker.visible == 0
+
+        assert colour_picker.ok_button.visible == 0
+        assert colour_picker.cancel_button.visible == 0
+        assert colour_picker.current_colour_image.visible == 0
+        assert colour_picker.sat_value_square.visible == 0
+
+        assert colour_picker.hue_channel.visible == 0
+        assert colour_picker.sat_channel.visible == 0
+        assert colour_picker.value_channel.visible == 0
+
+        assert colour_picker.red_channel.visible == 0
+        assert colour_picker.green_channel.visible == 0
+        assert colour_picker.blue_channel.visible == 0
+
+        colour_picker.show()
+
+        assert colour_picker.visible == 1
+
+        assert colour_picker.ok_button.visible == 1
+        assert colour_picker.cancel_button.visible == 1
+        assert colour_picker.current_colour_image.visible == 1
+        assert colour_picker.sat_value_square.visible == 1
+
+        assert colour_picker.hue_channel.visible == 1
+        assert colour_picker.sat_channel.visible == 1
+        assert colour_picker.value_channel.visible == 1
+
+        assert colour_picker.red_channel.visible == 1
+        assert colour_picker.green_channel.visible == 1
+        assert colour_picker.blue_channel.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
+                                             manager=default_ui_manager,
+                                             initial_colour=pygame.Color(200, 220, 50, 255),
+                                             visible=1)
+
+        assert colour_picker.visible == 1
+
+        assert colour_picker.ok_button.visible == 1
+        assert colour_picker.cancel_button.visible == 1
+        assert colour_picker.current_colour_image.visible == 1
+        assert colour_picker.sat_value_square.visible == 1
+
+        assert colour_picker.hue_channel.visible == 1
+        assert colour_picker.sat_channel.visible == 1
+        assert colour_picker.value_channel.visible == 1
+
+        assert colour_picker.red_channel.visible == 1
+        assert colour_picker.green_channel.visible == 1
+        assert colour_picker.blue_channel.visible == 1
+
+        colour_picker.hide()
+
+        assert colour_picker.visible == 0
+
+        assert colour_picker.ok_button.visible == 0
+        assert colour_picker.cancel_button.visible == 0
+        assert colour_picker.current_colour_image.visible == 0
+        assert colour_picker.sat_value_square.visible == 0
+
+        assert colour_picker.hue_channel.visible == 0
+        assert colour_picker.sat_channel.visible == 0
+        assert colour_picker.value_channel.visible == 0
+
+        assert colour_picker.red_channel.visible == 0
+        assert colour_picker.green_channel.visible == 0
+        assert colour_picker.blue_channel.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (600, 600)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = pygame_gui.UIManager(resolution)
+        colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
+                                             manager=manager,
+                                             initial_colour=pygame.Color(200, 220, 50, 255),
+                                             visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        colour_picker.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        colour_picker.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

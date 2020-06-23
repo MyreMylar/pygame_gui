@@ -26,7 +26,7 @@ class UIConfirmationDialog(UIWindow):
                      until it is closed.
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to
                       '#confirmation_dialog'.
-
+    :param visible: Whether the element is visible by default.
     """
 
     def __init__(self, rect: pygame.Rect,
@@ -36,12 +36,14 @@ class UIConfirmationDialog(UIWindow):
                  window_title: str = 'Confirm',
                  action_short_name: str = 'OK',
                  blocking: bool = True,
-                 object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None)):
+                 object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
+                 visible: int = 1):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          object_id=object_id,
-                         resizable=True)
+                         resizable=True,
+                         visible=visible)
 
         minimum_dimensions = (260, 200)
         if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
@@ -114,15 +116,3 @@ class UIConfirmationDialog(UIWindow):
             self.kill()
 
         return consumed_event
-
-    def show(self):
-        super().show()
-
-        warnings.warn("Use of show() and hide() methods of UIConfirmationDialog"
-                      " objects is not supported.")
-
-    def hide(self):
-        super().hide()
-
-        warnings.warn("Use of show() and hide() methods of UIConfirmationDialog"
-                      " objects is not supported.")

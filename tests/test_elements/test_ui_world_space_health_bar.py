@@ -2,7 +2,9 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
@@ -118,10 +120,8 @@ class TestUIWorldSpaceHealthBar:
                                            visible=0)
 
         assert health_bar.visible == 0
-        assert health_bar.dirty == 1
         health_bar.show()
         assert health_bar.visible == 1
-        assert health_bar.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
@@ -130,7 +130,32 @@ class TestUIWorldSpaceHealthBar:
                                            manager=default_ui_manager)
 
         assert health_bar.visible == 1
-        assert health_bar.dirty == 2
         health_bar.hide()
         assert health_bar.visible == 0
-        assert health_bar.dirty == 1
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
+        health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                           sprite_to_monitor=healthy_sprite,
+                                           manager=manager,
+                                           visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        health_bar.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        health_bar.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

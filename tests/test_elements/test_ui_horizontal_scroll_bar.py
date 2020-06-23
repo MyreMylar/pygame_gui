@@ -3,7 +3,8 @@ import pytest
 import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface , _display_surface_return_none
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_horizontal_scroll_bar import UIHorizontalScrollBar
@@ -287,7 +288,6 @@ class TestUIHorizontalScrollBar:
                                            visible=0)
 
         assert scroll_bar.visible == 0
-        assert scroll_bar.dirty == 1
 
         assert scroll_bar.button_container.visible == 0
         assert scroll_bar.sliding_button.visible == 0
@@ -297,7 +297,6 @@ class TestUIHorizontalScrollBar:
         scroll_bar.show()
 
         assert scroll_bar.visible == 1
-        assert scroll_bar.dirty == 2
 
         assert scroll_bar.button_container.visible == 1
         assert scroll_bar.sliding_button.visible == 1
@@ -309,7 +308,6 @@ class TestUIHorizontalScrollBar:
                                            visible_percentage=0.25, manager=default_ui_manager)
 
         assert scroll_bar.visible == 1
-        assert scroll_bar.dirty == 2
 
         assert scroll_bar.button_container.visible == 1
         assert scroll_bar.sliding_button.visible == 1
@@ -319,9 +317,33 @@ class TestUIHorizontalScrollBar:
         scroll_bar.hide()
 
         assert scroll_bar.visible == 0
-        assert scroll_bar.dirty == 1
 
         assert scroll_bar.button_container.visible == 0
         assert scroll_bar.sliding_button.visible == 0
         assert scroll_bar.left_button.visible == 0
         assert scroll_bar.right_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+        scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(25, 25, 375, 150),
+                                           visible_percentage=0.25,
+                                           manager=manager,
+                                           visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        scroll_bar.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        scroll_bar.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

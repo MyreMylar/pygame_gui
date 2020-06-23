@@ -5,6 +5,7 @@ import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_button import UIButton
@@ -504,7 +505,6 @@ class TestUIWindow:
                           visible=0)
 
         assert window.visible == 0
-        assert window.dirty == 1
 
         assert window._window_root_container.visible == 0
         assert window.title_bar.visible == 0
@@ -514,7 +514,6 @@ class TestUIWindow:
         window.show()
 
         assert window.visible == 1
-        assert window.dirty == 2
 
         assert window._window_root_container.visible == 1
         assert window.title_bar.visible == 1
@@ -528,7 +527,6 @@ class TestUIWindow:
                           manager=default_ui_manager)
 
         assert window.visible == 1
-        assert window.dirty == 2
 
         assert window._window_root_container.visible == 1
         assert window.title_bar.visible == 1
@@ -538,9 +536,34 @@ class TestUIWindow:
         window.hide()
 
         assert window.visible == 0
-        assert window.dirty == 1
 
         assert window._window_root_container.visible == 0
         assert window.title_bar.visible == 0
         assert window.window_element_container.visible == 0
         assert window.close_window_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        window = UIWindow(pygame.Rect(100, 100, 400, 400),
+                          window_display_title="Test Window",
+                          manager=manager,
+                          visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        window.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        window.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

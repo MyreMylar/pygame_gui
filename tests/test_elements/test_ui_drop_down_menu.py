@@ -5,6 +5,7 @@ import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
     _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
@@ -520,6 +521,31 @@ class TestUIDropDownMenu:
         assert menu.menu_states["closed"].visible == 0
         assert menu.menu_states["closed"].selected_option_button.visible == 0
         assert menu.menu_states["closed"].open_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = pygame_gui.UIManager(resolution)
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(25, 25, 375, 150),
+                              manager=manager,
+                              visible=0)
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        menu.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        menu.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
 
     def test_class_theming_id(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),

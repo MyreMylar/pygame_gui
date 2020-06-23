@@ -5,6 +5,7 @@ import pytest
 import pygame_gui
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.windows import UIFileDialog
 
@@ -274,3 +275,84 @@ class TestUIUIFileDialog:
         assert str(Path(file_dialog.current_directory_path).parts[-1]) == 'images'
 
         assert ('splat.png', '#file_list_item') in file_dialog.current_file_list
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=default_ui_manager,
+                                   visible=0)
+        file_dialog.file_path_text_line.set_text('tests/data/images')
+
+        assert file_dialog.visible == 0
+
+        assert file_dialog.cancel_button.visible == 0
+        assert file_dialog.ok_button.visible == 0
+        assert file_dialog.delete_button.visible == 0
+        assert file_dialog.home_button.visible == 0
+        assert file_dialog.parent_directory_button.visible == 0
+        assert file_dialog.refresh_button.visible == 0
+        assert file_dialog.close_window_button.visible == 0
+
+        file_dialog.show()
+
+        assert file_dialog.visible == 1
+
+        assert file_dialog.cancel_button.visible == 1
+        assert file_dialog.ok_button.visible == 1
+        assert file_dialog.delete_button.visible == 1
+        assert file_dialog.home_button.visible == 1
+        assert file_dialog.parent_directory_button.visible == 1
+        assert file_dialog.refresh_button.visible == 1
+        assert file_dialog.close_window_button.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=default_ui_manager)
+        file_dialog.file_path_text_line.set_text('tests/data/images')
+
+        assert file_dialog.visible == 1
+
+        assert file_dialog.cancel_button.visible == 1
+        assert file_dialog.ok_button.visible == 1
+        assert file_dialog.delete_button.visible == 1
+        assert file_dialog.home_button.visible == 1
+        assert file_dialog.parent_directory_button.visible == 1
+        assert file_dialog.refresh_button.visible == 1
+        assert file_dialog.close_window_button.visible == 1
+
+        file_dialog.hide()
+
+        assert file_dialog.visible == 0
+
+        assert file_dialog.cancel_button.visible == 0
+        assert file_dialog.ok_button.visible == 0
+        assert file_dialog.delete_button.visible == 0
+        assert file_dialog.home_button.visible == 0
+        assert file_dialog.parent_directory_button.visible == 0
+        assert file_dialog.refresh_button.visible == 0
+        assert file_dialog.close_window_button.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (600, 600)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = pygame_gui.UIManager(resolution)
+
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=manager,
+                                   visible=0)
+        file_dialog.file_path_text_line.set_text('tests/data/images')
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        file_dialog.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        file_dialog.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

@@ -306,7 +306,6 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         """
         if not self.visible:
             self.visible = 1
-            self.dirty = 2
 
             for element in self.elements:
                 if hasattr(element, 'show'):
@@ -324,4 +323,3 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     element.hide()
 
             self.visible = 0
-            self.dirty = 1
