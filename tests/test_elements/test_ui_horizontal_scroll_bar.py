@@ -288,7 +288,6 @@ class TestUIHorizontalScrollBar:
                                            visible=0)
 
         assert scroll_bar.visible == 0
-        assert scroll_bar.dirty == 1
 
         assert scroll_bar.button_container.visible == 0
         assert scroll_bar.sliding_button.visible == 0
@@ -298,7 +297,6 @@ class TestUIHorizontalScrollBar:
         scroll_bar.show()
 
         assert scroll_bar.visible == 1
-        assert scroll_bar.dirty == 2
 
         assert scroll_bar.button_container.visible == 1
         assert scroll_bar.sliding_button.visible == 1
@@ -310,7 +308,6 @@ class TestUIHorizontalScrollBar:
                                            visible_percentage=0.25, manager=default_ui_manager)
 
         assert scroll_bar.visible == 1
-        assert scroll_bar.dirty == 2
 
         assert scroll_bar.button_container.visible == 1
         assert scroll_bar.sliding_button.visible == 1
@@ -320,7 +317,6 @@ class TestUIHorizontalScrollBar:
         scroll_bar.hide()
 
         assert scroll_bar.visible == 0
-        assert scroll_bar.dirty == 1
 
         assert scroll_bar.button_container.visible == 0
         assert scroll_bar.sliding_button.visible == 0

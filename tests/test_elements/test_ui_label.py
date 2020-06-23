@@ -137,10 +137,8 @@ class TestUILabel:
                         visible=0)
 
         assert label.visible == 0
-        assert label.dirty == 1
         label.show()
         assert label.visible == 1
-        assert label.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -148,10 +146,8 @@ class TestUILabel:
                         manager=default_ui_manager)
 
         assert label.visible == 1
-        assert label.dirty == 2
         label.hide()
         assert label.visible == 0
-        assert label.dirty == 1
 
     def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)

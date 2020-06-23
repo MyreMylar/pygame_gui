@@ -609,10 +609,8 @@ class TestUIElement:
                             visible=0)
 
         assert element.visible == 0
-        assert element.dirty == 1
         element.show()
         assert element.visible == 1
-        assert element.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -625,12 +623,10 @@ class TestUIElement:
         element.hover_time = 1.0
 
         assert element.visible == 1
-        assert element.dirty == 2
 
         element.hide()
 
         assert element.visible == 0
-        assert element.dirty == 1
 
         assert element.hovered is False
         assert element.hover_time == 0.0

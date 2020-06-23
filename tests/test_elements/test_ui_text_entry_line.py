@@ -898,20 +898,16 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager, visible=0)
 
         assert text_entry.visible == 0
-        assert text_entry.dirty == 1
         text_entry.show()
         assert text_entry.visible == 1
-        assert text_entry.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
         assert text_entry.visible == 1
-        assert text_entry.dirty == 2
         text_entry.hide()
         assert text_entry.visible == 0
-        assert text_entry.dirty == 1
 
     def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)

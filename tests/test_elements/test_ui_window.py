@@ -505,7 +505,6 @@ class TestUIWindow:
                           visible=0)
 
         assert window.visible == 0
-        assert window.dirty == 1
 
         assert window._window_root_container.visible == 0
         assert window.title_bar.visible == 0
@@ -515,7 +514,6 @@ class TestUIWindow:
         window.show()
 
         assert window.visible == 1
-        assert window.dirty == 2
 
         assert window._window_root_container.visible == 1
         assert window.title_bar.visible == 1
@@ -529,7 +527,6 @@ class TestUIWindow:
                           manager=default_ui_manager)
 
         assert window.visible == 1
-        assert window.dirty == 2
 
         assert window._window_root_container.visible == 1
         assert window.title_bar.visible == 1
@@ -539,7 +536,6 @@ class TestUIWindow:
         window.hide()
 
         assert window.visible == 0
-        assert window.dirty == 1
 
         assert window._window_root_container.visible == 0
         assert window.title_bar.visible == 0

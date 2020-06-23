@@ -59,10 +59,8 @@ class TestUIImage:
                            visible=0)
 
         assert ui_image.visible == 0
-        assert ui_image.dirty == 1
         ui_image.show()
         assert ui_image.visible == 1
-        assert ui_image.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
@@ -71,10 +69,8 @@ class TestUIImage:
                            manager=default_ui_manager)
 
         assert ui_image.visible == 1
-        assert ui_image.dirty == 2
         ui_image.hide()
         assert ui_image.visible == 0
-        assert ui_image.dirty == 1
 
     def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)

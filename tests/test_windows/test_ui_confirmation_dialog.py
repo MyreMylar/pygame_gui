@@ -212,7 +212,6 @@ class TestUIConfirmationDialog:
                                               visible=0)
 
         assert confirm_dialog.visible == 0
-        assert confirm_dialog.dirty == 1
 
         assert confirm_dialog.confirm_button.visible == 0
         assert confirm_dialog.cancel_button.visible == 0
@@ -220,7 +219,6 @@ class TestUIConfirmationDialog:
         confirm_dialog.show()
 
         assert confirm_dialog.visible == 1
-        assert confirm_dialog.dirty == 2
 
         assert confirm_dialog.confirm_button.visible == 1
         assert confirm_dialog.cancel_button.visible == 1
@@ -235,7 +233,6 @@ class TestUIConfirmationDialog:
                                               visible=1)
 
         assert confirm_dialog.visible == 1
-        assert confirm_dialog.dirty == 2
 
         assert confirm_dialog.confirm_button.visible == 1
         assert confirm_dialog.cancel_button.visible == 1
@@ -243,12 +240,11 @@ class TestUIConfirmationDialog:
         confirm_dialog.hide()
 
         assert confirm_dialog.visible == 0
-        assert confirm_dialog.dirty == 1
 
         assert confirm_dialog.confirm_button.visible == 0
         assert confirm_dialog.cancel_button.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none):
         resolution = (500, 500)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

@@ -696,7 +696,6 @@ class TestUISelectionList:
                                          allow_multi_select=True, visible=0)
 
         assert selection_list.visible == 0
-        assert selection_list.dirty == 1
 
         assert selection_list.list_and_scroll_bar_container.visible == 0
         assert selection_list.item_list_container.visible == 0
@@ -710,7 +709,6 @@ class TestUISelectionList:
         selection_list.show()
 
         assert selection_list.visible == 1
-        assert selection_list.dirty == 2
 
         assert selection_list.list_and_scroll_bar_container.visible == 1
         assert selection_list.item_list_container.visible == 1
@@ -731,7 +729,6 @@ class TestUISelectionList:
                                          allow_multi_select=True)
 
         assert selection_list.visible == 1
-        assert selection_list.dirty == 2
 
         assert selection_list.list_and_scroll_bar_container.visible == 1
         assert selection_list.item_list_container.visible == 1
@@ -745,7 +742,6 @@ class TestUISelectionList:
         selection_list.hide()
 
         assert selection_list.visible == 0
-        assert selection_list.dirty == 1
 
         assert selection_list.list_and_scroll_bar_container.visible == 0
         assert selection_list.item_list_container.visible == 0

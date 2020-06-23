@@ -653,14 +653,12 @@ class TestUITextBox:
                              visible=0)
 
         assert text_box.visible == 0
-        assert text_box.dirty == 1
 
         assert text_box.scroll_bar is None
 
         text_box.show()
 
         assert text_box.visible == 1
-        assert text_box.dirty == 2
 
         assert text_box.scroll_bar is None
 
@@ -682,7 +680,6 @@ class TestUITextBox:
                              visible=0)
 
         assert text_box.visible == 0
-        assert text_box.dirty == 1
 
         assert text_box.scroll_bar.visible == 0
         assert text_box.scroll_bar.button_container.visible == 0
@@ -693,7 +690,6 @@ class TestUITextBox:
         text_box.show()
 
         assert text_box.visible == 1
-        assert text_box.dirty == 2
 
         assert text_box.scroll_bar.visible == 1
         assert text_box.scroll_bar.button_container.visible == 1
@@ -718,14 +714,12 @@ class TestUITextBox:
                              object_id="screen_message")
 
         assert text_box.visible == 1
-        assert text_box.dirty == 2
 
         assert text_box.scroll_bar is None
 
         text_box.hide()
 
         assert text_box.visible == 0
-        assert text_box.dirty == 1
 
         assert text_box.scroll_bar is None
 
@@ -746,7 +740,6 @@ class TestUITextBox:
                              object_id="screen_message")
 
         assert text_box.visible == 1
-        assert text_box.dirty == 2
 
         assert text_box.scroll_bar.visible == 1
         assert text_box.scroll_bar.button_container.visible == 1
@@ -757,7 +750,6 @@ class TestUITextBox:
         text_box.hide()
 
         assert text_box.visible == 0
-        assert text_box.dirty == 1
 
         assert text_box.scroll_bar.visible == 0
         assert text_box.scroll_bar.button_container.visible == 0

@@ -7,10 +7,10 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
-from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
+from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
@@ -45,7 +45,7 @@ class TestUIManager:
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
-        assert(type(sprite_group) == pygame.sprite.LayeredDirty)
+        assert(type(sprite_group) == LayeredGUIGroup)
 
     def test_get_window_stack(self, _init_pygame, default_ui_manager):
         """

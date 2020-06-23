@@ -654,10 +654,8 @@ class TestUIButton:
                           visible=0)
 
         assert button.visible == 0
-        assert button.dirty == 1
         button.show()
         assert button.visible == 1
-        assert button.dirty == 2
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -665,10 +663,8 @@ class TestUIButton:
                           manager=default_ui_manager)
 
         assert button.visible == 1
-        assert button.dirty == 2
         button.hide()
         assert button.visible == 0
-        assert button.dirty == 1
 
     def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)

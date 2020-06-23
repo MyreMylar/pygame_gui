@@ -512,9 +512,7 @@ class TestUIPanel:
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel, visible=1)
         assert panel.visible == 0
-        assert panel.dirty == 1
         assert button.visible == 0
-        assert button.dirty == 1
 
     def test_hidden_panel_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                                          _display_surface_return_none):
@@ -522,60 +520,50 @@ class TestUIPanel:
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel)
         assert panel.visible == 0
-        assert panel.dirty == 1
         assert button.visible == 0
-        assert button.dirty == 1
         panel.show()
         assert panel.visible == 1
-        assert panel.dirty == 2
         assert button.visible == 1
-        assert button.dirty == 2
 
-    def test_visible_panel_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+    def test_visible_panel_children_behaviour_on_show(self, _init_pygame,
+                                                      default_ui_manager: IUIManagerInterface,
                                                           _display_surface_return_none):
-        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=1, starting_layer_height=5)
+        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager,
+                        visible=1, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel, visible=0)
         assert panel.visible == 1
-        assert panel.dirty == 2
         assert button.visible == 0
-        assert button.dirty == 1
         panel.show()
         assert panel.visible == 1
-        assert panel.dirty == 2
         assert button.visible == 0
-        assert button.dirty == 1
 
-    def test_visible_panel_children_behaviour_on_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                          _display_surface_return_none):
-        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=1, starting_layer_height=5)
+    def test_visible_panel_children_behaviour_on_hide(self, _init_pygame,
+                                                      default_ui_manager: IUIManagerInterface,
+                                                      _display_surface_return_none):
+        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager,
+                        visible=1, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel)
         assert panel.visible == 1
-        assert panel.dirty == 2
         assert button.visible == 1
-        assert button.dirty == 2
         panel.hide()
         assert panel.visible == 0
-        assert panel.dirty == 1
         assert button.visible == 0
-        assert button.dirty == 1
 
-    def test_hidden_panel_children_behaviour_on_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                         _display_surface_return_none):
-        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0, starting_layer_height=5)
+    def test_hidden_panel_children_behaviour_on_hide(self, _init_pygame,
+                                                     default_ui_manager: IUIManagerInterface,
+                                                     _display_surface_return_none):
+        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager,
+                        visible=0, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel)
         button.show()
         assert panel.visible == 0
-        assert panel.dirty == 1
         assert button.visible == 1
-        assert button.dirty == 2
         panel.hide()
         assert panel.visible == 0
-        assert panel.dirty == 1
         assert button.visible == 1
-        assert button.dirty == 2
 
     def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)

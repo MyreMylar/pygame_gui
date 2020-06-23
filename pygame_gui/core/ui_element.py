@@ -7,9 +7,10 @@ from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
 from pygame_gui.core.utility import basic_blit
+from pygame_gui.core.layered_gui_group import GUISprite
 
 
-class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
+class UIElement(GUISprite, IUIElementInterface):
     """
     A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element
     classes should derive from this class. Inherits from pygame.sprite.Sprite.
@@ -57,10 +58,8 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         self.image = None
 
         if visible:
-            self.dirty = 2
             self.visible = 1
         else:
-            self.dirty = 1
             self.visible = 0
 
         self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
@@ -102,7 +101,6 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
             self.ui_container.add_element(self)
 
         if self.ui_container is not None and not self.ui_container.visible:
-            self.dirty = 1
             self.visible = 0
 
         self._update_absolute_rect_position_from_anchors()
@@ -806,7 +804,6 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         Shows the widget, which means the widget will get drawn and will process events.
         """
         self.visible = 1
-        self.dirty = 2
 
     def hide(self):
         """
@@ -814,7 +811,6 @@ class UIElement(pygame.sprite.DirtySprite, IUIElementInterface):
         Clear hovered state.
         """
         self.visible = 0
-        self.dirty = 1
 
         self.hovered = False
         self.hover_time = 0.0
