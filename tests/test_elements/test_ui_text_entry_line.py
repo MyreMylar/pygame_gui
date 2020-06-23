@@ -2,7 +2,9 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.shared_fixtures import _init_pygame, default_ui_manager
+from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
@@ -910,3 +912,28 @@ class TestUITextEntryLine:
         text_entry.hide()
         assert text_entry.visible == 0
         assert text_entry.dirty == 1
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (400, 400)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 400, 400),
+                                     manager=manager,
+                                     visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        text_entry.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        text_entry.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)

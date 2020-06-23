@@ -27,7 +27,7 @@ class UIFileDialog(UIWindow):
     :param window_title: The title for the window, defaults to 'File Dialog'
     :param initial_file_path: The initial path to open the file dialog at.
     :param object_id: The object ID for the window, used for theming - defaults to '#file_dialog'
-
+    :param visible: Whether the element is visible by default.
     """
 
     def __init__(self,
@@ -37,13 +37,15 @@ class UIFileDialog(UIWindow):
                  initial_file_path: Union[str, None] = None,
                  object_id: str = '#file_dialog',
                  allow_existing_files_only: bool = False,
-                 allow_picking_directories: bool = False
+                 allow_picking_directories: bool = False,
+                 visible: int = 1
                  ):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          object_id=object_id,
-                         resizable=True)
+                         resizable=True,
+                         visible=visible)
 
         minimum_dimensions = (260, 300)
         if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
@@ -462,13 +464,3 @@ class UIFileDialog(UIWindow):
             new_file_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(new_file_chosen_event)
             self.kill()
-
-    def show(self):
-        super().show()
-
-        warnings.warn("Use of show() and hide() methods of UIFileDialog objects is not supported.")
-
-    def hide(self):
-        super().hide()
-
-        warnings.warn("Use of show() and hide() methods of UIFileDialog objects is not supported.")

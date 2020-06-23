@@ -4,6 +4,7 @@ import pygame
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_tool_tip import UITooltip
@@ -156,3 +157,17 @@ class TestUIToolTip:
         tool_tip.set_dimensions((100.0, 150.0))
 
         assert tool_tip.rect.bottomright == (100, 150) and tool_tip.text_block.rect.bottomright == (100, 150)
+
+    def test_show_warning(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+        with pytest.warns(Warning):
+            tool_tip.show()
+
+    def test_hide_warning(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        tool_tip = UITooltip(html_text="A tip about tools.",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager)
+        with pytest.warns(Warning):
+            tool_tip.hide()
