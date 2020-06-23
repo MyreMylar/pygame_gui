@@ -173,7 +173,6 @@ class TestUIMessageWindow:
                                          visible=0)
 
         assert message_window.visible == 0
-        assert message_window.dirty == 1
 
         assert message_window.close_window_button.visible == 0
         assert message_window.dismiss_button.visible == 0
@@ -182,7 +181,6 @@ class TestUIMessageWindow:
         message_window.show()
 
         assert message_window.visible == 1
-        assert message_window.dirty == 2
 
         assert message_window.close_window_button.visible == 1
         assert message_window.dismiss_button.visible == 1
@@ -196,7 +194,6 @@ class TestUIMessageWindow:
                                          manager=default_ui_manager)
 
         assert message_window.visible == 1
-        assert message_window.dirty == 2
 
         assert message_window.close_window_button.visible == 1
         assert message_window.dismiss_button.visible == 1
@@ -205,7 +202,6 @@ class TestUIMessageWindow:
         message_window.hide()
 
         assert message_window.visible == 0
-        assert message_window.dirty == 1
 
         assert message_window.close_window_button.visible == 0
         assert message_window.dismiss_button.visible == 0

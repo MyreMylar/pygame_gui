@@ -283,7 +283,6 @@ class TestUIUIFileDialog:
         file_dialog.file_path_text_line.set_text('tests/data/images')
 
         assert file_dialog.visible == 0
-        assert file_dialog.dirty == 1
 
         assert file_dialog.cancel_button.visible == 0
         assert file_dialog.ok_button.visible == 0
@@ -296,7 +295,6 @@ class TestUIUIFileDialog:
         file_dialog.show()
 
         assert file_dialog.visible == 1
-        assert file_dialog.dirty == 2
 
         assert file_dialog.cancel_button.visible == 1
         assert file_dialog.ok_button.visible == 1
@@ -312,7 +310,6 @@ class TestUIUIFileDialog:
         file_dialog.file_path_text_line.set_text('tests/data/images')
 
         assert file_dialog.visible == 1
-        assert file_dialog.dirty == 2
 
         assert file_dialog.cancel_button.visible == 1
         assert file_dialog.ok_button.visible == 1
@@ -325,7 +322,6 @@ class TestUIUIFileDialog:
         file_dialog.hide()
 
         assert file_dialog.visible == 0
-        assert file_dialog.dirty == 1
 
         assert file_dialog.cancel_button.visible == 0
         assert file_dialog.ok_button.visible == 0

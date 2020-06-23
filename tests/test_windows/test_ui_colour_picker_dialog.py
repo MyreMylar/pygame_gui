@@ -159,7 +159,6 @@ class TestUIColourChannelEditor:
         channel_editor.set_dimensions((200, 29))
 
         assert channel_editor.visible == 0
-        assert channel_editor.dirty == 1
 
         assert channel_editor.element_container.visible == 0
         assert channel_editor.label.visible == 0
@@ -169,7 +168,6 @@ class TestUIColourChannelEditor:
         channel_editor.show()
 
         assert channel_editor.visible == 1
-        assert channel_editor.dirty == 2
 
         assert channel_editor.element_container.visible == 1
         assert channel_editor.label.visible == 1
@@ -191,7 +189,6 @@ class TestUIColourChannelEditor:
         channel_editor.set_dimensions((200, 29))
 
         assert channel_editor.visible == 1
-        assert channel_editor.dirty == 2
 
         assert channel_editor.element_container.visible == 1
         assert channel_editor.label.visible == 1
@@ -201,7 +198,6 @@ class TestUIColourChannelEditor:
         channel_editor.hide()
 
         assert channel_editor.visible == 0
-        assert channel_editor.dirty == 1
 
         assert channel_editor.element_container.visible == 0
         assert channel_editor.label.visible == 0
@@ -461,7 +457,6 @@ class TestUIColourPickerDialog:
                                              visible=0)
 
         assert colour_picker.visible == 0
-        assert colour_picker.dirty == 1
 
         assert colour_picker.ok_button.visible == 0
         assert colour_picker.cancel_button.visible == 0
@@ -479,7 +474,6 @@ class TestUIColourPickerDialog:
         colour_picker.show()
 
         assert colour_picker.visible == 1
-        assert colour_picker.dirty == 2
 
         assert colour_picker.ok_button.visible == 1
         assert colour_picker.cancel_button.visible == 1
@@ -501,7 +495,6 @@ class TestUIColourPickerDialog:
                                              visible=1)
 
         assert colour_picker.visible == 1
-        assert colour_picker.dirty == 2
 
         assert colour_picker.ok_button.visible == 1
         assert colour_picker.cancel_button.visible == 1
@@ -519,7 +512,6 @@ class TestUIColourPickerDialog:
         colour_picker.hide()
 
         assert colour_picker.visible == 0
-        assert colour_picker.dirty == 1
 
         assert colour_picker.ok_button.visible == 0
         assert colour_picker.cancel_button.visible == 0
