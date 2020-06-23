@@ -4,6 +4,7 @@ import pytest
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
+from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows.ui_message_window import UIMessageWindow
@@ -162,3 +163,79 @@ class TestUIMessageWindow:
                                          manager=manager)
 
         assert message_window.image is not None
+
+    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
+                                         window_title="Test Message",
+                                         html_message="This is a bold test of the "
+                                                      "message box functionality.",
+                                         manager=default_ui_manager,
+                                         visible=0)
+
+        assert message_window.visible == 0
+        assert message_window.dirty == 1
+
+        assert message_window.close_window_button.visible == 0
+        assert message_window.dismiss_button.visible == 0
+        assert message_window.text_block.visible == 0
+
+        message_window.show()
+
+        assert message_window.visible == 1
+        assert message_window.dirty == 2
+
+        assert message_window.close_window_button.visible == 1
+        assert message_window.dismiss_button.visible == 1
+        assert message_window.text_block.visible == 1
+
+    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
+                                         window_title="Test Message",
+                                         html_message="This is a bold test of the "
+                                                      "message box functionality.",
+                                         manager=default_ui_manager)
+
+        assert message_window.visible == 1
+        assert message_window.dirty == 2
+
+        assert message_window.close_window_button.visible == 1
+        assert message_window.dismiss_button.visible == 1
+        assert message_window.text_block.visible == 1
+
+        message_window.hide()
+
+        assert message_window.visible == 0
+        assert message_window.dirty == 1
+
+        assert message_window.close_window_button.visible == 0
+        assert message_window.dismiss_button.visible == 0
+        assert message_window.text_block.visible == 0
+
+    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        resolution = (600, 600)
+        empty_surface = pygame.Surface(resolution)
+        empty_surface.fill(pygame.Color(0, 0, 0))
+
+        surface = empty_surface.copy()
+        manager = UIManager(resolution)
+
+        message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
+                                         window_title="Test Message",
+                                         html_message="This is a bold test of the "
+                                                      "message box functionality.",
+                                         manager=manager,
+                                         visible=0)
+
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        message_window.show()
+        manager.draw_ui(surface)
+        assert not compare_surfaces(empty_surface, surface)
+
+        surface.fill(pygame.Color(0, 0, 0))
+        message_window.hide()
+        manager.draw_ui(surface)
+        assert compare_surfaces(empty_surface, surface)
+
