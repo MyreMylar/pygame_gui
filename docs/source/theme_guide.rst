@@ -80,9 +80,22 @@ allowing us to reference elements that are part of other elements. To address su
 For example, if we wanted to theme the vertical scroll bars that are part of a text box we could use
 'text_box.vertical_scroll_bar' as the theme ID.
 
-The parts of a theming block ID can be made up either of their element IDs or an 'object ID' which is passed to the
-element when it is created. More specific theme IDs composed of more object IDs are preferred to ones of entirely
-element IDs where two or more IDs would apply to an element.
+The parts of a theming block ID can be made up either of their element IDs or an 'ObjectID' which is passed to the
+element when it is created. ObjectID objects contain two string IDs - one called 'object_id'  intended for identifying
+this specific object and another called 'class_id' for identifying this object as part of a class of objects that share
+theming parameters.
+
+As a rule the entries in more specific theming ID blocks are preferred to more general ones. This means entries under
+your ObjectID's 'object_id' are preferred over it's 'class_id' and the 'class_id' is preferred over it's 'element_id'.
+It also means that if your object is part of a hierarchy, then IDs that specify more of the hierarchy will be preferred
+over those that only specify the final part of theme ID.
+
+e.g. for the buttons on a scroll bar:
+
+    - 'vertical_scroll_bar.button' preferred over 'button'
+    - 'vertical_scroll_bar.@arrow_button' preferred over 'vertical_scroll_bar.button'
+    - 'vertical_scroll_bar.#bottom_button' preferred over 'vertical_scroll_bar.@arrow_button'
+
 
 There are four general categories of theming which each have their own sub-blocks under the theme block IDs:
 
@@ -204,6 +217,26 @@ Here's a quick example:
          }
       }
    }
+
+Multiple Theme Files
+--------------------
+
+Because of the way that pygame_gui loads theme files you can load multiple theme
+files with different stuff defined in each one into a single UI Manger:
+
+.. code-block:: python
+   :linenos:
+
+    manager = pygame_gui.UIManager((800, 600), 'base_theme.json')
+    manager.load_theme('menu_theme.json')
+    manager.load_theme('hud_theme.json')
+
+As long as you keep your IDs distinct you can divide your theming up into lots
+of different files.
+
+Alternatively, if memory is tight and you are using lots of data in your themes,
+you could also use different UI Managers with different loaded themes
+for different states of your game.
 
 
 Theme Options Per Element

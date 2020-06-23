@@ -8,7 +8,7 @@ from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
 
 from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
-from pygame_gui.core import UIElement, UIContainer
+from pygame_gui.core import UIElement, UIContainer, ObjectID
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage
 from pygame_gui.elements import UIHorizontalSlider, UILabel, UITextEntryLine
@@ -57,7 +57,7 @@ class UIColourChannelEditor(UIElement):
                  initial_value: int,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1):
 
@@ -312,7 +312,7 @@ class UIColourPickerDialog(UIWindow):
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "Colour Picker",
-                 object_id: str = '#colour_picker_dialog',
+                 object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None),
                  visible: int = 1):
 
         super().__init__(rect, manager,

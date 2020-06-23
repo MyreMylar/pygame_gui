@@ -2,6 +2,7 @@ from typing import List, Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core.ui_element import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.interfaces import IUIContainerInterface, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
@@ -36,7 +37,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  is_window_root_container: bool = False,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Union[Dict[str, str], None] = None,
                  visible: int = 1):
 
@@ -312,8 +313,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def hide(self):
         """
-        Hides the container, which means the container will not get drawn and will not process events.
-        Should also hide all the children elements and containers.
+        Hides the container, which means the container will not get drawn and will not process
+        events. Should also hide all the children elements and containers.
         If the container was hidden before - ignore.
         """
         if self.visible:

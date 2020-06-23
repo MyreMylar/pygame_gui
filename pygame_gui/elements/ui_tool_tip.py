@@ -4,6 +4,7 @@ from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface
 from pygame_gui.core.ui_element import UIElement
 
@@ -35,7 +36,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  hover_distance: Tuple[int, int],
                  manager: IUIManagerInterface,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
@@ -197,8 +198,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def show(self):
         """
-        This is a base method show() of a UIElement, but since it's not intended to be used on a UIToolTip -
-        display a warning.
+        This is a base method show() of a UIElement, but since it's not intended to be used on a
+        UIToolTip - display a warning.
         """
         super().show()
 
@@ -206,8 +207,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def hide(self):
         """
-        This is a base method hide() of a UIElement, but since it's not intended to be used on a UIToolTip -
-        display a warning.
+        This is a base method hide() of a UIElement, but since it's not intended to be used
+        on a UIToolTip - display a warning.
         """
         super().hide()
 

@@ -5,6 +5,7 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
@@ -56,7 +57,8 @@ class UITextBox(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -67,7 +69,7 @@ class UITextBox(UIElement):
                  layer_starting_height: int = 1,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1):
 

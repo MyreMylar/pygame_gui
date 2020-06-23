@@ -2,6 +2,7 @@ from typing import Union, Dict, Tuple, List
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
@@ -38,7 +39,8 @@ class UISelectionList(UIElement):
                       from others with the same hierarchy.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -51,7 +53,7 @@ class UISelectionList(UIElement):
                  container: Union[IContainerLikeInterface, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1
                  ):
@@ -160,7 +162,8 @@ class UISelectionList(UIElement):
                                           manager=self.ui_manager,
                                           parent_element=self,
                                           container=self.item_list_container,
-                                          object_id=item['object_id'],
+                                          object_id=ObjectID(object_id=item['object_id'],
+                                                             class_id='@selection_list_item'),
                                           allow_double_clicks=self.allow_double_clicks,
                                           anchors={'left': 'left',
                                                    'right': 'right',
@@ -279,7 +282,9 @@ class UISelectionList(UIElement):
                                                   manager=self.ui_manager,
                                                   parent_element=self,
                                                   container=self.item_list_container,
-                                                  object_id=item['object_id'],
+                                                  object_id=ObjectID(
+                                                      object_id=item['object_id'],
+                                                      class_id='@selection_list_item'),
                                                   allow_double_clicks=self.allow_double_clicks,
                                                   anchors={'left': 'left',
                                                            'right': 'right',
@@ -526,9 +531,10 @@ class UISelectionList(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - call show() of owned container - list_and_scroll_bar_container.
-        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
-        visibility will propagate to them - there is no need to call their show() methods separately.
+        In addition to the base UIElement.show() - call show() of owned container -
+        list_and_scroll_bar_container. All other subelements (item_list_container, scrollbar) are
+        children of list_and_scroll_bar_container, so it's visibility will propagate to them -
+        there is no need to call their show() methods separately.
         """
         super().show()
 
@@ -536,9 +542,10 @@ class UISelectionList(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - call hide() of owned container - list_and_scroll_bar_container.
-        All other subelements (item_list_container, scrollbar) are children of list_and_scroll_bar_container, so it's
-        visibility will propagate to them - there is no need to call their hide() methods separately.
+        In addition to the base UIElement.hide() - call hide() of owned container -
+        list_and_scroll_bar_container. All other subelements (item_list_container, scrollbar) are
+        children of list_and_scroll_bar_container, so it's visibility will propagate to them -
+        there is no need to call their hide() methods separately.
         """
         super().hide()
 

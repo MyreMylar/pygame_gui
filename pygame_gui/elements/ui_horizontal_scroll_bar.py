@@ -2,6 +2,7 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -23,7 +24,8 @@ class UIHorizontalScrollBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -32,7 +34,7 @@ class UIHorizontalScrollBar(UIElement):
                  manager: IUIManagerInterface,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1):
 
@@ -157,7 +159,7 @@ class UIHorizontalScrollBar(UIElement):
                                             container=self.button_container,
                                             starting_height=1,
                                             parent_element=self,
-                                            object_id="#left_button",
+                                            object_id=ObjectID("#left_button", "@arrow_button"),
                                             anchors={'left': 'left',
                                                      'right': 'left',
                                                      'top': 'top',
@@ -173,7 +175,7 @@ class UIHorizontalScrollBar(UIElement):
                                              container=self.button_container,
                                              starting_height=1,
                                              parent_element=self,
-                                             object_id="#right_button",
+                                             object_id=ObjectID("#right_button", "@arrow_button"),
                                              anchors={'left': 'right',
                                                       'right': 'right',
                                                       'top': 'top',
@@ -531,8 +533,8 @@ class UIHorizontalScrollBar(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - show the self.button_container which will propagate and show all
-        the buttons.
+        In addition to the base UIElement.show() - show the self.button_container which
+        will propagate and show all the buttons.
         """
         super().show()
 
@@ -540,8 +542,8 @@ class UIHorizontalScrollBar(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - hide the self.button_container which will propagate and hide all
-        the buttons.
+        In addition to the base UIElement.hide() - hide the self.button_container which
+        will propagate and hide all the buttons.
         """
         super().hide()
 

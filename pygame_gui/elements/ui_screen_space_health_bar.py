@@ -2,6 +2,7 @@ from typing import Union, Dict
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -20,7 +21,8 @@ class UIScreenSpaceHealthBar(UIElement):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -28,7 +30,7 @@ class UIScreenSpaceHealthBar(UIElement):
                  sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1):
 

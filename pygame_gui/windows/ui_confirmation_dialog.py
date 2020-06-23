@@ -1,7 +1,9 @@
 import warnings
+from typing import Union
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextBox
@@ -34,7 +36,7 @@ class UIConfirmationDialog(UIWindow):
                  window_title: str = 'Confirm',
                  action_short_name: str = 'OK',
                  blocking: bool = True,
-                 object_id: str = '#confirmation_dialog',
+                 object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
                  visible: int = 1):
 
         super().__init__(rect, manager,

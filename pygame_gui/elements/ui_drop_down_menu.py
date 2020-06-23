@@ -6,7 +6,7 @@ from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_NEW_SELEC
 from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core import UIElement
+from pygame_gui.core import UIElement, ObjectID
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
@@ -122,7 +122,7 @@ class UIExpandedDropDownState:
                                                self.ui_container,
                                                starting_height=2,
                                                parent_element=self.drop_down_menu_ui,
-                                               object_id='#selected_option')
+                                               object_id=ObjectID('#selected_option', None))
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
 
         expand_button_symbol = '▼'
@@ -130,10 +130,13 @@ class UIExpandedDropDownState:
         list_object_id = '#drop_down_options_list'
         list_object_ids = self.drop_down_menu_ui.object_ids[:]
         list_object_ids.append(list_object_id)
+        list_class_ids = self.drop_down_menu_ui.class_ids[:]
+        list_class_ids.append(None)
         list_element_ids = self.drop_down_menu_ui.element_ids[:]
         list_element_ids.append('selection_list')
 
         final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_element_ids,
+                                                                       list_class_ids,
                                                                        list_object_ids)
 
         try:
@@ -358,7 +361,8 @@ class UIClosedDropDownState:
     :param container: The container the element is within.
     :param object_ids: The object IDs for the drop down UI element.
     :param element_ids: The element IDs for the drop down UI element.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning -
+                    container visibility may override this.
     """
 
     def __init__(self,
@@ -612,7 +616,8 @@ class UIDropDownMenu(UIElement):
     :param expansion_height_limit: Limit on the height that this will expand to, defaults to the
                                    container bounds.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
 
     def __init__(self,
@@ -622,7 +627,7 @@ class UIDropDownMenu(UIElement):
                  manager: IUIManagerInterface,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  expansion_height_limit: Union[int, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1
@@ -890,7 +895,8 @@ class UIDropDownMenu(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - call show() on the closed state - showing it's buttons.
+        In addition to the base UIElement.show() - call show() on the closed state -
+        showing it's buttons.
         """
         super().show()
 
@@ -898,9 +904,9 @@ class UIDropDownMenu(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - if the current state is 'expanded' call it's hide() method, which
-        begins a transition of the UIDropDownMenu to the 'closed' state, and call the hide() method of the 'closed'
-        state which hides all it's children widgets.
+        In addition to the base UIElement.hide() - if the current state is 'expanded' call it's
+        hide() method, which begins a transition of the UIDropDownMenu to the 'closed' state, and
+        call the hide() method of the 'closed' state which hides all it's children widgets.
         """
         super().hide()
 

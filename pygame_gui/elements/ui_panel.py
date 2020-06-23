@@ -2,6 +2,7 @@ from typing import Union, Dict, Tuple
 
 import pygame
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 
@@ -45,7 +46,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                       from others.
     :param anchors: Used to layout elements and dictate what the relative_rect is relative to.
                     Defaults to the top left.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -56,7 +58,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  margins: Dict[str, int] = None,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  visible: int = 1
                  ):
@@ -103,7 +105,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                            starting_height=starting_layer_height,
                                            container=container,
                                            parent_element=self,
-                                           object_id='#panel_container',
+                                           object_id=ObjectID(object_id='#panel_container',
+                                                              class_id=None),
                                            anchors=anchors,
                                            visible=self.visible)
 

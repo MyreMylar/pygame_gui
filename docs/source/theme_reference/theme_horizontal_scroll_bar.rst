@@ -37,7 +37,8 @@ Sub-elements
 --------------
 
 You can reference all three of the buttons that are sub elements of the scroll bar with a theming block id of
-'horizontal_scroll_bar.button'. You can also reference the three buttons individually by adding their object IDs:
+'horizontal_scroll_bar.button'. You can reference both of the arrow buttons with the class_id: '@arrow_button'.
+You can also reference the three buttons individually by adding their object IDs:
 
  - 'horizontal_scroll_bar.#left_button'
  - 'horizontal_scroll_bar.#right_button'
@@ -74,7 +75,7 @@ Here is an example of some horizontal scroll bar blocks in a JSON theme file, us
             {
                "shape": "rectangle",
                "border_width": "0",
-               "enable_arrow_buttons": "0"
+               "enable_arrow_buttons": "1"
             }
         },
         "horizontal_scroll_bar.button":
@@ -82,6 +83,13 @@ Here is an example of some horizontal scroll bar blocks in a JSON theme file, us
             "misc":
             {
                "border_width": "1"
+            }
+        },
+        "horizontal_scroll_bar.@arrow_button":
+        {
+            "misc":
+            {
+               "shadow_width": "0"
             }
         },
         "horizontal_scroll_bar.#sliding_button":

@@ -5,6 +5,7 @@ import pygame
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 
+from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
@@ -35,7 +36,8 @@ class UIButton(UIElement):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param allow_double_clicks: Enables double clicking on buttons which will generate a
                                 unique event.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility may
+                    override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
@@ -44,7 +46,7 @@ class UIButton(UIElement):
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
-                 object_id: Union[str, None] = None,
+                 object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  allow_double_clicks: bool = False,
                  visible: int = 1

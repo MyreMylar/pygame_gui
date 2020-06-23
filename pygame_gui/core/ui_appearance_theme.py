@@ -373,6 +373,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def _get_next_id_node(self, current_node: Union[Dict[str, Union[str, Dict]], None],
                           element_ids: List[str],
+                          class_ids: List[Union[str, None]],
                           object_ids: List[Union[str, None]],
                           index: int,
                           tree_size: int,
@@ -383,11 +384,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         We first iterate forward through the ID strings building up parent->child relationships
         and then unwind them backwards to create the final string IDs. We pick object IDs over
-        element IDs first when available placing those IDs containing object IDs higher up in
-        our list.
+        class IDs, then class IDs over element IDs when available placing those IDs containing
+        object IDs highest up in our list.
 
         :param current_node: The current 'node' we are at in the recursive algorithm.
         :param element_ids: A hierarchical list of all element IDs that apply to our element,
+                            this includes parents.
+        :param element_ids: A hierarchical list of all class IDs that apply to our element,
                             this includes parents.
         :param object_ids: A hierarchical list of all object IDs that apply to our element,
                            this includes parents.
@@ -396,15 +399,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param combined_ids: The final list of combined IDs.
         """
         if index < tree_size:
-            if object_ids is not None and index < len(object_ids):
-                object_id = object_ids[index]
-                if object_id is not None:
-                    next_node = {'id': object_id, 'parent': current_node}
-                    self._get_next_id_node(next_node, element_ids, object_ids,
-                                           index + 1, tree_size, combined_ids)
-            element_id = element_ids[index]
-            next_node_2 = {'id': element_id, 'parent': current_node}
-            self._get_next_id_node(next_node_2, element_ids, object_ids, index + 1,
+            # add any Object IDs first...
+            if (object_ids is not None
+                    and index < len(object_ids)
+                    and object_ids[index] is not None):
+                next_node = {'id': object_ids[index], 'parent': current_node}
+                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                                       index + 1, tree_size, combined_ids)
+            # then any class IDs...
+            if (class_ids is not None
+                    and index < len(class_ids)
+                    and class_ids[index] is not None):
+                next_node = {'id': class_ids[index], 'parent': current_node}
+                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                                       index + 1, tree_size, combined_ids)
+            # Finally add the required element IDs.
+            next_node_2 = {'id': element_ids[index], 'parent': current_node}
+            self._get_next_id_node(next_node_2, element_ids, class_ids, object_ids, index + 1,
                                    tree_size, combined_ids)
         else:
             # unwind
@@ -420,32 +431,35 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 combined_id += gathered_ids[gathered_index]
             combined_ids.append(combined_id)
 
-    def build_all_combined_ids(self,
-                               element_ids: Union[None, List[str]],
+    def build_all_combined_ids(self, element_ids: Union[None, List[str]],
+                               class_ids: Union[None, List[Union[str, None]]],
                                object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
         """
         Construct a list of combined element ids from the element's various accumulated ids.
 
         :param element_ids: All the ids of elements this element is contained within.
+        :param class_ids: All the ids of 'classes' that this element is contained within.
         :param object_ids: All the ids of objects this element is contained within.
 
         :return: A list of IDs that reference this element in order of decreasing specificity.
         """
-        combined_id = str(element_ids).join(str(object_ids))
+        combined_id = str(element_ids).join(str(class_ids)).join(str(object_ids))
         if combined_id in self.unique_theming_ids:
             return self.unique_theming_ids[combined_id]
 
         combined_ids = []
-        if object_ids is not None and element_ids is not None:
-            if len(object_ids) != len(element_ids):
-                raise ValueError("Object ID hierarchy is not equal "
+        if object_ids is not None and element_ids is not None and class_ids is not None:
+            if len(object_ids) != len(element_ids) or len(class_ids) != len(element_ids):
+                raise ValueError("Object & class ID hierarchy is not equal "
                                  "in length to Element ID hierarchy"
                                  "Element IDs: " +
                                  str(element_ids) +
+                                 "\nClass IDs: " +
+                                 str(class_ids) + "\n"
                                  "\nObject IDs: " +
                                  str(object_ids) + "\n")
             if len(element_ids) != 0:
-                self._get_next_id_node(None, element_ids, object_ids,
+                self._get_next_id_node(None, element_ids, class_ids, object_ids,
                                        0, len(element_ids), combined_ids)
 
             current_ids = combined_ids[:]

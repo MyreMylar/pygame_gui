@@ -1,4 +1,6 @@
+from sys import version_info
 import warnings
+from collections import namedtuple
 from typing import List, Union, Tuple, Dict, Any, Callable, Set
 
 import pygame
@@ -8,6 +10,13 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
+
+if version_info.minor >= 7:
+    ObjectID = namedtuple('ObjectID',
+                          field_names=('object_id', 'class_id'),
+                          defaults=(None, None))
+else:
+    ObjectID = namedtuple('ObjectID', field_names=('object_id', 'class_id'))
 
 
 class UIElement(GUISprite, IUIElementInterface):
@@ -23,7 +32,8 @@ class UIElement(GUISprite, IUIElementInterface):
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility may
+                    override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -44,6 +54,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.ui_theme = self.ui_manager.get_theme()
 
         self.object_ids = None
+        self.class_ids = None
         self.element_ids = None
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
@@ -88,26 +99,35 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
-        if container is None:
-            if self.ui_manager.get_root_container() is not None:
-                container = self.ui_manager.get_root_container()
-            else:
-                container = self
+        self._setup_container(container)
 
-        if isinstance(container, IContainerLikeInterface):
-            self.ui_container = container.get_container()
-
-        if self.ui_container is not None and self.ui_container is not self:
-            self.ui_container.add_element(self)
-
-        if self.ui_container is not None and not self.ui_container.visible:
-            self.visible = 0
+        self.dirty = 1
+        self.visible = 0
+        self._setup_visibility(visible)
 
         self._update_absolute_rect_position_from_anchors()
 
         self._update_container_clip()
 
         self._focus_set = {self}
+
+    def _setup_visibility(self, visible):
+        if visible:
+            self.visible = 1
+
+        if self.ui_container is not None and not self.ui_container.visible:
+            self.visible = 0
+
+    def _setup_container(self, container):
+        if container is None:
+            if self.ui_manager.get_root_container() is not None:
+                container = self.ui_manager.get_root_container()
+            else:
+                container = self
+        if isinstance(container, IContainerLikeInterface):
+            self.ui_container = container.get_container()
+        if self.ui_container is not None and self.ui_container is not self:
+            self.ui_container.add_element(self)
 
     def get_focus_set(self) -> Set['UIElement']:
         return self._focus_set
@@ -154,7 +174,7 @@ class UIElement(GUISprite, IUIElementInterface):
     def _create_valid_ids(self,
                           container: Union[IContainerLikeInterface, None],
                           parent_element: Union[None, 'UIElement'],
-                          object_id: str,
+                          object_id: Union[ObjectID, str, None],
                           element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
@@ -165,8 +185,8 @@ class UIElement(GUISprite, IUIElementInterface):
                           used as the parent.
         :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
                                colours from parents.
-        :param object_id: An optional ID to help distinguish this element from other elements of
-                          the same class.
+        :param object_id: An optional set of IDs to help distinguish this element
+                         from other elements.
         :param element_id: A string ID representing this element's class.
 
         """
@@ -174,21 +194,36 @@ class UIElement(GUISprite, IUIElementInterface):
             id_parent = container
         else:
             id_parent = parent_element
-        if object_id is not None and ('.' in object_id or ' ' in object_id):
-            raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
+
+        if isinstance(object_id, str):
+            if object_id is not None and ('.' in object_id or ' ' in object_id):
+                raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
+            obj_id = object_id
+            class_id = None
+        elif isinstance(object_id, ObjectID):
+            obj_id = object_id.object_id
+            class_id = object_id.class_id
+        else:
+            obj_id = None
+            class_id = None
 
         if id_parent is not None:
             self.element_ids = id_parent.element_ids.copy()
             self.element_ids.append(element_id)
 
+            self.class_ids = id_parent.class_ids.copy()
+            self.class_ids.append(class_id)
+
             self.object_ids = id_parent.object_ids.copy()
-            self.object_ids.append(object_id)
+            self.object_ids.append(obj_id)
         else:
             self.element_ids = [element_id]
-            self.object_ids = [object_id]
+            self.class_ids = [class_id]
+            self.object_ids = [obj_id]
 
         self.combined_element_ids = self.ui_manager.get_theme().build_all_combined_ids(
             self.element_ids,
+            self.class_ids,
             self.object_ids)
         if self.combined_element_ids is not None and len(self.combined_element_ids) > 0:
             self.most_specific_combined_id = self.combined_element_ids[0]

@@ -195,7 +195,7 @@ class IContainerLikeInterface(metaclass=ABCMeta):
     @abstractmethod
     def hide(self):
         """
-        Hides the container, which means the container will not get drawn and will not process events.
-        Should also hide all the children elements.
+        Hides the container, which means the container will not get drawn and will not
+        process events. Should also hide all the children elements.
         If the container was hidden before - ignore.
         """

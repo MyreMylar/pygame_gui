@@ -313,3 +313,16 @@ class IUIElementInterface(metaclass=ABCMeta):
 
         Elements should handle their own enabling and disabling.
         """
+
+    @abstractmethod
+    def show(self):
+        """
+        Shows the widget, which means the widget will get drawn and will process events.
+        """
+
+    @abstractmethod
+    def hide(self):
+        """
+        Hides the widget, which means the widget will not get drawn and will not process events.
+        Clear hovered state.
+        """
