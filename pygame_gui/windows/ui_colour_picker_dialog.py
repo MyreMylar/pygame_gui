@@ -312,7 +312,7 @@ class UIColourPickerDialog(UIWindow):
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "Colour Picker",
-                 object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None)),
+                 object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None),
                  visible: int = 1):
 
         super().__init__(rect, manager,
