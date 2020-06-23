@@ -9,7 +9,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.5, 3.6, 3.7]
-        pygame-version: [1.9.3, 1.9.6, 2.0.0.dev10]
+        pygame-version: [1.9.4, 1.9.6, 2.0.0.dev10]
         exclude:
           - {python-version: "3.6", pygame-version: "1.9.3"}
           - {python-version: "3.7", pygame-version: "1.9.3"}
