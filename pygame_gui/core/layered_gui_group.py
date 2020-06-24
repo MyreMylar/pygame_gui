@@ -1,9 +1,13 @@
-from pygame.sprite import LayeredUpdates, Sprite
+from operator import truth
+from abc import abstractmethod
+
+from pygame.sprite import LayeredUpdates
 
 
-class GUISprite(Sprite):
+class GUISprite:
     """
-
+    A sprite class specifically designed for the GUI. Very similar to pygame's
+    DirtySprite but without the Dirty flag.
     """
 
     def __init__(self, *groups):
@@ -20,7 +24,95 @@ class GUISprite(Sprite):
         # Default 0 unless initialized differently.
         self._layer = getattr(self, '_layer', 0)
         self.source_rect = None
-        Sprite.__init__(self, *groups)
+        self.__g = {}  # The groups the sprite is in
+        if groups:
+            self.add(*groups)
+
+    def add(self, *groups):
+        """add the sprite to groups
+
+        Sprite.add(*groups): return None
+
+        Any number of Group instances can be passed as arguments. The
+        Sprite will be added to the Groups it is not already a member of.
+
+        """
+        has = self.__g.__contains__
+        for group in groups:
+            if hasattr(group, '_spritegroup'):
+                if not has(group):
+                    group.add_internal(self)
+                    self.add_internal(group)
+            else:
+                self.add(*group)
+
+    def remove(self, *groups):
+        """remove the sprite from groups
+
+        Sprite.remove(*groups): return None
+
+        Any number of Group instances can be passed as arguments. The Sprite
+        will be removed from the Groups it is currently a member of.
+
+        """
+        has = self.__g.__contains__
+        for group in groups:
+            if hasattr(group, '_spritegroup'):
+                if has(group):
+                    group.remove_internal(self)
+                    self.remove_internal(group)
+            else:
+                self.remove(*group)
+
+    def add_internal(self, group):
+        """
+        For adding this sprite to a group internally.
+
+        :param group: The group we are adding to.
+        """
+        self.__g[group] = 0
+
+    def remove_internal(self, group):
+        """
+        For removing this sprite from a group internally.
+
+        :param group: The group we are removing from.
+        """
+        del self.__g[group]
+
+    def kill(self):
+        """remove the Sprite from all Groups
+
+        Sprite.kill(): return None
+
+        The Sprite is removed from all the Groups that contain it. This won't
+        change anything about the state of the Sprite. It is possible to
+        continue to use the Sprite after this method has been called, including
+        adding it to Groups.
+
+        """
+        for group in self.__g:
+            group.remove_internal(self)
+        self.__g.clear()
+
+    def groups(self):
+        """list of Groups that contain this Sprite
+
+        Sprite.groups(): return group_list
+
+        Returns a list of all the Groups that contain this Sprite.
+
+        """
+        return list(self.__g)
+
+    def alive(self):
+        """does the sprite belong to any groups
+
+        Sprite.alive(): return bool
+
+        Returns True when the Sprite belongs to one or more Groups.
+        """
+        return truth(self.__g)
 
     def _set_visible(self, val):
         """set the visible value (0 or 1) """
@@ -29,6 +121,14 @@ class GUISprite(Sprite):
     def _get_visible(self):
         """return the visible value of that sprite"""
         return self._visible
+
+    @abstractmethod
+    def update(self, time_delta: float):
+        """
+        A stub to override.
+
+        :param time_delta the time passed in seconds between calls to this function.
+        """
 
     @property
     def visible(self):
@@ -66,8 +166,8 @@ class GUISprite(Sprite):
         #                          "instead.")
 
     def __repr__(self):
-        return "<%s GUISprite(in %d groups)>" % \
-            (self.__class__.__name__, len(self.groups()))
+        return "<%s GUISprite(in %d groups)>" % (self.__class__.__name__,
+                                                 len(self.groups()))
 
     @property
     def image(self):
@@ -126,7 +226,8 @@ class GUISprite(Sprite):
 
 class LayeredGUIGroup(LayeredUpdates):
     """
-
+    A sprite group specifically for the GUI. Similar to pygame's LayeredDirty group but with the
+    dirty flag stuff removed for simplicity and speed.
     """
     def __init__(self, *sprites):
         """initialize group.
@@ -164,6 +265,11 @@ class LayeredGUIGroup(LayeredUpdates):
         surface.blits(self.visible)
 
     def update_visibility(self):
+        """
+        Update the list of what is currently visible.
+
+        Called when we add or remove elements from the group or when an element is hidden or shown.
+        """
         self.visible = [spr.blit_data
                         for spr in self._spritelist
                         if spr.image is not None and spr.visible]

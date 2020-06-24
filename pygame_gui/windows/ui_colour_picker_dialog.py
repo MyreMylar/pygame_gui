@@ -46,7 +46,8 @@ class UIColourChannelEditor(UIElement):
     :param object_id: A specific theming/event ID for this element.
     :param anchors: A dictionary of anchors used for setting up what this element's relative_rect
                     is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may override this.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -277,8 +278,8 @@ class UIColourChannelEditor(UIElement):
 
     def show(self):
         """
-        In addition to the base UIElement.show() - call show() of the element_container - which will propagate to the
-        subelements - label, entry and slider.
+        In addition to the base UIElement.show() - call show() of the element_container
+        - which will propagate to the sub-elements - label, entry and slider.
         """
         super().show()
 
@@ -286,8 +287,8 @@ class UIColourChannelEditor(UIElement):
 
     def hide(self):
         """
-        In addition to the base UIElement.hide() - call hide() of the element_container - which will propagate to the
-        subelements - label, entry and slider.
+        In addition to the base UIElement.hide() - call hide() of the element_container
+        - which will propagate to the sub-elements - label, entry and slider.
         """
         super().hide()
 
@@ -388,11 +389,23 @@ class UIColourPickerDialog(UIWindow):
                                         manager=self.ui_manager,
                                         container=self)
 
+        self.hue_channel = None
+        self.sat_channel = None
+        self.value_channel = None
+
+        self.red_channel = None
+        self.green_channel = None
+        self.blue_channel = None
+
+        self._setup_channels(default_sizes)
+
+    def _setup_channels(self, default_sizes):
+        # group up setting up the channels, possibly we can make this into a
+        # slimmer method called with just the bits that change like names, position and value range.
         channel_width = (self.rect.right -
                          self.sat_value_square.rect.right) - (default_sizes['element_spacing'] * 2)
         channel_left_start = ((default_sizes['element_spacing'] * 2) +
                               self.sat_value_square.rect.width)
-
         acc_channel_top = default_sizes['element_spacing']
         self.hue_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
                                                              acc_channel_top,
@@ -408,7 +421,6 @@ class UIColourPickerDialog(UIWindow):
                                                           'right': 'right',
                                                           'top': 'top',
                                                           'bottom': 'top'})
-
         acc_channel_top += (default_sizes['channel_height'] +
                             default_sizes['channel_spacing'])
         self.sat_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
@@ -425,7 +437,6 @@ class UIColourPickerDialog(UIWindow):
                                                           'right': 'right',
                                                           'top': 'top',
                                                           'bottom': 'top'})
-
         acc_channel_top += (default_sizes['channel_height'] +
                             default_sizes['channel_spacing'])
         self.value_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
@@ -442,7 +453,6 @@ class UIColourPickerDialog(UIWindow):
                                                             'right': 'right',
                                                             'top': 'top',
                                                             'bottom': 'top'})
-
         acc_channel_top += (default_sizes['channel_height'] +
                             default_sizes['channel_spacing'])
         self.red_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
@@ -459,7 +469,6 @@ class UIColourPickerDialog(UIWindow):
                                                           'right': 'right',
                                                           'top': 'top',
                                                           'bottom': 'top'})
-
         acc_channel_top += (default_sizes['channel_height'] +
                             default_sizes['channel_spacing'])
         self.green_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
@@ -476,7 +485,6 @@ class UIColourPickerDialog(UIWindow):
                                                             'right': 'right',
                                                             'top': 'top',
                                                             'bottom': 'top'})
-
         acc_channel_top += (default_sizes['channel_height'] +
                             default_sizes['channel_spacing'])
         self.blue_channel = UIColourChannelEditor(pygame.Rect(channel_left_start,
