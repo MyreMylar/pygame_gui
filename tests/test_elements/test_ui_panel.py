@@ -577,16 +577,18 @@ class TestUIPanel:
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=manager, container=panel)
 
-
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         panel.show()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert not compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         panel.hide()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)

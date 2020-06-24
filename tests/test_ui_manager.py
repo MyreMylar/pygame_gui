@@ -205,7 +205,7 @@ class TestUIManager:
         test_surface = pygame.display.set_mode((150, 30), 0, 32)
         manager = UIManager((150, 30))
         UIButton(relative_rect=pygame.Rect(0, 0, 150, 30), text="Test", manager=manager)
-        # manager.update(0.01)
+        manager.update(0.01)
         manager.draw_ui(test_surface)
         plat = platform.system().upper()
         if plat == 'WINDOWS':

@@ -343,16 +343,18 @@ class TestUIUIFileDialog:
                                    manager=manager,
                                    visible=0)
         file_dialog.file_path_text_line.set_text('tests/data/images')
-
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         file_dialog.show()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert not compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         file_dialog.hide()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)

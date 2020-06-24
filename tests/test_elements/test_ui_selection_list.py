@@ -768,16 +768,18 @@ class TestUISelectionList:
                                          manager=manager,
                                          allow_multi_select=True,
                                          visible=0)
-
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         selection_list.show()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert not compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         selection_list.hide()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)

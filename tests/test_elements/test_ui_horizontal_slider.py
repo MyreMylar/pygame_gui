@@ -375,16 +375,18 @@ class TestUIHorizontalSlider:
         manager = UIManager(resolution)
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(25, 25, 375, 150), start_value=50,
                                     value_range=(0, 200), manager=manager, visible=0)
-
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         slider.show()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert not compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         slider.hide()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)

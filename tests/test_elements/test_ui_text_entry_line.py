@@ -920,16 +920,18 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 400, 400),
                                      manager=manager,
                                      visible=0)
-
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         text_entry.show()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert not compare_surfaces(empty_surface, surface)
 
         surface.fill(pygame.Color(0, 0, 0))
         text_entry.hide()
+        manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
