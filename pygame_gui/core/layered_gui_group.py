@@ -236,6 +236,7 @@ class LayeredGUIGroup(LayeredUpdates):
         LayeredUpdates.__init__(self, *sprites)
         self._clip = None
         self.visible = []
+        self.should_update_visibility = True
 
     def add_internal(self, sprite, layer=None):
         """Do not use this method directly.
@@ -252,17 +253,27 @@ class LayeredGUIGroup(LayeredUpdates):
             raise TypeError()
 
         LayeredUpdates.add_internal(self, sprite, layer)
-        self.update_visibility()
+        self.should_update_visibility = True
 
     def remove_internal(self, sprite):
         LayeredUpdates.remove_internal(self, sprite)
-        self.update_visibility()
+        self.should_update_visibility = True
+
+    def change_layer(self, sprite, new_layer):
+        LayeredUpdates.change_layer(self, sprite, new_layer)
+        self.should_update_visibility = True
 
     def draw(self, surface):
         """draw all sprites in the right order onto the given surface
 
         """
         surface.blits(self.visible)
+
+    def update(self, *args, **kwargs) -> None:
+        if self.should_update_visibility:
+            self.should_update_visibility = False
+            self.update_visibility()
+        super().update(*args, **kwargs)
 
     def update_visibility(self):
         """

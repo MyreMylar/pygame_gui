@@ -39,7 +39,7 @@ class TestSurfaceCache:
         assert not cache.low_on_space
 
     def test_add_surface_to_long_term_cache_too_large(self, _init_pygame,
-                                                      _display_surface_return_none ):
+                                                      _display_surface_return_none):
         cache = SurfaceCache()
         with pytest.warns(UserWarning, match="Unable to cache surfaces larger than"):
             cache.add_surface_to_long_term_cache([pygame.Surface((2048, 2048)), 1],
@@ -112,8 +112,8 @@ class TestSurfaceCache:
                                                size=(64, 64),
                                                shadow_width=1,
                                                border_width=1,
-                                               border_colour=pygame.Color(255,0,0,255),
-                                               bg_colour=pygame.Color(100,200,100,180),
+                                               border_colour=pygame.Color(255, 0, 0, 255),
+                                               bg_colour=pygame.Color(100, 200, 100, 180),
                                                corner_radius=5)
 
         assert cache_id == 'rectangle_64_64_1_1_5_255_0_0_255_100_200_100_180'
