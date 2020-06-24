@@ -18,7 +18,7 @@ class DevelopOnlyInstall(develop):
 setup(
       cmdclass={'develop': DevelopOnlyInstall},
       name='pygame_gui',
-      version='0.5.7',
+      version='0.6.0',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. "
                        "Features HTML-style text formatting, "
@@ -26,7 +26,7 @@ setup(
                        " multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_057.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_060.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
