@@ -172,6 +172,8 @@ class UITextBox(UIElement):
         if self.rect[2] == -1:
             self.text_wrap_rect[2] = -1
 
+        drawable_area_size = (self.text_wrap_rect[2], self.text_wrap_rect[3])
+
         # This gives us the height of the text at the 'width' of the text_wrap_area
         self.parse_html_into_style_data()
         if self.formatted_text_block is not None:
@@ -184,6 +186,18 @@ class UITextBox(UIElement):
                                    (self.border_width * 2) + (self.shadow_width * 2) +
                                    (2 * self.rounded_corner_offset)))
                 self.set_dimensions(new_dimensions)
+
+                # need to regen this because it was dynamically generated
+                drawable_area_size = (max(1, (self.rect[2] -
+                                              (self.padding[0] * 2) -
+                                              (self.border_width * 2) -
+                                              (self.shadow_width * 2) -
+                                              (2 * self.rounded_corner_offset))),
+                                      max(1, (self.rect[3] -
+                                              (self.padding[1] * 2) -
+                                              (self.border_width * 2) -
+                                              (self.shadow_width * 2) -
+                                              (2 * self.rounded_corner_offset))))
 
             elif self.formatted_text_block.final_dimensions[1] > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we
@@ -240,7 +254,7 @@ class UITextBox(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.background_surf = self.drawable_shape.get_surface('normal')
+        self.background_surf = self.drawable_shape.get_fresh_surface()
 
         if self.scroll_bar is not None:
             height_adjustment = int(self.scroll_bar.start_percentage *
@@ -252,8 +266,7 @@ class UITextBox(UIElement):
             return
 
         drawable_area = pygame.Rect((0, height_adjustment),
-                                    (self.text_wrap_rect[2],
-                                     self.text_wrap_rect[3]))
+                                    drawable_area_size)
         new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))
@@ -286,8 +299,19 @@ class UITextBox(UIElement):
         if self.scroll_bar is not None and self.scroll_bar.check_has_moved_recently():
             height_adjustment = int(self.scroll_bar.start_percentage *
                                     self.formatted_text_block.final_dimensions[1])
+
+            drawable_area_size = (max(1, (self.rect[2] -
+                                          (self.padding[0] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))),
+                                  max(1, (self.rect[3] -
+                                          (self.padding[1] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))))
             drawable_area = pygame.Rect((0, height_adjustment),
-                                        (self.text_wrap_rect[2], self.text_wrap_rect[3]))
+                                        drawable_area_size)
 
             if self.rect.width <= 0 or self.rect.height <= 0:
                 return
@@ -355,7 +379,7 @@ class UITextBox(UIElement):
         Called by an element's drawable shape when it has a new image surface ready for use,
         normally after a rebuilding/redrawing of some kind.
         """
-        self.background_surf = self.drawable_shape.get_surface('normal')
+        self.background_surf = self.drawable_shape.get_fresh_surface()
         self.redraw_from_text_block()
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,
@@ -476,9 +500,18 @@ class UITextBox(UIElement):
                                     self.formatted_text_block.final_dimensions[1])
         else:
             height_adjustment = 0
-
+        drawable_area_size = (max(1, (self.rect[2] -
+                                      (self.padding[0] * 2) -
+                                      (self.border_width * 2) -
+                                      (self.shadow_width * 2) -
+                                      (2 * self.rounded_corner_offset))),
+                              max(1, (self.rect[3] -
+                                      (self.padding[1] * 2) -
+                                      (self.border_width * 2) -
+                                      (self.shadow_width * 2) -
+                                      (2 * self.rounded_corner_offset))))
         drawable_area = pygame.Rect((0, height_adjustment),
-                                    (self.text_wrap_rect[2], self.text_wrap_rect[3]))
+                                    drawable_area_size)
         new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))

@@ -155,7 +155,7 @@ class UIScreenSpaceHealthBar(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.set_image(self.drawable_shape.get_fresh_surface())
 
     def update(self, time_delta: float):
         """

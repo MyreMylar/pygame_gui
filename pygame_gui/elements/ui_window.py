@@ -506,7 +506,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_surface('normal'))
+        self.set_image(self.drawable_shape.get_fresh_surface())
 
         self.set_dimensions(self.relative_rect.size)
 

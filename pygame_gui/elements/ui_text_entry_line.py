@@ -149,7 +149,7 @@ class UITextEntryLine(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'disabled'], self.ui_manager)
 
-        self.background_and_border = self.drawable_shape.get_surface('normal')
+        self.background_and_border = self.drawable_shape.get_fresh_surface()
 
         if self.text_image is None:
             self.text_image = pygame.surface.Surface(self.text_image_rect.size,

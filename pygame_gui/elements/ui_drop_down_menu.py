@@ -337,7 +337,7 @@ class UIExpandedDropDownState:
 
         In this case the result is to set the UI element's image to the new surface.
         """
-        image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
+        image = self.drop_down_menu_ui.drawable_shape.get_fresh_surface()
         self.drop_down_menu_ui.set_image(image)
 
     def hide(self):
@@ -435,7 +435,7 @@ class UIClosedDropDownState:
                                                                           ['normal', 'disabled'],
                                                                           self.ui_manager)
 
-        self.drop_down_menu_ui.image = self.drop_down_menu_ui.drawable_shape.get_surface('normal')
+        self.drop_down_menu_ui.image = self.drop_down_menu_ui.drawable_shape.get_fresh_surface()
 
         # extra
         if self.open_button is not None:

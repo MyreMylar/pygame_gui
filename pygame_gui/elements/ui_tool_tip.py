@@ -63,7 +63,8 @@ class UITooltip(UIElement, IUITooltipInterface):
                                     layer_starting_height=self._layer,
                                     parent_element=self)
 
-        self.set_dimensions(self.text_block.rect.size)
+        self.rect_width = self.text_block.rect.size[0]
+        super().set_dimensions(self.text_block.rect.size)
 
         self.set_image(self.ui_manager.get_universal_empty_surface())
 
