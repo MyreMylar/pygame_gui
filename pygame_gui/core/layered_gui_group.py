@@ -142,7 +142,7 @@ class GUISprite:
     def visible(self, value):
         self._set_visible(value)
         for group in self.groups():
-            group.update_visibility()
+            group.should_update_visibility = True
 
     @property
     def layer(self):
@@ -186,7 +186,7 @@ class GUISprite:
             self._image = value
             self.blit_data[0] = self._image
             for group in self.groups():
-                group.update_visibility()
+                group.should_update_visibility = True
         else:
             self._image = value
             self.blit_data[0] = self._image
