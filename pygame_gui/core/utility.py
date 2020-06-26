@@ -345,6 +345,9 @@ class PackageResource:
         self.package = package
         self.resource = resource
 
+    def __repr__(self):
+        return self.package + '.' + self.resource
+
     def to_path(self) -> str:
         """
         If we don't have any importlib module to use, we can try to turn the resource into a file
