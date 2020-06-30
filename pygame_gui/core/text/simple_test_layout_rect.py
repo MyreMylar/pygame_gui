@@ -1,0 +1,57 @@
+from typing import Tuple
+import random
+
+import pygame
+
+from pygame.color import Color
+from pygame.surface import Surface
+
+from pygame_gui.core.text.text_layout_rect import TextLayoutRect
+
+
+class SimpleTestLayoutRect(TextLayoutRect):
+    """
+    Useful for testing layout generation.
+    """
+
+    def __init__(self,
+                 dimensions: Tuple[int, int], *,
+                 create_split_points=True,
+                 float_pos=TextLayoutRect.FLOAT_NONE):
+
+        super().__init__(dimensions, can_split=create_split_points, float_pos=float_pos)
+        self.colour = self.gen_random_colour()
+
+        if create_split_points:
+            self.split_points = [int(dimensions[0] / 3),
+                                 int(dimensions[0] / 3) * 2]
+        else:
+            self.split_points = []
+
+    @staticmethod
+    def gen_random_colour():
+        golden_ratio = ((5 ** 0.5) - 1) / 2
+        colour = Color("#000000")
+        colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 80
+        return colour
+
+    def finalise(self, target_surface: Surface):
+        surface = Surface(self.size, depth=32, flags=pygame.SRCALPHA)
+        surface.fill(self.colour)
+        target_surface.blit(surface, self)
+
+    def split(self, requested_x: int):
+        # find closest split point less than the request
+        current_split_point = 0
+        for point in self.split_points:
+            if requested_x > point > current_split_point:
+                current_split_point = point
+
+        if current_split_point != 0:
+            new_rect = SimpleTestLayoutRect(dimensions=(self.width - current_split_point,
+                                                        self.height),
+                                            create_split_points=False)
+            self.width -= new_rect.width
+            return new_rect
+        else:
+            return None
