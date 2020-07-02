@@ -1,11 +1,11 @@
 from typing import Tuple, Union
 from abc import abstractmethod
 
-from pygame.rect import Rect
+import pygame
 from pygame.surface import Surface
 
 
-class TextLayoutRect(Rect):
+class TextLayoutRect(pygame.Rect):
     """
     A base class for use in Layouts.
     """
@@ -32,20 +32,48 @@ class TextLayoutRect(Rect):
         """
 
     def can_split(self):
+        """
+        Return True if this rectangle can be split into smaller rectangles by a layout.
+
+        :return: True if splittable, False otherwise.
+        """
         return self._can_split
 
     def should_span(self):
+        """
+        Return True if this rectangle should be expanded/shrunk to fit the available
+        width in a layout.
+
+        :return: True if should span the width, False otherwise.
+        """
         return self._should_span
 
     def float_pos(self) -> int:
+        """
+        Return the 'floating' status of this rectangle. can be FLOAT_LEFT, FLOAT_RIGHT or
+        FLOAT_NONE and the  default, used by most rectangles, is FLOAT_NONE.
+
+        Used to make text flow around images.
+
+        :return: returns the float status of this rectangle.
+        """
         return self._float_pos
 
     def split(self, requested_x: int) -> Union['TextLayoutRect', None]:  # noqa
-        return None
+        """
+        Try to perform a split operation on this rectangle. Often rectangles will be split at the
+        nearest point that is still less than the request (i.e. to the left of the request in
+        the common left-to-right text layout case) .
 
-    def vertical_overlap(self, other_rect: Rect) -> bool:
+        :param requested_x: the requested place to split this rectangle along it's width.
+        """
+        super().width = requested_x
+        return TextLayoutRect((self.width - requested_x, self.height))
+
+    def vertical_overlap(self, other_rect: pygame.Rect) -> bool:
         """
         Test if two rectangles overlap one another in the y axis.
+
         :param other_rect:
         :return: True if they overlap.
         """

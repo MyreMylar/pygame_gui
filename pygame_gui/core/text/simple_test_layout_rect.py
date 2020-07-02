@@ -11,7 +11,9 @@ from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 
 class SimpleTestLayoutRect(TextLayoutRect):
     """
-    Useful for testing layout generation.
+    Useful class for testing layout generation. Multi coloured boxes make it easy to distinguish
+    different layout Rects from one another and it's possible to set all the layout options in the
+    constructor/initializer to represent different types of layout rect.
     """
 
     def __init__(self,
@@ -30,6 +32,11 @@ class SimpleTestLayoutRect(TextLayoutRect):
 
     @staticmethod
     def gen_random_colour():
+        """
+        Creates a random colour using the golden ratio method.
+
+        Helps make the test layout rects reasonably distinctive from each other.
+        """
         golden_ratio = ((5 ** 0.5) - 1) / 2
         colour = Color("#000000")
         colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 80
@@ -48,10 +55,10 @@ class SimpleTestLayoutRect(TextLayoutRect):
                 current_split_point = point
 
         if current_split_point != 0:
-            new_rect = SimpleTestLayoutRect(dimensions=(self.width - current_split_point,
+            new_rect = SimpleTestLayoutRect(dimensions=(self.width - current_split_point, # noqa pylint: disable=no-member
                                                         self.height),
                                             create_split_points=False)
-            self.width -= new_rect.width
+            self.width -= new_rect.width  # pylint: disable=no-member
             return new_rect
         else:
             return None

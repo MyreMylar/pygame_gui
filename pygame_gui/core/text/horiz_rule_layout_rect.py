@@ -10,6 +10,19 @@ from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 
 
 class HorizRuleLayoutRect(TextLayoutRect):
+    """
+    Represents a horizontal rule in the HTML style. This is normally a line across the width
+    of the layout block area, but styling options can provide some variation on that theme.
+
+    :param height: the current line height of the layout/font we are using when invoking the rule.
+    :param colour_or_gradient: the colour or gradient of the rule.
+    :param rule_dimensions: the dimensions of the rule itself, normally it is are 1 pixel tall
+                            and the width of the text block layout wide.
+    :param has_shade: whether the rule has 'shading' which by default is just another
+                      alpha'd line beneath it to add some depth. Doesn't work great if the line has
+                      more height to it.
+    :param alignment: ALIGN_CENTER, ALIGN_LEFT or ALIGN_RIGHT. ALIGN_CENTER is the default.
+    """
     ALIGN_CENTER = 0
     ALIGN_LEFT = 1
     ALIGN_RIGHT = 2
