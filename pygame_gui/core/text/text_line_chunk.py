@@ -63,6 +63,7 @@ class TextLineChunk_Font(TextLayoutRect):
         found_optimum = False
 
         optimum_split_point = 0
+        max_split_point_index = len(self.split_points) - 1
 
         while not found_optimum and len(self.split_points) > 0:
             optimum_split_point = self.split_points[current_split_point_index]
@@ -76,15 +77,20 @@ class TextLineChunk_Font(TextLayoutRect):
                 optimum_split_point = valid_points[-1]
             else:
                 width, _ = self.font.size(self.text[:optimum_split_point])
-                if width < requested_x:
+                if width < requested_x and current_split_point_index <= max_split_point_index:
                     # we are below the required width so we move right
                     valid_points.append(optimum_split_point)
-                    current_split_point_index += 1
-                elif width > requested_x:
+                    if current_split_point_index < max_split_point_index:
+                        current_split_point_index += 1
+                elif width > requested_x and current_split_point_index > 0:
                     current_split_point_index -= 1
-                else:
+                elif width == requested_x:
                     # the split point is right on the requested width
                     found_optimum = True
+                else:
+                    # no valid point
+                    found_optimum = True
+                    optimum_split_point = 0
                 tested_points.append(optimum_split_point)
 
         # What we need to consider is the case when there are no split points in a chunk and the
