@@ -287,8 +287,7 @@ class DrawableShape:
                 'font' not in self.theming):
             return
         # first we need to create rectangle the size of the text, if there is any text to draw
-        self.aligned_text_rect = pygame.Rect((0, 0),
-                                             self.theming['font'].size(self.theming['text']))
+        self.aligned_text_rect = self.theming['font'].get_rect(self.theming['text'])
 
         if (self.theming['text_horiz_alignment'] == 'center' or
                 self.theming['text_horiz_alignment'] not in ['left', 'right']):

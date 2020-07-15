@@ -471,7 +471,7 @@ class UITextBox(UIElement):
 
     def parse_html_into_style_data(self):
         """
-        Parses HTML styled string text into a format more useful for styling pygame.font
+        Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
         parser = TextHTMLParser(self.ui_theme, self.combined_element_ids)

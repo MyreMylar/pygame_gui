@@ -516,14 +516,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         return self.font_dictionary.default_font_info
 
-    def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
+    def get_font(self, combined_element_ids: List[str]) -> pygame.freetype.Font:
         """
         Uses some data about a UIElement to get a font object.
 
         :param combined_element_ids: A list of IDs representing an element's location in a
                                      interleaved hierarchy of elements.
 
-        :return pygame.font.Font: A pygame font object.
+        :return pygame.freetype.Font: A pygame font object.
         """
         # set the default font as the final fall back
         font = self.font_dictionary.get_default_font()

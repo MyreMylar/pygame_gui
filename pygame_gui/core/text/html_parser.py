@@ -4,6 +4,7 @@ from collections import deque
 from typing import Union, List, Dict, Any
 
 import pygame
+import pygame.freetype
 
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
@@ -12,6 +13,7 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.horiz_rule_layout_rect import HorizRuleLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunk_Font
+from pygame_gui.core.text.text_line_chunk import TextLineChunk_FTFont
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -132,7 +134,7 @@ class HTMLParser(html.parser.HTMLParser):
                                                 bold=self.current_style['bold'],
                                                 italic=self.current_style['italic'])
 
-            dimensions = current_font.size(' ')
+            dimensions = current_font.get_rect(' ').size
 
             self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
         else:
@@ -220,12 +222,15 @@ class HTMLParser(html.parser.HTMLParser):
 
         :param text:
         """
-
-        self.layout_rect_queue.append(
-            TextLineChunk_Font(text,
-                               self.ui_theme.get_font_dictionary().find_font(
+        chunk_font = self.ui_theme.get_font_dictionary().find_font(
                                    font_name=self.current_style['font_name'],
                                    font_size=self.current_style['font_size'],
                                    bold=self.current_style['bold'],
-                                   italic=self.current_style['italic']),
-                               colour=self.current_style['font_colour']))
+                                   italic=self.current_style['italic'])
+
+        self.layout_rect_queue.append(
+            TextLineChunk_FTFont(text,
+                                 chunk_font,
+                                 colour=self.current_style['font_colour'],
+                                 bg_colour=self.current_style['bg_colour'])
+        )

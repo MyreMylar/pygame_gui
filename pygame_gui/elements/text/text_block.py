@@ -105,7 +105,7 @@ class TextBlock:
                                                       style.font_name,
                                                       style.style.bold,
                                                       style.style.italic)
-                chunk_ascent = chunk_font.get_ascent()
+                chunk_ascent = chunk_font.get_sized_ascender(style.font_size)
                 chunk = {'text': text,
                          'style': style,
                          'font': chunk_font,
@@ -150,8 +150,8 @@ class TextBlock:
             chunk_to_split_index = 0
             chunk_length = 0
             for chunk in line_data['chunks']:
-                metrics = chunk['font'].metrics(chunk['text'])
-                chunk_length = chunk['font'].size(chunk['text'])[0]
+                metrics = chunk['font'].get_metrics(chunk['text'])
+                chunk_length = chunk['font'].get_rect(chunk['text']).width
                 line_render_length += chunk_length
                 if line_render_length > self.width:
                     char_line_length = line_render_length - chunk_length
@@ -277,7 +277,7 @@ class TextBlock:
 
             # If available space is less than three characters wide,
             # we won't be able to split words with hyphens
-            if self.width < chunk_to_split['font'].size('-W-')[0]:
+            if self.width < chunk_to_split['font'].get_rect('-W-').width:
                 chunk_1 = {'text': chunk_to_split['text'][:split_point - 1],
                            'style': chunk_to_split['style'],
                            'font': chunk_to_split['font'],

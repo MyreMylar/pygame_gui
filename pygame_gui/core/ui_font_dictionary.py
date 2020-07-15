@@ -138,7 +138,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                                   FiraMono_BoldItalic]
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> pygame.font.Font:
+                  bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -153,7 +153,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
 
-        :return pygame.font.Font: Returns either the font we asked for, or the default font.
+        :return pygame.freetype.Font: Returns either the font we asked for, or the default font.
 
         """
         return self.find_font_resource(font_size, font_name, bold, italic).loaded_font
@@ -207,7 +207,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             return self.loaded_fonts[self.default_font_id]
 
-    def get_default_font(self) -> pygame.font.Font:
+    def get_default_font(self) -> pygame.freetype.Font:
         """
         Grab the default font.
 
@@ -388,7 +388,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         :param html_size: Size in HTML style.
 
-        :return int: A 'point' font size we can use with pygame.font
+        :return int: A 'point' font size we can use with pygame.freetype
 
         """
         if html_size in UIFontDictionary._html_font_sizes:

@@ -164,7 +164,7 @@ class UITextEntryLine(UIElement):
 
         self.set_image(self.background_and_border.copy())
 
-        line_height = self.font.size(' ')[1]
+        line_height = self.font.get_rect(' ').height
         self.cursor = pygame.Rect((self.text_image_rect.x +
                                    self.padding[0] - self.start_text_offset,
                                    self.text_image_rect.y +
@@ -244,7 +244,7 @@ class UITextEntryLine(UIElement):
                            (self.border_width * 2) -
                            (self.shadow_width * 2))
 
-        width_to_edit_pos = self.font.size(self.text[:self.edit_position])[0]
+        width_to_edit_pos = self.font.get_rect(self.text[:self.edit_position]).width
 
         if self.start_text_offset > width_to_edit_pos:
             self.start_text_offset = width_to_edit_pos
@@ -295,8 +295,8 @@ class UITextEntryLine(UIElement):
         pre_select_area_surface = None
         post_select_area_surface = None
 
-        overall_size = self.font.size(self.text)
-        advances = [letter_metrics[4] for letter_metrics in self.font.metrics(self.text)]
+        overall_size = self.font.get_rect(self.text).size
+        advances = [letter_metrics[4] for letter_metrics in self.font.get_metrics(self.text)]
         pre_select_width = sum(advances[:low_end])
         select_area_width = sum(advances[low_end:high_end])
 
@@ -330,9 +330,10 @@ class UITextEntryLine(UIElement):
                 basic_blit(select_area_surface, alpha_text, (0, 0))
 
             else:
-                select_area_surface = self.font.render(select_area_text, True,
-                                                       self.selected_text_colour,
-                                                       self.selected_bg_colour).convert_alpha()
+                select_area_surface, _ = self.font.render(select_area_text,
+                                                          self.selected_text_colour,
+                                                          self.selected_bg_colour)
+                select_area_surface = select_area_surface.convert_alpha()
         if len(post_select_area_text) > 0:
             post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
                                                                         self.text_colour)
@@ -386,7 +387,7 @@ class UITextEntryLine(UIElement):
         basic_blit(new_image, self.text_image, self.text_image_rect)
         if self.cursor_on and self.is_enabled:
             cursor_len_str = self.text[:self.edit_position]
-            cursor_size = self.font.size(cursor_len_str)
+            cursor_size = self.font.get_rect(cursor_len_str).size
             self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
                              self.padding[0] - self.start_text_offset)
 
@@ -521,7 +522,7 @@ class UITextEntryLine(UIElement):
             within_length_limit = False
         if within_length_limit:
             character = event.unicode
-            char_metrics = self.font.metrics(character)
+            char_metrics = self.font.get_metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
                 valid_character = True
                 if (self.allowed_characters is not None and
@@ -574,7 +575,8 @@ class UITextEntryLine(UIElement):
                 self.cursor_has_moved_recently = True
             elif self.edit_position > 0:
                 if self.start_text_offset > 0:
-                    self.start_text_offset -= self.font.size(self.text[self.edit_position - 1])[0]
+                    self.start_text_offset -= self.font.get_rect(
+                        self.text[self.edit_position - 1]).width
                 self.text = self.text[:self.edit_position - 1] + self.text[self.edit_position:]
                 self.edit_position -= 1
                 self.cursor_has_moved_recently = True
@@ -796,7 +798,7 @@ class UITextEntryLine(UIElement):
         acc_pos = start_pos
         index = 0
         for char in self.text:
-            x_width = self.font.size(char)[0]
+            x_width = self.font.get_rect(char).width
 
             if acc_pos + (x_width/2) > pixel_pos:
                 break
@@ -976,7 +978,7 @@ class UITextEntryLine(UIElement):
 
         """
         corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
-        line_height = self.font.size(' ')[1]
+        line_height = self.font.get_rect(' ').height
         corrected_dimensions[1] = int(line_height + (2 * self.padding[1]) +
                                       (2 * self.border_width) + (2 * self.shadow_width))
         super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))

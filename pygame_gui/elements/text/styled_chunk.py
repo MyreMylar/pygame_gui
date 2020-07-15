@@ -71,7 +71,7 @@ class StyledChunk:
 
         if self.style.underline or (self.is_hovered and self.link_hover_underline) or \
                 (self.link_normal_underline and not self.is_hovered):
-            self.font.set_underline(True)
+            self.font.underline = True
 
         if len(self.chunk) > 0:
             if not isinstance(self.colour, ColourGradient):
@@ -79,10 +79,10 @@ class StyledChunk:
                     self.rendered_chunk = render_white_text_alpha_black_bg(self.font, self.chunk)
                     apply_colour_to_surface(self.colour, self.rendered_chunk)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk,
-                                                           True,
-                                                           self.colour,
-                                                           self.bg_colour).convert_alpha()
+                    self.rendered_chunk, _ = self.font.render(self.chunk,
+                                                              self.colour,
+                                                              self.bg_colour)
+                    self.rendered_chunk = self.rendered_chunk.convert_alpha()
             else:
                 self.rendered_chunk = render_white_text_alpha_black_bg(self.font, self.chunk)
                 self.colour.apply_gradient_to_surface(self.rendered_chunk)
@@ -90,13 +90,14 @@ class StyledChunk:
             self.rendered_chunk = pygame.surface.Surface((0, 0),
                                                          flags=pygame.SRCALPHA,
                                                          depth=32)
-        metrics = self.font.metrics(self.chunk)
-        self.ascent = self.font.get_ascent()
-        self.width = self.font.size(self.chunk)[0]
-        self.height = self.font.size(self.chunk)[1]
+        metrics = self.font.get_metrics(self.chunk)
+        self.ascent = self.font.get_sized_ascender(font_size)
+        text_rect = self.font.get_rect(self.chunk)
+        self.width = text_rect.width
+        self.height = text_rect.height
         self.advance = 0
         for i in range(len(self.chunk)):
-            if len(metrics[i]) == 5:
+            if len(metrics[i]) == 6:
                 self.advance += metrics[i][4]
 
         self.rect = pygame.Rect(self.position, (self.width, self.height))
@@ -110,7 +111,7 @@ class StyledChunk:
         rendering.
 
         """
-        self.font.set_underline(False)
+        self.font.underline = False
 
     def redraw(self):
         """
@@ -119,7 +120,7 @@ class StyledChunk:
         """
         if self.style.underline or (self.is_hovered and self.link_hover_underline) or \
                 (self.link_normal_underline and not self.is_hovered):
-            self.font.set_underline(True)
+            self.font.underline = True
 
         if len(self.chunk) > 0:
             if isinstance(self.colour, ColourGradient):
@@ -130,23 +131,24 @@ class StyledChunk:
                     self.rendered_chunk = render_white_text_alpha_black_bg(self.font, self.chunk)
                     apply_colour_to_surface(self.colour, self.rendered_chunk)
                 else:
-                    self.rendered_chunk = self.font.render(self.chunk,
-                                                           True,
-                                                           self.colour,
-                                                           self.bg_colour).convert_alpha()
+                    self.rendered_chunk, _ = self.font.render(self.chunk,
+                                                              self.colour,
+                                                              self.bg_colour)
+                    self.rendered_chunk = self.rendered_chunk.convert_alpha()
         else:
             self.rendered_chunk = pygame.surface.Surface((0, 0),
                                                          flags=pygame.SRCALPHA,
                                                          depth=32)
 
-        self.font.set_underline(False)
+        self.font.underline = False
 
-        new_metrics = self.font.metrics(self.chunk)
-        new_ascent = self.font.get_ascent()
-        new_width = self.font.size(self.chunk)[0]
-        new_height = self.font.size(self.chunk)[1]
+        new_metrics = self.font.get_metrics(self.chunk)
+        new_ascent = self.font.get_sized_ascender(self.font_size)
+        text_rect = self.font.get_rect(self.chunk)
+        new_width = text_rect.width
+        new_height = text_rect.height
         new_advance = sum(new_metrics[i][4] for i in range(len(self.chunk))
-                          if len(new_metrics[i]) == 5)
+                          if len(new_metrics[i]) == 6)
         if (new_ascent == self.ascent and new_width == self.width and
                 new_height == self.height and new_advance == self.advance):
             self.metrics_changed_after_redraw = False

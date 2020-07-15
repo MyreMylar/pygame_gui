@@ -196,7 +196,8 @@ class UIFileDialog(UIWindow):
                            (self.file_path_text_line.border_width * 2) -
                            (self.file_path_text_line.shadow_width * 2))
 
-        text_width = self.file_path_text_line.font.size(self.file_path_text_line.get_text())[0]
+        text_width = self.file_path_text_line.font.get_rect(
+            self.file_path_text_line.get_text()).width
         self.file_path_text_line.start_text_offset = max(0, text_width - text_clip_width)
         if not self.file_path_text_line.is_focused:
             self.file_path_text_line.focus()

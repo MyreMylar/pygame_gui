@@ -80,7 +80,7 @@ class UILabel(UIElement):
         the displayed text is or remake it with different theming (if the theming has changed).
         """
 
-        text_size = self.font.size(self.text)
+        text_size = self.font.get_rect(self.text).size
         if text_size[1] > self.relative_rect.height or text_size[0] > self.relative_rect.width:
             width_overlap = self.relative_rect.width - text_size[0]
             height_overlap = self.relative_rect.height - text_size[1]
@@ -117,8 +117,8 @@ class UILabel(UIElement):
                         text_render = render_white_text_alpha_black_bg(self.font, self.text)
                         apply_colour_to_surface(self.text_colour, text_render)
                     else:
-                        text_render = self.font.render(self.text, True,
-                                                       self.text_colour, self.bg_colour)
+                        text_render, _ = self.font.render(self.text,
+                                                          self.text_colour, self.bg_colour)
                         text_render = text_render.convert_alpha()
             else:
                 if isinstance(self.disabled_text_colour, ColourGradient):
@@ -129,8 +129,8 @@ class UILabel(UIElement):
                         text_render = render_white_text_alpha_black_bg(self.font, self.text)
                         apply_colour_to_surface(self.disabled_text_colour, text_render)
                     else:
-                        text_render = self.font.render(self.text, True,
-                                                       self.disabled_text_colour, self.bg_colour)
+                        text_render, _ = self.font.render(self.text,
+                                                          self.disabled_text_colour, self.bg_colour)
                         text_render = text_render.convert_alpha()
         text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
                                                 centery=int(self.rect.height / 2))
