@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from typing import Dict, Union
+from typing import Dict, Union, Tuple
 from importlib.util import find_spec
 
 
@@ -108,8 +108,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         default_font_res = FontResource(font_id=self.default_font_id,
                                         size=self.default_font_size,
                                         style={'bold': False, 'italic': False},
-                                        location=PackageResource(package='pygame_gui.data',
-                                                                 resource='FiraCode-Regular.ttf'))
+                                        location=(PackageResource(package='pygame_gui.data',
+                                                                  resource='FiraCode-Regular.ttf'),
+                                                  False))
         if not USE_STRINGIFIED_DATA:
             error = default_font_res.load()
             if error is not None:
@@ -117,14 +118,14 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             self.loaded_fonts[self.default_font_id] = default_font_res
 
             self.known_font_paths['fira_code'] = [
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraCode-Regular.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraCode-Bold.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraMono-RegularItalic.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraMono-BoldItalic.ttf')]
+                (PackageResource(package='pygame_gui.data',
+                                 resource='FiraCode-Regular.ttf'), False),
+                (PackageResource(package='pygame_gui.data',
+                                 resource='FiraCode-Bold.ttf'), False),
+                (PackageResource(package='pygame_gui.data',
+                                 resource='FiraMono-RegularItalic.ttf'), False),
+                (PackageResource(package='pygame_gui.data',
+                                 resource='FiraMono-BoldItalic.ttf'), False)]
         else:
             default_font_res.location = FiraCode_Regular
             error = default_font_res.load()
@@ -132,10 +133,10 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                 warnings.warn(str(error))
             self.loaded_fonts[self.default_font_id] = default_font_res
 
-            self.known_font_paths['fira_code'] = [FiraCode_Regular,
-                                                  FiraCode_Bold,
-                                                  FiraMono_RegularItalic,
-                                                  FiraMono_BoldItalic]
+            self.known_font_paths['fira_code'] = [(FiraCode_Regular, False),
+                                                  (FiraCode_Bold, False),
+                                                  (FiraMono_RegularItalic, False),
+                                                  (FiraMono_BoldItalic, False)]
 
     def find_font(self, font_size: int, font_name: str,
                   bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
@@ -301,7 +302,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
 
     def _load_single_font_style(self,
-                                font_loc: Union[str, PackageResource, bytes],
+                                font_loc: Union[Tuple[str, bool],
+                                                Tuple[PackageResource, bool],
+                                                Tuple[bytes, bool]],
                                 font_id: str,
                                 font_size: int,
                                 font_style: Dict[str, bool],
@@ -353,17 +356,17 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             regular_font_loc = os.path.abspath(font_path)
 
-        style_locations = [bold_path, italic_path, bold_italic_path]
+        style_locations = [(bold_path, False), (italic_path, False), (bold_italic_path, False)]
         for index, location in enumerate(style_locations):
-            if location is None:
-                style_locations[index] = regular_font_loc
-            elif not isinstance(location, PackageResource):
-                style_locations[index] = os.path.abspath(location)
+            if location[0] is None:
+                style_locations[index] = (regular_font_loc, True)
+            elif not isinstance(location[0], PackageResource):
+                style_locations[index] = (os.path.abspath(location), False)
 
-            self.known_font_paths[font_name] = [regular_font_loc,
-                                                style_locations[0],
-                                                style_locations[1],
-                                                style_locations[2]]
+        self.known_font_paths[font_name] = [(regular_font_loc, False),
+                                            style_locations[0],
+                                            style_locations[1],
+                                            style_locations[2]]
 
     def print_unused_loaded_fonts(self):
         """

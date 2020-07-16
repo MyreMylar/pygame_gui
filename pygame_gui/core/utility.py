@@ -283,15 +283,9 @@ def render_white_text_alpha_black_bg(font: pygame.freetype.Font, text: str) -> p
     """
     if USE_PREMULTIPLIED_ALPHA:
         final_surface, _ = font.render(text, pygame.Color('#FFFFFFFF'), pygame.Color('#00000001'))
-        # final_surface = pygame.surface.Surface(text_render.get_rect(),
-        #                                        flags=pygame.SRCALPHA, depth=32)
-        # # Can't be exactly transparent black or we trigger SDL1 'bug'
-        # final_surface.fill(pygame.Color('#00000001'))
-        # final_surface.blit(text_render, (0, 0))
-        return final_surface
     else:
         final_surface, _ = font.render(text, pygame.Color('#FFFFFFFF'))
-        return final_surface
+    return final_surface
 
 
 def basic_blit(destination: pygame.surface.Surface,
@@ -380,12 +374,13 @@ class FontResource:
                  font_id: str,
                  size: int,
                  style: Dict[str, bool],
-                 location: Union[PackageResource, str]):
+                 location: Union[Tuple[PackageResource, bool], Tuple[str, bool]]):
 
         self.font_id = font_id
         self.size = size
         self.style = style
-        self.location = location
+        self.location = location[0]
+        self.force_style = location[1]
         self.loaded_font = None  # type: Union[pygame.freetype.Font, None]
 
     def load(self):
@@ -401,29 +396,33 @@ class FontResource:
                 try:
                     self.loaded_font = pygame.freetype.Font(
                         io.BytesIO(read_binary(self.location.package,
-                                               self.location.resource)), self.size)
+                                               self.location.resource)), self.size, resolution=72)
                     self.loaded_font.pad = True
-                    # self.loaded_font.set_bold(self.style['bold'])
-                    # self.loaded_font.set_italic(self.style['italic'])
+                    if self.force_style:
+                        self.loaded_font.strong = self.style['bold']
+                        self.loaded_font.oblique = self.style['italic']
                 except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
             elif USE_FILE_PATH:
                 try:
-                    self.loaded_font = pygame.freetype.Font(self.location.to_path(), self.size)
+                    self.loaded_font = pygame.freetype.Font(self.location.to_path(),
+                                                            self.size, resolution=72)
                     self.loaded_font.pad = True
-                    # self.loaded_font.set_bold(self.style['bold'])
-                    # self.loaded_font.set_italic(self.style['italic'])
+                    if self.force_style:
+                        self.loaded_font.strong = self.style['bold']
+                        self.loaded_font.oblique = self.style['italic']
                 except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location.to_path()))
 
         elif isinstance(self.location, str):
             try:
-                self.loaded_font = pygame.freetype.Font(self.location, self.size)
+                self.loaded_font = pygame.freetype.Font(self.location, self.size, resolution=72)
                 self.loaded_font.pad = True
-                # self.loaded_font.set_bold(self.style['bold'])
-                # self.loaded_font.set_italic(self.style['italic'])
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -431,10 +430,11 @@ class FontResource:
         elif isinstance(self.location, bytes):
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
-                self.loaded_font = pygame.freetype.Font(file_obj, self.size)
+                self.loaded_font = pygame.freetype.Font(file_obj, self.size, resolution=72)
                 self.loaded_font.pad = True
-                # self.loaded_font.set_bold(self.style['bold'])
-                # self.loaded_font.set_italic(self.style['italic'])
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))

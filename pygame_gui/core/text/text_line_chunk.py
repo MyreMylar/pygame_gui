@@ -119,13 +119,18 @@ class TextLineChunk_FTFont(TextLayoutRect):
 
     """
 
-    def __init__(self, text: str, font: pygame.freetype.Font, colour: Color, bg_colour: Color):
+    def __init__(self, text: str,
+                 font: pygame.freetype.Font,
+                 line_height: int,
+                 colour: Color,
+                 bg_colour: Color):
 
-        dimensions = font.get_rect(text).size
+        dimensions = (font.get_rect(text).width, line_height)
         super().__init__(dimensions, can_split=True)
 
         self.text = text
         self.font = font
+        self.line_height = line_height
         self.colour = colour
         self.bg_color = bg_colour
 
@@ -134,8 +139,12 @@ class TextLineChunk_FTFont(TextLayoutRect):
 
     def finalise(self, target_surface: Surface):
 
-        surface, _ = self.font.render(self.text, fgcolor=self.colour, bgcolor=self.bg_color)
-        target_surface.blit(surface, self)
+        surface, render_rect = self.font.render(self.text,
+                                                fgcolor=self.colour,
+                                                bgcolor=self.bg_color)
+
+        render_rect.center = self.center
+        target_surface.blit(surface, render_rect)
 
     def split(self, requested_x: int):
         # starting heuristic: find the percentage through the chunk width of this split request
@@ -192,9 +201,10 @@ class TextLineChunk_FTFont(TextLayoutRect):
 
             # update the data for this chunk
             self.text = left_side
-            self.size = self.font.get_rect(self.text).size
+            self.size = (self.font.get_rect(self.text).width, self.line_height)
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return TextLineChunk_FTFont(right_side, self.font, self.colour, self.bg_color)
+            return TextLineChunk_FTFont(right_side, self.font,
+                                        self.line_height, self.colour, self.bg_color)
         else:
             return None

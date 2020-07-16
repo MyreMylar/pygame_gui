@@ -41,11 +41,13 @@ class HTMLParser(html.parser.HTMLParser):
         7: 48
     }
 
-    def __init__(self, ui_theme: UIAppearanceTheme, combined_ids: List[str]):
+    def __init__(self, ui_theme: UIAppearanceTheme, combined_ids: List[str],
+                 line_spacing: float = 1.2):
 
         super().__init__()
         self.ui_theme = ui_theme
         self.combined_ids = combined_ids
+        self.line_spacing = line_spacing
 
         self.element_stack = []
 
@@ -134,7 +136,9 @@ class HTMLParser(html.parser.HTMLParser):
                                                 bold=self.current_style['bold'],
                                                 italic=self.current_style['italic'])
 
-            dimensions = current_font.get_rect(' ').size
+            dimensions = (current_font.get_rect(' ').width,
+                          int(self.current_style['font_size'] *
+                              self.line_spacing))
 
             self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
         else:
@@ -231,6 +235,8 @@ class HTMLParser(html.parser.HTMLParser):
         self.layout_rect_queue.append(
             TextLineChunk_FTFont(text,
                                  chunk_font,
+                                 line_height=int(self.current_style['font_size'] *
+                                                 self.line_spacing),
                                  colour=self.current_style['font_colour'],
                                  bg_colour=self.current_style['bg_colour'])
         )
