@@ -68,45 +68,61 @@ class TextBoxLayout:
     """
     def __init__(self,
                  input_data_queue: Deque[TextLayoutRect],
-                 overall_layout_rect: pygame.Rect):
+                 layout_rect: pygame.Rect):
         # TODO: supply only a width and create final rect shape or just a final height?
-        self.layout_rect_queue = input_data_queue.copy()
+        self.imput_data_rect_queue = input_data_queue.copy()
+        self.layout_rect = layout_rect.copy()
 
+        self.layout_rect_queue = None
+        self.finalised_surface = None
         self.floating_rects = []
         self.layout_rows = []
-        current_row = TextBoxLayoutRow(row_start_y=0)
+        self.link_chunks = []
 
+        self._process_layout_queue()
+
+    def reprocess_layout_queue(self, layout_rect):
+        """
+        Re-lays out already parsed text data. Useful to call if the layout requirements have
+        changed but the text data hasn't.
+
+        :param layout_rect: The new layout rectangle.
+        """
+        self.layout_rect = layout_rect
+        self.layout_rect_queue = None
+        self.finalised_surface = None
+        self.floating_rects = []
+        self.layout_rows = []
+
+        self._process_layout_queue()
+
+    def _process_layout_queue(self):
+        self.layout_rect_queue = self.imput_data_rect_queue.copy()
+        current_row = TextBoxLayoutRow(row_start_y=0)
         while self.layout_rect_queue:
 
             test_layout_rect = self.layout_rect_queue.popleft()
             test_layout_rect.topleft = tuple(current_row.topright)
 
             if isinstance(test_layout_rect, LineBreakLayoutRect):
-                current_row = self._handle_line_break_rect(current_row, test_layout_rect,
-                                                           overall_layout_rect)
+                current_row = self._handle_line_break_rect(current_row, test_layout_rect)
             elif test_layout_rect.should_span():
-                current_row = self._handle_span_rect(current_row, test_layout_rect,
-                                                     overall_layout_rect)
-
+                current_row = self._handle_span_rect(current_row, test_layout_rect)
             elif test_layout_rect.float_pos() != TextLayoutRect.FLOAT_NONE:
-                current_row = self._handle_float_rect(current_row, test_layout_rect,
-                                                      overall_layout_rect)
-
+                current_row = self._handle_float_rect(current_row, test_layout_rect)
             else:
-                current_row = self._handle_regular_rect(current_row, test_layout_rect,
-                                                        overall_layout_rect)
-
+                current_row = self._handle_regular_rect(current_row, test_layout_rect)
         # make sure we add the last row to the layout
-        self._add_row_to_layout(current_row, overall_layout_rect)
+        self._add_row_to_layout(current_row)
 
-    def _add_row_to_layout(self, current_row, overall_layout_rect):
+    def _add_row_to_layout(self, current_row):
         self.layout_rows.append(current_row)
-        if current_row.bottom > overall_layout_rect.height:
-            overall_layout_rect.height = current_row.bottom
+        if current_row.bottom > self.layout_rect.height:
+            self.layout_rect.height = current_row.bottom
 
-    def _handle_regular_rect(self, current_row, test_layout_rect, overall_layout_rect):
+    def _handle_regular_rect(self, current_row, test_layout_rect):
 
-        rhs_limit = overall_layout_rect.width
+        rhs_limit = self.layout_rect.width
         for floater in self.floating_rects:
             if floater.vertical_overlap(test_layout_rect):
                 if (current_row.at_start() and
@@ -122,13 +138,12 @@ class TextBoxLayout:
             # move to next line and try to split if we can
             current_row = self._split_rect_and_move_to_next_line(current_row,
                                                                  rhs_limit,
-                                                                 overall_layout_rect,
                                                                  test_layout_rect)
         else:
             current_row.add_item(test_layout_rect)
         return current_row
 
-    def _handle_float_rect(self, current_row, test_layout_rect, overall_layout_rect):
+    def _handle_float_rect(self, current_row, test_layout_rect):
         max_floater_line_height = current_row.height
         if test_layout_rect.float_pos() == TextLayoutRect.FLOAT_LEFT:
             test_layout_rect.left = 0
@@ -138,24 +153,23 @@ class TextBoxLayout:
                     test_layout_rect.left = floater.right
                     if max_floater_line_height < floater.height:
                         max_floater_line_height = floater.height
-            if test_layout_rect.right > overall_layout_rect.width:
+            if test_layout_rect.right > self.layout_rect.width:
                 # If this rectangle won't fit, we see if we can split it
                 current_row = self._split_rect_and_move_to_next_line(
                     current_row,
-                    overall_layout_rect.width,
-                    overall_layout_rect,
+                    self.layout_rect.width,
                     test_layout_rect,
                     max_floater_line_height)
             else:
                 self.floating_rects.append(test_layout_rect)
                 # expand overall rect bottom to fit if needed
-                if test_layout_rect.bottom > overall_layout_rect.height:
-                    overall_layout_rect.height = test_layout_rect.bottom
+                if test_layout_rect.bottom > self.layout_rect.height:
+                    self.layout_rect.height = test_layout_rect.bottom
                 # rewind current text row so we can account for new floating rect
                 current_row.rewind_row(self.layout_rect_queue)
 
         else:  # FLOAT_RIGHT
-            rhs_limit = overall_layout_rect.width
+            rhs_limit = self.layout_rect.width
             for floater in self.floating_rects:
                 if (floater.vertical_overlap(test_layout_rect)
                         and floater.float_pos() == TextLayoutRect.FLOAT_RIGHT
@@ -168,49 +182,48 @@ class TextBoxLayout:
                 # If this rectangle won't fit, we see if we can split it
                 current_row = self._split_rect_and_move_to_next_line(
                     current_row,
-                    overall_layout_rect.width,
-                    overall_layout_rect,
+                    self.layout_rect.width,
                     test_layout_rect,
                     max_floater_line_height)
             else:
-                self._add_floating_rect(current_row, overall_layout_rect, test_layout_rect)
+                self._add_floating_rect(current_row, test_layout_rect)
         return current_row
 
-    def _add_floating_rect(self, current_row, overall_layout_rect, test_layout_rect):
+    def _add_floating_rect(self, current_row, test_layout_rect):
         self.floating_rects.append(test_layout_rect)
         # expand overall rect bottom to fit if needed
-        if test_layout_rect.bottom > overall_layout_rect.height:
-            overall_layout_rect.height = test_layout_rect.bottom
+        if test_layout_rect.bottom > self.layout_rect.height:
+            self.layout_rect.height = test_layout_rect.bottom
         # rewind current text row so we can account for new floating rect
         current_row.rewind_row(self.layout_rect_queue)
 
-    def _handle_span_rect(self, current_row, test_layout_rect, overall_layout_rect):
+    def _handle_span_rect(self, current_row, test_layout_rect):
         if not current_row.at_start():
             # not at start of line so end current row...
-            self._add_row_to_layout(current_row, overall_layout_rect)
+            self._add_row_to_layout(current_row)
             # ...and start new one
             current_row = TextBoxLayoutRow(row_start_y=current_row.bottom)
 
         # Make the rect span the current row's full width & add it to the row
-        test_layout_rect.width = overall_layout_rect.width  # TODO: floating rects?
+        test_layout_rect.width = self.layout_rect.width  # TODO: floating rects?
         current_row.add_item(test_layout_rect)
 
         # add the row to the layout since it's now full up after spanning the full width...
-        self._add_row_to_layout(current_row, overall_layout_rect)
+        self._add_row_to_layout(current_row)
         # ...then start a new row
         current_row = TextBoxLayoutRow(row_start_y=current_row.bottom)
         return current_row
 
-    def _handle_line_break_rect(self, current_row, test_layout_rect, overall_layout_rect):
+    def _handle_line_break_rect(self, current_row, test_layout_rect):
         # line break, so first end current row...
         current_row.add_item(test_layout_rect)
-        self._add_row_to_layout(current_row, overall_layout_rect)
+        self._add_row_to_layout(current_row)
 
         # ...then start a new row
         return TextBoxLayoutRow(row_start_y=current_row.bottom)
 
     def _split_rect_and_move_to_next_line(self, current_row, rhs_limit,
-                                          overall_layout_rect, test_layout_rect,
+                                          test_layout_rect,
                                           floater_height=None):
         # TODO: move floating rect stuff out of here? Right now there is no splitting and the height
         #       is different
@@ -233,7 +246,7 @@ class TextBoxLayout:
             self.layout_rect_queue.appendleft(test_layout_rect)
 
         # whether we split successfully or not, we need to end the current row...
-        self._add_row_to_layout(current_row, overall_layout_rect)
+        self._add_row_to_layout(current_row)
 
         # And then start a new one.
         if floater_height is not None:
@@ -256,3 +269,20 @@ class TextBoxLayout:
 
         for floating_rect in self.floating_rects:
             floating_rect.finalise(surface)
+
+    def finalise_to_new(self):
+        """
+        Finalises our layout to a brand new surface that this method creates.
+        """
+        self.finalised_surface = pygame.Surface(self.layout_rect.size,
+                                                depth=32, flags=pygame.SRCALPHA)
+        self.finalised_surface.fill('#00000000')
+        self.finalise_to_surf(self.finalised_surface)
+
+        return self.finalised_surface
+
+    def add_chunks_to_hover_group(self, link_hover_chunks):
+        """
+        TODO: Add me.
+        :param link_hover_chunks:
+        """

@@ -361,7 +361,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             if location[0] is None:
                 style_locations[index] = (regular_font_loc, True)
             elif not isinstance(location[0], PackageResource):
-                style_locations[index] = (os.path.abspath(location), False)
+                style_locations[index] = (os.path.abspath(location[0]), False)
 
         self.known_font_paths[font_name] = [(regular_font_loc, False),
                                             style_locations[0],

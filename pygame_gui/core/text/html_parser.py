@@ -12,12 +12,22 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.horiz_rule_layout_rect import HorizRuleLayoutRect
-from pygame_gui.core.text.text_line_chunk import TextLineChunk_Font
-from pygame_gui.core.text.text_line_chunk import TextLineChunk_FTFont
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFont
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 
 class HTMLParser(html.parser.HTMLParser):
+    """
+    Parses a subset of HTML styled text so it is usable as text in pygame GUI. There are
+    lots of text markup languages and this would be the class to swap in and out if you
+    wanted to support them (Though this might need some refactoring to have a generic
+    markup parser base class).
 
+    :param ui_theme: The UI theme we are using - for colour and fonts.
+    :param combined_ids: The IDs for the UI element this parser instance belongs to.
+    :param line_spacing: The line spacing we use when the text is on multiple lines -
+                         defaults to 1.2.
+    """
     default_style = {
         'font_name': 'fira_code',
         'font_size': 14,
@@ -119,22 +129,22 @@ class HTMLParser(html.parser.HTMLParser):
         elif element == 'body':
             if 'bgcolor' in attributes:
                 if len(attributes['bgcolor']) > 0:
-                    if ',' in attributes['bgcolor']:
-                        col_id = attributes['bgcolor']
-                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(col_id,
-                                                                                  self.combined_ids)
-                    else:
+                    if attributes['bgcolor'][0] == '#':
                         style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
+                    else:
+                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
+                            attributes['bgcolor'],
+                            self.combined_ids)
                 else:
                     style["bg_colour"] = None
 
         elif element == 'br':
 
             current_font = self.ui_theme.get_font_dictionary().find_font(
-                                                font_name=self.current_style['font_name'],
-                                                font_size=self.current_style['font_size'],
-                                                bold=self.current_style['bold'],
-                                                italic=self.current_style['italic'])
+                font_name=self.current_style['font_name'],
+                font_size=self.current_style['font_size'],
+                bold=self.current_style['bold'],
+                italic=self.current_style['italic'])
 
             dimensions = (current_font.get_rect(' ').width,
                           int(self.current_style['font_size'] *
@@ -227,16 +237,16 @@ class HTMLParser(html.parser.HTMLParser):
         :param text:
         """
         chunk_font = self.ui_theme.get_font_dictionary().find_font(
-                                   font_name=self.current_style['font_name'],
-                                   font_size=self.current_style['font_size'],
-                                   bold=self.current_style['bold'],
-                                   italic=self.current_style['italic'])
+            font_name=self.current_style['font_name'],
+            font_size=self.current_style['font_size'],
+            bold=self.current_style['bold'],
+            italic=self.current_style['italic'])
 
         self.layout_rect_queue.append(
-            TextLineChunk_FTFont(text,
-                                 chunk_font,
-                                 line_height=int(self.current_style['font_size'] *
-                                                 self.line_spacing),
-                                 colour=self.current_style['font_colour'],
-                                 bg_colour=self.current_style['bg_colour'])
+            TextLineChunkFTFont(text,
+                                chunk_font,
+                                line_height=int(self.current_style['font_size'] *
+                                                self.line_spacing),
+                                colour=self.current_style['font_colour'],
+                                bg_colour=self.current_style['bg_colour'])
         )

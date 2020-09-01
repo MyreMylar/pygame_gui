@@ -7,11 +7,15 @@ from tests.shared_fixtures import default_display_surface, _display_surface_retu
 import pygame
 import pygame_gui
 
+from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.text.html_parser import CharStyle
 from pygame_gui.elements.text.styled_chunk import StyledChunk
 from pygame_gui.elements.text.text_block import TextBlock
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core import BlockingThreadedResourceLoader
+
+from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.elements.ui_new_text_box import UINewTextBox
 
 
 def test_old_char_style_performance(benchmark, _init_pygame, _display_surface_return_none):
@@ -80,3 +84,39 @@ def test_old_text_block_performance(benchmark, _init_pygame, _display_surface_re
 
     # this part will likely all be different
     benchmark(create_text_block, dictionary)
+
+
+def create_old_text_box(default_ui_manager):
+    text_box = UITextBox(
+        html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                  "<i>styles</i>.",
+        relative_rect=pygame.Rect(100, 100, 200, 300),
+        manager=default_ui_manager)
+
+
+def test_old_style_text_box_performance(benchmark, _init_pygame,
+                                        default_ui_manager: UIManager,
+                                        _display_surface_return_none):
+
+    default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                      {"name": "fira_code", "size:": 14, "style": "italic"}])
+
+    benchmark(create_old_text_box, default_ui_manager)
+
+
+def create_new_text_box(default_ui_manager):
+    text_box = UINewTextBox(
+        html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                  "<i>styles</i>.",
+        relative_rect=pygame.Rect(100, 100, 200, 300),
+        manager=default_ui_manager)
+
+
+def test_new_style_text_box_performance(benchmark, _init_pygame,
+                                        default_ui_manager: UIManager,
+                                        _display_surface_return_none):
+
+    default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                      {"name": "fira_code", "size:": 14, "style": "italic"}])
+
+    benchmark(create_new_text_box, default_ui_manager)

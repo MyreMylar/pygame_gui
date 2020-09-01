@@ -28,10 +28,15 @@ from pygame.surface import Surface
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 
+from pygame_gui.core import ColourGradient
+from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
+from pygame_gui.core.utility import basic_blit
 
-class TextLineChunk_Font(TextLayoutRect):
+
+class TextLineChunkFont(TextLayoutRect):
     """
-
+    A Text line chunk (text on the same horizontal line in the same style) using pygame's font
+    module.
     """
 
     def __init__(self, text: str, font: Font, colour: Color, bg_colour: Color):
@@ -106,17 +111,18 @@ class TextLineChunk_Font(TextLayoutRect):
 
             # update the data for this chunk
             self.text = left_side
-            self.size = self.font.size(self.text)
+            self.size = self.font.size(self.text)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return TextLineChunk_Font(right_side, self.font, self.colour, self.bg_color)
+            return TextLineChunkFont(right_side, self.font, self.colour, self.bg_color)
         else:
             return None
 
 
-class TextLineChunk_FTFont(TextLayoutRect):
+class TextLineChunkFTFont(TextLayoutRect):
     """
-
+    A Text line chunk (text on the same horizontal line in the same style) using pygame's freetype
+    module.
     """
 
     def __init__(self, text: str,
@@ -139,12 +145,54 @@ class TextLineChunk_FTFont(TextLayoutRect):
 
     def finalise(self, target_surface: Surface):
 
-        surface, render_rect = self.font.render(self.text,
-                                                fgcolor=self.colour,
-                                                bgcolor=self.bg_color)
+        if isinstance(self.colour, ColourGradient):
+            # draw the text first
+            # Anti-aliasing on text is not done with pre-multiplied alpha so we need to bake
+            # this text onto a surface with a normal blit before it can enter the pre-multipled
+            # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
+            # on the normal text colour.
+            text_surface, render_rect = self.font.render(self.text, fgcolor=Color('#FFFFFFFF'))
+            self.colour.apply_gradient_to_surface(text_surface)
 
-        render_rect.center = self.center
-        target_surface.blit(surface, render_rect)
+            # then make the background
+            surface = Surface(render_rect.size, flags=pygame.SRCALPHA, depth=32)
+            if isinstance(self.bg_color, ColourGradient):
+                surface.fill(Color('#FFFFFFFF'))
+                self.bg_color.apply_gradient_to_surface(surface)
+            else:
+                surface.fill(self.bg_color)
+
+            # then apply the text to the background deliberately not pre-multiplied to bake the
+            # text anti-aliasing
+            surface.blit(text_surface, (0, 0))
+        elif isinstance(self.bg_color, ColourGradient):
+            # draw the text first
+            text_surface, render_rect = self.font.render(self.text, fgcolor=self.colour)
+
+            # then make the background
+            surface = Surface(render_rect.size, flags=pygame.SRCALPHA, depth=32)
+            surface.fill(Color('#FFFFFFFF'))
+            self.bg_color.apply_gradient_to_surface(surface)
+
+            # then apply the text to the background, deliberately not pre-multiplied to bake the
+            # text anti-aliasing
+            surface.blit(text_surface, (0, 0))
+        else:
+
+            surface, render_rect = self.font.render(self.text,
+                                                    fgcolor=self.colour,
+                                                    bgcolor=self.bg_color)
+        # using padding on freetype fonts adds three pixels above and below
+        # the ascender/descender height of the font. Not using padding shrinks
+        # the bounds to the actual height of whatever letters are drawn which
+        # means variable height render surface. The strategy I'm using here
+        # starts with padded rects, that are at least of equal height, and
+        # then removes the padding.
+        render_rect.height -= 6
+        render_rect.topleft = self.topleft
+        target_surface.blit(surface, render_rect,
+                            area=pygame.Rect((0, 3), render_rect.size),
+                            special_flags=pygame.BLEND_PREMULTIPLIED)
 
     def split(self, requested_x: int):
         # starting heuristic: find the percentage through the chunk width of this split request
@@ -201,10 +249,10 @@ class TextLineChunk_FTFont(TextLayoutRect):
 
             # update the data for this chunk
             self.text = left_side
-            self.size = (self.font.get_rect(self.text).width, self.line_height)
+            self.size = (self.font.get_rect(self.text).width, self.line_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return TextLineChunk_FTFont(right_side, self.font,
-                                        self.line_height, self.colour, self.bg_color)
+            return TextLineChunkFTFont(right_side, self.font,
+                                       self.line_height, self.colour, self.bg_color)
         else:
             return None

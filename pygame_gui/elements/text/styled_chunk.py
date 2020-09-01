@@ -94,7 +94,7 @@ class StyledChunk:
         self.ascent = self.font.get_sized_ascender(font_size)
         text_rect = self.font.get_rect(self.chunk)
         self.width = text_rect.width
-        self.height = text_rect.height
+        self.height = text_rect.height - 1
         self.advance = 0
         for i in range(len(self.chunk)):
             if len(metrics[i]) == 6:
@@ -146,7 +146,7 @@ class StyledChunk:
         new_ascent = self.font.get_sized_ascender(self.font_size)
         text_rect = self.font.get_rect(self.chunk)
         new_width = text_rect.width
-        new_height = text_rect.height
+        new_height = text_rect.height - 1
         new_advance = sum(new_metrics[i][4] for i in range(len(self.chunk))
                           if len(new_metrics[i]) == 6)
         if (new_ascent == self.ascent and new_width == self.width and

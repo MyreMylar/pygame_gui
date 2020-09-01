@@ -288,6 +288,7 @@ class DrawableShape:
             return
         # first we need to create rectangle the size of the text, if there is any text to draw
         self.aligned_text_rect = self.theming['font'].get_rect(self.theming['text'])
+        self.aligned_text_rect.height -= 1
 
         if (self.theming['text_horiz_alignment'] == 'center' or
                 self.theming['text_horiz_alignment'] not in ['left', 'right']):

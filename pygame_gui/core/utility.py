@@ -276,13 +276,22 @@ def premul_alpha_surface(surface: pygame.surface.Surface) -> pygame.surface.Surf
     return surface
 
 
-def render_white_text_alpha_black_bg(font: pygame.freetype.Font, text: str) -> pygame.surface.Surface:
+def render_white_text_alpha_black_bg(font: pygame.freetype.Font,
+                                     text: str) -> pygame.surface.Surface:
     """
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
     """
     if USE_PREMULTIPLIED_ALPHA:
-        final_surface, _ = font.render(text, pygame.Color('#FFFFFFFF'), pygame.Color('#00000001'))
+        text_surface, text_rect = font.render(text,
+                                              pygame.Color('#FFFFFFFF'),
+                                              pygame.Color('#00000001'))
+        text_rect.height -= 1
+        text_rect.topleft = (0, 0)
+        final_surface = pygame.surface.Surface(text_rect.size,
+                                               flags=pygame.SRCALPHA, depth=32)
+        final_surface.fill(pygame.Color('#00000001'))
+        final_surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
     else:
         final_surface, _ = font.render(text, pygame.Color('#FFFFFFFF'))
     return final_surface
