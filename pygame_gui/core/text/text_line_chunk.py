@@ -19,6 +19,7 @@ TODO:
   - Performance comparison tests & functionality comparison tests between current system and new.
     Need to set these up early.
 """
+from typing import Optional
 
 import pygame.freetype
 
@@ -127,6 +128,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def __init__(self, text: str,
                  font: pygame.freetype.Font,
+                 underlined: bool,
                  line_height: int,
                  colour: Color,
                  bg_colour: Color):
@@ -136,22 +138,30 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         self.text = text
         self.font = font
+        self.underlined = underlined
         self.line_height = line_height
         self.colour = colour
         self.bg_color = bg_colour
+        self.target_surface = None
 
         # we split text stings based on spaces
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
+        self.letter_count = len(self.text)
 
-    def finalise(self, target_surface: Surface):
+    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
 
+        final_str_text = self.text if letter_end is None else self.text[:letter_end]
+        self.font.underline = self.underlined  # set underlined state
+        if self.underlined:
+            self.font.underline_adjustment = 0.5
         if isinstance(self.colour, ColourGradient):
             # draw the text first
             # Anti-aliasing on text is not done with pre-multiplied alpha so we need to bake
             # this text onto a surface with a normal blit before it can enter the pre-multipled
             # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
             # on the normal text colour.
-            text_surface, render_rect = self.font.render(self.text, fgcolor=Color('#FFFFFFFF'))
+
+            text_surface, render_rect = self.font.render(final_str_text, fgcolor=Color('#FFFFFFFF'))
             self.colour.apply_gradient_to_surface(text_surface)
 
             # then make the background
@@ -167,7 +177,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             surface.blit(text_surface, (0, 0))
         elif isinstance(self.bg_color, ColourGradient):
             # draw the text first
-            text_surface, render_rect = self.font.render(self.text, fgcolor=self.colour)
+            text_surface, render_rect = self.font.render(final_str_text, fgcolor=self.colour)
 
             # then make the background
             surface = Surface(render_rect.size, flags=pygame.SRCALPHA, depth=32)
@@ -179,22 +189,26 @@ class TextLineChunkFTFont(TextLayoutRect):
             surface.blit(text_surface, (0, 0))
         else:
 
-            surface, render_rect = self.font.render(self.text,
+            surface, render_rect = self.font.render(final_str_text,
                                                     fgcolor=self.colour,
                                                     bgcolor=self.bg_color)
-        # using padding on freetype fonts adds three pixels above and below
+        # using padding on freetype fonts adds pixels (three?) above and below
         # the ascender/descender height of the font. Not using padding shrinks
         # the bounds to the actual height of whatever letters are drawn which
         # means variable height render surface. The strategy I'm using here
         # starts with padded rects, that are at least of equal height, and
         # then removes the padding.
-        render_rect.height -= 6
+
+        # EDIT: removed 6 pixels from the height originally, but this was cutting off letters at small font sizes
+        #       suspect this means the padding is actually relative to the font size somehow.
+        render_rect.height -= 2
         render_rect.topleft = self.topleft
         target_surface.blit(surface, render_rect,
-                            area=pygame.Rect((0, 3), render_rect.size),
+                            area=pygame.Rect((0, 1), render_rect.size),
                             special_flags=pygame.BLEND_PREMULTIPLIED)
+        self.target_surface = target_surface
 
-    def split(self, requested_x: int):
+    def split(self, requested_x: int, line_width: int):
         # starting heuristic: find the percentage through the chunk width of this split request
         percentage_split = float(requested_x)/float(self.width)
         closest_split_index = int(percentage_split * len(self.split_points))
@@ -239,20 +253,36 @@ class TextLineChunkFTFont(TextLayoutRect):
                     optimum_split_point = 0
                 tested_points.append(optimum_split_point)
 
-        # What we need to consider is the case when there are no split points in a chunk and the
-        # chunk is wider than the maximum width, in that case moving the chunk to the next line
-        # will not work
+        split_text_ok = False
         if optimum_split_point != 0:
             # split the text
             left_side = self.text[:optimum_split_point]
             right_side = self.text[optimum_split_point:]
+            split_text_ok = True
 
+        elif self.x == 0 and self.width > line_width:
+            # we have a chunk with no breaks (one long word usually) longer than a line
+            # split it at the word
+            optimum_split_point = int(percentage_split * len(self.text)) - 1
+            left_side = self.text[:optimum_split_point] + '-'
+            right_side = '-' + self.text[optimum_split_point:]
+            split_text_ok = True
+
+        if split_text_ok:
             # update the data for this chunk
             self.text = left_side
+            self.letter_count = len(self.text)
             self.size = (self.font.get_rect(self.text).width, self.line_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return TextLineChunkFTFont(right_side, self.font,
-                                       self.line_height, self.colour, self.bg_color)
+            return self._split_at(right_side)
         else:
             return None
+
+    def _split_at(self, right_side):
+        return TextLineChunkFTFont(right_side, self.font, self.underlined,
+                                   self.line_height, self.colour, self.bg_color)
+
+    def clear(self):
+        if self.target_surface is not None:
+            self.target_surface.fill(pygame.Color('#00000000'), self)

@@ -6,6 +6,7 @@ from pygame.surface import Surface
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
+from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -16,6 +17,8 @@ class TextBoxLayoutRow(pygame.Rect):
     def __init__(self, row_start_y):
         super().__init__(0, row_start_y, 0, 0)
         self.items = []
+
+        self.letter_count = 0
 
     def at_start(self):
         """
@@ -42,6 +45,8 @@ class TextBoxLayoutRow(pygame.Rect):
         if item.height > self.height:
             self.height = item.height  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
+        self.letter_count += item.letter_count
+
     def rewind_row(self, layout_rect_queue):
         """
         Use this to add items from the row back onto a layout queue, useful if we've added
@@ -57,6 +62,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.width = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.height = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.x = 0  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; this name is inherited from the base class
+        self.letter_count = 0
 
 
 class TextBoxLayout:
@@ -78,6 +84,11 @@ class TextBoxLayout:
         self.floating_rects = []
         self.layout_rows = []
         self.link_chunks = []
+        self.letter_count = 0
+        self.current_end_pos = 0
+
+        self.alpha = 255
+        self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
         self._process_layout_queue()
 
@@ -101,17 +112,17 @@ class TextBoxLayout:
         current_row = TextBoxLayoutRow(row_start_y=0)
         while self.layout_rect_queue:
 
-            test_layout_rect = self.layout_rect_queue.popleft()
-            test_layout_rect.topleft = tuple(current_row.topright)
+            text_layout_rect = self.layout_rect_queue.popleft()
+            text_layout_rect.topleft = tuple(current_row.topright)
 
-            if isinstance(test_layout_rect, LineBreakLayoutRect):
-                current_row = self._handle_line_break_rect(current_row, test_layout_rect)
-            elif test_layout_rect.should_span():
-                current_row = self._handle_span_rect(current_row, test_layout_rect)
-            elif test_layout_rect.float_pos() != TextLayoutRect.FLOAT_NONE:
-                current_row = self._handle_float_rect(current_row, test_layout_rect)
+            if isinstance(text_layout_rect, LineBreakLayoutRect):
+                current_row = self._handle_line_break_rect(current_row, text_layout_rect)
+            elif text_layout_rect.should_span():
+                current_row = self._handle_span_rect(current_row, text_layout_rect)
+            elif text_layout_rect.float_pos() != TextLayoutRect.FLOAT_NONE:
+                current_row = self._handle_float_rect(current_row, text_layout_rect)
             else:
-                current_row = self._handle_regular_rect(current_row, test_layout_rect)
+                current_row = self._handle_regular_rect(current_row, text_layout_rect)
         # make sure we add the last row to the layout
         self._add_row_to_layout(current_row)
 
@@ -119,28 +130,32 @@ class TextBoxLayout:
         self.layout_rows.append(current_row)
         if current_row.bottom > self.layout_rect.height:
             self.layout_rect.height = current_row.bottom
+        self.letter_count += current_row.letter_count
+        self.current_end_pos = self.letter_count
 
-    def _handle_regular_rect(self, current_row, test_layout_rect):
+    def _handle_regular_rect(self, current_row, text_layout_rect):
 
         rhs_limit = self.layout_rect.width
         for floater in self.floating_rects:
-            if floater.vertical_overlap(test_layout_rect):
+            if floater.vertical_overlap(text_layout_rect):
                 if (current_row.at_start() and
                         floater.float_pos() == TextLayoutRect.FLOAT_LEFT):
                     # if we are at the start of a new line see if this rectangle
                     # will overlap with any left aligned floating rectangles
-                    test_layout_rect.left = floater.right
+                    text_layout_rect.left = floater.right
                 elif floater.float_pos() == TextLayoutRect.FLOAT_RIGHT:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
         # See if this rectangle will fit on the current line
-        if test_layout_rect.right > rhs_limit:
+        if text_layout_rect.right > rhs_limit:
             # move to next line and try to split if we can
             current_row = self._split_rect_and_move_to_next_line(current_row,
                                                                  rhs_limit,
-                                                                 test_layout_rect)
+                                                                 text_layout_rect)
         else:
-            current_row.add_item(test_layout_rect)
+            current_row.add_item(text_layout_rect)
+            if isinstance(text_layout_rect, HyperlinkTextChunk):
+                self.link_chunks.append(text_layout_rect)
         return current_row
 
     def _handle_float_rect(self, current_row, test_layout_rect):
@@ -230,7 +245,7 @@ class TextBoxLayout:
 
         if test_layout_rect.can_split():
             split_point = rhs_limit - test_layout_rect.left
-            new_layout_rect = test_layout_rect.split(split_point)
+            new_layout_rect = test_layout_rect.split(split_point, self.layout_rect.width)
             if new_layout_rect is not None:
                 # split successfully...
 
@@ -263,12 +278,23 @@ class TextBoxLayout:
 
         :param surface: The surface we are going to blit the contents of this layout onto.
         """
-        for row in self.layout_rows:
-            for rect in row.items:
-                rect.finalise(surface)
+        if self.current_end_pos != self.letter_count:
+            cumulative_letter_count = 0
+            for row in self.layout_rows:
+                if cumulative_letter_count < self.current_end_pos:
+                    for rect in row.items:
+                        if cumulative_letter_count < self.current_end_pos:
+                            rect.finalise(surface, self.current_end_pos - cumulative_letter_count)
+                            cumulative_letter_count += rect.letter_count
+        else:
+            for row in self.layout_rows:
+                for rect in row.items:
+                    rect.finalise(surface)
 
         for floating_rect in self.floating_rects:
             floating_rect.finalise(surface)
+
+        self.finalised_surface = surface
 
     def finalise_to_new(self):
         """
@@ -281,8 +307,49 @@ class TextBoxLayout:
 
         return self.finalised_surface
 
+    def update_text_with_new_text_end_pos(self, new_end_pos: int):
+        cumulative_letter_count = 0
+        found_row_to_update = False
+        found_chunk_to_update = False
+        self.current_end_pos = new_end_pos
+        for row in self.layout_rows:
+            if not found_row_to_update:
+                if cumulative_letter_count + row.letter_count < new_end_pos:
+                    cumulative_letter_count += row.letter_count
+                else:
+                    found_row_to_update = True
+                    for rect in row.items:
+                        if not found_chunk_to_update:
+                            if cumulative_letter_count + rect.letter_count < new_end_pos:
+                                cumulative_letter_count += rect.letter_count
+                            else:
+                                found_chunk_to_update = True
+                                rect.clear()
+                                rect.finalise(self.finalised_surface,
+                                              new_end_pos - cumulative_letter_count)
+
+    def clear_final_surface(self):
+        """
+        Clears the finalised surface.
+        """
+        if self.finalised_surface is not None:
+            self.finalised_surface.fill('#00000000')
+
+    def set_alpha(self, alpha):
+        if self.alpha == 255 and alpha != 255:
+            self.pre_alpha_final_surf = self.finalised_surface.copy()
+
+        self.alpha = alpha
+
+        if self.pre_alpha_final_surf is not None:
+            self.finalised_surface = self.pre_alpha_final_surf.copy()
+            self.finalised_surface.fill(pygame.Color(self.alpha, self.alpha, self.alpha, self.alpha),
+                                        special_flags=pygame.BLEND_RGBA_MULT)
+
     def add_chunks_to_hover_group(self, link_hover_chunks):
         """
         TODO: Add me.
         :param link_hover_chunks:
         """
+        for chunk in self.link_chunks:
+            link_hover_chunks.append(chunk)

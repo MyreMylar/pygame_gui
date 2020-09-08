@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 from pygame.surface import Surface
 
@@ -15,5 +15,5 @@ class LineBreakLayoutRect(TextLayoutRect):
     def __init__(self, dimensions: Tuple[int, int]):
         super().__init__(dimensions)
 
-    def finalise(self, target_surface: Surface):
+    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
         pass

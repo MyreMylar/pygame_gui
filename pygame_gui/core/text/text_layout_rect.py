@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 from abc import abstractmethod
 
 import pygame
@@ -22,13 +22,20 @@ class TextLayoutRect(pygame.Rect):
         self._can_split = can_split
         self._float_pos = float_pos
         self._should_span = should_span
+        self.letter_count = 0
 
     @abstractmethod
-    def finalise(self, target_surface: Surface):
+    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
         """
         Bake the contents of this layout rect onto a surface.
 
         :param target_surface:
+        :param letter_end:
+        """
+
+    def clear(self):
+        """
+        Clear the space this rect takes up on the finalised surface.
         """
 
     def can_split(self):

@@ -14,6 +14,7 @@ from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.horiz_rule_layout_rect import HorizRuleLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFont
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
+from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -51,7 +52,10 @@ class HTMLParser(html.parser.HTMLParser):
         7: 48
     }
 
-    def __init__(self, ui_theme: UIAppearanceTheme, combined_ids: List[str],
+    def __init__(self,
+                 ui_theme: UIAppearanceTheme,
+                 combined_ids: List[str],
+                 link_style: Dict[str, Any],
                  line_spacing: float = 1.2):
 
         super().__init__()
@@ -59,6 +63,7 @@ class HTMLParser(html.parser.HTMLParser):
         self.combined_ids = combined_ids
         self.line_spacing = line_spacing
 
+        self.link_style = link_style
         self.element_stack = []
 
         self.style_stack = []
@@ -242,11 +247,30 @@ class HTMLParser(html.parser.HTMLParser):
             bold=self.current_style['bold'],
             italic=self.current_style['italic'])
 
-        self.layout_rect_queue.append(
-            TextLineChunkFTFont(text,
-                                chunk_font,
-                                line_height=int(self.current_style['font_size'] *
-                                                self.line_spacing),
-                                colour=self.current_style['font_colour'],
-                                bg_colour=self.current_style['bg_colour'])
-        )
+        if self.current_style['link']:
+            # link_style = {'link_text': self.link_normal_colour,
+            #               'link_hover': self.link_hover_colour,
+            #               'link_selected': self.link_selected_colour,
+            #               'link_normal_underline': self.link_normal_underline,
+            #               'link_hover_underline': self.link_hover_underline}
+            self.layout_rect_queue.append(
+                HyperlinkTextChunk(self.current_style['link_href'],
+                                   text,
+                                   chunk_font,
+                                   self.current_style['underline'] or self.link_style['link_normal_underline'],
+                                   line_height=int(self.current_style['font_size'] *
+                                                   self.line_spacing),
+                                   colour=self.link_style['link_text'],
+                                   bg_colour=self.current_style['bg_colour'],
+                                   hover_colour=self.link_style['link_hover'],
+                                   selected_colour=self.link_style['link_selected'],
+                                   hover_underline=self.link_style['link_hover_underline']))
+        else:
+            self.layout_rect_queue.append(
+                TextLineChunkFTFont(text,
+                                    chunk_font,
+                                    self.current_style['underline'],
+                                    line_height=int(self.current_style['font_size'] *
+                                                    self.line_spacing),
+                                    colour=self.current_style['font_colour'],
+                                    bg_colour=self.current_style['bg_colour']))

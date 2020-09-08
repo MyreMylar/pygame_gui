@@ -19,8 +19,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
-# from pygame_gui.elements.text import TextBlock, TextHTMLParser
-# from pygame_gui.elements.text import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
 
 
 class UINewTextBox(UIElement):
@@ -349,9 +348,9 @@ class UINewTextBox(UIElement):
         for chunk in self.link_hover_chunks:
             hovered_currently = False
 
-            hover_rect = pygame.Rect((base_x + chunk.rect.x,
-                                      base_y + chunk.rect.y),
-                                     chunk.rect.size)
+            hover_rect = pygame.Rect((base_x + chunk.x,
+                                      base_y + chunk.y),
+                                     chunk.size)
             if hover_rect.collidepoint(mouse_x, mouse_y) and self.rect.collidepoint(mouse_x,
                                                                                     mouse_y):
                 hovered_currently = True
@@ -367,10 +366,8 @@ class UINewTextBox(UIElement):
 
         if self.active_text_effect is not None:
             self.active_text_effect.update(time_delta)
-            if self.active_text_effect.should_full_redraw():
-                self.full_redraw()
-            if self.active_text_effect.should_redraw_from_chunks():
-                self.redraw_from_chunks()
+            if self.active_text_effect.has_text_block_changed():
+                self.redraw_from_text_block()
 
         if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
             self.rebuild()
@@ -478,7 +475,7 @@ class UINewTextBox(UIElement):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
-        parser = HTMLParser(self.ui_theme, self.combined_element_ids, line_spacing=1.5)
+        parser = HTMLParser(self.ui_theme, self.combined_element_ids, self.link_style, line_spacing=1.5)
         parser.push_style('body', {"bg_colour": self.background_colour})
         parser.feed(self.html_text)
 
@@ -557,8 +554,8 @@ class UINewTextBox(UIElement):
 
         """
         self.formatted_text_block.reprocess_layout_queue(pygame.Rect((0, 0),
-                                                              (self.text_wrap_rect[2],
-                                                               self.text_wrap_rect[3])))
+                                                         (self.text_wrap_rect[2],
+                                                          self.text_wrap_rect[3])))
         self.formatted_text_block.finalise_to_new()
         self.redraw_from_text_block()
         self.link_hover_chunks = []
@@ -594,17 +591,17 @@ class UINewTextBox(UIElement):
                                  self.shadow_width + self.rounded_corner_offset - height_adjustment)
                     for chunk in self.link_hover_chunks:
 
-                        hover_rect = pygame.Rect((base_x + chunk.rect.x,
-                                                  base_y + chunk.rect.y),
-                                                 chunk.rect.size)
+                        hover_rect = pygame.Rect((base_x + chunk.x,
+                                                  base_y + chunk.y),
+                                                 chunk.size)
                         if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                             consumed_event = True
                             if not chunk.is_selected:
                                 chunk.on_selected()
-                                if chunk.metrics_changed_after_redraw:
-                                    should_full_redraw = True
-                                else:
-                                    should_redraw_from_chunks = True
+                                # if chunk.metrics_changed_after_redraw:
+                                #     should_full_redraw = True
+                                # else:
+                                should_redraw_from_chunks = True
 
         if self.is_enabled and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.scroll_bar is not None:
@@ -619,25 +616,25 @@ class UINewTextBox(UIElement):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             for chunk in self.link_hover_chunks:
 
-                hover_rect = pygame.Rect((base_x + chunk.rect.x,
-                                          base_y + chunk.rect.y),
-                                         chunk.rect.size)
+                hover_rect = pygame.Rect((base_x + chunk.x,
+                                          base_y + chunk.y),
+                                         chunk.size)
                 if (hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and
                         self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
                     consumed_event = True
                     if chunk.is_selected:
                         event_data = {'user_type': UI_TEXT_BOX_LINK_CLICKED,
-                                      'link_target': chunk.link_href,
+                                      'link_target': chunk.href,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
                 if chunk.is_selected:
                     chunk.on_unselected()
-                    if chunk.metrics_changed_after_redraw:
-                        should_full_redraw = True
-                    else:
-                        should_redraw_from_chunks = True
+                    # if chunk.metrics_changed_after_redraw:
+                    #     should_full_redraw = True
+                    # else:
+                    should_redraw_from_chunks = True
 
         if should_redraw_from_chunks:
             self.redraw_from_chunks()
@@ -662,23 +659,20 @@ class UINewTextBox(UIElement):
                             active effect.
 
         """
-        # if effect_name is None:
-        #     self.active_text_effect = None
-        # elif isinstance(effect_name, str):
-        #     if effect_name == TEXT_EFFECT_TYPING_APPEAR:
-        #         effect = TypingAppearEffect(self.formatted_text_block.characters)
-        #         self.active_text_effect = effect
-        #         self.full_redraw()
-        #     elif effect_name == TEXT_EFFECT_FADE_IN:
-        #         effect = FadeInEffect(self.formatted_text_block.characters)
-        #         self.active_text_effect = effect
-        #         self.redraw_from_chunks()
-        #     elif effect_name == TEXT_EFFECT_FADE_OUT:
-        #         effect = FadeOutEffect(self.formatted_text_block.characters)
-        #         self.active_text_effect = effect
-        #         self.redraw_from_chunks()
-        #     else:
-        #         warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
+        if effect_name is None:
+            self.active_text_effect = None
+        elif isinstance(effect_name, str):
+            if effect_name == TEXT_EFFECT_TYPING_APPEAR:
+                effect = TypingAppearEffect(self.formatted_text_block)
+                self.active_text_effect = effect
+            elif effect_name == TEXT_EFFECT_FADE_IN:
+                effect = FadeInEffect(self.formatted_text_block)
+                self.active_text_effect = effect
+            elif effect_name == TEXT_EFFECT_FADE_OUT:
+                effect = FadeOutEffect(self.formatted_text_block)
+                self.active_text_effect = effect
+            else:
+                warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
 
     def rebuild_from_changed_theme_data(self):
         """

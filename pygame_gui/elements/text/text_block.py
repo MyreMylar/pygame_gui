@@ -416,7 +416,8 @@ class TextBlock:
             for chunk in text_line.chunks:
                 if self.block_sprite is not None:
                     basic_blit(self.block_sprite, chunk.rendered_chunk, chunk.rect)
-        self.block_sprite.set_alpha(final_alpha)
+        self.block_sprite.fill(pygame.Color(final_alpha, final_alpha, final_alpha, final_alpha),
+                               special_flags=pygame.BLEND_RGBA_MULT)
 
     def add_chunks_to_hover_group(self, hover_group: List[StyledChunk]):
         """
