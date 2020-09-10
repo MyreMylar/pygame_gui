@@ -1,4 +1,5 @@
 from typing import Deque
+from collections import deque
 
 import warnings
 import pygame
@@ -57,6 +58,7 @@ class TextBoxLayoutRow(pygame.Rect):
         :param layout_rect_queue: A layout queue that contains items to be laid out in order.
         """
         for rect in reversed(self.items):
+            rect.clear()
             layout_rect_queue.appendleft(rect)
 
         self.items.clear()
@@ -96,7 +98,9 @@ class TextBoxLayout:
         self.alpha = 255
         self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
-        self._process_layout_queue()
+        self.layout_rect_queue = self.input_data_rect_queue.copy()
+        current_row = TextBoxLayoutRow(row_start_y=0)
+        self._process_layout_queue(self.layout_rect_queue, current_row)
 
     def reprocess_layout_queue(self, layout_rect):
         """
@@ -111,14 +115,15 @@ class TextBoxLayout:
         self.floating_rects = []
         self.layout_rows = []
 
-        self._process_layout_queue()
-
-    def _process_layout_queue(self):
         self.layout_rect_queue = self.input_data_rect_queue.copy()
         current_row = TextBoxLayoutRow(row_start_y=0)
-        while self.layout_rect_queue:
+        self._process_layout_queue(self.layout_rect_queue, current_row)
 
-            text_layout_rect = self.layout_rect_queue.popleft()
+    def _process_layout_queue(self, input_queue, current_row):
+
+        while input_queue:
+
+            text_layout_rect = input_queue.popleft()
             text_layout_rect.topleft = tuple(current_row.topright)
 
             if isinstance(text_layout_rect, LineBreakLayoutRect):
@@ -126,9 +131,9 @@ class TextBoxLayout:
             elif text_layout_rect.should_span():
                 current_row = self._handle_span_rect(current_row, text_layout_rect)
             elif text_layout_rect.float_pos() != TextLayoutRect.FLOAT_NONE:
-                current_row = self._handle_float_rect(current_row, text_layout_rect)
+                current_row = self._handle_float_rect(current_row, text_layout_rect, input_queue)
             else:
-                current_row = self._handle_regular_rect(current_row, text_layout_rect)
+                current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
         # make sure we add the last row to the layout
         self._add_row_to_layout(current_row)
 
@@ -139,7 +144,7 @@ class TextBoxLayout:
         self.letter_count += current_row.letter_count
         self.current_end_pos = self.letter_count
 
-    def _handle_regular_rect(self, current_row, text_layout_rect):
+    def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 
         rhs_limit = self.layout_rect.width
         for floater in self.floating_rects:
@@ -157,14 +162,15 @@ class TextBoxLayout:
             # move to next line and try to split if we can
             current_row = self._split_rect_and_move_to_next_line(current_row,
                                                                  rhs_limit,
-                                                                 text_layout_rect)
+                                                                 text_layout_rect,
+                                                                 input_queue)
         else:
             current_row.add_item(text_layout_rect)
             if isinstance(text_layout_rect, HyperlinkTextChunk):
                 self.link_chunks.append(text_layout_rect)
         return current_row
 
-    def _handle_float_rect(self, current_row, test_layout_rect):
+    def _handle_float_rect(self, current_row, test_layout_rect, input_queue):
         max_floater_line_height = current_row.height
         if test_layout_rect.float_pos() == TextLayoutRect.FLOAT_LEFT:
             test_layout_rect.left = 0
@@ -187,7 +193,7 @@ class TextBoxLayout:
                 if test_layout_rect.bottom > self.layout_rect.height:
                     self.layout_rect.height = test_layout_rect.bottom
                 # rewind current text row so we can account for new floating rect
-                current_row.rewind_row(self.layout_rect_queue)
+                current_row.rewind_row(input_queue)
 
         else:  # FLOAT_RIGHT
             rhs_limit = self.layout_rect.width
@@ -207,16 +213,16 @@ class TextBoxLayout:
                     test_layout_rect,
                     max_floater_line_height)
             else:
-                self._add_floating_rect(current_row, test_layout_rect)
+                self._add_floating_rect(current_row, test_layout_rect, input_queue)
         return current_row
 
-    def _add_floating_rect(self, current_row, test_layout_rect):
+    def _add_floating_rect(self, current_row, test_layout_rect, input_queue):
         self.floating_rects.append(test_layout_rect)
         # expand overall rect bottom to fit if needed
         if test_layout_rect.bottom > self.layout_rect.height:
             self.layout_rect.height = test_layout_rect.bottom
         # rewind current text row so we can account for new floating rect
-        current_row.rewind_row(self.layout_rect_queue)
+        current_row.rewind_row(input_queue)
 
     def _handle_span_rect(self, current_row, test_layout_rect):
         if not current_row.at_start():
@@ -245,6 +251,7 @@ class TextBoxLayout:
 
     def _split_rect_and_move_to_next_line(self, current_row, rhs_limit,
                                           test_layout_rect,
+                                          input_queue,
                                           floater_height=None):
         # TODO: move floating rect stuff out of here? Right now there is no splitting and the height
         #       is different
@@ -259,17 +266,17 @@ class TextBoxLayout:
                     # add left side of rect onto current line
                     current_row.add_item(test_layout_rect)
                     # put right of rect back on the queue and move layout position down a line
-                    self.layout_rect_queue.appendleft(new_layout_rect)
+                    input_queue.appendleft(new_layout_rect)
                 else:
                     # failed to split, have to move whole chunk down a line.
-                    self.layout_rect_queue.appendleft(test_layout_rect)
+                    input_queue.appendleft(test_layout_rect)
             except ValueError:
                 warnings.warn('Unable to split word into'
                               ' chunks because text box is too narrow')
 
         else:
             # can't split, have to move whole chunk down a line.
-            self.layout_rect_queue.appendleft(test_layout_rect)
+            input_queue.appendleft(test_layout_rect)
 
         # whether we split successfully or not, we need to end the current row...
         self._add_row_to_layout(current_row)
@@ -359,8 +366,32 @@ class TextBoxLayout:
 
     def add_chunks_to_hover_group(self, link_hover_chunks):
         """
-        TODO: Add me.
         :param link_hover_chunks:
         """
         for chunk in self.link_chunks:
             link_hover_chunks.append(chunk)
+
+    def insert_layout_rects(self, layout_rects: Deque[TextLayoutRect],
+                            row_index: int, item_index: int, chunk_index: int):
+        row = self.layout_rows[row_index]
+        item = row.items[item_index]
+
+        for input_rect in layout_rects:
+            if item.style_match(input_rect):
+                item.insert_text(input_rect.text, chunk_index)
+
+        temp_layout_queue = deque([])
+        for row in reversed(self.layout_rows[row_index:]):
+            row.rewind_row(temp_layout_queue)
+
+        self.layout_rows = self.layout_rows[:row_index]
+
+        self._process_layout_queue(temp_layout_queue, row)
+
+        if self.finalised_surface is not None:
+            if self.layout_rect.size != self.finalised_surface.get_size():
+                self.finalise_to_new()
+            else:
+                for row in self.layout_rows[row_index:]:
+                    for rect in row.items:
+                        rect.finalise(self.finalised_surface)

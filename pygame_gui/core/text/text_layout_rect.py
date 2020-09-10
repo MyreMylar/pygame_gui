@@ -88,3 +88,9 @@ class TextLayoutRect(pygame.Rect):
         below = self.top > other_rect.bottom
 
         return not (above or below)
+
+    def style_match(self, other_rect):
+        return True
+
+    def insert_text(self, input_text: str, index: int):
+        pass

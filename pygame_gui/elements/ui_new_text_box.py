@@ -506,6 +506,9 @@ class UINewTextBox(UIElement):
         if self.scroll_bar is not None:
             height_adjustment = int(self.scroll_bar.start_percentage *
                                     self.formatted_text_block.layout_rect.height)
+            percentage_visible = (self.text_wrap_rect[3] /
+                                  self.formatted_text_block.layout_rect.height)
+            self.scroll_bar.set_visible_percentage(percentage_visible)
         else:
             height_adjustment = 0
         drawable_area_size = (max(1, (self.rect[2] -

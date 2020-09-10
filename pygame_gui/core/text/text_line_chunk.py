@@ -289,3 +289,12 @@ class TextLineChunkFTFont(TextLayoutRect):
     def clear(self):
         if self.target_surface is not None:
             self.target_surface.fill(pygame.Color('#00000000'), self)
+
+    def insert_text(self, input_text: str, index: int):
+        self.clear()
+        self.text = self.text[:index] + input_text + self.text[index:]
+        # we split text stings based on spaces
+        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
+        self.letter_count = len(self.text)
+
+        self.size = (self.font.get_rect(self.text).width, self.line_height)
