@@ -263,10 +263,13 @@ class TextLineChunkFTFont(TextLayoutRect):
         elif self.x == 0 and self.width > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
-            optimum_split_point = int(percentage_split * len(self.text)) - 1
-            left_side = self.text[:optimum_split_point] + '-'
-            right_side = '-' + self.text[optimum_split_point:]
-            split_text_ok = True
+            optimum_split_point = max(0, int(percentage_split * len(self.text)) - 1)
+            if optimum_split_point != 0:
+                left_side = self.text[:optimum_split_point] + '-'
+                right_side = '-' + self.text[optimum_split_point:]
+                split_text_ok = True
+            else:
+                raise ValueError('line width too small')
 
         if split_text_ok:
             # update the data for this chunk

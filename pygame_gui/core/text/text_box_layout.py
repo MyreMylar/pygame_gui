@@ -1,5 +1,6 @@
 from typing import Deque
 
+import warnings
 import pygame
 
 from pygame.surface import Surface
@@ -76,8 +77,13 @@ class TextBoxLayout:
                  input_data_queue: Deque[TextLayoutRect],
                  layout_rect: pygame.Rect):
         # TODO: supply only a width and create final rect shape or just a final height?
-        self.imput_data_rect_queue = input_data_queue.copy()
+        self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
+
+        if self.layout_rect.width == -1:
+            self.layout_rect.width = 0
+            for rect in self.input_data_rect_queue:
+                self.layout_rect.width += rect.width
 
         self.layout_rect_queue = None
         self.finalised_surface = None
@@ -108,7 +114,7 @@ class TextBoxLayout:
         self._process_layout_queue()
 
     def _process_layout_queue(self):
-        self.layout_rect_queue = self.imput_data_rect_queue.copy()
+        self.layout_rect_queue = self.input_data_rect_queue.copy()
         current_row = TextBoxLayoutRow(row_start_y=0)
         while self.layout_rect_queue:
 
@@ -245,17 +251,22 @@ class TextBoxLayout:
 
         if test_layout_rect.can_split():
             split_point = rhs_limit - test_layout_rect.left
-            new_layout_rect = test_layout_rect.split(split_point, self.layout_rect.width)
-            if new_layout_rect is not None:
-                # split successfully...
+            try:
+                new_layout_rect = test_layout_rect.split(split_point, self.layout_rect.width)
+                if new_layout_rect is not None:
+                    # split successfully...
 
-                # add left side of rect onto current line
-                current_row.add_item(test_layout_rect)
-                # put right of rect back on the queue and move layout position down a line
-                self.layout_rect_queue.appendleft(new_layout_rect)
-            else:
-                # failed to split, have to move whole chunk down a line.
-                self.layout_rect_queue.appendleft(test_layout_rect)
+                    # add left side of rect onto current line
+                    current_row.add_item(test_layout_rect)
+                    # put right of rect back on the queue and move layout position down a line
+                    self.layout_rect_queue.appendleft(new_layout_rect)
+                else:
+                    # failed to split, have to move whole chunk down a line.
+                    self.layout_rect_queue.appendleft(test_layout_rect)
+            except ValueError:
+                warnings.warn('Unable to split word into'
+                              ' chunks because text box is too narrow')
+
         else:
             # can't split, have to move whole chunk down a line.
             self.layout_rect_queue.appendleft(test_layout_rect)
