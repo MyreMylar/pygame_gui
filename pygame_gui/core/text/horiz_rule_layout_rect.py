@@ -50,7 +50,10 @@ class HorizRuleLayoutRect(TextLayoutRect):
                                             self.colour_or_gradient.hsla[2],
                                             self.colour_or_gradient.hsla[3] * 0.25)
 
-    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
+    def finalise(self, target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
 
         x_start = self.left
         y_start = self.centery - int(self.rule_dimensions[1] / 2)

@@ -139,18 +139,24 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.text = text
         self.font = font
         self.underlined = underlined
-        self.line_height = line_height
         self.colour = colour
         self.bg_color = bg_colour
         self.target_surface = None
+        self.descender = abs(self.font.get_sized_descender())
 
         # we split text stings based on spaces
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
+    def finalise(self,
+                 target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
 
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
+        chunk_draw_width = self.font.get_rect(final_str_text).width  # update chunk width for drawing only
+
         self.font.underline = self.underlined  # set underlined state
         if self.underlined:
             self.font.underline_adjustment = 0.5
@@ -161,11 +167,14 @@ class TextLineChunkFTFont(TextLayoutRect):
             # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
             # on the normal text colour.
 
-            text_surface, render_rect = self.font.render(final_str_text, fgcolor=Color('#FFFFFFFF'))
+            text_surface = pygame.Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
+            self.font.origin = True
+            self.font.render_to(text_surface, (0, row_origin),
+                                final_str_text, fgcolor=Color('#FFFFFFFF'))
             self.colour.apply_gradient_to_surface(text_surface)
 
             # then make the background
-            surface = Surface(render_rect.size, flags=pygame.SRCALPHA, depth=32)
+            surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
             if isinstance(self.bg_color, ColourGradient):
                 surface.fill(Color('#FFFFFFFF'))
                 self.bg_color.apply_gradient_to_surface(surface)
@@ -177,10 +186,13 @@ class TextLineChunkFTFont(TextLayoutRect):
             surface.blit(text_surface, (0, 0))
         elif isinstance(self.bg_color, ColourGradient):
             # draw the text first
-            text_surface, render_rect = self.font.render(final_str_text, fgcolor=self.colour)
+            text_surface = pygame.Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
+            self.font.origin = True
+            self.font.render_to(text_surface, (0, row_origin),
+                                final_str_text, fgcolor=self.colour)
 
             # then make the background
-            surface = Surface(render_rect.size, flags=pygame.SRCALPHA, depth=32)
+            surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
             surface.fill(Color('#FFFFFFFF'))
             self.bg_color.apply_gradient_to_surface(surface)
 
@@ -188,23 +200,14 @@ class TextLineChunkFTFont(TextLayoutRect):
             # text anti-aliasing
             surface.blit(text_surface, (0, 0))
         else:
+            surface = pygame.Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
+            surface.fill(self.bg_color)
+            self.font.origin = True
+            self.font.render_to(surface, (0, row_origin),
+                                final_str_text,
+                                fgcolor=self.colour)
 
-            surface, render_rect = self.font.render(final_str_text,
-                                                    fgcolor=self.colour,
-                                                    bgcolor=self.bg_color)
-        # using padding on freetype fonts adds pixels (three?) above and below
-        # the ascender/descender height of the font. Not using padding shrinks
-        # the bounds to the actual height of whatever letters are drawn which
-        # means variable height render surface. The strategy I'm using here
-        # starts with padded rects, that are at least of equal height, and
-        # then removes the padding.
-
-        # EDIT: removed 6 pixels from the height originally, but this was cutting off letters at small font sizes
-        #       suspect this means the padding is actually relative to the font size somehow.
-        render_rect.height -= 2
-        render_rect.topleft = self.topleft
-        target_surface.blit(surface, render_rect,
-                            area=pygame.Rect((0, 1), render_rect.size),
+        target_surface.blit(surface, self.topleft,
                             special_flags=pygame.BLEND_PREMULTIPLIED)
         self.target_surface = target_surface
 
@@ -275,7 +278,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (self.font.get_rect(self.text).width, self.line_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.size = (self.font.get_rect(self.text).width, self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
             return self._split_at(right_side)
@@ -284,7 +287,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def _split_at(self, right_side):
         return TextLineChunkFTFont(right_side, self.font, self.underlined,
-                                   self.line_height, self.colour, self.bg_color)
+                                   self.height, self.colour, self.bg_color)
 
     def clear(self):
         if self.target_surface is not None:
@@ -297,4 +300,4 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-        self.size = (self.font.get_rect(self.text).width, self.line_height)
+        self.size = (self.font.get_rect(self.text).width, self.height)

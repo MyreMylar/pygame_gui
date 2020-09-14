@@ -9,6 +9,7 @@ from pygame.surface import Surface
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -21,6 +22,8 @@ class TextBoxLayoutRow(pygame.Rect):
         self.items = []
 
         self.letter_count = 0
+
+        self.origin = 999999
 
     def at_start(self):
         """
@@ -44,6 +47,7 @@ class TextBoxLayoutRow(pygame.Rect):
             self.left = item.left  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+
         if item.height > self.height:
             self.height = item.height  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
@@ -296,18 +300,29 @@ class TextBoxLayout:
 
         :param surface: The surface we are going to blit the contents of this layout onto.
         """
+
+        # calculate the origin of all the rows
+        for row in self.layout_rows:
+            for text_chunk in row.items:
+                if isinstance(text_chunk, TextLineChunkFTFont):
+                    new_origin = (row.height - text_chunk.descender)
+                    if new_origin < row.origin:
+                        row.origin = new_origin
+
         if self.current_end_pos != self.letter_count:
             cumulative_letter_count = 0
             for row in self.layout_rows:
                 if cumulative_letter_count < self.current_end_pos:
                     for rect in row.items:
                         if cumulative_letter_count < self.current_end_pos:
-                            rect.finalise(surface, self.current_end_pos - cumulative_letter_count)
+                            rect.finalise(surface, row.origin, row.height,
+                                          self.current_end_pos - cumulative_letter_count)
                             cumulative_letter_count += rect.letter_count
         else:
             for row in self.layout_rows:
-                for rect in row.items:
-                    rect.finalise(surface)
+                for text_chunk in row.items:
+                    if isinstance(text_chunk, TextLineChunkFTFont):
+                        text_chunk.finalise(surface, row.origin, row.height)
 
         for floating_rect in self.floating_rects:
             floating_rect.finalise(surface)
@@ -343,7 +358,7 @@ class TextBoxLayout:
                             else:
                                 found_chunk_to_update = True
                                 rect.clear()
-                                rect.finalise(self.finalised_surface,
+                                rect.finalise(self.finalised_surface, row.origin, row.height,
                                               new_end_pos - cumulative_letter_count)
 
     def clear_final_surface(self):
@@ -394,4 +409,4 @@ class TextBoxLayout:
             else:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
-                        rect.finalise(self.finalised_surface)
+                        rect.finalise(self.finalised_surface, row.origin, row.height)

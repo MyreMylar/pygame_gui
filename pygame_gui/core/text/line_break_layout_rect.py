@@ -15,5 +15,8 @@ class LineBreakLayoutRect(TextLayoutRect):
     def __init__(self, dimensions: Tuple[int, int]):
         super().__init__(dimensions)
 
-    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
+    def finalise(self, target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
         pass

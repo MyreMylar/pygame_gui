@@ -42,7 +42,10 @@ class SimpleTestLayoutRect(TextLayoutRect):
         colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 80
         return colour
 
-    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
+    def finalise(self, target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
         surface = Surface(self.size, depth=32, flags=pygame.SRCALPHA)
         surface.fill(self.colour)
         target_surface.blit(surface, self)

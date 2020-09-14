@@ -23,13 +23,19 @@ class TextLayoutRect(pygame.Rect):
         self._float_pos = float_pos
         self._should_span = should_span
         self.letter_count = 0
+        self.descender = 0
 
     @abstractmethod
-    def finalise(self, target_surface: Surface, letter_end: Optional[int] = None):
+    def finalise(self, target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
         """
         Bake the contents of this layout rect onto a surface.
 
         :param target_surface:
+        :param row_origin:
+        :param row_height:
         :param letter_end:
         """
 

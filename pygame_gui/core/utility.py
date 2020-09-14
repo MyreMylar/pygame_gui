@@ -406,7 +406,7 @@ class FontResource:
                     self.loaded_font = pygame.freetype.Font(
                         io.BytesIO(read_binary(self.location.package,
                                                self.location.resource)), self.size, resolution=72)
-                    self.loaded_font.pad = True
+                    # self.loaded_font.pad = True
                     if self.force_style:
                         self.loaded_font.strong = self.style['bold']
                         self.loaded_font.oblique = self.style['italic']
@@ -417,7 +417,7 @@ class FontResource:
                 try:
                     self.loaded_font = pygame.freetype.Font(self.location.to_path(),
                                                             self.size, resolution=72)
-                    self.loaded_font.pad = True
+                    # self.loaded_font.pad = True
                     if self.force_style:
                         self.loaded_font.strong = self.style['bold']
                         self.loaded_font.oblique = self.style['italic']
@@ -428,7 +428,7 @@ class FontResource:
         elif isinstance(self.location, str):
             try:
                 self.loaded_font = pygame.freetype.Font(self.location, self.size, resolution=72)
-                self.loaded_font.pad = True
+                # self.loaded_font.pad = True
                 if self.force_style:
                     self.loaded_font.strong = self.style['bold']
                     self.loaded_font.oblique = self.style['italic']
@@ -440,7 +440,7 @@ class FontResource:
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
                 self.loaded_font = pygame.freetype.Font(file_obj, self.size, resolution=72)
-                self.loaded_font.pad = True
+                # self.loaded_font.pad = True
                 if self.force_style:
                     self.loaded_font.strong = self.style['bold']
                     self.loaded_font.oblique = self.style['italic']

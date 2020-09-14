@@ -248,11 +248,6 @@ class HTMLParser(html.parser.HTMLParser):
             italic=self.current_style['italic'])
 
         if self.current_style['link']:
-            # link_style = {'link_text': self.link_normal_colour,
-            #               'link_hover': self.link_hover_colour,
-            #               'link_selected': self.link_selected_colour,
-            #               'link_normal_underline': self.link_normal_underline,
-            #               'link_hover_underline': self.link_hover_underline}
             self.layout_rect_queue.append(
                 HyperlinkTextChunk(self.current_style['link_href'],
                                    text,

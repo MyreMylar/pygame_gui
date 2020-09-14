@@ -1,6 +1,10 @@
+from typing import Optional
+
 import pygame.freetype
 
 from pygame.color import Color
+from pygame.surface import Surface
+
 
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
@@ -33,6 +37,9 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
 
         self.normal_underline = underlined
         self.hover_underline = hover_underline
+
+        self.last_row_origin = 0
+        self.last_row_height = 0
 
     def on_hovered(self):
         """
@@ -75,10 +82,19 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         self.is_selected = False
         self.redraw()
 
+    def finalise(self,
+                 target_surface: Surface,
+                 row_origin: int,
+                 row_height: int,
+                 letter_end: Optional[int] = None):
+        self.last_row_origin = row_origin
+        self.last_row_height = row_height
+        super().finalise(target_surface, row_origin, row_height, letter_end)
+
     def redraw(self):
         if self.target_surface is not None:
             self.target_surface.fill(self.bg_color, self)
-            self.finalise(self.target_surface)
+            self.finalise(self.target_surface, self.last_row_origin, self.last_row_height)
 
     def _split_at(self, right_side):
         return HyperlinkTextChunk(self.href,
