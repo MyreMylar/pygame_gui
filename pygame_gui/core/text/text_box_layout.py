@@ -1,4 +1,4 @@
-from typing import Deque
+from typing import Deque, List
 from collections import deque
 
 import warnings
@@ -11,65 +11,7 @@ from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
-
-class TextBoxLayoutRow(pygame.Rect):
-    """
-    A single line of text-like stuff to be used in a text box type layout.
-    """
-
-    def __init__(self, row_start_y):
-        super().__init__(0, row_start_y, 0, 0)
-        self.items = []
-
-        self.letter_count = 0
-
-        self.origin = 999999
-
-    def at_start(self):
-        """
-        Returns true if this row has no items in it.
-
-        :return: True if we are at the start of the row.
-        """
-        return not self.items
-
-    def add_item(self, item: TextLayoutRect):
-        """
-        Add a new item to the row. Items are added left to right.
-
-        If you wanted to built a right to left writing system layout,
-        changing this might be a good place to start.
-
-        :param item: The new item to add to the text row
-        """
-        if not self.items:
-            # first item
-            self.left = item.left  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-        self.items.append(item)
-        self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-
-        if item.height > self.height:
-            self.height = item.height  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-
-        self.letter_count += item.letter_count
-
-    def rewind_row(self, layout_rect_queue):
-        """
-        Use this to add items from the row back onto a layout queue, useful if we've added
-        something to the layout that means that this row needs to be re-run through the
-        layout code.
-
-        :param layout_rect_queue: A layout queue that contains items to be laid out in order.
-        """
-        for rect in reversed(self.items):
-            rect.clear()
-            layout_rect_queue.appendleft(rect)
-
-        self.items.clear()
-        self.width = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
-        self.height = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
-        self.x = 0  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; this name is inherited from the base class
-        self.letter_count = 0
+from pygame_gui.core.text.text_box_layout_row import TextBoxLayoutRow
 
 
 class TextBoxLayout:
@@ -301,13 +243,13 @@ class TextBoxLayout:
         :param surface: The surface we are going to blit the contents of this layout onto.
         """
 
-        # calculate the origin of all the rows
+        # calculate the y-origin of all the rows
         for row in self.layout_rows:
             for text_chunk in row.items:
                 if isinstance(text_chunk, TextLineChunkFTFont):
-                    new_origin = (row.height - text_chunk.descender)
-                    if new_origin < row.origin:
-                        row.origin = new_origin
+                    new_y_origin = text_chunk.y_origin
+                    if new_y_origin > row.y_origin:
+                        row.y_origin = new_y_origin
 
         if self.current_end_pos != self.letter_count:
             cumulative_letter_count = 0
@@ -315,14 +257,14 @@ class TextBoxLayout:
                 if cumulative_letter_count < self.current_end_pos:
                     for rect in row.items:
                         if cumulative_letter_count < self.current_end_pos:
-                            rect.finalise(surface, row.origin, row.height,
+                            rect.finalise(surface, row.y_origin, row.height,
                                           self.current_end_pos - cumulative_letter_count)
                             cumulative_letter_count += rect.letter_count
         else:
             for row in self.layout_rows:
                 for text_chunk in row.items:
                     if isinstance(text_chunk, TextLineChunkFTFont):
-                        text_chunk.finalise(surface, row.origin, row.height)
+                        text_chunk.finalise(surface, row.y_origin, row.height)
 
         for floating_rect in self.floating_rects:
             floating_rect.finalise(surface)
@@ -341,6 +283,13 @@ class TextBoxLayout:
         return self.finalised_surface
 
     def update_text_with_new_text_end_pos(self, new_end_pos: int):
+        """
+        Sets a new end position for the text in this block and redraws it
+        so we can display a 'typing' type effect. The text will only be displayed
+        up to the index position set here.
+
+        :param new_end_pos: The new ending index for the text string.
+        """
         cumulative_letter_count = 0
         found_row_to_update = False
         found_chunk_to_update = False
@@ -358,7 +307,7 @@ class TextBoxLayout:
                             else:
                                 found_chunk_to_update = True
                                 rect.clear()
-                                rect.finalise(self.finalised_surface, row.origin, row.height,
+                                rect.finalise(self.finalised_surface, row.y_origin, row.height,
                                               new_end_pos - cumulative_letter_count)
 
     def clear_final_surface(self):
@@ -368,7 +317,13 @@ class TextBoxLayout:
         if self.finalised_surface is not None:
             self.finalised_surface.fill('#00000000')
 
-    def set_alpha(self, alpha):
+    def set_alpha(self, alpha: int):
+        """
+        Set the overall alpha level of this text box from 0 to 255.
+        This allows us to fade text in and out of view.
+
+        :param alpha: integer from 0 to 255.
+        """
         if self.alpha == 255 and alpha != 255:
             self.pre_alpha_final_surf = self.finalised_surface.copy()
 
@@ -376,11 +331,16 @@ class TextBoxLayout:
 
         if self.pre_alpha_final_surf is not None:
             self.finalised_surface = self.pre_alpha_final_surf.copy()
-            self.finalised_surface.fill(pygame.Color(self.alpha, self.alpha, self.alpha, self.alpha),
+            pre_mul_alpha_colour = pygame.Color(self.alpha, self.alpha,
+                                                self.alpha, self.alpha)
+            self.finalised_surface.fill(pre_mul_alpha_colour,
                                         special_flags=pygame.BLEND_RGBA_MULT)
 
-    def add_chunks_to_hover_group(self, link_hover_chunks):
+    def add_chunks_to_hover_group(self, link_hover_chunks: List[TextLayoutRect]):
         """
+        Pass in a list of layout rectangles to add to a hoverable group.
+        Usually used for hyperlinks.
+
         :param link_hover_chunks:
         """
         for chunk in self.link_chunks:
@@ -388,11 +348,20 @@ class TextBoxLayout:
 
     def insert_layout_rects(self, layout_rects: Deque[TextLayoutRect],
                             row_index: int, item_index: int, chunk_index: int):
+        """
+        Insert some new layout rectangles from a queue at specific place in the current layout.
+        Hopefully this means we only need to redo the layout after this point... we shall see.
+
+        :param layout_rects: the new TextLayoutRects to insert.
+        :param row_index: which row we are sticking them on.
+        :param item_index: which chunk we are sticking them into.
+        :param chunk_index: where in the chunk we are sticking them.
+        """
         row = self.layout_rows[row_index]
         item = row.items[item_index]
 
         for input_rect in layout_rects:
-            if item.style_match(input_rect):
+            if isinstance(input_rect, TextLineChunkFTFont) and item.style_match(input_rect):
                 item.insert_text(input_rect.text, chunk_index)
 
         temp_layout_queue = deque([])
@@ -409,4 +378,4 @@ class TextBoxLayout:
             else:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
-                        rect.finalise(self.finalised_surface, row.origin, row.height)
+                        rect.finalise(self.finalised_surface, row.y_origin, row.height)

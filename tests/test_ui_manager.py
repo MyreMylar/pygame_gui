@@ -6,7 +6,7 @@ import pytest
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
-from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.elements.ui_old_text_box import UIOldTextBox
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
@@ -248,9 +248,9 @@ class TestUIManager:
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
 
-        UITextBox(html_text="<font face=roboto>Test font pre-loading</font>",
-                  relative_rect=pygame.Rect(100, 100, 200, 100),
-                  manager=default_ui_manager)
+        UIOldTextBox(html_text="<font face=roboto>Test font pre-loading</font>",
+                     relative_rect=pygame.Rect(100, 100, 200, 100),
+                     manager=default_ui_manager)
 
     def test_print_unused_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none, capsys):
         """

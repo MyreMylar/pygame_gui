@@ -1,18 +1,14 @@
 import warnings
 import html.parser
 from collections import deque
-from typing import Union, List, Dict, Any
+from typing import List, Dict, Any
 
 import pygame
 import pygame.freetype
 
-from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 
-
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
-from pygame_gui.core.text.horiz_rule_layout_rect import HorizRuleLayoutRect
-from pygame_gui.core.text.text_line_chunk import TextLineChunkFont
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 
@@ -56,7 +52,7 @@ class HTMLParser(html.parser.HTMLParser):
                  ui_theme: UIAppearanceTheme,
                  combined_ids: List[str],
                  link_style: Dict[str, Any],
-                 line_spacing: float = 1.2):
+                 line_spacing: float = 1.0):
 
         super().__init__()
         self.ui_theme = ui_theme
@@ -75,8 +71,7 @@ class HTMLParser(html.parser.HTMLParser):
         self.default_style['font_size'] = int(font_info['size'])
         self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient('normal_text',
                                                                                  combined_ids)
-        self.default_style['bg_colour'] = self.ui_theme.get_colour_or_gradient('dark_bg',
-                                                                               combined_ids)
+        self.default_style['bg_colour'] = pygame.Color('#00000000')
         self.default_style['bold'] = False
         self.default_style['italic'] = False
         self.default_style['underline'] = False
@@ -141,7 +136,7 @@ class HTMLParser(html.parser.HTMLParser):
                             attributes['bgcolor'],
                             self.combined_ids)
                 else:
-                    style["bg_colour"] = None
+                    style["bg_colour"] = pygame.Color('#00000000')
 
         elif element == 'br':
 
@@ -152,8 +147,8 @@ class HTMLParser(html.parser.HTMLParser):
                 italic=self.current_style['italic'])
 
             dimensions = (current_font.get_rect(' ').width,
-                          int(self.current_style['font_size'] *
-                              self.line_spacing))
+                          int(round(self.current_style['font_size'] *
+                                    self.line_spacing)))
 
             self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
         else:
@@ -248,13 +243,15 @@ class HTMLParser(html.parser.HTMLParser):
             italic=self.current_style['italic'])
 
         if self.current_style['link']:
+            should_underline = (self.current_style['underline'] or
+                                self.link_style['link_normal_underline'])
             self.layout_rect_queue.append(
                 HyperlinkTextChunk(self.current_style['link_href'],
                                    text,
                                    chunk_font,
-                                   self.current_style['underline'] or self.link_style['link_normal_underline'],
-                                   line_height=int(self.current_style['font_size'] *
-                                                   self.line_spacing),
+                                   should_underline,
+                                   text_height=self.current_style['font_size'] + 1,
+                                   line_spacing=self.line_spacing,
                                    colour=self.link_style['link_text'],
                                    bg_colour=self.current_style['bg_colour'],
                                    hover_colour=self.link_style['link_hover'],
@@ -265,7 +262,7 @@ class HTMLParser(html.parser.HTMLParser):
                 TextLineChunkFTFont(text,
                                     chunk_font,
                                     self.current_style['underline'],
-                                    line_height=int(self.current_style['font_size'] *
-                                                    self.line_spacing),
+                                    text_height=self.current_style['font_size'] + 1,
+                                    line_spacing=self.line_spacing,
                                     colour=self.current_style['font_colour'],
                                     bg_colour=self.current_style['bg_colour']))

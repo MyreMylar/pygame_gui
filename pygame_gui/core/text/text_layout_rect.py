@@ -24,6 +24,7 @@ class TextLayoutRect(pygame.Rect):
         self._should_span = should_span
         self.letter_count = 0
         self.descender = 0
+        self.smallest_split_size = 1
 
     @abstractmethod
     def finalise(self, target_surface: Surface,
@@ -72,7 +73,7 @@ class TextLayoutRect(pygame.Rect):
         """
         return self._float_pos
 
-    def split(self, requested_x: int) -> Union['TextLayoutRect', None]:  # noqa
+    def split(self, requested_x: int, line_width: int) -> Union['TextLayoutRect', None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the
         nearest point that is still less than the request (i.e. to the left of the request in
@@ -80,6 +81,9 @@ class TextLayoutRect(pygame.Rect):
 
         :param requested_x: the requested place to split this rectangle along it's width.
         """
+        if line_width < self.smallest_split_size:
+            raise ValueError('Line width is too narrow')
+
         super().width = requested_x
         return TextLayoutRect((self.width - requested_x, self.height))
 
@@ -94,9 +98,3 @@ class TextLayoutRect(pygame.Rect):
         below = self.top > other_rect.bottom
 
         return not (above or below)
-
-    def style_match(self, other_rect):
-        return True
-
-    def insert_text(self, input_text: str, index: int):
-        pass

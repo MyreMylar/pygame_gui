@@ -19,13 +19,14 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  text: str,
                  font: pygame.freetype.Font,
                  underlined: bool,
-                 line_height: int,
+                 text_height: int,
+                 line_spacing: float,
                  colour: Color,
                  bg_colour: Color,
                  hover_colour: Color,
                  selected_colour: Color,
                  hover_underline: bool):
-        super().__init__(text, font, underlined, line_height, colour, bg_colour)
+        super().__init__(text, font, underlined, text_height, line_spacing, colour, bg_colour)
 
         self.href = href
         self.is_hovered = False
@@ -92,8 +93,11 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         super().finalise(target_surface, row_origin, row_height, letter_end)
 
     def redraw(self):
+        """
+        Redraw a surface that has already been finalised once before.
+        """
         if self.target_surface is not None:
-            self.target_surface.fill(self.bg_color, self)
+            self.target_surface.fill(self.bg_colour, self)
             self.finalise(self.target_surface, self.last_row_origin, self.last_row_height)
 
     def _split_at(self, right_side):
@@ -101,9 +105,10 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                                   right_side,
                                   self.font,
                                   self.underlined,
-                                  self.line_height,
+                                  self.text_height,
+                                  self.line_spacing,
                                   self.colour,
-                                  self.bg_color,
+                                  self.bg_colour,
                                   self.hover_colour,
                                   self.selected_colour,
                                   self.hover_underline)

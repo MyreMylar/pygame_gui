@@ -148,7 +148,7 @@ class TestDrawableShape:
         shape.theming['text_vert_alignment_padding'] = 5
         shape.compute_aligned_text_rect()
         assert shape.aligned_text_rect.x == 14
-        assert shape.aligned_text_rect.y == 41
+        assert shape.aligned_text_rect.y == 43
 
         shape.theming['text_horiz_alignment'] = 'right'
         shape.theming['text_vert_alignment'] = 'bottom'

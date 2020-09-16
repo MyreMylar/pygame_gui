@@ -71,7 +71,7 @@ class UIMessageWindow(UIWindow):
                                              "top": "top",
                                              "right": "right",
                                              "bottom": "bottom"}
-                                    )
+                                       )
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

@@ -14,8 +14,8 @@ from pygame_gui.elements.text.text_block import TextBlock
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core import BlockingThreadedResourceLoader
 
+from pygame_gui.elements.ui_old_text_box import UIOldTextBox
 from pygame_gui.elements.ui_text_box import UITextBox
-from pygame_gui.elements.ui_new_text_box import UINewTextBox
 
 
 def test_old_char_style_performance(benchmark, _init_pygame, _display_surface_return_none):
@@ -87,7 +87,7 @@ def test_old_text_block_performance(benchmark, _init_pygame, _display_surface_re
 
 
 def create_old_text_box(default_ui_manager):
-    text_box = UITextBox(
+    text_box = UIOldTextBox(
         html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                   "<i>styles</i>.",
         relative_rect=pygame.Rect(100, 100, 200, 300),
@@ -105,7 +105,7 @@ def test_old_style_text_box_performance(benchmark, _init_pygame,
 
 
 def create_new_text_box(default_ui_manager):
-    text_box = UINewTextBox(
+    text_box = UITextBox(
         html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                   "<i>styles</i>.",
         relative_rect=pygame.Rect(100, 100, 200, 300),

@@ -164,7 +164,9 @@ class UITextEntryLine(UIElement):
 
         self.set_image(self.background_and_border.copy())
 
-        line_height = self.font.get_rect(' ').height
+        # TODO: get line spacing from theme?
+        line_spacing = 1.2
+        line_height = self.font.size * line_spacing
         self.cursor = pygame.Rect((self.text_image_rect.x +
                                    self.padding[0] - self.start_text_offset,
                                    self.text_image_rect.y +
@@ -978,7 +980,9 @@ class UITextEntryLine(UIElement):
 
         """
         corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
-        line_height = self.font.get_rect(' ').height
+        # TODO: get line spacing from theme?
+        line_spacing = 1.2
+        line_height = self.font.size * line_spacing
         corrected_dimensions[1] = int(line_height + (2 * self.padding[1]) +
                                       (2 * self.border_width) + (2 * self.shadow_width))
         super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))

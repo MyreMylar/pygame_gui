@@ -1,14 +1,15 @@
 import os
-import pytest
+
 import pygame
-import pygame_gui
+import pytest
 
 from tests.shared_fixtures import _init_pygame, default_ui_manager
 from tests.shared_fixtures import default_display_surface, _display_surface_return_none
-from tests.shared_comparators import compare_surfaces
 
-from pygame_gui.ui_manager import UIManager
+import pygame_gui
 from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.ui_manager import UIManager
+from tests.shared_comparators import compare_surfaces
 
 
 class TestUITextBox:
@@ -19,7 +20,7 @@ class TestUITextBox:
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
-                                       "<i>styles</i>.",
+                                          "<i>styles</i>.",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
         assert text_box.image is not None
@@ -30,11 +31,12 @@ class TestUITextBox:
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
-                                       "<i>styles</i>. Hey hey hey, what is this? More text padding this out a little."
+                                       "<i>styles</i>. Hey hey hey, what is this? More text padding this "
+                                       "out a little."
                                        "Well OK.",
                              relative_rect=pygame.Rect(100, 100, -1, 50),
                              manager=default_ui_manager)
-        assert text_box.image is not None and text_box.rect.width == 984
+        assert text_box.image is not None and text_box.rect.width == 983
 
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None,
                                                  default_ui_manager: UIManager,
@@ -51,40 +53,50 @@ class TestUITextBox:
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextBox(html_text=''
-                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
-                                       'ipsum dolor sit amet</b></font>,'
-                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
-                                       'rub a la clob slip the perry tin fo glorp yip dorp'
-                                       'skorp si pork flum de dum be dung, slob be robble glurp destination flum kin slum. '
-                                       'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>Vestibulum'
-                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere ullamcorper '
-                                       'sem pulvinar.'
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>tellus a'
-                                       'tortor. a<br>'
-                                       'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
-                                       'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
-                                       'accumsan, lectus at '
-                                       'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
-                                       'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
-                                       'sollicitudin.</font></font>'
-                                       '<br><br>'
-                                       '<b>consectetur</b> adipiscing elit. in a<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
-                                       'Vestibulum <font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, '
-                                       'posuere ullamcorper sem pulvinar. '
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>'
-                                       'Maecenas at <font size=6><b>tellus a tortor. a<br>'
-                                       'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
-                                       'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
-                                       'accumsan, lectus at'
-                                       'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
-                                       'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
-                                       'sollicitudin.</font></font>',
+                                          '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
+                                          '<br><br><br>'
+                                          'ipsum dolor sit amet</b></font>,'
+                                          ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de '
+                                          'dib do '
+                                          'rub a la clob slip the perry tin fo glorp yip dorp'
+                                          'skorp si pork flum de dum be dung, slob be robble glurp destination flum'
+                                          ' kin slum. '
+                                          'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
+                                          'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                          'Vestibulum'
+                                          '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere '
+                                          'ullamcorper '
+                                          'sem pulvinar.'
+                                          'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>'
+                                          'tellus a'
+                                          'tortor. a<br>'
+                                          'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                                          'In hac a habitasse to platea dictumst.<br>'
+                                          '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.'
+                                          '<br>Morbi '
+                                          'accumsan, lectus at '
+                                          'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                                          'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                                          'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                          'pharetra a ante '
+                                          'sollicitudin.</font></font>'
+                                          '<br><br>'
+                                          '<b>consectetur</b> adipiscing elit. in a<br>'
+                                          'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                          'Vestibulum <font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, '
+                                          'posuere ullamcorper sem pulvinar. '
+                                          'Nulla at pulvinar a odio, a dictum dolor.<br>'
+                                          'Maecenas at <font size=6><b>tellus a tortor. a<br>'
+                                          'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                                          'In hac a habitasse to platea dictumst.<br>'
+                                          '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec '
+                                          'porttitor.<br>Morbi '
+                                          'accumsan, lectus at'
+                                          'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                                          'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                                          'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                          'pharetra a ante '
+                                          'sollicitudin.</font></font>',
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
 
@@ -97,12 +109,12 @@ class TestUITextBox:
                                                 _display_surface_return_none):
         with pytest.warns(UserWarning, match="Unable to split word into chunks because text box is too narrow"):
             text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                           'LLALAALALA ALALA ALAL ALA'
-                                           'LAALA ALALA ALALA AAaal aa'
-                                           'ALALAa laalal alalal alala'
-                                           'alalalala alalalalalal alal'
-                                           'alalalala alala alalala ala'
-                                           'alalalalal lalal alalalal al',
+                                              'LLALAALALA ALALA ALAL ALA'
+                                              'LAALA ALALA ALALA AAaal aa'
+                                              'ALALAa laalal alalal alala'
+                                              'alalalala alalalalalal alal'
+                                              'alalalala alala alalala ala'
+                                              'alalalalal lalal alalalal al',
                                  relative_rect=pygame.Rect(100, 100, 5, 50),
                                  manager=default_ui_manager)
 
@@ -122,40 +134,50 @@ class TestUITextBox:
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextBox(html_text=''
-                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
-                                       'ipsum dolor sit amet</b></font>,'
-                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
-                                       'rub a la clob slip the perry tin fo glorp yip dorp'
-                                       'skorp si pork flum de dum be dung, slob be robble glurp destination flum kin slum. '
-                                       'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>Vestibulum'
-                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere ullamcorper '
-                                       'sem pulvinar.'
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>tellus a'
-                                       'tortor. a<br>'
-                                       'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
-                                       'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
-                                       'accumsan, lectus at '
-                                       'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
-                                       'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
-                                       'sollicitudin.</font></font>'
-                                       '<br><br>'
-                                       '<b>consectetur</b> adipiscing elit. in a<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
-                                       'Vestibulum <font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, '
-                                       'posuere ullamcorper sem pulvinar. '
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>'
-                                       'Maecenas at <font size=6><b>tellus a tortor. a<br>'
-                                       'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
-                                       'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
-                                       'accumsan, lectus at'
-                                       'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
-                                       'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
-                                       'sollicitudin.</font></font>',
+                                          '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
+                                          '<br><br><br>'
+                                          'ipsum dolor sit amet</b></font>,'
+                                          ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de '
+                                          'dib do '
+                                          'rub a la clob slip the perry tin fo glorp yip dorp'
+                                          'skorp si pork flum de dum be dung, slob be robble glurp destination flum '
+                                          'kin slum. '
+                                          'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
+                                          'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                          'Vestibulum'
+                                          '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere '
+                                          'ullamcorper '
+                                          'sem pulvinar.'
+                                          'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>'
+                                          'tellus a'
+                                          'tortor. a<br>'
+                                          'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                                          'In hac a habitasse to platea dictumst.<br>'
+                                          '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.'
+                                          '<br>Morbi '
+                                          'accumsan, lectus at '
+                                          'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                                          'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                                          'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                          'pharetra a ante '
+                                          'sollicitudin.</font></font>'
+                                          '<br><br>'
+                                          '<b>consectetur</b> adipiscing elit. in a<br>'
+                                          'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                          'Vestibulum <font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, '
+                                          'posuere ullamcorper sem pulvinar. '
+                                          'Nulla at pulvinar a odio, a dictum dolor.<br>'
+                                          'Maecenas at <font size=6><b>tellus a tortor. a<br>'
+                                          'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
+                                          'In hac a habitasse to platea dictumst.<br>'
+                                          '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec '
+                                          'porttitor.<br>Morbi '
+                                          'accumsan, lectus at'
+                                          'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
+                                          'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
+                                          'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet '
+                                          'on pharetra a ante '
+                                          'sollicitudin.</font></font>',
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
 
@@ -177,12 +199,12 @@ class TestUITextBox:
                                            default_ui_manager: UIManager,
                                            _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala alala alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala alala alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 100, 100),
                              manager=default_ui_manager)
         text_box.on_fresh_drawable_shape_ready()
@@ -193,12 +215,12 @@ class TestUITextBox:
                                          default_ui_manager: UIManager,
                                          _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala alala alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala alala alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 100, 100),
                              manager=default_ui_manager)
         text_box.set_position(pygame.math.Vector2(0.0, 0.0))
@@ -214,12 +236,12 @@ class TestUITextBox:
                                                   default_ui_manager: UIManager,
                                                   _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala alala alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala alala alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_relative_position(pygame.math.Vector2(0.0, 0.0))
@@ -236,13 +258,13 @@ class TestUITextBox:
                                    default_ui_manager: UIManager,
                                    _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.scroll_bar.has_moved_recently = True
@@ -266,13 +288,13 @@ class TestUITextBox:
                                                    default_ui_manager: UIManager,
                                                    _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.redraw_from_text_block()
@@ -291,13 +313,13 @@ class TestUITextBox:
                                                default_ui_manager: UIManager,
                                                _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.redraw_from_chunks()
@@ -307,13 +329,13 @@ class TestUITextBox:
                                         default_ui_manager: UIManager,
                                         _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.full_redraw()
@@ -323,13 +345,13 @@ class TestUITextBox:
                                    default_ui_manager: UIManager,
                                    _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         default_ui_manager.set_focus_set(text_box.get_focus_set())
@@ -338,63 +360,63 @@ class TestUITextBox:
     def test_set_active_effect_typing(self, _init_pygame: None, default_ui_manager: UIManager,
                                       _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
         text_box.active_text_effect.text_block_changed = True
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
 
     def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeInEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeInEffect
 
     def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager,
                                         _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeOutEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeOutEffect
 
     def test_set_active_effect_invalid(self, _init_pygame: None,
                                        default_ui_manager: UIManager,
                                        _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         with pytest.warns(UserWarning, match="Unsupported effect name"):
@@ -404,13 +426,13 @@ class TestUITextBox:
                                     default_ui_manager: UIManager,
                                     _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
 
@@ -426,15 +448,15 @@ class TestUITextBox:
                                {"name": "fira_code", "point_size": 10, "style": "italic"},
                                {"name": "fira_code", "point_size": 10, "style": "bold_italic"}])
         htm_text_block_2 = UITextBox('<font face=fira_code size=2 color=#000000>'
-                                     '<b>Hey, What the heck!</b>'
-                                     '<br><br>'
-                                     'This is some <a href="test">text</a> in a different box,'
-                                     ' hooray for variety - '
-                                     'if you want then you should put a ring upon it. '
-                                     '<body bgcolor=#990000>What if we do a really long word?'
-                                     '</body> '
-                                     '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp'
-                                     ' gosh</b></i></font>',
+                                        '<b>Hey, What the heck!</b>'
+                                        '<br><br>'
+                                        'This is some <a href="test">text</a> in a different box,'
+                                        ' hooray for variety - '
+                                        'if you want then you should put a ring upon it. '
+                                        '<body bgcolor=#990000>What if we do a really long word?'
+                                        '</body> '
+                                        '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp'
+                                        ' gosh</b></i></font>',
                                      pygame.Rect((0, 0), (250, 200)),
                                      manager=manager,
                                      object_id="#text_box_2")
@@ -442,19 +464,19 @@ class TestUITextBox:
         htm_text_block_2.active_text_effect.text_block_changed = True
         htm_text_block_2.update(5.0)
         htm_text_block_2.update(5.0)
-        assert type(htm_text_block_2.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+        assert type(htm_text_block_2.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
 
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None,
                                                         default_ui_manager: UIManager,
                                                         _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
 
@@ -485,9 +507,9 @@ class TestUITextBox:
         manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some "
-                                       "<font color=regular_text>text</font> "
-                                       "in a <b>bold box</b> using "
-                                       "colours and <i>styles</i>.</font>",
+                                          "<font color=regular_text>text</font> "
+                                          "in a <b>bold box</b> using "
+                                          "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
         text_box.redraw_from_chunks()
@@ -504,7 +526,7 @@ class TestUITextBox:
         manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some text in a <b>bold box</b> using "
-                                       "colours and <i>styles</i>.</font>",
+                                          "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
         assert text_box.image is not None
@@ -512,16 +534,16 @@ class TestUITextBox:
     def test_set_dimensions(self, _init_pygame, default_ui_manager,
                             _display_surface_return_none):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al'
-                                       'al alalalal lfed alal alal alal al'
-                                       'ala lalalal lasda lal a lalalal slapl'
-                                       'alalala lal la blop lal alal aferlal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al'
+                                          'al alalalal lfed alal alal alal al'
+                                          'ala lalalal lasda lal a lalalal slapl'
+                                          'alalala lal la blop lal alal aferlal al',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
 
@@ -573,13 +595,13 @@ class TestUITextBox:
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
                      _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
 
@@ -605,13 +627,13 @@ class TestUITextBox:
     def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
                     _display_surface_return_none: None):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                       'LLALAALALA ALALA ALAL ALA'
-                                       'LAALA ALALA ALALA AAaal aa'
-                                       'ALALAa laalal alalal alala'
-                                       'alalalala alalalalalal alal'
-                                       'alalalala <a href=none>alala<a/> '
-                                       'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                          'LLALAALALA ALALA ALAL ALA'
+                                          'LAALA ALALA ALALA AAaal aa'
+                                          'ALALAa laalal alalal alala'
+                                          'alalalala alalalalalal alal'
+                                          'alalalala <a href=none>alala<a/> '
+                                          'alalala ala'
+                                          'alalalalal lalal alalalal al',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
 

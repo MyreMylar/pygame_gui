@@ -24,6 +24,8 @@ class SimpleTestLayoutRect(TextLayoutRect):
         super().__init__(dimensions, can_split=create_split_points, float_pos=float_pos)
         self.colour = self.gen_random_colour()
 
+        self.smallest_split_size = 1
+
         if create_split_points:
             self.split_points = [int(dimensions[0] / 3),
                                  int(dimensions[0] / 3) * 2]
@@ -50,7 +52,11 @@ class SimpleTestLayoutRect(TextLayoutRect):
         surface.fill(self.colour)
         target_surface.blit(surface, self)
 
-    def split(self, requested_x: int):
+    def split(self, requested_x: int, line_width: int):
+
+        if line_width < self.smallest_split_size:
+            raise ValueError('Line width is too narrow')
+
         # find closest split point less than the request
         current_split_point = 0
         for point in self.split_points:
