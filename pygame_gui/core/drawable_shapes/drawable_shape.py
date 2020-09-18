@@ -386,7 +386,10 @@ class DrawableShape:
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-                line_height = int(round(self.theming['font'].size)) + 1
+                text_shadow_data = (0, 0, 0, pygame.Color('#505050'))
+                if 'text_shadow' in self.theming:
+                    text_shadow_data = self.theming['text_shadow']
+                line_height = self.theming['font'].size + 1  # need to add 1 here to get usable pixel sizes
                 line_spacing = 1.5
                 self.text_chunk = TextLineChunkFTFont(self.theming['text'],
                                                       self.theming['font'],
@@ -394,11 +397,12 @@ class DrawableShape:
                                                       text_height=line_height,
                                                       line_spacing=line_spacing,
                                                       colour=self.theming[text_colour_state_str],
-                                                      bg_colour=pygame.Color('#00000000'))
+                                                      bg_colour=pygame.Color('#00000000'),
+                                                      text_shadow_data=text_shadow_data)
                 self.text_chunk.center = self.aligned_text_rect.center
                 self.text_chunk.finalise(target_surface=self.states[state_str].surface,
                                          row_origin=self.text_chunk.y_origin,
-                                         row_height=line_height * line_spacing)
+                                         row_height=int(round(line_height * line_spacing)))
 
             # if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
             #     text_surface = render_white_text_alpha_black_bg(font=self.theming['font'],

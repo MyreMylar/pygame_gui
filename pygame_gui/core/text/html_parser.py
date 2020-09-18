@@ -29,7 +29,8 @@ class HTMLParser(html.parser.HTMLParser):
         'font_name': 'fira_code',
         'font_size': 14,
         'font_colour': pygame.Color(255, 255, 255, 255),
-        'bg_colour': pygame.Color(0, 0, 0, 0)
+        'bg_colour': pygame.Color(0, 0, 0, 0),
+        'shadow_data': (0, 0, 0)
     }
 
     font_sizes = {
@@ -72,11 +73,13 @@ class HTMLParser(html.parser.HTMLParser):
         self.default_style['font_colour'] = self.ui_theme.get_colour_or_gradient('normal_text',
                                                                                  combined_ids)
         self.default_style['bg_colour'] = pygame.Color('#00000000')
+
         self.default_style['bold'] = False
         self.default_style['italic'] = False
         self.default_style['underline'] = False
         self.default_style['link'] = False
         self.default_style['link_href'] = ''
+        self.default_style['shadow_data'] = (0, 0, 0)
 
         # this is the style used before any html is loaded
         self.push_style('default_style', self.default_style)
@@ -110,6 +113,22 @@ class HTMLParser(html.parser.HTMLParser):
             style['italic'] = True
         elif element == 'u':
             style['underline'] = True
+        elif element == 'shadow':
+            shadow_size = 0
+            shadow_offset = [0, 0]
+            shadow_colour = [50, 50, 50]
+            if 'size' in attributes:
+                shadow_size = int(attributes['size'])
+            if 'offset' in attributes:
+                offset_str = attributes['offset'].split(',')
+                shadow_offset[0] = int(offset_str[0])
+                shadow_offset[1] = int(offset_str[1])
+            if 'color' in attributes:
+                if attributes['color'][0] == '#':
+                    shadow_colour = pygame.color.Color(attributes['color'])
+                else:
+                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'], self.combined_ids)
+            style['shadow_data'] = (shadow_size, shadow_offset[0], shadow_offset[1], shadow_colour)
         elif element == 'font':
             if 'face' in attributes:
                 font_name = attributes['face'] if len(attributes['face']) > 0 else None
@@ -256,7 +275,8 @@ class HTMLParser(html.parser.HTMLParser):
                                    bg_colour=self.current_style['bg_colour'],
                                    hover_colour=self.link_style['link_hover'],
                                    selected_colour=self.link_style['link_selected'],
-                                   hover_underline=self.link_style['link_hover_underline']))
+                                   hover_underline=self.link_style['link_hover_underline'],
+                                   text_shadow_data=self.current_style['shadow_data']))
         else:
             self.layout_rect_queue.append(
                 TextLineChunkFTFont(text,
@@ -265,4 +285,5 @@ class HTMLParser(html.parser.HTMLParser):
                                     text_height=self.current_style['font_size'] + 1,
                                     line_spacing=self.line_spacing,
                                     colour=self.current_style['font_colour'],
-                                    bg_colour=self.current_style['bg_colour']))
+                                    bg_colour=self.current_style['bg_colour'],
+                                    text_shadow_data=self.current_style['shadow_data']))

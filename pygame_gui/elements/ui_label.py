@@ -8,6 +8,7 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.core import ColourGradient, UIElement
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
 from pygame_gui.core.utility import basic_blit
+from pygame_gui.core.drawable_shapes import RectDrawableShape
 
 
 class UILabel(UIElement):
@@ -58,7 +59,7 @@ class UILabel(UIElement):
         self.text_shadow_colour = None
 
         self.text_shadow = False
-        self.text_shadow_size = 1
+        self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
 
         self.rebuild_from_changed_theme_data()
@@ -72,7 +73,10 @@ class UILabel(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.rebuild()
+            self.drawable_shape.theming['text'] = self.text
+            # recompute aligned_text_rect before rebuild
+            self.drawable_shape.compute_aligned_text_rect()
+            self.drawable_shape.redraw_all_states()
 
     def rebuild(self):
         """
@@ -88,87 +92,109 @@ class UILabel(UIElement):
                          '' + self.text + ' - size diff: ' + str((width_overlap, height_overlap)))
             warnings.warn(warn_text, UserWarning)
 
-        new_image = pygame.surface.Surface(self.relative_rect.size,
-                                           flags=pygame.SRCALPHA,
-                                           depth=32)
+        theming_parameters = {'normal_bg': self.bg_colour,
+                              'normal_text': self.text_colour,
+                              'normal_border': self.bg_colour,
+                              'disabled_text': self.disabled_text_colour,
+                              'disabled_border': self.bg_colour,
+                              'disabled_bg': self.bg_colour,
+                              'border_width': 0,
+                              'shadow_width': 0,
+                              'font': self.font,
+                              'text': self.text,
+                              'text_shadow': (self.text_shadow_size,
+                                              self.text_shadow_offset[0],
+                                              self.text_shadow_offset[1],
+                                              self.text_shadow_colour),
+                              'text_horiz_alignment': 'center',
+                              'text_vert_alignment': 'center',
+                              'text_horiz_alignment_padding': 0,
+                              'text_vert_alignment_padding': 0}
 
-        if isinstance(self.bg_colour, ColourGradient):
-            new_image.fill(pygame.Color('#FFFFFFFF'))
-            self.bg_colour.apply_gradient_to_surface(new_image)
-            text_render = render_white_text_alpha_black_bg(self.font, self.text)
-            if self.is_enabled:
-                if isinstance(self.text_colour, ColourGradient):
-                    self.text_colour.apply_gradient_to_surface(text_render)
-                else:
-                    apply_colour_to_surface(self.text_colour, text_render)
-            else:
-                if isinstance(self.disabled_text_colour, ColourGradient):
-                    self.disabled_text_colour.apply_gradient_to_surface(text_render)
-                else:
-                    apply_colour_to_surface(self.disabled_text_colour, text_render)
-        else:
-            new_image.fill(self.bg_colour)
-            if self.is_enabled:
-                if isinstance(self.text_colour, ColourGradient):
-                    text_render = render_white_text_alpha_black_bg(self.font, self.text)
-                    self.text_colour.apply_gradient_to_surface(text_render)
-                else:
-                    if self.bg_colour.a != 255 or self.text_shadow:
-                        text_render = render_white_text_alpha_black_bg(self.font, self.text)
-                        apply_colour_to_surface(self.text_colour, text_render)
-                    else:
-                        text_render, _ = self.font.render(self.text,
-                                                          self.text_colour, self.bg_colour)
-                        text_render = text_render.convert_alpha()
-            else:
-                if isinstance(self.disabled_text_colour, ColourGradient):
-                    text_render = render_white_text_alpha_black_bg(self.font, self.text)
-                    self.disabled_text_colour.apply_gradient_to_surface(text_render)
-                else:
-                    if self.bg_colour.a != 255 or self.text_shadow:
-                        text_render = render_white_text_alpha_black_bg(self.font, self.text)
-                        apply_colour_to_surface(self.disabled_text_colour, text_render)
-                    else:
-                        text_render, _ = self.font.render(self.text,
-                                                          self.disabled_text_colour, self.bg_colour)
-                        text_render = text_render.convert_alpha()
-        text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
-                                                centery=int(self.rect.height / 2))
+        self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                ['normal', 'disabled'], self.ui_manager)
 
-        if self.text_shadow:
-            self._rebuild_shadow(new_image, text_render_rect)
+        # new_image = pygame.surface.Surface(self.relative_rect.size,
+        #                                    flags=pygame.SRCALPHA,
+        #                                    depth=32)
+        #
+        # if isinstance(self.bg_colour, ColourGradient):
+        #     new_image.fill(pygame.Color('#FFFFFFFF'))
+        #     self.bg_colour.apply_gradient_to_surface(new_image)
+        #     text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        #     if self.is_enabled:
+        #         if isinstance(self.text_colour, ColourGradient):
+        #             self.text_colour.apply_gradient_to_surface(text_render)
+        #         else:
+        #             apply_colour_to_surface(self.text_colour, text_render)
+        #     else:
+        #         if isinstance(self.disabled_text_colour, ColourGradient):
+        #             self.disabled_text_colour.apply_gradient_to_surface(text_render)
+        #         else:
+        #             apply_colour_to_surface(self.disabled_text_colour, text_render)
+        # else:
+        #     new_image.fill(self.bg_colour)
+        #     if self.is_enabled:
+        #         if isinstance(self.text_colour, ColourGradient):
+        #             text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        #             self.text_colour.apply_gradient_to_surface(text_render)
+        #         else:
+        #             if self.bg_colour.a != 255 or self.text_shadow:
+        #                 text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        #                 apply_colour_to_surface(self.text_colour, text_render)
+        #             else:
+        #                 text_render, _ = self.font.render(self.text,
+        #                                                   self.text_colour, self.bg_colour)
+        #                 text_render = text_render.convert_alpha()
+        #     else:
+        #         if isinstance(self.disabled_text_colour, ColourGradient):
+        #             text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        #             self.disabled_text_colour.apply_gradient_to_surface(text_render)
+        #         else:
+        #             if self.bg_colour.a != 255 or self.text_shadow:
+        #                 text_render = render_white_text_alpha_black_bg(self.font, self.text)
+        #                 apply_colour_to_surface(self.disabled_text_colour, text_render)
+        #             else:
+        #                 text_render, _ = self.font.render(self.text,
+        #                                                   self.disabled_text_colour, self.bg_colour)
+        #                 text_render = text_render.convert_alpha()
+        # text_render_rect = text_render.get_rect(centerx=int(self.rect.width / 2),
+        #                                         centery=int(self.rect.height / 2))
+        #
+        # if self.text_shadow:
+        #     self._rebuild_shadow(new_image, text_render_rect)
+        #
+        # basic_blit(new_image, text_render, text_render_rect)
 
-        basic_blit(new_image, text_render, text_render_rect)
+        self.on_fresh_drawable_shape_ready()
 
-        self.set_image(new_image)
-
-    def _rebuild_shadow(self, new_image, text_render_rect):
-        shadow_text_render = render_white_text_alpha_black_bg(self.font, self.text)
-        apply_colour_to_surface(self.text_shadow_colour, shadow_text_render)
-        for y_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
-            shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0],
-                                            text_render_rect.y + self.text_shadow_offset[1]
-                                            + y_pos),
-                                           text_render_rect.size)
-            basic_blit(new_image, shadow_text_render, shadow_text_rect)
-        for x_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
-            shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0]
-                                            + x_pos,
-                                            text_render_rect.y + self.text_shadow_offset[1]),
-                                           text_render_rect.size)
-            basic_blit(new_image, shadow_text_render, shadow_text_rect)
-        for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
-            shadow_text_rect = pygame.Rect(
-                (text_render_rect.x + self.text_shadow_offset[0] + x_and_y,
-                 text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
-                text_render_rect.size)
-            basic_blit(new_image, shadow_text_render, shadow_text_rect)
-        for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
-            shadow_text_rect = pygame.Rect(
-                (text_render_rect.x + self.text_shadow_offset[0] - x_and_y,
-                 text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
-                text_render_rect.size)
-            basic_blit(new_image, shadow_text_render, shadow_text_rect)
+    # def _rebuild_shadow(self, new_image, text_render_rect):
+    #     shadow_text_render = render_white_text_alpha_black_bg(self.font, self.text)
+    #     apply_colour_to_surface(self.text_shadow_colour, shadow_text_render)
+    #     for y_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+    #         shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0],
+    #                                         text_render_rect.y + self.text_shadow_offset[1]
+    #                                         + y_pos),
+    #                                        text_render_rect.size)
+    #         basic_blit(new_image, shadow_text_render, shadow_text_rect)
+    #     for x_pos in range(-self.text_shadow_size, self.text_shadow_size + 1):
+    #         shadow_text_rect = pygame.Rect((text_render_rect.x + self.text_shadow_offset[0]
+    #                                         + x_pos,
+    #                                         text_render_rect.y + self.text_shadow_offset[1]),
+    #                                        text_render_rect.size)
+    #         basic_blit(new_image, shadow_text_render, shadow_text_rect)
+    #     for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
+    #         shadow_text_rect = pygame.Rect(
+    #             (text_render_rect.x + self.text_shadow_offset[0] + x_and_y,
+    #              text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
+    #             text_render_rect.size)
+    #         basic_blit(new_image, shadow_text_render, shadow_text_rect)
+    #     for x_and_y in range(-self.text_shadow_size, self.text_shadow_size + 1):
+    #         shadow_text_rect = pygame.Rect(
+    #             (text_render_rect.x + self.text_shadow_offset[0] - x_and_y,
+    #              text_render_rect.y + self.text_shadow_offset[1] + x_and_y),
+    #             text_render_rect.size)
+    #         basic_blit(new_image, shadow_text_render, shadow_text_rect)
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -214,12 +240,7 @@ class UILabel(UIElement):
             any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
-                                               default_value=1,
-                                               casting_func=int):
-            any_changed = True
-
-        if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
-                                               default_value=1,
+                                               default_value=0,
                                                casting_func=int):
             any_changed = True
 
@@ -234,19 +255,19 @@ class UILabel(UIElement):
         if any_changed:
             self.rebuild()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]]):
-        """
-        Method to directly set the dimensions of a label.
-
-        :param dimensions: The new dimensions to set.
-
-        """
-        super().set_dimensions(dimensions)
-
-        if dimensions[0] >= 0 and dimensions[1] >= 0:
-            self.rebuild()
+    # def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+    #                                            Tuple[int, int],
+    #                                            Tuple[float, float]]):
+    #     """
+    #     Method to directly set the dimensions of a label.
+    #
+    #     :param dimensions: The new dimensions to set.
+    #
+    #     """
+    #     super().set_dimensions(dimensions)
+    #
+    #     if dimensions[0] >= 0 and dimensions[1] >= 0:
+    #         self.rebuild()
 
     def disable(self):
         """
@@ -254,7 +275,7 @@ class UILabel(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.rebuild()
+            self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
@@ -262,4 +283,4 @@ class UILabel(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.rebuild()
+            self.drawable_shape.set_active_state('normal')

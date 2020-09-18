@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import pygame.freetype
 
@@ -25,8 +25,9 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  bg_colour: Color,
                  hover_colour: Color,
                  selected_colour: Color,
-                 hover_underline: bool):
-        super().__init__(text, font, underlined, text_height, line_spacing, colour, bg_colour)
+                 hover_underline: bool,
+                 text_shadow_data: Optional[Tuple[int, int, int]] = None):
+        super().__init__(text, font, underlined, text_height, line_spacing, colour, bg_colour, text_shadow_data)
 
         self.href = href
         self.is_hovered = False
@@ -111,4 +112,5 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                                   self.bg_colour,
                                   self.hover_colour,
                                   self.selected_colour,
-                                  self.hover_underline)
+                                  self.hover_underline,
+                                  self.text_shadow_data)
