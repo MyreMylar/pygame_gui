@@ -4,8 +4,6 @@ from typing import Dict, List, Union, Tuple
 import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
-from pygame_gui.core.colour_gradient import ColourGradient
-from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
 from pygame_gui.core.utility import basic_blit
 
 from pygame_gui.core.text import TextLineChunkFTFont
@@ -403,38 +401,6 @@ class DrawableShape:
                 self.text_chunk.finalise(target_surface=self.states[state_str].surface,
                                          row_origin=self.text_chunk.y_origin,
                                          row_height=int(round(line_height * line_spacing)))
-
-            # if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-            #     text_surface = render_white_text_alpha_black_bg(font=self.theming['font'],
-            #                                                     text=self.theming['text'])
-            #     if isinstance(self.theming[text_colour_state_str], ColourGradient):
-            #         self.theming[text_colour_state_str].apply_gradient_to_surface(text_surface)
-            #     else:
-            #         apply_colour_to_surface(self.theming[text_colour_state_str], text_surface)
-            # else:
-            #     text_surface = None
-            #
-            # if 'text_shadow' in self.theming:
-            #     text_shadow = render_white_text_alpha_black_bg(font=self.theming['font'],
-            #                                                    text=self.theming['text'])
-            #     apply_colour_to_surface(self.theming['text_shadow'], text_shadow)
-            #
-            #     basic_blit(self.states[state_str].surface, text_shadow,
-            #                (self.aligned_text_rect.x,
-            #                 self.aligned_text_rect.y + 1))
-            #     basic_blit(self.states[state_str].surface, text_shadow,
-            #                (self.aligned_text_rect.x,
-            #                 self.aligned_text_rect.y - 1))
-            #     basic_blit(self.states[state_str].surface, text_shadow,
-            #                (self.aligned_text_rect.x + 1,
-            #                 self.aligned_text_rect.y))
-            #     basic_blit(self.states[state_str].surface, text_shadow,
-            #                (self.aligned_text_rect.x - 1,
-            #                 self.aligned_text_rect.y))
-            #
-                # basic_blit(self.states[state_str].surface,
-                #            text_surface,
-                #            self.text_chunk)
 
     def redraw_state(self, state_str: str):
         """
