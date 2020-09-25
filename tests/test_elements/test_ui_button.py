@@ -513,14 +513,11 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        old_text_rect = button.drawable_shape.aligned_text_rect.copy()
-
         button.set_text('Ipsum')
 
         full_queue = len(button.drawable_shape.states_to_redraw_queue)
 
         assert (empty_queue == 0 and full_queue != 0 and
-                button.drawable_shape.aligned_text_rect != old_text_rect and
                 button.drawable_shape.theming['text'] == 'Ipsum' and button.text == 'Ipsum')
 
     def test_set_text_same(self, _init_pygame: None, default_ui_manager: UIManager,
@@ -538,14 +535,11 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        old_text_rect = button.drawable_shape.aligned_text_rect.copy()
-
         button.set_text('Test Button')
 
         still_empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
         assert (empty_queue == 0 and still_empty_queue == 0 and
-                button.drawable_shape.aligned_text_rect == old_text_rect and
                 button.drawable_shape.theming[
                     'text'] == 'Test Button' and button.text == 'Test Button')
 

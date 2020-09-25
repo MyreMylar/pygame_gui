@@ -147,8 +147,6 @@ class RoundedRectangleShape(DrawableShape):
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)
 
-        self.compute_aligned_text_rect()
-
         self.border_rect = pygame.Rect((self.shadow_width,
                                         self.shadow_width),
                                        (self.click_area_shape.width, self.click_area_shape.height))
@@ -287,7 +285,6 @@ class RoundedRectangleShape(DrawableShape):
                                                                    self.click_area_shape.size))
 
         self.states['normal'].surface = quick_surf
-        self.compute_aligned_text_rect()
         self.rebuild_images_and_text('normal_image', 'normal', 'normal_text')
         self.states['normal'].has_fresh_surface = True
 

@@ -87,8 +87,6 @@ class RectDrawableShape(DrawableShape):
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)
 
-        self.compute_aligned_text_rect()
-
         self.border_rect = pygame.Rect((self.shadow_width,
                                         self.shadow_width),
                                        (self.click_area_shape.width, self.click_area_shape.height))

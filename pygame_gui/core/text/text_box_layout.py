@@ -45,8 +45,12 @@ class TextBoxLayout:
         self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_y=0)
+        current_row = TextBoxLayoutRow(row_start_y=0, layout=self)
         self._process_layout_queue(self.layout_rect_queue, current_row)
+
+        self.cursor_text_chunk = None
+
+        self.selection_colour = pygame.Color(128, 128, 200, 255)
 
     def reprocess_layout_queue(self, layout_rect):
         """
@@ -62,7 +66,7 @@ class TextBoxLayout:
         self.layout_rows = []
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_y=0)
+        current_row = TextBoxLayoutRow(row_start_y=0, layout=self)
         self._process_layout_queue(self.layout_rect_queue, current_row)
 
     def _process_layout_queue(self, input_queue, current_row):
@@ -175,7 +179,7 @@ class TextBoxLayout:
             # not at start of line so end current row...
             self._add_row_to_layout(current_row)
             # ...and start new one
-            current_row = TextBoxLayoutRow(row_start_y=current_row.bottom)
+            current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
 
         # Make the rect span the current row's full width & add it to the row
         test_layout_rect.width = self.layout_rect.width  # TODO: floating rects?
@@ -184,7 +188,7 @@ class TextBoxLayout:
         # add the row to the layout since it's now full up after spanning the full width...
         self._add_row_to_layout(current_row)
         # ...then start a new row
-        current_row = TextBoxLayoutRow(row_start_y=current_row.bottom)
+        current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
         return current_row
 
     def _handle_line_break_rect(self, current_row, test_layout_rect):
@@ -193,7 +197,7 @@ class TextBoxLayout:
         self._add_row_to_layout(current_row)
 
         # ...then start a new row
-        return TextBoxLayoutRow(row_start_y=current_row.bottom)
+        return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
 
     def _split_rect_and_move_to_next_line(self, current_row, rhs_limit,
                                           test_layout_rect,
@@ -229,9 +233,9 @@ class TextBoxLayout:
 
         # And then start a new one.
         if floater_height is not None:
-            return TextBoxLayoutRow(row_start_y=floater_height)
+            return TextBoxLayoutRow(row_start_y=floater_height, layout=self)
         else:
-            return TextBoxLayoutRow(row_start_y=current_row.bottom)
+            return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
 
     def finalise_to_surf(self, surface: Surface):
         """
@@ -242,29 +246,14 @@ class TextBoxLayout:
 
         :param surface: The surface we are going to blit the contents of this layout onto.
         """
-
-        # calculate the y-origin of all the rows
-        for row in self.layout_rows:
-            for text_chunk in row.items:
-                if isinstance(text_chunk, TextLineChunkFTFont):
-                    new_y_origin = text_chunk.y_origin
-                    if new_y_origin > row.y_origin:
-                        row.y_origin = new_y_origin
-
         if self.current_end_pos != self.letter_count:
             cumulative_letter_count = 0
+            # calculate the y-origin of all the rows
             for row in self.layout_rows:
-                if cumulative_letter_count < self.current_end_pos:
-                    for rect in row.items:
-                        if cumulative_letter_count < self.current_end_pos:
-                            rect.finalise(surface, row.y_origin, row.height,
-                                          self.current_end_pos - cumulative_letter_count)
-                            cumulative_letter_count += rect.letter_count
+                cumulative_letter_count = row.finalise(surface, self.current_end_pos, cumulative_letter_count)
         else:
             for row in self.layout_rows:
-                for text_chunk in row.items:
-                    if isinstance(text_chunk, TextLineChunkFTFont):
-                        text_chunk.finalise(surface, row.y_origin, row.height)
+                row.finalise(surface)
 
         for floating_rect in self.floating_rects:
             floating_rect.finalise(surface)
@@ -379,3 +368,155 @@ class TextBoxLayout:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
                         rect.finalise(self.finalised_surface, row.y_origin, row.height)
+
+    def horiz_center_all_rows(self):
+        for row in self.layout_rows:
+            row.horiz_center_row()
+
+    def align_left_all_rows(self, x_padding):
+        start_left = x_padding
+        for row in self.layout_rows:
+            row.align_left_row(start_left)
+
+    def align_right_all_rows(self, x_padding):
+        start_right = self.layout_rect.width - x_padding
+        for row in self.layout_rows:
+            row.align_right_row(start_right)
+
+    def vert_center_all_rows(self):
+        total_row_height = 0
+        for row in self.layout_rows:
+            total_row_height += row.height
+
+        half_total_row_height = int(round(total_row_height/2.0))
+        half_total_layout_height = int(round(self.layout_rect.height/2.0))
+        centered_start_y = half_total_layout_height - half_total_row_height
+        new_y = centered_start_y
+        for row in self.layout_rows:
+            row.y = new_y
+            row.vert_align_items_to_row()
+            new_y += row.height
+
+    def vert_align_top_all_rows(self, y_padding):
+        new_y = y_padding
+        for row in self.layout_rows:
+            row.y = new_y
+            row.vert_align_items_to_row()
+            new_y += row.height
+
+    def vert_align_bottom_all_rows(self, y_padding):
+        new_y = self.layout_rect.height - y_padding
+        for row in reversed(self.layout_rows):
+            row.bottom = new_y
+            row.vert_align_items_to_row()
+            new_y -= row.height
+
+    def set_cursor_from_click_pos(self, click_pos):
+        if self.cursor_text_chunk is not None:
+            if self.cursor_text_chunk.edit_cursor_active:
+                self.cursor_text_chunk.toggle_cursor()
+            self.cursor_text_chunk = None
+
+        layout_space_click_pos = pygame.Vector2(click_pos[0] - self.layout_rect.x,
+                                                click_pos[1] - self.layout_rect.y)
+
+        for row in self.layout_rows:
+            if row.collidepoint(layout_space_click_pos):
+                for chunk in row.items:
+                    if isinstance(chunk, TextLineChunkFTFont) and chunk.collidepoint(layout_space_click_pos):
+                        letter_index = chunk.x_pos_to_letter_index(layout_space_click_pos.x)
+                        chunk.set_cursor_position(letter_index)
+                        self.cursor_text_chunk = chunk
+
+    def toggle_cursor(self):
+        if self.cursor_text_chunk is not None:
+            self.cursor_text_chunk.toggle_cursor()
+
+    def set_text_selection(self, start_index, end_index):
+        # We need to check if the indexes are at the start/end of a chunk and if not, split the chunk
+
+        start_chunk = None
+        start_chunk_row = None
+        start_row_index = 0
+        start_chunk_index = 0
+
+        end_chunk = None
+        end_chunk_row = None
+        end_row_index = 0
+        end_chunk_index = 0
+        # step 1: find the start chunk
+        letter_accumulator = 0
+
+        for row in self.layout_rows:
+            if start_chunk is None:
+                if start_index < letter_accumulator + row.letter_count:
+                    start_chunk_row = row
+                    for chunk in row.items:
+                        if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
+                            if start_index < letter_accumulator + chunk.letter_count:
+                                start_chunk_index = start_index - letter_accumulator
+                                start_chunk = chunk
+                                break
+                            else:
+                                letter_accumulator += chunk.letter_count
+
+                else:
+                    letter_accumulator += row.letter_count
+                    start_row_index += 1
+            else:
+                break
+
+        if start_chunk_index != 0:
+            # split the chunk
+
+            # for the start chunk we want the right hand side of the split
+            start_chunk = start_chunk.split_index(start_chunk_index)
+            start_chunk_row.items.insert(start_row_index+1, start_chunk)
+            start_chunk_index = 0
+
+        # step 1: find the end chunk
+        letter_accumulator = 0
+        for row in self.layout_rows:
+            if end_chunk is None:
+                if end_index < letter_accumulator + row.letter_count:
+                    end_chunk_row = row
+                    for chunk in row.items:
+                        if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
+                            if end_index < letter_accumulator + chunk.letter_count:
+                                end_chunk_index = end_index - letter_accumulator
+                                end_chunk = chunk
+                                break
+                            else:
+                                letter_accumulator += chunk.letter_count
+
+                else:
+                    letter_accumulator += row.letter_count
+                    end_row_index += 1
+            else:
+                break
+
+        if end_chunk_index != 0:
+            # split the chunk
+
+            # for the start chunk we want the right hand side of the split
+            new_chunk = end_chunk.split_index(end_chunk_index)
+            end_chunk_row.items.insert(end_row_index + 1, new_chunk)
+
+        for i in range(start_row_index, end_row_index + 1):
+            start_selection = False
+            end_selection = False
+            row = self.layout_rows[i]
+            for chunk in row.items:
+                if chunk == start_chunk:
+                    start_selection = True
+
+                if start_selection and not end_selection:
+                    chunk.is_selected = True
+                    chunk.selection_colour = self.selection_colour
+
+                if chunk == end_chunk:
+                    end_selection = True
+
+                chunk.clear()
+
+            row.finalise(self.finalised_surface)

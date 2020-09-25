@@ -404,8 +404,6 @@ class UIButton(UIElement):
         if text != self.text:
             self.text = text
             self.drawable_shape.theming['text'] = self.text
-            # recompute aligned_text_rect before rebuild
-            self.drawable_shape.compute_aligned_text_rect()
             self.drawable_shape.redraw_all_states()
 
     def set_hold_range(self, xy_range: Tuple[int, int]):

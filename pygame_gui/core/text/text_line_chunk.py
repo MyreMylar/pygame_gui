@@ -45,24 +45,40 @@ class TextLineChunkFTFont(TextLayoutRect):
                  bg_colour: Color,
                  text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None):
 
-        text_rect = font.get_rect(text)
-        dimensions = (text_rect.x + text_rect.width, int(round(text_height * line_spacing)))
+        # text_rect = font.get_rect(text)
+        dimensions = (sum([char_metric[4] for char_metric in font.get_metrics(text)]),
+                      int(round(text_height * line_spacing)))
         super().__init__(dimensions, can_split=True)
 
         self.text = text
+
+        # style that needs to be matched to merge or insert chunks (are those basically the same operation?)
         self.font = font
         self.underlined = underlined
         self.colour = colour
         self.bg_colour = bg_colour
-        self.target_surface = None
-        self.text_height = text_height
-        self.line_spacing = line_spacing
-        self.y_origin = (self.text_height + (self.font.get_sized_descender() + 1))
         self.text_shadow_data = text_shadow_data
 
-        # we split text stings based on spaces
+        self.line_spacing = line_spacing
+        self.text_height = text_height
+        self.y_origin = (self.text_height + (self.font.get_sized_descender() + 1))
+
+        # we split text stings based on spaces, these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
+
+        # don't copy this stuff when splitting chunks
+        self.cursor_rect = pygame.Rect(0, 1, 2, self.height-2)
+        self.edit_cursor_active = False
+        self.cursor_position = 0
+
+        self.target_surface = None
+        self.row_origin = 0
+        self.row_height = 0
+        self.letter_end = 0
+
+        self.is_selected = False
+        self.selection_colour = pygame.Color(128, 128, 128, 255)
 
     def style_match(self, other_text_chunk: 'TextLineChunkFTFont'):
         """
@@ -72,14 +88,22 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_underlined = self.underlined == other_text_chunk.underlined
         match_colour = self.colour == other_text_chunk.colour
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
+        match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
+        match_selected = self.is_selected == other_text_chunk.is_selected
 
-        return match_fonts and match_underlined and match_colour and match_bg_color
+        return (match_fonts and match_underlined and match_colour and
+                match_bg_color and match_shadow_data and match_selected)
 
     def finalise(self,
                  target_surface: Surface,
                  row_origin: int,
                  row_height: int,
                  letter_end: Optional[int] = None):
+
+        if self.is_selected:
+            bg_col = self.selection_colour
+        else:
+            bg_col = self.bg_colour
 
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
@@ -113,11 +137,12 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             # then make the background
             surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
-            if isinstance(self.bg_colour, ColourGradient):
+
+            if isinstance(bg_col, ColourGradient):
                 surface.fill(Color('#FFFFFFFF'))
-                self.bg_colour.apply_gradient_to_surface(surface)
+                bg_col.apply_gradient_to_surface(surface)
             else:
-                surface.fill(self.bg_colour)
+                surface.fill(bg_col)
 
             # center the text in the line
             text_rect = text_surface.get_rect()
@@ -130,7 +155,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             # to bake the text anti-aliasing,
             surface.blit(text_surface, text_rect)
 
-        elif isinstance(self.bg_colour, ColourGradient):
+        elif isinstance(bg_col, ColourGradient):
             # draw the text first
             text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
                                           flags=pygame.SRCALPHA, depth=32)
@@ -142,7 +167,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             surface = Surface((chunk_draw_width, row_height),
                               flags=pygame.SRCALPHA, depth=32)
             surface.fill(Color('#FFFFFFFF'))
-            self.bg_colour.apply_gradient_to_surface(surface)
+            bg_col.apply_gradient_to_surface(surface)
 
             # center the text in the line
             text_rect = text_surface.get_rect()
@@ -162,7 +187,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                 fgcolor=self.colour)
 
             surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
-            surface.fill(self.bg_colour)
+            surface.fill(bg_col)
 
             # center the text in the line
             text_rect = text_surface.get_rect()
@@ -175,9 +200,25 @@ class TextLineChunkFTFont(TextLayoutRect):
             # to bake the text anti-aliasing,
             surface.blit(text_surface, text_rect)
 
-        target_surface.blit(surface, self.topleft,
-                            special_flags=pygame.BLEND_PREMULTIPLIED)
+        if self.edit_cursor_active:
+            cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
+                                                    flags=pygame.SRCALPHA, depth=32)
+
+            if isinstance(self.colour, ColourGradient):
+                cursor_surface.fill(pygame.Color('#FFFFFFFF'))
+                self.colour.apply_gradient_to_surface(cursor_surface)
+            else:
+                cursor_surface.fill(self.colour)
+
+            surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+
+        target_surface.blit(surface, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
+
+        # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
+        self.row_origin = row_origin
+        self.row_height = row_height
+        self.letter_end = letter_end
 
     def apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
@@ -274,8 +315,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         elif self.x == 0 and self.width > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
-            optimum_split_point = max(0, int(percentage_split * len(self.text)) - 1)
-            if optimum_split_point != 0:
+            optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            if optimum_split_point != 1:  # have to be at least wide enough to fit in a dash and another character
                 left_side = self.text[:optimum_split_point] + '-'
                 right_side = '-' + self.text[optimum_split_point:]
                 split_text_ok = True
@@ -286,19 +327,40 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (self.font.get_rect(self.text).width, self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            text_rect = self.font.get_rect(self.text)
+            self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
+                         self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side)
+            return self._split_at(right_side, self.right, self.target_surface)
         else:
             return None
 
-    def _split_at(self, right_side):
-        return TextLineChunkFTFont(right_side, self.font, self.underlined,
-                                   self.text_height, self.line_spacing,
-                                   self.colour,
-                                   self.bg_colour,
-                                   self.text_shadow_data)
+    def split_index(self, index):
+        if 0 < index < len(self.text):
+            left_side = self.text[:index]
+            right_side = self.text[index:]
+
+            self.text = left_side
+            self.letter_count = len(self.text)
+            text_rect = self.font.get_rect(self.text)
+            self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
+                         self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
+
+            return self._split_at(right_side, self.right, self.target_surface)
+        else:
+            return None
+
+    def _split_at(self, right_side, split_pos, target_surface):
+        right_side_chunk = TextLineChunkFTFont(right_side, self.font, self.underlined,
+                                               self.text_height, self.line_spacing,
+                                               self.colour,
+                                               self.bg_colour,
+                                               self.text_shadow_data)
+        right_side_chunk.left = split_pos
+        right_side_chunk.target_surface = target_surface
+        return right_side_chunk
 
     def clear(self):
         if self.target_surface is not None:
@@ -321,3 +383,57 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.letter_count = len(self.text)
 
         self.size = (self.font.get_rect(self.text).width, self.height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+
+    def toggle_cursor(self):
+        if self.edit_cursor_active:
+            self.edit_cursor_active = False
+        else:
+            self.edit_cursor_active = True
+
+        if self.target_surface is not None:
+            self.clear()
+            self.finalise(self.target_surface, self.row_origin, self.row_height, self.letter_end)
+
+    def set_cursor_position(self, text_index):
+        self.cursor_position = min(len(self.text), max(0, text_index))
+        to_cursor_text_rect = self.font.get_rect(self.text[:self.cursor_position])
+        cursor_draw_width = to_cursor_text_rect.x + to_cursor_text_rect.width
+        self.cursor_rect.x = cursor_draw_width
+
+    def insert_text_at_cursor(self, input_text: str):
+        self.insert_text(input_text, self.cursor_position)
+
+    def delete_letter_at_cursor(self):
+        self.text = self.text[:self.cursor_position] + self.text[min(len(self.text), self.cursor_position+1):]
+
+    def backspace_letter_at_cursor(self):
+        self.text = self.text[:max(0, self.cursor_position-1)] + self.text[self.cursor_position:]
+        self.set_cursor_position(self.cursor_position - 1)
+
+    def x_pos_to_letter_index(self, x_pos: int):
+        chunk_space_x = x_pos - self.x
+        percentage = chunk_space_x/self.width
+        estimated_index = int(round(len(self.text) * percentage))
+        best_index = estimated_index
+        text_rect = self.font.get_rect(self.text[:best_index])
+        width_to_index = text_rect.x + text_rect.width
+        lowest_diff = abs(width_to_index - chunk_space_x)
+
+        check_dir = -1
+        changed_dir = 0
+        step = 1
+        # algorithm picks a good guess for the best letter index and then checks either side for better indexes
+        while changed_dir < 2:
+            new_index = best_index + (step * check_dir)
+            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index + (step * check_dir), 0)])
+            new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
+            if new_diff < lowest_diff:
+                lowest_diff = new_diff
+                best_index = new_index
+                step += 1
+            else:
+                check_dir *= -1
+                changed_dir += 1
+                step = 1
+
+        return best_index

@@ -74,8 +74,6 @@ class EllipseDrawableShape(DrawableShape):
                                                        depth=32)
             self.base_surface.fill(pygame.Color('#00000000'))
 
-        self.compute_aligned_text_rect()
-
         self.border_rect = pygame.Rect((self.shadow_width,
                                         self.shadow_width),
                                        (self.click_area_shape.width, self.click_area_shape.height))

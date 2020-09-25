@@ -30,7 +30,7 @@ class HTMLParser(html.parser.HTMLParser):
         'font_size': 14,
         'font_colour': pygame.Color(255, 255, 255, 255),
         'bg_colour': pygame.Color(0, 0, 0, 0),
-        'shadow_data': (0, 0, 0)
+        'shadow_data': None
     }
 
     font_sizes = {
@@ -79,7 +79,7 @@ class HTMLParser(html.parser.HTMLParser):
         self.default_style['underline'] = False
         self.default_style['link'] = False
         self.default_style['link_href'] = ''
-        self.default_style['shadow_data'] = (0, 0, 0)
+        self.default_style['shadow_data'] = None
 
         # this is the style used before any html is loaded
         self.push_style('default_style', self.default_style)

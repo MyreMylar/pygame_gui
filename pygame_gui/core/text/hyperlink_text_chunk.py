@@ -101,16 +101,20 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
             self.target_surface.fill(self.bg_colour, self)
             self.finalise(self.target_surface, self.last_row_origin, self.last_row_height)
 
-    def _split_at(self, right_side):
-        return HyperlinkTextChunk(self.href,
-                                  right_side,
-                                  self.font,
-                                  self.underlined,
-                                  self.text_height,
-                                  self.line_spacing,
-                                  self.colour,
-                                  self.bg_colour,
-                                  self.hover_colour,
-                                  self.selected_colour,
-                                  self.hover_underline,
-                                  self.text_shadow_data)
+    def _split_at(self, right_side, split_pos, target_surface):
+        right_side_chunk = HyperlinkTextChunk(self.href,
+                                              right_side,
+                                              self.font,
+                                              self.underlined,
+                                              self.text_height,
+                                              self.line_spacing,
+                                              self.colour,
+                                              self.bg_colour,
+                                              self.hover_colour,
+                                              self.selected_colour,
+                                              self.hover_underline,
+                                              self.text_shadow_data)
+
+        right_side_chunk.left = split_pos
+        right_side_chunk.target_surface = target_surface
+        return right_side_chunk

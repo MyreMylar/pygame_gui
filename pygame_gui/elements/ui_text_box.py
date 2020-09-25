@@ -149,26 +149,26 @@ class UITextBox(UIElement):
         self.rounded_corner_offset = int(self.shape_corner_radius -
                                          (math.sin(math.pi / 4) *
                                           self.shape_corner_radius))
-        self.text_wrap_rect = [(self.rect[0] +
-                                self.padding[0] +
-                                self.border_width +
-                                self.shadow_width +
-                                self.rounded_corner_offset),
-                               (self.rect[1] +
-                                self.padding[1] +
-                                self.border_width +
-                                self.shadow_width +
-                                self.rounded_corner_offset),
-                               max(1, (self.rect[2] -
-                                       (self.padding[0] * 2) -
-                                       (self.border_width * 2) -
-                                       (self.shadow_width * 2) -
-                                       (2 * self.rounded_corner_offset))),
-                               max(1, (self.rect[3] -
-                                       (self.padding[1] * 2) -
-                                       (self.border_width * 2) -
-                                       (self.shadow_width * 2) -
-                                       (2 * self.rounded_corner_offset)))]
+        self.text_wrap_rect = pygame.Rect((self.rect[0] +
+                                           self.padding[0] +
+                                           self.border_width +
+                                           self.shadow_width +
+                                           self.rounded_corner_offset),
+                                          (self.rect[1] +
+                                           self.padding[1] +
+                                           self.border_width +
+                                           self.shadow_width +
+                                           self.rounded_corner_offset),
+                                          max(1, (self.rect[2] -
+                                                  (self.padding[0] * 2) -
+                                                  (self.border_width * 2) -
+                                                  (self.shadow_width * 2) -
+                                                  (2 * self.rounded_corner_offset))),
+                                          max(1, (self.rect[3] -
+                                                  (self.padding[1] * 2) -
+                                                  (self.border_width * 2) -
+                                                  (self.shadow_width * 2) -
+                                                  (2 * self.rounded_corner_offset))))
         if self.wrap_to_height or self.rect[3] == -1:
             self.text_wrap_rect[3] = -1
         if self.rect[2] == -1:
@@ -209,7 +209,7 @@ class UITextBox(UIElement):
                                    (self.border_width * 2) -
                                    (self.shadow_width * 2) -
                                    self.rounded_corner_offset - self.scroll_bar_width)
-                self.text_wrap_rect = [(self.rect[0] + self.padding[0] + self.border_width +
+                self.text_wrap_rect = pygame.Rect((self.rect[0] + self.padding[0] + self.border_width +
                                         self.shadow_width + self.rounded_corner_offset),
                                        (self.rect[1] + self.padding[1] + self.border_width +
                                         self.shadow_width + self.rounded_corner_offset),
@@ -218,7 +218,7 @@ class UITextBox(UIElement):
                                                (self.padding[1] * 2) -
                                                (self.border_width * 2) -
                                                (self.shadow_width * 2) -
-                                               (2 * self.rounded_corner_offset)))]
+                                               (2 * self.rounded_corner_offset))))
                 self.parse_html_into_style_data()
                 percentage_visible = (self.text_wrap_rect[3] /
                                       self.formatted_text_block.layout_rect.height)
@@ -483,7 +483,6 @@ class UITextBox(UIElement):
                                                   pygame.Rect((0, 0),
                                                               (self.text_wrap_rect[2],
                                                                self.text_wrap_rect[3])))
-
         self.formatted_text_block.finalise_to_new()
 
         # self.formatted_text_block = TextBlock(parser.text_data,

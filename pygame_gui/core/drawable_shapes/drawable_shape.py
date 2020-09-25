@@ -6,7 +6,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.utility import basic_blit
 
-from pygame_gui.core.text import TextLineChunkFTFont
+from pygame_gui.core.text import TextLineChunkFTFont, TextBoxLayout
 
 
 class DrawableShapeState:
@@ -182,7 +182,7 @@ class DrawableShape:
         self.aligned_text_rect = None
         self.base_surface = None
 
-        self.text_chunk = None
+        self.text_box_layout = None
 
     def set_active_state(self, state_id: str):
         """
@@ -276,38 +276,37 @@ class DrawableShape:
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 
-    def compute_aligned_text_rect(self):
+    def align_all_text_rows(self):
         """
         Aligns the text drawing position correctly according to our theming options.
 
         """
-        if ('text' not in self.theming or
-                len(self.theming['text']) <= 0 or
-                'font' not in self.theming):
-            return
-        # first we need to create rectangle the size of the text, if there is any text to draw
-        self.aligned_text_rect = self.theming['font'].get_rect(self.theming['text'])
-
+        # Horizontal alignment
         if (self.theming['text_horiz_alignment'] == 'center' or
                 self.theming['text_horiz_alignment'] not in ['left', 'right']):
-            self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
+            self.text_box_layout.horiz_center_all_rows()
         elif self.theming['text_horiz_alignment'] == 'left':
-            self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
-                                        self.shadow_width + self.border_width)
+            left_padding = (self.theming['text_horiz_alignment_padding'] +
+                            self.shadow_width + self.border_width)
+            self.text_box_layout.align_left_all_rows(left_padding)
         else:
-            x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
-                     self.aligned_text_rect.width - self.shadow_width - self.border_width)
-            self.aligned_text_rect.x = x_pos
+            right_padding = (self.theming['text_horiz_alignment_padding'] +
+                             self.shadow_width + self.border_width)
+            self.text_box_layout.align_right_all_rows(right_padding)
+
+        # Vertical alignment
         if (self.theming['text_vert_alignment'] == 'center' or
                 self.theming['text_vert_alignment'] not in ['top', 'bottom']):
-            self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
+            self.text_box_layout.vert_center_all_rows()
         elif self.theming['text_vert_alignment'] == 'top':
-            self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
-                                        self.shadow_width + self.border_width)
+            top_padding = (self.theming['text_vert_alignment_padding'] +
+                           self.shadow_width + self.border_width)
+            self.text_box_layout.vert_align_top_all_rows(top_padding)
+
         else:
-            self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
-                                        - self.theming['text_vert_alignment_padding'] -
-                                        self.shadow_width - self.border_width)
+            bottom_padding = (self.theming['text_vert_alignment_padding'] +
+                              self.shadow_width + self.border_width)
+            self.text_box_layout.vert_align_bottom_all_rows(bottom_padding)
 
     def get_active_state_surface(self) -> pygame.surface.Surface:
         """
@@ -389,18 +388,18 @@ class DrawableShape:
                     text_shadow_data = self.theming['text_shadow']
                 line_height = self.theming['font'].size + 1  # need to add 1 here to get usable pixel sizes
                 line_spacing = 1.5
-                self.text_chunk = TextLineChunkFTFont(self.theming['text'],
-                                                      self.theming['font'],
-                                                      underlined=False,
-                                                      text_height=line_height,
-                                                      line_spacing=line_spacing,
-                                                      colour=self.theming[text_colour_state_str],
-                                                      bg_colour=pygame.Color('#00000000'),
-                                                      text_shadow_data=text_shadow_data)
-                self.text_chunk.center = self.aligned_text_rect.center
-                self.text_chunk.finalise(target_surface=self.states[state_str].surface,
-                                         row_origin=self.text_chunk.y_origin,
-                                         row_height=int(round(line_height * line_spacing)))
+                text_chunk = TextLineChunkFTFont(self.theming['text'],
+                                                 self.theming['font'],
+                                                 underlined=False,
+                                                 text_height=line_height,
+                                                 line_spacing=line_spacing,
+                                                 colour=self.theming[text_colour_state_str],
+                                                 bg_colour=pygame.Color('#00000000'),
+                                                 text_shadow_data=text_shadow_data)
+
+                self.text_box_layout = TextBoxLayout(deque([text_chunk]), self.containing_rect)
+                self.align_all_text_rows()
+                self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
 
     def redraw_state(self, state_str: str):
         """
