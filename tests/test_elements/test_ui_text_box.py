@@ -687,9 +687,9 @@ class TestUITextBox:
     def test_show_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         x = 640
         y = 360
-        width = 320
-        height = 10
-        text = "this is a test"
+        width = 100
+        height = 32
+        text = "this is a test, this is a test, this is a test, this is a test, this is a test"
 
         rect = pygame.Rect((x, y), (width, height))
 
@@ -748,9 +748,9 @@ class TestUITextBox:
     def test_hide_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         x = 640
         y = 360
-        width = 320
-        height = 10
-        text = "this is a test"
+        width = 100
+        height = 32
+        text = "this is a test, this is a test, this is a test, this is a test, this is a test, this is a test"
 
         rect = pygame.Rect((x, y), (width, height))
 

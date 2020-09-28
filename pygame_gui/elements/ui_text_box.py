@@ -475,14 +475,15 @@ class UITextBox(UIElement):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
-        parser = HTMLParser(self.ui_theme, self.combined_element_ids, self.link_style, line_spacing=1.5)
+        parser = HTMLParser(self.ui_theme, self.combined_element_ids, self.link_style, line_spacing=1.25)
         # parser.push_style('body', {"bg_colour": self.background_colour})
         parser.feed(self.html_text)
 
         self.formatted_text_block = TextBoxLayout(parser.layout_rect_queue,
                                                   pygame.Rect((0, 0),
                                                               (self.text_wrap_rect[2],
-                                                               self.text_wrap_rect[3])))
+                                                               self.text_wrap_rect[3])),
+                                                  line_spacing=1.25)
         self.formatted_text_block.finalise_to_new()
 
         # self.formatted_text_block = TextBlock(parser.text_data,

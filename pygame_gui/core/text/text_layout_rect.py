@@ -28,15 +28,17 @@ class TextLayoutRect(pygame.Rect):
 
     @abstractmethod
     def finalise(self, target_surface: Surface,
-                 row_origin: int,
-                 row_height: int,
+                 row_chunk_origin: int,
+                 row_chunk_height: int,
+                 row_bg_height: int,
                  letter_end: Optional[int] = None):
         """
         Bake the contents of this layout rect onto a surface.
 
         :param target_surface:
-        :param row_origin:
-        :param row_height:
+        :param row_chunk_origin:
+        :param row_chunk_height:
+        :param row_bg_height:
         :param letter_end:
         """
 

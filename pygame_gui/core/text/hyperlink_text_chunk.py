@@ -19,15 +19,13 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  text: str,
                  font: pygame.freetype.Font,
                  underlined: bool,
-                 text_height: int,
-                 line_spacing: float,
                  colour: Color,
                  bg_colour: Color,
                  hover_colour: Color,
                  selected_colour: Color,
                  hover_underline: bool,
                  text_shadow_data: Optional[Tuple[int, int, int]] = None):
-        super().__init__(text, font, underlined, text_height, line_spacing, colour, bg_colour, text_shadow_data)
+        super().__init__(text, font, underlined, colour, bg_colour, text_shadow_data)
 
         self.href = href
         self.is_hovered = False
@@ -84,30 +82,11 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         self.is_selected = False
         self.redraw()
 
-    def finalise(self,
-                 target_surface: Surface,
-                 row_origin: int,
-                 row_height: int,
-                 letter_end: Optional[int] = None):
-        self.last_row_origin = row_origin
-        self.last_row_height = row_height
-        super().finalise(target_surface, row_origin, row_height, letter_end)
-
-    def redraw(self):
-        """
-        Redraw a surface that has already been finalised once before.
-        """
-        if self.target_surface is not None:
-            self.target_surface.fill(self.bg_colour, self)
-            self.finalise(self.target_surface, self.last_row_origin, self.last_row_height)
-
     def _split_at(self, right_side, split_pos, target_surface):
         right_side_chunk = HyperlinkTextChunk(self.href,
                                               right_side,
                                               self.font,
                                               self.underlined,
-                                              self.text_height,
-                                              self.line_spacing,
                                               self.colour,
                                               self.bg_colour,
                                               self.hover_colour,

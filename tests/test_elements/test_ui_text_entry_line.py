@@ -451,7 +451,7 @@ class TestUITextEntryLine:
 
         assert processed_down_event
         assert processed_up_event
-        assert text_entry.select_range == [3, 10]
+        assert text_entry.select_range == [3, 9]
 
     def test_process_event_mouse_button_double_click(self, _init_pygame: None,
                                                      default_ui_manager: UIManager,

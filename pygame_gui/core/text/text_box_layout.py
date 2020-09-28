@@ -23,10 +23,12 @@ class TextBoxLayout:
     """
     def __init__(self,
                  input_data_queue: Deque[TextLayoutRect],
-                 layout_rect: pygame.Rect):
+                 layout_rect: pygame.Rect,
+                 line_spacing: float):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
+        self.line_spacing = line_spacing
 
         if self.layout_rect.width == -1:
             self.layout_rect.width = 0
@@ -45,7 +47,7 @@ class TextBoxLayout:
         self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_y=0, layout=self)
+        current_row = TextBoxLayoutRow(row_start_y=0, layout=self, line_spacing=self.line_spacing)
         self._process_layout_queue(self.layout_rect_queue, current_row)
 
         self.cursor_text_chunk = None
@@ -66,7 +68,7 @@ class TextBoxLayout:
         self.layout_rows = []
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_y=0, layout=self)
+        current_row = TextBoxLayoutRow(row_start_y=0, layout=self, line_spacing=self.line_spacing)
         self._process_layout_queue(self.layout_rect_queue, current_row)
 
     def _process_layout_queue(self, input_queue, current_row):
@@ -179,7 +181,7 @@ class TextBoxLayout:
             # not at start of line so end current row...
             self._add_row_to_layout(current_row)
             # ...and start new one
-            current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
+            current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self, line_spacing=self.line_spacing)
 
         # Make the rect span the current row's full width & add it to the row
         test_layout_rect.width = self.layout_rect.width  # TODO: floating rects?
@@ -188,7 +190,7 @@ class TextBoxLayout:
         # add the row to the layout since it's now full up after spanning the full width...
         self._add_row_to_layout(current_row)
         # ...then start a new row
-        current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
+        current_row = TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self, line_spacing=self.line_spacing)
         return current_row
 
     def _handle_line_break_rect(self, current_row, test_layout_rect):
@@ -197,7 +199,7 @@ class TextBoxLayout:
         self._add_row_to_layout(current_row)
 
         # ...then start a new row
-        return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
+        return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self, line_spacing=self.line_spacing)
 
     def _split_rect_and_move_to_next_line(self, current_row, rhs_limit,
                                           test_layout_rect,
@@ -233,9 +235,9 @@ class TextBoxLayout:
 
         # And then start a new one.
         if floater_height is not None:
-            return TextBoxLayoutRow(row_start_y=floater_height, layout=self)
+            return TextBoxLayoutRow(row_start_y=floater_height, layout=self, line_spacing=self.line_spacing)
         else:
-            return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self)
+            return TextBoxLayoutRow(row_start_y=current_row.bottom, layout=self, line_spacing=self.line_spacing)
 
     def finalise_to_surf(self, surface: Surface):
         """
@@ -296,7 +298,7 @@ class TextBoxLayout:
                             else:
                                 found_chunk_to_update = True
                                 rect.clear()
-                                rect.finalise(self.finalised_surface, row.y_origin, row.height,
+                                rect.finalise(self.finalised_surface, row.y_origin, row.text_chunk_height, row.height,
                                               new_end_pos - cumulative_letter_count)
 
     def clear_final_surface(self):
@@ -367,7 +369,7 @@ class TextBoxLayout:
             else:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
-                        rect.finalise(self.finalised_surface, row.y_origin, row.height)
+                        rect.finalise(self.finalised_surface, row.y_origin, row.text_chunk_height, row.height)
 
     def horiz_center_all_rows(self):
         for row in self.layout_rows:
@@ -396,6 +398,22 @@ class TextBoxLayout:
             row.y = new_y
             row.vert_align_items_to_row()
             new_y += row.height
+
+        # if len(self.layout_rows) == 1:
+        #     row = self.layout_rows[0]
+        #     if len(row.items) == 1:
+        #         # one row and one chunk so try centering based on the glyph bounds instead
+        #         chunk = row.items[0]
+        #
+        #         if isinstance(chunk, TextLineChunkFTFont):
+        #             half_chunk_height = int(round((row.height / chunk.line_spacing) / 2.0))
+        #             chunk.centering_rect = chunk.glyph_bounds.copy()
+        #             chunk.centering_rect.top = row.centery - half_chunk_height + row.y_origin - chunk.glyph_bounds.y
+        #             chunk.centering_rect.x = chunk.x
+        #             diff = chunk.centery - chunk.centering_rect.centery
+        #             chunk.centering_rect.y += diff
+        #             row.y = chunk.y + diff
+        #             row.vert_align_items_to_row()
 
     def vert_align_top_all_rows(self, y_padding):
         new_y = y_padding

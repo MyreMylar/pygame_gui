@@ -386,18 +386,16 @@ class DrawableShape:
                 text_shadow_data = (0, 0, 0, pygame.Color('#505050'))
                 if 'text_shadow' in self.theming:
                     text_shadow_data = self.theming['text_shadow']
-                line_height = self.theming['font'].size + 1  # need to add 1 here to get usable pixel sizes
-                line_spacing = 1.5
                 text_chunk = TextLineChunkFTFont(self.theming['text'],
                                                  self.theming['font'],
                                                  underlined=False,
-                                                 text_height=line_height,
-                                                 line_spacing=line_spacing,
                                                  colour=self.theming[text_colour_state_str],
                                                  bg_colour=pygame.Color('#00000000'),
-                                                 text_shadow_data=text_shadow_data)
-
-                self.text_box_layout = TextBoxLayout(deque([text_chunk]), self.containing_rect)
+                                                 text_shadow_data=text_shadow_data,
+                                                 max_dimensions=(self.containing_rect.width,
+                                                                 self.containing_rect.height))
+                text_chunk.should_centre_from_baseline = True
+                self.text_box_layout = TextBoxLayout(deque([text_chunk]), self.containing_rect, line_spacing=1.25)
                 self.align_all_text_rows()
                 self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
 

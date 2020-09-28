@@ -44,7 +44,7 @@ class UIMessageWindow(UIWindow):
         self.dismiss_button = None
         self.text_block = None
 
-        button_size = (70, 20)
+        button_size = (70, 24)
         button_spacing = 10
         button_vertical_space = (button_spacing * 2) + button_size[1]
 

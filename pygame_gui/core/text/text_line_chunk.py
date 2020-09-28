@@ -39,15 +39,17 @@ class TextLineChunkFTFont(TextLayoutRect):
     def __init__(self, text: str,
                  font: pygame.freetype.Font,
                  underlined: bool,
-                 text_height: int,
-                 line_spacing: float,
                  colour: Color,
                  bg_colour: Color,
-                 text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None):
+                 text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None,
+                 max_dimensions: Optional[Tuple[int, int]] = None):
 
-        # text_rect = font.get_rect(text)
+        text_rect = font.get_rect(text)
         dimensions = (sum([char_metric[4] for char_metric in font.get_metrics(text)]),
-                      int(round(text_height * line_spacing)))
+                      text_rect.height)
+        if max_dimensions is not None:
+            dimensions = (min(max_dimensions[0], dimensions[0]),
+                          min(max_dimensions[1], dimensions[1]))
         super().__init__(dimensions, can_split=True)
 
         self.text = text
@@ -59,9 +61,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.bg_colour = bg_colour
         self.text_shadow_data = text_shadow_data
 
-        self.line_spacing = line_spacing
-        self.text_height = text_height
-        self.y_origin = (self.text_height + (self.font.get_sized_descender() + 1))
+        self.max_dimensions = max_dimensions
+        self.y_origin = text_rect.y
+        self.font_y_padding = self._calc_font_padding()
 
         # we split text stings based on spaces, these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
@@ -73,12 +75,31 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.cursor_position = 0
 
         self.target_surface = None
-        self.row_origin = 0
-        self.row_height = 0
+        self.row_chunk_origin = 0
+        self.row_chunk_height = 0
+        self.row_bg_height = 0
         self.letter_end = 0
 
         self.is_selected = False
         self.selection_colour = pygame.Color(128, 128, 128, 255)
+
+        self.should_centre_from_baseline = False
+
+    def _calc_font_padding(self):
+        # 'font padding' this determines the amount of padding that font.pad adds to the top of text excluding
+        # any padding added to make glyphs even - this is useful for 'base-line centering' when we want to center text
+        # that doesn't drop below the base line (no y's, g's, p's etc) but also don't want it to flicker on and off.
+        # base-line centering is the default for chunks on a single style row.
+        padding_state = self.font.pad
+
+        self.font.pad = False
+        no_pad_origin = self.font.get_rect('A').y
+
+        self.font.pad = True
+        pad_origin = self.font.get_rect('A').y
+
+        self.font.pad = padding_state
+        return pad_origin - no_pad_origin
 
     def style_match(self, other_text_chunk: 'TextLineChunkFTFont'):
         """
@@ -96,8 +117,9 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def finalise(self,
                  target_surface: Surface,
-                 row_origin: int,
-                 row_height: int,
+                 row_chunk_origin: int,
+                 row_chunk_height: int,
+                 row_bg_height: int,
                  letter_end: Optional[int] = None):
 
         if self.is_selected:
@@ -110,7 +132,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         # to make the surface wide enough
         draw_text_rect = self.font.get_rect(final_str_text)
         chunk_draw_width = draw_text_rect.x + draw_text_rect.width
-        chunk_draw_height = int(round(row_height/self.line_spacing))
+        chunk_draw_height = row_chunk_height
         chunk_x_origin = 0
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
             # expand our text chunk if we have a text shadow
@@ -131,12 +153,12 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
                                           flags=pygame.SRCALPHA, depth=32)
 
-            self.font.render_to(text_surface, (chunk_x_origin, row_origin),
+            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
                                 final_str_text, fgcolor=Color('#FFFFFFFF'))
             self.colour.apply_gradient_to_surface(text_surface)
 
             # then make the background
-            surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
+            surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
 
             if isinstance(bg_col, ColourGradient):
                 surface.fill(Color('#FFFFFFFF'))
@@ -146,10 +168,16 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             # center the text in the line
             text_rect = text_surface.get_rect()
-            text_rect.centery = surface.get_rect().centery
+            if self.should_centre_from_baseline:
+                padless_origin = self.y_origin - self.font_y_padding
+                half_padless_origin = int(round(0.5 * padless_origin))
+                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+            else:
+                text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text, text_surface, (chunk_x_origin, row_origin))
+            self.apply_shadow_effect(surface, text_rect, final_str_text,
+                                     text_surface, (chunk_x_origin, row_chunk_origin))
 
             # then apply the text to the background deliberately not pre-multiplied
             # to bake the text anti-aliasing,
@@ -160,21 +188,27 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
                                           flags=pygame.SRCALPHA, depth=32)
 
-            self.font.render_to(text_surface, (chunk_x_origin, row_origin),
+            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
                                 final_str_text, fgcolor=self.colour)
 
             # then make the background
-            surface = Surface((chunk_draw_width, row_height),
+            surface = Surface((chunk_draw_width, row_bg_height),
                               flags=pygame.SRCALPHA, depth=32)
             surface.fill(Color('#FFFFFFFF'))
             bg_col.apply_gradient_to_surface(surface)
 
             # center the text in the line
             text_rect = text_surface.get_rect()
-            text_rect.centery = surface.get_rect().centery
+            if self.should_centre_from_baseline:
+                padless_origin = self.y_origin - self.font_y_padding
+                half_padless_origin = int(round(0.5 * padless_origin))
+                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+            else:
+                text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text, text_surface, (chunk_x_origin, row_origin))
+            self.apply_shadow_effect(surface, text_rect, final_str_text,
+                                     text_surface, (chunk_x_origin, row_chunk_origin))
 
             # then apply the text to the background deliberately not pre-multiplied
             # to bake the text anti-aliasing,
@@ -182,19 +216,25 @@ class TextLineChunkFTFont(TextLayoutRect):
         else:
             text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
                                           flags=pygame.SRCALPHA, depth=32)
-            self.font.render_to(text_surface, (chunk_x_origin, row_origin),
+            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
                                 final_str_text,
                                 fgcolor=self.colour)
 
-            surface = Surface((chunk_draw_width, row_height), flags=pygame.SRCALPHA, depth=32)
+            surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
             surface.fill(bg_col)
 
             # center the text in the line
             text_rect = text_surface.get_rect()
-            text_rect.centery = surface.get_rect().centery
+            if self.should_centre_from_baseline:
+                padless_origin = self.y_origin - self.font_y_padding
+                half_padless_origin = int(round(0.5 * padless_origin))
+                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+            else:
+                text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text, text_surface, (chunk_x_origin, row_origin))
+            self.apply_shadow_effect(surface, text_rect, final_str_text,
+                                     text_surface, (chunk_x_origin, row_chunk_origin))
 
             # then apply the text to the background deliberately not pre-multiplied
             # to bake the text anti-aliasing,
@@ -216,8 +256,9 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
-        self.row_origin = row_origin
-        self.row_height = row_height
+        self.row_chunk_origin = row_chunk_origin
+        self.row_chunk_height = row_chunk_height
+        self.row_bg_height = row_bg_height
         self.letter_end = letter_end
 
     def apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
@@ -229,7 +270,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             # we have a shadow
             shadow_surface = text_surface.copy()
             shadow_surface.fill('#00000000')
-            shadow_rect = text_rect.copy()
+
             self.font.render_to(shadow_surface, origin,
                                 text_str,
                                 fgcolor=shadow_colour)
@@ -306,6 +347,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                 tested_points.append(optimum_split_point)
 
         split_text_ok = False
+        left_side = ''
+        right_side = ''
         if optimum_split_point != 0:
             # split the text
             left_side = self.text[:optimum_split_point]
@@ -327,7 +370,6 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            text_rect = self.font.get_rect(self.text)
             self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
@@ -343,7 +385,6 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.text = left_side
             self.letter_count = len(self.text)
-            text_rect = self.font.get_rect(self.text)
             self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
@@ -354,7 +395,6 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def _split_at(self, right_side, split_pos, target_surface):
         right_side_chunk = TextLineChunkFTFont(right_side, self.font, self.underlined,
-                                               self.text_height, self.line_spacing,
                                                self.colour,
                                                self.bg_colour,
                                                self.text_shadow_data)
@@ -392,7 +432,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         if self.target_surface is not None:
             self.clear()
-            self.finalise(self.target_surface, self.row_origin, self.row_height, self.letter_end)
+            self.finalise(self.target_surface, self.row_chunk_origin, self.row_chunk_height, self.letter_end)
 
     def set_cursor_position(self, text_index):
         self.cursor_position = min(len(self.text), max(0, text_index))
@@ -437,3 +477,11 @@ class TextLineChunkFTFont(TextLayoutRect):
                 step = 1
 
         return best_index
+
+    def redraw(self):
+        """
+        Redraw a surface that has already been finalised once before.
+        """
+        if self.target_surface is not None:
+            self.clear()
+            self.finalise(self.target_surface, self.row_chunk_origin, self.row_chunk_height, self.row_bg_height)

@@ -11,14 +11,16 @@ class TextBoxLayoutRow(pygame.Rect):
     A single line of text-like stuff to be used in a text box type layout.
     """
 
-    def __init__(self, row_start_y, layout):
+    def __init__(self, row_start_y, line_spacing, layout):
         super().__init__(0, row_start_y, 0, 0)
+        self.line_spacing = line_spacing
         self.layout = layout
         self.items = []
 
         self.letter_count = 0
 
         self.y_origin = 0
+        self.text_chunk_height = 0
 
     def at_start(self):
         """
@@ -43,8 +45,17 @@ class TextBoxLayoutRow(pygame.Rect):
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
-        if item.height > self.height:
-            self.height = item.height  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+        if item.height > self.text_chunk_height:
+            self.text_chunk_height = item.height
+            if self.layout.layout_rect.height != -1:
+                self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                                  item.height * self.line_spacing)
+            else:
+                self.height = item.height * self.line_spacing
+
+        if isinstance(item, TextLineChunkFTFont):
+            if item.y_origin > self.y_origin:
+                self.y_origin = item.y_origin
 
         self.letter_count += item.letter_count
 
@@ -65,6 +76,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.height = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.x = 0  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; this name is inherited from the base class
         self.letter_count = 0
+        self.y_origin = 0
 
     def horiz_center_row(self):
         self.centerx = int(round(self.layout.layout_rect.width/2.0))
@@ -107,21 +119,14 @@ class TextBoxLayoutRow(pygame.Rect):
     def finalise(self, surface, current_end_pos: Optional[int] = None, cumulative_letter_count: Optional[int] = None):
         self.merge_adjacent_compatible_chunks()
 
-        # Can't merge these two loops because we need to calculate the row origin based on each chunk before blitting
-        for text_chunk in self.items:
-            if isinstance(text_chunk, TextLineChunkFTFont):
-                new_y_origin = text_chunk.y_origin
-                if new_y_origin > self.y_origin:
-                    self.y_origin = new_y_origin
-
         for text_chunk in self.items:
             if isinstance(text_chunk, TextLineChunkFTFont):
                 if current_end_pos is not None and cumulative_letter_count is not None:
                     if cumulative_letter_count < current_end_pos:
-                        text_chunk.finalise(surface, self.y_origin, self.height,
+                        text_chunk.finalise(surface, self.y_origin, self.text_chunk_height, self.height,
                                             current_end_pos - cumulative_letter_count)
                         cumulative_letter_count += text_chunk.letter_count
                 else:
-                    text_chunk.finalise(surface, self.y_origin, self.height)
+                    text_chunk.finalise(surface, self.y_origin, self.text_chunk_height, self.height)
 
         return cumulative_letter_count

@@ -269,8 +269,6 @@ class HTMLParser(html.parser.HTMLParser):
                                    text,
                                    chunk_font,
                                    should_underline,
-                                   text_height=self.current_style['font_size'] + 1,
-                                   line_spacing=self.line_spacing,
                                    colour=self.link_style['link_text'],
                                    bg_colour=self.current_style['bg_colour'],
                                    hover_colour=self.link_style['link_hover'],
@@ -282,8 +280,6 @@ class HTMLParser(html.parser.HTMLParser):
                 TextLineChunkFTFont(text,
                                     chunk_font,
                                     self.current_style['underline'],
-                                    text_height=self.current_style['font_size'] + 1,
-                                    line_spacing=self.line_spacing,
                                     colour=self.current_style['font_colour'],
                                     bg_colour=self.current_style['bg_colour'],
                                     text_shadow_data=self.current_style['shadow_data']))
