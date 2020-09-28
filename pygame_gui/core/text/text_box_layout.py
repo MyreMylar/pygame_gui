@@ -456,12 +456,14 @@ class TextBoxLayout:
         start_chunk = None
         start_chunk_row = None
         start_row_index = 0
-        start_chunk_index = 0
+        start_chunk_in_row_index = 0
+        start_letter_index = 0
 
         end_chunk = None
         end_chunk_row = None
         end_row_index = 0
-        end_chunk_index = 0
+        end_chunk_in_row_index = 0
+        end_letter_index = 0
         # step 1: find the start chunk
         letter_accumulator = 0
 
@@ -469,14 +471,16 @@ class TextBoxLayout:
             if start_chunk is None:
                 if start_index < letter_accumulator + row.letter_count:
                     start_chunk_row = row
+                    start_chunk_in_row_index = 0
                     for chunk in row.items:
                         if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
                             if start_index < letter_accumulator + chunk.letter_count:
-                                start_chunk_index = start_index - letter_accumulator
+                                start_letter_index = start_index - letter_accumulator
                                 start_chunk = chunk
                                 break
                             else:
                                 letter_accumulator += chunk.letter_count
+                                start_chunk_in_row_index += 1
 
                 else:
                     letter_accumulator += row.letter_count
@@ -484,13 +488,13 @@ class TextBoxLayout:
             else:
                 break
 
-        if start_chunk_index != 0:
+        if start_letter_index != 0:
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
-            start_chunk = start_chunk.split_index(start_chunk_index)
-            start_chunk_row.items.insert(start_row_index+1, start_chunk)
-            start_chunk_index = 0
+            start_chunk = start_chunk.split_index(start_letter_index)
+            start_chunk_row.items.insert(start_chunk_in_row_index + 1, start_chunk)
+            start_letter_index = 0
 
         # step 1: find the end chunk
         letter_accumulator = 0
@@ -498,14 +502,16 @@ class TextBoxLayout:
             if end_chunk is None:
                 if end_index < letter_accumulator + row.letter_count:
                     end_chunk_row = row
+                    end_chunk_in_row_index = 0
                     for chunk in row.items:
                         if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
                             if end_index < letter_accumulator + chunk.letter_count:
-                                end_chunk_index = end_index - letter_accumulator
+                                end_letter_index = end_index - letter_accumulator
                                 end_chunk = chunk
                                 break
                             else:
                                 letter_accumulator += chunk.letter_count
+                                end_chunk_in_row_index += 1
 
                 else:
                     letter_accumulator += row.letter_count
@@ -513,24 +519,28 @@ class TextBoxLayout:
             else:
                 break
 
-        if end_chunk_index != 0:
+        if end_letter_index != 0:
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
-            new_chunk = end_chunk.split_index(end_chunk_index)
-            end_chunk_row.items.insert(end_row_index + 1, new_chunk)
+            new_chunk = end_chunk.split_index(end_letter_index)
+            end_chunk_row.items.insert(end_chunk_in_row_index + 1, new_chunk)
 
+        start_selection = False
+        end_selection = False
         for i in range(start_row_index, end_row_index + 1):
-            start_selection = False
-            end_selection = False
             row = self.layout_rows[i]
             for chunk in row.items:
                 if chunk == start_chunk:
                     start_selection = True
 
                 if start_selection and not end_selection:
-                    chunk.is_selected = True
-                    chunk.selection_colour = self.selection_colour
+                    if chunk == end_chunk and end_letter_index == 0:
+                        # don't select this
+                        pass
+                    else:
+                        chunk.is_selected = True
+                        chunk.selection_colour = self.selection_colour
 
                 if chunk == end_chunk:
                     end_selection = True

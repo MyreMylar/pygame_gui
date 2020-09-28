@@ -374,7 +374,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.right, self.target_surface)
+            return self._split_at(right_side, self.topright, self.target_surface)
         else:
             return None
 
@@ -387,9 +387,10 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.letter_count = len(self.text)
             self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.right, self.target_surface)
+            return self._split_at(right_side, self.topright, self.target_surface)
         else:
             return None
 
@@ -398,7 +399,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                self.colour,
                                                self.bg_colour,
                                                self.text_shadow_data)
-        right_side_chunk.left = split_pos
+        right_side_chunk.topleft = split_pos
         right_side_chunk.target_surface = target_surface
         return right_side_chunk
 
