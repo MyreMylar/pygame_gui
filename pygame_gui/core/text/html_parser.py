@@ -276,10 +276,12 @@ class HTMLParser(html.parser.HTMLParser):
                                    hover_underline=self.link_style['link_hover_underline'],
                                    text_shadow_data=self.current_style['shadow_data']))
         else:
+            using_default_text_colour = self.current_style['font_colour'] == self.default_style['font_colour']
             self.layout_rect_queue.append(
                 TextLineChunkFTFont(text,
                                     chunk_font,
                                     self.current_style['underline'],
                                     colour=self.current_style['font_colour'],
+                                    using_default_text_colour=using_default_text_colour,
                                     bg_colour=self.current_style['bg_colour'],
                                     text_shadow_data=self.current_style['shadow_data']))

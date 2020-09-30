@@ -25,7 +25,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  selected_colour: Color,
                  hover_underline: bool,
                  text_shadow_data: Optional[Tuple[int, int, int]] = None):
-        super().__init__(text, font, underlined, colour, bg_colour, text_shadow_data)
+        super().__init__(text, font, underlined, colour, False, bg_colour, text_shadow_data)
 
         self.href = href
         self.is_hovered = False
@@ -82,7 +82,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         self.is_selected = False
         self.redraw()
 
-    def _split_at(self, right_side, split_pos, target_surface):
+    def _split_at(self, right_side, split_pos, target_surface, baseline_centred):
         right_side_chunk = HyperlinkTextChunk(self.href,
                                               right_side,
                                               self.font,
@@ -94,6 +94,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                                               self.hover_underline,
                                               self.text_shadow_data)
 
-        right_side_chunk.left = split_pos
+        right_side_chunk.topleft = split_pos
         right_side_chunk.target_surface = target_surface
+        right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk

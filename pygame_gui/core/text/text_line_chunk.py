@@ -40,17 +40,22 @@ class TextLineChunkFTFont(TextLayoutRect):
                  font: pygame.freetype.Font,
                  underlined: bool,
                  colour: Color,
+                 using_default_text_colour: bool,
                  bg_colour: Color,
                  text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None,
                  max_dimensions: Optional[Tuple[int, int]] = None):
-
-        text_rect = font.get_rect(text)
-        dimensions = (sum([char_metric[4] for char_metric in font.get_metrics(text)]),
-                      text_rect.height)
+        if len(text) == 0:
+            text_rect = font.get_rect('A')
+        else:
+            text_rect = font.get_rect(text)
+        text_width = sum([char_metric[4] for char_metric in font.get_metrics(text)])
+        text_height = text_rect.height
         if max_dimensions is not None:
-            dimensions = (min(max_dimensions[0], dimensions[0]),
-                          min(max_dimensions[1], dimensions[1]))
-        super().__init__(dimensions, can_split=True)
+            if max_dimensions[0] != -1:
+                text_width = min(max_dimensions[0], text_width)
+            if max_dimensions[1] != -1:
+                text_height = min(max_dimensions[1], text_height)
+        super().__init__((text_width, text_height), can_split=True)
 
         self.text = text
 
@@ -58,6 +63,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.font = font
         self.underlined = underlined
         self.colour = colour
+        self.using_default_text_colour = using_default_text_colour
         self.bg_colour = bg_colour
         self.text_shadow_data = text_shadow_data
 
@@ -69,9 +75,6 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-        # don't copy this stuff when splitting chunks
-        self.cursor_rect = pygame.Rect(0, 1, 2, self.height-2)
-        self.edit_cursor_active = False
         self.cursor_position = 0
 
         self.target_surface = None
@@ -130,8 +133,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
         # to make the surface wide enough
-        draw_text_rect = self.font.get_rect(final_str_text)
-        chunk_draw_width = draw_text_rect.x + draw_text_rect.width
+        chunk_draw_width = sum([char_metric[4] for char_metric in self.font.get_metrics(final_str_text)])
         chunk_draw_height = row_chunk_height
         chunk_x_origin = 0
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
@@ -239,18 +241,6 @@ class TextLineChunkFTFont(TextLayoutRect):
             # then apply the text to the background deliberately not pre-multiplied
             # to bake the text anti-aliasing,
             surface.blit(text_surface, text_rect)
-
-        if self.edit_cursor_active:
-            cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
-                                                    flags=pygame.SRCALPHA, depth=32)
-
-            if isinstance(self.colour, ColourGradient):
-                cursor_surface.fill(pygame.Color('#FFFFFFFF'))
-                self.colour.apply_gradient_to_surface(cursor_surface)
-            else:
-                cursor_surface.fill(self.colour)
-
-            surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         target_surface.blit(surface, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
 
@@ -374,7 +364,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.topright, self.target_surface)
+            return self._split_at(right_side, self.topright, self.target_surface, self.should_centre_from_baseline)
         else:
             return None
 
@@ -390,22 +380,27 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.topright, self.target_surface)
+            return self._split_at(right_side, self.topright, self.target_surface, self.should_centre_from_baseline)
         else:
             return None
 
-    def _split_at(self, right_side, split_pos, target_surface):
+    def _split_at(self, right_side, split_pos, target_surface, baseline_centred):
         right_side_chunk = TextLineChunkFTFont(right_side, self.font, self.underlined,
                                                self.colour,
+                                               self.using_default_text_colour,
                                                self.bg_colour,
                                                self.text_shadow_data)
         right_side_chunk.topleft = split_pos
         right_side_chunk.target_surface = target_surface
+        right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk
 
     def clear(self):
         if self.target_surface is not None:
             self.target_surface.fill(pygame.Color('#00000000'), self)
+
+    def add_text(self, input_text: str):
+        self.insert_text(input_text, len(self.text))
 
     def insert_text(self, input_text: str, index: int):
         """
@@ -417,29 +412,24 @@ class TextLineChunkFTFont(TextLayoutRect):
         :param input_text: the new text to insert.
         :param index: the index we are sticking the new text at.
         """
-        self.clear()
         self.text = self.text[:index] + input_text + self.text[index:]
         # we split text stings based on spaces
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-        self.size = (self.font.get_rect(self.text).width, self.height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-
-    def toggle_cursor(self):
-        if self.edit_cursor_active:
-            self.edit_cursor_active = False
+        if len(self.text) == 0:
+            text_rect = self.font.get_rect('A')
         else:
-            self.edit_cursor_active = True
+            text_rect = self.font.get_rect(self.text)
+        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_height = text_rect.height
+        if self.max_dimensions is not None:
+            if self.max_dimensions[0] != -1:
+                text_width = min(self.max_dimensions[0], text_width)
+            if self.max_dimensions[1] != -1:
+                text_height = min(self.max_dimensions[1], text_height)
 
-        if self.target_surface is not None:
-            self.clear()
-            self.finalise(self.target_surface, self.row_chunk_origin, self.row_chunk_height, self.letter_end)
-
-    def set_cursor_position(self, text_index):
-        self.cursor_position = min(len(self.text), max(0, text_index))
-        to_cursor_text_rect = self.font.get_rect(self.text[:self.cursor_position])
-        cursor_draw_width = to_cursor_text_rect.x + to_cursor_text_rect.width
-        self.cursor_rect.x = cursor_draw_width
+        self.size = (text_width, text_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
     def insert_text_at_cursor(self, input_text: str):
         self.insert_text(input_text, self.cursor_position)
@@ -485,4 +475,5 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         if self.target_surface is not None:
             self.clear()
-            self.finalise(self.target_surface, self.row_chunk_origin, self.row_chunk_height, self.row_bg_height)
+            self.finalise(self.target_surface, self.row_chunk_origin,
+                          self.row_chunk_height, self.row_bg_height, self.letter_end)

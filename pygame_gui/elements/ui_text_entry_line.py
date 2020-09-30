@@ -10,9 +10,8 @@ from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
-from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
-from pygame_gui.core.utility import basic_blit
-from pygame_gui.core import ColourGradient, UIElement
+
+from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 try:
@@ -84,7 +83,7 @@ class UITextEntryLine(UIElement):
         self.cursor = None
         self.background_and_border = None
         self.text_image_rect = None
-        self.text_image = None
+        # self.text_image = None
 
         # colours from theme
         self.background_colour = None
@@ -132,14 +131,22 @@ class UITextEntryLine(UIElement):
         Rebuild whatever needs building.
 
         """
-        self.set_dimensions((self.relative_rect.width, -1))
 
         theming_parameters = {'normal_bg': self.background_colour,
+                              'normal_text': self.text_colour,
                               'normal_border': self.border_colour,
                               'disabled_bg': self.disabled_background_colour,
+                              'disabled_text': self.disabled_text_colour,
                               'disabled_border': self.disabled_border_colour,
+                              'selected_text': self.selected_text_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
+                              'font': self.font,
+                              'text': self.text,
+                              'text_horiz_alignment': 'left',
+                              'text_vert_alignment': 'centre',
+                              'text_horiz_alignment_padding': self.padding[0] + self.shape_corner_radius,
+                              'text_vert_alignment_padding': self.padding[1],
                               'shape_corner_radius': self.shape_corner_radius}
 
         if self.shape == 'rectangle':
@@ -149,31 +156,31 @@ class UITextEntryLine(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'disabled'], self.ui_manager)
 
-        self.background_and_border = self.drawable_shape.get_fresh_surface()
+        self.set_image(self.drawable_shape.get_fresh_surface())
 
-        if self.text_image is None:
-            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
-
-        if isinstance(self.background_colour, ColourGradient):
-            self.text_image.fill(pygame.Color("#FFFFFFFF"))
-            self.background_colour.apply_gradient_to_surface(self.text_image)
-        else:
-            self.text_image.fill(self.background_colour)
-
-        self.set_image(self.background_and_border.copy())
-
-        # TODO: get line spacing from theme?
-        line_spacing = 1.2
-        line_height = self.font.size * line_spacing
-        self.cursor = pygame.Rect((self.text_image_rect.x +
-                                   self.padding[0] - self.start_text_offset,
-                                   self.text_image_rect.y +
-                                   self.padding[1]), (1, line_height))
-
-        # setup for drawing
-        self.redraw()
+        # if self.text_image is None:
+        #     self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+        #                                              flags=pygame.SRCALPHA,
+        #                                              depth=32)
+        #
+        # if isinstance(self.background_colour, ColourGradient):
+        #     self.text_image.fill(pygame.Color("#FFFFFFFF"))
+        #     self.background_colour.apply_gradient_to_surface(self.text_image)
+        # else:
+        #     self.text_image.fill(self.background_colour)
+        #
+        # self.set_image(self.background_and_border.copy())
+        #
+        # # TODO: get line spacing from theme?
+        # line_spacing = 1.2
+        # line_height = self.font.size * line_spacing
+        # self.cursor = pygame.Rect((self.text_image_rect.x +
+        #                            self.padding[0] - self.start_text_offset,
+        #                            self.text_image_rect.y +
+        #                            self.padding[1]), (1, line_height))
+        #
+        # # setup for drawing
+        # self.redraw()
 
     def set_text_length_limit(self, limit: int):
         """
@@ -211,6 +218,7 @@ class UITextEntryLine(UIElement):
             if within_length_limit:
                 self.text = text
                 self.edit_position = 0
+                self.drawable_shape.set_text(self.text)
                 self.should_redraw = True
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
@@ -222,187 +230,189 @@ class UITextEntryLine(UIElement):
         Redraws the entire text entry element onto the underlying sprite image. Usually called
         when the displayed text has been edited or changed in some fashion.
         """
-        if self.is_enabled:
-            if isinstance(self.background_colour, ColourGradient):
-                self.text_image.fill(pygame.Color("#FFFFFFFF"))
-                self.background_colour.apply_gradient_to_surface(self.text_image)
-            else:
-                self.text_image.fill(self.background_colour)
-        else:
-            if isinstance(self.disabled_background_colour, ColourGradient):
-                self.text_image.fill(pygame.Color("#FFFFFFFF"))
-                self.disabled_background_colour.apply_gradient_to_surface(self.text_image)
-            else:
-                self.text_image.fill(self.disabled_background_colour)
+        self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+        self.drawable_shape.redraw_all_states()
+    #     if self.is_enabled:
+    #         if isinstance(self.background_colour, ColourGradient):
+    #             self.text_image.fill(pygame.Color("#FFFFFFFF"))
+    #             self.background_colour.apply_gradient_to_surface(self.text_image)
+    #         else:
+    #             self.text_image.fill(self.background_colour)
+    #     else:
+    #         if isinstance(self.disabled_background_colour, ColourGradient):
+    #             self.text_image.fill(pygame.Color("#FFFFFFFF"))
+    #             self.disabled_background_colour.apply_gradient_to_surface(self.text_image)
+    #         else:
+    #             self.text_image.fill(self.disabled_background_colour)
+    #
+    #     if self.select_range[0] == self.select_range[1]:
+    #         self._redraw_unselected_text()
+    #     else:
+    #         self._redraw_selected_text()
+    #
+    #     text_clip_width = (self.rect.width -
+    #                        (self.padding[0] * 2) -
+    #                        (self.shape_corner_radius * 2) -
+    #                        (self.border_width * 2) -
+    #                        (self.shadow_width * 2))
+    #
+    #     width_to_edit_pos = self.font.get_rect(self.text[:self.edit_position]).width
+    #
+    #     if self.start_text_offset > width_to_edit_pos:
+    #         self.start_text_offset = width_to_edit_pos
+    #     elif width_to_edit_pos > (self.start_text_offset + text_clip_width):
+    #         self.start_text_offset = max(0, width_to_edit_pos - text_clip_width)
+    #     elif width_to_edit_pos == 0:
+    #         self.start_text_offset = 0
+    #
+    #     if len(self.text) > 0:
+    #         basic_blit(self.text_image,
+    #                    self.text_surface,
+    #                    self.padding,
+    #                    pygame.Rect((self.start_text_offset, 0),
+    #                                (text_clip_width,
+    #                                 (self.rect.height -
+    #                                  (self.padding[1] * 2) -
+    #                                  (self.border_width * 2) -
+    #                                  (self.shadow_width * 2)))))
+    #
+    #     self.redraw_cursor()
 
-        if self.select_range[0] == self.select_range[1]:
-            self._redraw_unselected_text()
-        else:
-            self._redraw_selected_text()
-
-        text_clip_width = (self.rect.width -
-                           (self.padding[0] * 2) -
-                           (self.shape_corner_radius * 2) -
-                           (self.border_width * 2) -
-                           (self.shadow_width * 2))
-
-        width_to_edit_pos = self.font.get_rect(self.text[:self.edit_position]).width
-
-        if self.start_text_offset > width_to_edit_pos:
-            self.start_text_offset = width_to_edit_pos
-        elif width_to_edit_pos > (self.start_text_offset + text_clip_width):
-            self.start_text_offset = max(0, width_to_edit_pos - text_clip_width)
-        elif width_to_edit_pos == 0:
-            self.start_text_offset = 0
-
-        if len(self.text) > 0:
-            basic_blit(self.text_image,
-                       self.text_surface,
-                       self.padding,
-                       pygame.Rect((self.start_text_offset, 0),
-                                   (text_clip_width,
-                                    (self.rect.height -
-                                     (self.padding[1] * 2) -
-                                     (self.border_width * 2) -
-                                     (self.shadow_width * 2)))))
-
-        self.redraw_cursor()
-
-    def _redraw_unselected_text(self):
-        """
-        Redraw text where none has been selected by a user.
-        """
-        self.text_surface = render_white_text_alpha_black_bg(font=self.font,
-                                                             text=self.text)
-        if self.is_enabled:
-            if isinstance(self.text_colour, ColourGradient):
-                self.text_colour.apply_gradient_to_surface(self.text_surface)
-            else:
-                apply_colour_to_surface(self.text_colour, self.text_surface)
-        else:
-            if isinstance(self.disabled_text_colour, ColourGradient):
-                self.disabled_text_colour.apply_gradient_to_surface(self.text_surface)
-            else:
-                apply_colour_to_surface(self.disabled_text_colour, self.text_surface)
-
-    def _redraw_selected_text(self):
-        """
-        Redraw text where some has been selected by a user.
-        """
-        low_end = min(self.select_range[0], self.select_range[1])
-        high_end = max(self.select_range[0], self.select_range[1])
-        pre_select_area_text = self.text[:low_end]
-        select_area_text = self.text[low_end:high_end]
-        post_select_area_text = self.text[high_end:]
-        pre_select_area_surface = None
-        post_select_area_surface = None
-
-        overall_size = self.font.get_rect(self.text).size
-        advances = [letter_metrics[4] for letter_metrics in self.font.get_metrics(self.text)]
-        pre_select_width = sum(advances[:low_end])
-        select_area_width = sum(advances[low_end:high_end])
-
-        if len(pre_select_area_text) > 0:
-            pre_select_area_surface = self._draw_text_with_grad_or_col(pre_select_area_text,
-                                                                       self.text_colour)
-
-        if isinstance(self.selected_bg_colour, ColourGradient):
-            select_area_surface = pygame.surface.Surface((select_area_width,
-                                                          overall_size[1]),
-                                                         flags=pygame.SRCALPHA,
-                                                         depth=32)
-            select_area_surface.fill(pygame.Color('#FFFFFFFF'))
-            self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
-
-            alpha_text = self._draw_text_with_grad_or_col(select_area_text,
-                                                          self.selected_text_colour)
-
-            basic_blit(select_area_surface, alpha_text, (0, 0))
-        else:
-            if isinstance(self.selected_text_colour, ColourGradient):
-                select_area_surface = pygame.surface.Surface((select_area_width,
-                                                              overall_size[1]),
-                                                             flags=pygame.SRCALPHA,
-                                                             depth=32)
-                select_area_surface.fill(self.selected_bg_colour)
-
-                alpha_text = render_white_text_alpha_black_bg(font=self.font,
-                                                              text=select_area_text)
-                self.selected_text_colour.apply_gradient_to_surface(alpha_text)
-                basic_blit(select_area_surface, alpha_text, (0, 0))
-
-            else:
-                select_area_surface, _ = self.font.render(select_area_text,
-                                                          self.selected_text_colour,
-                                                          self.selected_bg_colour)
-                select_area_surface = select_area_surface.convert_alpha()
-        if len(post_select_area_text) > 0:
-            post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
-                                                                        self.text_colour)
-
-        self.text_surface = pygame.surface.Surface(overall_size,
-                                                   flags=pygame.SRCALPHA,
-                                                   depth=32)
-
-        if isinstance(self.background_colour, ColourGradient):
-            self.text_image.fill(pygame.Color("#FFFFFFFF"))
-            self.background_colour.apply_gradient_to_surface(self.text_image)
-        else:
-            self.text_image.fill(self.background_colour)
-
-        if pre_select_area_surface is not None:
-            basic_blit(self.text_surface, pre_select_area_surface, (0, 0))
-
-        basic_blit(self.text_surface, select_area_surface, (pre_select_width, 0))
-
-        if post_select_area_surface is not None:
-            basic_blit(self.text_surface, post_select_area_surface,
-                       (pre_select_width + select_area_width, 0))
-
-    def _draw_text_with_grad_or_col(self,
-                                    text: str,
-                                    col_or_grad: Union[ColourGradient,
-                                                       pygame.Color]) -> pygame.surface.Surface:
-        """
-        Draw text to a surface using either a colour or gradient.
-
-        :param text: The text to render.
-        :param col_or_grad: A colour or a colour gradient.
-
-        :return: A surface with the text on.
-
-        """
-        text_surface = render_white_text_alpha_black_bg(font=self.font,
-                                                        text=text)
-        if isinstance(col_or_grad, ColourGradient):
-            col_or_grad.apply_gradient_to_surface(text_surface)
-        else:
-            apply_colour_to_surface(col_or_grad, text_surface)
-        return text_surface
-
-    def redraw_cursor(self):
-        """
-        Redraws only the blinking edit cursor. This allows us to blink the cursor on and off
-        without spending time redrawing all the text.
-        """
-        new_image = self.background_and_border.copy()
-        basic_blit(new_image, self.text_image, self.text_image_rect)
-        if self.cursor_on and self.is_enabled:
-            cursor_len_str = self.text[:self.edit_position]
-            cursor_size = self.font.get_rect(cursor_len_str).size
-            self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
-                             self.padding[0] - self.start_text_offset)
-
-            if not isinstance(self.text_colour, ColourGradient):
-                pygame.draw.rect(new_image, self.text_colour, self.cursor)
-            else:
-                cursor_surface = pygame.surface.Surface(self.cursor.size,
-                                                        flags=pygame.SRCALPHA, depth=32)
-                cursor_surface.fill(pygame.Color('#FFFFFFFF'))
-                self.text_colour.apply_gradient_to_surface(cursor_surface)
-                basic_blit(new_image, cursor_surface, self.cursor)
-
-        self.set_image(new_image)
+    # def _redraw_unselected_text(self):
+    #     """
+    #     Redraw text where none has been selected by a user.
+    #     """
+    #     self.text_surface = render_white_text_alpha_black_bg(font=self.font,
+    #                                                          text=self.text)
+    #     if self.is_enabled:
+    #         if isinstance(self.text_colour, ColourGradient):
+    #             self.text_colour.apply_gradient_to_surface(self.text_surface)
+    #         else:
+    #             apply_colour_to_surface(self.text_colour, self.text_surface)
+    #     else:
+    #         if isinstance(self.disabled_text_colour, ColourGradient):
+    #             self.disabled_text_colour.apply_gradient_to_surface(self.text_surface)
+    #         else:
+    #             apply_colour_to_surface(self.disabled_text_colour, self.text_surface)
+    #
+    # def _redraw_selected_text(self):
+    #     """
+    #     Redraw text where some has been selected by a user.
+    #     """
+    #     low_end = min(self.select_range[0], self.select_range[1])
+    #     high_end = max(self.select_range[0], self.select_range[1])
+    #     pre_select_area_text = self.text[:low_end]
+    #     select_area_text = self.text[low_end:high_end]
+    #     post_select_area_text = self.text[high_end:]
+    #     pre_select_area_surface = None
+    #     post_select_area_surface = None
+    #
+    #     overall_size = self.font.get_rect(self.text).size
+    #     advances = [letter_metrics[4] for letter_metrics in self.font.get_metrics(self.text)]
+    #     pre_select_width = sum(advances[:low_end])
+    #     select_area_width = sum(advances[low_end:high_end])
+    #
+    #     if len(pre_select_area_text) > 0:
+    #         pre_select_area_surface = self._draw_text_with_grad_or_col(pre_select_area_text,
+    #                                                                    self.text_colour)
+    #
+    #     if isinstance(self.selected_bg_colour, ColourGradient):
+    #         select_area_surface = pygame.surface.Surface((select_area_width,
+    #                                                       overall_size[1]),
+    #                                                      flags=pygame.SRCALPHA,
+    #                                                      depth=32)
+    #         select_area_surface.fill(pygame.Color('#FFFFFFFF'))
+    #         self.selected_bg_colour.apply_gradient_to_surface(select_area_surface)
+    #
+    #         alpha_text = self._draw_text_with_grad_or_col(select_area_text,
+    #                                                       self.selected_text_colour)
+    #
+    #         basic_blit(select_area_surface, alpha_text, (0, 0))
+    #     else:
+    #         if isinstance(self.selected_text_colour, ColourGradient):
+    #             select_area_surface = pygame.surface.Surface((select_area_width,
+    #                                                           overall_size[1]),
+    #                                                          flags=pygame.SRCALPHA,
+    #                                                          depth=32)
+    #             select_area_surface.fill(self.selected_bg_colour)
+    #
+    #             alpha_text = render_white_text_alpha_black_bg(font=self.font,
+    #                                                           text=select_area_text)
+    #             self.selected_text_colour.apply_gradient_to_surface(alpha_text)
+    #             basic_blit(select_area_surface, alpha_text, (0, 0))
+    #
+    #         else:
+    #             select_area_surface, _ = self.font.render(select_area_text,
+    #                                                       self.selected_text_colour,
+    #                                                       self.selected_bg_colour)
+    #             select_area_surface = select_area_surface.convert_alpha()
+    #     if len(post_select_area_text) > 0:
+    #         post_select_area_surface = self._draw_text_with_grad_or_col(post_select_area_text,
+    #                                                                     self.text_colour)
+    #
+    #     self.text_surface = pygame.surface.Surface(overall_size,
+    #                                                flags=pygame.SRCALPHA,
+    #                                                depth=32)
+    #
+    #     if isinstance(self.background_colour, ColourGradient):
+    #         self.text_image.fill(pygame.Color("#FFFFFFFF"))
+    #         self.background_colour.apply_gradient_to_surface(self.text_image)
+    #     else:
+    #         self.text_image.fill(self.background_colour)
+    #
+    #     if pre_select_area_surface is not None:
+    #         basic_blit(self.text_surface, pre_select_area_surface, (0, 0))
+    #
+    #     basic_blit(self.text_surface, select_area_surface, (pre_select_width, 0))
+    #
+    #     if post_select_area_surface is not None:
+    #         basic_blit(self.text_surface, post_select_area_surface,
+    #                    (pre_select_width + select_area_width, 0))
+    #
+    # def _draw_text_with_grad_or_col(self,
+    #                                 text: str,
+    #                                 col_or_grad: Union[ColourGradient,
+    #                                                    pygame.Color]) -> pygame.surface.Surface:
+    #     """
+    #     Draw text to a surface using either a colour or gradient.
+    #
+    #     :param text: The text to render.
+    #     :param col_or_grad: A colour or a colour gradient.
+    #
+    #     :return: A surface with the text on.
+    #
+    #     """
+    #     text_surface = render_white_text_alpha_black_bg(font=self.font,
+    #                                                     text=text)
+    #     if isinstance(col_or_grad, ColourGradient):
+    #         col_or_grad.apply_gradient_to_surface(text_surface)
+    #     else:
+    #         apply_colour_to_surface(col_or_grad, text_surface)
+    #     return text_surface
+    #
+    # def redraw_cursor(self):
+    #     """
+    #     Redraws only the blinking edit cursor. This allows us to blink the cursor on and off
+    #     without spending time redrawing all the text.
+    #     """
+    #     new_image = self.background_and_border.copy()
+    #     basic_blit(new_image, self.text_image, self.text_image_rect)
+    #     if self.cursor_on and self.is_enabled:
+    #         cursor_len_str = self.text[:self.edit_position]
+    #         cursor_size = self.font.get_rect(cursor_len_str).size
+    #         self.cursor.x = (cursor_size[0] + self.text_image_rect.x +
+    #                          self.padding[0] - self.start_text_offset)
+    #
+    #         if not isinstance(self.text_colour, ColourGradient):
+    #             pygame.draw.rect(new_image, self.text_colour, self.cursor)
+    #         else:
+    #             cursor_surface = pygame.surface.Surface(self.cursor.size,
+    #                                                     flags=pygame.SRCALPHA, depth=32)
+    #             cursor_surface.fill(pygame.Color('#FFFFFFFF'))
+    #             self.text_colour.apply_gradient_to_surface(cursor_surface)
+    #             basic_blit(new_image, cursor_surface, self.cursor)
+    #
+    #     self.set_image(new_image)
 
     def update(self, time_delta: float):
         """
@@ -427,6 +437,7 @@ class UITextEntryLine(UIElement):
             if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
                 self.select_range[0] = new_range[0]
                 self.select_range[1] = new_range[1]
+
                 self.edit_position = self.select_range[1]
                 self.cursor_has_moved_recently = True
 
@@ -434,9 +445,15 @@ class UITextEntryLine(UIElement):
             self.cursor_has_moved_recently = False
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
-            self.should_redraw = True
+
+            start_select = min(self.select_range[0], self.select_range[1])
+            end_select = max(self.select_range[0], self.select_range[1])
+            self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
+            self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+            self.drawable_shape.toggle_text_cursor()
 
         if self.should_redraw:
+            self.should_redraw = False
             self.redraw()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
@@ -444,10 +461,10 @@ class UITextEntryLine(UIElement):
                 self.blink_cursor_time_acc = 0.0
                 if self.cursor_on:
                     self.cursor_on = False
-                    self.redraw_cursor()
+                    self.drawable_shape.toggle_text_cursor()
                 elif self.is_focused:
                     self.cursor_on = True
-                    self.redraw_cursor()
+                    self.drawable_shape.toggle_text_cursor()
             else:
                 self.blink_cursor_time_acc += time_delta
         else:
@@ -538,12 +555,15 @@ class UITextEntryLine(UIElement):
                         low_end = min(self.select_range[0], self.select_range[1])
                         high_end = max(self.select_range[0], self.select_range[1])
                         self.text = self.text[:low_end] + character + self.text[high_end:]
+
                         self.edit_position = low_end + 1
                         self.select_range = [0, 0]
                     else:
                         start_str = self.text[:self.edit_position]
                         end_str = self.text[self.edit_position:]
                         self.text = start_str + character + end_str
+                        self.drawable_shape.text_box_layout.insert_text(character, self.edit_position)
+
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
                     consumed_event = True
@@ -716,15 +736,19 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
+
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
                     pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
                     self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
 
+                    double_clicking = False
                     if self.double_click_timer < self.ui_manager.get_double_click_time():
-                        self._calculate_double_click_word_selection()
-                    else:
+                        if self._calculate_double_click_word_selection():
+                            double_clicking = True
+
+                    if not double_clicking:
                         self.select_range[0] = self.edit_position
                         self.select_range[1] = self.edit_position
                         self.cursor_has_moved_recently = True
@@ -753,7 +777,7 @@ class UITextEntryLine(UIElement):
 
         """
         if self.edit_position != self.select_range[0]:
-            return
+            return False
         index = min(self.edit_position, len(self.text) - 1)
         if index > 0:
             char = self.text[index]
@@ -785,6 +809,9 @@ class UITextEntryLine(UIElement):
             self.edit_position = end_select_index
             self.cursor_has_moved_recently = True
             self.selection_in_progress = False
+            return True
+        else:
+            return False
 
     def find_edit_position_from_pixel_pos(self, pixel_pos: int) -> int:
         """
@@ -969,43 +996,43 @@ class UITextEntryLine(UIElement):
 
         return has_any_changed
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]]):
-        """
-        Will allow us to change the width of the text entry line, but not it's height which is
-        determined by the height of the font.
-
-        :param dimensions: The dimensions to set. Only the first, the width, will actually be used.
-
-        """
-        corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
-        # TODO: get line spacing from theme?
-        line_spacing = 1.2
-        line_height = self.font.size * line_spacing
-        corrected_dimensions[1] = int(line_height + (2 * self.padding[1]) +
-                                      (2 * self.border_width) + (2 * self.shadow_width))
-        super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))
-
-        self.text_image_rect = pygame.Rect((self.border_width +
-                                            self.shadow_width +
-                                            self.shape_corner_radius,
-                                            self.border_width +
-                                            self.shadow_width),
-                                           (self.relative_rect.width -
-                                            (self.border_width * 2) -
-                                            (self.shadow_width * 2) -
-                                            (2 * self.shape_corner_radius),
-                                            self.relative_rect.height -
-                                            (self.border_width * 2) -
-                                            (self.shadow_width * 2)))
-
-        if self.drawable_shape is not None:
-            self.background_and_border = self.drawable_shape.get_fresh_surface()
-            self.text_image = pygame.surface.Surface(self.text_image_rect.size,
-                                                     flags=pygame.SRCALPHA,
-                                                     depth=32)
-            self.redraw()
+    # def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+    #                                            Tuple[int, int],
+    #                                            Tuple[float, float]]):
+    #     """
+    #     Will allow us to change the width of the text entry line, but not it's height which is
+    #     determined by the height of the font.
+    #
+    #     :param dimensions: The dimensions to set. Only the first, the width, will actually be used.
+    #
+    #     """
+    #     corrected_dimensions = [int(dimensions[0]), int(dimensions[1])]
+    #     # TODO: get line spacing from theme?
+    #     line_spacing = 1.2
+    #     line_height = self.font.size * line_spacing
+    #     corrected_dimensions[1] = int(line_height + (2 * self.padding[1]) +
+    #                                   (2 * self.border_width) + (2 * self.shadow_width))
+    #     super().set_dimensions((corrected_dimensions[0], corrected_dimensions[1]))
+    #
+    #     self.text_image_rect = pygame.Rect((self.border_width +
+    #                                         self.shadow_width +
+    #                                         self.shape_corner_radius,
+    #                                         self.border_width +
+    #                                         self.shadow_width),
+    #                                        (self.relative_rect.width -
+    #                                         (self.border_width * 2) -
+    #                                         (self.shadow_width * 2) -
+    #                                         (2 * self.shape_corner_radius),
+    #                                         self.relative_rect.height -
+    #                                         (self.border_width * 2) -
+    #                                         (self.shadow_width * 2)))
+    #
+    #     if self.drawable_shape is not None:
+    #         self.background_and_border = self.drawable_shape.get_fresh_surface()
+    #         self.text_image = pygame.surface.Surface(self.text_image_rect.size,
+    #                                                  flags=pygame.SRCALPHA,
+    #                                                  depth=32)
+    #         self.redraw()
 
     def disable(self):
         """

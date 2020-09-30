@@ -71,8 +71,7 @@ class UILabel(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.drawable_shape.theming['text'] = self.text
-            self.drawable_shape.redraw_all_states()
+            self.drawable_shape.set_text(self.text)
 
     def rebuild(self):
         """

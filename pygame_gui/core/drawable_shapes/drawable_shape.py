@@ -139,16 +139,24 @@ class DrawableShape:
                  states: List[str],
                  manager: IUIManagerInterface):
 
+        self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
+
+        self.shadow_width = 0
+        self.border_width = 0
+        if 'shadow_width' in self.theming:
+            self.shadow_width = self.theming['shadow_width']
+        if 'border_width' in self.theming:
+            self.border_width = self.theming['border_width']
+
+        self.text_box_layout = None
+        self.build_text_layout()
+
+        self._evaluate_contents_for_containing_rect()
         if self.containing_rect.width < 1:
             self.containing_rect.width = 1
         if self.containing_rect.height < 1:
             self.containing_rect.height = 1
-
-        self.theming = theming_parameters
-
-        self.shadow_width = 0
-        self.border_width = 0
 
         self.states = OrderedDict()
         for state in states:
@@ -179,10 +187,46 @@ class DrawableShape:
         self.click_area_shape = None
         self.border_rect = None
         self.background_rect = None
-        self.aligned_text_rect = None
         self.base_surface = None
 
-        self.text_box_layout = None
+    def _evaluate_contents_for_containing_rect(self):
+        if self.containing_rect.width == -1:
+            # check to see if we have text and a font, this won't work with HTML text - throw a warning?
+            # What we really need to to is process the html text layout by this point but hold off finalising
+            # and passing default colours until later?
+            if self.text_box_layout is not None:
+                text_width = self.text_box_layout.layout_rect.width
+
+                # As well as the text width we want to throw in the borders, shadows and any text padding
+                shadow_width = 0
+                border_width = 0
+                horiz_text_padding = 0
+                if 'shadow_width' in self.theming:
+                    shadow_width = self.theming['shadow_width']
+                if 'border_width' in self.theming:
+                    border_width = self.theming['border_width']
+                if 'text_horiz_alignment_padding' in self.theming:
+                    horiz_text_padding = self.theming['text_horiz_alignment_padding']
+
+                final_width = text_width + (2 * shadow_width) + (2 * border_width) + (2 * horiz_text_padding)
+                self.containing_rect.width = final_width
+        if self.containing_rect.height == -1:
+            if self.text_box_layout is not None:
+                text_height = self.text_box_layout.layout_rect.height
+
+                # As well as the text height we want to throw in the borders, shadows and any text padding
+                shadow_width = 0
+                border_width = 0
+                vert_text_padding = 0
+                if 'shadow_width' in self.theming:
+                    shadow_width = self.theming['shadow_width']
+                if 'border_width' in self.theming:
+                    border_width = self.theming['border_width']
+                if 'text_vert_alignment_padding' in self.theming:
+                    vert_text_padding = self.theming['text_vert_alignment_padding']
+
+                final_height = text_height + (2 * shadow_width) + (2 * border_width) + (2 * vert_text_padding)
+                self.containing_rect.height = final_height
 
     def set_active_state(self, state_id: str):
         """
@@ -262,6 +306,8 @@ class DrawableShape:
             self.shadow_width = self.theming['shadow_width']
         if 'border_width' in self.theming:
             self.border_width = self.theming['border_width']
+
+        self.build_text_layout()
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
@@ -282,31 +328,37 @@ class DrawableShape:
 
         """
         # Horizontal alignment
-        if (self.theming['text_horiz_alignment'] == 'center' or
-                self.theming['text_horiz_alignment'] not in ['left', 'right']):
-            self.text_box_layout.horiz_center_all_rows()
-        elif self.theming['text_horiz_alignment'] == 'left':
-            left_padding = (self.theming['text_horiz_alignment_padding'] +
-                            self.shadow_width + self.border_width)
-            self.text_box_layout.align_left_all_rows(left_padding)
+        if 'text_horiz_alignment' in self.theming:
+            if (self.theming['text_horiz_alignment'] == 'center' or
+                    self.theming['text_horiz_alignment'] not in ['left', 'right']):
+                self.text_box_layout.horiz_center_all_rows()
+            elif self.theming['text_horiz_alignment'] == 'left':
+                left_padding = (self.theming['text_horiz_alignment_padding'] +
+                                self.shadow_width + self.border_width)
+                self.text_box_layout.align_left_all_rows(left_padding)
+            else:
+                right_padding = (self.theming['text_horiz_alignment_padding'] +
+                                 self.shadow_width + self.border_width)
+                self.text_box_layout.align_right_all_rows(right_padding)
         else:
-            right_padding = (self.theming['text_horiz_alignment_padding'] +
-                             self.shadow_width + self.border_width)
-            self.text_box_layout.align_right_all_rows(right_padding)
+            self.text_box_layout.horiz_center_all_rows()
 
         # Vertical alignment
-        if (self.theming['text_vert_alignment'] == 'center' or
-                self.theming['text_vert_alignment'] not in ['top', 'bottom']):
-            self.text_box_layout.vert_center_all_rows()
-        elif self.theming['text_vert_alignment'] == 'top':
-            top_padding = (self.theming['text_vert_alignment_padding'] +
-                           self.shadow_width + self.border_width)
-            self.text_box_layout.vert_align_top_all_rows(top_padding)
+        if 'text_vert_alignment' in self.theming:
+            if (self.theming['text_vert_alignment'] == 'center' or
+                    self.theming['text_vert_alignment'] not in ['top', 'bottom']):
+                self.text_box_layout.vert_center_all_rows()
+            elif self.theming['text_vert_alignment'] == 'top':
+                top_padding = (self.theming['text_vert_alignment_padding'] +
+                               self.shadow_width + self.border_width)
+                self.text_box_layout.vert_align_top_all_rows(top_padding)
 
+            else:
+                bottom_padding = (self.theming['text_vert_alignment_padding'] +
+                                  self.shadow_width + self.border_width)
+                self.text_box_layout.vert_align_bottom_all_rows(bottom_padding)
         else:
-            bottom_padding = (self.theming['text_vert_alignment_padding'] +
-                              self.shadow_width + self.border_width)
-            self.text_box_layout.vert_align_bottom_all_rows(bottom_padding)
+            self.text_box_layout.vert_center_all_rows()
 
     def get_active_state_surface(self) -> pygame.surface.Surface:
         """
@@ -357,10 +409,10 @@ class DrawableShape:
         """
         return self.active_state.has_fresh_surface
 
-    def rebuild_images_and_text(self,
-                                image_state_str: str,
-                                state_str: str,
-                                text_colour_state_str: str):
+    def finalise_images_and_text(self,
+                                 image_state_str: str,
+                                 state_str: str,
+                                 text_colour_state_str: str):
         """
         Rebuilds any text or image used by a specific state in the drawable shape. Effectively
         this means adding them on top of whatever is already in the state's surface. As such it
@@ -380,24 +432,41 @@ class DrawableShape:
                                  int(self.containing_rect.height / 2))
             basic_blit(self.states[state_str].surface,
                        self.theming[image_state_str], image_rect)
+        self.finalise_text(state_str, text_colour_state_str)
+
+    def build_text_layout(self):
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
-            if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-                text_shadow_data = (0, 0, 0, pygame.Color('#505050'))
-                if 'text_shadow' in self.theming:
-                    text_shadow_data = self.theming['text_shadow']
-                text_chunk = TextLineChunkFTFont(self.theming['text'],
-                                                 self.theming['font'],
-                                                 underlined=False,
-                                                 colour=self.theming[text_colour_state_str],
-                                                 bg_colour=pygame.Color('#00000000'),
-                                                 text_shadow_data=text_shadow_data,
-                                                 max_dimensions=(self.containing_rect.width,
-                                                                 self.containing_rect.height))
-                text_chunk.should_centre_from_baseline = True
-                self.text_box_layout = TextBoxLayout(deque([text_chunk]), self.containing_rect, line_spacing=1.25)
-                self.align_all_text_rows()
-                self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
+            text_shadow_data = (0, 0, 0, pygame.Color('#505050'))
+            if 'text_shadow' in self.theming:
+                text_shadow_data = self.theming['text_shadow']
+            text_chunk = TextLineChunkFTFont(self.theming['text'],
+                                             self.theming['font'],
+                                             underlined=False,
+                                             colour=pygame.Color('#FFFFFFFF'),
+                                             using_default_text_colour=True,
+                                             bg_colour=pygame.Color('#00000000'),
+                                             text_shadow_data=text_shadow_data,
+                                             max_dimensions=(self.containing_rect.width,
+                                                             self.containing_rect.height))
+            text_chunk.should_centre_from_baseline = True
+            self.text_box_layout = TextBoxLayout(deque([text_chunk]), self.containing_rect, line_spacing=1.25)
+            self.align_all_text_rows()
+
+    def finalise_text(self, state_str, text_colour_state_str):
+        if self.text_box_layout is not None:
+            self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
+            self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
+
+    def set_text(self, text: str):
+        self.theming['text'] = text
+        self.build_text_layout()
+        self.redraw_all_states()
+
+    def toggle_text_cursor(self):
+        if self.text_box_layout is not None:
+            self.text_box_layout.toggle_cursor()
+            self.active_state.has_fresh_surface = True
 
     def redraw_state(self, state_str: str):
         """
