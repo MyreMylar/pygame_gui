@@ -465,7 +465,6 @@ class TextBoxLayout:
         # first clear the current selection
         for chunk in self.selected_chunks:
             chunk.is_selected = False
-        self.selected_chunks.clear()
 
         for row in self.selected_rows:
             row.clear()
@@ -473,103 +472,103 @@ class TextBoxLayout:
         self.selected_rows.clear()
 
         # We need to check if the indexes are at the start/end of a chunk and if not, split the chunk
-
-        start_chunk = None
-        start_chunk_row = None
-        start_row_index = 0
-        start_chunk_in_row_index = 0
-        start_letter_index = 0
-
-        end_chunk = None
-        end_chunk_row = None
-        end_row_index = 0
-        end_chunk_in_row_index = 0
-        end_letter_index = 0
-        # step 1: find the start chunk
-        letter_accumulator = 0
-
-        for row in self.layout_rows:
-            if start_chunk is None:
-                if start_index <= letter_accumulator + row.letter_count:
-                    start_chunk_row = row
-                    start_chunk_in_row_index = 0
-                    for chunk in row.items:
-                        if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
-                            if start_index < letter_accumulator + chunk.letter_count:
-                                start_letter_index = start_index - letter_accumulator
-                                start_chunk = chunk
-                                break
-                            else:
-                                letter_accumulator += chunk.letter_count
-                                start_chunk_in_row_index += 1
-
-                else:
-                    letter_accumulator += row.letter_count
-                    start_row_index += 1
-            else:
-                break
-
-        if start_letter_index != 0:
-            # split the chunk
-
-            # for the start chunk we want the right hand side of the split
-            start_chunk = start_chunk.split_index(start_letter_index)
-            start_chunk_row.items.insert(start_chunk_in_row_index + 1, start_chunk)
+        if start_index != end_index:
+            start_chunk = None
+            start_chunk_row = None
+            start_row_index = 0
+            start_chunk_in_row_index = 0
             start_letter_index = 0
 
-        # step 1: find the end chunk
-        letter_accumulator = 0
-        for row in self.layout_rows:
-            if end_chunk is None:
-                if end_index <= letter_accumulator + row.letter_count:
-                    end_chunk_row = row
-                    end_chunk_in_row_index = 0
-                    for chunk in row.items:
-                        if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
-                            if end_index < letter_accumulator + chunk.letter_count:
-                                end_letter_index = end_index - letter_accumulator
-                                end_chunk = chunk
-                                break
-                            else:
-                                letter_accumulator += chunk.letter_count
-                                end_chunk_in_row_index += 1
+            end_chunk = None
+            end_chunk_row = None
+            end_row_index = 0
+            end_chunk_in_row_index = 0
+            end_letter_index = 0
+            # step 1: find the start chunk
+            letter_accumulator = 0
 
-                else:
-                    letter_accumulator += row.letter_count
-                    end_row_index += 1
-            else:
-                break
+            for row in self.layout_rows:
+                if start_chunk is None:
+                    if start_index <= letter_accumulator + row.letter_count:
+                        start_chunk_row = row
+                        start_chunk_in_row_index = 0
+                        for chunk in row.items:
+                            if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
+                                if start_index < letter_accumulator + chunk.letter_count:
+                                    start_letter_index = start_index - letter_accumulator
+                                    start_chunk = chunk
+                                    break
+                                else:
+                                    letter_accumulator += chunk.letter_count
+                                    start_chunk_in_row_index += 1
 
-        if end_letter_index != 0:
-            # split the chunk
-
-            # for the start chunk we want the right hand side of the split
-            new_chunk = end_chunk.split_index(end_letter_index)
-            end_chunk_row.items.insert(end_chunk_in_row_index + 1, new_chunk)
-
-        start_selection = False
-        end_selection = False
-        for i in range(start_row_index, end_row_index + 1):
-            row = self.layout_rows[i]
-
-            row.clear()
-            self.selected_rows.append(row)
-            rows_to_finalise.add(row)
-            for chunk in row.items:
-                if chunk == start_chunk:
-                    start_selection = True
-
-                if start_selection and not end_selection:
-                    if chunk == end_chunk and end_letter_index == 0:
-                        # don't select this
-                        pass
                     else:
-                        chunk.is_selected = True
-                        chunk.selection_colour = self.selection_colour
-                        self.selected_chunks.append(chunk)
+                        letter_accumulator += row.letter_count
+                        start_row_index += 1
+                else:
+                    break
 
-                if chunk == end_chunk:
-                    end_selection = True
+            if start_letter_index != 0:
+                # split the chunk
+
+                # for the start chunk we want the right hand side of the split
+                start_chunk = start_chunk.split_index(start_letter_index)
+                start_chunk_row.items.insert(start_chunk_in_row_index + 1, start_chunk)
+                start_letter_index = 0
+
+            # step 1: find the end chunk
+            letter_accumulator = 0
+            for row in self.layout_rows:
+                if end_chunk is None:
+                    if end_index <= letter_accumulator + row.letter_count:
+                        end_chunk_row = row
+                        end_chunk_in_row_index = 0
+                        for chunk in row.items:
+                            if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
+                                if end_index < letter_accumulator + chunk.letter_count:
+                                    end_letter_index = end_index - letter_accumulator
+                                    end_chunk = chunk
+                                    break
+                                else:
+                                    letter_accumulator += chunk.letter_count
+                                    end_chunk_in_row_index += 1
+
+                    else:
+                        letter_accumulator += row.letter_count
+                        end_row_index += 1
+                else:
+                    break
+
+            if end_letter_index != 0:
+                # split the chunk
+
+                # for the start chunk we want the right hand side of the split
+                new_chunk = end_chunk.split_index(end_letter_index)
+                end_chunk_row.items.insert(end_chunk_in_row_index + 1, new_chunk)
+
+            start_selection = False
+            end_selection = False
+            for i in range(start_row_index, end_row_index + 1):
+                row = self.layout_rows[i]
+
+                row.clear()
+                self.selected_rows.append(row)
+                rows_to_finalise.add(row)
+                for chunk in row.items:
+                    if chunk == start_chunk:
+                        start_selection = True
+
+                    if start_selection and not end_selection:
+                        if chunk == end_chunk and end_letter_index == 0:
+                            # don't select this
+                            pass
+                        else:
+                            chunk.is_selected = True
+                            chunk.selection_colour = self.selection_colour
+                            self.selected_chunks.append(chunk)
+
+                    if chunk == end_chunk:
+                        end_selection = True
 
         for row in rows_to_finalise:
             row.finalise(self.finalised_surface)
@@ -607,3 +606,95 @@ class TextBoxLayout:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
                         rect.finalise(self.finalised_surface, row.y_origin, row.text_chunk_height, row.height)
+
+    def delete_selected_text(self):
+        temp_layout_queue = deque([])
+        max_row_index = 0
+        current_row = self.selected_rows[0]
+        self.cursor_text_row = current_row
+        letter_acc = 0
+        for chunk in current_row.items:
+            if chunk.is_selected:
+                current_row.set_cursor_position(letter_acc)
+                break
+            else:
+                letter_acc += chunk.letter_count
+
+        current_row_starting_chunk = self.selected_rows[0].items[0]
+        current_row_index = current_row.row_index
+        for row in self.selected_rows:
+            row.items = [chunk for chunk in row.items if not chunk.is_selected]
+            row.rewind_row(temp_layout_queue)
+            if row.row_index > max_row_index:
+                max_row_index = row.row_index
+
+        for row_index in range(max_row_index+1, len(self.layout_rows)):
+            self.layout_rows[row_index].rewind_row(temp_layout_queue)
+
+        self.layout_rows = self.layout_rows[:current_row_index]
+
+        self._process_layout_queue(temp_layout_queue, current_row)
+
+        if len(current_row.items) == 0:
+            current_row_starting_chunk.text = ''
+            current_row_starting_chunk.width = 0
+            current_row_starting_chunk.letter_count = 0
+            current_row_starting_chunk.split_points = []
+            current_row_starting_chunk.is_selected = False
+            current_row.add_item(current_row_starting_chunk)
+
+        for row in self.layout_rows[current_row_index:]:
+            row.finalise(self.finalised_surface)
+
+        self.selected_rows = []
+        self.selected_chunks = []
+
+    def delete_at_cursor(self):
+        if self.cursor_text_row is not None:
+            current_row = self.cursor_text_row
+            current_row_index = current_row.row_index
+            cursor_pos = self.cursor_text_row.cursor_position
+            letter_acc = 0
+            for chunk in self.cursor_text_row.items:
+                if cursor_pos <= letter_acc + chunk.letter_count:
+                    chunk_letter_pos = cursor_pos - letter_acc
+                    chunk.delete_letter_at_index(chunk_letter_pos)
+                    break
+                else:
+                    letter_acc += chunk.letter_count
+
+            temp_layout_queue = deque([])
+            for row_index in range(current_row_index, len(self.layout_rows)):
+                self.layout_rows[row_index].rewind_row(temp_layout_queue)
+
+            self.layout_rows = self.layout_rows[:current_row_index]
+
+            self._process_layout_queue(temp_layout_queue, current_row)
+
+            for row in self.layout_rows[current_row_index:]:
+                row.finalise(self.finalised_surface)
+
+    def backspace_at_cursor(self):
+        if self.cursor_text_row is not None:
+            current_row = self.cursor_text_row
+            current_row_index = current_row.row_index
+            cursor_pos = self.cursor_text_row.cursor_position
+            letter_acc = 0
+            for chunk in self.cursor_text_row.items:
+                if cursor_pos <= letter_acc + chunk.letter_count:
+                    chunk_letter_pos = cursor_pos - letter_acc
+                    chunk.backspace_letter_at_index(chunk_letter_pos)
+                    break
+                else:
+                    letter_acc += chunk.letter_count
+            self.cursor_text_row.set_cursor_position(cursor_pos - 1)
+            temp_layout_queue = deque([])
+            for row_index in range(current_row_index, len(self.layout_rows)):
+                self.layout_rows[row_index].rewind_row(temp_layout_queue)
+
+            self.layout_rows = self.layout_rows[:current_row_index]
+
+            self._process_layout_queue(temp_layout_queue, current_row)
+
+            for row in self.layout_rows[current_row_index:]:
+                row.finalise(self.finalised_surface)

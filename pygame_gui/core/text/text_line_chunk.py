@@ -75,8 +75,6 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-        self.cursor_position = 0
-
         self.target_surface = None
         self.row_chunk_origin = 0
         self.row_chunk_height = 0
@@ -431,15 +429,47 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         self.size = (text_width, text_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
-    def insert_text_at_cursor(self, input_text: str):
-        self.insert_text(input_text, self.cursor_position)
+    def delete_letter_at_index(self, index):
+        self.text = self.text[:index] + self.text[min(len(self.text), index+1):]
 
-    def delete_letter_at_cursor(self):
-        self.text = self.text[:self.cursor_position] + self.text[min(len(self.text), self.cursor_position+1):]
+        self.letter_count = len(self.text)
+        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-    def backspace_letter_at_cursor(self):
-        self.text = self.text[:max(0, self.cursor_position-1)] + self.text[self.cursor_position:]
-        self.set_cursor_position(self.cursor_position - 1)
+        if len(self.text) == 0:
+            text_rect = self.font.get_rect('A')
+        else:
+            text_rect = self.font.get_rect(self.text)
+        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_height = text_rect.height
+        if self.max_dimensions is not None:
+            if self.max_dimensions[0] != -1:
+                text_width = min(self.max_dimensions[0], text_width)
+            if self.max_dimensions[1] != -1:
+                text_height = min(self.max_dimensions[1], text_height)
+
+        self.size = (
+        text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+
+    def backspace_letter_at_index(self, index):
+        self.text = self.text[:max(0, index-1)] + self.text[index:]
+
+        self.letter_count = len(self.text)
+        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
+
+        if len(self.text) == 0:
+            text_rect = self.font.get_rect('A')
+        else:
+            text_rect = self.font.get_rect(self.text)
+        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_height = text_rect.height
+        if self.max_dimensions is not None:
+            if self.max_dimensions[0] != -1:
+                text_width = min(self.max_dimensions[0], text_width)
+            if self.max_dimensions[1] != -1:
+                text_height = min(self.max_dimensions[1], text_height)
+
+        self.size = (
+        text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
     def x_pos_to_letter_index(self, x_pos: int):
         chunk_space_x = x_pos - self.x

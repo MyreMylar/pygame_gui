@@ -8,14 +8,12 @@ from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 
-class UIScreenSpaceHealthBar(UIElement):
+class UIProgressBar(UIElement):
     """
-    A UI that will display health capacity and current health for a sprite in 'screen space'.
-    That means it won't move with the camera. This is a good choice for a user/player sprite.
+    A UI that will display a progress bar from 0 to 100%
 
-    :param relative_rect: The rectangle that defines the size and position of the health bar.
+    :param relative_rect: The rectangle that defines the size and position of the progress bar.
     :param manager: The UIManager that manages this element.
-    :param sprite_to_monitor: The sprite we are displaying the health of.
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
@@ -27,7 +25,6 @@ class UIScreenSpaceHealthBar(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
@@ -43,11 +40,11 @@ class UIScreenSpaceHealthBar(UIElement):
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
                                object_id=object_id,
-                               element_id='screen_space_health_bar')
+                               element_id='progress_bar')
 
-        self.current_health = 50
-        self.health_capacity = 100
-        self.health_percentage = self.current_health / self.health_capacity
+        self.current_progress = 0.0
+        self.maximum_progress = 100.0
+        self.progress_percentage = self.current_progress / self.maximum_progress
 
         self.font = None
         self.border_width = None
@@ -66,43 +63,21 @@ class UIScreenSpaceHealthBar(UIElement):
         self.capacity_width = None
         self.capacity_height = None
         self.capacity_rect = None
-        self.current_health_rect = None
+        self.current_progress_rect = None
 
         self.drawable_shape = None
         self.shape = 'rectangle'
         self.shape_corner_radius = None
 
-        if sprite_to_monitor is not None:
-            if not hasattr(sprite_to_monitor, 'health_capacity'):
-                raise AttributeError('Sprite does not have health_capacity attribute')
-            if not hasattr(sprite_to_monitor, 'current_health'):
-                raise AttributeError('Sprite does not have current_health attribute')
-            self.sprite_to_monitor = sprite_to_monitor
-        else:
-            self.sprite_to_monitor = None
         self.set_image(None)
         self.background_text = None
         self.foreground_text = None
 
         self.rebuild_from_changed_theme_data()
 
-    def set_sprite_to_monitor(self, sprite_to_monitor: pygame.sprite.Sprite):
-        """
-        Sprite to monitor the health of. Must have 'health_capacity' and 'current_health'
-        attributes.
-
-        :param sprite_to_monitor:
-
-        """
-        if not hasattr(sprite_to_monitor, 'health_capacity'):
-            raise AttributeError('Sprite does not have health_capacity attribute')
-        if not hasattr(sprite_to_monitor, 'current_health'):
-            raise AttributeError('Sprite does not have current_health attribute')
-        self.sprite_to_monitor = sprite_to_monitor
-
     def rebuild(self):
         """
-        Rebuild the health bar entirely because the theming data has changed.
+        Rebuild the progress bar entirely because the theming data has changed.
 
         """
         border_rect_width = self.rect.width - (self.shadow_width * 2)
@@ -117,19 +92,19 @@ class UIScreenSpaceHealthBar(UIElement):
                                           self.shadow_width + self.border_width),
                                          (self.capacity_width, self.capacity_height))
 
-        self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
-                                                self.shadow_width + self.border_width),
-                                               (int(self.capacity_width * self.health_percentage),
-                                                self.capacity_height))
+        self.current_progress_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                                  self.shadow_width + self.border_width),
+                                                 (int(self.capacity_width * self.progress_percentage),
+                                                  self.capacity_height))
 
         self.redraw()
 
     def redraw(self):
         """
-        Redraws the health bar rectangles and text onto the underlying sprite's image surface.
-        Takes a little while so we only do it when the health has changed.
+        Redraws the progress bar rectangles and text onto the underlying sprite's image surface.
+        Takes a little while so we only do it when the progress has changed.
         """
-        health_display_string = str(self.current_health) + "/" + str(self.health_capacity)
+        progress_string = "{0:0.1f}/{1:0.1f}".format(self.current_progress, self.maximum_progress)
 
         theming_parameters = {'normal_bg': self.bar_unfilled_colour,
                               'normal_border': self.border_colour,
@@ -137,9 +112,9 @@ class UIScreenSpaceHealthBar(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius,
                               'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width_percentage': self.health_percentage,
+                              'filled_bar_width_percentage': self.progress_percentage,
                               'font': self.font,
-                              'text': health_display_string,
+                              'text': progress_string,
                               'normal_text': self.text_colour,
                               'text_shadow': (1,
                                               0,
@@ -160,27 +135,16 @@ class UIScreenSpaceHealthBar(UIElement):
 
         self.set_image(self.drawable_shape.get_fresh_surface())
 
-    def update(self, time_delta: float):
-        """
-        Updates the health bar sprite's image with the latest health data from the
-        sprite we are monitoring. Only triggers a rebuild if the health values have changed.
-
-        :param time_delta: time passed in seconds between one call to this method and the next.
-
-        """
-        super().update(time_delta)
-        if (self.alive() and self.sprite_to_monitor is not None and
-                (self.sprite_to_monitor.maximum_progress != self.health_capacity or
-                 self.current_health != self.sprite_to_monitor.current_progress)):
-            self.current_health = self.sprite_to_monitor.current_progress
-            self.health_capacity = self.sprite_to_monitor.maximum_progress
-            self.health_percentage = self.current_health / self.health_capacity
-
-            rect_width = int(self.capacity_width * self.health_percentage)
-            self.current_health_rect = pygame.Rect((self.shadow_width + self.border_width,
-                                                    self.shadow_width + self.border_width),
-                                                   (rect_width,
-                                                    self.capacity_height))
+    def set_current_progress(self, progress: float):
+        if progress != self.current_progress:
+            progress = min(progress, self.maximum_progress)
+            self.current_progress = progress
+            self.progress_percentage = self.current_progress / self.maximum_progress
+            rect_width = int(self.capacity_width * self.progress_percentage)
+            self.current_progress_rect = pygame.Rect((self.shadow_width + self.border_width,
+                                                      self.shadow_width + self.border_width),
+                                                     (rect_width,
+                                                      self.capacity_height))
             self.redraw()
 
     def rebuild_from_changed_theme_data(self):

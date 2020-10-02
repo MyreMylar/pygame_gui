@@ -112,6 +112,15 @@
     {
         "prototype": "#default_shape_style"
     },
+    "progress_bar":
+    {
+        "prototype": "#default_shape_style",
+        "colours":
+        {
+            "filled_bar": "#6c7062",
+            "unfilled_bar": "#21382d"
+        }
+    },
     "selection_list":
     {
         "prototype": "#default_shape_style",
