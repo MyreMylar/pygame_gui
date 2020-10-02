@@ -151,7 +151,7 @@ class UIFileDialog(UIWindow):
                                                 'top': 'top',
                                                 'bottom': 'top'})
 
-        text_line_rect = pygame.Rect(10, 40, self.get_container().get_size()[0] - 20, 25)
+        text_line_rect = pygame.Rect(10, 40, self.get_container().get_size()[0] - 20, -1)
         self.file_path_text_line = UITextEntryLine(relative_rect=text_line_rect,
                                                    manager=self.ui_manager,
                                                    container=self,

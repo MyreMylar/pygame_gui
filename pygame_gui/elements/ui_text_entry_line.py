@@ -143,9 +143,10 @@ class UITextEntryLine(UIElement):
                               'shadow_width': self.shadow_width,
                               'font': self.font,
                               'text': self.text,
+                              'text_width': -1,
                               'text_horiz_alignment': 'left',
                               'text_vert_alignment': 'centre',
-                              'text_horiz_alignment_padding': self.padding[0] + self.shape_corner_radius,
+                              'text_horiz_alignment_padding': self.padding[0],
                               'text_vert_alignment_padding': self.padding[1],
                               'shape_corner_radius': self.shape_corner_radius}
 

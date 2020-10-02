@@ -76,6 +76,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.letter_count = len(self.text)
 
         self.target_surface = None
+        self.target_surface_area = None
         self.row_chunk_origin = 0
         self.row_chunk_height = 0
         self.row_bg_height = 0
@@ -118,6 +119,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def finalise(self,
                  target_surface: Surface,
+                 target_area: pygame.Rect,
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
@@ -240,10 +242,11 @@ class TextLineChunkFTFont(TextLayoutRect):
             # to bake the text anti-aliasing,
             surface.blit(text_surface, text_rect)
 
-        target_surface.blit(surface, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
+        target_surface.blit(surface, self.topleft, area=target_area, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
+        self.target_surface_area = target_area
         self.row_chunk_origin = row_chunk_origin
         self.row_chunk_height = row_chunk_height
         self.row_bg_height = row_bg_height
@@ -289,7 +292,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                     text_rect.size)
                 surface.blit(shadow_surface, shadow_text_rect)
 
-    def split(self, requested_x: int, line_width: int) -> Union['TextLayoutRect', None]:
+    def split(self, requested_x: int, line_width: int, row_start_x: int) -> Union['TextLayoutRect', None]:
         # starting heuristic: find the percentage through the chunk width of this split request
         percentage_split = float(requested_x)/float(self.width)
 
@@ -343,7 +346,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             right_side = self.text[optimum_split_point:]
             split_text_ok = True
 
-        elif self.x == 0 and self.width > line_width:
+        elif self.x == row_start_x and self.right > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
             optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
@@ -362,7 +365,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.topright, self.target_surface, self.should_centre_from_baseline)
+            return self._split_at(right_side, self.topright, self.target_surface,
+                                  self.target_surface_area, self.should_centre_from_baseline)
         else:
             return None
 
@@ -378,11 +382,12 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
-            return self._split_at(right_side, self.topright, self.target_surface, self.should_centre_from_baseline)
+            return self._split_at(right_side, self.topright, self.target_surface,
+                                  self.target_surface_area, self.should_centre_from_baseline)
         else:
             return None
 
-    def _split_at(self, right_side, split_pos, target_surface, baseline_centred):
+    def _split_at(self, right_side, split_pos, target_surface, target_surface_area, baseline_centred):
         right_side_chunk = TextLineChunkFTFont(right_side, self.font, self.underlined,
                                                self.colour,
                                                self.using_default_text_colour,
@@ -390,6 +395,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                self.text_shadow_data)
         right_side_chunk.topleft = split_pos
         right_side_chunk.target_surface = target_surface
+        right_side_chunk.target_surface_area = target_surface_area
         right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk
 
@@ -505,5 +511,5 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         if self.target_surface is not None:
             self.clear()
-            self.finalise(self.target_surface, self.row_chunk_origin,
+            self.finalise(self.target_surface, self.target_surface_area, self.row_chunk_origin,
                           self.row_chunk_height, self.row_bg_height, self.letter_end)

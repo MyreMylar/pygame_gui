@@ -107,8 +107,8 @@ class UIButton(UIElement):
 
         self.text_horiz_alignment = 'center'
         self.text_vert_alignment = 'center'
-        self.text_horiz_alignment_padding = 1
-        self.text_vert_alignment_padding = 1
+        self.text_horiz_alignment_padding = 0
+        self.text_vert_alignment_padding = 0
         self.shape = 'rectangle'
 
         self.state_transitions = {}
@@ -550,7 +550,7 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
-                                               default_value=1,
+                                               default_value=0,
                                                casting_func=int):
             has_any_changed = True
 
@@ -560,7 +560,7 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
-                                               default_value=1,
+                                               default_value=0,
                                                casting_func=int):
             has_any_changed = True
 

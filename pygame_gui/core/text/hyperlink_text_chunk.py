@@ -82,7 +82,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         self.is_selected = False
         self.redraw()
 
-    def _split_at(self, right_side, split_pos, target_surface, baseline_centred):
+    def _split_at(self, right_side, split_pos, target_surface, target_surface_area, baseline_centred):
         right_side_chunk = HyperlinkTextChunk(self.href,
                                               right_side,
                                               self.font,
@@ -96,5 +96,6 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
 
         right_side_chunk.topleft = split_pos
         right_side_chunk.target_surface = target_surface
+        right_side_chunk.target_surface_area = target_surface_area
         right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk

@@ -11,8 +11,8 @@ class TextBoxLayoutRow(pygame.Rect):
     A single line of text-like stuff to be used in a text box type layout.
     """
 
-    def __init__(self, row_start_y, row_index, line_spacing, layout):
-        super().__init__(0, row_start_y, 0, 0)
+    def __init__(self, row_start_x, row_start_y, row_index, line_spacing, layout):
+        super().__init__(row_start_x, row_start_y, 0, 0)
         self.line_spacing = line_spacing
         self.row_index = row_index
         self.layout = layout
@@ -88,7 +88,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.y_origin = 0
 
     def horiz_center_row(self):
-        self.centerx = int(round(self.layout.layout_rect.width/2.0))
+        self.centerx = self.layout.layout_rect.centerx
         current_start_x = self.x
         for item in self.items:
             item.x = current_start_x
@@ -132,11 +132,13 @@ class TextBoxLayoutRow(pygame.Rect):
             if isinstance(text_chunk, TextLineChunkFTFont):
                 if current_end_pos is not None and cumulative_letter_count is not None:
                     if cumulative_letter_count < current_end_pos:
-                        text_chunk.finalise(surface, self.y_origin, self.text_chunk_height, self.height,
+                        text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
+                                            self.text_chunk_height, self.height,
                                             current_end_pos - cumulative_letter_count)
                         cumulative_letter_count += text_chunk.letter_count
                 else:
-                    text_chunk.finalise(surface, self.y_origin, self.text_chunk_height, self.height)
+                    text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
+                                        self.text_chunk_height, self.height)
 
         if self.edit_cursor_active:
             cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
@@ -147,6 +149,8 @@ class TextBoxLayoutRow(pygame.Rect):
             surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.target_surface = surface
+
+        # pygame.draw.rect(self.target_surface, pygame.Color('#FF0000'), self, 1)
 
         return cumulative_letter_count
 

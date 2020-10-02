@@ -75,7 +75,7 @@ class TextLayoutRect(pygame.Rect):
         """
         return self._float_pos
 
-    def split(self, requested_x: int, line_width: int) -> Union['TextLayoutRect', None]:  # noqa
+    def split(self, requested_x: int, line_width: int, row_start_x: int) -> Union['TextLayoutRect', None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the
         nearest point that is still less than the request (i.e. to the left of the request in

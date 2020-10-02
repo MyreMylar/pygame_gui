@@ -52,7 +52,7 @@ class SimpleTestLayoutRect(TextLayoutRect):
         surface.fill(self.colour)
         target_surface.blit(surface, self)
 
-    def split(self, requested_x: int, line_width: int):
+    def split(self, requested_x: int, line_width: int, row_start_x: int):
 
         if line_width < self.smallest_split_size:
             raise ValueError('Line width is too narrow')

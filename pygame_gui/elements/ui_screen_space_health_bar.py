@@ -170,10 +170,10 @@ class UIScreenSpaceHealthBar(UIElement):
         """
         super().update(time_delta)
         if (self.alive() and self.sprite_to_monitor is not None and
-                (self.sprite_to_monitor.maximum_progress != self.health_capacity or
-                 self.current_health != self.sprite_to_monitor.current_progress)):
-            self.current_health = self.sprite_to_monitor.current_progress
-            self.health_capacity = self.sprite_to_monitor.maximum_progress
+                (self.sprite_to_monitor.health_capacity != self.health_capacity or
+                 self.current_health != self.sprite_to_monitor.current_health)):
+            self.current_health = self.sprite_to_monitor.current_health
+            self.health_capacity = self.sprite_to_monitor.health_capacity
             self.health_percentage = self.current_health / self.health_capacity
 
             rect_width = int(self.capacity_width * self.health_percentage)

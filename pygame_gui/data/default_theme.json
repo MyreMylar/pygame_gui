@@ -259,7 +259,7 @@
             "border_width": "1",
             "shadow_width": "1",
             "text_vert_alignment": "top",
-            "text_vert_alignment_padding": "-2"
+            "text_vert_alignment_padding": "0"
         }
     },
     "#file_dialog.#file_display_list.vertical_scroll_bar":
@@ -314,7 +314,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "-1"
+            "text_vert_alignment_padding": "0"
         }
     },
     "#file_dialog.#parent_icon_button":
@@ -326,7 +326,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "1"
+            "text_vert_alignment_padding": "0"
         }
     },
     "#message_window.text_box":

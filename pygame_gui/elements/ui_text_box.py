@@ -483,6 +483,9 @@ class UITextBox(UIElement):
                                                   pygame.Rect((0, 0),
                                                               (self.text_wrap_rect[2],
                                                                self.text_wrap_rect[3])),
+                                                  pygame.Rect((0, 0),
+                                                              (self.text_wrap_rect[2],
+                                                               self.text_wrap_rect[3])),
                                                   line_spacing=1.25)
         self.formatted_text_block.finalise_to_new()
 
