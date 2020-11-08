@@ -9,7 +9,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 from pygame_gui.core.utility import apply_colour_to_surface, basic_blit
-from pygame_gui.core.utility import USE_PREMULTIPLIED_ALPHA, PYGAME_DEV_NUM
+from pygame_gui.core.utility import USE_PREMULTIPLIED_ALPHA
 
 
 class RoundedRectangleShape(DrawableShape):
@@ -542,7 +542,7 @@ class RoundedRectangleShape(DrawableShape):
         :param corner_offset: Offsets the corners, used to help avoid overlaps that look bad.
 
         """
-        if pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 8:
+        if pygame.version.vernum[0] >= 2:
             pygame.draw.rect(large_shape_surface, pygame.Color('#FFFFFFFF'),
                              pygame.Rect((corner_offset, corner_offset),
                                          (large_shape_surface.get_width() - corner_offset,
