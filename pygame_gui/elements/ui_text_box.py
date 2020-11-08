@@ -487,6 +487,8 @@ class UITextBox(UIElement):
                                                               (self.text_wrap_rect[2],
                                                                self.text_wrap_rect[3])),
                                                   line_spacing=1.25)
+        if self.text_wrap_rect[3] == -1:
+            self.formatted_text_block.view_rect.height = self.formatted_text_block.layout_rect.height
         self.formatted_text_block.finalise_to_new()
 
         # self.formatted_text_block = TextBlock(parser.text_data,
