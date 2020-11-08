@@ -121,15 +121,18 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _setup_container(self, container):
         if container is None:
+            # no container passed in so make it the root container
             if self.ui_manager.get_root_container() is not None:
                 container = self.ui_manager.get_root_container()
             else:
                 container = self
         elif not isinstance(container, IContainerLikeInterface):
+            # oops, passed in something that wasn't a container so bail
             raise ValueError("container parameter must be of type "
                              "IContainerLikeInterface.")
-        else:
-            self.ui_container = container.get_container()
+
+        # by this point container should be a valid container
+        self.ui_container = container.get_container()
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
