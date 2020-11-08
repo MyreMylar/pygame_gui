@@ -99,6 +99,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
+        self.ui_container = None
         self._setup_container(container)
 
         self.dirty = 1
@@ -124,7 +125,10 @@ class UIElement(GUISprite, IUIElementInterface):
                 container = self.ui_manager.get_root_container()
             else:
                 container = self
-        if isinstance(container, IContainerLikeInterface):
+        elif not isinstance(container, IContainerLikeInterface):
+            raise ValueError("container parameter must be of type "
+                             "IContainerLikeInterface.")
+        else:
             self.ui_container = container.get_container()
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
