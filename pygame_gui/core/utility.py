@@ -22,13 +22,8 @@ import pygame
 import pygame.freetype
 
 
-# Only use pre-multiplied alpha if we are using SDL2 past dev 10 where it is decently fast.
-if 'dev' in pygame.ver.split('.')[-1]:
-    PYGAME_DEV_NUM = int(re.findall(r'\d+', pygame.ver.split('.')[-1])[0])
-else:
-    PYGAME_DEV_NUM = 10
-
-USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 10
+# Only use pre-multiplied alpha if we are using SDL2
+USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2
 
 USE_IMPORT_LIB_RESOURCE = False
 USE_FILE_PATH = False
