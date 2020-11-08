@@ -151,12 +151,22 @@ class TextLineChunkFTFont(TextLayoutRect):
             # this text onto a surface with a normal blit before it can enter the pre-multipled
             # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
             # on the normal text colour.
+            if pygame.version.vernum[0] >= 2:
+                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                temp_text_surface = text_surface.copy()
 
-            text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                          flags=pygame.SRCALPHA, depth=32)
-
-            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                final_str_text, fgcolor=Color('#FFFFFFFF'))
+                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=Color('#FFFFFFFF'))
+                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+            else:
+                # pygame 1 version is a bit rubbish
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                text_surface.fill((0, 0, 0, 1))
+                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=Color('#FFFFFFFF'))
             self.colour.apply_gradient_to_surface(text_surface)
 
             # then make the background
@@ -181,17 +191,25 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.apply_shadow_effect(surface, text_rect, final_str_text,
                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
-            # then apply the text to the background deliberately not pre-multiplied
-            # to bake the text anti-aliasing,
-            surface.blit(text_surface, text_rect)
+            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         elif isinstance(bg_col, ColourGradient):
             # draw the text first
-            text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                          flags=pygame.SRCALPHA, depth=32)
+            if pygame.version.vernum[0] >= 2:
+                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                temp_text_surface = text_surface.copy()
 
-            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                final_str_text, fgcolor=self.colour)
+                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=self.colour)
+                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+            else:
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                text_surface.fill((0, 0, 0, 1))
+                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=self.colour)
 
             # then make the background
             surface = Surface((chunk_draw_width, row_bg_height),
@@ -212,15 +230,23 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.apply_shadow_effect(surface, text_rect, final_str_text,
                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
-            # then apply the text to the background deliberately not pre-multiplied
-            # to bake the text anti-aliasing,
-            surface.blit(text_surface, text_rect)
+            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
         else:
-            text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                          flags=pygame.SRCALPHA, depth=32)
-            self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                final_str_text,
-                                fgcolor=self.colour)
+            if pygame.version.vernum[0] >= 2:
+                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                temp_text_surface = text_surface.copy()
+
+                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=self.colour)
+                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+            else:
+                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                              flags=pygame.SRCALPHA, depth=32)
+                text_surface.fill((0, 0, 0, 1))
+                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
+                                    final_str_text, fgcolor=self.colour)
 
             surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
             surface.fill(bg_col)
@@ -238,9 +264,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.apply_shadow_effect(surface, text_rect, final_str_text,
                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
-            # then apply the text to the background deliberately not pre-multiplied
-            # to bake the text anti-aliasing,
-            surface.blit(text_surface, text_rect)
+            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         target_surface.blit(surface, self.topleft, area=target_area, special_flags=pygame.BLEND_PREMULTIPLIED)
 
@@ -259,12 +283,22 @@ class TextLineChunkFTFont(TextLayoutRect):
             shadow_offset = (self.text_shadow_data[1], self.text_shadow_data[2])
             shadow_colour = self.text_shadow_data[3]
             # we have a shadow
-            shadow_surface = text_surface.copy()
-            shadow_surface.fill('#00000000')
+            if pygame.version.vernum[0] >= 2:
+                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+                shadow_surface = text_surface.copy()
+                temp_shadow_surface = shadow_surface.copy()
 
-            self.font.render_to(shadow_surface, origin,
-                                text_str,
-                                fgcolor=shadow_colour)
+                self.font.render_to(temp_shadow_surface, origin,
+                                    text_str,
+                                    fgcolor=shadow_colour)
+                shadow_surface.blit(temp_shadow_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+            else:
+                shadow_surface = text_surface.copy()
+                shadow_surface.fill((0, 0, 0, 1))  # have to have 1 alpha here to fake convert to pre-multiplied alpha
+
+                self.font.render_to(shadow_surface, origin,
+                                    text_str,
+                                    fgcolor=shadow_colour)
 
             for y_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_rect.x + shadow_offset[0],
@@ -272,29 +306,31 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                 + y_pos),
                                                text_rect.size)
 
-                surface.blit(shadow_surface, shadow_text_rect)
+                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_rect.x + shadow_offset[0]
                                                 + x_pos,
                                                 text_rect.y + shadow_offset[1]),
                                                text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect)
+                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_and_y in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
                     (text_rect.x + shadow_offset[0] + x_and_y,
                      text_rect.y + shadow_offset[1] + x_and_y),
                     text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect)
+                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_and_y in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
                     (text_rect.x + shadow_offset[0] - x_and_y,
                      text_rect.y + shadow_offset[1] + x_and_y),
                     text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect)
+                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
     def split(self, requested_x: int, line_width: int, row_start_x: int) -> Union['TextLayoutRect', None]:
         # starting heuristic: find the percentage through the chunk width of this split request
-        percentage_split = float(requested_x)/float(self.width)
+        percentage_split = 0
+        if self.width != 0:
+            percentage_split = float(requested_x)/float(self.width)
 
         # Now we need to search for the perfect split point
         # perfect split point is a) less than or equal requested x, b) as close to it as possible
