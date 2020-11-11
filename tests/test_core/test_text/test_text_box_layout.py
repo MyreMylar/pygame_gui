@@ -54,7 +54,26 @@ class TestTextBoxLayout:
         layout.reprocess_layout_queue(pygame.Rect(0, 0, 100, 300))
         assert len(layout.layout_rows) == 8
 
-    def test_
+    def test_finalise_to_surf(self, _init_pygame, default_ui_manager: UIManager):
+        input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(90, 20)),
+                            SimpleTestLayoutRect(dimensions=(175, 20)),
+                            SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(90, 20)),
+                            SimpleTestLayoutRect(dimensions=(175, 20))])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 200, 300),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        layout_surface = pygame.Surface((200, 300), depth=32, flags=pygame.SRCALPHA)
+        layout_surface.fill((0, 0, 0, 0))
+        layout.finalise_to_surf(layout_surface)
+
+        assert layout_surface.get_at((10, 10)) != pygame.Color(0, 0, 0, 0)
 
 
 if __name__ == '__main__':

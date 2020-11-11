@@ -1,5 +1,6 @@
 from typing import Deque, List
 from collections import deque
+from bisect import bisect
 
 import warnings
 import pygame
@@ -45,6 +46,7 @@ class TextBoxLayout:
         self.finalised_surface = None
         self.floating_rects = []
         self.layout_rows = []
+        self.row_lengths = []
         self.link_chunks = []
         self.letter_count = 0
         self.current_end_pos = 0
@@ -76,6 +78,7 @@ class TextBoxLayout:
         self.finalised_surface = None
         self.floating_rects = []
         self.layout_rows = []
+        self.row_lengths = []
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
         current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x, row_start_y=self.layout_rect.y,
@@ -106,6 +109,7 @@ class TextBoxLayout:
             self.layout_rect.height = current_row.bottom - self.layout_rect.y
         self.letter_count += current_row.letter_count
         self.current_end_pos = self.letter_count
+        self._refresh_row_letter_counts()
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 
@@ -243,8 +247,7 @@ class TextBoxLayout:
                     # failed to split, have to move whole chunk down a line.
                     input_queue.appendleft(test_layout_rect)
             except ValueError:
-                warnings.warn('Unable to split word into'
-                              ' chunks because text box is too narrow')
+                warnings.warn('Unable to split word into chunks because text box is too narrow')
                 current_row.add_item(test_layout_rect)
                 if isinstance(test_layout_rect, HyperlinkTextChunk):
                     self.link_chunks.append(test_layout_rect)
@@ -715,3 +718,15 @@ class TextBoxLayout:
 
             for row in self.layout_rows[current_row_index:]:
                 row.finalise(self.finalised_surface)
+
+    def _find_row_from_text_box_index(self, text_box_index: int):
+        row_index = bisect(self.row_lengths, text_box_index)
+        return self.layout_rows[row_index]
+
+    def _refresh_row_letter_counts(self):
+        self.row_lengths = []
+        cumulative_length = 0
+        for row in self.layout_rows:
+            cumulative_length += row.letter_count
+            self.row_lengths.append(cumulative_length)
+

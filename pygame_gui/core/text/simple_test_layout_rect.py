@@ -44,13 +44,16 @@ class SimpleTestLayoutRect(TextLayoutRect):
         colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 80
         return colour
 
-    def finalise(self, target_surface: Surface,
+    def finalise(self,
+                 target_surface: Surface,
+                 target_area: pygame.Rect,
                  row_origin: int,
                  row_height: int,
+                 row_bg_height: int,
                  letter_end: Optional[int] = None):
         surface = Surface(self.size, depth=32, flags=pygame.SRCALPHA)
         surface.fill(self.colour)
-        target_surface.blit(surface, self)
+        target_surface.blit(surface, self, area=target_area)
 
     def split(self, requested_x: int, line_width: int, row_start_x: int):
 

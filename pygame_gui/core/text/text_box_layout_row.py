@@ -139,6 +139,9 @@ class TextBoxLayoutRow(pygame.Rect):
                 else:
                     text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
                                         self.text_chunk_height, self.height)
+            else:
+                text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
+                                    self.text_chunk_height, self.height)
 
         if self.edit_cursor_active:
             cursor_surface = pygame.surface.Surface(self.cursor_rect.size,

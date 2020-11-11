@@ -27,7 +27,9 @@ class TextLayoutRect(pygame.Rect):
         self.smallest_split_size = 1
 
     @abstractmethod
-    def finalise(self, target_surface: Surface,
+    def finalise(self,
+                 target_surface: Surface,
+                 target_area: pygame.Rect,
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
@@ -36,6 +38,7 @@ class TextLayoutRect(pygame.Rect):
         Bake the contents of this layout rect onto a surface.
 
         :param target_surface:
+        :param target_area:
         :param row_chunk_origin:
         :param row_chunk_height:
         :param row_bg_height:
