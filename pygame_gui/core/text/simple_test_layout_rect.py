@@ -63,10 +63,14 @@ class SimpleTestLayoutRect(TextLayoutRect):
             if requested_x > point > current_split_point:
                 current_split_point = point
 
+        if self.x == row_start_x and self.right > line_width:
+            # no nice split point and we are at start of a line so force a split.
+            current_split_point = requested_x
+
         if current_split_point != 0:
             new_rect = SimpleTestLayoutRect(dimensions=(self.width - current_split_point, # noqa pylint: disable=no-member
                                                         self.height),
-                                            create_split_points=False)
+                                            create_split_points=True)
             self.width -= new_rect.width  # pylint: disable=no-member
             return new_rect
         else:
