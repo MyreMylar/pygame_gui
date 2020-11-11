@@ -54,6 +54,8 @@ class TestTextBoxLayout:
         layout.reprocess_layout_queue(pygame.Rect(0, 0, 100, 300))
         assert len(layout.layout_rows) == 8
 
+    def test_
+
 
 if __name__ == '__main__':
     pytest.console_main()
