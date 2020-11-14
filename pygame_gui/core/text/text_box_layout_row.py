@@ -181,17 +181,20 @@ class TextBoxLayoutRow(pygame.Rect):
     def set_cursor_from_click_pos(self, click_pos):
         letter_acc = 0
         cursor_draw_width = 0
+        found_chunk = False
         for chunk in self.items:
             if isinstance(chunk, TextLineChunkFTFont):
-                if chunk.collidepoint(click_pos):
-                    letter_index = chunk.x_pos_to_letter_index(click_pos.x)
-                    cursor_draw_width += sum([char_metric[4]
-                                              for char_metric
-                                              in chunk.font.get_metrics(chunk.text[:letter_index])])
-                    letter_acc += letter_index
-                else:
-                    cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
-                    letter_acc += chunk.letter_count
+                if not found_chunk:
+                    if chunk.collidepoint(click_pos):
+                        letter_index = chunk.x_pos_to_letter_index(click_pos.x)
+                        cursor_draw_width += sum([char_metric[4]
+                                                  for char_metric
+                                                  in chunk.font.get_metrics(chunk.text[:letter_index])])
+                        letter_acc += letter_index
+                        found_chunk = True
+                    else:
+                        cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
+                        letter_acc += chunk.letter_count
 
         self.cursor_draw_width = cursor_draw_width
         self.cursor_position = min(self.letter_count, max(0, letter_acc))

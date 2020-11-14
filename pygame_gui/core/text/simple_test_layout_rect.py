@@ -41,7 +41,7 @@ class SimpleTestLayoutRect(TextLayoutRect):
         """
         golden_ratio = ((5 ** 0.5) - 1) / 2
         colour = Color("#000000")
-        colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 80
+        colour.hsla = 360 * ((random.uniform(1.0, 500.0) * golden_ratio) % 1), 50, 70, 100
         return colour
 
     def finalise(self,

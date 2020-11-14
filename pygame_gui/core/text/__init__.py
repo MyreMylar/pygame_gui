@@ -5,6 +5,7 @@ from pygame_gui.core.text.simple_test_layout_rect import SimpleTestLayoutRect
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from pygame_gui.core.text.text_box_layout_row import TextBoxLayoutRow
 from pygame_gui.core.text.text_effects import TextBoxEffect, TypingAppearEffect
 from pygame_gui.core.text.text_effects import FadeOutEffect, FadeInEffect
 
@@ -16,6 +17,7 @@ __all__ = ['TextLayoutRect',
            'HyperlinkTextChunk',
            'TextLineChunkFTFont',
            'TextBoxLayout',
+           'TextBoxLayoutRow',
            'TextBoxEffect',
            'TypingAppearEffect',
            'FadeOutEffect',
