@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 import pygame
 import pygame.freetype
 
-from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
+from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
@@ -50,7 +50,7 @@ class HTMLParser(html.parser.HTMLParser):
     }
 
     def __init__(self,
-                 ui_theme: UIAppearanceTheme,
+                 ui_theme: IUIAppearanceThemeInterface,
                  combined_ids: List[str],
                  link_style: Dict[str, Any],
                  line_spacing: float = 1.0):
@@ -88,9 +88,9 @@ class HTMLParser(html.parser.HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: Dict[str, str]):
         """
-        Process an HTML 'start tag' (e.g. <b>) where we have a start and an end tag enclosing a
-        range of text this is the first one of those and controls where we add the 'styling' thing
-        to our styling stack.
+        Process an HTML 'start tag' (e.g. 'b' - tags are stripped of their angle brackets)
+        where we have a start and an end tag enclosing a range of text this is the first
+        one of those and controls where we add the 'styling' thing to our styling stack.
 
         Eventually we will want to expand this to handle tags like <img>.
 
@@ -201,7 +201,7 @@ class HTMLParser(html.parser.HTMLParser):
 
         :param data: Some string data.
         """
-        self.add_text(data)
+        self._add_text(data)
 
     def error(self, message):
         """
@@ -249,7 +249,7 @@ class HTMLParser(html.parser.HTMLParser):
             if match == key:
                 break
 
-    def add_text(self, text: str):
+    def _add_text(self, text: str):
         """
         Add another bit of text using the current style, and index the text's style appropriately.
 
