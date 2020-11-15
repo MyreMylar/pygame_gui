@@ -594,8 +594,9 @@ class TextBoxLayout:
                     if chunk == end_chunk:
                         end_selection = True
 
-        for row in rows_to_finalise:
-            row.finalise(self.finalised_surface)
+        if self.finalised_surface is not None:
+            for row in rows_to_finalise:
+                row.finalise(self.finalised_surface)
 
     def set_default_text_colour(self, colour):
         for row in self.layout_rows:
@@ -642,13 +643,13 @@ class TextBoxLayout:
 
         current_row_starting_chunk = self.selected_rows[0].items[0]
         current_row_index = current_row.row_index
-        for row in self.selected_rows:
+        for row in reversed(self.selected_rows):
             row.items = [chunk for chunk in row.items if not chunk.is_selected]
             row.rewind_row(temp_layout_queue)
             if row.row_index > max_row_index:
                 max_row_index = row.row_index
 
-        for row_index in range(max_row_index + 1, len(self.layout_rows)):
+        for row_index in reversed(range(max_row_index + 1, len(self.layout_rows))):
             self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
         self.layout_rows = self.layout_rows[:current_row_index]
@@ -663,8 +664,9 @@ class TextBoxLayout:
             current_row_starting_chunk.is_selected = False
             current_row.add_item(current_row_starting_chunk)
 
-        for row in self.layout_rows[current_row_index:]:
-            row.finalise(self.finalised_surface)
+        if self.finalised_surface is not None:
+            for row in self.layout_rows[current_row_index:]:
+                row.finalise(self.finalised_surface)
 
         self.selected_rows = []
         self.selected_chunks = []
@@ -676,7 +678,7 @@ class TextBoxLayout:
             cursor_pos = self.cursor_text_row.cursor_position
             letter_acc = 0
             for chunk in self.cursor_text_row.items:
-                if cursor_pos <= letter_acc + chunk.letter_count:
+                if cursor_pos <= letter_acc + (chunk.letter_count - 1):
                     chunk_letter_pos = cursor_pos - letter_acc
                     chunk.delete_letter_at_index(chunk_letter_pos)
                     break
@@ -684,15 +686,16 @@ class TextBoxLayout:
                     letter_acc += chunk.letter_count
 
             temp_layout_queue = deque([])
-            for row_index in range(current_row_index, len(self.layout_rows)):
+            for row_index in reversed(range(current_row_index, len(self.layout_rows))):
                 self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
             self.layout_rows = self.layout_rows[:current_row_index]
 
             self._process_layout_queue(temp_layout_queue, current_row)
 
-            for row in self.layout_rows[current_row_index:]:
-                row.finalise(self.finalised_surface)
+            if self.finalised_surface is not None:
+                for row in self.layout_rows[current_row_index:]:
+                    row.finalise(self.finalised_surface)
 
     def backspace_at_cursor(self):
         if self.cursor_text_row is not None:
@@ -709,15 +712,16 @@ class TextBoxLayout:
                     letter_acc += chunk.letter_count
             self.cursor_text_row.set_cursor_position(cursor_pos - 1)
             temp_layout_queue = deque([])
-            for row_index in range(current_row_index, len(self.layout_rows)):
+            for row_index in reversed(range(current_row_index, len(self.layout_rows))):
                 self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
             self.layout_rows = self.layout_rows[:current_row_index]
 
             self._process_layout_queue(temp_layout_queue, current_row)
 
-            for row in self.layout_rows[current_row_index:]:
-                row.finalise(self.finalised_surface)
+            if self.finalised_surface is not None:
+                for row in self.layout_rows[current_row_index:]:
+                    row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
         row_index = bisect(self.row_lengths, text_box_index)

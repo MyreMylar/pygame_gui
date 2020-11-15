@@ -499,6 +499,277 @@ class TestTextBoxLayout:
         assert layout.cursor_text_row.cursor_position == 2
         assert layout.cursor_text_row.cursor_draw_width == 17
 
+    def test_toggle_cursor(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 300),
+                               view_rect=pygame.Rect(0, 0, 100, 150),
+                               line_spacing=1.0)
+
+        layout.set_cursor_from_click_pos((17, 24))
+
+        assert layout.cursor_text_row is not None
+        assert not layout.cursor_text_row.edit_cursor_active
+        layout.toggle_cursor()
+        assert layout.cursor_text_row.edit_cursor_active
+        layout.toggle_cursor()
+        assert not layout.cursor_text_row.edit_cursor_active
+
+    def test_set_text_selection(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 300),
+                               view_rect=pygame.Rect(0, 0, 100, 150),
+                               line_spacing=1.0)
+
+        layout.set_text_selection(5, 17)
+
+        assert len(layout.selected_rows) == 2
+        assert len(layout.selected_chunks) == 4
+
+        selected_text = ""
+        for chunk in layout.selected_chunks:
+            selected_text += chunk.text
+
+        assert selected_text == ' this is a t'
+
+    def test_set_default_text_colour(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=True,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 500, 300),
+                               view_rect=pygame.Rect(0, 0, 500, 150),
+                               line_spacing=1.0)
+
+        layout.set_default_text_colour(pygame.Color('#00FF00'))
+        default_chunk_colour = layout.layout_rows[0].items[1].colour
+        assert default_chunk_colour == pygame.Color('#00FF00')
+
+    def test_insert_text(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=True,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 500, 300),
+                               view_rect=pygame.Rect(0, 0, 500, 150),
+                               line_spacing=1.0)
+
+        layout.insert_text('nother insertion', 15)
+
+        row = layout.layout_rows[0]
+        chunk = row.items[1]
+
+        assert chunk.text == 'this is another insertion'
+
+    def test_delete_selected_text(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=True,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 300),
+                               view_rect=pygame.Rect(0, 0, 100, 150),
+                               line_spacing=1.0)
+
+        layout.set_text_selection(5, 17)
+
+        assert len(layout.selected_rows) == 2
+        assert len(layout.selected_chunks) == 4
+
+        selected_text = ""
+        for chunk in layout.selected_chunks:
+            selected_text += chunk.text
+
+        assert selected_text == ' this is a t'
+
+        layout.delete_selected_text()
+
+        assert len(layout.selected_rows) == 0
+        assert len(layout.selected_chunks) == 0
+
+        selected_text = ""
+        for chunk in layout.selected_chunks:
+            selected_text += chunk.text
+
+        assert selected_text == ''
+
+        remaining_text = ''
+        for row in layout.layout_rows:
+            for chunk in row.items:
+                remaining_text += chunk.text
+
+        assert remaining_text == 'helloest'
+
+    def test_delete_at_cursor(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=True,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 300),
+                               view_rect=pygame.Rect(0, 0, 100, 150),
+                               line_spacing=1.0)
+
+        layout.set_cursor_position(14)
+        layout.delete_at_cursor()
+        layout.delete_at_cursor()
+
+        remaining_text = ''
+        for row in layout.layout_rows:
+            for chunk in row.items:
+                remaining_text += chunk.text
+
+        assert remaining_text == 'hello this is test'
+
+    def test_backspace_at_cursor(self, _init_pygame, default_ui_manager: UIManager):
+        the_font = pygame.freetype.Font(None, 20)
+        input_data = deque([TextLineChunkFTFont(text='hello ',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text='this is a',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=True,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' test',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FFFFFF'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000')),
+                            ])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 300),
+                               view_rect=pygame.Rect(0, 0, 100, 150),
+                               line_spacing=1.0)
+
+        layout.set_cursor_position(16)
+        layout.backspace_at_cursor()
+        layout.backspace_at_cursor()
+
+        remaining_text = ''
+        for row in layout.layout_rows:
+            for chunk in row.items:
+                remaining_text += chunk.text
+
+        assert remaining_text == 'hello this is test'
+
 
 if __name__ == '__main__':
     pytest.console_main()
