@@ -3,10 +3,10 @@ import pygame.freetype
 import pytest
 
 from pygame_gui.ui_manager import UIManager
-from pygame_gui.core.text import  HyperlinkTextChunk
+from pygame_gui.core.text import HyperlinkTextChunk
 
 
-class TestTextBoxLayout:
+class TestHyperlinkTextChunk:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
         style = {'link_text':       pygame.Color('#FF0000'),
