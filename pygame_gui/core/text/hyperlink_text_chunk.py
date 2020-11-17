@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 import pygame.freetype
 
 from pygame.color import Color
-from pygame.surface import Surface
 
 
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
