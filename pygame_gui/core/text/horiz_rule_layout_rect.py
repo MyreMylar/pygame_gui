@@ -16,7 +16,7 @@ class HorizRuleLayoutRect(TextLayoutRect):
 
     :param height: the current line height of the layout/font we are using when invoking the rule.
     :param colour_or_gradient: the colour or gradient of the rule.
-    :param rule_dimensions: the dimensions of the rule itself, normally it is are 1 pixel tall
+    :param rule_dimensions: the dimensions of the rule itself, normally it is 1 pixel tall
                             and the width of the text block layout wide.
     :param has_shade: whether the rule has 'shading' which by default is just another
                       alpha'd line beneath it to add some depth. Doesn't work great if the line has
