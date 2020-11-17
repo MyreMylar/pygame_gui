@@ -47,8 +47,8 @@ class SimpleTestLayoutRect(TextLayoutRect):
     def finalise(self,
                  target_surface: Surface,
                  target_area: pygame.Rect,
-                 row_origin: int,
-                 row_height: int,
+                 row_chunk_origin: int,
+                 row_chunk_height: int,
                  row_bg_height: int,
                  letter_end: Optional[int] = None):
         surface = Surface(self.size, depth=32, flags=pygame.SRCALPHA)
@@ -62,11 +62,13 @@ class SimpleTestLayoutRect(TextLayoutRect):
 
         # find closest split point less than the request
         current_split_point = 0
+        found_any_split_point = False
         for point in self.split_points:
-            if requested_x > point > current_split_point:
+            if requested_x > point > self.left + current_split_point:
                 current_split_point = point
+                found_any_split_point = True
 
-        if self.x == row_start_x and self.right > line_width:
+        if self.x == row_start_x and not found_any_split_point:
             # no nice split point and we are at start of a line so force a split.
             current_split_point = requested_x
 

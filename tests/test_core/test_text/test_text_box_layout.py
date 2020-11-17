@@ -51,7 +51,7 @@ class TestTextBoxLayout:
 
         assert len(layout.layout_rows) == 4
         layout.reprocess_layout_queue(pygame.Rect(0, 0, 100, 300))
-        assert len(layout.layout_rows) == 8
+        assert len(layout.layout_rows) == 9
 
     def test_finalise_to_surf(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
