@@ -1,7 +1,5 @@
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
+import pytest
 
 from pygame_gui.core.drawable_shapes.ellipse_drawable_shape import EllipseDrawableShape
 from pygame_gui.ui_manager import UIManager
@@ -121,3 +119,7 @@ class TestEllipseDrawableShape:
                                                  'text_horiz_alignment': 'center',
                                                  'text_vert_alignment': 'center'},
                              states=['normal'], manager=default_ui_manager)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -1,13 +1,9 @@
-import os
 import pygame
 import pytest
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
-from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
@@ -374,8 +370,9 @@ class TestUIColourPickerDialog:
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
 
-        pixel_colour = colour_picker.current_colour_image.image.get_at((int(colour_picker.current_colour_image.rect.width/2),
-                                                                        int(colour_picker.current_colour_image.rect.height/2)))
+        pixel_colour = colour_picker.current_colour_image.image.get_at(
+            (int(colour_picker.current_colour_image.rect.width/2),
+             int(colour_picker.current_colour_image.rect.height/2)))
 
         pixel_colour = restore_premul_col(pixel_colour)  # this is going to be slightly inaccurate
 
@@ -555,3 +552,7 @@ class TestUIColourPickerDialog:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

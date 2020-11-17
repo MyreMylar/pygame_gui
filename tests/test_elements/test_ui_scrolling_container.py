@@ -1,15 +1,11 @@
-import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface , _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_button import UIButton
-from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.interfaces import IUIManagerInterface
 
 
@@ -265,3 +261,7 @@ class TestUIScrollingContainer:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

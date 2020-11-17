@@ -12,8 +12,6 @@ from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
-
 
 #  factory of overrides for _update_mouse_position of UIManager - for use in hover tests
 def update_mouse_position_override_factory(obj, mouse_pos_x=0, mouse_pos_y=0):
@@ -312,3 +310,7 @@ class TestUIManager:
         manager.update(0.01)
         assert button1.hovered is True
         assert button2.hovered is False
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -1,8 +1,6 @@
 from typing import Tuple, List
 
-from pygame_gui.core.interfaces import IWindowInterface
-from pygame_gui.core.ui_container import UIContainer
-
+from pygame_gui.core.interfaces import IWindowInterface, IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 
 
@@ -15,7 +13,7 @@ class UIWindowStack(IUIWindowStackInterface):
     :param root_container: The root container for the whole UI.
 
     """
-    def __init__(self, window_resolution: Tuple[int, int], root_container: UIContainer):
+    def __init__(self, window_resolution: Tuple[int, int], root_container: IUIContainerInterface):
         self.window_resolution = window_resolution
         self.stack = []  # type: List[IWindowInterface]
         self.root_container = root_container

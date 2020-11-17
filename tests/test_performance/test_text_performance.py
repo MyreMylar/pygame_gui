@@ -1,11 +1,7 @@
 import pytest
 import pytest_benchmark
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
-
 import pygame
-import pygame_gui
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.text.html_parser import CharStyle
@@ -87,7 +83,7 @@ def test_old_text_block_performance(benchmark, _init_pygame, _display_surface_re
 
 
 def create_old_text_box(default_ui_manager):
-    text_box = UIOldTextBox(
+    UIOldTextBox(
         html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                   "<i>styles</i>.",
         relative_rect=pygame.Rect(100, 100, 200, 300),
@@ -105,7 +101,7 @@ def test_old_style_text_box_performance(benchmark, _init_pygame,
 
 
 def create_new_text_box(default_ui_manager):
-    text_box = UITextBox(
+    UITextBox(
         html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                   "<i>styles</i>.",
         relative_rect=pygame.Rect(100, 100, 200, 300),
@@ -120,3 +116,7 @@ def test_new_style_text_box_performance(benchmark, _init_pygame,
                                       {"name": "fira_code", "size:": 14, "style": "italic"}])
 
     benchmark(create_new_text_box, default_ui_manager)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

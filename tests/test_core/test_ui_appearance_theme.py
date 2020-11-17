@@ -5,8 +5,6 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
-
 from pygame_gui.core._string_data import default_theme
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
@@ -182,3 +180,8 @@ class TestUIAppearanceTheme:
                                            combined_element_ids=combined_ids)
         assert border_width == '2'
         assert shadow_width == '0'
+
+
+if __name__ == '__main__':
+    pytest.console_main()
+

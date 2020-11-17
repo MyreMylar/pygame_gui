@@ -1,9 +1,6 @@
-import os
 import pytest
-import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
 from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
@@ -156,3 +153,7 @@ class TestUIFontDictionary:
         loader.update()
 
         assert font_dictionary.check_font_preloaded('roboto_regular_14')
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -1,4 +1,4 @@
-import os
+# import os
 import pygame
 import pytest
 from pygame_gui.ui_manager import UIManager

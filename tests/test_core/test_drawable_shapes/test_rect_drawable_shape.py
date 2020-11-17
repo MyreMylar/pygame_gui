@@ -1,7 +1,5 @@
+import pytest
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
 
 from pygame_gui.core.drawable_shapes.rect_drawable_shape import RectDrawableShape
 from pygame_gui.ui_manager import UIManager
@@ -111,3 +109,5 @@ class TestRectDrawableShape:
         assert shape.containing_rect.width == 50
 
 
+if __name__ == '__main__':
+    pytest.console_main()

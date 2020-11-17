@@ -3,7 +3,7 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
+from tests.conftest import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.elements.text.styled_chunk import StyledChunk
 from pygame_gui.elements.text.html_parser import CharStyle

@@ -3,13 +3,10 @@ import pygame
 import pygame.freetype
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from pygame_gui.ui_manager import UIManager
 
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
 from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont, HyperlinkTextChunk
-from pygame_gui.core.text import TextBoxLayoutRow
 
 
 class TestTextBoxLayout:
@@ -166,7 +163,7 @@ class TestTextBoxLayout:
                                                 colour=pygame.Color('#FFFFFF'),
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
-                            HyperlinkTextChunk(href='boop',
+                            HyperlinkTextChunk(href='test',
                                                text='a link',
                                                font=pygame.freetype.Font(None, 20),
                                                underlined=False,
@@ -182,7 +179,7 @@ class TestTextBoxLayout:
                                view_rect=pygame.Rect(0, 0, 200, 150),
                                line_spacing=1.0)
 
-        links_found = deque([])
+        links_found = []
         layout.add_chunks_to_hover_group(links_found)
         assert len(links_found) == 1
 

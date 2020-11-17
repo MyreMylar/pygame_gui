@@ -1,6 +1,5 @@
+import pytest
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.elements.ui_window import UIWindow
@@ -88,3 +87,7 @@ class TestWindowStack:
         assert stack.is_window_at_top(window_2) is True
         assert stack.is_window_at_top(window) is False
         assert stack.is_window_at_top(window_3) is False
+
+
+if __name__ == '__main__':
+    pytest.console_main()

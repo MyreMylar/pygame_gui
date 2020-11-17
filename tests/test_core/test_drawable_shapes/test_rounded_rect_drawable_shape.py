@@ -1,9 +1,6 @@
 import pygame
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
-
 from pygame_gui.core.drawable_shapes.rounded_rect_drawable_shape import RoundedRectangleShape
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.colour_gradient import ColourGradient
@@ -276,3 +273,7 @@ class TestRoundedRectangleShape:
 
         shape.clear_and_create_shape_surface(pygame.Surface((100, 100)), pygame.Rect(0, 0, 75, 75), overlap=0,
                                              corner_radius=40, aa_amount=4)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

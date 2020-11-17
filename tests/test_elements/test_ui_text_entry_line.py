@@ -2,8 +2,6 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -750,7 +748,7 @@ class TestUITextEntryLine:
 
         text_entry.update(0.01)
 
-    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None):
+    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -935,3 +933,7 @@ class TestUITextEntryLine:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

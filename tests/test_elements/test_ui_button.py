@@ -4,8 +4,6 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -217,8 +215,8 @@ class TestUIButton:
 
         button.set_relative_position(pygame.math.Vector2(150.0, 30.0))
 
-        assert button.rect.topleft == (
-        250, 130) and button.drawable_shape.containing_rect.topleft == (250, 130)
+        assert (button.rect.topleft == (250, 130) and
+                button.drawable_shape.containing_rect.topleft == (250, 130))
 
     def test_set_position(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
@@ -232,8 +230,8 @@ class TestUIButton:
 
         button.set_position(pygame.math.Vector2(150.0, 30.0))
 
-        assert button.relative_rect.topleft == (
-        50, -70) and button.drawable_shape.containing_rect.topleft == (150, 30)
+        assert (button.relative_rect.topleft == (50, -70) and
+                button.drawable_shape.containing_rect.topleft == (150, 30))
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager,
                             _display_surface_return_none):
@@ -730,3 +728,7 @@ class TestUIButton:
                                                '#test_object_1',
                                                '@test_class',
                                                'button']
+
+
+if __name__ == '__main__':
+    pytest.console_main()

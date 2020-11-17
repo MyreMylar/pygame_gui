@@ -3,8 +3,6 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.elements.ui_window import UIWindow
@@ -216,15 +214,15 @@ class TestUIWindow:
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
-        button = UIButton(relative_rect=button_rect,
-                          text="Test Button",
-                          tool_tip_text="This is a test of the button's tool tip functionality.",
-                          manager=default_ui_manager,
-                          container=window,
-                          anchors={'left': 'right',
-                                   'right': 'right',
-                                   'top': 'top',
-                                   'bottom': 'top'})
+        UIButton(relative_rect=button_rect,
+                 text="Test Button",
+                 tool_tip_text="This is a test of the button's tool tip functionality.",
+                 manager=default_ui_manager,
+                 container=window,
+                 anchors={'left': 'right',
+                          'right': 'right',
+                          'top': 'top',
+                          'bottom': 'top'})
 
         window.update(time_delta=0.05)
 
@@ -293,21 +291,21 @@ class TestUIWindow:
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
-        button = UIButton(relative_rect=button_rect,
-                          text="Test Button",
-                          tool_tip_text="This is a test of the button's tool tip functionality.",
-                          manager=default_ui_manager,
-                          container=window,
-                          anchors={'left': 'right',
-                                   'right': 'right',
-                                   'top': 'top',
-                                   'bottom': 'top'})
+        UIButton(relative_rect=button_rect,
+                 text="Test Button",
+                 tool_tip_text="This is a test of the button's tool tip functionality.",
+                 manager=default_ui_manager,
+                 container=window,
+                 anchors={'left': 'right',
+                          'right': 'right',
+                          'top': 'top',
+                          'bottom': 'top'})
 
-        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
-                              starting_option='eggs',
-                              relative_rect=pygame.Rect(10, 10, 150, 30),
-                              manager=default_ui_manager,
-                              container=window)
+        UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                       starting_option='eggs',
+                       relative_rect=pygame.Rect(10, 10, 150, 30),
+                       manager=default_ui_manager,
+                       container=window)
 
         assert window.get_top_layer() == 4
         window.update(0.05)
@@ -569,3 +567,7 @@ class TestUIWindow:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

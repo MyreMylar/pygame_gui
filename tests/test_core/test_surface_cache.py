@@ -1,9 +1,5 @@
-import os
 import pytest
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.surface_cache import SurfaceCache
 
@@ -117,3 +113,8 @@ class TestSurfaceCache:
                                                corner_radius=5)
 
         assert cache_id == 'rectangle_64_64_1_1_5_255_0_0_255_100_200_100_180'
+
+
+if __name__ == '__main__':
+    pytest.console_main()
+

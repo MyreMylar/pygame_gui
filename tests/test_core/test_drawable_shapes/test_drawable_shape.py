@@ -1,8 +1,6 @@
 import pygame
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
-
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape, DrawableShapeState, DrawableStateTransition
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.utility import apply_colour_to_surface
@@ -70,7 +68,7 @@ class TestDrawableShape:
 
     def test_set_active_state(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
-                              theming_parameters={}, states=['normal','hovered'],
+                              theming_parameters={}, states=['normal', 'hovered'],
                               manager=default_ui_manager)
 
         shape.set_active_state('hovered')
@@ -156,11 +154,11 @@ class TestDrawableShape:
 
     def test_apply_colour_to_surface(self, _init_pygame, default_ui_manager: UIManager, default_display_surface):
 
-        shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
-                              theming_parameters={}, states=['normal'], manager=default_ui_manager)
+        DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
+                      theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
         test_surface = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
-        test_surface.fill(pygame.Color(255,255,255,255))
+        test_surface.fill(pygame.Color(255, 255, 255, 255))
 
         apply_colour_to_surface(pygame.Color(50, 100, 50, 255), test_surface)
 
@@ -202,5 +200,5 @@ class TestDrawableShape:
         shape.finalise_images_and_text('normal_image', 'normal', 'normal_text')
 
 
-
-
+if __name__ == '__main__':
+    pytest.console_main()
