@@ -57,9 +57,9 @@ class TextBoxLayoutRow(pygame.Rect):
             self.text_chunk_height = item.height
             if self.layout.layout_rect.height != -1:
                 self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  item.height * self.line_spacing)
+                                  int(item.height * self.line_spacing))
             else:
-                self.height = item.height * self.line_spacing
+                self.height = int(item.height * self.line_spacing)
 
             self.cursor_rect = pygame.Rect(self.x, self.y, 2, self.height - 2)
 
@@ -102,11 +102,11 @@ class TextBoxLayoutRow(pygame.Rect):
             current_start_x += item.width
 
     def align_right_row(self, start_x: int):
-        self.right = start_x
-        current_start_x = start_x
-        for item in self.items:
+        self.right = self.layout.layout_rect.width - start_x
+        current_start_x = self.right
+        for item in reversed(self.items):
             item.right = current_start_x
-            current_start_x += item.width
+            current_start_x -= item.width
 
     def vert_align_items_to_row(self):
         for item in self.items:

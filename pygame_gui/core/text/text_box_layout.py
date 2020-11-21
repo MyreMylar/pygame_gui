@@ -418,9 +418,8 @@ class TextBoxLayout:
             row.align_left_row(start_left)
 
     def align_right_all_rows(self, x_padding):
-        start_right = self.layout_rect.right - x_padding
         for row in self.layout_rows:
-            row.align_right_row(start_right)
+            row.align_right_row(x_padding)
 
     def vert_center_all_rows(self):
         total_row_height = 0
