@@ -332,10 +332,12 @@ class TextBoxLayout:
                                 cumulative_letter_count += rect.letter_count
                             else:
                                 found_chunk_to_update = True
-                                rect.clear()
-                                rect.finalise(self.finalised_surface, self.view_rect,
-                                              row.y_origin, row.text_chunk_height, row.height,
-                                              new_end_pos - cumulative_letter_count)
+
+                                if self.finalised_surface is not None:
+                                    rect.clear()
+                                    rect.finalise(self.finalised_surface, self.view_rect,
+                                                  row.y_origin, row.text_chunk_height, row.height,
+                                                  new_end_pos - cumulative_letter_count)
 
     def clear_final_surface(self):
         """
@@ -352,7 +354,8 @@ class TextBoxLayout:
         :param alpha: integer from 0 to 255.
         """
         if self.alpha == 255 and alpha != 255:
-            self.pre_alpha_final_surf = self.finalised_surface.copy()
+            if self.finalised_surface is not None:
+                self.pre_alpha_final_surf = self.finalised_surface.copy()
 
         self.alpha = alpha
 
