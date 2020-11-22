@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import pygame
 
@@ -178,7 +178,7 @@ class TextBoxLayoutRow(pygame.Rect):
             slightly_wider_rect = pygame.Rect(self.x, self.y, self.width + self.layout.edit_buffer, self.height)
             self.target_surface.fill(pygame.Color('#00000000'), slightly_wider_rect)
 
-    def set_cursor_from_click_pos(self, click_pos):
+    def set_cursor_from_click_pos(self, click_pos: Tuple[int, int]):
         letter_acc = 0
         cursor_draw_width = 0
         found_chunk = False
@@ -186,7 +186,7 @@ class TextBoxLayoutRow(pygame.Rect):
             if isinstance(chunk, TextLineChunkFTFont):
                 if not found_chunk:
                     if chunk.collidepoint(click_pos):
-                        letter_index = chunk.x_pos_to_letter_index(click_pos.x)
+                        letter_index = chunk.x_pos_to_letter_index(click_pos[0])
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric
                                                   in chunk.font.get_metrics(chunk.text[:letter_index])])

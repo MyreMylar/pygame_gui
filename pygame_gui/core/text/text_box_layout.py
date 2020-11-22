@@ -469,8 +469,8 @@ class TextBoxLayout:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
 
-        layout_space_click_pos = pygame.Vector2(click_pos[0] - self.layout_rect.x,
-                                                click_pos[1] - self.layout_rect.y)
+        layout_space_click_pos = (click_pos[0] - self.layout_rect.x,
+                                  click_pos[1] - self.layout_rect.y)
 
         for row in self.layout_rows:
             if row.collidepoint(layout_space_click_pos):
