@@ -39,9 +39,9 @@ class TextLineChunkFTFont(TextLayoutRect):
     def __init__(self, text: str,
                  font: pygame.freetype.Font,
                  underlined: bool,
-                 colour: Color,
+                 colour: Union[Color, ColourGradient],
                  using_default_text_colour: bool,
-                 bg_colour: Color,
+                 bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None,
                  max_dimensions: Optional[Tuple[int, int]] = None):
         if len(text) == 0:
@@ -188,8 +188,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                 text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text,
-                                     text_surface, (chunk_x_origin, row_chunk_origin))
+            self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
             surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
@@ -227,8 +227,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                 text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text,
-                                     text_surface, (chunk_x_origin, row_chunk_origin))
+            self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
             surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
         else:
@@ -261,8 +261,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                 text_rect.centery = surface.get_rect().centery
 
             # apply any shadow effects
-            self.apply_shadow_effect(surface, text_rect, final_str_text,
-                                     text_surface, (chunk_x_origin, row_chunk_origin))
+            self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                      text_surface, (chunk_x_origin, row_chunk_origin))
 
             surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
@@ -276,7 +276,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.row_bg_height = row_bg_height
         self.letter_end = letter_end
 
-    def apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
+    def _apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
 
             shadow_size = self.text_shadow_data[0]
@@ -391,7 +391,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                 right_side = '-' + self.text[optimum_split_point:]
                 split_text_ok = True
             else:
-                raise ValueError('line width too small')
+                raise ValueError('Line width is too narrow')
 
         if split_text_ok:
             # update the data for this chunk
