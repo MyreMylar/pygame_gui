@@ -1,22 +1,26 @@
 from typing import Tuple, Union, Optional
 from abc import abstractmethod
+from enum import Enum
 
 import pygame
 from pygame.surface import Surface
+
+
+class TextFloatPosition(Enum):
+    none = 0
+    left = 1
+    right = 2
 
 
 class TextLayoutRect(pygame.Rect):
     """
     A base class for use in Layouts.
     """
-    FLOAT_NONE = 0
-    FLOAT_LEFT = 1
-    FLOAT_RIGHT = 2
 
     def __init__(self, dimensions: Tuple[int, int],
                  *,
                  can_split=False,
-                 float_pos=FLOAT_NONE,
+                 float_pos: TextFloatPosition = TextFloatPosition.none,
                  should_span=False):
         super().__init__((0, 0), dimensions)
         self._can_split = can_split
@@ -67,10 +71,11 @@ class TextLayoutRect(pygame.Rect):
         """
         return self._should_span
 
-    def float_pos(self) -> int:
+    def float_pos(self) -> TextFloatPosition:
         """
-        Return the 'floating' status of this rectangle. can be FLOAT_LEFT, FLOAT_RIGHT or
-        FLOAT_NONE and the  default, used by most rectangles, is FLOAT_NONE.
+        Return the 'floating' status of this rectangle. can be TextFloatPosition.left,
+        TextFloatPosition.right or TextFloatPosition.none and the default, used by most
+        rectangles, is TextFloatPosition.none.
 
         Used to make text flow around images.
 

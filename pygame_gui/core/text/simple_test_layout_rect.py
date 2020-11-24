@@ -6,7 +6,7 @@ import pygame
 from pygame.color import Color
 from pygame.surface import Surface
 
-from pygame_gui.core.text.text_layout_rect import TextLayoutRect
+from pygame_gui.core.text.text_layout_rect import TextLayoutRect, TextFloatPosition
 
 
 class SimpleTestLayoutRect(TextLayoutRect):
@@ -19,7 +19,7 @@ class SimpleTestLayoutRect(TextLayoutRect):
     def __init__(self,
                  dimensions: Tuple[int, int], *,
                  create_split_points=True,
-                 float_pos=TextLayoutRect.FLOAT_NONE):
+                 float_pos=TextFloatPosition.none):
 
         super().__init__(dimensions, can_split=create_split_points, float_pos=float_pos)
         self.colour = self.gen_random_colour()

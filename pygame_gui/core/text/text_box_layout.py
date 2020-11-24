@@ -7,7 +7,7 @@ import pygame
 
 from pygame.surface import Surface
 
-from pygame_gui.core.text.text_layout_rect import TextLayoutRect
+from pygame_gui.core.text.text_layout_rect import TextLayoutRect, TextFloatPosition
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
@@ -96,7 +96,7 @@ class TextBoxLayout:
                 current_row = self._handle_line_break_rect(current_row, text_layout_rect)
             elif text_layout_rect.should_span():
                 current_row = self._handle_span_rect(current_row, text_layout_rect)
-            elif text_layout_rect.float_pos() != TextLayoutRect.FLOAT_NONE:
+            elif text_layout_rect.float_pos() != TextFloatPosition.none:
                 current_row = self._handle_float_rect(current_row, text_layout_rect, input_queue)
             else:
                 current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
@@ -117,11 +117,11 @@ class TextBoxLayout:
         for floater in self.floating_rects:
             if floater.vertical_overlap(text_layout_rect):
                 if (current_row.at_start() and
-                        floater.float_pos() == TextLayoutRect.FLOAT_LEFT):
+                        floater.float_pos() == TextFloatPosition.left):
                     # if we are at the start of a new line see if this rectangle
                     # will overlap with any left aligned floating rectangles
                     text_layout_rect.left = floater.right
-                elif floater.float_pos() == TextLayoutRect.FLOAT_RIGHT:
+                elif floater.float_pos() == TextFloatPosition.right:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
         # See if this rectangle will fit on the current line
@@ -139,11 +139,11 @@ class TextBoxLayout:
 
     def _handle_float_rect(self, current_row, test_layout_rect, input_queue):
         max_floater_line_height = current_row.height
-        if test_layout_rect.float_pos() == TextLayoutRect.FLOAT_LEFT:
+        if test_layout_rect.float_pos() == TextFloatPosition.left:
             test_layout_rect.left = 0
             for floater in self.floating_rects:
                 if (floater.vertical_overlap(test_layout_rect)
-                        and floater.float_pos() == TextLayoutRect.FLOAT_LEFT):
+                        and floater.float_pos() == TextFloatPosition.left):
                     test_layout_rect.left = floater.right
                     if max_floater_line_height < floater.height:
                         max_floater_line_height = floater.height
@@ -162,11 +162,11 @@ class TextBoxLayout:
                 # rewind current text row so we can account for new floating rect
                 current_row.rewind_row(input_queue)
 
-        else:  # FLOAT_RIGHT
+        else:  # TextFloatPosition.right
             rhs_limit = self.layout_rect.width
             for floater in self.floating_rects:
                 if (floater.vertical_overlap(test_layout_rect)
-                        and floater.float_pos() == TextLayoutRect.FLOAT_RIGHT
+                        and floater.float_pos() == TextFloatPosition.right
                         and floater.left < rhs_limit):
                     rhs_limit = floater.left
                     if max_floater_line_height < floater.height:
