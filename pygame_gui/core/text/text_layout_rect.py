@@ -94,8 +94,9 @@ class TextLayoutRect(pygame.Rect):
         if line_width < self.smallest_split_size:
             raise ValueError('Line width is too narrow')
 
-        super().width = requested_x
-        return TextLayoutRect((self.width - requested_x, self.height))
+        original_width = self.width
+        self.width = requested_x
+        return TextLayoutRect((original_width - requested_x, self.height))
 
     def vertical_overlap(self, other_rect: pygame.Rect) -> bool:
         """
