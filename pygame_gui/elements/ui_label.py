@@ -60,6 +60,11 @@ class UILabel(UIElement):
         self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
 
+        self.text_horiz_alignment = 'center'
+        self.text_vert_alignment = 'center'
+        self.text_horiz_alignment_padding = 0
+        self.text_vert_alignment_padding = 0
+
         self.rebuild_from_changed_theme_data()
 
     def set_text(self, text: str):
@@ -101,10 +106,10 @@ class UILabel(UIElement):
                                               self.text_shadow_offset[0],
                                               self.text_shadow_offset[1],
                                               self.text_shadow_colour),
-                              'text_horiz_alignment': 'center',
-                              'text_vert_alignment': 'center',
-                              'text_horiz_alignment_padding': 0,
-                              'text_vert_alignment_padding': 0}
+                              'text_horiz_alignment': self.text_horiz_alignment,
+                              'text_vert_alignment': self.text_vert_alignment,
+                              'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                              'text_vert_alignment_padding': self.text_vert_alignment_padding}
 
         self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                 ['normal', 'disabled'], self.ui_manager)
@@ -166,8 +171,42 @@ class UILabel(UIElement):
                                                casting_func=tuple_extract):
             any_changed = True
 
+        if self._check_text_alignment_theming():
+            any_changed = True
+
         if any_changed:
             self.rebuild()
+
+    def _check_text_alignment_theming(self) -> bool:
+        """
+        Checks for any changes in the theming data related to text alignment.
+
+        :return: True if changes found.
+
+        """
+        has_any_changed = False
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
+                                               default_value='center',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
+                                               default_value='center',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        return has_any_changed
 
     def disable(self):
         """

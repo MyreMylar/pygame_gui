@@ -19,7 +19,11 @@
          {
              "text_shadow": "0",
              "text_shadow_size": "4",
-             "text_shadow_offset": "10.0,5.0"
+             "text_shadow_offset": "10.0,5.0",
+             "text_horiz_alignment": "right",
+             "text_vert_alignment": "bottom",
+             "text_horiz_alignment_padding": "6",
+             "text_vert_alignment_padding": "7"
          }
     }
 }

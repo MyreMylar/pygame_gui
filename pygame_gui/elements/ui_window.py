@@ -232,7 +232,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.close_window_button):
-            self.kill()
+            self.on_close_window_button_pressed()
 
         return consumed_event
 
@@ -440,6 +440,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
                 if self._window_root_container.layer_thickness != self.layer_thickness:
                     self.layer_thickness = self._window_root_container.layer_thickness
+
+    def on_close_window_button_pressed(self):
+        """
+        Override this method to call 'hide()' instead if you want to hide a window when the
+        close button is pressed.
+        """
+        self.kill()
 
     def kill(self):
         """
