@@ -155,6 +155,7 @@ class RectDrawableShape(DrawableShape):
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
+        text_shadow_colour_state_str = state_str + '_text_shadow'
         image_state_str = state_str + '_image'
 
         found_shape = None
@@ -234,7 +235,7 @@ class RectDrawableShape(DrawableShape):
                                                       shape_id)
                 self.states[state_str].cached_background_id = shape_id
 
-        self.finalise_images_and_text(image_state_str, state_str, text_colour_state_str)
+        self.finalise_images_and_text(image_state_str, state_str, text_colour_state_str, text_shadow_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

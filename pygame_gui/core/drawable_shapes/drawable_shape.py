@@ -413,7 +413,8 @@ class DrawableShape:
     def finalise_images_and_text(self,
                                  image_state_str: str,
                                  state_str: str,
-                                 text_colour_state_str: str):
+                                 text_colour_state_str: str,
+                                 text_shadow_colour_state_str: str):
         """
         Rebuilds any text or image used by a specific state in the drawable shape. Effectively
         this means adding them on top of whatever is already in the state's surface. As such it
@@ -424,6 +425,8 @@ class DrawableShape:
         :param state_str: normal ID of the state we are going to be adding images and text to.
         :param text_colour_state_str: text ID of the state we are going to be adding images and
                                       text to.
+        :param text_shadow_colour_state_str: text shadow ID of the state we are going to be adding
+                                             images and text to.
 
         """
         # Draw any themed images
@@ -433,7 +436,7 @@ class DrawableShape:
                                  int(self.containing_rect.height / 2))
             basic_blit(self.states[state_str].surface,
                        self.theming[image_state_str], image_rect)
-        self.finalise_text(state_str, text_colour_state_str)
+        self.finalise_text(state_str, text_colour_state_str, text_shadow_colour_state_str)
 
     def build_text_layout(self):
         # Draw any text
@@ -468,7 +471,7 @@ class DrawableShape:
             if 'text_height' in self.theming:
                 text_actual_area_rect.height = self.theming['text_height']
 
-            text_shadow_data = (0, 0, 0, pygame.Color('#505050'))
+            text_shadow_data = (0, 0, 0, pygame.Color('#505050'), False)
             if 'text_shadow' in self.theming:
                 text_shadow_data = self.theming['text_shadow']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
@@ -485,9 +488,10 @@ class DrawableShape:
                                                  self.text_view_rect, line_spacing=1.25)
             self.align_all_text_rows()
 
-    def finalise_text(self, state_str, text_colour_state_str):
+    def finalise_text(self, state_str, text_colour_state_str, text_shadow_colour_state_str):
         if self.text_box_layout is not None:
             self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
+            self.text_box_layout.set_default_text_shadow_colour(self.theming[text_shadow_colour_state_str])
             self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
 
     def set_text(self, text: str):

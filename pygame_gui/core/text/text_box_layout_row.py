@@ -163,6 +163,12 @@ class TextBoxLayoutRow(pygame.Rect):
                 if chunk.using_default_text_colour:
                     chunk.colour = colour
 
+    def set_default_text_shadow_colour(self, colour):
+        for chunk in self.items:
+            if isinstance(chunk, TextLineChunkFTFont):
+                if chunk.using_default_text_shadow_colour:
+                    chunk.shadow_colour = colour
+
     def toggle_cursor(self):
         if self.edit_cursor_active:
             self.edit_cursor_active = False

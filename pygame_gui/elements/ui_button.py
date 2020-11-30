@@ -2,14 +2,13 @@ from typing import Union, Tuple, Dict
 
 import pygame
 
-from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
-
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
 from pygame_gui.core.drawable_shapes import RectDrawableShape
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.ui_element import UIElement
 
 
 class UIButton(UIElement):
@@ -39,6 +38,7 @@ class UIButton(UIElement):
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
     """
+
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
                  manager: IUIManagerInterface,
@@ -110,6 +110,8 @@ class UIButton(UIElement):
         self.text_horiz_alignment_padding = 0
         self.text_vert_alignment_padding = 0
         self.shape = 'rectangle'
+        self.text_shadow_size = 0
+        self.text_shadow_offset = (0, 0)
 
         self.state_transitions = {}
 
@@ -474,6 +476,16 @@ class UIButton(UIElement):
                                                                       self.combined_element_ids),
                 'active_text': self.ui_theme.get_colour_or_gradient('active_text',
                                                                     self.combined_element_ids),
+                'normal_text_shadow': self.ui_theme.get_colour_or_gradient('normal_text_shadow',
+                                                                           self.combined_element_ids),
+                'hovered_text_shadow': self.ui_theme.get_colour_or_gradient('hovered_text_shadow',
+                                                                            self.combined_element_ids),
+                'disabled_text_shadow': self.ui_theme.get_colour_or_gradient('disabled_text_shadow',
+                                                                             self.combined_element_ids),
+                'selected_text_shadow': self.ui_theme.get_colour_or_gradient('selected_text_shadow',
+                                                                             self.combined_element_ids),
+                'active_text_shadow': self.ui_theme.get_colour_or_gradient('active_text_shadow',
+                                                                           self.combined_element_ids),
                 'normal_border': self.ui_theme.get_colour_or_gradient('normal_border',
                                                                       self.combined_element_ids),
                 'hovered_border': self.ui_theme.get_colour_or_gradient('hovered_border',
@@ -512,6 +524,19 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_text_alignment_theming():
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_offset',
+                                               default_value=(0, 0),
+                                               casting_func=tuple_extract):
             has_any_changed = True
 
         try:
@@ -573,28 +598,38 @@ class UIButton(UIElement):
         """
         theming_parameters = {'normal_bg': self.colours['normal_bg'],
                               'normal_text': self.colours['normal_text'],
+                              'normal_text_shadow': self.colours['normal_text_shadow'],
                               'normal_border': self.colours['normal_border'],
                               'normal_image': self.normal_image,
                               'hovered_bg': self.colours['hovered_bg'],
                               'hovered_text': self.colours['hovered_text'],
+                              'hovered_text_shadow': self.colours['hovered_text_shadow'],
                               'hovered_border': self.colours['hovered_border'],
                               'hovered_image': self.hovered_image,
                               'disabled_bg': self.colours['disabled_bg'],
                               'disabled_text': self.colours['disabled_text'],
+                              'disabled_text_shadow': self.colours['disabled_text_shadow'],
                               'disabled_border': self.colours['disabled_border'],
                               'disabled_image': self.disabled_image,
                               'selected_bg': self.colours['selected_bg'],
                               'selected_text': self.colours['selected_text'],
+                              'selected_text_shadow': self.colours['selected_text_shadow'],
                               'selected_border': self.colours['selected_border'],
                               'selected_image': self.selected_image,
                               'active_bg': self.colours['active_bg'],
                               'active_border': self.colours['active_border'],
                               'active_text': self.colours['active_text'],
+                              'active_text_shadow': self.colours['active_text_shadow'],
                               'active_image': self.selected_image,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
                               'text': self.text,
+                              'text_shadow': (self.text_shadow_size,
+                                              self.text_shadow_offset[0],
+                                              self.text_shadow_offset[1],
+                                              self.colours['normal_text_shadow'],
+                                              True),
                               'text_horiz_alignment': self.text_horiz_alignment,
                               'text_vert_alignment': self.text_vert_alignment,
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,

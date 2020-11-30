@@ -42,7 +42,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  colour: Union[Color, ColourGradient],
                  using_default_text_colour: bool,
                  bg_colour: Union[Color, ColourGradient],
-                 text_shadow_data: Optional[Tuple[int, int, int, pygame.Color]] = None,
+                 text_shadow_data: Optional[Tuple[int, int, int, pygame.Color, bool]] = None,
                  max_dimensions: Optional[Tuple[int, int]] = None):
         if len(text) == 0:
             text_rect = font.get_rect('A')
@@ -63,9 +63,14 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.font = font
         self.underlined = underlined
         self.colour = colour
+        self.shadow_colour = pygame.Color('#000000')
         self.using_default_text_colour = using_default_text_colour
+        self.using_default_text_shadow_colour = False
         self.bg_colour = bg_colour
         self.text_shadow_data = text_shadow_data
+        if self.text_shadow_data is not None:
+            self.using_default_text_shadow_colour = self.text_shadow_data[4]
+            self.shadow_colour = self.text_shadow_data[3]
 
         self.max_dimensions = max_dimensions
         self.y_origin = text_rect.y
@@ -281,7 +286,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             shadow_size = self.text_shadow_data[0]
             shadow_offset = (self.text_shadow_data[1], self.text_shadow_data[2])
-            shadow_colour = self.text_shadow_data[3]
+            shadow_colour = self.shadow_colour
             # we have a shadow
             if pygame.version.vernum[0] >= 2:
                 # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit

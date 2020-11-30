@@ -134,9 +134,11 @@ class UITextEntryLine(UIElement):
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
+                              'normal_text_shadow': pygame.Color('#000000'),
                               'normal_border': self.border_colour,
                               'disabled_bg': self.disabled_background_colour,
                               'disabled_text': self.disabled_text_colour,
+                              'disabled_text_shadow': pygame.Color('#000000'),
                               'disabled_border': self.disabled_border_colour,
                               'selected_text': self.selected_text_colour,
                               'border_width': self.border_width,

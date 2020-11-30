@@ -604,6 +604,10 @@ class TextBoxLayout:
         for row in self.layout_rows:
             row.set_default_text_colour(colour)
 
+    def set_default_text_shadow_colour(self, colour):
+        for row in self.layout_rows:
+            row.set_default_text_shadow_colour(colour)
+
     def insert_text(self, text: str, layout_index: int):
         row_index = 0
         letter_accumulator = 0

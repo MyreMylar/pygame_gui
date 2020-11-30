@@ -285,7 +285,7 @@ class RoundedRectangleShape(DrawableShape):
                                                                    self.click_area_shape.size))
 
         self.states['normal'].surface = quick_surf
-        self.finalise_images_and_text('normal_image', 'normal', 'normal_text')
+        self.finalise_images_and_text('normal_image', 'normal', 'normal_text', 'normal_text_shadow')
         self.states['normal'].has_fresh_surface = True
 
         self.has_been_resized = True
@@ -300,6 +300,7 @@ class RoundedRectangleShape(DrawableShape):
 
         """
         text_colour_state_str = state_str + '_text'
+        text_shadow_colour_state_str = state_str + '_text_shadow'
         image_state_str = state_str + '_image'
         bg_col = self.theming[state_str + '_bg']
         border_col = self.theming[state_str + '_border']
@@ -394,7 +395,7 @@ class RoundedRectangleShape(DrawableShape):
                                                       shape_id)
                 self.states[state_str].cached_background_id = shape_id
 
-        self.finalise_images_and_text(image_state_str, state_str, text_colour_state_str)
+        self.finalise_images_and_text(image_state_str, state_str, text_colour_state_str, text_shadow_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

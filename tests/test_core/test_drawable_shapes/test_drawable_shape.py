@@ -186,10 +186,15 @@ class TestDrawableShape:
                               theming_parameters={'text': 'doop doop',
                                                   'font': default_ui_manager.get_theme().get_font([]),
                                                   'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'normal_image': pygame.image.load('tests/data/images/splat.png'),
-                                                  'text_shadow': pygame.Color(0, 0, 0, 255)},
+                                                  'text_shadow': (0,
+                                                                  0,
+                                                                  0,
+                                                                  pygame.Color('#000000'),
+                                                                  False)},
                               states=['normal'], manager=default_ui_manager)
 
         shape.theming['text_horiz_alignment'] = 'left'
@@ -197,7 +202,7 @@ class TestDrawableShape:
         shape.theming['text_horiz_alignment_padding'] = 5
         shape.theming['text_vert_alignment_padding'] = 5
 
-        shape.finalise_images_and_text('normal_image', 'normal', 'normal_text')
+        shape.finalise_images_and_text('normal_image', 'normal', 'normal_text', 'normal_text_shadow')
 
 
 if __name__ == '__main__':
