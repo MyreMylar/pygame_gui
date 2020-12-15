@@ -434,6 +434,7 @@ class UITextEntryLine(UIElement):
             self.should_redraw = True
 
         if self.should_redraw:
+            self.should_redraw = False
             self.redraw()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
