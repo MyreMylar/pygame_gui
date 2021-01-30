@@ -9,10 +9,10 @@ from pygame_gui.elements.ui_progress_bar import UIProgressBar
 from pygame_gui.elements.ui_screen_space_health_bar import UIScreenSpaceHealthBar
 from pygame_gui.elements.ui_selection_list import UISelectionList
 from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from pygame_gui.elements.ui_tool_tip import UITooltip
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
-from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.text import TextHTMLParser, FadeInEffect, FadeOutEffect, TypingAppearEffect

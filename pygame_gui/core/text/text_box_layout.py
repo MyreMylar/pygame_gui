@@ -316,28 +316,24 @@ class TextBoxLayout:
 
         :param new_end_pos: The new ending index for the text string.
         """
-        cumulative_letter_count = 0
-        found_row_to_update = False
+        cumulative_row_letter_count = 0
         found_chunk_to_update = False
         self.current_end_pos = new_end_pos
-        for row in self.layout_rows:
-            if not found_row_to_update:
-                if cumulative_letter_count + row.letter_count < new_end_pos:
-                    cumulative_letter_count += row.letter_count
-                else:
-                    found_row_to_update = True
-                    for rect in row.items:
-                        if not found_chunk_to_update:
-                            if cumulative_letter_count + rect.letter_count < new_end_pos:
-                                cumulative_letter_count += rect.letter_count
-                            else:
-                                found_chunk_to_update = True
 
-                                if self.finalised_surface is not None:
-                                    rect.clear()
-                                    rect.finalise(self.finalised_surface, self.view_rect,
-                                                  row.y_origin, row.text_chunk_height, row.height,
-                                                  new_end_pos - cumulative_letter_count)
+        row, index_in_row = self._find_row_from_text_box_index(new_end_pos)
+        if row is not None:
+            for rect in row.items:
+                if not found_chunk_to_update:
+                    if cumulative_row_letter_count + rect.letter_count < new_end_pos:
+                        cumulative_row_letter_count += rect.letter_count
+                    else:
+                        found_chunk_to_update = True
+
+                        if self.finalised_surface is not None:
+                            rect.clear()
+                            rect.finalise(self.finalised_surface, self.view_rect,
+                                          row.y_origin, row.text_chunk_height, row.height,
+                                          index_in_row - cumulative_row_letter_count)
 
     def clear_final_surface(self):
         """
@@ -500,39 +496,25 @@ class TextBoxLayout:
         # We need to check if the indexes are at the start/end of a chunk and if not, split the chunk
         if start_index != end_index:
             start_chunk = None
-            start_chunk_row = None
-            start_row_index = 0
-            start_chunk_in_row_index = 0
             start_letter_index = 0
-
             end_chunk = None
-            end_chunk_row = None
-            end_row_index = 0
-            end_chunk_in_row_index = 0
             end_letter_index = 0
+
             # step 1: find the start chunk
             letter_accumulator = 0
 
-            for row in self.layout_rows:
-                if start_chunk is None:
-                    if start_index <= letter_accumulator + row.letter_count:
-                        start_chunk_row = row
-                        start_chunk_in_row_index = 0
-                        for chunk in row.items:
-                            if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
-                                if start_index < letter_accumulator + chunk.letter_count:
-                                    start_letter_index = start_index - letter_accumulator
-                                    start_chunk = chunk
-                                    break
-                                else:
-                                    letter_accumulator += chunk.letter_count
-                                    start_chunk_in_row_index += 1
-
+            start_chunk_row, index_in_row = self._find_row_from_text_box_index(start_index)
+            start_row_index = start_chunk_row.row_index
+            start_chunk_in_row_index = 0
+            for chunk in start_chunk_row.items:
+                if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
+                    if index_in_row < letter_accumulator + chunk.letter_count:
+                        start_letter_index = index_in_row - letter_accumulator
+                        start_chunk = chunk
+                        break
                     else:
-                        letter_accumulator += row.letter_count
-                        start_row_index += 1
-                else:
-                    break
+                        letter_accumulator += chunk.letter_count
+                        start_chunk_in_row_index += 1
 
             if start_letter_index != 0:
                 # split the chunk
@@ -540,30 +522,21 @@ class TextBoxLayout:
                 # for the start chunk we want the right hand side of the split
                 start_chunk = start_chunk.split_index(start_letter_index)
                 start_chunk_row.items.insert(start_chunk_in_row_index + 1, start_chunk)
-                start_letter_index = 0
 
             # step 1: find the end chunk
             letter_accumulator = 0
-            for row in self.layout_rows:
-                if end_chunk is None:
-                    if end_index <= letter_accumulator + row.letter_count:
-                        end_chunk_row = row
-                        end_chunk_in_row_index = 0
-                        for chunk in row.items:
-                            if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
-                                if end_index < letter_accumulator + chunk.letter_count:
-                                    end_letter_index = end_index - letter_accumulator
-                                    end_chunk = chunk
-                                    break
-                                else:
-                                    letter_accumulator += chunk.letter_count
-                                    end_chunk_in_row_index += 1
-
+            end_chunk_row, index_in_row = self._find_row_from_text_box_index(end_index)
+            end_row_index = end_chunk_row.row_index
+            end_chunk_in_row_index = 0
+            for chunk in end_chunk_row.items:
+                if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
+                    if index_in_row < letter_accumulator + chunk.letter_count:
+                        end_letter_index = index_in_row - letter_accumulator
+                        end_chunk = chunk
+                        break
                     else:
-                        letter_accumulator += row.letter_count
-                        end_row_index += 1
-                else:
-                    break
+                        letter_accumulator += chunk.letter_count
+                        end_chunk_in_row_index += 1
 
             if end_letter_index != 0:
                 # split the chunk
@@ -609,29 +582,19 @@ class TextBoxLayout:
             row.set_default_text_shadow_colour(colour)
 
     def insert_text(self, text: str, layout_index: int):
-        row_index = 0
-        letter_accumulator = 0
-        current_row = None
-        for row in self.layout_rows:
-            if layout_index <= letter_accumulator + row.letter_count:
-                letter_row_index = layout_index - letter_accumulator
-                row.insert_text(text, letter_row_index)
-                current_row = row
-                break
-            else:
-                letter_accumulator += row.letter_count
-                row_index += 1
+        current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
+        current_row.insert_text(text, index_in_row)
 
         temp_layout_queue = deque([])
-        for row in reversed(self.layout_rows[row_index:]):
+        for row in reversed(self.layout_rows[current_row.row_index:]):
             row.rewind_row(temp_layout_queue)
 
-        self.layout_rows = self.layout_rows[:row_index]
+        self.layout_rows = self.layout_rows[:current_row.row_index]
 
         self._process_layout_queue(temp_layout_queue, current_row)
 
         if self.finalised_surface is not None:
-            for row in self.layout_rows[row_index:]:
+            for row in self.layout_rows[current_row.row_index:]:
                 row.finalise(self.finalised_surface)
 
     def delete_selected_text(self):
@@ -730,8 +693,14 @@ class TextBoxLayout:
                     row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
-        row_index = bisect(self.row_lengths, text_box_index)
-        return self.layout_rows[row_index]
+        if self.layout_rows != 0:
+            row_index = bisect(self.row_lengths, text_box_index)
+            if row_index >= len(self.layout_rows):
+                row_index = len(self.layout_rows) - 1
+            index_in_row = text_box_index - (self.row_lengths[row_index - 1] if row_index != 0 else 0)
+            return self.layout_rows[row_index], index_in_row
+
+        return None, 0
 
     def _refresh_row_letter_counts(self):
         self.row_lengths = []
@@ -739,4 +708,3 @@ class TextBoxLayout:
         for row in self.layout_rows:
             cumulative_length += row.letter_count
             self.row_lengths.append(cumulative_length)
-
