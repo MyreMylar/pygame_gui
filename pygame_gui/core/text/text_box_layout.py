@@ -600,7 +600,10 @@ class TextBoxLayout:
     def delete_selected_text(self):
         temp_layout_queue = deque([])
         max_row_index = 0
-        current_row = self.selected_rows[0]
+        if self.selected_rows:
+            current_row = self.selected_rows[0]
+        else:
+            raise IndexError('No selected rows.')
         self.cursor_text_row = current_row
         letter_acc = 0
         for chunk in current_row.items:

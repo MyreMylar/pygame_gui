@@ -112,7 +112,7 @@ class UITextEntryLine(UIElement):
 
         self.start_text_offset = 0
         self.edit_position = 0
-        self.select_range = [0, 0]
+        self._select_range = [0, 0]
         self.selection_in_progress = False
 
         self.cursor_on = False
@@ -125,6 +125,17 @@ class UITextEntryLine(UIElement):
         self.length_limit = None
 
         self.rebuild_from_changed_theme_data()
+
+    @property
+    def select_range(self):
+        return self._select_range
+
+    @select_range.setter
+    def select_range(self, value):
+        self._select_range = value
+        start_select = min(self._select_range[0], self._select_range[1])
+        end_select = max(self._select_range[0], self._select_range[1])
+        self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
 
     def rebuild(self):
         """
@@ -438,8 +449,7 @@ class UITextEntryLine(UIElement):
             new_range = [self.select_range[0], select_end_pos]
 
             if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
-                self.select_range[0] = new_range[0]
-                self.select_range[1] = new_range[1]
+                self.select_range = [new_range[0], new_range[1]]
 
                 self.edit_position = self.select_range[1]
                 self.cursor_has_moved_recently = True
@@ -449,9 +459,9 @@ class UITextEntryLine(UIElement):
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
 
-            start_select = min(self.select_range[0], self.select_range[1])
-            end_select = max(self.select_range[0], self.select_range[1])
-            self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
+            # start_select = min(self.select_range[0], self.select_range[1])
+            # end_select = max(self.select_range[0], self.select_range[1])
+            # self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
             self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             self.drawable_shape.toggle_text_cursor()
 
@@ -592,6 +602,7 @@ class UITextEntryLine(UIElement):
             consumed_event = True
         elif event.key == pygame.K_BACKSPACE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.drawable_shape.text_box_layout.delete_selected_text()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.text = self.text[:low_end] + self.text[high_end:]
@@ -599,7 +610,6 @@ class UITextEntryLine(UIElement):
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-                self.drawable_shape.text_box_layout.delete_selected_text()
             elif self.edit_position > 0:
                 if self.start_text_offset > 0:
                     self.start_text_offset -= self.font.get_rect(
@@ -612,6 +622,7 @@ class UITextEntryLine(UIElement):
             consumed_event = True
         elif event.key == pygame.K_DELETE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.drawable_shape.text_box_layout.delete_selected_text()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.text = self.text[:low_end] + self.text[high_end:]
@@ -619,7 +630,6 @@ class UITextEntryLine(UIElement):
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-                self.drawable_shape.text_box_layout.delete_selected_text()
             elif self.edit_position < len(self.text):
                 self.text = self.text[:self.edit_position] + self.text[self.edit_position + 1:]
                 self.edit_position = self.edit_position
@@ -681,11 +691,11 @@ class UITextEntryLine(UIElement):
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 clipboard_copy(self.text[low_end:high_end])
-                self.text = self.text[:low_end] + self.text[high_end:]
-                self.edit_position = low_end
-                self.select_range = [0, 0]
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.drawable_shape.text_box_layout.delete_selected_text()
+                self.edit_position = low_end
+                self.text = self.text[:low_end] + self.text[high_end:]
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
                 consumed_event = True
         elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL:

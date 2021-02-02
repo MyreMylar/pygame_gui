@@ -245,6 +245,8 @@ class TestUIManager:
         default_ui_manager.add_font_paths(font_name='roboto', regular_path='tests/data/Roboto-Regular.ttf')
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
+        # default_ui_manager.resource_loader.start()
+        # default_ui_manager.resource_loader.update()
 
         UIOldTextBox(html_text="<font face=roboto>Test font pre-loading</font>",
                      relative_rect=pygame.Rect(100, 100, 200, 100),
