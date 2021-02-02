@@ -111,12 +111,23 @@ class ThreadedLoader:
         """
         self._started = True
         self._threads_running = True
+        self._threaded_loading_finished = False
+        self._sequential_loading_finished = False
+
+        self._threaded_loading_done_queue = ClosableQueue()
+        self._threading_error_queue = ClosableQueue()
+
         self._threaded_load_queue_start_length = self._threaded_loading_queue.qsize()
         self._start_output_threads(self.num_loading_threads,
                                    ThreadedLoader._threaded_loader,
                                    self._threaded_loading_queue,
                                    self._threaded_loading_done_queue,
                                    self._threading_error_queue)
+
+    def set_finished(self):
+        pass
+    # Currently we are relying on disabling the resource loader after one use to support dynamic loading
+    #     self._started = False
 
     def _start_output_threads(self,
                               count: int,
@@ -233,6 +244,7 @@ class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
         progress = self._calculate_progress()
         if self._threaded_loading_finished and self._threads_running:
             self._stop_threaded_loading()
+            self.set_finished()
 
             while self._threading_error_queue.qsize() > 0:
                 loading_error = self._threading_error_queue.get_nowait()
@@ -266,5 +278,7 @@ class BlockingThreadedResourceLoader(ThreadedLoader, IResourceLoader):
 
         while not self._sequential_loading_finished:
             self._sequential_loading_finished = self._untimed_sequential_loading_update()
+
+        self.set_finished()
 
         return (self._threaded_loading_finished and self._sequential_loading_finished), 1.0

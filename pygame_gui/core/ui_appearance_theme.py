@@ -263,7 +263,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                     image_id=resource_id,
                                     location=package_resource.to_path())
 
-                            self._resource_loader.add_resource(image_resource)
+                            if self._resource_loader.started():
+                                error = image_resource.load()
+                                if error is not None:
+                                    warnings.warn(str(error))
+                            else:
+                                self._resource_loader.add_resource(image_resource)
                             self.image_resources[resource_id] = image_resource
 
                     elif 'path' in image_resource_data:
@@ -274,7 +279,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             image_resource = ImageResource(image_id=resource_id,
                                                            location=image_resource_data['path'])
 
-                            self._resource_loader.add_resource(image_resource)
+                            if self._resource_loader.started():
+                                error = image_resource.load()
+                                if error is not None:
+                                    warnings.warn(str(error))
+                            else:
+                                self._resource_loader.add_resource(image_resource)
+
                             self.image_resources[resource_id] = image_resource
 
                     else:
@@ -291,7 +302,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                     image_resource=image_resource,
                                     sub_surface_rect=image_resource_data['sub_surface_rect'])
                                 self.surface_resources[surface_id] = surf_resource
-                                self._resource_loader.add_resource(surf_resource)
+                                if self._resource_loader.started():
+                                    error = surf_resource.load()
+                                    if error is not None:
+                                        warnings.warn(str(error))
+                                else:
+                                    self._resource_loader.add_resource(surf_resource)
                         else:
                             surface_id = image_resource.image_id
                             if surface_id in self.surface_resources:
