@@ -55,6 +55,7 @@ class HorizRuleLayoutRect(TextLayoutRect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 x_scroll_offset: int,
                  letter_end: Optional[int] = None):
 
         x_start = self.left

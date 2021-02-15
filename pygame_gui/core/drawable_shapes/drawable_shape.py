@@ -459,9 +459,9 @@ class DrawableShape:
             self.text_view_rect.x = 0
             self.text_view_rect.y = 0
             if self.text_view_rect.width != -1:
-                self.text_view_rect.width -= (total_text_buffer * 2) + (2 * horiz_padding)
+                self.text_view_rect.width -= ((total_text_buffer * 2) + (2 * horiz_padding))
             if self.text_view_rect.height != -1:
-                self.text_view_rect.height -= (total_text_buffer * 2) + (2 * vert_padding)
+                self.text_view_rect.height -= ((total_text_buffer * 2) + (2 * vert_padding))
 
             text_actual_area_rect = self.text_view_rect.copy()
             text_actual_area_rect.x = total_text_buffer + horiz_padding

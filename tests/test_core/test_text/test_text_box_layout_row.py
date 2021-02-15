@@ -452,7 +452,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_row.edit_cursor_active is True
         assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
-        assert layout_row.cursor_position == 0
+        assert layout_row.cursor_index == 0
 
         layout_row.set_cursor_from_click_pos((44, 5))
 
@@ -461,7 +461,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_row.edit_cursor_active is True
         assert layout_surface.get_at((1, 5)) == pygame.Color('#00000000')
-        assert layout_row.cursor_position == 3
+        assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
     def test_set_cursor_position(self):
@@ -496,7 +496,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_row.edit_cursor_active is True
         assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
-        assert layout_row.cursor_position == 0
+        assert layout_row.cursor_index == 0
         assert layout_row.cursor_draw_width == 0
 
         layout_row.set_cursor_position(3)
@@ -506,7 +506,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_row.edit_cursor_active is True
         assert layout_surface.get_at((1, 5)) == pygame.Color('#00000000')
-        assert layout_row.cursor_position == 3
+        assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
     def test_insert_text(self):

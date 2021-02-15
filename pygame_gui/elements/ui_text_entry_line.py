@@ -233,7 +233,7 @@ class UITextEntryLine(UIElement):
                 self.text = text
                 self.edit_position = 0
                 self.drawable_shape.set_text(self.text)
-                self.should_redraw = True
+                #self.should_redraw = True
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
         else:
@@ -443,9 +443,13 @@ class UITextEntryLine(UIElement):
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
         if self.selection_in_progress:
-            mouse_x, _ = self.ui_manager.get_mouse_position()
-            select_end_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset +
-                                                                    mouse_x)
+            mouse_pos = self.ui_manager.get_mouse_position()
+            drawable_shape_space_click = (mouse_pos[0] - self.rect.left,
+                                          mouse_pos[1] - self.rect.top)
+            self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+            select_end_pos = self.drawable_shape.text_box_layout.get_cursor_index()
+            # select_end_pos = self.find_edit_position_from_pixel_pos(self.start_text_offset +
+            #                                                         mouse_x)
             new_range = [self.select_range[0], select_end_pos]
 
             if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
@@ -501,7 +505,7 @@ class UITextEntryLine(UIElement):
         """
         super().focus()
         pygame.key.set_repeat(500, 25)
-        self.redraw()
+        # self.redraw()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -767,8 +771,12 @@ class UITextEntryLine(UIElement):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
-                    pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
-                    self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
+                    drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
+                                                  scaled_mouse_pos[1] - self.rect.top)
+                    self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+                    self.edit_position = self.drawable_shape.text_box_layout.get_cursor_index()
+                    # pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
+                    # self.edit_position = self.find_edit_position_from_pixel_pos(pixel_x_pos)
 
                     double_clicking = False
                     if self.double_click_timer < self.ui_manager.get_double_click_time():
@@ -776,8 +784,7 @@ class UITextEntryLine(UIElement):
                             double_clicking = True
 
                     if not double_clicking:
-                        self.select_range[0] = self.edit_position
-                        self.select_range[1] = self.edit_position
+                        self.select_range = [self.edit_position, self.edit_position]
                         self.cursor_has_moved_recently = True
                         self.selection_in_progress = True
                         self.double_click_timer = 0.0
@@ -789,12 +796,16 @@ class UITextEntryLine(UIElement):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.drawable_shape.collide_point(scaled_mouse_pos):
                 consumed_event = True
-                pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
-                new_edit_pos = self.find_edit_position_from_pixel_pos(pixel_x_pos)
+                drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
+                                              scaled_mouse_pos[1] - self.rect.top)
+                self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+                new_edit_pos = self.drawable_shape.text_box_layout.get_cursor_index()
+                # pixel_x_pos = self.start_text_offset + scaled_mouse_pos[0]
+                # new_edit_pos = self.find_edit_position_from_pixel_pos(pixel_x_pos)
                 if new_edit_pos != self.edit_position:
                     self.edit_position = new_edit_pos
                     self.cursor_has_moved_recently = True
-                    self.select_range[1] = self.edit_position
+                    self.select_range = [self.select_range[0], self.edit_position]
             self.selection_in_progress = False
         return consumed_event
 
@@ -831,8 +842,7 @@ class UITextEntryLine(UIElement):
                     char = self.text[index]
             end_select_index = index
 
-            self.select_range[0] = start_select_index
-            self.select_range[1] = end_select_index
+            self.select_range = [start_select_index, end_select_index]
             self.edit_position = end_select_index
             self.cursor_has_moved_recently = True
             self.selection_in_progress = False
@@ -840,28 +850,28 @@ class UITextEntryLine(UIElement):
         else:
             return False
 
-    def find_edit_position_from_pixel_pos(self, pixel_pos: int) -> int:
-        """
-        Locates the correct position to move the edit cursor to, when reacting to a mouse click
-        inside the text entry element.
-
-        :param pixel_pos: The x position of our click after being adjusted for text in our box
-                          scrolling off-screen.
-
-        """
-        start_pos = (self.rect.x + self.border_width + self.shadow_width +
-                     self.shape_corner_radius + self.padding[0])
-        acc_pos = start_pos
-        index = 0
-        for char in self.text:
-            x_width = self.font.get_rect(char).width
-
-            if acc_pos + (x_width/2) > pixel_pos:
-                break
-
-            index += 1
-            acc_pos += x_width
-        return index
+    # def find_edit_position_from_pixel_pos(self, pixel_pos: int) -> int:
+    #     """
+    #     Locates the correct position to move the edit cursor to, when reacting to a mouse click
+    #     inside the text entry element.
+    #
+    #     :param pixel_pos: The x position of our click after being adjusted for text in our box
+    #                       scrolling off-screen.
+    #
+    #     """
+    #     start_pos = (self.rect.x + self.border_width + self.shadow_width +
+    #                  self.shape_corner_radius + self.padding[0])
+    #     acc_pos = start_pos
+    #     index = 0
+    #     for char in self.text:
+    #         x_width = self.font.get_rect(char).width
+    #
+    #         if acc_pos + (x_width/2) > pixel_pos:
+    #             break
+    #
+    #         index += 1
+    #         acc_pos += x_width
+    #     return index
 
     def set_allowed_characters(self, allowed_characters: Union[str, List[str]]):
         """

@@ -37,6 +37,7 @@ class TextLayoutRect(pygame.Rect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 x_scroll_offset: int,
                  letter_end: Optional[int] = None):
         """
         Bake the contents of this layout rect onto a surface.
@@ -46,6 +47,7 @@ class TextLayoutRect(pygame.Rect):
         :param row_chunk_origin:
         :param row_chunk_height:
         :param row_bg_height:
+        :param x_scroll_offset:
         :param letter_end:
         """
 

@@ -85,6 +85,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.row_chunk_origin = 0
         self.row_chunk_height = 0
         self.row_bg_height = 0
+        self.layout_x_offset = 0
         self.letter_end = 0
 
         self.is_selected = False
@@ -128,6 +129,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 x_scroll_offset: int,
                  letter_end: Optional[int] = None):
 
         if self.is_selected:
@@ -271,7 +273,24 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
-        target_surface.blit(surface, self.topleft, area=target_area, special_flags=pygame.BLEND_PREMULTIPLIED)
+        # sort out horizontal scrolling
+        final_pos = (max(target_area.left, self.left - x_scroll_offset), self.top)
+
+        distance_to_lhs_overlap = self.left - target_area.left
+        lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
+
+        remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
+        rhs_overlap = max(0, ((self.width - lhs_overlap) - remaining_rhs_space))
+
+        target_width = (self.width - lhs_overlap) - rhs_overlap
+
+        final_target = pygame.Rect(lhs_overlap,
+                                   target_area.top,
+                                   min(target_width, target_area.width),  # we only want to grab as much as we can show
+                                   target_area.height)
+
+        if target_width > 0:
+            target_surface.blit(surface, final_pos, area=final_target, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
@@ -279,6 +298,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.row_chunk_origin = row_chunk_origin
         self.row_chunk_height = row_chunk_height
         self.row_bg_height = row_bg_height
+        self.layout_x_offset = x_scroll_offset
         self.letter_end = letter_end
 
     def _apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
@@ -553,4 +573,4 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.target_surface is not None:
             self.clear()
             self.finalise(self.target_surface, self.target_surface_area, self.row_chunk_origin,
-                          self.row_chunk_height, self.row_bg_height, self.letter_end)
+                          self.row_chunk_height, self.row_bg_height, self.layout_x_offset, self.letter_end)

@@ -461,7 +461,7 @@ class TestTextBoxLayout:
         layout.set_cursor_position(13)
 
         assert layout.cursor_text_row is not None
-        assert layout.cursor_text_row.cursor_position == 2
+        assert layout.cursor_text_row.cursor_index == 2
         assert layout.cursor_text_row.cursor_draw_width == 17
 
     def test_set_cursor_from_click_pos(self, _init_pygame, default_ui_manager: UIManager):
@@ -493,7 +493,7 @@ class TestTextBoxLayout:
 
         layout.set_cursor_from_click_pos((17, 24))
         assert layout.cursor_text_row is not None
-        assert layout.cursor_text_row.cursor_position == 2
+        assert layout.cursor_text_row.cursor_index == 2
         assert layout.cursor_text_row.cursor_draw_width == 17
 
     def test_toggle_cursor(self, _init_pygame, default_ui_manager: UIManager):

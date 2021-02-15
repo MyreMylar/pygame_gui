@@ -66,6 +66,8 @@ class TextBoxLayout:
         self.selected_chunks = []
         self.selected_rows = []
 
+        self.x_scroll_offset = 0
+
     def reprocess_layout_queue(self, layout_rect):
         """
         Re-lays out already parsed text data. Useful to call if the layout requirements have
@@ -333,6 +335,7 @@ class TextBoxLayout:
                             rect.clear()
                             rect.finalise(self.finalised_surface, self.view_rect,
                                           row.y_origin, row.text_chunk_height, row.height,
+                                          self.x_scroll_offset,
                                           index_in_row - cumulative_row_letter_count)
 
     def clear_final_surface(self):
@@ -405,7 +408,8 @@ class TextBoxLayout:
                 for row in self.layout_rows[row_index:]:
                     for rect in row.items:
                         rect.finalise(self.finalised_surface, self.view_rect,
-                                      row.y_origin, row.text_chunk_height, row.height)
+                                      row.y_origin, row.text_chunk_height, row.height,
+                                      self.x_scroll_offset)
 
     def horiz_center_all_rows(self):
         for row in self.layout_rows:
@@ -468,13 +472,20 @@ class TextBoxLayout:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
 
-        layout_space_click_pos = (click_pos[0] - self.layout_rect.x,
-                                  click_pos[1] - self.layout_rect.y)
+        # layout_space_click_pos = (click_pos[0] - self.layout_rect.x,
+        #                           click_pos[1] - self.layout_rect.y)
 
         for row in self.layout_rows:
-            if row.collidepoint(layout_space_click_pos):
-                self.cursor_text_row = row
-                row.set_cursor_from_click_pos(layout_space_click_pos)
+            if click_pos[1] < row.top or click_pos[1] >= row.bottom:
+                continue
+            self.cursor_text_row = row
+            row.set_cursor_from_click_pos(click_pos)
+
+    def get_cursor_index(self):
+        cursor_index = 0
+        if self.cursor_text_row is not None:
+            cursor_index = self.cursor_text_row.get_cursor_index()
+        return cursor_index
 
     def toggle_cursor(self):
         if self.cursor_text_row is not None:
@@ -647,7 +658,7 @@ class TextBoxLayout:
         if self.cursor_text_row is not None:
             current_row = self.cursor_text_row
             current_row_index = current_row.row_index
-            cursor_pos = self.cursor_text_row.cursor_position
+            cursor_pos = self.cursor_text_row.cursor_index
             letter_acc = 0
             for chunk in self.cursor_text_row.items:
                 if cursor_pos <= letter_acc + (chunk.letter_count - 1):
@@ -673,7 +684,7 @@ class TextBoxLayout:
         if self.cursor_text_row is not None:
             current_row = self.cursor_text_row
             current_row_index = current_row.row_index
-            cursor_pos = self.cursor_text_row.cursor_position
+            cursor_pos = self.cursor_text_row.cursor_index
             letter_acc = 0
             for chunk in self.cursor_text_row.items:
                 if cursor_pos <= letter_acc + chunk.letter_count:

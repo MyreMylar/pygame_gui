@@ -26,7 +26,9 @@ class TextBoxLayoutRow(pygame.Rect):
         self.target_surface = None
         self.cursor_rect = pygame.Rect(self.x, row_start_y, 2, self.height - 2)
         self.edit_cursor_active = False
-        self.cursor_position = 0
+        self.edit_cursor_left_margin = 2
+        self.edit_right_margin = 2
+        self.cursor_index = 0
         self.cursor_draw_width = 0
 
     def __hash__(self):
@@ -127,28 +129,32 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def finalise(self, surface, current_end_pos: Optional[int] = None, cumulative_letter_count: Optional[int] = None):
         self.merge_adjacent_compatible_chunks()
-
         for text_chunk in self.items:
+            chunk_view_rect = pygame.Rect(self.layout.layout_rect.left, 0, self.layout.view_rect.width, self.layout.view_rect.height)
             if isinstance(text_chunk, TextLineChunkFTFont):
                 if current_end_pos is not None and cumulative_letter_count is not None:
                     if cumulative_letter_count < current_end_pos:
-                        text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
+                        text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
                                             self.text_chunk_height, self.height,
+                                            self.layout.x_scroll_offset,
                                             current_end_pos - cumulative_letter_count)
                         cumulative_letter_count += text_chunk.letter_count
                 else:
-                    text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
-                                        self.text_chunk_height, self.height)
+                    text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
+                                        self.text_chunk_height, self.height,
+                                        self.layout.x_scroll_offset)
             else:
-                text_chunk.finalise(surface, self.layout.view_rect, self.y_origin,
-                                    self.text_chunk_height, self.height)
+                text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
+                                    self.text_chunk_height, self.height,
+                                    self.layout.x_scroll_offset)
 
         if self.edit_cursor_active:
             cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
                                                     flags=pygame.SRCALPHA, depth=32)
 
             cursor_surface.fill(pygame.Color('#FFFFFFFF'))
-            self.cursor_rect = pygame.Rect(self.x + self.cursor_draw_width, self.y, 2, max(0, self.height - 2))
+            self.cursor_rect = pygame.Rect(self.x + self.cursor_draw_width - self.layout.x_scroll_offset,
+                                           self.y, 2, max(0, self.height - 2))
             surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.target_surface = surface
@@ -181,18 +187,26 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def clear(self):
         if self.target_surface is not None:
-            slightly_wider_rect = pygame.Rect(self.x, self.y, self.width + self.layout.edit_buffer, self.height)
+            slightly_wider_rect = pygame.Rect(self.x, self.y, self.layout.view_rect.width, self.height)
             self.target_surface.fill(pygame.Color('#00000000'), slightly_wider_rect)
+
+    def _setup_offset_position_from_edit_cursor(self):
+        if self.cursor_draw_width > (self.layout.x_scroll_offset + self.layout.view_rect.width) - self.edit_right_margin:
+            self.layout.x_scroll_offset = (self.cursor_draw_width - self.layout.view_rect.width) + self.edit_right_margin
+
+        if self.cursor_draw_width < self.layout.x_scroll_offset + self.edit_cursor_left_margin:
+            self.layout.x_scroll_offset = max(0, self.cursor_draw_width - self.edit_cursor_left_margin)
 
     def set_cursor_from_click_pos(self, click_pos: Tuple[int, int]):
         letter_acc = 0
         cursor_draw_width = 0
         found_chunk = False
+        scrolled_click_pos = (click_pos[0]+self.layout.x_scroll_offset, click_pos[1])
         for chunk in self.items:
             if isinstance(chunk, TextLineChunkFTFont):
                 if not found_chunk:
-                    if chunk.collidepoint(click_pos):
-                        letter_index = chunk.x_pos_to_letter_index(click_pos[0])
+                    if chunk.collidepoint(scrolled_click_pos):
+                        letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric
                                                   in chunk.font.get_metrics(chunk.text[:letter_index])])
@@ -201,12 +215,18 @@ class TextBoxLayoutRow(pygame.Rect):
                     else:
                         cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
                         letter_acc += chunk.letter_count
-
+        if not found_chunk:
+            # not inside chunk so move to start of line if we are on left, should be at end of line already
+            if scrolled_click_pos[0] < self.left:
+                cursor_draw_width = 0
+                letter_acc = 0
         self.cursor_draw_width = cursor_draw_width
-        self.cursor_position = min(self.letter_count, max(0, letter_acc))
+        self.cursor_index = min(self.letter_count, max(0, letter_acc))
+
+        self._setup_offset_position_from_edit_cursor()
 
     def set_cursor_position(self, cursor_pos):
-        self.cursor_position = min(self.letter_count, max(0, cursor_pos))
+        self.cursor_index = min(self.letter_count, max(0, cursor_pos))
         letter_acc = 0
         cursor_draw_width = 0
         for chunk in self.items:
@@ -222,6 +242,11 @@ class TextBoxLayoutRow(pygame.Rect):
                 cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
 
         self.cursor_draw_width = cursor_draw_width
+
+        self._setup_offset_position_from_edit_cursor()
+
+    def get_cursor_index(self):
+        return self.cursor_index
 
     def insert_text(self, text: str, letter_row_index: int):
         letter_acc = 0
