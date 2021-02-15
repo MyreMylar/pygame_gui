@@ -128,7 +128,7 @@ class HTMLParser(html.parser.HTMLParser):
                     shadow_colour = pygame.color.Color(attributes['color'])
                 else:
                     shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'], self.combined_ids)
-            style['shadow_data'] = (shadow_size, shadow_offset[0], shadow_offset[1], shadow_colour)
+            style['shadow_data'] = (shadow_size, shadow_offset[0], shadow_offset[1], shadow_colour, False)
         elif element == 'font':
             if 'face' in attributes:
                 font_name = attributes['face'] if len(attributes['face']) > 0 else None
