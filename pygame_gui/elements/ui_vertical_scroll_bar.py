@@ -59,8 +59,8 @@ class UIVerticalScrollBar(UIElement):
 
         self.grabbed_slider = False
         self.has_moved_recently = False
-        self.scroll_wheel_up = False
-        self.scroll_wheel_down = False
+        self.scroll_wheel_moved = False
+        self.scroll_wheel_amount = 0
 
         self.background_colour = None
         self.border_colour = None
@@ -243,12 +243,9 @@ class UIVerticalScrollBar(UIElement):
         if (self.is_enabled and
                 self._check_is_focus_set_hovered() and
                 event.type == pygame.MOUSEWHEEL):
-            if event.y > 0:
-                self.scroll_wheel_up = True
-                consumed_event = True
-            elif event.y < 0:
-                self.scroll_wheel_down = True
-                consumed_event = True
+            self.scroll_wheel_moved = True
+            self.scroll_wheel_amount = event.y
+            consumed_event = True
 
         return consumed_event
 
@@ -278,18 +275,24 @@ class UIVerticalScrollBar(UIElement):
         self.has_moved_recently = False
         if self.alive():
             moved_this_frame = False
-            if ((self.top_button is not None and self.top_button.held) or
-                    (self.scroll_wheel_up and self.scroll_position > self.top_limit)):
-                self.scroll_wheel_up = False
+            if self.scroll_wheel_moved and (self.scroll_position > self.top_limit or
+                                            self.scroll_position < self.bottom_limit):
+                self.scroll_wheel_moved = False
+                self.scroll_position -= self.scroll_wheel_amount * (750.0 * time_delta)
+                self.scroll_position = min(max(self.scroll_position, self.top_limit),
+                                           self.bottom_limit - self.sliding_button.relative_rect.height)
+                x_pos = 0
+                y_pos = (self.scroll_position + self.arrow_button_height)
+                self.sliding_button.set_relative_position((x_pos, y_pos))
+                moved_this_frame = True
+            elif self.top_button is not None and self.top_button.held:
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.top_limit)
                 x_pos = 0
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
-            elif ((self.bottom_button is not None and self.bottom_button.held) or
-                  (self.scroll_wheel_down and self.scroll_position < self.bottom_limit)):
-                self.scroll_wheel_down = False
+            elif self.bottom_button is not None and self.bottom_button.held:
                 self.scroll_position += (250.0 * time_delta)
                 self.scroll_position = min(self.scroll_position,
                                            self.bottom_limit -
