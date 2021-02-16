@@ -326,11 +326,10 @@ class TextBoxLayout:
         if row is not None:
             for rect in row.items:
                 if not found_chunk_to_update:
-                    if cumulative_row_letter_count + rect.letter_count < new_end_pos:
+                    if cumulative_row_letter_count + rect.letter_count < index_in_row:
                         cumulative_row_letter_count += rect.letter_count
                     else:
                         found_chunk_to_update = True
-
                         if self.finalised_surface is not None:
                             rect.clear()
                             rect.finalise(self.finalised_surface, self.view_rect,
