@@ -87,6 +87,20 @@
     {
         "prototype": "#no_frills_button"
     },
+    "horizontal_slider.#left_button":
+    {
+        "misc":
+        {
+            "text_horiz_alignment_method": "left_triangle"
+        }
+    },
+    "horizontal_slider.#right_button":
+    {
+        "misc":
+        {
+            "text_horiz_alignment_method": "right_triangle"
+        }
+    },
     "horizontal_slider.#sliding_button":
     {
         "misc":

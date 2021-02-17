@@ -341,13 +341,18 @@ class DrawableShape:
         if 'text_horiz_alignment' in self.theming:
             if (self.theming['text_horiz_alignment'] == 'center' or
                     self.theming['text_horiz_alignment'] not in ['left', 'right']):
-                self.text_box_layout.horiz_center_all_rows()
+                method = 'rect'
+                if 'text_horiz_alignment_method' in self.theming:
+                    method = self.theming['text_horiz_alignment_method']
+                self.text_box_layout.horiz_center_all_rows(method)
             elif self.theming['text_horiz_alignment'] == 'left':
                 self.text_box_layout.align_left_all_rows(0)
             else:
                 self.text_box_layout.align_right_all_rows(0)
         else:
-            self.text_box_layout.horiz_center_all_rows()
+            if 'text_horiz_alignment_method' in self.theming:
+                method = self.theming['text_horiz_alignment_method']
+            self.text_box_layout.horiz_center_all_rows(method)
 
         # Vertical alignment
         if 'text_vert_alignment' in self.theming:

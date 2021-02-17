@@ -109,6 +109,7 @@ class UIButton(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 0
         self.text_vert_alignment_padding = 0
+        self.text_horiz_alignment_method = 'rect'
         self.shape = 'rectangle'
         self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
@@ -579,6 +580,11 @@ class UIButton(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_method',
+                                               default_value='rect',
+                                               casting_func=str):
+            has_any_changed = True
+
         if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
                                                default_value='center',
                                                casting_func=str):
@@ -633,6 +639,7 @@ class UIButton(UIElement):
                               'text_horiz_alignment': self.text_horiz_alignment,
                               'text_vert_alignment': self.text_vert_alignment,
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                              'text_horiz_alignment_method': self.text_horiz_alignment_method,
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
                               'shape_corner_radius': self.shape_corner_radius,
                               'transitions': self.state_transitions}

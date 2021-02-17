@@ -410,9 +410,9 @@ class TextBoxLayout:
                                       row.y_origin, row.text_chunk_height, row.height,
                                       self.x_scroll_offset)
 
-    def horiz_center_all_rows(self):
+    def horiz_center_all_rows(self, method='rect'):
         for row in self.layout_rows:
-            row.horiz_center_row()
+            row.horiz_center_row(method)
 
     def align_left_all_rows(self, x_padding):
         start_left = self.layout_rect.left + x_padding

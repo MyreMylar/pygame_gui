@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-
+import math
 import pygame
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
@@ -89,8 +89,30 @@ class TextBoxLayoutRow(pygame.Rect):
         self.letter_count = 0
         self.y_origin = 0
 
-    def horiz_center_row(self):
-        self.centerx = self.layout.layout_rect.centerx
+    def horiz_center_row(self, method='rect'):
+        if method == 'rect':
+            self.centerx = self.layout.layout_rect.centerx
+        elif method == 'right_triangle':
+            # two lines - from bottom left of triangle at a -60 angle (because y axis is inverted)
+            # then from mid left at 90
+            m1 = math.tan(math.radians(-60))
+            n1 = self.centery + int(self.width / 2)
+            n2 = self.centery
+
+            visual_center_x = (n2 - n1) / m1
+
+            self.left = self.layout.layout_rect.centerx - visual_center_x
+
+        elif method == 'left_triangle':
+            # just flip right_triangle method
+            m1 = math.tan(math.radians(-60))
+            n1 = self.centery + int(self.width / 2)
+            n2 = self.centery
+
+            visual_center_x = (n2 - n1) / m1
+
+            self.right = self.layout.layout_rect.centerx + visual_center_x
+
         current_start_x = self.x
         for item in self.items:
             item.x = current_start_x
@@ -159,7 +181,8 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self.target_surface = surface
 
-        # pygame.draw.rect(self.target_surface, pygame.Color('#FF0000'), self, 1)
+        # pygame.draw.rect(self.target_surface, pygame.Color('#FF0000'), self.layout.layout_rect, 1)
+        # pygame.draw.rect(self.target_surface, pygame.Color('#00FF00'), self, 1)
 
         return cumulative_letter_count
 
