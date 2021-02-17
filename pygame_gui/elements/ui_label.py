@@ -56,7 +56,6 @@ class UILabel(UIElement):
         self.disabled_text_colour = None
         self.text_shadow_colour = None
 
-        self.text_shadow = False
         self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
 
@@ -151,14 +150,6 @@ class UILabel(UIElement):
         text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
         if text_shadow_colour != self.text_shadow_colour:
             self.text_shadow_colour = text_shadow_colour
-            any_changed = True
-
-        def parse_to_bool(str_data: str):
-            return bool(int(str_data))
-
-        if self._check_misc_theme_data_changed(attribute_name='text_shadow',
-                                               default_value=False,
-                                               casting_func=parse_to_bool):
             any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',

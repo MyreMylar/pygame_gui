@@ -113,9 +113,8 @@
     {
         "misc":
         {
-            "text_shadow": "0",
-            "text_shadow_size": "1",
-            "text_shadow_offset": "1,1"
+            "text_shadow_size": "0",
+            "text_shadow_offset": "0,0"
         }
     },
     "panel":

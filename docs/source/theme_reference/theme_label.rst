@@ -61,8 +61,7 @@ Misc
 
 :class:`UILabel <pygame_gui.elements.UILabel>` has the following miscellaneous parameters in a 'misc' block:
 
- - "**text_shadow**" - Set to "1" to enable, or "0" to disable a shadow/outline behind the text. Defaults to "0".
- - "**text_shadow_size**" - The increased size in pixels of the shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together.
+ - "**text_shadow_size**" - The increased size in pixels of the shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together. Defaults to "0", no shadow.
  - "**text_shadow_offset**" - Pixel offset in horizontal (x) and vertical (y) dimensions for where the shadow is drawn. In the format "x,y". Defaults to "0,0".
  - "**text_horiz_alignment**" - Set to "left", "right" or "center". Controls the horizontal placement of the label text. Default is "center".
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the label text. Default is "center".
