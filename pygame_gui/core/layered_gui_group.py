@@ -270,10 +270,10 @@ class LayeredGUIGroup(LayeredUpdates):
         surface.blits(self.visible)
 
     def update(self, *args, **kwargs) -> None:
+        super().update(*args, **kwargs)
         if self.should_update_visibility:
             self.should_update_visibility = False
             self.update_visibility()
-        super().update(*args, **kwargs)
 
     def update_visibility(self):
         """

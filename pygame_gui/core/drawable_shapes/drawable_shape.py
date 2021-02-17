@@ -287,7 +287,7 @@ class DrawableShape:
         """
         Updates the drawable shape to process rebuilds and update blends between states.
 
-        :param time_delta: amount fo time passed between now and the previous frame in seconds.
+        :param time_delta: amount of time passed between now and the previous frame in seconds.
 
         """
         if len(self.states_to_redraw_queue) > 0:
