@@ -272,7 +272,7 @@ class HTMLParser(html.parser.HTMLParser):
                                    colour=self.link_style['link_text'],
                                    bg_colour=self.current_style['bg_colour'],
                                    hover_colour=self.link_style['link_hover'],
-                                   selected_colour=self.link_style['link_selected'],
+                                   active_colour=self.link_style['link_selected'],
                                    hover_underline=self.link_style['link_hover_underline'],
                                    text_shadow_data=self.current_style['shadow_data']))
         else:

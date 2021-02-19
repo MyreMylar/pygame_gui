@@ -604,8 +604,8 @@ class UITextBox(UIElement):
                                                  chunk.size)
                         if hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                             consumed_event = True
-                            if not chunk.is_selected:
-                                chunk.on_selected()
+                            if not chunk.is_active:
+                                chunk.set_active()
                                 # if chunk.metrics_changed_after_redraw:
                                 #     should_full_redraw = True
                                 # else:
@@ -630,15 +630,15 @@ class UITextBox(UIElement):
                 if (hover_rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1]) and
                         self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
                     consumed_event = True
-                    if chunk.is_selected:
+                    if chunk.is_active:
                         event_data = {'user_type': UI_TEXT_BOX_LINK_CLICKED,
                                       'link_target': chunk.href,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
-                if chunk.is_selected:
-                    chunk.on_unselected()
+                if chunk.is_active:
+                    chunk.set_inactive()
                     # if chunk.metrics_changed_after_redraw:
                     #     should_full_redraw = True
                     # else:

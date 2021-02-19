@@ -89,6 +89,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.letter_end = 0
 
         self.is_selected = False
+        self.is_active = False
         self.selection_colour = pygame.Color(128, 128, 128, 255)
 
         self.should_centre_from_baseline = False
@@ -119,9 +120,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
         match_selected = self.is_selected == other_text_chunk.is_selected
+        match_active = self.is_active == other_text_chunk.is_active
 
         return (match_fonts and match_underlined and match_colour and
-                match_bg_color and match_shadow_data and match_selected)
+                match_bg_color and match_shadow_data and match_selected and match_active)
 
     def finalise(self,
                  target_surface: Surface,

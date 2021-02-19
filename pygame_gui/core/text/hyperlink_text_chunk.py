@@ -21,7 +21,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  colour: Color,
                  bg_colour: Color,
                  hover_colour: Color,
-                 selected_colour: Color,
+                 active_colour: Color,
                  hover_underline: bool,
                  text_shadow_data: Optional[Tuple[int, int, int]] = None):
         super().__init__(text, font, underlined, colour, False, bg_colour, text_shadow_data)
@@ -32,7 +32,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
 
         self.normal_colour = colour
         self.hover_colour = hover_colour
-        self.selected_colour = selected_colour
+        self.active_colour = active_colour
 
         self.normal_underline = underlined
         self.hover_underline = hover_underline
@@ -62,23 +62,22 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
             self.is_hovered = False
             self.redraw()
 
-    def on_selected(self):
+    def set_active(self):
         """
         Handles clicking on this text chunk with the mouse. Used for links.
-        TODO: Should this be set_active/set_inactive? To be internally consistent with buttons.
 
         """
-        self.colour = self.selected_colour
-        self.is_selected = True
+        self.colour = self.active_colour
+        self.is_active = True
         self.redraw()
 
-    def on_unselected(self):
+    def set_inactive(self):
         """
         Handles clicking on this text chunk with the mouse. Used for links.
 
         """
         self.colour = self.normal_colour
-        self.is_selected = False
+        self.is_active = False
         self.redraw()
 
     def _split_at(self, right_side, split_pos, target_surface, target_surface_area, baseline_centred):
@@ -89,7 +88,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                                               self.colour,
                                               self.bg_colour,
                                               self.hover_colour,
-                                              self.selected_colour,
+                                              self.active_colour,
                                               self.hover_underline,
                                               self.text_shadow_data)
 
