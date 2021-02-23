@@ -44,11 +44,17 @@ class TextLineChunkFTFont(TextLayoutRect):
                  bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, pygame.Color, bool]] = None,
                  max_dimensions: Optional[Tuple[int, int]] = None):
+
+        self.text_shadow_data = text_shadow_data
         if len(text) == 0:
             text_rect = font.get_rect('A')
         else:
             text_rect = font.get_rect(text)
-        text_width = sum([char_metric[4] for char_metric in font.get_metrics(text)])
+        text_shadow_width = 0
+        if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
+            # expand our text chunk if we have a text shadow
+            text_shadow_width = self.text_shadow_data[0]
+        text_width = sum([char_metric[4] for char_metric in font.get_metrics(text)]) + (2 * text_shadow_width)
         text_height = text_rect.height
         if max_dimensions is not None:
             if max_dimensions[0] != -1:
@@ -67,7 +73,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.using_default_text_colour = using_default_text_colour
         self.using_default_text_shadow_colour = False
         self.bg_colour = bg_colour
-        self.text_shadow_data = text_shadow_data
+
         if self.text_shadow_data is not None:
             self.using_default_text_shadow_colour = self.text_shadow_data[4]
             self.shadow_colour = self.text_shadow_data[3]
@@ -145,11 +151,13 @@ class TextLineChunkFTFont(TextLayoutRect):
         chunk_draw_width = sum([char_metric[4] for char_metric in self.font.get_metrics(final_str_text)])
         chunk_draw_height = row_chunk_height
         chunk_x_origin = 0
+        text_shadow_width = 0
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
             # expand our text chunk if we have a text shadow
-            chunk_x_origin += self.text_shadow_data[0]
-            chunk_draw_width += (self.text_shadow_data[0] * 2)
-            chunk_draw_height += (self.text_shadow_data[0] * 2)
+            text_shadow_width = self.text_shadow_data[0]
+            chunk_x_origin += text_shadow_width
+            chunk_draw_width += (text_shadow_width * 2)
+            chunk_draw_height += (text_shadow_width * 2)
 
         self.font.underline = self.underlined  # set underlined state
         if self.underlined:
@@ -284,7 +292,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
         rhs_overlap = max(0, ((self.width - lhs_overlap) - remaining_rhs_space))
 
-        target_width = (self.width - lhs_overlap) - rhs_overlap
+        target_width = (self.width - lhs_overlap) - rhs_overlap + (2 * text_shadow_width)
 
         final_target = pygame.Rect(lhs_overlap,
                                    target_area.top,

@@ -119,6 +119,11 @@ class UITextBox(UIElement):
         self.shape = 'rectangle'
         self.shape_corner_radius = None
 
+        self.text_horiz_alignment = 'default'
+        self.text_vert_alignment = 'default'
+        self.text_horiz_alignment_padding = 0
+        self.text_vert_alignment_padding = 0
+
         self.should_trigger_full_rebuild = True
         self.time_until_full_rebuild_after_changing_size = 0.2
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
@@ -286,6 +291,29 @@ class UITextBox(UIElement):
 
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+
+    def _align_all_text_rows(self):
+        """
+        Aligns the text drawing position correctly according to our theming options.
+
+        """
+        # Horizontal alignment
+        if self.text_horiz_alignment != 'default':
+            if self.text_horiz_alignment == 'center':
+                self.formatted_text_block.horiz_center_all_rows()
+            elif self.text_horiz_alignment == 'left':
+                self.formatted_text_block.align_left_all_rows(self.text_horiz_alignment_padding)
+            else:
+                self.formatted_text_block.align_right_all_rows(self.text_horiz_alignment_padding)
+
+        # Vertical alignment
+        if self.text_vert_alignment != 'default':
+            if self.text_vert_alignment == 'center':
+                self.formatted_text_block.vert_center_all_rows()
+            elif self.text_vert_alignment == 'top':
+                self.formatted_text_block.vert_align_top_all_rows(self.text_vert_alignment_padding)
+            else:
+                self.formatted_text_block.vert_align_bottom_all_rows(self.text_vert_alignment_padding)
 
     def update(self, time_delta: float):
         """
@@ -489,6 +517,8 @@ class UITextBox(UIElement):
                                                   line_spacing=1.25)
         if self.text_wrap_rect[3] == -1:
             self.formatted_text_block.view_rect.height = self.formatted_text_block.layout_rect.height
+
+        self._align_all_text_rows()
         self.formatted_text_block.finalise_to_new()
 
         # self.formatted_text_block = TextBlock(parser.text_data,
@@ -724,11 +754,45 @@ class UITextBox(UIElement):
             self.border_colour = border_colour
             has_any_changed = True
 
+        if self._check_text_alignment_theming():
+            has_any_changed = True
+
         if self._check_link_style_changed():
             has_any_changed = True
 
         if has_any_changed:
             self.rebuild()
+
+    def _check_text_alignment_theming(self) -> bool:
+        """
+        Checks for any changes in the theming data related to text alignment.
+
+        :return: True if changes found.
+
+        """
+        has_any_changed = False
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
+                                               default_value='left',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
+                                               default_value='top',
+                                               casting_func=str):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        return has_any_changed
 
     def _check_link_style_changed(self) -> bool:
         """
