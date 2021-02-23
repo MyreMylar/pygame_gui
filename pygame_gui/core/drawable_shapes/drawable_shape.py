@@ -476,7 +476,7 @@ class DrawableShape:
             if 'text_height' in self.theming:
                 text_actual_area_rect.height = self.theming['text_height']
 
-            text_shadow_data = (0, 0, 0, pygame.Color('#505050'), False)
+            text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
                 text_shadow_data = self.theming['text_shadow']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
