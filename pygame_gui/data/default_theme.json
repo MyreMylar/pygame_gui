@@ -40,7 +40,8 @@
             "shape": "rectangle",
             "border_width": "1",
             "shadow_width": "2",
-            "shape_corner_radius": "2"
+            "shape_corner_radius": "2",
+            "text_horiz_alignment_padding": "10"
         }
     },
     "#no_frills_button":
@@ -50,7 +51,8 @@
             "shape": "rectangle",
             "border_width": "0",
             "shadow_width": "0",
-            "shape_corner_radius": "2"
+            "shape_corner_radius": "2",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "button":
@@ -248,7 +250,8 @@
         {
             "shape": "rectangle",
             "shadow_width": "0",
-            "border_width": "1"
+            "border_width": "1",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "world_space_health_bar":
@@ -277,7 +280,8 @@
             "border_width": "1",
             "shadow_width": "1",
             "text_vert_alignment": "top",
-            "text_vert_alignment_padding": "0"
+            "text_vert_alignment_padding": "0",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "#file_dialog.#file_display_list.vertical_scroll_bar":

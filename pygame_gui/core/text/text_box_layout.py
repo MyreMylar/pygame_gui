@@ -1,4 +1,4 @@
-from typing import Deque, List
+from typing import Deque, List, Tuple
 from collections import deque
 from bisect import bisect
 
@@ -115,7 +115,7 @@ class TextBoxLayout:
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 
-        rhs_limit = self.layout_rect.width
+        rhs_limit = self.layout_rect.right
         for floater in self.floating_rects:
             if floater.vertical_overlap(text_layout_rect):
                 if (current_row.at_start() and
@@ -470,9 +470,6 @@ class TextBoxLayout:
             if self.cursor_text_row.edit_cursor_active:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
-
-        # layout_space_click_pos = (click_pos[0] - self.layout_rect.x,
-        #                           click_pos[1] - self.layout_rect.y)
 
         for row in self.layout_rows:
             if click_pos[1] < row.top or click_pos[1] >= row.bottom:

@@ -659,6 +659,26 @@ class UIButton(UIElement):
 
         self.on_fresh_drawable_shape_ready()
 
+        if self.relative_rect.width == -1 or self.relative_rect.height == -1:
+            old_width = self.relative_rect.width
+            old_height = self.relative_rect.height
+            self.set_dimensions(self.image.get_size())
+
+            # if we have anchored the left side of our button to the right of it's container then
+            # changing the width is going to mess up the horiz position as well.
+            new_left = self.relative_rect.left
+            new_top = self.relative_rect.top
+            if self.anchors['left'] == 'right':
+                left_offset = self.relative_rect.left + old_width
+                new_left = left_offset - self.relative_rect.width
+            # if we have anchored the top side of our button to the bottom of it's container then
+            # changing the height is going to mess up the vert position as well.
+            if self.anchors['top'] == 'bottom':
+                top_offset = self.relative_rect.top + old_height
+                new_top = top_offset - self.relative_rect.height
+
+            self.set_relative_position((new_left, new_top))
+
     def hide(self):
         """
         In addition to the base UIElement.hide() - Change the hovered state to a normal state.
