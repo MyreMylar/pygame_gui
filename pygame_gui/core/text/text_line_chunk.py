@@ -27,7 +27,7 @@ from pygame.color import Color
 from pygame.surface import Surface
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
-from pygame_gui.core import ColourGradient
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class TextLineChunkFTFont(TextLayoutRect):
@@ -54,7 +54,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
             # expand our text chunk if we have a text shadow
             text_shadow_width = self.text_shadow_data[0]
-        text_width = sum([char_metric[4] for char_metric in font.get_metrics(text)]) + (2 * text_shadow_width)
+        text_width = sum([char_metric[4]
+                          for char_metric in
+                          font.get_metrics(text)]) + (2 * text_shadow_width)
         text_height = text_rect.height
         if max_dimensions is not None:
             if max_dimensions[0] != -1:
@@ -65,7 +67,8 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         self.text = text
 
-        # style that needs to be matched to merge or insert chunks (are those basically the same operation?)
+        # style that needs to be matched to merge or insert
+        # chunks (are those basically the same operation?)
         self.font = font
         self.underlined = underlined
         self.colour = colour
@@ -82,7 +85,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.y_origin = text_rect.y
         self.font_y_padding = self._calc_font_padding()
 
-        # we split text stings based on spaces, these variables need recalculating when splitting or merging chunks
+        # we split text stings based on spaces,
+        # these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
@@ -101,10 +105,13 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.should_centre_from_baseline = False
 
     def _calc_font_padding(self):
-        # 'font padding' this determines the amount of padding that font.pad adds to the top of text excluding
-        # any padding added to make glyphs even - this is useful for 'base-line centering' when we want to center text
-        # that doesn't drop below the base line (no y's, g's, p's etc) but also don't want it to flicker on and off.
-        # base-line centering is the default for chunks on a single style row.
+        # 'font padding' this determines the amount of padding that
+        # font.pad adds to the top of text excluding
+        # any padding added to make glyphs even - this is useful
+        # for 'base-line centering' when we want to center text
+        # that doesn't drop below the base line (no y's, g's, p's etc)
+        # but also don't want it to flicker on and off. Base-line
+        # centering is the default for chunks on a single style row.
         padding_state = self.font.pad
 
         self.font.pad = False
@@ -148,7 +155,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
         # to make the surface wide enough
-        chunk_draw_width = sum([char_metric[4] for char_metric in self.font.get_metrics(final_str_text)])
+        chunk_draw_width = sum([char_metric[4]
+                                for char_metric in
+                                self.font.get_metrics(final_str_text)])
         chunk_draw_height = row_chunk_height
         chunk_x_origin = 0
         text_shadow_width = 0
@@ -273,7 +282,8 @@ class TextLineChunkFTFont(TextLayoutRect):
             if self.should_centre_from_baseline:
                 padless_origin = self.y_origin - self.font_y_padding
                 half_padless_origin = int(round(0.5 * padless_origin))
-                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+                text_rect.y = (surface.get_rect().centery -
+                               self.font_y_padding - half_padless_origin)
             else:
                 text_rect.centery = surface.get_rect().centery
 
@@ -296,11 +306,13 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         final_target = pygame.Rect(lhs_overlap,
                                    target_area.top,
-                                   min(target_width, target_area.width),  # we only want to grab as much as we can show
+                                   # we only want to grab as much as we can show
+                                   min(target_width, target_area.width),
                                    target_area.height)
 
         if target_width > 0:
-            target_surface.blit(surface, final_pos, area=final_target, special_flags=pygame.BLEND_PREMULTIPLIED)
+            target_surface.blit(surface, final_pos, area=final_target,
+                                special_flags=pygame.BLEND_PREMULTIPLIED)
 
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
@@ -319,17 +331,20 @@ class TextLineChunkFTFont(TextLayoutRect):
             shadow_colour = self.shadow_colour
             # we have a shadow
             if pygame.version.vernum[0] >= 2:
-                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+                # This is a hacky way to convert text to
+                # pre-multiplied alpha with a SDL2 alpha blit
                 shadow_surface = text_surface.copy()
                 temp_shadow_surface = shadow_surface.copy()
 
                 self.font.render_to(temp_shadow_surface, origin,
                                     text_str,
                                     fgcolor=shadow_colour)
-                shadow_surface.blit(temp_shadow_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+                shadow_surface.blit(temp_shadow_surface, (0, 0),
+                                    special_flags=pygame.BLEND_ALPHA_SDL2)
             else:
                 shadow_surface = text_surface.copy()
-                shadow_surface.fill((0, 0, 0, 1))  # have to have 1 alpha here to fake convert to pre-multiplied alpha
+                # have to have 1 alpha here to fake convert to pre-multiplied alpha
+                shadow_surface.fill((0, 0, 0, 1))
 
                 self.font.render_to(shadow_surface, origin,
                                     text_str,
@@ -341,27 +356,34 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                 + y_pos),
                                                text_rect.size)
 
-                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+                surface.blit(shadow_surface, shadow_text_rect,
+                             special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_rect.x + shadow_offset[0]
                                                 + x_pos,
                                                 text_rect.y + shadow_offset[1]),
                                                text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+                surface.blit(shadow_surface, shadow_text_rect,
+                             special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_and_y in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
                     (text_rect.x + shadow_offset[0] + x_and_y,
                      text_rect.y + shadow_offset[1] + x_and_y),
                     text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+                surface.blit(shadow_surface, shadow_text_rect,
+                             special_flags=pygame.BLEND_PREMULTIPLIED)
             for x_and_y in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect(
                     (text_rect.x + shadow_offset[0] - x_and_y,
                      text_rect.y + shadow_offset[1] + x_and_y),
                     text_rect.size)
-                surface.blit(shadow_surface, shadow_text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+                surface.blit(shadow_surface, shadow_text_rect,
+                             special_flags=pygame.BLEND_PREMULTIPLIED)
 
-    def split(self, requested_x: int, line_width: int, row_start_x: int) -> Union['TextLayoutRect', None]:
+    def split(self,
+              requested_x: int,
+              line_width: int,
+              row_start_x: int) -> Union['TextLayoutRect', None]:
         # starting heuristic: find the percentage through the chunk width of this split request
         percentage_split = 0
         if self.width != 0:
@@ -421,7 +443,8 @@ class TextLineChunkFTFont(TextLayoutRect):
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
             optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
-            if optimum_split_point != 1:  # have to be at least wide enough to fit in a dash and another character
+            if optimum_split_point != 1:
+                # have to be at least wide enough to fit in a dash and another character
                 left_side = self.text[:optimum_split_point] + '-'
                 right_side = '-' + self.text[optimum_split_point:]
                 split_text_ok = True
@@ -432,7 +455,9 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
+            self.size = (sum([char_metric[4]  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                              for char_metric in
+                              self.font.get_metrics(self.text)]),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
@@ -448,7 +473,9 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)]),
+            self.size = (sum([char_metric[4] # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                              for char_metric in
+                              self.font.get_metrics(self.text)]),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
@@ -458,23 +485,34 @@ class TextLineChunkFTFont(TextLayoutRect):
         else:
             return None
 
-    def _split_at(self, right_side, split_pos, target_surface, target_surface_area, baseline_centred):
+    def _split_at(self, right_side, split_pos, target_surface,
+                  target_surface_area, baseline_centred):
         right_side_chunk = TextLineChunkFTFont(right_side, self.font, self.underlined,
                                                self.colour,
                                                self.using_default_text_colour,
                                                self.bg_colour,
                                                self.text_shadow_data)
-        right_side_chunk.topleft = split_pos
+        right_side_chunk.topleft = split_pos  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         right_side_chunk.target_surface = target_surface
         right_side_chunk.target_surface_area = target_surface_area
         right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk
 
     def clear(self):
+        """
+        Clear the finalised/rendered text in this chunk to an invisible/empty surface.
+        """
         if self.target_surface is not None:
             self.target_surface.fill(pygame.Color('#00000000'), self)
 
     def add_text(self, input_text: str):
+        """
+        Adds text to the end of this text chunk.
+        Theoretically it should be faster to add text on the end of a text layout
+        than sticking it in the middle.
+
+        :param input_text: The text to add.
+        """
         self.insert_text(input_text, len(self.text))
 
     def insert_text(self, input_text: str, index: int):
@@ -507,6 +545,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.size = (text_width, text_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
     def delete_letter_at_index(self, index):
+        """
+        Removes the letter after the supplied character index.
+
+        :param index: the index of the character to 'delete' from.
+        """
         self.text = self.text[:index] + self.text[min(len(self.text), index+1):]
 
         self.letter_count = len(self.text)
@@ -524,10 +567,14 @@ class TextLineChunkFTFont(TextLayoutRect):
             if self.max_dimensions[1] != -1:
                 text_height = min(self.max_dimensions[1], text_height)
 
-        self.size = (
-        text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+        self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
     def backspace_letter_at_index(self, index):
+        """
+        Removes the letter before the supplied character index.
+
+        :param index: the index of the character to 'backspace' from.
+        """
         self.text = self.text[:max(0, index-1)] + self.text[index:]
 
         self.letter_count = len(self.text)
@@ -545,10 +592,15 @@ class TextLineChunkFTFont(TextLayoutRect):
             if self.max_dimensions[1] != -1:
                 text_height = min(self.max_dimensions[1], text_height)
 
-        self.size = (
-        text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+        self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
     def x_pos_to_letter_index(self, x_pos: int):
+        """
+        Convert a horizontal, or 'x' pixel position into a letter/character index in this
+        text chunk. Commonly used fro converting mouse clicks into letter positions for
+        positioning the text editing cursor/carat.
+        """
+
         chunk_space_x = x_pos - self.x
         percentage = chunk_space_x/self.width
         estimated_index = int(round(len(self.text) * percentage))
@@ -560,10 +612,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         check_dir = -1
         changed_dir = 0
         step = 1
-        # algorithm picks a good guess for the best letter index and then checks either side for better indexes
+        # algorithm picks a good guess for the best letter
+        # index and then checks either side for better indexes
         while changed_dir < 2:
             new_index = best_index + (step * check_dir)
-            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index + (step * check_dir), 0)])
+            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index +
+                                                               (step * check_dir), 0)])
             new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
             if new_diff < lowest_diff:
                 lowest_diff = new_diff
@@ -582,5 +636,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         if self.target_surface is not None:
             self.clear()
-            self.finalise(self.target_surface, self.target_surface_area, self.row_chunk_origin,
-                          self.row_chunk_height, self.row_bg_height, self.layout_x_offset, self.letter_end)
+            self.finalise(self.target_surface,
+                          self.target_surface_area,
+                          self.row_chunk_origin,
+                          self.row_chunk_height,
+                          self.row_bg_height,
+                          self.layout_x_offset,
+                          self.letter_end)

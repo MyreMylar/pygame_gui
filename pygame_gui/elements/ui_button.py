@@ -457,46 +457,56 @@ class UIButton(UIElement):
             self.font = font
             has_any_changed = True
 
-        cols = {'normal_bg': self.ui_theme.get_colour_or_gradient('normal_bg',
-                                                                  self.combined_element_ids),
-                'hovered_bg': self.ui_theme.get_colour_or_gradient('hovered_bg',
-                                                                   self.combined_element_ids),
-                'disabled_bg': self.ui_theme.get_colour_or_gradient('disabled_bg',
-                                                                    self.combined_element_ids),
-                'selected_bg': self.ui_theme.get_colour_or_gradient('selected_bg',
-                                                                    self.combined_element_ids),
-                'active_bg': self.ui_theme.get_colour_or_gradient('active_bg',
-                                                                  self.combined_element_ids),
-                'normal_text': self.ui_theme.get_colour_or_gradient('normal_text',
-                                                                    self.combined_element_ids),
-                'hovered_text': self.ui_theme.get_colour_or_gradient('hovered_text',
-                                                                     self.combined_element_ids),
-                'disabled_text': self.ui_theme.get_colour_or_gradient('disabled_text',
-                                                                      self.combined_element_ids),
-                'selected_text': self.ui_theme.get_colour_or_gradient('selected_text',
-                                                                      self.combined_element_ids),
-                'active_text': self.ui_theme.get_colour_or_gradient('active_text',
-                                                                    self.combined_element_ids),
-                'normal_text_shadow': self.ui_theme.get_colour_or_gradient('normal_text_shadow',
-                                                                           self.combined_element_ids),
-                'hovered_text_shadow': self.ui_theme.get_colour_or_gradient('hovered_text_shadow',
-                                                                            self.combined_element_ids),
-                'disabled_text_shadow': self.ui_theme.get_colour_or_gradient('disabled_text_shadow',
-                                                                             self.combined_element_ids),
-                'selected_text_shadow': self.ui_theme.get_colour_or_gradient('selected_text_shadow',
-                                                                             self.combined_element_ids),
-                'active_text_shadow': self.ui_theme.get_colour_or_gradient('active_text_shadow',
-                                                                           self.combined_element_ids),
-                'normal_border': self.ui_theme.get_colour_or_gradient('normal_border',
-                                                                      self.combined_element_ids),
-                'hovered_border': self.ui_theme.get_colour_or_gradient('hovered_border',
-                                                                       self.combined_element_ids),
-                'disabled_border': self.ui_theme.get_colour_or_gradient('disabled_border',
-                                                                        self.combined_element_ids),
-                'selected_border': self.ui_theme.get_colour_or_gradient('selected_border',
-                                                                        self.combined_element_ids),
-                'active_border': self.ui_theme.get_colour_or_gradient('active_border',
-                                                                      self.combined_element_ids)}
+        cols = {'normal_bg':
+                self.ui_theme.get_colour_or_gradient('normal_bg', self.combined_element_ids),
+                'hovered_bg':
+                self.ui_theme.get_colour_or_gradient('hovered_bg', self.combined_element_ids),
+                'disabled_bg':
+                self.ui_theme.get_colour_or_gradient('disabled_bg', self.combined_element_ids),
+                'selected_bg':
+                self.ui_theme.get_colour_or_gradient('selected_bg', self.combined_element_ids),
+                'active_bg':
+                self.ui_theme.get_colour_or_gradient('active_bg', self.combined_element_ids),
+                'normal_text':
+                self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids),
+                'hovered_text':
+                self.ui_theme.get_colour_or_gradient('hovered_text', self.combined_element_ids),
+                'disabled_text':
+                self.ui_theme.get_colour_or_gradient('disabled_text', self.combined_element_ids),
+                'selected_text':
+                self.ui_theme.get_colour_or_gradient('selected_text', self.combined_element_ids),
+                'active_text':
+                self.ui_theme.get_colour_or_gradient('active_text', self.combined_element_ids),
+                'normal_text_shadow':
+                self.ui_theme.get_colour_or_gradient('normal_text_shadow',
+                                                     self.combined_element_ids),
+                'hovered_text_shadow':
+                self.ui_theme.get_colour_or_gradient('hovered_text_shadow',
+                                                     self.combined_element_ids),
+                'disabled_text_shadow':
+                self.ui_theme.get_colour_or_gradient('disabled_text_shadow',
+                                                     self.combined_element_ids),
+                'selected_text_shadow':
+                self.ui_theme.get_colour_or_gradient('selected_text_shadow',
+                                                     self.combined_element_ids),
+                'active_text_shadow':
+                self.ui_theme.get_colour_or_gradient('active_text_shadow',
+                                                     self.combined_element_ids),
+                'normal_border':
+                self.ui_theme.get_colour_or_gradient('normal_border',
+                                                     self.combined_element_ids),
+                'hovered_border':
+                self.ui_theme.get_colour_or_gradient('hovered_border',
+                                                     self.combined_element_ids),
+                'disabled_border':
+                self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                     self.combined_element_ids),
+                'selected_border':
+                self.ui_theme.get_colour_or_gradient('selected_border',
+                                                     self.combined_element_ids),
+                'active_border':
+                self.ui_theme.get_colour_or_gradient('active_border',
+                                                     self.combined_element_ids)}
 
         if cols != self.colours:
             self.colours = cols

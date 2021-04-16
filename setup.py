@@ -36,7 +36,6 @@ setup(
                 'pygame_gui.core.drawable_shapes',
                 'pygame_gui.core.text',
                 'pygame_gui.elements',
-                'pygame_gui.elements.text',
                 'pygame_gui.windows',
                 'pygame_gui.data'],
       zip_safe=False,

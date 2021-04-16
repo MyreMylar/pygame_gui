@@ -19,7 +19,7 @@ class SimpleTestLayoutRect(TextLayoutRect):
     def __init__(self,
                  dimensions: Tuple[int, int], *,
                  create_split_points=True,
-                 float_pos=TextFloatPosition.none):
+                 float_pos=TextFloatPosition.NONE):
 
         super().__init__(dimensions, can_split=create_split_points, float_pos=float_pos)
         self.colour = self.gen_random_colour()

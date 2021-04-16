@@ -111,7 +111,7 @@ class UITextBox(UIElement):
         self.link_style = None
 
         self.rounded_corner_offset = None
-        self.formatted_text_block = None  # TextLine()
+        self.text_box_layout = None  # TextLine()
         self.text_wrap_rect = None
         self.background_surf = None
 
@@ -183,9 +183,9 @@ class UITextBox(UIElement):
 
         # This gives us the height of the text at the 'width' of the text_wrap_area
         self.parse_html_into_style_data()
-        if self.formatted_text_block is not None:
+        if self.text_box_layout is not None:
             if self.wrap_to_height or self.rect[3] == -1 or self.rect[2] == -1:
-                final_text_area_size = self.formatted_text_block.layout_rect.size
+                final_text_area_size = self.text_box_layout.layout_rect.size
                 new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
                                    (2 * self.rounded_corner_offset)),
@@ -206,7 +206,7 @@ class UITextBox(UIElement):
                                               (self.shadow_width * 2) -
                                               (2 * self.rounded_corner_offset))))
 
-            elif self.formatted_text_block.layout_rect.height > self.text_wrap_rect[3]:
+            elif self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we
                 # have to display it. This also means we need to parse the text again.
                 text_rect_width = (self.rect[2] -
@@ -214,19 +214,22 @@ class UITextBox(UIElement):
                                    (self.border_width * 2) -
                                    (self.shadow_width * 2) -
                                    self.rounded_corner_offset - self.scroll_bar_width)
-                self.text_wrap_rect = pygame.Rect((self.rect[0] + self.padding[0] + self.border_width +
-                                        self.shadow_width + self.rounded_corner_offset),
-                                       (self.rect[1] + self.padding[1] + self.border_width +
-                                        self.shadow_width + self.rounded_corner_offset),
-                                       max(1, text_rect_width),
-                                       max(1, (self.rect[3] -
-                                               (self.padding[1] * 2) -
-                                               (self.border_width * 2) -
-                                               (self.shadow_width * 2) -
-                                               (2 * self.rounded_corner_offset))))
+                self.text_wrap_rect = pygame.Rect((self.rect[0] + self.padding[0] +
+                                                   self.border_width + self.shadow_width +
+                                                   self.rounded_corner_offset),
+                                                  (self.rect[1] + self.padding[1] +
+                                                   self.border_width +
+                                                   self.shadow_width +
+                                                   self.rounded_corner_offset),
+                                                  max(1, text_rect_width),
+                                                  max(1, (self.rect[3] -
+                                                          (self.padding[1] * 2) -
+                                                          (self.border_width * 2) -
+                                                          (self.shadow_width * 2) -
+                                                          (2 * self.rounded_corner_offset))))
                 self.parse_html_into_style_data()
                 percentage_visible = (self.text_wrap_rect[3] /
-                                      self.formatted_text_block.layout_rect.height)
+                                      self.text_box_layout.layout_rect.height)
                 scroll_bar_position = (self.relative_rect.right - self.border_width -
                                        self.shadow_width - self.scroll_bar_width,
                                        self.relative_rect.top + self.border_width +
@@ -265,7 +268,7 @@ class UITextBox(UIElement):
 
         if self.scroll_bar is not None:
             height_adjustment = int(self.scroll_bar.start_percentage *
-                                    self.formatted_text_block.layout_rect.height)
+                                    self.text_box_layout.layout_rect.height)
         else:
             height_adjustment = 0
 
@@ -278,7 +281,7 @@ class UITextBox(UIElement):
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))
 
-        basic_blit(new_image, self.formatted_text_block.finalised_surface,
+        basic_blit(new_image, self.text_box_layout.finalised_surface,
                    (self.padding[0] + self.border_width +
                     self.shadow_width + self.rounded_corner_offset,
                     self.padding[1] + self.border_width +
@@ -287,7 +290,7 @@ class UITextBox(UIElement):
 
         self.set_image(new_image)
 
-        self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
+        self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
@@ -300,20 +303,20 @@ class UITextBox(UIElement):
         # Horizontal alignment
         if self.text_horiz_alignment != 'default':
             if self.text_horiz_alignment == 'center':
-                self.formatted_text_block.horiz_center_all_rows()
+                self.text_box_layout.horiz_center_all_rows()
             elif self.text_horiz_alignment == 'left':
-                self.formatted_text_block.align_left_all_rows(self.text_horiz_alignment_padding)
+                self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
             else:
-                self.formatted_text_block.align_right_all_rows(self.text_horiz_alignment_padding)
+                self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
 
         # Vertical alignment
         if self.text_vert_alignment != 'default':
             if self.text_vert_alignment == 'center':
-                self.formatted_text_block.vert_center_all_rows()
+                self.text_box_layout.vert_center_all_rows()
             elif self.text_vert_alignment == 'top':
-                self.formatted_text_block.vert_align_top_all_rows(self.text_vert_alignment_padding)
+                self.text_box_layout.vert_align_top_all_rows(self.text_vert_alignment_padding)
             else:
-                self.formatted_text_block.vert_align_bottom_all_rows(self.text_vert_alignment_padding)
+                self.text_box_layout.vert_align_bottom_all_rows(self.text_vert_alignment_padding)
 
     def update(self, time_delta: float):
         """
@@ -329,7 +332,7 @@ class UITextBox(UIElement):
             return
         if self.scroll_bar is not None and self.scroll_bar.check_has_moved_recently():
             height_adjustment = int(self.scroll_bar.start_percentage *
-                                    self.formatted_text_block.layout_rect.height)
+                                    self.text_box_layout.layout_rect.height)
 
             drawable_area_size = (max(1, (self.rect[2] -
                                           (self.padding[0] * 2) -
@@ -350,7 +353,7 @@ class UITextBox(UIElement):
             new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
             new_image.fill(pygame.Color(0, 0, 0, 0))
             basic_blit(new_image, self.background_surf, (0, 0))
-            basic_blit(new_image, self.formatted_text_block.finalised_surface,
+            basic_blit(new_image, self.text_box_layout.finalised_surface,
                        (self.padding[0] + self.border_width +
                         self.shadow_width +
                         self.rounded_corner_offset,
@@ -365,7 +368,7 @@ class UITextBox(UIElement):
 
         if self.scroll_bar is not None:
             height_adjustment = (self.scroll_bar.start_percentage *
-                                 self.formatted_text_block.layout_rect.height)
+                                 self.text_box_layout.layout_rect.height)
         else:
             height_adjustment = 0
         base_x = int(self.rect[0] + self.padding[0] + self.border_width +
@@ -503,23 +506,22 @@ class UITextBox(UIElement):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
-        parser = HTMLParser(self.ui_theme, self.combined_element_ids, self.link_style, line_spacing=1.25)
+        parser = HTMLParser(self.ui_theme, self.combined_element_ids,
+                            self.link_style, line_spacing=1.25)
         # parser.push_style('body', {"bg_colour": self.background_colour})
         parser.feed(self.html_text)
 
-        self.formatted_text_block = TextBoxLayout(parser.layout_rect_queue,
-                                                  pygame.Rect((0, 0),
-                                                              (self.text_wrap_rect[2],
-                                                               self.text_wrap_rect[3])),
-                                                  pygame.Rect((0, 0),
-                                                              (self.text_wrap_rect[2],
-                                                               self.text_wrap_rect[3])),
-                                                  line_spacing=1.25)
+        self.text_box_layout = TextBoxLayout(parser.layout_rect_queue,
+                                             pygame.Rect((0, 0), (self.text_wrap_rect[2],
+                                                                  self.text_wrap_rect[3])),
+                                             pygame.Rect((0, 0), (self.text_wrap_rect[2],
+                                                                  self.text_wrap_rect[3])),
+                                             line_spacing=1.25)
         if self.text_wrap_rect[3] == -1:
-            self.formatted_text_block.view_rect.height = self.formatted_text_block.layout_rect.height
+            self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
         self._align_all_text_rows()
-        self.formatted_text_block.finalise_to_new()
+        self.text_box_layout.finalise_to_new()
 
         # self.formatted_text_block = TextBlock(parser.text_data,
         #                                       self.text_wrap_rect,
@@ -540,9 +542,9 @@ class UITextBox(UIElement):
             return
         if self.scroll_bar is not None:
             height_adjustment = int(self.scroll_bar.start_percentage *
-                                    self.formatted_text_block.layout_rect.height)
+                                    self.text_box_layout.layout_rect.height)
             percentage_visible = (self.text_wrap_rect[3] /
-                                  self.formatted_text_block.layout_rect.height)
+                                  self.text_box_layout.layout_rect.height)
             self.scroll_bar.set_visible_percentage(percentage_visible)
         else:
             height_adjustment = 0
@@ -561,7 +563,7 @@ class UITextBox(UIElement):
         new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
         new_image.fill(pygame.Color(0, 0, 0, 0))
         basic_blit(new_image, self.background_surf, (0, 0))
-        basic_blit(new_image, self.formatted_text_block.finalised_surface,
+        basic_blit(new_image, self.text_box_layout.finalised_surface,
                    (self.padding[0] + self.border_width +
                     self.shadow_width + self.rounded_corner_offset,
                     self.padding[1] + self.border_width +
@@ -578,7 +580,7 @@ class UITextBox(UIElement):
 
         This won't work very well if redrawing a chunk changed it's dimensions.
         """
-        self.formatted_text_block.finalise_to_new()
+        self.text_box_layout.finalise_to_new()
         self.redraw_from_text_block()
 
     def full_redraw(self):
@@ -591,13 +593,13 @@ class UITextBox(UIElement):
         new text box.
 
         """
-        self.formatted_text_block.reprocess_layout_queue(pygame.Rect((0, 0),
-                                                         (self.text_wrap_rect[2],
-                                                          self.text_wrap_rect[3])))
-        self.formatted_text_block.finalise_to_new()
+        self.text_box_layout.reprocess_layout_queue(pygame.Rect((0, 0),
+                                                                (self.text_wrap_rect[2],
+                                                                 self.text_wrap_rect[3])))
+        self.text_box_layout.finalise_to_new()
         self.redraw_from_text_block()
         self.link_hover_chunks = []
-        self.formatted_text_block.add_chunks_to_hover_group(self.link_hover_chunks)
+        self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -618,7 +620,7 @@ class UITextBox(UIElement):
 
                 if self.is_enabled:
                     if self.scroll_bar is not None:
-                        text_block_full_height = self.formatted_text_block.layout_rect.height
+                        text_block_full_height = self.text_box_layout.layout_rect.height
                         height_adjustment = (self.scroll_bar.start_percentage *
                                              text_block_full_height)
                     else:
@@ -644,7 +646,7 @@ class UITextBox(UIElement):
         if self.is_enabled and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.scroll_bar is not None:
                 height_adjustment = (self.scroll_bar.start_percentage *
-                                     self.formatted_text_block.layout_rect.height)
+                                     self.text_box_layout.layout_rect.height)
             else:
                 height_adjustment = 0
             base_x = int(self.rect[0] + self.padding[0] + self.border_width +
@@ -701,13 +703,13 @@ class UITextBox(UIElement):
             self.active_text_effect = None
         elif isinstance(effect_name, str):
             if effect_name == TEXT_EFFECT_TYPING_APPEAR:
-                effect = TypingAppearEffect(self.formatted_text_block)
+                effect = TypingAppearEffect(self.text_box_layout)
                 self.active_text_effect = effect
             elif effect_name == TEXT_EFFECT_FADE_IN:
-                effect = FadeInEffect(self.formatted_text_block)
+                effect = FadeInEffect(self.text_box_layout)
                 self.active_text_effect = effect
             elif effect_name == TEXT_EFFECT_FADE_OUT:
-                effect = FadeOutEffect(self.formatted_text_block)
+                effect = FadeOutEffect(self.text_box_layout)
                 self.active_text_effect = effect
             else:
                 warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')

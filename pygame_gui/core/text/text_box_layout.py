@@ -1,4 +1,4 @@
-from typing import Deque, List, Tuple
+from typing import Deque, List
 from collections import deque
 from bisect import bisect
 
@@ -55,7 +55,8 @@ class TextBoxLayout:
         self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x, row_start_y=self.layout_rect.y, row_index=0,
+        current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
+                                       row_start_y=self.layout_rect.y, row_index=0,
                                        layout=self, line_spacing=self.line_spacing)
         self._process_layout_queue(self.layout_rect_queue, current_row)
 
@@ -83,7 +84,8 @@ class TextBoxLayout:
         self.row_lengths = []
 
         self.layout_rect_queue = self.input_data_rect_queue.copy()
-        current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x, row_start_y=self.layout_rect.y,
+        current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
+                                       row_start_y=self.layout_rect.y,
                                        row_index=0, layout=self, line_spacing=self.line_spacing)
         self._process_layout_queue(self.layout_rect_queue, current_row)
 
@@ -98,7 +100,7 @@ class TextBoxLayout:
                 current_row = self._handle_line_break_rect(current_row, text_layout_rect)
             elif text_layout_rect.should_span():
                 current_row = self._handle_span_rect(current_row, text_layout_rect)
-            elif text_layout_rect.float_pos() != TextFloatPosition.none:
+            elif text_layout_rect.float_pos() != TextFloatPosition.NONE:
                 current_row = self._handle_float_rect(current_row, text_layout_rect, input_queue)
             else:
                 current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
@@ -119,11 +121,11 @@ class TextBoxLayout:
         for floater in self.floating_rects:
             if floater.vertical_overlap(text_layout_rect):
                 if (current_row.at_start() and
-                        floater.float_pos() == TextFloatPosition.left):
+                        floater.float_pos() == TextFloatPosition.LEFT):
                     # if we are at the start of a new line see if this rectangle
                     # will overlap with any left aligned floating rectangles
                     text_layout_rect.left = floater.right
-                elif floater.float_pos() == TextFloatPosition.right:
+                elif floater.float_pos() == TextFloatPosition.RIGHT:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
         # See if this rectangle will fit on the current line
@@ -141,11 +143,11 @@ class TextBoxLayout:
 
     def _handle_float_rect(self, current_row, test_layout_rect, input_queue):
         max_floater_line_height = current_row.height
-        if test_layout_rect.float_pos() == TextFloatPosition.left:
+        if test_layout_rect.float_pos() == TextFloatPosition.LEFT:
             test_layout_rect.left = 0
             for floater in self.floating_rects:
                 if (floater.vertical_overlap(test_layout_rect)
-                        and floater.float_pos() == TextFloatPosition.left):
+                        and floater.float_pos() == TextFloatPosition.LEFT):
                     test_layout_rect.left = floater.right
                     if max_floater_line_height < floater.height:
                         max_floater_line_height = floater.height
@@ -168,7 +170,7 @@ class TextBoxLayout:
             rhs_limit = self.layout_rect.width
             for floater in self.floating_rects:
                 if (floater.vertical_overlap(test_layout_rect)
-                        and floater.float_pos() == TextFloatPosition.right
+                        and floater.float_pos() == TextFloatPosition.RIGHT
                         and floater.left < rhs_limit):
                     rhs_limit = floater.left
                     if max_floater_line_height < floater.height:
@@ -237,7 +239,9 @@ class TextBoxLayout:
         if test_layout_rect.can_split():
             split_point = rhs_limit - test_layout_rect.left
             try:
-                new_layout_rect = test_layout_rect.split(split_point, self.layout_rect.width, self.layout_rect.x)
+                new_layout_rect = test_layout_rect.split(split_point,
+                                                         self.layout_rect.width,
+                                                         self.layout_rect.x)
                 if new_layout_rect is not None:
                     # split successfully...
 
@@ -287,7 +291,9 @@ class TextBoxLayout:
             cumulative_letter_count = 0
             # calculate the y-origin of all the rows
             for row in self.layout_rows:
-                cumulative_letter_count = row.finalise(surface, self.current_end_pos, cumulative_letter_count)
+                cumulative_letter_count = row.finalise(surface,
+                                                       self.current_end_pos,
+                                                       cumulative_letter_count)
         else:
             for row in self.layout_rows:
                 row.finalise(surface)
@@ -303,7 +309,8 @@ class TextBoxLayout:
         """
         Finalises our layout to a brand new surface that this method creates.
         """
-        self.finalised_surface = pygame.Surface((self.layout_rect.width + self.edit_buffer, self.layout_rect.height),
+        self.finalised_surface = pygame.Surface((self.layout_rect.width + self.edit_buffer,
+                                                 self.layout_rect.height),
                                                 depth=32, flags=pygame.SRCALPHA)
         self.finalised_surface.fill('#00000000')
         self.finalise_to_surf(self.finalised_surface)
@@ -411,19 +418,46 @@ class TextBoxLayout:
                                       self.x_scroll_offset)
 
     def horiz_center_all_rows(self, method='rect'):
+        """
+        Horizontally center all rows of text in the layout. This uses 'rectangular' centering
+        by default, which could also be called mathematical centering. Sometimes this type of
+        centering looks wrong - e.g. for arrows, so we instead have an option to use a 'center
+        of mass' style centering for right facing and left facing triangles.
+
+        :param method: this is an ID for the method of centering to use, for almost all cases
+                       this will be the default 'rect' style basic centering. However, if you are
+                       trying to center an arrow you might try 'right_triangle' or 'left_triangle'
+        """
         for row in self.layout_rows:
             row.horiz_center_row(method)
 
     def align_left_all_rows(self, x_padding):
+        """
+        Align all rows to the left hand side of the layout.
+
+        :param x_padding: the amount of padding to insert to on the left
+                          before the text starts.
+        """
         start_left = self.layout_rect.left + x_padding
         for row in self.layout_rows:
             row.align_left_row(start_left)
 
     def align_right_all_rows(self, x_padding):
+        """
+        Align all rows to the right hand side of the layout.
+
+        :param x_padding: the amount of padding to insert to on the right
+                          before the text starts.
+        """
         for row in self.layout_rows:
             row.align_right_row(x_padding)
 
     def vert_center_all_rows(self):
+        """
+        Vertically center all rows of text in the layout.
+
+        TODO: I expect we should have the arrow centering methods in here too.
+        """
         total_row_height = 0
         for row in self.layout_rows:
             total_row_height += row.height
@@ -438,6 +472,12 @@ class TextBoxLayout:
             new_y += row.height
 
     def vert_align_top_all_rows(self, y_padding):
+        """
+        Align all rows to the top of the layout.
+
+        :param y_padding: the amount of padding to insert above
+                          before the text starts.
+        """
         new_y = self.layout_rect.top + y_padding
         for row in self.layout_rows:
             row.y = new_y
@@ -445,6 +485,12 @@ class TextBoxLayout:
             new_y += row.height
 
     def vert_align_bottom_all_rows(self, y_padding):
+        """
+        Align all rows to the bottom of the layout.
+
+        :param y_padding: the amount of padding to insert below
+                          before the text starts.
+        """
         new_y = self.layout_rect.bottom - y_padding
         for row in reversed(self.layout_rows):
             row.bottom = new_y
@@ -452,6 +498,11 @@ class TextBoxLayout:
             new_y -= row.height
 
     def set_cursor_position(self, cursor_pos):
+        """
+        Set the edit cursor position in the text layout.
+
+        :param cursor_pos: This is the index of the character the cursor should appear before.
+        """
         if self.cursor_text_row is not None:
             if self.cursor_text_row.edit_cursor_active:
                 self.cursor_text_row.toggle_cursor()
@@ -466,6 +517,12 @@ class TextBoxLayout:
                 letter_acc += row.letter_count
 
     def set_cursor_from_click_pos(self, click_pos):
+        """
+        Set the edit cursor position in the text layout from a pixel position. Generally used
+        to set the text editing cursor position from a mouse click.
+
+        :param click_pos: This is the pixel position we want the cursor to appear near to.
+        """
         if self.cursor_text_row is not None:
             if self.cursor_text_row.edit_cursor_active:
                 self.cursor_text_row.toggle_cursor()
@@ -478,17 +535,34 @@ class TextBoxLayout:
             row.set_cursor_from_click_pos(click_pos)
 
     def get_cursor_index(self):
+        """
+        Get the current character index, in the text layout's text, of the current edit cursor
+        position.
+
+        Essentially the reverse of 'set_cursor_position()'.
+        """
         cursor_index = 0
         if self.cursor_text_row is not None:
             cursor_index = self.cursor_text_row.get_cursor_index()
         return cursor_index
 
     def toggle_cursor(self):
+        """
+        Toggle the visibility of the edit cursor.
+
+        Used routinely by editable text boxes to make the cursor flash to catch user attention.
+        """
         if self.cursor_text_row is not None:
             self.cursor_text_row.toggle_cursor()
 
     def set_text_selection(self, start_index, end_index):
+        """
+        Set a portion of the text layout as 'selected'. This is useful when editing chunks
+        of text all at once (e.g. copying to a memory 'clipboard', deleting a block of text).
 
+        :param start_index: the character index to start the selection area at.
+        :param end_index: the character index to end the selection area at.
+        """
         rows_to_finalise = set([])
 
         # first clear the current selection
@@ -500,7 +574,8 @@ class TextBoxLayout:
             rows_to_finalise.add(row)
         self.selected_rows.clear()
 
-        # We need to check if the indexes are at the start/end of a chunk and if not, split the chunk
+        # We need to check if the indexes are at the
+        # start/end of a chunk and if not, split the chunk
         if start_index != end_index:
             start_chunk = None
             start_letter_index = 0
@@ -519,9 +594,8 @@ class TextBoxLayout:
                         start_letter_index = index_in_row - letter_accumulator
                         start_chunk = chunk
                         break
-                    else:
-                        letter_accumulator += chunk.letter_count
-                        start_chunk_in_row_index += 1
+                    letter_accumulator += chunk.letter_count
+                    start_chunk_in_row_index += 1
 
             if start_letter_index != 0:
                 # split the chunk
@@ -541,9 +615,9 @@ class TextBoxLayout:
                         end_letter_index = index_in_row - letter_accumulator
                         end_chunk = chunk
                         break
-                    else:
-                        letter_accumulator += chunk.letter_count
-                        end_chunk_in_row_index += 1
+
+                    letter_accumulator += chunk.letter_count
+                    end_chunk_in_row_index += 1
 
             if end_letter_index != 0:
                 # split the chunk
@@ -581,14 +655,32 @@ class TextBoxLayout:
                 row.finalise(self.finalised_surface)
 
     def set_default_text_colour(self, colour):
+        """
+        Set the default text colour, used when no other colour is set for a portion of the text.
+
+        :param colour: the colour to use as the default text colour.
+        """
         for row in self.layout_rows:
             row.set_default_text_colour(colour)
 
     def set_default_text_shadow_colour(self, colour):
+        """
+        Set the default text shadow colour, used when no other colour is set for
+        the shadow of a portion of the text.
+
+        :param colour: the colour to use as the default text shadow colour.
+        """
         for row in self.layout_rows:
             row.set_default_text_shadow_colour(colour)
 
     def insert_text(self, text: str, layout_index: int):
+        """
+        Insert some text into the text layout at a given point. Handy when e.g. pasting a chunk
+        of text into an existing layout.
+
+        :param text: the text to insert.
+        :param layout_index: the character index at which to insert the text.
+        """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
         current_row.insert_text(text, index_in_row)
 
@@ -605,6 +697,9 @@ class TextBoxLayout:
                 row.finalise(self.finalised_surface)
 
     def delete_selected_text(self):
+        """
+        Delete the currently selected text.
+        """
         temp_layout_queue = deque([])
         max_row_index = 0
         if self.selected_rows:
@@ -617,8 +712,8 @@ class TextBoxLayout:
             if chunk.is_selected:
                 current_row.set_cursor_position(letter_acc)
                 break
-            else:
-                letter_acc += chunk.letter_count
+
+            letter_acc += chunk.letter_count
 
         current_row_starting_chunk = self.selected_rows[0].items[0]
         current_row_index = current_row.row_index
@@ -651,6 +746,10 @@ class TextBoxLayout:
         self.selected_chunks = []
 
     def delete_at_cursor(self):
+        """
+        Deletes a single character in front of the edit cursor. Mimics a standard word
+        processor 'delete' operation.
+        """
         if self.cursor_text_row is not None:
             current_row = self.cursor_text_row
             current_row_index = current_row.row_index
@@ -661,8 +760,8 @@ class TextBoxLayout:
                     chunk_letter_pos = cursor_pos - letter_acc
                     chunk.delete_letter_at_index(chunk_letter_pos)
                     break
-                else:
-                    letter_acc += chunk.letter_count
+
+                letter_acc += chunk.letter_count
 
             temp_layout_queue = deque([])
             for row_index in reversed(range(current_row_index, len(self.layout_rows))):
@@ -677,6 +776,10 @@ class TextBoxLayout:
                     row.finalise(self.finalised_surface)
 
     def backspace_at_cursor(self):
+        """
+        Deletes a single character behind the edit cursor. Mimics a standard word
+        processor 'backspace' operation.
+        """
         if self.cursor_text_row is not None:
             current_row = self.cursor_text_row
             current_row_index = current_row.row_index
@@ -687,8 +790,8 @@ class TextBoxLayout:
                     chunk_letter_pos = cursor_pos - letter_acc
                     chunk.backspace_letter_at_index(chunk_letter_pos)
                     break
-                else:
-                    letter_acc += chunk.letter_count
+
+                letter_acc += chunk.letter_count
             self.cursor_text_row.set_cursor_position(cursor_pos - 1)
             temp_layout_queue = deque([])
             for row_index in reversed(range(current_row_index, len(self.layout_rows))):
@@ -707,7 +810,8 @@ class TextBoxLayout:
             row_index = bisect(self.row_lengths, text_box_index)
             if row_index >= len(self.layout_rows):
                 row_index = len(self.layout_rows) - 1
-            index_in_row = text_box_index - (self.row_lengths[row_index - 1] if row_index != 0 else 0)
+            index_in_row = text_box_index - (self.row_lengths[row_index - 1]
+                                             if row_index != 0 else 0)
             return self.layout_rows[row_index], index_in_row
 
         return None, 0

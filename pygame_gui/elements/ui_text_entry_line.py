@@ -137,6 +137,13 @@ class UITextEntryLine(UIElement):
 
     @property
     def select_range(self):
+        """
+        The selected range for this text. A tuple containing the start
+        and end indexes of the current selection.
+
+        Made into a property to keep it synchronised with the underlying drawable shape's
+        representation.
+        """
         return self._select_range
 
     @select_range.setter
@@ -148,11 +155,13 @@ class UITextEntryLine(UIElement):
 
     def set_text_hidden(self, is_hidden=True):
         """
-        Passing in True will hide text typed into the text line, replacing it with ● characters and also disallow
-        copying the text into the clipboard. It is designed for basic 'password box' usage.
+        Passing in True will hide text typed into the text line, replacing it with ●
+        characters and also disallow copying the text into the clipboard. It is designed
+        for basic 'password box' usage.
 
-        :param is_hidden: Can be set to True or False. Defaults to True because if you are calling this you likely
-                          want a password box with no fuss. Set it back to False if you want to unhide the text (e.g.
+        :param is_hidden: Can be set to True or False. Defaults to True because
+                          if you are calling this you likely want a password box with no fuss.
+                          Set it back to False if you want to un-hide the text (e.g.
                           for one of those 'Show my password' buttons).
         """
 
@@ -271,7 +280,8 @@ class UITextEntryLine(UIElement):
             mouse_pos = self.ui_manager.get_mouse_position()
             drawable_shape_space_click = (mouse_pos[0] - self.rect.left,
                                           mouse_pos[1] - self.rect.top)
-            self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+            self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                drawable_shape_space_click)
             select_end_pos = self.drawable_shape.text_box_layout.get_cursor_index()
             new_range = [self.select_range[0], select_end_pos]
 
@@ -401,7 +411,8 @@ class UITextEntryLine(UIElement):
                         display_character = character
                         if self.is_text_hidden:
                             display_character = '●'
-                        self.drawable_shape.text_box_layout.insert_text(display_character, self.edit_position)
+                        self.drawable_shape.text_box_layout.insert_text(display_character,
+                                                                        self.edit_position)
 
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
@@ -577,7 +588,8 @@ class UITextEntryLine(UIElement):
                         display_new_text = new_text
                         if self.is_text_hidden:
                             display_new_text = '●' * len(new_text)
-                        self.drawable_shape.text_box_layout.insert_text(display_new_text, self.edit_position)
+                        self.drawable_shape.text_box_layout.insert_text(display_new_text,
+                                                                        self.edit_position)
                         self.edit_position += len(new_text)
                         self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                         self.cursor_has_moved_recently = True
@@ -601,7 +613,8 @@ class UITextEntryLine(UIElement):
                 if self.is_enabled:
                     drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
                                                   scaled_mouse_pos[1] - self.rect.top)
-                    self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+                    self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                        drawable_shape_space_click)
                     self.edit_position = self.drawable_shape.text_box_layout.get_cursor_index()
                     double_clicking = False
                     if self.double_click_timer < self.ui_manager.get_double_click_time():
@@ -623,7 +636,8 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
                 drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
                                               scaled_mouse_pos[1] - self.rect.top)
-                self.drawable_shape.text_box_layout.set_cursor_from_click_pos(drawable_shape_space_click)
+                self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                    drawable_shape_space_click)
                 new_edit_pos = self.drawable_shape.text_box_layout.get_cursor_index()
                 if new_edit_pos != self.edit_position:
                     self.edit_position = new_edit_pos

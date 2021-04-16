@@ -2,6 +2,7 @@ from sys import version_info
 import warnings
 from collections import namedtuple
 from typing import List, Union, Tuple, Dict, Any, Callable, Set
+from typing import TYPE_CHECKING
 
 import pygame
 
@@ -10,6 +11,10 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
+
+
+if TYPE_CHECKING:
+    from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
 if version_info.minor >= 7:
     ObjectID = namedtuple('ObjectID',

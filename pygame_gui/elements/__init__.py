@@ -15,7 +15,6 @@ from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
-from pygame_gui.elements.text import TextHTMLParser, FadeInEffect, FadeOutEffect, TypingAppearEffect
 
 
 __all__ = ['UIImage',
@@ -31,10 +30,7 @@ __all__ = ['UIImage',
            'UITooltip',
            'UIDropDownMenu',
            'UIWorldSpaceHealthBar',
+           'UIProgressBar',
            'UITextEntryLine',
            'UIWindow',
-           'UIScrollingContainer',
-           'TextHTMLParser',
-           'FadeInEffect',
-           'FadeOutEffect',
-           'TypingAppearEffect']
+           'UIScrollingContainer']

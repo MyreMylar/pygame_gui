@@ -125,8 +125,11 @@ class ThreadedLoader:
                                    self._threading_error_queue)
 
     def set_finished(self):
-        pass
-    # Currently we are relying on disabling the resource loader after one use to support dynamic loading
+        """
+        Called when loading is done.
+        """
+    # Currently we are relying on disabling the resource loader after one use
+    # to support dynamic loading
     #     self._started = False
 
     def _start_output_threads(self,

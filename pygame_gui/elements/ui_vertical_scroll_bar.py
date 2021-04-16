@@ -280,7 +280,8 @@ class UIVerticalScrollBar(UIElement):
                 self.scroll_wheel_moved = False
                 self.scroll_position -= self.scroll_wheel_amount * (750.0 * time_delta)
                 self.scroll_position = min(max(self.scroll_position, self.top_limit),
-                                           self.bottom_limit - self.sliding_button.relative_rect.height)
+                                           self.bottom_limit -
+                                           self.sliding_button.relative_rect.height)
                 x_pos = 0
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))

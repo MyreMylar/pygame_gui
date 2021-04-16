@@ -8,7 +8,7 @@ class TestTextLayoutRect:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
-                                          float_pos=TextFloatPosition.none,
+                                          float_pos=TextFloatPosition.NONE,
                                           should_span=False)
 
         assert text_layout_rect.size == (100, 50)
@@ -16,14 +16,14 @@ class TestTextLayoutRect:
     def test_can_split(self, _init_pygame, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
-                                          float_pos=TextFloatPosition.none,
+                                          float_pos=TextFloatPosition.NONE,
                                           should_span=False)
 
         assert text_layout_rect.can_split()
 
         text_layout_rect_no_split = TextLayoutRect(dimensions=(100, 50),
                                                    can_split=False,
-                                                   float_pos=TextFloatPosition.none,
+                                                   float_pos=TextFloatPosition.NONE,
                                                    should_span=False)
 
         assert not text_layout_rect_no_split.can_split()
@@ -31,14 +31,14 @@ class TestTextLayoutRect:
     def test_should_span(self, _init_pygame, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
-                                          float_pos=TextFloatPosition.none,
+                                          float_pos=TextFloatPosition.NONE,
                                           should_span=True)
 
         assert text_layout_rect.should_span()
 
         text_layout_rect_no_span = TextLayoutRect(dimensions=(100, 50),
                                                   can_split=False,
-                                                  float_pos=TextFloatPosition.none,
+                                                  float_pos=TextFloatPosition.NONE,
                                                   should_span=False)
 
         assert not text_layout_rect_no_span.should_span()
@@ -46,29 +46,29 @@ class TestTextLayoutRect:
     def test_float_pos(self, _init_pygame, default_ui_manager: UIManager):
         rect_float_none = TextLayoutRect(dimensions=(100, 50),
                                          can_split=True,
-                                         float_pos=TextFloatPosition.none,
+                                         float_pos=TextFloatPosition.NONE,
                                          should_span=True)
 
-        assert rect_float_none.float_pos() == TextFloatPosition.none
+        assert rect_float_none.float_pos() == TextFloatPosition.NONE
 
         rect_float_left = TextLayoutRect(dimensions=(100, 50),
                                          can_split=True,
-                                         float_pos=TextFloatPosition.left,
+                                         float_pos=TextFloatPosition.LEFT,
                                          should_span=True)
 
-        assert rect_float_left.float_pos() == TextFloatPosition.left
+        assert rect_float_left.float_pos() == TextFloatPosition.LEFT
 
         rect_float_right = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
-                                          float_pos=TextFloatPosition.right,
+                                          float_pos=TextFloatPosition.RIGHT,
                                           should_span=True)
 
-        assert rect_float_right.float_pos() == TextFloatPosition.right
+        assert rect_float_right.float_pos() == TextFloatPosition.RIGHT
 
     def test_split(self, _init_pygame, default_ui_manager: UIManager):
         layout_rect = TextLayoutRect(dimensions=(100, 50),
                                      can_split=True,
-                                     float_pos=TextFloatPosition.none,
+                                     float_pos=TextFloatPosition.NONE,
                                      should_span=False)
 
         with pytest.raises(ValueError, match='Line width is too narrow'):
@@ -83,13 +83,13 @@ class TestTextLayoutRect:
     def test_vertical_overlap(self, _init_pygame, default_ui_manager: UIManager):
         layout_rect_1 = TextLayoutRect(dimensions=(100, 50),
                                        can_split=True,
-                                       float_pos=TextFloatPosition.none,
+                                       float_pos=TextFloatPosition.NONE,
                                        should_span=False)
         layout_rect_1.topleft = (0, 0)
 
         layout_rect_2 = TextLayoutRect(dimensions=(100, 50),
                                        can_split=True,
-                                       float_pos=TextFloatPosition.none,
+                                       float_pos=TextFloatPosition.NONE,
                                        should_span=False)
         layout_rect_2.topleft = (0, 45)
 

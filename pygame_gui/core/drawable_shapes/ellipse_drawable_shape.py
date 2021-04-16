@@ -247,7 +247,9 @@ class EllipseDrawableShape(DrawableShape):
                 self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
                                                       shape_id)
 
-        self.finalise_images_and_text(image_state_str, state_str, text_colour_state_str, text_shadow_colour_state_str)
+        self.finalise_images_and_text(image_state_str, state_str,
+                                      text_colour_state_str,
+                                      text_shadow_colour_state_str)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

@@ -94,7 +94,8 @@ class UIProgressBar(UIElement):
 
         self.current_progress_rect = pygame.Rect((self.shadow_width + self.border_width,
                                                   self.shadow_width + self.border_width),
-                                                 (int(self.capacity_width * self.progress_percentage),
+                                                 (int(self.capacity_width *
+                                                      self.progress_percentage),
                                                   self.capacity_height))
 
         self.redraw()
@@ -138,6 +139,11 @@ class UIProgressBar(UIElement):
         self.set_image(self.drawable_shape.get_fresh_surface())
 
     def set_current_progress(self, progress: float):
+        """
+        Set the current progress of the bar.
+
+        :param progress: The level of progress to set from 0 to 100.0
+        """
         if progress != self.current_progress:
             progress = min(progress, self.maximum_progress)
             self.current_progress = progress

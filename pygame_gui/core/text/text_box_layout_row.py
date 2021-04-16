@@ -61,7 +61,7 @@ class TextBoxLayoutRow(pygame.Rect):
                 self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                                   int(item.height * self.line_spacing))
             else:
-                self.height = int(item.height * self.line_spacing)
+                self.height = int(item.height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
             self.cursor_rect = pygame.Rect(self.x, self.y, 2, self.height - 2)
 
@@ -90,28 +90,43 @@ class TextBoxLayoutRow(pygame.Rect):
         self.y_origin = 0
 
     def horiz_center_row(self, method='rect'):
+        """
+        Horizontally center this row of text.
+
+        This uses 'rectangular' centering by default, which could also
+        be called mathematical centering. Sometimes this type of
+        centering looks wrong - e.g. for arrows, so we instead have an
+        option to use a 'center of mass' style centering for right
+        facing and left facing triangles.
+
+        :param method: this is an ID for the method of centering to use,
+                       for almost all cases this will be the default 'rect'
+                       style basic centering. However, if you are trying
+                       to center an arrow you might try 'right_triangle' or
+                       'left_triangle'
+        """
         if method == 'rect':
-            self.centerx = self.layout.layout_rect.centerx
+            self.centerx = self.layout.layout_rect.centerx  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         elif method == 'right_triangle':
             # two lines - from bottom left of triangle at a -60 angle (because y axis is inverted)
             # then from mid left at 90
-            m1 = math.tan(math.radians(-60))
-            n1 = self.centery + int(self.width / 2)
-            n2 = self.centery
+            m_1 = math.tan(math.radians(-60))
+            n_1 = self.centery + int(self.width / 2)
+            n_2 = self.centery
 
-            visual_center_x = (n2 - n1) / m1
+            visual_center_x = (n_2 - n_1) / m_1
 
-            self.left = self.layout.layout_rect.centerx - visual_center_x
+            self.left = self.layout.layout_rect.centerx - visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
         elif method == 'left_triangle':
             # just flip right_triangle method
-            m1 = math.tan(math.radians(-60))
-            n1 = self.centery + int(self.width / 2)
-            n2 = self.centery
+            m_1 = math.tan(math.radians(-60))
+            n_1 = self.centery + int(self.width / 2)
+            n_2 = self.centery
 
-            visual_center_x = (n2 - n1) / m1
+            visual_center_x = (n_2 - n_1) / m_1
 
-            self.right = self.layout.layout_rect.centerx + visual_center_x
+            self.right = self.layout.layout_rect.centerx + visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
         current_start_x = self.x
         for item in self.items:
@@ -119,14 +134,14 @@ class TextBoxLayoutRow(pygame.Rect):
             current_start_x += item.width
 
     def align_left_row(self, start_x: int):
-        self.x = start_x
+        self.x = start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
         current_start_x = self.x
         for item in self.items:
             item.x = current_start_x
             current_start_x += item.width
 
     def align_right_row(self, start_x: int):
-        self.right = self.layout.layout_rect.width - start_x
+        self.right = self.layout.layout_rect.width - start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
         for item in reversed(self.items):
             item.right = current_start_x
@@ -149,10 +164,13 @@ class TextBoxLayoutRow(pygame.Rect):
             else:
                 index += 1
 
-    def finalise(self, surface, current_end_pos: Optional[int] = None, cumulative_letter_count: Optional[int] = None):
+    def finalise(self, surface, current_end_pos: Optional[int] = None,
+                 cumulative_letter_count: Optional[int] = None):
         self.merge_adjacent_compatible_chunks()
         for text_chunk in self.items:
-            chunk_view_rect = pygame.Rect(self.layout.layout_rect.left, 0, self.layout.view_rect.width, self.layout.view_rect.height)
+            chunk_view_rect = pygame.Rect(self.layout.layout_rect.left,
+                                          0, self.layout.view_rect.width,
+                                          self.layout.view_rect.height)
             if isinstance(text_chunk, TextLineChunkFTFont):
                 if current_end_pos is not None and cumulative_letter_count is not None:
                     if cumulative_letter_count < current_end_pos:
@@ -175,8 +193,12 @@ class TextBoxLayoutRow(pygame.Rect):
                                                     flags=pygame.SRCALPHA, depth=32)
 
             cursor_surface.fill(pygame.Color('#FFFFFFFF'))
-            self.cursor_rect = pygame.Rect(self.x + self.cursor_draw_width - self.layout.x_scroll_offset,
-                                           self.y, 2, max(0, self.height - 2))
+            self.cursor_rect = pygame.Rect((self.x +
+                                            self.cursor_draw_width -
+                                            self.layout.x_scroll_offset),
+                                           self.y,
+                                           2,
+                                           max(0, self.height - 2))
             surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
 
         self.target_surface = surface
@@ -210,15 +232,20 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def clear(self):
         if self.target_surface is not None:
-            slightly_wider_rect = pygame.Rect(self.x, self.y, self.layout.view_rect.width, self.height)
+            slightly_wider_rect = pygame.Rect(self.x, self.y,
+                                              self.layout.view_rect.width,
+                                              self.height)
             self.target_surface.fill(pygame.Color('#00000000'), slightly_wider_rect)
 
     def _setup_offset_position_from_edit_cursor(self):
-        if self.cursor_draw_width > (self.layout.x_scroll_offset + self.layout.view_rect.width) - self.edit_right_margin:
-            self.layout.x_scroll_offset = (self.cursor_draw_width - self.layout.view_rect.width) + self.edit_right_margin
+        if self.cursor_draw_width > (self.layout.x_scroll_offset +
+                                     self.layout.view_rect.width) - self.edit_right_margin:
+            self.layout.x_scroll_offset = (self.cursor_draw_width -
+                                           self.layout.view_rect.width) + self.edit_right_margin
 
         if self.cursor_draw_width < self.layout.x_scroll_offset + self.edit_cursor_left_margin:
-            self.layout.x_scroll_offset = max(0, self.cursor_draw_width - self.edit_cursor_left_margin)
+            self.layout.x_scroll_offset = max(0, self.cursor_draw_width -
+                                              self.edit_cursor_left_margin)
 
     def set_cursor_from_click_pos(self, click_pos: Tuple[int, int]):
         letter_acc = 0
@@ -231,15 +258,19 @@ class TextBoxLayoutRow(pygame.Rect):
                     if chunk.collidepoint(scrolled_click_pos):
                         letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
                         cursor_draw_width += sum([char_metric[4]
-                                                  for char_metric
-                                                  in chunk.font.get_metrics(chunk.text[:letter_index])])
+                                                  for char_metric in
+                                                  chunk.font.get_metrics(
+                                                      chunk.text[:letter_index])])
                         letter_acc += letter_index
                         found_chunk = True
                     else:
-                        cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
+                        cursor_draw_width += sum([char_metric[4]
+                                                  for char_metric in
+                                                  chunk.font.get_metrics(chunk.text)])
                         letter_acc += chunk.letter_count
         if not found_chunk:
-            # not inside chunk so move to start of line if we are on left, should be at end of line already
+            # not inside chunk so move to start of line
+            # if we are on left, should be at end of line already
             if scrolled_click_pos[0] < self.left:
                 cursor_draw_width = 0
                 letter_acc = 0
@@ -260,9 +291,11 @@ class TextBoxLayoutRow(pygame.Rect):
                                           in chunk.font.get_metrics(chunk.text[:chunk_letter_pos])])
 
                 break
-            else:
-                letter_acc += chunk.letter_count
-                cursor_draw_width += sum([char_metric[4] for char_metric in chunk.font.get_metrics(chunk.text)])
+
+            letter_acc += chunk.letter_count
+            cursor_draw_width += sum([char_metric[4]
+                                      for char_metric in
+                                      chunk.font.get_metrics(chunk.text)])
 
         self.cursor_draw_width = cursor_draw_width
 
@@ -278,6 +311,5 @@ class TextBoxLayoutRow(pygame.Rect):
                 chunk_index = letter_row_index - letter_acc
                 chunk.insert_text(text, chunk_index)
                 break
-            else:
-                letter_acc += chunk.letter_count
 
+            letter_acc += chunk.letter_count

@@ -9,7 +9,6 @@ import contextlib
 import os
 import sys
 import io
-import re
 import base64
 
 from pathlib import Path
@@ -86,7 +85,7 @@ if PLATFORM == 'WINDOWS':
         Wrapper for platform functions.
         """
         def __init__(self, func):
-            super(CheckedCall, self).__setattr__("func", func)
+            super().__setattr__("func", func)
             self.argtypes = []
             self.restype = None
 

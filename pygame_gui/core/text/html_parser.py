@@ -105,14 +105,14 @@ class HTMLParser(html.parser.HTMLParser):
         style = {}
         if element in ('b', 'strong'):
             style['bold'] = True
-        elif element == 'a':
-            style['link'] = True
-            if 'href' in attributes:
-                style["link_href"] = attributes['href']
         elif element in ('i', 'em', 'var'):
             style['italic'] = True
         elif element == 'u':
             style['underline'] = True
+        elif element == 'a':
+            style['link'] = True
+            if 'href' in attributes:
+                style["link_href"] = attributes['href']
         elif element == 'shadow':
             shadow_size = 0
             shadow_offset = [0, 0]
@@ -127,8 +127,10 @@ class HTMLParser(html.parser.HTMLParser):
                 if attributes['color'][0] == '#':
                     shadow_colour = pygame.color.Color(attributes['color'])
                 else:
-                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'], self.combined_ids)
-            style['shadow_data'] = (shadow_size, shadow_offset[0], shadow_offset[1], shadow_colour, False)
+                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
+                                                                         self.combined_ids)
+            style['shadow_data'] = (shadow_size, shadow_offset[0],
+                                    shadow_offset[1], shadow_colour, False)
         elif element == 'font':
             if 'face' in attributes:
                 font_name = attributes['face'] if len(attributes['face']) > 0 else None
@@ -276,7 +278,8 @@ class HTMLParser(html.parser.HTMLParser):
                                    hover_underline=self.link_style['link_hover_underline'],
                                    text_shadow_data=self.current_style['shadow_data']))
         else:
-            using_default_text_colour = self.current_style['font_colour'] == self.default_style['font_colour']
+            using_default_text_colour = (self.current_style['font_colour'] ==
+                                         self.default_style['font_colour'])
             self.layout_rect_queue.append(
                 TextLineChunkFTFont(text,
                                     chunk_font,

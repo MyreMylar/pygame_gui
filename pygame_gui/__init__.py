@@ -9,7 +9,6 @@ from pygame_gui import core
 from pygame_gui import elements
 from pygame_gui import windows
 from pygame_gui import data
-from pygame_gui.elements import text
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
@@ -31,7 +30,6 @@ __all__ = ['UIManager',
            'elements',
            'windows',
            'data',
-           'text',
            'PackageResource',
            'UI_BUTTON_PRESSED',
            'UI_BUTTON_START_PRESS',

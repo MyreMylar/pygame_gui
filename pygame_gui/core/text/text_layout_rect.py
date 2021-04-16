@@ -7,12 +7,12 @@ from pygame.surface import Surface
 
 
 class TextFloatPosition(Enum):
-    none = 0
-    left = 1
-    right = 2
+    NONE = 0
+    LEFT = 1
+    RIGHT = 2
 
 
-class TextLayoutRect(pygame.Rect):
+class TextLayoutRect(pygame.rect.Rect):
     """
     A base class for use in Layouts.
     """
@@ -20,7 +20,7 @@ class TextLayoutRect(pygame.Rect):
     def __init__(self, dimensions: Tuple[int, int],
                  *,
                  can_split=False,
-                 float_pos: TextFloatPosition = TextFloatPosition.none,
+                 float_pos: TextFloatPosition = TextFloatPosition.NONE,
                  should_span=False):
         super().__init__((0, 0), dimensions)
         self._can_split = can_split
@@ -85,19 +85,28 @@ class TextLayoutRect(pygame.Rect):
         """
         return self._float_pos
 
-    def split(self, requested_x: int, line_width: int, row_start_x: int) -> Union['TextLayoutRect', None]:  # noqa
+    def split(self,
+              requested_x: int,
+              line_width: int,
+              row_start_x: int) -> Union['TextLayoutRect', None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the
         nearest point that is still less than the request (i.e. to the left of the request in
         the common left-to-right text layout case) .
 
         :param requested_x: the requested place to split this rectangle along it's width.
+        :param line_width: the width of the current line.
+        :param row_start_x: the x start position of the row.
+
         """
         if line_width < self.smallest_split_size:
             raise ValueError('Line width is too narrow')
 
-        original_width = self.width
-        self.width = requested_x
+        if row_start_x < -1:
+            raise ValueError('Row start must be 0 or greater')
+
+        original_width = self.width  # noqa: pylint: disable=access-member-before-definition,attribute-defined-outside-init
+        self.width = requested_x  # noqa: pylint: disable=attribute-defined-outside-init
         return TextLayoutRect((original_width - requested_x, self.height))
 
     def vertical_overlap(self, other_rect: pygame.Rect) -> bool:

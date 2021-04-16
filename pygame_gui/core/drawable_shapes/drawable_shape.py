@@ -200,9 +200,10 @@ class DrawableShape:
 
     def _evaluate_contents_for_containing_rect(self):
         if self.containing_rect.width == -1:
-            # check to see if we have text and a font, this won't work with HTML text - throw a warning?
-            # What we really need to to is process the html text layout by this point but hold off finalising
-            # and passing default colours until later?
+            # check to see if we have text and a font, this won't work with HTML
+            # text - throw a warning?
+            # What we really need to to is process the html text layout by this
+            # point but hold off finalising and passing default colours until later?
             if self.text_box_layout is not None:
                 text_width = self.text_box_layout.layout_rect.width
 
@@ -210,7 +211,8 @@ class DrawableShape:
                 if 'text_horiz_alignment_padding' in self.theming:
                     horiz_padding = self.theming['text_horiz_alignment_padding']
 
-                # As well as the text width we want to throw in the borders, shadows and any text padding
+                # As well as the text width we want to throw in the borders,
+                # shadows and any text padding
                 final_width = (text_width +
                                (2 * self.shadow_width) +
                                (2 * self.border_width) +
@@ -228,7 +230,8 @@ class DrawableShape:
                 if 'text_vert_alignment_padding' in self.theming:
                     vert_padding = self.theming['text_vert_alignment_padding']
 
-                # As well as the text height we want to throw in the borders, shadows and any text padding
+                # As well as the text height we want to throw in the borders,
+                # shadows and any text padding
                 final_height = (text_height +
                                 (2 * self.shadow_width) +
                                 (2 * self.border_width) +
@@ -445,11 +448,15 @@ class DrawableShape:
         self.finalise_text(state_str, text_colour_state_str, text_shadow_colour_state_str)
 
     def build_text_layout(self):
+        """
+        Build a text box layout for this drawable shape if it has some text.
+        """
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
-            # we need two rectangles for the text. One is has actual area the text surface takes up,
-            # which may be larger than the displayed area, and its position on the final surface.
-            # The other is the amount of area of the text surface which we blit from, which may be much smaller
+            # we need two rectangles for the text. One is has actual area the
+            # text surface takes up, which may be larger than the displayed area,
+            # and its position on the final surface. The other is the amount of
+            # area of the text surface which we blit from, which may be much smaller
             # than the total text area.
 
             horiz_padding = 0
@@ -495,24 +502,45 @@ class DrawableShape:
             self.align_all_text_rows()
 
     def finalise_text(self, state_str, text_colour_state_str, text_shadow_colour_state_str):
+        """
+        Finalise the text to a surface with some last-minute data that doesn't require the text
+        be re-laid out.
+
+        :param state_str: The name of the shape's state we are finalising.
+        :param text_colour_state_str: The string identifying the text colour to use.
+        :param text_shadow_colour_state_str: The string identifying the text shadow
+                                             colour to use.
+        """
         if self.text_box_layout is not None:
             self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
-            self.text_box_layout.set_default_text_shadow_colour(self.theming[text_shadow_colour_state_str])
+            self.text_box_layout.set_default_text_shadow_colour(
+                self.theming[text_shadow_colour_state_str])
             self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
 
     def set_text(self, text: str):
+        """
+        Set the visible text that the drawable shape has on it. This call will build a text
+        layout and then redraw the final shape with the new, laid out text on top.
+
+        :param text: the new string of text to stick on the shape.
+        """
         self.theming['text'] = text
         self.build_text_layout()
         self.redraw_all_states()
 
     def toggle_text_cursor(self):
+        """
+        Toggle the edit text cursor/carat between visible and invisible. Usually this is run to
+        make the cursor appear to flash so it catches user attention.
+        """
         if self.text_box_layout is not None:
             self.text_box_layout.toggle_cursor()
             self.active_state.has_fresh_surface = True
 
     def redraw_state(self, state_str: str):
         """
-        This method is declared for derived classes to implement but has no default implementation.
+        This method is declared for derived classes to implement but has no default
+        implementation.
 
         :param state_str: The ID/name of the state to redraw.
 

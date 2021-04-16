@@ -1,4 +1,7 @@
-from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygame_gui.core.text.text_box_layout import TextBoxLayout
 
 
 class TextBoxEffect:
@@ -37,7 +40,7 @@ class TypingAppearEffect(TextBoxEffect):
     they were being typed by an invisible hand.
 
     """
-    def __init__(self, text_box: TextBoxLayout):
+    def __init__(self, text_box: 'TextBoxLayout'):
         super().__init__()
         self.text_box = text_box
         self.text_progress = 0
@@ -87,7 +90,7 @@ class FadeInEffect(TextBoxEffect):
     care of fading up an alpha value over time.
 
     """
-    def __init__(self, text_box: TextBoxLayout):
+    def __init__(self, text_box: 'TextBoxLayout'):
         super().__init__()
         self.text_box = text_box
         self.alpha_value = 0
@@ -145,7 +148,7 @@ class FadeOutEffect(TextBoxEffect):
 
     :param all_characters: The text characters in the text box. Useful to know for some effects.
     """
-    def __init__(self, text_box: TextBoxLayout):
+    def __init__(self, text_box: 'TextBoxLayout'):
 
         super().__init__()
         self.text_box = text_box
