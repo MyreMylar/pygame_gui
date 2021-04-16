@@ -457,9 +457,9 @@ class UIElement(GUISprite, IUIElementInterface):
             self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
             if self.drawable_shape is not None:
-                self.drawable_shape.set_dimensions(self.relative_rect.size)
-                # needed to stop resizing 'lag'
-                self.set_image(self.drawable_shape.get_fresh_surface())
+                if self.drawable_shape.set_dimensions(self.relative_rect.size):
+                    # needed to stop resizing 'lag'
+                    self.set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
 

@@ -197,6 +197,8 @@ class UITextEntryLine(UIElement):
                                                         ['normal', 'disabled'], self.ui_manager)
 
         self.set_image(self.drawable_shape.get_fresh_surface())
+        if self.rect.width == -1 or self.rect.height == -1:
+            self.set_dimensions(self.drawable_shape.containing_rect.size)
 
     def set_text_length_limit(self, limit: int):
         """

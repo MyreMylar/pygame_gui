@@ -252,7 +252,7 @@ class RoundedRectangleShape(DrawableShape):
         """
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
-            return
+            return False
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
         self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
@@ -291,6 +291,8 @@ class RoundedRectangleShape(DrawableShape):
         self.has_been_resized = True
         self.should_trigger_full_rebuild = True
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
+
+        return True
 
     def redraw_state(self, state_str: str):
         """

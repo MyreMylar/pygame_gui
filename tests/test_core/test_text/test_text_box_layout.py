@@ -170,7 +170,7 @@ class TestTextBoxLayout:
                                                colour=pygame.Color('#FFFFFF'),
                                                bg_colour=pygame.Color('#FF0000'),
                                                hover_colour=pygame.Color('#0000FF'),
-                                               selected_colour=pygame.Color('#FFFF00'),
+                                               active_colour=pygame.Color('#FFFF00'),
                                                hover_underline=False)
                             ])
 

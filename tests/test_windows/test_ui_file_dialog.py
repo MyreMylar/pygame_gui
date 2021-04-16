@@ -267,6 +267,15 @@ class TestUIUIFileDialog:
         default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
                                                              {'key': pygame.K_RETURN}))
 
+        # event_data = {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
+        #               'text': file_dialog.file_path_text_line.get_text(),
+        #               'ui_element': file_dialog.file_path_text_line,
+        #               'ui_object_id': file_dialog.file_path_text_line.most_specific_combined_id}
+        # pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 

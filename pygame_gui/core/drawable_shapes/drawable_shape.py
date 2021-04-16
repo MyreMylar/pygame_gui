@@ -350,6 +350,7 @@ class DrawableShape:
             else:
                 self.text_box_layout.align_right_all_rows(0)
         else:
+            method = 'rect'
             if 'text_horiz_alignment_method' in self.theming:
                 method = self.theming['text_horiz_alignment_method']
             self.text_box_layout.horiz_center_all_rows(method)

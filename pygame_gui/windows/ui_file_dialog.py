@@ -232,6 +232,9 @@ class UIFileDialog(UIWindow):
         else:
             return self._validate_path_in_existing_directory(path_to_validate)
 
+    def _validate_file_or_dir_path(self, path_to_validate: Path) -> bool:
+        return self._validate_path_exists_and_of_allowed_type(path_to_validate, True)
+
     @staticmethod
     def _validate_path_in_existing_directory(path_to_validate: Path) -> bool:
         """
@@ -294,7 +297,7 @@ class UIFileDialog(UIWindow):
                 or event.ui_element != self.file_path_text_line):
             return
         entered_file_path = Path(self.file_path_text_line.get_text()).absolute()
-        if self._validate_file_path(entered_file_path):
+        if self._validate_file_or_dir_path(entered_file_path):
             if len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
                                                     not entered_file_path.exists()):
                 self.current_file_path = entered_file_path

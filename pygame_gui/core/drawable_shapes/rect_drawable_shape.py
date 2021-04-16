@@ -121,7 +121,7 @@ class RectDrawableShape(DrawableShape):
         """
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
-            return
+            return False
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
         self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
@@ -130,6 +130,8 @@ class RectDrawableShape(DrawableShape):
         self.has_been_resized = True
 
         self.full_rebuild_on_size_change()
+
+        return True
 
     def set_position(self, point: Union[pygame.math.Vector2,
                                         Tuple[int, int],
