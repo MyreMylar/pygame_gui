@@ -134,6 +134,12 @@ class TextBoxLayoutRow(pygame.Rect):
             current_start_x += item.width
 
     def align_left_row(self, start_x: int):
+        """
+        Align this row to the left.
+
+        :param start_x: Effectively the padding. Indicates how many pixels from the edge
+                        to start this row.
+        """
         self.x = start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
         current_start_x = self.x
         for item in self.items:
@@ -141,6 +147,12 @@ class TextBoxLayoutRow(pygame.Rect):
             current_start_x += item.width
 
     def align_right_row(self, start_x: int):
+        """
+        Align this row to the right.
+
+        :param start_x: Effectively the padding. Indicates how many pixels from the right edge
+                        of the layout to start this row.
+        """
         self.right = self.layout.layout_rect.width - start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
         for item in reversed(self.items):
@@ -148,10 +160,18 @@ class TextBoxLayoutRow(pygame.Rect):
             current_start_x -= item.width
 
     def vert_align_items_to_row(self):
+        """
+        Align items in this row to the row's vertical position.
+        """
         for item in self.items:
             item.y = self.y
 
     def merge_adjacent_compatible_chunks(self):
+        """
+        Merge chunks of text next to each other in this row that have identical styles.
+
+        Should leave the minimum possible chunks in a row given the set styles for text.
+        """
         index = 0
         while index < len(self.items)-1:
             current_item = self.items[index]
@@ -166,6 +186,16 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def finalise(self, surface, current_end_pos: Optional[int] = None,
                  cumulative_letter_count: Optional[int] = None):
+        """
+        Finalise this row, turning it into pixels on a pygame surface. Generally done once we are
+        finished applying styles and laying out the text.
+
+        :param surface: The surface we are finalising this row on to.
+        :param current_end_pos: Optional parameter indicating the current end position of
+                                the visible text. This lets us do the 'typewriter' effect.
+        :param cumulative_letter_count: A count of how many letters we have already finalised.
+                                        Also helps with the 'typewriter' effect.
+        """
         self.merge_adjacent_compatible_chunks()
         for text_chunk in self.items:
             chunk_view_rect = pygame.Rect(self.layout.layout_rect.left,
@@ -209,18 +239,33 @@ class TextBoxLayoutRow(pygame.Rect):
         return cumulative_letter_count
 
     def set_default_text_colour(self, colour):
+        """
+        Set the default colour of the text.
+
+        :param colour: The colour to set.
+        """
         for chunk in self.items:
             if isinstance(chunk, TextLineChunkFTFont):
                 if chunk.using_default_text_colour:
                     chunk.colour = colour
 
     def set_default_text_shadow_colour(self, colour):
+        """
+        Set the default colour of the text shadow.
+
+        :param colour: The colour to set.
+        """
         for chunk in self.items:
             if isinstance(chunk, TextLineChunkFTFont):
                 if chunk.using_default_text_shadow_colour:
                     chunk.shadow_colour = colour
 
     def toggle_cursor(self):
+        """
+        Toggles the visibility of the edit cursor/carat.
+
+        Generally used to make it flash on and off to catch the attention of the user.
+        """
         if self.edit_cursor_active:
             self.edit_cursor_active = False
         else:
@@ -231,6 +276,12 @@ class TextBoxLayoutRow(pygame.Rect):
             self.finalise(self.target_surface)
 
     def clear(self):
+        """
+        'Clears' the current row from it's target surface by setting the
+         area taken up by this row to transparent black.
+
+         Hopefully the target surface is supposed to be transparent black when empty.
+        """
         if self.target_surface is not None:
             slightly_wider_rect = pygame.Rect(self.x, self.y,
                                               self.layout.view_rect.width,
@@ -248,6 +299,12 @@ class TextBoxLayoutRow(pygame.Rect):
                                               self.edit_cursor_left_margin)
 
     def set_cursor_from_click_pos(self, click_pos: Tuple[int, int]):
+        """
+        Set the current edit cursor position from a pixel position - usually
+        originating from a mouse click.
+
+        :param click_pos: The pixel position to use.
+        """
         letter_acc = 0
         cursor_draw_width = 0
         found_chunk = False
