@@ -7,6 +7,18 @@ from pygame.surface import Surface
 
 
 class TextFloatPosition(Enum):
+    """
+    An enumeration covering the three possible 'float' positions of a layout rect in a text layout.
+
+    'NONE' is the normal case. This rectangle will be treated as one in a row of rectangles
+
+    'LEFT' will allow other rectangles to flow around this one on the right hand side with
+           potentially multiple rows of shorter rectangles taking up its vertical height.
+
+    'RIGHT' the same as left except on the other side.
+
+    Generally we use this to embed images into the flow of a text box.
+    """
     NONE = 0
     LEFT = 1
     RIGHT = 2

@@ -337,6 +337,11 @@ class TextBoxLayoutRow(pygame.Rect):
         self._setup_offset_position_from_edit_cursor()
 
     def set_cursor_position(self, cursor_pos):
+        """
+        Set the edit cursor position by a character index.
+
+        :param cursor_pos: the character index in this row to put the edit cursor after.
+        """
         self.cursor_index = min(self.letter_count, max(0, cursor_pos))
         letter_acc = 0
         cursor_draw_width = 0
@@ -358,10 +363,21 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self._setup_offset_position_from_edit_cursor()
 
-    def get_cursor_index(self):
+    def get_cursor_index(self) -> int:
+        """
+        Get the current character index of the cursor
+
+        :return: the character index the edit cursor currently occupies.
+        """
         return self.cursor_index
 
     def insert_text(self, text: str, letter_row_index: int):
+        """
+        Insert the provided text into this row at the given location.
+
+        :param text: the text to insert.
+        :param letter_row_index: the index in the row at which to insert this text.
+        """
         letter_acc = 0
         for chunk in self.items:
             if letter_row_index <= letter_acc + chunk.letter_count:

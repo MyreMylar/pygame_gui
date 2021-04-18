@@ -577,54 +577,12 @@ class TextBoxLayout:
         # We need to check if the indexes are at the
         # start/end of a chunk and if not, split the chunk
         if start_index != end_index:
-            start_chunk = None
-            start_letter_index = 0
-            end_chunk = None
-            end_letter_index = 0
-
             # step 1: find the start chunk
-            letter_accumulator = 0
+            start_chunk, _, start_row_index = self._find_and_split_chunk(start_index,
+                                                                         return_rhs=True)
 
-            start_chunk_row, index_in_row = self._find_row_from_text_box_index(start_index)
-            start_row_index = start_chunk_row.row_index
-            start_chunk_in_row_index = 0
-            for chunk in start_chunk_row.items:
-                if isinstance(chunk, TextLineChunkFTFont) and start_chunk is None:
-                    if index_in_row < letter_accumulator + chunk.letter_count:
-                        start_letter_index = index_in_row - letter_accumulator
-                        start_chunk = chunk
-                        break
-                    letter_accumulator += chunk.letter_count
-                    start_chunk_in_row_index += 1
-
-            if start_letter_index != 0:
-                # split the chunk
-
-                # for the start chunk we want the right hand side of the split
-                start_chunk = start_chunk.split_index(start_letter_index)
-                start_chunk_row.items.insert(start_chunk_in_row_index + 1, start_chunk)
-
-            # step 1: find the end chunk
-            letter_accumulator = 0
-            end_chunk_row, index_in_row = self._find_row_from_text_box_index(end_index)
-            end_row_index = end_chunk_row.row_index
-            end_chunk_in_row_index = 0
-            for chunk in end_chunk_row.items:
-                if isinstance(chunk, TextLineChunkFTFont) and end_chunk is None:
-                    if index_in_row < letter_accumulator + chunk.letter_count:
-                        end_letter_index = index_in_row - letter_accumulator
-                        end_chunk = chunk
-                        break
-
-                    letter_accumulator += chunk.letter_count
-                    end_chunk_in_row_index += 1
-
-            if end_letter_index != 0:
-                # split the chunk
-
-                # for the start chunk we want the right hand side of the split
-                new_chunk = end_chunk.split_index(end_letter_index)
-                end_chunk_row.items.insert(end_chunk_in_row_index + 1, new_chunk)
+            # step 2: find the end chunk
+            end_chunk, end_letter_index, end_row_index = self._find_and_split_chunk(end_index)
 
             start_selection = False
             end_selection = False
@@ -653,6 +611,34 @@ class TextBoxLayout:
         if self.finalised_surface is not None:
             for row in rows_to_finalise:
                 row.finalise(self.finalised_surface)
+
+    def _find_and_split_chunk(self, index: int, return_rhs: bool = False):
+        found_chunk = None
+        letter_index = 0
+        letter_accumulator = 0
+        chunk_row, index_in_row = self._find_row_from_text_box_index(index)
+        row_index = chunk_row.row_index
+        chunk_in_row_index = 0
+        for chunk in chunk_row.items:
+            if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
+                if index_in_row < letter_accumulator + chunk.letter_count:
+                    letter_index = index_in_row - letter_accumulator
+                    found_chunk = chunk
+                    break
+                letter_accumulator += chunk.letter_count
+                chunk_in_row_index += 1
+
+        if letter_index != 0:
+            # split the chunk
+
+            # for the start chunk we want the right hand side of the split
+            new_chunk = found_chunk.split_index(letter_index)
+            chunk_row.items.insert(chunk_in_row_index + 1, new_chunk)
+
+            if return_rhs:
+                found_chunk = new_chunk
+
+        return found_chunk, letter_index, row_index
 
     def set_default_text_colour(self, colour):
         """
