@@ -316,26 +316,6 @@ class TestUIManager:
         assert button1.hovered is True
         assert button2.hovered is False
 
-    def test_hide_and_show_of_disabled_elements(self, _init_pygame, _display_surface_return_none):
-        manager = UIManager((800, 600))
-        button = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="button test",
-                          manager=manager, starting_height=1)
-        ddmenu = UIDropDownMenu(["first", "second"], "first",
-                                relative_rect=pygame.Rect(100, 100, 100, 100), manager=manager)
-        hscroll = UIHorizontalScrollBar(relative_rect=pygame.Rect(150, 150, 150, 150),
-                                        visible_percentage=0.10, manager=manager)
-
-        elements = [
-            button,
-            ddmenu,
-            hscroll]
-
-        for e in elements:
-            e.disable()
-            e.hide()
-            e.show()
-            assert e.drawable_shape.active_state.state_id == 'disabled'
-
 
 if __name__ == '__main__':
     pytest.console_main()
