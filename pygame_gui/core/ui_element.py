@@ -861,3 +861,13 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self.hovered = False
         self.hover_time = 0.0
+
+    def get_appropriate_state(self):
+        """
+        Returns a string representing the appropriate state for the widgets DrawableShapes.
+        Currently only returns either 'normal' or 'disabled' based on is_enabled.
+        """
+
+        if self.is_enabled:
+            return "normal"
+        return "disabled"
