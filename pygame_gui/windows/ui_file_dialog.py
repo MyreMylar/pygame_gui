@@ -377,7 +377,8 @@ class UIFileDialog(UIWindow):
         self.file_selection_list.set_item_list(self.current_file_list)
 
         if self.current_file_path is not None and not self.allow_existing_files_only:
-            self.current_file_path = (new_directory_path / self.current_file_path.name).resolve()
+            if self.current_file_path != new_directory_path:
+                self.current_file_path = (new_directory_path / self.current_file_path.name).resolve()
             self.file_path_text_line.set_text(str(self.current_file_path))
             self._highlight_file_name_for_editing()
             self.ok_button.enable()
