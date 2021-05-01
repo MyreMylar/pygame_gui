@@ -3,7 +3,6 @@ import platform
 import pygame
 import pytest
 
-from pygame_gui.elements import UIDropDownMenu, UIHorizontalScrollBar
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
@@ -210,7 +209,7 @@ class TestUIManager:
         plat = platform.system().upper()
         if plat == 'WINDOWS':
             comparison_surface = pygame.image.load(
-                os.path.join('comparison_images', 'test_ui_manager_draw_ui.png')).convert_alpha()
+                os.path.join('tests', 'comparison_images', 'test_ui_manager_draw_ui.png')).convert_alpha()
         else:
             comparison_surface = pygame.image.load(
                 os.path.join('tests', 'comparison_images', 'test_ui_manager_draw_ui_linux.png')).convert_alpha()
@@ -245,7 +244,7 @@ class TestUIManager:
         happen.
         """
         default_ui_manager.add_font_paths(font_name='roboto',
-                                          regular_path=os.path.join('data', 'Roboto-Regular.ttf'))
+                                          regular_path=os.path.join('tests', 'data', 'Roboto-Regular.ttf'))
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
         # default_ui_manager.resource_loader.start()

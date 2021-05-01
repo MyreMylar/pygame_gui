@@ -248,7 +248,7 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any
         tooltip that was created while we were hovering the button.
         """
-        self.drawable_shape.set_active_state(self.get_appropriate_state())
+        self.drawable_shape.set_active_state(self._get_appropriate_state_name())
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
