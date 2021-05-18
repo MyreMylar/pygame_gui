@@ -2,6 +2,7 @@ import warnings
 import html.parser
 from collections import deque
 from typing import List, Dict, Any
+from pathlib import Path
 
 import pygame
 import pygame.freetype
@@ -11,6 +12,8 @@ from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
+from pygame_gui.core.text.text_layout_rect import TextFloatPosition
+from pygame_gui.core.text.image_layout_rect import ImageLayoutRect
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -172,6 +175,21 @@ class HTMLParser(html.parser.HTMLParser):
                                     self.line_spacing)))
 
             self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+        elif element == 'img':
+            image_path = Path('')
+            image_float = TextFloatPosition.NONE
+            if 'src' in attributes:
+                image_path = Path(attributes['src'])
+            if 'float' in attributes:
+                if attributes['float'] == 'left':
+                    image_float = TextFloatPosition.LEFT
+                elif attributes['float'] == 'right':
+                    image_float = TextFloatPosition.RIGHT
+                else:
+                    image_float = TextFloatPosition.NONE
+
+            self.layout_rect_queue.append(ImageLayoutRect(image_path, image_float))
+
         else:
             warning_text = 'Unsupported HTML Tag <' + element + '>. Check documentation' \
                                                                 ' for full range of supported tags.'

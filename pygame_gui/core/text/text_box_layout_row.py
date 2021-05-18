@@ -4,6 +4,7 @@ import pygame
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
+from pygame_gui.core.text.text_layout_rect import TextFloatPosition
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -133,14 +134,21 @@ class TextBoxLayoutRow(pygame.Rect):
             item.x = current_start_x
             current_start_x += item.width
 
-    def align_left_row(self, start_x: int):
+    def align_left_row(self, start_x: int, floating_rects):
         """
         Align this row to the left.
 
         :param start_x: Effectively the padding. Indicates how many pixels from the edge
                         to start this row.
+
+        :floating_rects: Floating rectangles we need to align around
         """
-        self.x = start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
+        aligned_left_start_x = start_x
+        for floater in floating_rects:
+            if (floater.vertical_overlap(self)
+                    and floater.float_pos() == TextFloatPosition.LEFT):
+                aligned_left_start_x = floater.right
+        self.x = aligned_left_start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
         current_start_x = self.x
         for item in self.items:
             item.x = current_start_x

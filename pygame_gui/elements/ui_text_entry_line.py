@@ -126,7 +126,6 @@ class UITextEntryLine(UIElement):
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
-        self.should_redraw = False
 
         # restrictions on text input
         self.allowed_characters = None
@@ -297,10 +296,6 @@ class UITextEntryLine(UIElement):
             self.cursor_on = True
             self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             self.drawable_shape.toggle_text_cursor()
-
-        if self.should_redraw:
-            self.should_redraw = False
-            self.redraw()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
             if self.blink_cursor_time_acc >= self.blink_cursor_time:

@@ -125,6 +125,7 @@ class TextBoxLayout:
                     # if we are at the start of a new line see if this rectangle
                     # will overlap with any left aligned floating rectangles
                     text_layout_rect.left = floater.right
+                    current_row.left = floater.right
                 elif floater.float_pos() == TextFloatPosition.RIGHT:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
@@ -299,7 +300,7 @@ class TextBoxLayout:
                 row.finalise(surface)
 
         for floating_rect in self.floating_rects:
-            floating_rect.finalise(surface)
+            floating_rect.finalise(surface, self.view_rect, 0, 0, 0)
 
         self.finalised_surface = surface
 
@@ -440,7 +441,7 @@ class TextBoxLayout:
         """
         start_left = self.layout_rect.left + x_padding
         for row in self.layout_rows:
-            row.align_left_row(start_left)
+            row.align_left_row(start_left, self.floating_rects)
 
     def align_right_all_rows(self, x_padding):
         """
