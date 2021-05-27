@@ -25,6 +25,7 @@ class TestUIManager:
     """
     Testing the UIManager class
     """
+
     def test_creation(self, _init_pygame, _display_surface_return_none):
         """
         Just test whether we can create a UIManager without raising any exceptions.
@@ -36,21 +37,21 @@ class TestUIManager:
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
-        assert(type(theme) == UIAppearanceTheme)
+        assert (type(theme) == UIAppearanceTheme)
 
     def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
-        assert(type(sprite_group) == LayeredGUIGroup)
+        assert (type(sprite_group) == LayeredGUIGroup)
 
     def test_get_window_stack(self, _init_pygame, default_ui_manager):
         """
         Can we get the window stack? Serves as a test of the window stack being successfully created.
         """
         window_stack = default_ui_manager.get_window_stack()
-        assert(type(window_stack) == UIWindowStack)
+        assert (type(window_stack) == UIWindowStack)
 
     def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
@@ -242,7 +243,8 @@ class TestUIManager:
         We sets the path to a font, preload it then try and use it in a text box and see if any errors or warnings
         happen.
         """
-        default_ui_manager.add_font_paths(font_name='roboto', regular_path='tests/data/Roboto-Regular.ttf')
+        default_ui_manager.add_font_paths(font_name='roboto',
+                                          regular_path=os.path.join('tests', 'data', 'Roboto-Regular.ttf'))
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
         # default_ui_manager.resource_loader.start()
@@ -290,7 +292,7 @@ class TestUIManager:
             finished, progress = incremental_loader.update()
         assert finished
 
-    def test_hover_of_hidden_elements(self,  _init_pygame, _display_surface_return_none):
+    def test_hover_of_hidden_elements(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
         button1 = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="Lower button test",
                            manager=manager, starting_height=1)

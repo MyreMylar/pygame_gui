@@ -686,6 +686,16 @@ class TestUIButton:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_hide_and_show_of_disabled_button(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="button test",
+                          manager=manager, starting_height=1)
+
+        button.disable()
+        button.hide()
+        button.show()
+        assert button.drawable_shape.active_state.state_id == 'disabled'
+
     def test_class_theming_id(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),
                             PackageResource('tests.data.themes',
