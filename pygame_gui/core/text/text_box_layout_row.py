@@ -90,7 +90,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.letter_count = 0
         self.y_origin = 0
 
-    def horiz_center_row(self, method='rect'):
+    def horiz_center_row(self, floating_rects, method='rect'):
         """
         Horizontally center this row of text.
 
@@ -106,8 +106,17 @@ class TextBoxLayoutRow(pygame.Rect):
                        to center an arrow you might try 'right_triangle' or
                        'left_triangle'
         """
+        floater_adjustment = 0
+
+        for floater in floating_rects:
+            if floater.vertical_overlap(self):
+                if floater.float_pos() == TextFloatPosition.LEFT:
+                    floater_adjustment += (floater.width * 0.5)
+                elif floater.float_pos() == TextFloatPosition.RIGHT:
+                    floater_adjustment -= (floater.width * 0.5)
+
         if method == 'rect':
-            self.centerx = self.layout.layout_rect.centerx  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.centerx = self.layout.layout_rect.centerx + floater_adjustment  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         elif method == 'right_triangle':
             # two lines - from bottom left of triangle at a -60 angle (because y axis is inverted)
             # then from mid left at 90
@@ -116,6 +125,7 @@ class TextBoxLayoutRow(pygame.Rect):
             n_2 = self.centery
 
             visual_center_x = (n_2 - n_1) / m_1
+            visual_center_x += floater_adjustment
 
             self.left = self.layout.layout_rect.centerx - visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
@@ -126,6 +136,7 @@ class TextBoxLayoutRow(pygame.Rect):
             n_2 = self.centery
 
             visual_center_x = (n_2 - n_1) / m_1
+            visual_center_x += floater_adjustment
 
             self.right = self.layout.layout_rect.centerx + visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
@@ -148,20 +159,25 @@ class TextBoxLayoutRow(pygame.Rect):
             if (floater.vertical_overlap(self)
                     and floater.float_pos() == TextFloatPosition.LEFT):
                 aligned_left_start_x = floater.right
-        self.x = aligned_left_start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
-        current_start_x = self.x
+        self.left = aligned_left_start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
+        current_start_x = self.left
         for item in self.items:
             item.x = current_start_x
             current_start_x += item.width
 
-    def align_right_row(self, start_x: int):
+    def align_right_row(self, start_x: int, floating_rects):
         """
         Align this row to the right.
 
         :param start_x: Effectively the padding. Indicates how many pixels from the right edge
                         of the layout to start this row.
         """
-        self.right = self.layout.layout_rect.width - start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+        aligned_right_start_x = start_x
+        for floater in floating_rects:
+            if (floater.vertical_overlap(self)
+                    and floater.float_pos() == TextFloatPosition.RIGHT):
+                aligned_right_start_x = floater.left
+        self.right = aligned_right_start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
         for item in reversed(self.items):
             item.right = current_start_x

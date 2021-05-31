@@ -430,7 +430,7 @@ class TextBoxLayout:
                        trying to center an arrow you might try 'right_triangle' or 'left_triangle'
         """
         for row in self.layout_rows:
-            row.horiz_center_row(method)
+            row.horiz_center_row(self.floating_rects, method)
 
     def align_left_all_rows(self, x_padding):
         """
@@ -450,8 +450,9 @@ class TextBoxLayout:
         :param x_padding: the amount of padding to insert to on the right
                           before the text starts.
         """
+        start_right = self.layout_rect.width - x_padding
         for row in self.layout_rows:
-            row.align_right_row(x_padding)
+            row.align_right_row(start_right, self.floating_rects)
 
     def vert_center_all_rows(self):
         """
