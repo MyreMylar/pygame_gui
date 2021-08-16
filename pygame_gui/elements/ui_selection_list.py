@@ -332,8 +332,8 @@ class UISelectionList(UIElement):
 
         """
         default = self._default_selection
-        cmp_list = []
 
+        # Sanity check: make sure all requirements and appropriately satisfied.
         if isinstance(default, list) and self.allow_multi_select is not True:
             raise ValueError('Multiple default values specified for single-selection list.')
         elif not isinstance(default, list):
@@ -344,6 +344,8 @@ class UISelectionList(UIElement):
             if item['selected']:
                 return
 
+        # Get the index of each selection in the default selection list, then set each appropriate
+        # selected flag to true and select the button to apply theming.
         for d in default:
             if isinstance(d, str):
                 idx = next((i for i, item in enumerate(self.item_list) if item['text'] == d), None)
@@ -354,7 +356,9 @@ class UISelectionList(UIElement):
                 raise TypeError(f'Requested default {d} is not a string or (str, str) tuple.')
 
             if idx is None:
-                raise ValueError(f'Requested default {d} not found in selection list {self.item_list}.')
+                raise ValueError(
+                    f'Requested default {d} not found in selection list.')
+            
             self.item_list[idx]['selected'] = True
             self.item_list[idx]['button_element'].select()
 
