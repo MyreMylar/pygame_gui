@@ -24,6 +24,9 @@ class UISelectionList(UIElement):
                           for details.
     :param item_list: A list of items as strings (item name only), or tuples of two strings (name,
                       theme_object_id).
+    :param default_selection: Default item(s) that should be selected: a string or a (str, str)
+                              tuple for single-selection lists or a list of strings or list of
+                              (str, str) tuples for multi-selection lists.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
                     between elements.
     :param allow_multi_select: True if we are allowed to pick multiple things from the selection
@@ -55,7 +58,12 @@ class UISelectionList(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
-                 visible: int = 1
+                 visible: int = 1,
+                 default_selection: Union[
+                    str, Tuple[str, str],               # Single-selection lists
+                    List[str], List[Tuple[str, str]],   # Multi-selection lists
+                    None
+                 ] = None,
                  ):
 
         super().__init__(relative_rect,
@@ -75,6 +83,7 @@ class UISelectionList(UIElement):
         self.list_and_scroll_bar_container = None
         self.item_list_container = None
         self._raw_item_list = item_list
+        self._default_selection = default_selection
         self.item_list = []
         self.allow_multi_select = allow_multi_select
         self.allow_double_clicks = allow_double_clicks
@@ -94,6 +103,8 @@ class UISelectionList(UIElement):
         self.scroll_bar_width = 20
         self.current_scroll_bar_width = 0
 
+        if self._default_selection is not None:
+            self.set_default_selection()
         self.rebuild_from_changed_theme_data()
 
     def get_single_selection(self) -> Union[str, None]:
@@ -294,6 +305,56 @@ class UISelectionList(UIElement):
                 item_y_height += self.list_item_height
             else:
                 break
+
+    def set_default_selection(self):
+        """
+        Set the default selection of the list. The default selection type must be a string or (str,
+        str) tuple for single selection lists. For multi-selection lists, they can be a single
+        string, an (str, str) tuple, a list of strings, or a list of (str, str) tuples.
+
+        For foregivess' sake, a single-item list MAY be used to specify the default value for a
+        single-selection list.
+
+        Tuples should be arranged like so:
+
+         (list_text, object_ID)
+
+         - list_text: displayed in the UI
+         - object_ID: used for theming and events
+
+        :raise ValueError: Throw an exception if a list is used for the default for a
+                           single-selection list, or if the default value(s) requested is/are not
+                           present in the options list.
+        
+        :raise TypeError: Throw an exception if anything other than a string or a (str, str) tuple
+                          is encountered in the requested defaults.
+
+        """
+        default = self._default_selection
+        cmp_list = []
+
+        if isinstance(default, list) and self.allow_multi_select is not True:
+            raise ValueError('Multiple default values specified for single-selection list.')
+        elif not isinstance(default, list):
+            default = [default]
+
+        # Sanity check: return if any values - even not requested defaults - are already selected.
+        for item in self.item_list:
+            if item['selected']:
+                return
+
+        for d in default:
+            if isinstance(d, str):
+                idx = next((i for i, item in enumerate(self.item_list) if item['text'] == d), None)
+            elif isinstance(d, tuple):
+                idx = next((i for i, item in enumerate(self.item_list) if item['text'] == d[0] and
+                            item['object_id'] == d[1]), None)
+            else:
+                raise TypeError(f'Requested default {d} is not a string or (str, str) tuple.')
+
+            if idx is None:
+                raise ValueError(f'Requested default {d} not found in selection list.')
+            self.item_list[idx]['selected'] = True
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
