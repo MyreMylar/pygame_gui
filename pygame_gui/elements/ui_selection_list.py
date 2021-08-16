@@ -356,6 +356,7 @@ class UISelectionList(UIElement):
             if idx is None:
                 raise ValueError(f'Requested default {d} not found in selection list {self.item_list}.')
             self.item_list[idx]['selected'] = True
+            self.item_list[idx]['button_element'].select()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
