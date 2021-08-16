@@ -103,9 +103,10 @@ class UISelectionList(UIElement):
         self.scroll_bar_width = 20
         self.current_scroll_bar_width = 0
 
+        self.rebuild_from_changed_theme_data()
+
         if self._default_selection is not None:
             self.set_default_selection()
-        self.rebuild_from_changed_theme_data()
 
     def get_single_selection(self) -> Union[str, None]:
         """
@@ -353,7 +354,7 @@ class UISelectionList(UIElement):
                 raise TypeError(f'Requested default {d} is not a string or (str, str) tuple.')
 
             if idx is None:
-                raise ValueError(f'Requested default {d} not found in selection list.')
+                raise ValueError(f'Requested default {d} not found in selection list {self.item_list}.')
             self.item_list[idx]['selected'] = True
 
     def process_event(self, event: pygame.event.Event) -> bool:
