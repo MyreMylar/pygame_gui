@@ -44,6 +44,11 @@ class UIToggleButton(UIButton):
 
         self._state = is_on
 
+        if self.state is True:
+            self._set_active()
+        else:
+            self._set_inactive()
+
     def process_event(self, event: pygame.event.Event) -> bool:
         """
         Handles various interactions with the button, including toggling its value.
