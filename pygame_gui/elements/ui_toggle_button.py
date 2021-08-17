@@ -107,6 +107,40 @@ class UIToggleButton(UIButton):
 
         return consumed_event
 
+    def on_unhovered(self):
+        """
+        Called when we leave the hover state. Resets the colours and images to normal and kills any
+        tooltip that was created while we were hovering the button.
+        """
+        state = self._get_ui_state()
+        self.drawable_shape.set_active_state(state)
+        if self.tool_tip is not None:
+            self.tool_tip.kill()
+            self.tool_tip = None
+
+        event_data = {'user_type': UI_BUTTON_ON_UNHOVERED,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+    def enable(self):
+        """
+        Re-enables the button so we can once again interact with it.
+        """
+        state = self._get_ui_state()
+        if not self.is_enabled:
+            self.is_enabled = True
+            self.drawable_shape.set_active_state(state)
+
+    def unselect(self):
+        """
+        Called when we are no longer select focusing this element. Restores the colours and image
+        to the default state then redraws the button.
+        """
+        state = self._get_ui_state()
+        self.is_selected = False
+        self.drawable_shape.set_active_state(state)
+
     def get_state(self) -> bool:
         """
         Get the on/off state of this toggle button.
@@ -114,3 +148,6 @@ class UIToggleButton(UIButton):
         :return: Return True if the button is "on" or False if the button is "off."
         """
         return self._state
+
+    def _get_ui_state(self):
+        return 'active' if self._state is True else 'normal'
