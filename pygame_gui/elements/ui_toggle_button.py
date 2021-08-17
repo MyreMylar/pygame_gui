@@ -44,7 +44,7 @@ class UIToggleButton(UIButton):
 
         self._state = is_on
 
-        if self.state is True:
+        if self._state is True:
             self._set_active()
         else:
             self._set_inactive()
