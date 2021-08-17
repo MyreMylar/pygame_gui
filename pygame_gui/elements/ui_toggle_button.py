@@ -24,7 +24,7 @@ class UIToggleButton(UIButton):
         starting_height: int = 1,
         parent_element: UIElement = None,
         object_id: Union[ObjectID, str, None] = None,
-        anchors: Dict(str, str) = None,
+        anchors: Dict[str, str] = None,
         visible: int = 1,
         is_on: bool = False
     ):
