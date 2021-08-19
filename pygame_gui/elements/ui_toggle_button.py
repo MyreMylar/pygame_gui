@@ -164,7 +164,7 @@ class UIToggleButton(UIButton):
         if not self.is_enabled:
             return
 
-        state = self._get_ui_state(self._state)
+        state = self._get_ui_state()
         self.drawable_shape.set_active_state(state)
 
     def _get_ui_state(self):
