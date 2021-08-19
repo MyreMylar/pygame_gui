@@ -160,10 +160,10 @@ class UIToggleButton(UIButton):
 
         :param new_state: Desired new state.
         """
+        self._state = new_state
         if not self.is_enabled:
             return
 
-        self._state = new_state
         self.drawable_shape.set_active_state(new_state)
 
     def _get_ui_state(self):
