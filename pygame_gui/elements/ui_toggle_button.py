@@ -154,5 +154,17 @@ class UIToggleButton(UIButton):
         """
         return self._state
 
+    def set_state(self, new_state: bool) -> None:
+        """
+        Set the on/off state of this toggle button.
+
+        :param new_state: Desired new state.
+        """
+        if not self.is_enabled:
+            return
+
+        self._state = new_state
+        self.drawable_shape.set_active_state(new_state)
+
     def _get_ui_state(self):
         return 'active' if self._state is True else 'normal'
