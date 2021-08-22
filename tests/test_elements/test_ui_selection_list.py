@@ -783,3 +783,163 @@ class TestUISelectionList:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_default_selection_exceptions(self):
+        """
+        Test that all exceptions throw appropriately:
+        1. ValueError if a list of strings/string tuples is passed to a single-selection list.
+        2. TypeError is a completely invalid type (like an object) is passed.
+        3. ValueError if ANY of the requested default values are not actually present in the item
+            list.
+        """
+        resolution = (400, 400)
+        manager = UIManager(resolution)
+        lst = [f'item {n}' for n in range(20)]
+
+        # Test Case 1
+        test_case_1_throws = False
+        try:
+            UISelectionList(
+                relative_rect=pygame.Rect(100, 100, 400, 400),
+                item_list=lst,
+                default_selection=['item 1', 'item 2'],
+                manager=manager
+            )
+        except ValueError as e:
+            assert 'Multiple default values' in str(e)
+            test_case_1_throws = True
+
+        assert test_case_1_throws is True
+
+        # Test Case 2
+        test_case_2_throws = False
+        try:
+            UISelectionList(
+                relative_rect=pygame.Rect(100, 100, 400, 400),
+                item_list=lst,
+                default_selection=4,
+                manager=manager
+            )
+        except TypeError as e:
+            assert 'is not a string or (str, str) tuple.' in str(e)
+            test_case_2_throws = True
+
+        assert test_case_2_throws is True
+
+        # Test Case 3 for single-selection lists
+        test_case_3_single_throws = False
+        try:
+            UISelectionList(
+                relative_rect=pygame.Rect(100, 100, 400, 400),
+                item_list=lst,
+                default_selection='I am not in the list',
+                manager=manager
+            )
+        except ValueError as e:
+            assert 'not found in selection list' in str(e)
+            test_case_3_single_throws = True
+
+        assert test_case_3_single_throws is True
+
+        # Test Case 4 for multi-select lists.
+        test_case_3_multiple_throws = False
+        try:
+            UISelectionList(
+                relative_rect=pygame.Rect(100, 100, 400, 400),
+                item_list=lst,
+                default_selection=['item 1', 'I am not in the list'],
+                allow_multi_select=True,
+                manager=manager
+            )
+        except ValueError as e:
+            assert 'not found in selection list' in str(e)
+            test_case_3_multiple_throws = True
+
+        assert test_case_3_multiple_throws is True
+
+    def test_default_selection_sets_correctly(self):
+        """
+        Test that the default selection parameter ACTUALLY sets the values.
+        """
+        resolution = (400, 400)
+        manager = UIManager(resolution)
+        lst = [f'item {i}' for i in range(20)]
+        selection = 'item 10'
+
+        # Single-selection list default.
+        single_list = UISelectionList(
+            relative_rect=pygame.Rect(100, 100, 400, 400),
+            item_list=lst,
+            default_selection=selection,
+            manager=manager
+        )
+
+        assert selection == single_list.get_single_selection()
+
+        # Multi-selection list defaults.
+        selection = ['item 3', 'item 10', 'item 15']
+        multi_list = UISelectionList(
+            relative_rect=pygame.Rect(100, 100, 400, 400),
+            item_list=lst,
+            default_selection=selection,
+            allow_multi_select=True,
+            manager=manager
+        )
+
+        assert selection == multi_list.get_multi_selection()
+
+    def test_default_selection_changes(
+        self,
+        _init_pygame,
+        default_ui_manager,
+        default_display_surface,
+        _display_surface_return_none
+    ):
+        """
+        Test that the default selection parameter does not permanently fix the list selection.
+        """
+        resolution = (400, 400)
+        manager = UIManager(resolution)
+        lst = [f'item {i}' for i in range(0, 20)]
+        default = 10
+        new_selection = 5
+
+        # Test single selection list
+        single_list = UISelectionList(
+            relative_rect=pygame.Rect(100, 100, 400, 400),
+            item_list=lst,
+            default_selection=lst[default],
+            manager=manager
+        )
+
+        event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                      'ui_element': single_list.item_list_container.elements[new_selection]}
+        select_event = pygame.event.Event(pygame.USEREVENT, event_data)
+        single_list.process_event(select_event)
+
+        assert lst[new_selection] == single_list.get_single_selection()
+
+        # Test multi-selection list
+        default = [lst[10], lst[17]]
+        selections = [4, 10, 15]
+
+        multi_list = UISelectionList(
+            relative_rect=pygame.Rect(100, 100, 400, 400),
+            item_list=lst,
+            default_selection=default,
+            allow_multi_select=True,
+            manager=manager
+        )
+
+        for selection in selections:
+            event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
+                          'ui_element': multi_list.item_list_container.elements[selection]}
+            select_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            multi_list.process_event(select_event)
+
+        final_vals = multi_list.get_multi_selection()
+        assert len(final_vals) == 3
+        assert lst[10] not in final_vals
+        assert lst[4] in final_vals
+        assert lst[15] in final_vals
+        assert lst[17] in final_vals

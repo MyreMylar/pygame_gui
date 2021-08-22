@@ -332,7 +332,6 @@ class UISelectionList(UIElement):
 
         """
         default = self._default_selection
-        cmp_list = []
 
         if isinstance(default, list) and self.allow_multi_select is not True:
             raise ValueError('Multiple default values specified for single-selection list.')
