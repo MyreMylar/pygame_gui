@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import math
 import pygame
 
@@ -145,14 +145,14 @@ class TextBoxLayoutRow(pygame.Rect):
             item.x = current_start_x
             current_start_x += item.width
 
-    def align_left_row(self, start_x: int, floating_rects):
+    def align_left_row(self, start_x: int, floating_rects: List[TextLayoutRect]):
         """
         Align this row to the left.
 
         :param start_x: Effectively the padding. Indicates how many pixels from the edge
                         to start this row.
 
-        :floating_rects: Floating rectangles we need to align around
+        :param floating_rects: Floating rectangles we need to align around
         """
         aligned_left_start_x = start_x
         for floater in floating_rects:

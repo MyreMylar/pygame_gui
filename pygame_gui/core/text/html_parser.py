@@ -12,7 +12,7 @@ from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
-from pygame_gui.core.text.text_layout_rect import TextFloatPosition
+from pygame_gui.core.text.text_layout_rect import TextFloatPosition, Padding
 from pygame_gui.core.text.image_layout_rect import ImageLayoutRect
 
 
@@ -178,6 +178,10 @@ class HTMLParser(html.parser.HTMLParser):
         elif element == 'img':
             image_path = Path('')
             image_float = TextFloatPosition.NONE
+            padding_top = 0
+            padding_right = 0
+            padding_bottom = 0
+            padding_left = 0
             if 'src' in attributes:
                 image_path = Path(attributes['src'])
             if 'float' in attributes:
@@ -187,8 +191,36 @@ class HTMLParser(html.parser.HTMLParser):
                     image_float = TextFloatPosition.RIGHT
                 else:
                     image_float = TextFloatPosition.NONE
+            if 'padding' in attributes:
+                paddings = attributes['padding'].split(' ')
+                for index, padding in enumerate(paddings):
+                    paddings[index] = int(padding.strip('px'))
+                if len(paddings) == 4:
+                    padding_top = paddings[0]
+                    padding_right = paddings[1]
+                    padding_bottom = paddings[2]
+                    padding_left = paddings[3]
+                elif len(paddings) == 3:
+                    padding_top = paddings[0]
+                    padding_right = paddings[1]
+                    padding_left = paddings[1]
+                    padding_bottom = paddings[2]
+                elif len(paddings) == 2:
+                    padding_top = paddings[0]
+                    padding_right = paddings[1]
+                    padding_left = paddings[1]
+                    padding_bottom = paddings[0]
+                elif len(paddings) == 1:
+                    padding_top = paddings[0]
+                    padding_right = paddings[0]
+                    padding_left = paddings[0]
+                    padding_bottom = paddings[0]
 
-            self.layout_rect_queue.append(ImageLayoutRect(image_path, image_float))
+            all_paddings = Padding(padding_top, padding_right, padding_bottom, padding_left)
+
+            self.layout_rect_queue.append(ImageLayoutRect(image_path,
+                                                          image_float,
+                                                          all_paddings))
 
         else:
             warning_text = 'Unsupported HTML Tag <' + element + '>. Check documentation' \

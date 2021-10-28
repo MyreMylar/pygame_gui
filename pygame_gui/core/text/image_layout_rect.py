@@ -4,16 +4,19 @@ from pygame.surface import Surface
 from pygame.rect import Rect
 from pygame.image import load
 
-from pygame_gui.core.text.text_layout_rect import TextLayoutRect
+from pygame_gui.core.text.text_layout_rect import TextLayoutRect, Padding
 
 
 class ImageLayoutRect(TextLayoutRect):
     """
     Represents an image that sits in the text.
     """
-    def __init__(self, image_path, float_position):
+    def __init__(self, image_path, float_position, padding: Padding):
         self.image_surf = load(image_path)
-        super().__init__(self.image_surf.get_size(), float_pos=float_position)
+        self.padding = padding
+        self.size_with_padding = (self.image_surf.get_width() + padding.left + padding.right,
+                                  self.image_surf.get_height() + padding.top + padding.bottom)
+        super().__init__(self.size_with_padding, float_pos=float_position)
 
     def finalise(self,
                  target_surface: Surface,
@@ -23,5 +26,9 @@ class ImageLayoutRect(TextLayoutRect):
                  row_bg_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
-
-        target_surface.blit(self.image_surf, self, target_area)
+        blit_rect = self.copy()
+        blit_rect.width -= (self.padding.left + self.padding.right)
+        blit_rect.height -= (self.padding.top + self.padding.bottom)
+        blit_rect.left += self.padding.left
+        blit_rect.top += self.padding.top
+        target_surface.blit(self.image_surf, blit_rect, target_area)

@@ -109,7 +109,7 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(simple_rect_2)
         layout_row.add_item(simple_rect_3)
 
-        layout_row.horiz_center_row()
+        layout_row.horiz_center_row(text_box_layout.floating_rects)
 
         assert layout_row.left == 50
         assert layout_row.items[0].x == 50
@@ -138,8 +138,8 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(simple_rect_2)
         layout_row.add_item(simple_rect_3)
 
-        layout_row.horiz_center_row()
-        layout_row.align_left_row(start_x=5)
+        layout_row.horiz_center_row(text_box_layout.floating_rects)
+        layout_row.align_left_row(floating_rects=text_box_layout.floating_rects, start_x=5)
 
         assert layout_row.left == 5
         assert layout_row.items[0].x == 5
@@ -168,8 +168,9 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(simple_rect_2)
         layout_row.add_item(simple_rect_3)
 
-        layout_row.horiz_center_row()
-        layout_row.align_right_row(start_x=5)
+        layout_row.horiz_center_row(text_box_layout.floating_rects)
+        layout_row.align_right_row(floating_rects=text_box_layout.floating_rects,
+                                   start_x=text_box_layout.layout_rect.width - 5)
 
         assert layout_row.left == 95
         assert layout_row.items[0].x == 95

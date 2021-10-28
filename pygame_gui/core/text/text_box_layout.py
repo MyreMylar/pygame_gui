@@ -44,7 +44,7 @@ class TextBoxLayout:
 
         self.layout_rect_queue = None
         self.finalised_surface = None
-        self.floating_rects = []
+        self.floating_rects: List[TextLayoutRect] = []
         self.layout_rows = []
         self.row_lengths = []
         self.link_chunks = []

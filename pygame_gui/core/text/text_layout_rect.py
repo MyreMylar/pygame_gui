@@ -1,9 +1,13 @@
 from typing import Tuple, Union, Optional
 from abc import abstractmethod
 from enum import Enum
+from collections import namedtuple
 
 import pygame
 from pygame.surface import Surface
+
+
+Padding = namedtuple('Padding', "top right bottom left")
 
 
 class TextFloatPosition(Enum):
