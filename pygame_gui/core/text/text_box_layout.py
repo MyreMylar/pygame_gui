@@ -1,6 +1,6 @@
 from typing import Deque, List
 from collections import deque
-from bisect import bisect
+from bisect import bisect_left
 
 import warnings
 import pygame
@@ -795,7 +795,7 @@ class TextBoxLayout:
 
     def _find_row_from_text_box_index(self, text_box_index: int):
         if self.layout_rows != 0:
-            row_index = bisect(self.row_lengths, text_box_index)
+            row_index = bisect_left(self.row_lengths, text_box_index)
             if row_index >= len(self.layout_rows):
                 row_index = len(self.layout_rows) - 1
             index_in_row = text_box_index - (self.row_lengths[row_index - 1]

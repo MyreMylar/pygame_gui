@@ -146,6 +146,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                  row_bg_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
+        if len(self.text) == 0:
+            return
 
         if self.is_selected:
             bg_col = self.selection_colour
