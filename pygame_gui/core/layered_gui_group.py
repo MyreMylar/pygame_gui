@@ -166,8 +166,7 @@ class GUISprite:
         #                          "instead.")
 
     def __repr__(self):
-        return "<%s GUISprite(in %d groups)>" % (self.__class__.__name__,
-                                                 len(self.groups()))
+        return f"<{self.__class__.__name__} GUISprite(in {len(self.groups())} groups)>"
 
     @property
     def image(self):

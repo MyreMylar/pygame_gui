@@ -10,7 +10,12 @@ from pygame_gui.elements.ui_text_box import UITextBox
 def create_new_text_box(default_ui_manager):
     UITextBox(
         html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
-                  "<i>styles</i>.",
+                  "<i>styles</i>. <br><br>"
+                  "Yeah yeah <b>yeah!</><br><br>"
+                  "Wild horses. <shadow>Wooooo!</shadow>.<br>"
+                  "More text a bunch more text a whole lotta text some stuff words, words, "
+                  "elephants. On the loose. In my cornflakes. Under the ducks."
+                  "Some other text ipsum lorem. More text - how much text is enough text?",
         relative_rect=pygame.Rect(100, 100, 200, 300),
         manager=default_ui_manager)
 

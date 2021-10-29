@@ -49,8 +49,8 @@ class RectDrawableShape(DrawableShape):
                                    math.floor(self.containing_rect.height / 2)):
             self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                     math.floor(self.containing_rect.height / 2))
-        if self.shadow_width < 0:
-            self.shadow_width = 0
+
+        self.shadow_width = max(self.shadow_width, 0)
 
         if self.border_width > min(math.floor((self.containing_rect.width -
                                                (self.shadow_width * 2)) / 2),
@@ -60,8 +60,8 @@ class RectDrawableShape(DrawableShape):
                                                 (self.shadow_width * 2)) / 2),
                                     math.floor((self.containing_rect.height -
                                                 (self.shadow_width * 2)) / 2))
-        if self.border_width < 0:
-            self.border_width = 0
+
+        self.border_width = max(self.border_width, 0)
 
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,

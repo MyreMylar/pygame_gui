@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Optional
 
 from pygame.surface import Surface
 from pygame.rect import Rect

@@ -701,10 +701,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         """
         if rect is not None:
-            if rect.width < 0:
-                rect.width = 0
-            if rect.height < 0:
-                rect.height = 0
+            rect.width = max(rect.width, 0)
+            rect.height = max(rect.height, 0)
 
             if self._pre_clipped_image is None and self.image is not None:
                 self._pre_clipped_image = self.image.copy()

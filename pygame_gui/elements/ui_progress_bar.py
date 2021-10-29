@@ -105,7 +105,7 @@ class UIProgressBar(UIElement):
         Redraws the progress bar rectangles and text onto the underlying sprite's image surface.
         Takes a little while so we only do it when the progress has changed.
         """
-        progress_string = "{0:0.1f}/{1:0.1f}".format(self.current_progress, self.maximum_progress)
+        progress_string = f"{self.current_progress:0.1f}/{self.maximum_progress:0.1f}"
 
         theming_parameters = {'normal_bg': self.bar_unfilled_colour,
                               'normal_border': self.border_colour,

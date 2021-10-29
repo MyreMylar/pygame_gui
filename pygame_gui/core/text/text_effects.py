@@ -112,10 +112,7 @@ class FadeInEffect(TextBoxEffect):
             alpha_progress = int(self.time_per_alpha_change_acc / self.time_per_alpha_change)
 
             if alpha_progress != self.alpha_value:
-                self.alpha_value = alpha_progress
-                if self.alpha_value > 255:
-                    self.alpha_value = 255
-
+                self.alpha_value = min(alpha_progress, 255)
                 self.text_box.set_alpha(self.alpha_value)
                 self.text_block_changed = True
 
@@ -170,9 +167,7 @@ class FadeOutEffect(TextBoxEffect):
             alpha_progress = 255 - int(self.time_per_alpha_change_acc / self.time_per_alpha_change)
 
             if alpha_progress != self.alpha_value:
-                self.alpha_value = alpha_progress
-                if self.alpha_value < 0:
-                    self.alpha_value = 0
+                self.alpha_value = max(alpha_progress, 0)
                 self.text_box.set_alpha(self.alpha_value)
                 self.text_block_changed = True
 

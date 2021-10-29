@@ -139,9 +139,8 @@ class RoundedRectangleShape(DrawableShape):
                                    self.click_area_shape.height / 2):
                 corner_radius = int(min(self.click_area_shape.width / 2,
                                         self.click_area_shape.height / 2))
-            if corner_radius < 0:
-                corner_radius = 0
-            self.corner_radius = corner_radius
+
+            self.corner_radius = max(corner_radius, 0)
 
             self.base_surface = pygame.surface.Surface(self.containing_rect.size,
                                                        flags=pygame.SRCALPHA,
@@ -458,9 +457,8 @@ class RoundedRectangleShape(DrawableShape):
         # lock the corner radius to a maximum size of half the smallest dimension and greater than 0
         if corner_radius > min(rect.width / 2, rect.height / 2):
             corner_radius = min(rect.width / 2, rect.height / 2)
-        if corner_radius < 0:
-            corner_radius = 0
-        large_corner_radius = corner_radius * aa_amount
+
+        large_corner_radius = max(corner_radius, 0) * aa_amount
 
         # For the visible AA shape surface we only want to blend in the alpha channel
         if self.temp_additive_shape is None:

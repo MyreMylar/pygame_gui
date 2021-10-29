@@ -116,7 +116,8 @@ class TextBoxLayoutRow(pygame.Rect):
                     floater_adjustment -= (floater.width * 0.5)
 
         if method == 'rect':
-            self.centerx = self.layout.layout_rect.centerx + floater_adjustment  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.centerx = (self.layout.layout_rect.centerx +  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                            floater_adjustment)
         elif method == 'right_triangle':
             # two lines - from bottom left of triangle at a -60 angle (because y axis is inverted)
             # then from mid left at 90

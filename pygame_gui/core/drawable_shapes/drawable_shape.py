@@ -162,10 +162,11 @@ class DrawableShape:
         self.build_text_layout()
 
         self._evaluate_contents_for_containing_rect()
-        if self.containing_rect.width < 1:
-            self.containing_rect.width = 1
-        if self.containing_rect.height < 1:
-            self.containing_rect.height = 1
+        self.containing_rect.width = max(self.containing_rect.width, 1)
+        self.containing_rect.height = max(self.containing_rect.height, 1)
+
+        self.initial_text_layout_size = (self.containing_rect.width,
+                                         self.containing_rect.height)
 
         self.states = OrderedDict()
         for state in states:
@@ -315,12 +316,22 @@ class DrawableShape:
         to account for it.
 
         """
-        if 'shadow_width' in self.theming:
+        shape_params_changed = False
+        if 'shadow_width' in self.theming and self.shadow_width != self.theming['shadow_width']:
             self.shadow_width = self.theming['shadow_width']
-        if 'border_width' in self.theming:
+            shape_params_changed = True
+        if 'border_width' in self.theming and self.border_width != self.theming['border_width']:
             self.border_width = self.theming['border_width']
+            shape_params_changed = True
+        if ('shape_corner_radius' in self.theming and
+                self.shape_corner_radius != self.theming['shape_corner_radius']):
+            self.shape_corner_radius = self.theming['shape_corner_radius']
+            self.rounded_corner_offset = int(self.shape_corner_radius -
+                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            shape_params_changed = True
 
-        self.build_text_layout()
+        if shape_params_changed or self.initial_text_layout_size != self.containing_rect.size:
+            self.build_text_layout()
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
@@ -451,6 +462,7 @@ class DrawableShape:
         """
         Build a text box layout for this drawable shape if it has some text.
         """
+        containing_rect_when_text_built = self.containing_rect.copy()
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
             # we need two rectangles for the text. One is has actual area the
@@ -500,6 +512,7 @@ class DrawableShape:
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
                                                  self.text_view_rect, line_spacing=1.25)
             self.align_all_text_rows()
+        return containing_rect_when_text_built
 
     def finalise_text(self, state_str, text_colour_state_str, text_shadow_colour_state_str):
         """

@@ -796,8 +796,8 @@ class UIDropDownMenu(UIElement):
                                                self.relative_rect.width - (2 * border_and_shadow),
                                                self.relative_rect.height - (2 * border_and_shadow))
 
-            for state in self.menu_states:
-                self.menu_states[state].expand_direction = self.expand_direction
+            for _, state in self.menu_states.items():
+                state.expand_direction = self.expand_direction
 
             self.rebuild()
 

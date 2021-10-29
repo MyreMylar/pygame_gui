@@ -178,8 +178,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Loads all fonts specified in our loaded theme.
         """
-        for element_key in self.ui_element_fonts_info:
-            font_info = self.ui_element_fonts_info[element_key]
+        for element_key, font_info in self.ui_element_fonts_info.items():
 
             if 'regular_path' in font_info:
                 regular_path = font_info['regular_path']
@@ -236,8 +235,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Loads all images in our loaded theme.
         """
-        for element_key in self.ui_element_image_locs:
-            image_ids_dict = self.ui_element_image_locs[element_key]
+        for element_key, image_ids_dict in self.ui_element_image_locs.items():
             if element_key not in self.ui_element_image_surfaces:
                 self.ui_element_image_surfaces[element_key] = {}
             for image_id in image_ids_dict:
@@ -330,12 +328,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         later clamped by the UI, plus, it is helpful if any rounded rectangles that set a corner
         radius also set a shadow width at the same time.
         """
-        for misc_id in self.ui_element_misc_data:
+        for _, misc_data in self.ui_element_misc_data.items():
 
             shape = 'rectangle'
             shadow_width = 2
             shape_corner_radius = 2
-            element_misc_data = self.ui_element_misc_data[misc_id]
+            element_misc_data = misc_data
             if 'shape' in element_misc_data:
                 shape = element_misc_data['shape']
 
@@ -355,18 +353,18 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     shape_corner_radius = 2
                     warnings.warn(
                         "Invalid value: " +
-                        self.ui_element_misc_data[misc_id]['shape_corner_radius'] +
+                        misc_data['shape_corner_radius'] +
                         " for shape_corner_radius")
 
             if shape in ['rounded_rectangle', 'rectangle'] and shadow_width > 0:
-                if ('shadow_width' in self.ui_element_misc_data[misc_id] and
-                        'shape_corner_radius' in self.ui_element_misc_data[misc_id]):
+                if ('shadow_width' in misc_data and
+                        'shape_corner_radius' in misc_data):
                     shadow_id = str(shadow_width) + 'x' + str(shadow_width + shape_corner_radius)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width,
                                                                     shadow_width +
                                                                     shape_corner_radius)
-                elif 'shadow_width' in self.ui_element_misc_data[misc_id]:
+                elif 'shadow_width' in misc_data:
                     # have a shadow width but no idea on the corners, try most common -
                     shadow_id_1 = str(shadow_width) + 'x' + str(2)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -374,7 +372,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
-                elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
+                elif 'shape_corner_radius' in misc_data:
                     # have a corner radius but no idea on the shadow width, try most common -
                     shadow_id_1 = str(1) + 'x' + str(1 + shape_corner_radius)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -617,23 +615,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         colour_parts = colour_id.split('_')
         best_fit_key_count = 0
         best_fit_colour = self.base_colours['normal_bg']
-        for key in self.base_colours:
+        for key, colour in self.base_colours.items():
             key_words = key.split('_')
             count = sum(el in colour_parts for el in key_words)
             if count > best_fit_key_count:
                 best_fit_key_count = count
-                best_fit_colour = self.base_colours[key]
+                best_fit_colour = colour
         return best_fit_colour
 
     @staticmethod
     @contextmanager
-    def _opened_w_error(filename: Any, mode: str = "r"):
+    def _opened_w_error(filename: Any, mode: str = "rt", encoding: str = "utf-8"):
         """
         Wraps file open in some exception handling.
         """
         if not isinstance(filename, io.StringIO):
             try:
-                file = open(filename, mode)
+                file = open(filename, mode, encoding=encoding)
             except IOError as err:
                 yield None, err
             else:
@@ -675,7 +673,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         else:
             used_file_path = file_path
 
-        with self._opened_w_error(used_file_path, 'r') as (theme_file, error):
+        with self._opened_w_error(used_file_path, 'rt') as (theme_file, error):
             if error:
                 warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False

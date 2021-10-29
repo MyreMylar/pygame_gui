@@ -155,19 +155,25 @@ if PLATFORM == 'WINDOWS':
 elif PLATFORM == 'LINUX':
 
     def __linux_copy(data: str):
-        process = subprocess.Popen(['xsel', '-b', '-i'], stdin=subprocess.PIPE, close_fds=True)
-        process.communicate(input=data.encode('utf-8'))
+        with subprocess.Popen(['xsel', '-b', '-i'],
+                              stdin=subprocess.PIPE,
+                              close_fds=True) as process:
+            process.communicate(input=data.encode('utf-8'))
 
     def __linux_paste():
-        process = subprocess.Popen(['xsel', '-b', '-o'], stdout=subprocess.PIPE, close_fds=True)
-        stdout, _ = process.communicate()
-        return stdout.decode('utf-8')
+        with subprocess.Popen(['xsel', '-b', '-o'],
+                              stdout=subprocess.PIPE,
+                              close_fds=True) as process:
+            stdout, _ = process.communicate()
+            return stdout.decode('utf-8')
 
 else:
     def __mac_copy(data: str):
-        process = subprocess.Popen(
-            'pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
-        process.communicate(data.encode('utf-8'))
+        with subprocess.Popen('pbcopy',
+                              env={'LANG': 'en_US.UTF-8'},
+                              stdin=subprocess.PIPE) as process:
+
+            process.communicate(data.encode('utf-8'))
 
     def __mac_paste():
         return subprocess.check_output(
