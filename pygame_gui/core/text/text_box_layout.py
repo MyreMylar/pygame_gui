@@ -1,4 +1,4 @@
-from typing import Deque, List
+from typing import Deque, List, Optional
 from collections import deque
 from bisect import bisect_left
 
@@ -13,6 +13,7 @@ from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 from pygame_gui.core.text.text_box_layout_row import TextBoxLayoutRow
+from pygame_gui.core.text.html_parser import HTMLParser
 
 
 class TextBoxLayout:
@@ -108,11 +109,10 @@ class TextBoxLayout:
         self._add_row_to_layout(current_row)
 
     def _add_row_to_layout(self, current_row):
-        self.layout_rows.append(current_row)
+        if current_row not in self.layout_rows:
+            self.layout_rows.append(current_row)
         if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
             self.layout_rect.height = current_row.bottom - self.layout_rect.y
-        self.letter_count += current_row.letter_count
-        self.current_end_pos = self.letter_count
         self._refresh_row_letter_counts()
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
@@ -661,16 +661,17 @@ class TextBoxLayout:
         for row in self.layout_rows:
             row.set_default_text_shadow_colour(colour)
 
-    def insert_text(self, text: str, layout_index: int):
+    def insert_text(self, text: str, layout_index: int, parser: Optional[HTMLParser] = None):
         """
         Insert some text into the text layout at a given point. Handy when e.g. pasting a chunk
         of text into an existing layout.
 
         :param text: the text to insert.
         :param layout_index: the character index at which to insert the text.
+        :param parser: An optional HTML parser for text styling data
         """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
-        current_row.insert_text(text, index_in_row)
+        current_row.insert_text(text, index_in_row, parser)
 
         temp_layout_queue = deque([])
         for row in reversed(self.layout_rows[current_row.row_index:]):
@@ -683,6 +684,10 @@ class TextBoxLayout:
         if self.finalised_surface is not None:
             for row in self.layout_rows[current_row.row_index:]:
                 row.finalise(self.finalised_surface)
+
+    def append_text(self, text: str, parser):
+        text_end_pos = self.row_lengths[-1]
+        self.insert_text(text, text_end_pos, parser)
 
     def delete_selected_text(self):
         """
@@ -810,3 +815,16 @@ class TextBoxLayout:
         for row in self.layout_rows:
             cumulative_length += row.letter_count
             self.row_lengths.append(cumulative_length)
+        self.letter_count = cumulative_length
+        self.current_end_pos = self.letter_count
+
+    def append_layout_rects(self, new_queue):
+        last_row = self.layout_rows[-1]
+        self._process_layout_queue(new_queue, last_row)
+        if self.finalised_surface is not None:
+            if self.finalised_surface is not None:
+                if self.layout_rect.size != self.finalised_surface.get_size():
+                    self.finalise_to_new()
+                else:
+                    for row in self.layout_rows[last_row.row_index:]:
+                        row.finalise(self.finalised_surface)

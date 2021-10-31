@@ -128,6 +128,8 @@ class UITextBox(UIElement):
         self.time_until_full_rebuild_after_changing_size = 0.2
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
+        self.parser = None
+
         self.rebuild_from_changed_theme_data()
 
     def kill(self):
@@ -506,17 +508,17 @@ class UITextBox(UIElement):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
-        parser = HTMLParser(self.ui_theme, self.combined_element_ids,
-                            self.link_style, line_spacing=1.25)
-        # parser.push_style('body', {"bg_colour": self.background_colour})
-        parser.feed(self.html_text)
 
-        self.text_box_layout = TextBoxLayout(parser.layout_rect_queue,
+        # parser.push_style('body', {"bg_colour": self.background_colour})
+        self.parser.feed(self.html_text)
+
+        self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
                                              line_spacing=1.25)
+        self.parser.empty_layout_queue()
         if self.text_wrap_rect[3] == -1:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
@@ -763,6 +765,8 @@ class UITextBox(UIElement):
             has_any_changed = True
 
         if has_any_changed:
+            self.parser = HTMLParser(self.ui_theme, self.combined_element_ids,
+                                     self.link_style, line_spacing=1.25)
             self.rebuild()
 
     def _check_text_alignment_theming(self) -> bool:
@@ -872,3 +876,31 @@ class UITextBox(UIElement):
 
         if self.scroll_bar is not None:
             self.scroll_bar.hide()
+
+    def append_text(self, new_text: str):
+        """
+        Adds the new string of text at the end of the current text.
+        """
+        self.text_box_layout.append_text(new_text, self.parser)
+        self.redraw_from_text_block()
+
+    def append_html_text(self, new_html_str: str):
+        self.html_text += new_html_str
+        self.parser.feed(new_html_str)
+        self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
+        self.parser.empty_layout_queue()
+
+        if (self.scroll_bar is None and
+                (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
+            self.rebuild()
+        else:
+            if self.scroll_bar is not None:
+                # set the scroll bar to the bottom
+                percentage_visible = (self.text_wrap_rect[3] /
+                                      self.text_box_layout.layout_rect.height)
+                self.scroll_bar.start_percentage = 1.0 - percentage_visible
+                self.scroll_bar.scroll_position = (self.scroll_bar.start_percentage *
+                                                   self.scroll_bar.scrollable_height)
+            self.redraw_from_text_block()
+
+

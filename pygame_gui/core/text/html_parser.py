@@ -89,6 +89,9 @@ class HTMLParser(html.parser.HTMLParser):
 
         self.layout_rect_queue = deque([])
 
+    def empty_layout_queue(self):
+        self.layout_rect_queue.clear()
+
     def handle_starttag(self, tag: str, attrs: Dict[str, str]):
         """
         Process an HTML 'start tag' (e.g. 'b' - tags are stripped of their angle brackets)
@@ -102,7 +105,9 @@ class HTMLParser(html.parser.HTMLParser):
         """
         element = tag.lower()
 
-        self.element_stack.append(element)
+        if element not in ('img', 'br'):
+            # don't add self closing tags to the element stack
+            self.element_stack.append(element)
 
         attributes = {key.lower(): value for key, value in attrs}
         style = {}
@@ -307,6 +312,10 @@ class HTMLParser(html.parser.HTMLParser):
 
         :param text:
         """
+        chunk = self.create_styled_text_chunk(text)
+        self.layout_rect_queue.append(chunk)
+
+    def create_styled_text_chunk(self, text: str):
         chunk_font = self.ui_theme.get_font_dictionary().find_font(
             font_name=self.current_style['font_name'],
             font_size=self.current_style['font_size'],
@@ -316,25 +325,27 @@ class HTMLParser(html.parser.HTMLParser):
         if self.current_style['link']:
             should_underline = (self.current_style['underline'] or
                                 self.link_style['link_normal_underline'])
-            self.layout_rect_queue.append(
-                HyperlinkTextChunk(self.current_style['link_href'],
-                                   text,
-                                   chunk_font,
-                                   should_underline,
-                                   colour=self.link_style['link_text'],
-                                   bg_colour=self.current_style['bg_colour'],
-                                   hover_colour=self.link_style['link_hover'],
-                                   active_colour=self.link_style['link_selected'],
-                                   hover_underline=self.link_style['link_hover_underline'],
-                                   text_shadow_data=self.current_style['shadow_data']))
+
+            chunk = HyperlinkTextChunk(self.current_style['link_href'],
+                                       text,
+                                       chunk_font,
+                                       should_underline,
+                                       colour=self.link_style['link_text'],
+                                       bg_colour=self.current_style['bg_colour'],
+                                       hover_colour=self.link_style['link_hover'],
+                                       active_colour=self.link_style['link_selected'],
+                                       hover_underline=self.link_style['link_hover_underline'],
+                                       text_shadow_data=self.current_style['shadow_data'])
         else:
             using_default_text_colour = (self.current_style['font_colour'] ==
                                          self.default_style['font_colour'])
-            self.layout_rect_queue.append(
-                TextLineChunkFTFont(text,
-                                    chunk_font,
-                                    self.current_style['underline'],
-                                    colour=self.current_style['font_colour'],
-                                    using_default_text_colour=using_default_text_colour,
-                                    bg_colour=self.current_style['bg_colour'],
-                                    text_shadow_data=self.current_style['shadow_data']))
+
+            chunk = TextLineChunkFTFont(text,
+                                        chunk_font,
+                                        self.current_style['underline'],
+                                        colour=self.current_style['font_colour'],
+                                        using_default_text_colour=using_default_text_colour,
+                                        bg_colour=self.current_style['bg_colour'],
+                                        text_shadow_data=self.current_style['shadow_data'])
+        return chunk
+

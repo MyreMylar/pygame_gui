@@ -126,6 +126,7 @@ class UITextEntryLine(UIElement):
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
+        self.text_entered = False  # Reset when enter key up or focus lost
 
         # restrictions on text input
         self.allowed_characters = None
@@ -320,6 +321,7 @@ class UITextEntryLine(UIElement):
         self.select_range = [0, 0]
         self.edit_position = 0
         self.cursor_on = False
+        self.text_entered = False
         self.redraw()
 
     def focus(self):
@@ -356,6 +358,10 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
             elif self._process_text_entry_key(event):
                 consumed_event = True
+
+        if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
+            if event.key == pygame.K_RETURN:
+                self.text_entered = False  # reset text input entry
 
         if self.text != initial_text_state:
             event_data = {'user_type': UI_TEXT_ENTRY_CHANGED,
@@ -425,13 +431,14 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_RETURN:
+        if event.key == pygame.K_RETURN and not self.text_entered:
             event_data = {'user_type': UI_TEXT_ENTRY_FINISHED,
                           'text': self.text,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
             consumed_event = True
+            self.text_entered = True
         elif event.key == pygame.K_BACKSPACE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.drawable_shape.text_box_layout.delete_selected_text()
@@ -873,6 +880,7 @@ class UITextEntryLine(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
+            self.text_entered = False
             self.drawable_shape.set_active_state('normal')
             self.background_and_border = self.drawable_shape.get_surface('normal')
             self.redraw()

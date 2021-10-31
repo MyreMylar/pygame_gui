@@ -5,6 +5,7 @@ import pygame
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_layout_rect import TextFloatPosition
+from pygame_gui.core.text.html_parser import HTMLParser
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -396,18 +397,28 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         return self.cursor_index
 
-    def insert_text(self, text: str, letter_row_index: int):
+    def insert_text(self, text: str, letter_row_index: int,
+                    parser: Optional[HTMLParser] = None):
         """
         Insert the provided text into this row at the given location.
 
         :param text: the text to insert.
         :param letter_row_index: the index in the row at which to insert this text.
+        :param parser: An optional HTML parser for text styling data
         """
         letter_acc = 0
-        for chunk in self.items:
-            if letter_row_index <= letter_acc + chunk.letter_count:
-                chunk_index = letter_row_index - letter_acc
-                chunk.insert_text(text, chunk_index)
-                break
+        if len(self.items) > 0:
+            for chunk in self.items:
+                if letter_row_index <= letter_acc + chunk.letter_count:
+                    chunk_index = letter_row_index - letter_acc
+                    chunk.insert_text(text, chunk_index)
+                    break
 
-            letter_acc += chunk.letter_count
+                letter_acc += chunk.letter_count
+        elif parser is not None:
+            text_chunk = parser.create_styled_text_chunk(text)
+            self.add_item(text_chunk)
+        else:
+            raise AttributeError("Trying to insert into empty text row with no Parser"
+                                 " for style data - fix this later?")
+
