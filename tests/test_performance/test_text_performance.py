@@ -25,7 +25,10 @@ def test_new_style_text_box_performance(benchmark, _init_pygame,
                                         _display_surface_return_none):
 
     default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                      {"name": "fira_code", "size:": 14, "style": "italic"}])
+                                      {"name": "fira_code", "size:": 14, "style": "italic"},
+                                      {'name': 'fira_code',
+                                       'point_size': 14,
+                                       'style': 'bold_italic'}])
 
     benchmark(create_new_text_box, default_ui_manager)
 

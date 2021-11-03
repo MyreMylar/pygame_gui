@@ -877,14 +877,15 @@ class UITextBox(UIElement):
         if self.scroll_bar is not None:
             self.scroll_bar.hide()
 
-    def append_text(self, new_text: str):
-        """
-        Adds the new string of text at the end of the current text.
-        """
-        self.text_box_layout.append_text(new_text, self.parser)
-        self.redraw_from_text_block()
-
     def append_html_text(self, new_html_str: str):
+        """
+        Adds a string, that is parsed for any HTML tags that pygame_gui supports, onto the bottom
+        of the text box's current contents.
+
+        This is useful for making things like logs.
+
+        :param new_html_str: The, potentially HTML tag, containing string of text to append.
+        """
         self.html_text += new_html_str
         self.parser.feed(new_html_str)
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)

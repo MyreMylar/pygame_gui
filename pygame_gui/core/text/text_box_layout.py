@@ -685,10 +685,6 @@ class TextBoxLayout:
             for row in self.layout_rows[current_row.row_index:]:
                 row.finalise(self.finalised_surface)
 
-    def append_text(self, text: str, parser):
-        text_end_pos = self.row_lengths[-1]
-        self.insert_text(text, text_end_pos, parser)
-
     def delete_selected_text(self):
         """
         Delete the currently selected text.
@@ -819,6 +815,15 @@ class TextBoxLayout:
         self.current_end_pos = self.letter_count
 
     def append_layout_rects(self, new_queue):
+        """
+        Add some LayoutRect's on to the end of the current layout. This should be relatively fast
+        as we don't have to rejig everything before the additions, and some of the time don't need
+        to redraw everything either.
+
+        This is new so there may still be some bugs to iron out.
+
+        :param new_queue:
+        """
         last_row = self.layout_rows[-1]
         self._process_layout_queue(new_queue, last_row)
         if self.finalised_surface is not None:

@@ -45,6 +45,7 @@ class UIConsoleWindow(UIWindow):
         self.should_logged_commands_escape_html = True
 
         self.logged_commands_above = []
+        self.current_logged_command = None
         self.logged_commands_below = []
 
         self.command_entry = UITextEntryLine(
@@ -136,14 +137,18 @@ class UIConsoleWindow(UIWindow):
             if event.key == pygame.K_DOWN:
                 if len(self.logged_commands_below) > 0:
                     popped_command = self.logged_commands_below.pop()
-                    self.command_entry.set_text(popped_command)
-                    self.logged_commands_above.append(popped_command)
+                    if self.current_logged_command is not None:
+                        self.logged_commands_above.append(self.current_logged_command)
+                    self.current_logged_command = popped_command
+                    self.command_entry.set_text(self.current_logged_command)
                     self.command_entry.cursor_has_moved_recently = True
             elif event.key == pygame.K_UP:
                 if len(self.logged_commands_above) > 0:
                     popped_command = self.logged_commands_above.pop()
-                    self.command_entry.set_text(popped_command)
-                    self.logged_commands_below.append(popped_command)
+                    if self.current_logged_command is not None:
+                        self.logged_commands_below.append(self.current_logged_command)
+                    self.current_logged_command = popped_command
+                    self.command_entry.set_text(self.current_logged_command)
                     self.command_entry.cursor_has_moved_recently = True
 
         if (event.type == pygame.USEREVENT and
@@ -152,7 +157,9 @@ class UIConsoleWindow(UIWindow):
             handled = True
             command = self.command_entry.get_text()
             command_for_log = command
-
+            if self.current_logged_command is not None:
+                self.logged_commands_above.append(self.current_logged_command)
+            self.current_logged_command = None
             while len(self.logged_commands_below) > 0:
                 self.logged_commands_above.append(self.logged_commands_below.pop())
             self.logged_commands_above.append(command_for_log)
