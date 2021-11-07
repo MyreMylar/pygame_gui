@@ -32,8 +32,8 @@ class UIConsoleWindow(UIWindow):
                  manager: IUIManagerInterface,
                  window_title: str = 'Console',
                  object_id: Union[ObjectID, str] = ObjectID('#console_window', None),
-                 visible: int = 1
-                 ):
+                 visible: int = 1,
+                 preload_bold_log_font: bool = True):
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          object_id=object_id,
@@ -71,6 +71,23 @@ class UIConsoleWindow(UIWindow):
                      'right': 'right',
                      'top': 'top',
                      'bottom': 'bottom'})
+
+        if preload_bold_log_font:
+            # Would be better to load this font during UIManager setup, but this is probably
+            # second best place. We can't know if someone will use the console window in advance
+            # but if they do and use the default bold output setup for it, it would be a good idea
+            # to load the bold font at th the same time th other UI stuff is loaded.
+
+            log_font_info = self.ui_theme.get_font_info(self.log.combined_element_ids)
+            font_dict = self.ui_manager.get_theme().get_font_dictionary()
+            bold_font_id = font_dict.create_font_id(log_font_info['size'],
+                                                    log_font_info['name'],
+                                                    bold=True,
+                                                    italic=False)
+            if not font_dict.check_font_preloaded(bold_font_id):
+                font_dict.preload_font(log_font_info['size'],
+                                       log_font_info['name'],
+                                       bold=True)
 
     def set_log_prefix(self, prefix: str) -> None:
         """
