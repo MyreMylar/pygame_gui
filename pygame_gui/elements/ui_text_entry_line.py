@@ -244,11 +244,12 @@ class UITextEntryLine(UIElement):
                 within_length_limit = False
             if within_length_limit:
                 self.text = text
-                self.edit_position = 0
+                self.edit_position = len(self.text)
                 display_text = self.text
                 if self.is_text_hidden:
                     display_text = '●' * len(self.text)
                 self.drawable_shape.set_text(display_text)
+                self.cursor_has_moved_recently = True
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
         else:

@@ -6,7 +6,8 @@ import pygame
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UITextBox, UITextEntryLine
-from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_CONSOLE_COMMAND_ENTERED
+from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
+from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED
 
 
 class UIConsoleWindow(UIWindow):
@@ -141,7 +142,6 @@ class UIConsoleWindow(UIWindow):
                         self.logged_commands_above.append(self.current_logged_command)
                     self.current_logged_command = popped_command
                     self.command_entry.set_text(self.current_logged_command)
-                    self.command_entry.cursor_has_moved_recently = True
             elif event.key == pygame.K_UP:
                 if len(self.logged_commands_above) > 0:
                     popped_command = self.logged_commands_above.pop()
@@ -149,7 +149,6 @@ class UIConsoleWindow(UIWindow):
                         self.logged_commands_below.append(self.current_logged_command)
                     self.current_logged_command = popped_command
                     self.command_entry.set_text(self.current_logged_command)
-                    self.command_entry.cursor_has_moved_recently = True
 
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_TEXT_ENTRY_FINISHED and
@@ -157,17 +156,12 @@ class UIConsoleWindow(UIWindow):
             handled = True
             command = self.command_entry.get_text()
             command_for_log = command
-            if self.current_logged_command is not None:
-                self.logged_commands_above.append(self.current_logged_command)
-            self.current_logged_command = None
-            while len(self.logged_commands_below) > 0:
-                self.logged_commands_above.append(self.logged_commands_below.pop())
+            self._restore_command_log_to_end()
             self.logged_commands_above.append(command_for_log)
             if self.should_logged_commands_escape_html:
                 command_for_log = html.escape(command_for_log)
             self.log.append_html_text(self.log_prefix + command_for_log + "<br>")
             self.command_entry.set_text("")
-            self.command_entry.cursor_has_moved_recently = True
 
             event_data = {'user_type': UI_CONSOLE_COMMAND_ENTERED,
                           'command': command,
@@ -176,4 +170,16 @@ class UIConsoleWindow(UIWindow):
             command_entered_event = pygame.event.Event(pygame.USEREVENT, event_data)
             pygame.event.post(command_entered_event)
 
+        if (event.type == pygame.USEREVENT and
+                event.user_type == UI_TEXT_ENTRY_CHANGED and
+                event.ui_element == self.command_entry):
+            self._restore_command_log_to_end()
+
         return handled
+
+    def _restore_command_log_to_end(self):
+        if self.current_logged_command is not None:
+            self.logged_commands_above.append(self.current_logged_command)
+        self.current_logged_command = None
+        while len(self.logged_commands_below) > 0:
+            self.logged_commands_above.append(self.logged_commands_below.pop())
