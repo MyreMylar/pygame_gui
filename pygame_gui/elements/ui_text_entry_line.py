@@ -387,7 +387,7 @@ class UITextEntryLine(UIElement):
                      abs(self.select_range[0] -
                          self.select_range[1])) >= self.length_limit):
             within_length_limit = False
-        if within_length_limit:
+        if within_length_limit and hasattr(event, 'unicode'):
             character = event.unicode
             char_metrics = self.font.get_metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
