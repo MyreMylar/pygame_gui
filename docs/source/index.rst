@@ -63,8 +63,8 @@ library can do in action.
 Game projects using Pygame GUI
 ------------------------------
 
- - `Tower Defence <https://github.com/MyreMylar/tower_defence/tree/new_gui>`_ - A tower defence demo game.
- - `Christmas Adventure <https://github.com/MyreMylar/christmas_adventure/tree/new_gui>`_ - A text adventure demo.
+ - `Tower Defence <https://github.com/MyreMylar/tower_defence>`_ - A tower defence demo game.
+ - `Christmas Adventure <https://github.com/MyreMylar/christmas_adventure>`_ - A text adventure demo.
 
 
 Table of contents
