@@ -1,3 +1,4 @@
 pygame
+python-i18n
 pytest
 stringify
