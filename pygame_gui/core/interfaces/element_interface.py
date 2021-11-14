@@ -326,3 +326,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         Hides the widget, which means the widget will not get drawn and will not process events.
         Clear hovered state.
         """
+
+    @abstractmethod
+    def on_locale_changed(self):
+        pass

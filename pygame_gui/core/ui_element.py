@@ -869,3 +869,6 @@ class UIElement(GUISprite, IUIElementInterface):
         if self.is_enabled:
             return "normal"
         return "disabled"
+
+    def on_locale_changed(self):
+        pass

@@ -1,6 +1,7 @@
 from typing import Union, Tuple, Dict
 
 import pygame
+import i18n
 
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
@@ -406,7 +407,7 @@ class UIButton(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.drawable_shape.set_text(self.text)
+            self.drawable_shape.set_text(i18n.t(self.text))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -640,7 +641,7 @@ class UIButton(UIElement):
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
-                              'text': self.text,
+                              'text': i18n.t(self.text),
                               'text_shadow': (self.text_shadow_size,
                                               self.text_shadow_offset[0],
                                               self.text_shadow_offset[1],
@@ -696,3 +697,7 @@ class UIButton(UIElement):
         super().hide()
 
         self.on_unhovered()
+
+    def on_locale_changed(self):
+        self.drawable_shape.set_text(i18n.t(self.text))
+

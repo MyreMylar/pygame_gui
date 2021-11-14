@@ -2,6 +2,7 @@ import warnings
 from typing import Union
 
 import pygame
+import i18n
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED
@@ -33,8 +34,8 @@ class UIConfirmationDialog(UIWindow):
                  manager: IUIManagerInterface,
                  action_long_desc: str,
                  *,
-                 window_title: str = 'Confirm',
-                 action_short_name: str = 'OK',
+                 window_title: str = 'pygame-gui.Confirm',
+                 action_short_name: str = 'pygame-gui.OK',
                  blocking: bool = True,
                  object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
                  visible: int = 1):
@@ -63,7 +64,7 @@ class UIConfirmationDialog(UIWindow):
                                                 'bottom': 'bottom'})
 
         self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
-                                      text='Cancel',
+                                      text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
                                       object_id='#cancel_button',

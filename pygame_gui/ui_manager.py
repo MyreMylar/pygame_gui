@@ -1,6 +1,9 @@
 from typing import Tuple, List, Dict, Union, Set
 
 import pygame
+import i18n
+
+import os
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
@@ -34,7 +37,18 @@ class UIManager(IUIManagerInterface):
                  window_resolution: Tuple[int, int],
                  theme_path: Union[str, PackageResource] = None,
                  enable_live_theme_updates: bool = True,
-                 resource_loader: IResourceLoader = None):
+                 resource_loader: IResourceLoader = None,
+                 starting_language: str = 'en',
+                 translation_directory_path: str = None):
+
+        root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        translations_path = os.path.normpath(os.path.join(root_path,
+                                                          'pygame_gui/data/translations/'))
+        i18n.load_path.append(translations_path)
+        if translation_directory_path is not None:
+            # check this is a valid path
+            i18n.load_path.append(translation_directory_path)
+        i18n.set('locale', starting_language)
 
         # Pygame compat
         try:
@@ -534,3 +548,9 @@ class UIManager(IUIManagerInterface):
                                         'yb': ((16, 24), (8, 8), *y_sizer_cursor),
                                         'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
                                         'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
+
+    def set_locale(self, locale: str):
+        i18n.set('locale', locale)
+        for sprite in self.ui_group.sprites():
+            if isinstance(sprite, IUIElementInterface):
+                sprite.on_locale_changed()
