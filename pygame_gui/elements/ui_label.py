@@ -2,6 +2,7 @@ import warnings
 from typing import Union, Tuple, Dict
 
 import pygame
+from pygame_gui.core.utility import translate
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -75,7 +76,7 @@ class UILabel(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.drawable_shape.set_text(self.text)
+            self.drawable_shape.set_text(translate(self.text))
 
     def rebuild(self):
         """
@@ -83,12 +84,12 @@ class UILabel(UIElement):
         the displayed text is or remake it with different theming (if the theming has changed).
         """
 
-        text_size = self.font.get_rect(self.text).size
+        text_size = self.font.get_rect(translate(self.text)).size
         if text_size[1] > self.relative_rect.height or text_size[0] > self.relative_rect.width:
             width_overlap = self.relative_rect.width - text_size[0]
             height_overlap = self.relative_rect.height - text_size[1]
             warn_text = ('Label Rect is too small for text: '
-                         '' + self.text + ' - size diff: ' + str((width_overlap, height_overlap)))
+                         '' + translate(self.text) + ' - size diff: ' + str((width_overlap, height_overlap)))
             warnings.warn(warn_text, UserWarning)
 
         theming_parameters = {'normal_bg': self.bg_colour,
@@ -102,7 +103,7 @@ class UILabel(UIElement):
                               'border_width': 0,
                               'shadow_width': 0,
                               'font': self.font,
-                              'text': self.text,
+                              'text': translate(self.text),
                               'text_shadow': (self.text_shadow_size,
                                               self.text_shadow_offset[0],
                                               self.text_shadow_offset[1],
@@ -217,3 +218,6 @@ class UILabel(UIElement):
         if not self.is_enabled:
             self.is_enabled = True
             self.drawable_shape.set_active_state('normal')
+
+    def on_locale_changed(self):
+        self.drawable_shape.set_text(translate(self.text))

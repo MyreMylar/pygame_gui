@@ -10,6 +10,7 @@ from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 
+from pygame_gui.core.utility import translate
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -88,6 +89,7 @@ class UITextBox(UIElement):
                                element_id='text_box')
 
         self.html_text = html_text
+        self.appended_text = ""
         self.font_dict = self.ui_theme.get_font_dictionary()
 
         self.wrap_to_height = wrap_to_height
@@ -510,7 +512,7 @@ class UITextBox(UIElement):
         """
 
         # parser.push_style('body', {"bg_colour": self.background_colour})
-        self.parser.feed(self.html_text)
+        self.parser.feed(translate(self.html_text) + self.appended_text)
 
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
@@ -886,7 +888,7 @@ class UITextBox(UIElement):
 
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
-        self.html_text += new_html_str
+        self.appended_text += new_html_str
         self.parser.feed(new_html_str)
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
@@ -904,4 +906,5 @@ class UITextBox(UIElement):
                                                    self.scroll_bar.scrollable_height)
             self.redraw_from_text_block()
 
-
+    def on_locale_changed(self):
+        self.rebuild()

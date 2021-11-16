@@ -17,6 +17,8 @@ from typing import Union, Dict, Tuple
 from threading import Thread
 from queue import Queue
 
+import i18n
+
 import pygame
 import pygame.freetype
 
@@ -621,3 +623,7 @@ class StoppableOutputWorker(Thread):
             self.out_list.put(result)
             if error:
                 self.errors.put(error)
+
+
+def translate(text_to_translate: str) -> str:
+    return i18n.t(text_to_translate)
