@@ -89,6 +89,8 @@ class HTMLParser(html.parser.HTMLParser):
 
         self.layout_rect_queue = deque([])
 
+        self.in_paragraph_block = False
+
     def empty_layout_queue(self):
         self.layout_rect_queue.clear()
 
@@ -180,6 +182,21 @@ class HTMLParser(html.parser.HTMLParser):
                                     self.line_spacing)))
 
             self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+        elif element == 'p':
+            if self.in_paragraph_block:
+                current_font = self.ui_theme.get_font_dictionary().find_font(
+                    font_name=self.current_style['font_name'],
+                    font_size=self.current_style['font_size'],
+                    bold=self.current_style['bold'],
+                    italic=self.current_style['italic'])
+
+                dimensions = (current_font.get_rect(' ').width,
+                              int(round(self.current_style['font_size'] *
+                                        self.line_spacing)))
+
+                self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+
+            self.in_paragraph_block = True
         elif element == 'img':
             image_path = Path('')
             image_float = TextFloatPosition.NONE
@@ -247,6 +264,20 @@ class HTMLParser(html.parser.HTMLParser):
             return
 
         self.pop_style(element)
+
+        if element == 'p':
+            self.in_paragraph_block = False
+            current_font = self.ui_theme.get_font_dictionary().find_font(
+                font_name=self.current_style['font_name'],
+                font_size=self.current_style['font_size'],
+                bold=self.current_style['bold'],
+                italic=self.current_style['italic'])
+
+            dimensions = (current_font.get_rect(' ').width,
+                          int(round(self.current_style['font_size'] *
+                                    self.line_spacing)))
+
+            self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
 
         result = None
         while result != element:
