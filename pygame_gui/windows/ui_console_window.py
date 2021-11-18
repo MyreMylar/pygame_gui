@@ -30,7 +30,7 @@ class UIConsoleWindow(UIWindow):
     def __init__(self,
                  rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 window_title: str = 'Console',
+                 window_title: str = 'pygame-gui.console_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#console_window', None),
                  visible: int = 1,
                  preload_bold_log_font: bool = True):

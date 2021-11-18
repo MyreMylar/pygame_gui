@@ -24,7 +24,7 @@ class UIMessageWindow(UIWindow):
                  html_message: str,
                  manager: IUIManagerInterface,
                  *,
-                 window_title: str = 'Message',
+                 window_title: str = 'pygame-gui.message_window_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#message_window', None),
                  visible: int = 1):
 
@@ -51,7 +51,7 @@ class UIMessageWindow(UIWindow):
         dismiss_button_rect = pygame.Rect((0, 0), button_size)
         dismiss_button_rect.bottomright = (-button_spacing, -button_spacing)
         self.dismiss_button = UIButton(relative_rect=dismiss_button_rect,
-                                       text="Dismiss",
+                                       text="pygame-gui.Dismiss",
                                        manager=manager,
                                        container=self,
                                        tool_tip_text="Click to get rid of this message.",

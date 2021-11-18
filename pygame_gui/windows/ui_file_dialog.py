@@ -34,7 +34,7 @@ class UIFileDialog(UIWindow):
     def __init__(self,
                  rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 window_title: str = 'File Dialog',
+                 window_title: str = 'pygame-gui.file_dialog_title_bar',
                  initial_file_path: Union[str, None] = None,
                  object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
@@ -83,7 +83,7 @@ class UIFileDialog(UIWindow):
         self.update_current_file_list()
 
         self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                  text='OK',
+                                  text='pygame-gui.OK',
                                   manager=self.ui_manager,
                                   container=self,
                                   object_id='#ok_button',
@@ -95,7 +95,7 @@ class UIFileDialog(UIWindow):
             self.ok_button.disable()
 
         self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
-                                      text='Cancel',
+                                      text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
                                       object_id='#cancel_button',
@@ -106,7 +106,7 @@ class UIFileDialog(UIWindow):
 
         self.home_button = UIButton(relative_rect=pygame.Rect(10, 10, 20, 20),
                                     text='⌂',
-                                    tool_tip_text='Home Directory',
+                                    tool_tip_text='pygame-gui.Home_Directory',
                                     manager=self.ui_manager,
                                     container=self,
                                     object_id='#home_icon_button',

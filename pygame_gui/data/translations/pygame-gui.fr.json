@@ -3,7 +3,19 @@
     "Confirm": "Confirmer",
     "OK": "OK",
     "Cancel": "Annuler",
+    "Dismiss": "Rejeter",
     "English": "Anglaise",
-    "French": "Française"
+    "French": "Française",
+    "colour_picker_title_bar": "Sélecteur de couleurs",
+    "Saturation_S": "S:",
+    "Value_V": "V:",
+    "Hue_H": "T:",
+    "Red_R": "R:",
+    "Green_G": "V:",
+    "Blue_B": "B:",
+    "console_title_bar": "Console",
+    "message_window_title_bar": "Un message",
+    "file_dialog_title_bar": "Boîte de dialogue du fichier",
+    "Home_Directory": "Accueil Répertoire"
   }
 }
