@@ -16,6 +16,11 @@
     "console_title_bar": "Console",
     "message_window_title_bar": "Un message",
     "file_dialog_title_bar": "Boîte de dialogue du fichier",
-    "Home_Directory": "Accueil Répertoire"
+    "Home_directory": "Accueil répertoire",
+    "Delete": "Effacer",
+    "Parent_directory": "Répertoire parent",
+    "Refresh_directory": "Actualiser le répertoire actuel",
+    "Delete_filename": "Effacer %{file_name} ?"
+
   }
 }

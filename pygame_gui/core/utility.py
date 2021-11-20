@@ -10,6 +10,7 @@ import os
 import sys
 import io
 import base64
+import inspect
 
 from pathlib import Path
 from typing import Union, Dict, Tuple
@@ -625,5 +626,5 @@ class StoppableOutputWorker(Thread):
                 self.errors.put(error)
 
 
-def translate(text_to_translate: str) -> str:
-    return i18n.t(text_to_translate)
+def translate(text_to_translate: str, **keywords) -> str:
+    return i18n.t(text_to_translate, **keywords)

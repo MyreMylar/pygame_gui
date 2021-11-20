@@ -16,6 +16,11 @@
     "console_title_bar": "Console",
     "message_window_title_bar": "Message",
     "file_dialog_title_bar": "File dialog",
-    "Home_Directory": "Home Directory"
+    "Home_directory": "Home Directory",
+    "Delete": "Delete",
+    "Parent_directory": "Parent directory",
+    "Refresh_directory": "Refresh directory",
+    "Delete_filename": "Delete %{file_name} ?"
+
   }
 }

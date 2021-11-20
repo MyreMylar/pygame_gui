@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pygame
 
+from pygame_gui.core.utility import translate
+
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
@@ -106,7 +108,7 @@ class UIFileDialog(UIWindow):
 
         self.home_button = UIButton(relative_rect=pygame.Rect(10, 10, 20, 20),
                                     text='⌂',
-                                    tool_tip_text='pygame-gui.Home_Directory',
+                                    tool_tip_text='pygame-gui.Home_directory',
                                     manager=self.ui_manager,
                                     container=self,
                                     object_id='#home_icon_button',
@@ -117,7 +119,7 @@ class UIFileDialog(UIWindow):
 
         self.delete_button = UIButton(relative_rect=pygame.Rect(32, 10, 20, 20),
                                       text='⌧',
-                                      tool_tip_text='Delete',
+                                      tool_tip_text='pygame-gui.Delete',
                                       manager=self.ui_manager,
                                       container=self,
                                       object_id='#delete_icon_button',
@@ -131,7 +133,7 @@ class UIFileDialog(UIWindow):
 
         self.parent_directory_button = UIButton(relative_rect=pygame.Rect(54, 10, 20, 20),
                                                 text='↑',
-                                                tool_tip_text='Parent Directory',
+                                                tool_tip_text='pygame-gui.Parent_directory',
                                                 manager=self.ui_manager,
                                                 container=self,
                                                 object_id='#parent_icon_button',
@@ -142,7 +144,7 @@ class UIFileDialog(UIWindow):
 
         self.refresh_button = UIButton(relative_rect=pygame.Rect(76, 10, 20, 20),
                                        text='⇪',
-                                       tool_tip_text='Refresh Directory',
+                                       tool_tip_text='pygame-gui.Refresh_directory',
                                        manager=self.ui_manager,
                                        container=self,
                                        object_id='#refresh_icon_button',
@@ -435,12 +437,13 @@ class UIFileDialog(UIWindow):
             confirmation_rect.center = self.rect.center
 
             selected_file_name = self.current_file_path.name
-            long_desc = "Delete " + str(selected_file_name) + "?"
+            long_desc = translate("pygame-gui.Delete_filename",
+                                  file_name=str(selected_file_name))
             self.delete_confirmation_dialog = UIConfirmationDialog(rect=confirmation_rect,
                                                                    manager=self.ui_manager,
                                                                    action_long_desc=long_desc,
-                                                                   action_short_name='Delete',
-                                                                   window_title='Delete')
+                                                                   action_short_name='pygame-gui.Delete',
+                                                                   window_title='pygame-gui.Delete')
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.parent_directory_button):
             self._change_directory_path(Path(self.current_directory_path).parent)
