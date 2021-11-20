@@ -39,15 +39,18 @@ class UIManager(IUIManagerInterface):
                  enable_live_theme_updates: bool = True,
                  resource_loader: IResourceLoader = None,
                  starting_language: str = 'en',
-                 translation_directory_path: str = None):
+                 translation_directory_paths: List[str] = None):
 
+        # Translation stuff
         root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         translations_path = os.path.normpath(os.path.join(root_path,
                                                           'pygame_gui/data/translations/'))
         i18n.load_path.append(translations_path)
-        if translation_directory_path is not None:
-            # check this is a valid path
-            i18n.load_path.append(translation_directory_path)
+        if translation_directory_paths is not None:
+            for path in translation_directory_paths:
+                # check this is a valid path
+                i18n.load_path.append(path)
+
         i18n.set('locale', starting_language)
 
         # Pygame compat
