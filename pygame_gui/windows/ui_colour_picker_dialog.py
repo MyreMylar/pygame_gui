@@ -445,7 +445,7 @@ class UIColourPickerDialog(UIWindow):
                                                                default_sizes['channel_height']),
                                                    manager=self.ui_manager,
                                                    container=self,
-                                                   name='pygame-gui.Value_V:',
+                                                   name='pygame-gui.Value_V',
                                                    channel_index=2,
                                                    initial_value=int(self.current_colour.hsva[2]),
                                                    value_range=(0, 100),
