@@ -41,6 +41,16 @@ source, navigating to the project's directory (the one with setup.py in it) and 
     python setup.py install
     pip install . -U
 
+Why is your package called pygame-gui on PyPI?
+----------------------------------------------
+
+PyPI converts all non-letter characters in package names to dashes for web search optimisation reasons. I can assure you
+that the pygame-gui package on PyPI is this library pygame_gui. Conversely, Python does not allow dashes in package
+names. So it is not possible to standardise around either convention unless you forgo any kind of non-lowercase letter,
+pygamegui is already taken as a name on PyPI - so here we are.
+
+Please live with the inconsistency.
+
 
 Source code on GitHub
 ----------------------
