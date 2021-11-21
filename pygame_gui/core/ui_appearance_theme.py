@@ -32,8 +32,6 @@ if sys.version_info.minor < 6:
 # If that fails fall back to __file__
 # Finally fall back to stringified data
 USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
-USE_STRINGIFIED_DATA = False
 
 try:
     from importlib.resources import path, read_text
@@ -41,15 +39,9 @@ except ImportError:
     try:
         from importlib_resources import path, read_text
     except ImportError:
-        ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        THEME_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/default_theme.json'))
-        if os.path.exists(THEME_PATH):
-            USE_FILE_PATH = True
-        else:
-            USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import default_theme  # noqa: E501 pylint: disable=ungrouped-imports
-    else:
-        USE_IMPORT_LIB_RESOURCE = True
+        raise ImportError('pygame-gui requires importlib.resources or importlib_resources')
+
+    USE_IMPORT_LIB_RESOURCE = True
 
 else:
     USE_IMPORT_LIB_RESOURCE = True
@@ -111,10 +103,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         if USE_IMPORT_LIB_RESOURCE:
             self.load_theme(PackageResource('pygame_gui.data', 'default_theme.json'))
-        elif USE_FILE_PATH:
-            self.load_theme(THEME_PATH)
-        elif USE_STRINGIFIED_DATA:
-            self.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
 
     def get_font_dictionary(self) -> IUIFontDictionaryInterface:
         """
@@ -256,10 +244,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                 image_resource = ImageResource(
                                     image_id=resource_id,
                                     location=package_resource)
-                            else:
-                                image_resource = ImageResource(
-                                    image_id=resource_id,
-                                    location=package_resource.to_path())
 
                             if self._resource_loader.started():
                                 error = image_resource.load()
@@ -660,8 +644,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 self._theme_file_path = file_path
                 with path(file_path.package, file_path.resource) as package_file_path:
                     self._theme_file_last_modified = os.stat(package_file_path).st_mtime
-            elif USE_FILE_PATH:
-                used_file_path = file_path.to_path()
 
         elif not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)

@@ -28,7 +28,6 @@ import pygame.freetype
 USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2
 
 USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
 try:
     from importlib.resources import open_binary, read_binary
     USE_IMPORT_LIB_RESOURCE = True
@@ -37,9 +36,7 @@ except ImportError:
         from importlib_resources import open_binary, read_binary
         USE_IMPORT_LIB_RESOURCE = True
     except ImportError:
-        USE_FILE_PATH = True
-
-ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        raise ImportError('pygame-gui requires importlib.resources or importlib_resources')
 
 PLATFORM = platform.system().upper()
 if PLATFORM == 'WINDOWS':
@@ -417,18 +414,18 @@ class FontResource:
                 except (pygame.error, FileNotFoundError, OSError):
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
-            elif USE_FILE_PATH:
-                try:
-                    self.loaded_font = pygame.freetype.Font(self.location.to_path(),
-                                                            self.size, resolution=72)
-                    self.loaded_font.pad = True
-                    self.loaded_font.origin = True
-                    if self.force_style:
-                        self.loaded_font.strong = self.style['bold']
-                        self.loaded_font.oblique = self.style['italic']
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location.to_path()))
+            # elif USE_FILE_PATH:
+            #     try:
+            #         self.loaded_font = pygame.freetype.Font(self.location.to_path(),
+            #                                                 self.size, resolution=72)
+            #         self.loaded_font.pad = True
+            #         self.loaded_font.origin = True
+            #         if self.force_style:
+            #             self.loaded_font.strong = self.style['bold']
+            #             self.loaded_font.oblique = self.style['italic']
+            #     except (pygame.error, FileNotFoundError, OSError):
+            #         error = FileNotFoundError('Unable to load resource with path: ' +
+            #                                   str(self.location.to_path()))
 
         elif isinstance(self.location, str):
             try:
@@ -493,12 +490,12 @@ class ImageResource:
                     error = FileNotFoundError('Unable to load resource with path: ' +
                                               str(self.location))
 
-            elif USE_FILE_PATH:
-                try:
-                    self.loaded_surface = pygame.image.load(self.location.to_path()).convert_alpha()
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
+            # elif USE_FILE_PATH:
+            #     try:
+            #         self.loaded_surface = pygame.image.load(self.location.to_path()).convert_alpha()
+            #     except (pygame.error, FileNotFoundError, OSError):
+            #         error = FileNotFoundError('Unable to load resource with path: ' +
+            #                                   str(self.location))
 
         elif isinstance(self.location, str):
             try:

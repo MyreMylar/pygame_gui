@@ -13,27 +13,14 @@ from pygame_gui.core.utility import PackageResource
 from pygame_gui.core.utility import FontResource
 
 # First try importlib
-# Then importlib_resources
-# If that fails fall back to __file__
-# Finally fall back to stringified data
+# Then importlib_resources - we've made this a dependency now
 USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
-USE_STRINGIFIED_DATA = False
 
+# importlib.resources  - added to standard library in Python 3.7
 RESOURCES_MODULE_SPEC = find_spec(name="importlib.resources")
 if RESOURCES_MODULE_SPEC is None:
     RESOURCES_MODULE_SPEC = find_spec(name="importlib_resources")
-    if RESOURCES_MODULE_SPEC is None:
-        ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        FONT_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/FiraCode-Regular.ttf'))
-        if not os.path.exists(FONT_PATH):
-            USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
-            from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
-        else:
-            USE_FILE_PATH = True
-    else:
-        USE_IMPORT_LIB_RESOURCE = True
+    USE_IMPORT_LIB_RESOURCE = True
 else:
     USE_IMPORT_LIB_RESOURCE = True
 
@@ -111,32 +98,21 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                         location=(PackageResource(package='pygame_gui.data',
                                                                   resource='FiraCode-Regular.ttf'),
                                                   False))
-        if not USE_STRINGIFIED_DATA:
-            error = default_font_res.load()
-            if error is not None:
-                warnings.warn(str(error))
-            self.loaded_fonts[self.default_font_id] = default_font_res
 
-            self.known_font_paths['fira_code'] = [
-                (PackageResource(package='pygame_gui.data',
-                                 resource='FiraCode-Regular.ttf'), False),
-                (PackageResource(package='pygame_gui.data',
-                                 resource='FiraCode-Bold.ttf'), False),
-                (PackageResource(package='pygame_gui.data',
-                                 resource='FiraMono-RegularItalic.ttf'), False),
-                (PackageResource(package='pygame_gui.data',
-                                 resource='FiraMono-BoldItalic.ttf'), False)]
-        else:
-            default_font_res.location = FiraCode_Regular
-            error = default_font_res.load()
-            if error is not None:
-                warnings.warn(str(error))
-            self.loaded_fonts[self.default_font_id] = default_font_res
+        error = default_font_res.load()
+        if error is not None:
+            warnings.warn(str(error))
+        self.loaded_fonts[self.default_font_id] = default_font_res
 
-            self.known_font_paths['fira_code'] = [(FiraCode_Regular, False),
-                                                  (FiraCode_Bold, False),
-                                                  (FiraMono_RegularItalic, False),
-                                                  (FiraMono_BoldItalic, False)]
+        self.known_font_paths['fira_code'] = [
+            (PackageResource(package='pygame_gui.data',
+                             resource='FiraCode-Regular.ttf'), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource='FiraCode-Bold.ttf'), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource='FiraMono-RegularItalic.ttf'), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource='FiraMono-BoldItalic.ttf'), False)]
 
     def find_font(self, font_size: int, font_name: str,
                   bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
