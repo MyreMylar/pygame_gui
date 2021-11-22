@@ -172,6 +172,8 @@ class UIManager(IUIManagerInterface):
         :param window_resolution: the resolution to set.
         """
         self.window_resolution = window_resolution
+        self.ui_window_stack.window_resolution = window_resolution
+        self.root_container.set_dimensions(window_resolution)
 
     def clear_and_reset(self):
         """
