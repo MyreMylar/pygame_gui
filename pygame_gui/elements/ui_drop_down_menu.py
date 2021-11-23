@@ -105,7 +105,7 @@ class UIExpandedDropDownState:
                     expand_button_symbol = '▼'
             self.close_button.set_text(expand_button_symbol)
 
-    def start(self):
+    def start(self, should_rebuild: bool = True):
         """
         Called each time we enter the expanded state. It creates the necessary elements, the
         selected option, all the other available options and the close button.
@@ -217,7 +217,8 @@ class UIExpandedDropDownState:
                                                       object_id='#drop_down_options_list')
         self.drop_down_menu_ui.join_focus_sets(self.options_selection_list)
 
-        self.rebuild()
+        if should_rebuild:
+            self.rebuild()
 
     def finish(self):
         """
@@ -337,8 +338,7 @@ class UIExpandedDropDownState:
 
         In this case the result is to set the UI element's image to the new surface.
         """
-        image = self.drop_down_menu_ui.drawable_shape.get_fresh_surface()
-        self.drop_down_menu_ui.set_image(image)
+        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
     def hide(self):
         """
@@ -435,7 +435,7 @@ class UIClosedDropDownState:
                                                                           ['normal', 'disabled'],
                                                                           self.ui_manager)
 
-        self.drop_down_menu_ui.image = self.drop_down_menu_ui.drawable_shape.get_fresh_surface()
+        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
         # extra
         if self.open_button is not None:
@@ -447,12 +447,13 @@ class UIClosedDropDownState:
                     expand_button_symbol = '▼'
             self.open_button.set_text(expand_button_symbol)
 
-    def start(self):
+    def start(self, should_rebuild: bool = True):
         """
         Called each time we enter the closed state. It creates the necessary elements, the
         selected option and the open button.
         """
-        self.rebuild()
+        if should_rebuild:
+            self.rebuild()
 
         self.should_transition = False
         self.selected_option_button = UIButton(pygame.Rect((self.base_position_rect.x,
@@ -690,7 +691,7 @@ class UIDropDownMenu(UIElement):
                                                                 self.object_ids
                                                                 )}
         self.current_state = self.menu_states['closed']
-        self.current_state.start()
+        self.current_state.start(should_rebuild=False)
 
     def kill(self):
         """
