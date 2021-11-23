@@ -68,7 +68,7 @@ class UIFileDialog(UIWindow):
             if pathed_initial_file_path.exists() and not pathed_initial_file_path.is_file():
                 self.current_directory_path = str(pathed_initial_file_path.resolve())
                 if self.allow_picking_directories:
-                    self.current_file_path = self.current_directory_path
+                    self.current_file_path = Path(self.current_directory_path)
             elif pathed_initial_file_path.exists() and pathed_initial_file_path.is_file():
                 self.current_file_path = pathed_initial_file_path.resolve()
                 self.current_directory_path = str(pathed_initial_file_path.parent.resolve())
