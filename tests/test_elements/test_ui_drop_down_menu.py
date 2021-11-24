@@ -240,10 +240,10 @@ class TestUIDropDownMenu:
         menu.set_dimensions((300, 50))
 
         assert (menu.current_state.open_button.relative_rect.right ==
-                (100 + 300) - (menu.border_width + menu.shadow_width))
+                300 - (menu.border_width + menu.shadow_width))
 
         assert (menu.current_state.open_button.relative_rect.bottom ==
-                (100 + 50) - (menu.border_width + menu.shadow_width))
+                50 - (menu.border_width + menu.shadow_width))
 
         # try to click on the menu
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,

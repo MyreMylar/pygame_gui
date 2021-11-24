@@ -8,6 +8,7 @@ from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, ObjectID
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.ui_container import UIContainer
 
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_selection_list import UISelectionList
@@ -113,7 +114,10 @@ class UIExpandedDropDownState:
         """
         self.should_transition = False
 
-        self.selected_option_button = UIButton(pygame.Rect(self.base_position_rect.topleft,
+        border_and_shadow = (self.drop_down_menu_ui.shadow_width +
+                             self.drop_down_menu_ui.border_width)
+
+        self.selected_option_button = UIButton(pygame.Rect((border_and_shadow, border_and_shadow),
                                                            (self.base_position_rect.width -
                                                             self.close_button_width,
                                                             self.base_position_rect.height)),
@@ -186,12 +190,12 @@ class UIExpandedDropDownState:
 
                 self.option_list_y_pos = self.base_position_rect.bottom
 
-        close_button_x = (self.base_position_rect.x +
+        close_button_x = (border_and_shadow +
                           self.base_position_rect.width -
                           self.close_button_width)
 
         self.close_button = UIButton(pygame.Rect((close_button_x,
-                                                  self.base_position_rect.y),
+                                                  border_and_shadow),
                                                  (self.close_button_width,
                                                   self.base_position_rect.height)),
                                      expand_button_symbol,
@@ -213,7 +217,8 @@ class UIExpandedDropDownState:
                                                       allow_double_clicks=False,
                                                       manager=self.ui_manager,
                                                       parent_element=self.drop_down_menu_ui,
-                                                      container=self.ui_container,
+                                                      container=self.drop_down_menu_ui.ui_container,
+                                                      anchors=self.drop_down_menu_ui.anchors,
                                                       object_id='#drop_down_options_list')
         self.drop_down_menu_ui.join_focus_sets(self.options_selection_list)
 
@@ -275,14 +280,14 @@ class UIExpandedDropDownState:
         self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
 
         # update all the ui elements that depend on the base position
-        self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
+        self.selected_option_button.set_relative_position((border_and_shadow, border_and_shadow))
         list_post = (self.drop_down_menu_ui.relative_rect.left, self.option_list_y_pos)
         self.options_selection_list.set_relative_position(list_post)
 
-        close_button_x = (self.base_position_rect.x +
+        close_button_x = (border_and_shadow +
                           self.base_position_rect.width -
                           self.close_button_width)
-        self.close_button.set_relative_position([close_button_x, self.base_position_rect.y])
+        self.close_button.set_relative_position([close_button_x, border_and_shadow])
 
     def update_dimensions(self):
         """
@@ -322,12 +327,12 @@ class UIExpandedDropDownState:
         list_pos = (self.drop_down_menu_ui.relative_rect.left, self.option_list_y_pos)
         self.options_selection_list.set_relative_position(list_pos)
 
-        close_button_x = (self.base_position_rect.x +
+        close_button_x = (border_and_shadow +
                           self.base_position_rect.width -
                           self.close_button_width)
         self.close_button.set_dimensions((self.close_button_width,
                                           self.base_position_rect.height))
-        self.close_button.set_relative_position((close_button_x, self.base_position_rect.y))
+        self.close_button.set_relative_position((close_button_x, border_and_shadow))
 
         # self.rebuild()
 
@@ -424,16 +429,16 @@ class UIClosedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         if self.drop_down_menu_ui.shape == 'rectangle':
-            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect,
-                                                                      theming_parameters,
-                                                                      ['normal', 'disabled'],
-                                                                      self.ui_manager)
+            self.drop_down_menu_ui.set_drawable_shape(RectDrawableShape(self.drop_down_menu_ui.rect,
+                                                                        theming_parameters,
+                                                                        ['normal', 'disabled'],
+                                                                        self.ui_manager))
         elif self.drop_down_menu_ui.shape == 'rounded_rectangle':
             shape_rect = self.drop_down_menu_ui.rect
-            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(shape_rect,
-                                                                          theming_parameters,
-                                                                          ['normal', 'disabled'],
-                                                                          self.ui_manager)
+            self.drop_down_menu_ui.set_drawable_shape(RoundedRectangleShape(shape_rect,
+                                                                            theming_parameters,
+                                                                            ['normal', 'disabled'],
+                                                                            self.ui_manager))
 
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
@@ -456,8 +461,11 @@ class UIClosedDropDownState:
             self.rebuild()
 
         self.should_transition = False
-        self.selected_option_button = UIButton(pygame.Rect((self.base_position_rect.x,
-                                                            self.base_position_rect.y),
+
+        border_and_shadow = (self.drop_down_menu_ui.shadow_width +
+                             self.drop_down_menu_ui.border_width)
+
+        self.selected_option_button = UIButton(pygame.Rect((border_and_shadow, border_and_shadow),
                                                            (self.base_position_rect.width -
                                                             self.open_button_width,
                                                             self.base_position_rect.height)),
@@ -470,7 +478,7 @@ class UIClosedDropDownState:
                                                visible=self.visible)
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
 
-        open_button_x = (self.base_position_rect.x +
+        open_button_x = (border_and_shadow +
                          self.base_position_rect.width -
                          self.open_button_width)
 
@@ -482,7 +490,7 @@ class UIClosedDropDownState:
                 expand_button_symbol = '▼'
 
         self.open_button = UIButton(pygame.Rect((open_button_x,
-                                                 self.base_position_rect.y),
+                                                 border_and_shadow),
                                                 (self.open_button_width,
                                                  self.base_position_rect.height)),
                                     expand_button_symbol,
@@ -532,9 +540,9 @@ class UIClosedDropDownState:
         self.base_position_rect.y = self.drop_down_menu_ui.relative_rect.y + border_and_shadow
 
         # update all the ui elements that depend on the base position
-        self.selected_option_button.set_relative_position(self.base_position_rect.topleft)
+        self.selected_option_button.set_relative_position((border_and_shadow, border_and_shadow))
 
-        open_button_x = (self.base_position_rect.x +
+        open_button_x = (border_and_shadow +
                          self.base_position_rect.width -
                          self.open_button_width)
         self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
@@ -558,11 +566,11 @@ class UIClosedDropDownState:
         self.selected_option_button.set_dimensions((self.base_position_rect.width -
                                                     self.open_button_width,
                                                     self.base_position_rect.height))
-        open_button_x = (self.base_position_rect.x +
+        open_button_x = (border_and_shadow +
                          self.base_position_rect.width -
                          self.open_button_width)
         self.open_button.set_dimensions((self.open_button_width, self.base_position_rect.height))
-        self.open_button.set_relative_position((open_button_x, self.base_position_rect.y))
+        self.open_button.set_relative_position((open_button_x, border_and_shadow))
 
     def on_fresh_drawable_shape_ready(self):
         """
@@ -596,7 +604,7 @@ class UIClosedDropDownState:
             self.selected_option_button.hide()
 
 
-class UIDropDownMenu(UIElement):
+class UIDropDownMenu(UIContainer):
     """
     A drop down menu lets us choose one text option from a list. That list of options can be
     expanded and hidden at the press of a button. While the element is called a drop down,
@@ -634,8 +642,8 @@ class UIDropDownMenu(UIElement):
                  visible: int = 1
                  ):
 
-        super().__init__(relative_rect, manager, container,
-                         layer_thickness=3, starting_height=1,
+        super().__init__(relative_rect, manager, container=container,
+                         starting_height=1,
                          anchors=anchors,
                          visible=visible)
 
@@ -666,16 +674,14 @@ class UIDropDownMenu(UIElement):
         self.expand_direction = None
 
         self.menu_states = {}
-
         self.rebuild_from_changed_theme_data()
-
         self.menu_states = {'closed': UIClosedDropDownState(self,
                                                             self.selected_option,
                                                             self.background_rect,
                                                             self.open_button_width,
                                                             self.expand_direction,
                                                             self.ui_manager,
-                                                            self.ui_container,
+                                                            self,
                                                             self.element_ids,
                                                             self.object_ids,
                                                             self.visible),
@@ -686,12 +692,12 @@ class UIDropDownMenu(UIElement):
                                                                 self.open_button_width,
                                                                 self.expand_direction,
                                                                 self.ui_manager,
-                                                                self.ui_container,
+                                                                self,
                                                                 self.element_ids,
                                                                 self.object_ids
                                                                 )}
         self.current_state = self.menu_states['closed']
-        self.current_state.start(should_rebuild=False)
+        self.current_state.start(should_rebuild=True)
 
     def kill(self):
         """
@@ -914,3 +920,6 @@ class UIDropDownMenu(UIElement):
         if self.current_state == self.menu_states['expanded']:
             self.menu_states['expanded'].hide()
         self.menu_states['closed'].hide()
+
+    def set_drawable_shape(self, shape):
+        self.drawable_shape = shape
