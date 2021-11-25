@@ -293,7 +293,7 @@ class UITextBox(UIElement):
                    drawable_area)
 
         self.set_image(new_image)
-
+        self.link_hover_chunks = []
         self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
         self.should_trigger_full_rebuild = False
