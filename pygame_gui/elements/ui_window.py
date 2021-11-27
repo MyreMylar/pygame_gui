@@ -740,3 +740,23 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         super().hide()
 
         self._window_root_container.hide()
+
+    def get_relative_mouse_pos(self):
+        """
+        Returns the current mouse position relative to the inside of this window.
+
+        If the cursor is outside the window contents area it returns None
+
+        :return: tuple of relative mouse co-ords or None
+        """
+        abs_mouse_pos = pygame.mouse.get_pos()
+        rel_mouse_pos = None
+        inside_window_rect = self.get_container().get_rect()
+        if inside_window_rect.contains(pygame.Rect(abs_mouse_pos, (1, 1))):
+
+            window_contents_top_left = inside_window_rect.topleft
+            rel_mouse_pos = (abs_mouse_pos[0] - window_contents_top_left[0],
+                             abs_mouse_pos[1] - window_contents_top_left[1])
+
+        return rel_mouse_pos
+

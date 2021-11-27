@@ -568,6 +568,16 @@ class TestUIWindow:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_get_relative_mouse_pos(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
+        window = UIWindow(pygame.Rect(100, 100, 400, 400),
+                          window_display_title="Test Window",
+                          manager=default_ui_manager,
+                          visible=0)
+
+        result = window.get_relative_mouse_pos()
+        assert result is None
+
 
 if __name__ == '__main__':
     pytest.console_main()
