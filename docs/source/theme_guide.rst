@@ -96,7 +96,70 @@ e.g. for the buttons on a scroll bar:
     - 'vertical_scroll_bar.@arrow_button' preferred over 'vertical_scroll_bar.button'
     - 'vertical_scroll_bar.#bottom_button' preferred over 'vertical_scroll_bar.@arrow_button'
 
+Object IDs - in depth
+----------------------
 
+By convention pygame_gui starts an 'element_id' with no prefix, a 'class_id' with a prefix of '@' and an 'object_id'
+with a prefix of '#'. These are just conventions and not enforced by the code, but I find it helps make it easier to
+remember what type of ID each block refers to in larger theme files. Your ids must match between the code and the json
+theme file (including any prefixes in both).
+
+To create an ObjectID for one of your elements, you first need to import the ObjectID class from the core submodule,
+then you can create on and pass it into your element when you create it. See the example below:
+
+.. code-block:: python
+   :caption: object_id.py
+   :linenos:
+
+   from pygame_gui.core import ObjectID
+   from pygame_gui.elements import UIButton
+
+   ...  # other code ommitted here -
+        # see quick start guide for how to get up and running with a single button
+
+   hello_button = UIButton(relative_rect=pygame.Rect((350, 280), (-1, -1)),
+                           text='Hello',
+                           manager=manager,
+                           object_id=ObjectID(class_id='@friendly_buttons',
+                                              object_id='#hello_button'))
+
+
+Once the ObjectID is in place in the code you can refer to it in a block in your loaded theme file, like so:
+
+.. code-block:: json
+   :caption: theme.json
+   :linenos:
+
+    {
+        "button":
+        {
+            "misc":
+            {
+                "border_width": "1",
+                "shadow_width": "2"
+            }
+       },
+       "@friendly_buttons":
+        {
+            "misc":
+            {
+                "shadow_width": "5",
+                "shape": "rounded_rectangle"
+            }
+       },
+       "#hello_button":
+        {
+            "misc":
+            {
+                "text_horiz_alignment": "left"
+            }
+       }
+   }
+
+
+
+Theme block categories
+----------------------
 There are four general categories of theming which each have their own sub-blocks under the theme block IDs:
 
     - 'colours'
