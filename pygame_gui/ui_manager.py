@@ -217,7 +217,7 @@ class UIManager(IUIManagerInterface):
                     if ui_element.visible:
                         # Only process events for visible elements - ignore hidden elements
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                            mouse_x, mouse_y = event.pos
+                            mouse_x, mouse_y = self.calculate_scaled_mouse_position(event.pos)
                             if ui_element.hover_point(mouse_x, mouse_y):
                                 # self.unset_focus_element()
                                 self.set_focus_set(ui_element.get_focus_set())
