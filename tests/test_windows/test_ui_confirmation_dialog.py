@@ -120,7 +120,7 @@ class TestUIConfirmationDialog:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
+            if (event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
                     event.ui_element == confirm_dialog):
                 confirm_event_fired = True
         is_dead_post_events = not confirm_dialog.alive()

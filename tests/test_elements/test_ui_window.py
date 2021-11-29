@@ -167,8 +167,7 @@ class TestUIWindow:
         confirm_event_fired = False
         event_object_id = None
         for event in pygame.event.get():
-            if (event.type == pygame.USEREVENT and
-                    event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+            if (event.type == pygame_gui.UI_BUTTON_PRESSED and
                     event.ui_element == button):
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
@@ -191,9 +190,8 @@ class TestUIWindow:
                                                                   'pos': (500, 500)}))
         assert not (consumed_event or window.resizing_mode_active)
 
-        consumed_event = window.process_event(pygame.event.Event(pygame.USEREVENT,
-                                                                 {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                                                  'ui_element': window.close_window_button}))
+        consumed_event = window.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED, {'ui_element': window.close_window_button}))
         assert not (consumed_event or window.alive())
 
     def test_check_clicked_inside(self, _init_pygame,
@@ -346,7 +344,7 @@ class TestUIWindow:
         confirm_event_fired = False
         event_object_id = None
         for event in pygame.event.get():
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_WINDOW_CLOSE and
+            if (event.type == pygame_gui.UI_WINDOW_CLOSE and
                     event.ui_element == window):
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id

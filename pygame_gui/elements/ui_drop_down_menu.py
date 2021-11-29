@@ -248,14 +248,10 @@ class UIExpandedDropDownState:
                  rest of the UI.
 
         """
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element in self.active_buttons):
-
+        if event.type == UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
             self.should_transition = True
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_SELECTION_LIST_NEW_SELECTION and
+        if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.options_selection_list):
             selection = self.options_selection_list.get_single_selection()
             self.drop_down_menu_ui.selected_option = selection
@@ -534,9 +530,7 @@ class UIClosedDropDownState:
         :return: Return True if we want to consume this event so it is not passed on to the
                  rest of the UI.
         """
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element in self.active_buttons):
-
+        if event.type == UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
             self.should_transition = True
 
         return False

@@ -86,8 +86,7 @@ class UIMessageWindow(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.dismiss_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.dismiss_button:
             self.kill()
 
         return consumed_event

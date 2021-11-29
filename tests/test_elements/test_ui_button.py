@@ -131,8 +131,7 @@ class TestUIButton:
                           manager=default_ui_manager)
         button.on_hovered()
 
-        confirm_on_hovered_event_fired = any((event.type == pygame.USEREVENT and
-                                              event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED and
+        confirm_on_hovered_event_fired = any((event.type == pygame_gui.UI_BUTTON_ON_HOVERED and
                                               event.ui_element == button) for event in
                                              pygame.event.get())
 
@@ -178,8 +177,7 @@ class TestUIButton:
         # stop hovering and kill the tool tip
         button.on_unhovered()
 
-        unhovered_event_fired = any((event.type == pygame.USEREVENT and
-                                     event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED and
+        unhovered_event_fired = any((event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED and
                                      event.ui_element == button) for event in
                                     pygame.event.get())
 
@@ -278,8 +276,7 @@ class TestUIButton:
 
         confirm_double_click_event_fired = False
         for event in pygame.event.get():
-            if (
-                    event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
+            if (event.type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
                     event.ui_element == button):
                 confirm_double_click_event_fired = True
 

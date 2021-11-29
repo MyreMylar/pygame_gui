@@ -88,8 +88,7 @@ class TestUIUIFileDialog:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-            if (event.type == pygame.USEREVENT and
-                    event.user_type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED and
+            if (event.type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED and
                     event.ui_element == file_dialog):
                 confirm_event_fired = True
                 event_path = event.text
@@ -119,9 +118,8 @@ class TestUIUIFileDialog:
 
         assert file_dialog.delete_confirmation_dialog is not None
 
-        event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                      'ui_element': file_dialog.delete_confirmation_dialog.cancel_button}
-        cancel_event = pygame.event.Event(pygame.USEREVENT, event_data)
+        event_data = {'ui_element': file_dialog.delete_confirmation_dialog.cancel_button}
+        cancel_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, event_data)
 
         default_ui_manager.process_events(cancel_event)
 
@@ -149,9 +147,8 @@ class TestUIUIFileDialog:
 
         assert file_dialog.delete_confirmation_dialog is not None
 
-        ok_event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                         'ui_element': file_dialog.delete_confirmation_dialog.confirm_button}
-        ok_event = pygame.event.Event(pygame.USEREVENT, ok_event_data)
+        ok_event_data = {'ui_element': file_dialog.delete_confirmation_dialog.confirm_button}
+        ok_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, ok_event_data)
 
         default_ui_manager.process_events(ok_event)
 
@@ -169,9 +166,8 @@ class TestUIUIFileDialog:
                                    manager=default_ui_manager,
                                    initial_file_path='tests/data/images/')
 
-        parent_event = pygame.event.Event(pygame.USEREVENT,
-                                          {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                           'ui_element': file_dialog.parent_directory_button})
+        parent_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
+                                          {'ui_element': file_dialog.parent_directory_button})
 
         default_ui_manager.process_events(parent_event)
 
@@ -184,9 +180,8 @@ class TestUIUIFileDialog:
                                    manager=default_ui_manager,
                                    initial_file_path='tests/data/images/')
 
-        parent_event = pygame.event.Event(pygame.USEREVENT,
-                                          {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                           'ui_element': file_dialog.refresh_button})
+        parent_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
+                                          {'ui_element': file_dialog.refresh_button})
 
         default_ui_manager.process_events(parent_event)
 
@@ -199,9 +194,8 @@ class TestUIUIFileDialog:
                                    manager=default_ui_manager,
                                    initial_file_path='tests/data/images/')
 
-        home_event = pygame.event.Event(pygame.USEREVENT,
-                                        {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                         'ui_element': file_dialog.home_button})
+        home_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
+                                        {'ui_element': file_dialog.home_button})
 
         default_ui_manager.process_events(home_event)
 
@@ -214,9 +208,8 @@ class TestUIUIFileDialog:
                                    manager=default_ui_manager,
                                    initial_file_path='tests/data/images/')
 
-        select_event = pygame.event.Event(pygame.USEREVENT,
-                                          {'user_type': pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
-                                           'ui_element': file_dialog.file_selection_list,
+        select_event = pygame.event.Event(pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
+                                          {'ui_element': file_dialog.file_selection_list,
                                            'text': 'splat.png'})
 
         default_ui_manager.process_events(select_event)
@@ -225,9 +218,8 @@ class TestUIUIFileDialog:
         assert file_dialog.current_file_path.name == 'splat.png'
         assert file_dialog.ok_button.is_enabled
 
-        select_event = pygame.event.Event(pygame.USEREVENT,
-                                          {'user_type': pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
-                                           'ui_element': file_dialog.file_selection_list,
+        select_event = pygame.event.Event(pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
+                                          {'ui_element': file_dialog.file_selection_list,
                                            'text': 'not_a_file.not'})
 
         default_ui_manager.process_events(select_event)
@@ -241,10 +233,10 @@ class TestUIUIFileDialog:
                                    manager=default_ui_manager,
                                    initial_file_path='tests/data/')
 
-        event_data = {'user_type': pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
-                      'ui_element': file_dialog.file_selection_list,
+        event_data = {'ui_element': file_dialog.file_selection_list,
                       'text': 'images'}
-        directory_event = pygame.event.Event(pygame.USEREVENT, event_data)
+        directory_event = pygame.event.Event(pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
+                                             event_data)
 
         default_ui_manager.process_events(directory_event)
 
@@ -266,12 +258,6 @@ class TestUIUIFileDialog:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, event_data))
         default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
                                                              {'key': pygame.K_RETURN}))
-
-        # event_data = {'user_type': pygame_gui.UI_TEXT_ENTRY_FINISHED,
-        #               'text': file_dialog.file_path_text_line.get_text(),
-        #               'ui_element': file_dialog.file_path_text_line,
-        #               'ui_object_id': file_dialog.file_path_text_line.most_specific_combined_id}
-        # pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
         for event in pygame.event.get():
             default_ui_manager.process_events(event)

@@ -153,10 +153,7 @@ class UIColourChannelEditor(UIElement):
 
         """
         consumed_event = super().process_event(event)
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_TEXT_ENTRY_FINISHED and
-                event.ui_element == self.entry):
-
+        if event.type == UI_TEXT_ENTRY_FINISHED and event.ui_element == self.entry:
             int_value = self.current_value
             try:
                 int_value = int(self.entry.get_text())
@@ -165,10 +162,7 @@ class UIColourChannelEditor(UIElement):
             finally:
                 self._set_value_from_entry(int_value)
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_HORIZONTAL_SLIDER_MOVED and
-                event.ui_element == self.slider):
-
+        if event.type == UI_HORIZONTAL_SLIDER_MOVED and event.ui_element == self.slider:
             int_value = self.current_value
             try:
                 int_value = int(self.slider.get_current_value())
@@ -192,7 +186,7 @@ class UIColourChannelEditor(UIElement):
             self.current_value = clipped_value
             self.entry.set_text(str(self.current_value))
             # old event - to be removed in 0.8.0
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
                           'value': self.current_value,
                           'channel_index': self.channel_index,
                           'ui_element': self,
@@ -223,12 +217,22 @@ class UIColourChannelEditor(UIElement):
         if clipped_value != self.current_value:
             self.current_value = clipped_value
             self.slider.set_current_value(self.current_value)
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
                           'value': self.current_value,
                           'channel_index': self.channel_index,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             colour_channel_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            pygame.event.post(colour_channel_changed_event)
+
+            event_data = {'value': self.current_value,
+                          'channel_index': self.channel_index,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            colour_channel_changed_event = pygame.event.Event(
+                UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, event_data)
             pygame.event.post(colour_channel_changed_event)
 
     def set_value(self, new_value: int):
@@ -523,14 +527,10 @@ class UIColourPickerDialog(UIWindow):
 
         """
         consumed_event = super().process_event(event)
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element == self.cancel_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.cancel_button:
             self.kill()
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element == self.ok_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.ok_button:
             # old event - to be removed in 0.8.0
             event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_PICKED),
                           'colour': self.current_colour,
@@ -544,8 +544,7 @@ class UIColourPickerDialog(UIWindow):
             pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_PICKED, event_data))
             self.kill()
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED):
+        if event.type == UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED:
             if event.ui_element in [self.hue_channel, self.sat_channel, self.value_channel]:
                 self.current_colour.hsva = (self.hue_channel.current_value,
                                             self.sat_channel.current_value,

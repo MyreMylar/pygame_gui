@@ -68,10 +68,8 @@ class TestUIColourChannelEditor:
 
         channel_editor.slider.current_value = 100
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.USEREVENT,
-                                                             {'user_type': pygame_gui.UI_HORIZONTAL_SLIDER_MOVED,
-                                                              'ui_element': channel_editor.slider}
-                                                             ))
+        default_ui_manager.process_events(pygame.event.Event(pygame_gui.UI_HORIZONTAL_SLIDER_MOVED,
+                                                             {'ui_element': channel_editor.slider}))
         assert channel_editor.entry.get_text() == '100'
 
     def test_set_value(self, _init_pygame, default_ui_manager,
@@ -289,7 +287,7 @@ class TestUIColourPickerDialog:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_COLOUR_PICKER_COLOUR_PICKED and
+            if (event.type == pygame_gui.UI_COLOUR_PICKER_COLOUR_PICKED and
                     event.ui_element == colour_picker):
                 confirm_event_fired = True
                 event_colour = event.colour
@@ -339,8 +337,7 @@ class TestUIColourPickerDialog:
         confirm_event_fired = False
         for event in pygame.event.get():
 
-            if (event.type == pygame.USEREVENT and
-                    event.user_type == pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED and
+            if (event.type == pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED and
                     event.ui_element == colour_picker.red_channel):
                 confirm_event_fired = True
 

@@ -231,8 +231,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 event.button == pygame.BUTTON_LEFT and self.resizing_mode_active):
             self.resizing_mode_active = False
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.close_window_button):
+        if (event.type == UI_BUTTON_PRESSED and event.ui_element == self.close_window_button):
             self.on_close_window_button_pressed()
 
         return consumed_event

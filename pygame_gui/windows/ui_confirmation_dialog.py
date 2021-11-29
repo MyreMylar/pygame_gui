@@ -103,12 +103,10 @@ class UIConfirmationDialog(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.cancel_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.cancel_button:
             self.kill()
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.confirm_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.confirm_button:
             # old event - to be removed in 0.8.0
             event_data = {'user_type': OldType(UI_CONFIRMATION_DIALOG_CONFIRMED),
                           'ui_element': self,

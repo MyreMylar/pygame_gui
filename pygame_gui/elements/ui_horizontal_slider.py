@@ -326,7 +326,7 @@ class UIHorizontalSlider(UIElement):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False
-        if event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED:
+        if event.type == UI_BUTTON_PRESSED:
             if event.ui_element == self.left_button:
                 if self.button_held_repeat_acc < self.button_held_repeat_time:
                     if self.get_current_value() > self.value_range[0]:
