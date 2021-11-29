@@ -6,7 +6,7 @@ from typing import Union, List, Tuple, Dict
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
+from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
@@ -365,11 +365,18 @@ class UITextEntryLine(UIElement):
                 self.text_entered = False  # reset text input entry
 
         if self.text != initial_text_state:
-            event_data = {'user_type': UI_TEXT_ENTRY_CHANGED,
+            # old event to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_TEXT_ENTRY_CHANGED),
                           'text': self.text,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'text': self.text,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_TEXT_ENTRY_CHANGED, event_data))
         return consumed_event
 
     def _process_text_entry_key(self, event: pygame.event.Event) -> bool:
@@ -433,11 +440,18 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if event.key == pygame.K_RETURN and not self.text_entered:
-            event_data = {'user_type': UI_TEXT_ENTRY_FINISHED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_TEXT_ENTRY_FINISHED),
                           'text': self.text,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'text': self.text,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_TEXT_ENTRY_FINISHED, event_data))
             consumed_event = True
             self.text_entered = True
         elif event.key == pygame.K_BACKSPACE:

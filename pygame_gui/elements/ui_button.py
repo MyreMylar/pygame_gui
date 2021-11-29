@@ -1,9 +1,10 @@
 from typing import Union, Tuple, Dict
 
+
 import pygame
 
 from pygame_gui.core.utility import translate
-from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
+from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED, OldType
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui.core import ObjectID
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
@@ -218,10 +219,16 @@ class UIButton(UIElement):
         """
         self.drawable_shape.set_active_state('hovered')
         self.hover_time = 0.0
-        event_data = {'user_type': UI_BUTTON_ON_HOVERED,
+
+        # old event to remove in 0.8.0
+        event_data = {'user_type': OldType(UI_BUTTON_ON_HOVERED),
                       'ui_element': self,
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        # new event
+        event_data = {'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_BUTTON_ON_HOVERED, event_data))
 
     def while_hovering(self, time_delta: float,
                        mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -254,10 +261,16 @@ class UIButton(UIElement):
             self.tool_tip.kill()
             self.tool_tip = None
 
-        event_data = {'user_type': UI_BUTTON_ON_UNHOVERED,
+        # old event to remove in 0.8.0
+        event_data = {'user_type': OldType(UI_BUTTON_ON_UNHOVERED),
                       'ui_element': self,
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+        # new event
+        event_data = {'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_BUTTON_ON_UNHOVERED, event_data))
 
     def update(self, time_delta: float):
         """
@@ -298,15 +311,27 @@ class UIButton(UIElement):
                 if self.is_enabled:
                     if (self.allow_double_clicks and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        event_data = {'user_type': UI_BUTTON_DOUBLE_CLICKED,
+                        # old event to remove in 0.8.0
+                        event_data = {'user_type': OldType(UI_BUTTON_DOUBLE_CLICKED),
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(UI_BUTTON_DOUBLE_CLICKED, event_data))
                     else:
-                        event_data = {'user_type': UI_BUTTON_START_PRESS,
+                        # old event to remove in 0.8.0
+                        event_data = {'user_type': OldType(UI_BUTTON_START_PRESS),
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(UI_BUTTON_START_PRESS, event_data))
                         self.double_click_timer = 0.0
                         self.held = True
                         self._set_active()
@@ -325,10 +350,16 @@ class UIButton(UIElement):
                 consumed_event = True
                 self.pressed_event = True
 
-                event_data = {'user_type': UI_BUTTON_PRESSED,
+                # old event
+                event_data = {'user_type': OldType(UI_BUTTON_PRESSED),
                               'ui_element': self,
                               'ui_object_id': self.most_specific_combined_id}
                 pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                # new event
+                event_data = {'ui_element': self,
+                              'ui_object_id': self.most_specific_combined_id}
+                pygame.event.post(pygame.event.Event(UI_BUTTON_PRESSED, event_data))
 
             if self.is_enabled and self.held:
                 self.held = False

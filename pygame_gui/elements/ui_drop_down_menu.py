@@ -3,7 +3,7 @@ from typing import Union, List, Tuple, Dict
 import pygame
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_NEW_SELECTION
-from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED
+from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED, OldType
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement, ObjectID
@@ -261,12 +261,18 @@ class UIExpandedDropDownState:
             self.drop_down_menu_ui.selected_option = selection
             self.should_transition = True
 
-            event_data = {'user_type': UI_DROP_DOWN_MENU_CHANGED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_DROP_DOWN_MENU_CHANGED),
                           'text': self.drop_down_menu_ui.selected_option,
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
-            drop_down_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(drop_down_changed_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'text': self.drop_down_menu_ui.selected_option,
+                          'ui_element': self.drop_down_menu_ui,
+                          'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_DROP_DOWN_MENU_CHANGED, event_data))
 
         return False  # don't consume any events
 

@@ -5,7 +5,7 @@ import pygame
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_HORIZONTAL_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED
-from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
+from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
 from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
 from pygame_gui.core import UIElement, UIContainer, ObjectID
@@ -191,13 +191,21 @@ class UIColourChannelEditor(UIElement):
         if clipped_value != self.current_value:
             self.current_value = clipped_value
             self.entry.set_text(str(self.current_value))
+            # old event - to be removed in 0.8.0
             event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
                           'value': self.current_value,
                           'channel_index': self.channel_index,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            colour_channel_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(colour_channel_changed_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'value': self.current_value,
+                          'channel_index': self.channel_index,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+                                                 event_data))
 
     def _set_value_from_entry(self, new_value: int):
         """
@@ -523,12 +531,17 @@ class UIColourPickerDialog(UIWindow):
         if (event.type == pygame.USEREVENT and
                 event.user_type == UI_BUTTON_PRESSED and
                 event.ui_element == self.ok_button):
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_PICKED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_PICKED),
                           'colour': self.current_colour,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            new_colour_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(new_colour_chosen_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+            # new event
+            event_data = {'colour': self.current_colour,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_PICKED, event_data))
             self.kill()
 
         if (event.type == pygame.USEREVENT and

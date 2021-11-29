@@ -6,7 +6,7 @@ from typing import Union, Tuple, Dict
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED
+from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED, OldType
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 
@@ -667,11 +667,19 @@ class UITextBox(UIElement):
                         self.rect.collidepoint(scaled_mouse_pos[0], scaled_mouse_pos[1])):
                     consumed_event = True
                     if chunk.is_active:
-                        event_data = {'user_type': UI_TEXT_BOX_LINK_CLICKED,
+
+                        # old event - to be removed in 0.8.0
+                        event_data = {'user_type': OldType(UI_TEXT_BOX_LINK_CLICKED),
                                       'link_target': chunk.href,
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'link_target': chunk.href,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(UI_TEXT_BOX_LINK_CLICKED, event_data))
 
                 if chunk.is_active:
                     chunk.set_inactive()

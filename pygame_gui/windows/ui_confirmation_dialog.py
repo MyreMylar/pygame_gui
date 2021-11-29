@@ -5,7 +5,7 @@ import pygame
 import i18n
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED
+from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED, OldType
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextBox
 
@@ -109,11 +109,15 @@ class UIConfirmationDialog(UIWindow):
 
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.confirm_button):
-            event_data = {'user_type': UI_CONFIRMATION_DIALOG_CONFIRMED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_CONFIRMATION_DIALOG_CONFIRMED),
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            confirmation_dialog_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(confirmation_dialog_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+            # new event
+            event_data = {'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_CONFIRMATION_DIALOG_CONFIRMED, event_data))
             self.kill()
 
         return consumed_event

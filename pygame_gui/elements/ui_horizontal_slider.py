@@ -3,7 +3,7 @@ from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
-from pygame_gui._constants import UI_HORIZONTAL_SLIDER_MOVED, UI_BUTTON_PRESSED
+from pygame_gui._constants import UI_HORIZONTAL_SLIDER_MOVED, UI_BUTTON_PRESSED, OldType
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -311,12 +311,18 @@ class UIHorizontalSlider(UIElement):
             if not self.has_been_moved_by_user_recently:
                 self.has_been_moved_by_user_recently = True
 
-            event_data = {'user_type': UI_HORIZONTAL_SLIDER_MOVED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_HORIZONTAL_SLIDER_MOVED),
                           'value': self.current_value,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            slider_moved_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(slider_moved_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'value': self.current_value,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
 
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False

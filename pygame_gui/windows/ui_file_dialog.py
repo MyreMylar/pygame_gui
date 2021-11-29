@@ -9,7 +9,7 @@ from pygame_gui.core.utility import translate
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
-from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
+from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, OldType
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_FILE_DIALOG_PATH_PICKED
 
@@ -467,10 +467,16 @@ class UIFileDialog(UIWindow):
         if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
                 and event.ui_element == self.ok_button
                 and self._validate_file_path(self.current_file_path)):
-            event_data = {'user_type': UI_FILE_DIALOG_PATH_PICKED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_FILE_DIALOG_PATH_PICKED),
                           'text': str(self.current_file_path),
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            new_file_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(new_file_chosen_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'text': str(self.current_file_path),
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_FILE_DIALOG_PATH_PICKED, event_data))
             self.kill()

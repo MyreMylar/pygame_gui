@@ -167,9 +167,7 @@ class UIConsoleWindow(UIWindow):
                     self.current_logged_command = popped_command
                     self.command_entry.set_text(self.current_logged_command)
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_TEXT_ENTRY_FINISHED and
-                event.ui_element == self.command_entry):
+        if event.type == UI_TEXT_ENTRY_FINISHED and event.ui_element == self.command_entry:
             handled = True
             command = self.command_entry.get_text()
             command_for_log = command
@@ -180,16 +178,13 @@ class UIConsoleWindow(UIWindow):
             self.log.append_html_text(self.log_prefix + command_for_log + "<br>")
             self.command_entry.set_text("")
 
-            event_data = {'user_type': UI_CONSOLE_COMMAND_ENTERED,
-                          'command': command,
+            event_data = {'command': command,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            command_entered_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            command_entered_event = pygame.event.Event(UI_CONSOLE_COMMAND_ENTERED, event_data)
             pygame.event.post(command_entered_event)
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_TEXT_ENTRY_CHANGED and
-                event.ui_element == self.command_entry):
+        if event.type == UI_TEXT_ENTRY_CHANGED and event.ui_element == self.command_entry:
             self._restore_command_log_to_end()
 
         return handled
