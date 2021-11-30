@@ -1,5 +1,4 @@
-from typing import Union, Tuple, Dict
-
+from typing import Union, Tuple, Dict, FrozenSet, Iterable
 
 import pygame
 
@@ -51,6 +50,7 @@ class UIButton(UIElement):
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  allow_double_clicks: bool = False,
+                 generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
                  visible: int = 1
                  ):
 
@@ -84,8 +84,11 @@ class UIButton(UIElement):
         self.hover_time = 0.0
 
         # timer for double clicks
+        self.last_click_button = None
         self.allow_double_clicks = allow_double_clicks
         self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
+
+        self.generate_click_events_from = generate_click_events_from
 
         self.text_surface = None
         self.aligned_text_rect = None
@@ -305,11 +308,11 @@ class UIButton(UIElement):
         """
         consumed_event = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
-                    if (self.allow_double_clicks and
+                    if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
                         # old event to remove in 0.8.0
                         event_data = {'user_type': OldType(UI_BUTTON_DOUBLE_CLICKED),
@@ -319,7 +322,8 @@ class UIButton(UIElement):
 
                         # new event
                         event_data = {'ui_element': self,
-                                      'ui_object_id': self.most_specific_combined_id}
+                                      'ui_object_id': self.most_specific_combined_id,
+                                      'mouse_button': event.button}
                         pygame.event.post(pygame.event.Event(UI_BUTTON_DOUBLE_CLICKED, event_data))
                     else:
                         # old event to remove in 0.8.0
@@ -330,9 +334,11 @@ class UIButton(UIElement):
 
                         # new event
                         event_data = {'ui_element': self,
-                                      'ui_object_id': self.most_specific_combined_id}
+                                      'ui_object_id': self.most_specific_combined_id,
+                                      'mouse_button': event.button}
                         pygame.event.post(pygame.event.Event(UI_BUTTON_START_PRESS, event_data))
                         self.double_click_timer = 0.0
+                        self.last_click_button = event.button
                         self.held = True
                         self._set_active()
                         self.hover_time = 0.0
@@ -340,7 +346,7 @@ class UIButton(UIElement):
                             self.tool_tip.kill()
                             self.tool_tip = None
                 consumed_event = True
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONUP and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if (self.is_enabled and
                     self.drawable_shape.collide_point(scaled_mouse_pos) and
@@ -358,7 +364,8 @@ class UIButton(UIElement):
 
                 # new event
                 event_data = {'ui_element': self,
-                              'ui_object_id': self.most_specific_combined_id}
+                              'ui_object_id': self.most_specific_combined_id,
+                              'mouse_button': event.button}
                 pygame.event.post(pygame.event.Event(UI_BUTTON_PRESSED, event_data))
 
             if self.is_enabled and self.held:
