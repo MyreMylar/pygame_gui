@@ -332,6 +332,7 @@ class UIHorizontalSlider(UIElement):
                     if self.get_current_value() > self.value_range[0]:
                         self.set_current_value(self.get_current_value() - self.increment, False)
                         processed_event = True
+
             elif event.ui_element == self.right_button:
                 if self.button_held_repeat_acc < self.button_held_repeat_time:
                     if self.get_current_value() < self.value_range[1]:
@@ -365,7 +366,7 @@ class UIHorizontalSlider(UIElement):
 
         min_value = min(self.value_range[0], self.value_range[1])
         max_value = max(self.value_range[0], self.value_range[1])
-        if value <= min_value or value >= max_value:
+        if value < min_value or value > max_value:
             if warn:
                 warnings.warn('value not in range', UserWarning)
                 return

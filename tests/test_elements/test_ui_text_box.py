@@ -417,7 +417,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         with pytest.warns(UserWarning, match="Unsupported effect name"):
-            text_box.set_active_effect(pygame_gui.UI_BUTTON_PRESSED)
+            text_box.set_active_effect("ghost_text")
 
     def test_set_active_effect_none(self, _init_pygame: None,
                                     default_ui_manager: UIManager,
