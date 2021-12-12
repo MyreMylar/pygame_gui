@@ -401,7 +401,9 @@ class UITextBox(UIElement):
 
         if self.active_text_effect is not None:
             self.active_text_effect.update(time_delta)
-            if self.active_text_effect.has_text_block_changed():
+            # update can set effect to None
+            if (self.active_text_effect is not None and
+                    self.active_text_effect.has_text_block_changed()):
                 self.redraw_from_text_block()
 
         if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
@@ -715,7 +717,7 @@ class UITextBox(UIElement):
             self.active_text_effect = None
         elif isinstance(effect_name, str):
             if effect_name == TEXT_EFFECT_TYPING_APPEAR:
-                effect = TypingAppearEffect(self.text_box_layout)
+                effect = TypingAppearEffect(self)
                 self.active_text_effect = effect
             elif effect_name == TEXT_EFFECT_FADE_IN:
                 effect = FadeInEffect(self.text_box_layout)
