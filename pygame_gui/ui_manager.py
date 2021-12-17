@@ -42,6 +42,7 @@ class UIManager(IUIManagerInterface):
                  translation_directory_paths: List[str] = None):
 
         # Translation stuff
+        self._locale = starting_language
         root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         translations_path = os.path.normpath(os.path.join(root_path,
                                                           'pygame_gui/data/translations/'))
@@ -52,7 +53,7 @@ class UIManager(IUIManagerInterface):
                 # check this is a valid path
                 i18n.load_path.append(path)
 
-        i18n.set('locale', starting_language)
+        i18n.set('locale', self._locale)
 
         # Pygame compat
         try:
@@ -69,7 +70,7 @@ class UIManager(IUIManagerInterface):
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme(self.resource_loader, starting_language)
+        self.ui_theme = UIAppearanceTheme(self.resource_loader, self._locale)
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
@@ -556,8 +557,12 @@ class UIManager(IUIManagerInterface):
                                         'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
 
     def set_locale(self, locale: str):
-        i18n.set('locale', locale)
-        self.ui_theme.get_font_dictionary().set_locale(locale)
+        self._locale = locale
+        i18n.set('locale', self._locale)
+        self.ui_theme.get_font_dictionary().set_locale(self._locale)
         for sprite in self.ui_group.sprites():
             if isinstance(sprite, IUIElementInterface):
                 sprite.on_locale_changed()
+
+    def get_locale(self):
+        return self._locale

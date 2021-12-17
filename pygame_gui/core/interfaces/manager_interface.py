@@ -236,3 +236,21 @@ class IUIManagerInterface(metaclass=ABCMeta):
         :return: A tool tip placed somewhere on the screen.
 
         """
+
+    @abstractmethod
+    def set_locale(self, locale: str):
+        """
+        Set a locale language code to use in the UIManager
+
+        :param locale: A two letter ISO 639-1 code for a supported language.
+
+        TODO: Make this raise an exception for an unsupported language?
+        """
+
+    @abstractmethod
+    def get_locale(self) -> str:
+        """
+        Get the locale language code being used in the UIManager
+
+        :return: A two letter ISO 639-1 code for the current locale.
+        """

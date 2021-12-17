@@ -47,19 +47,26 @@ class UITextEntryLine(UIElement):
                     may override this.
     """
 
-    _number_character_set = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    _number_character_set = {'en': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
 
     # excluding these characters won't ensure that user entered text is a valid filename but they
     # can help reduce the problems that input will leave you with.
-    _forbidden_file_path_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '\0', '.']
+    _forbidden_file_path_characters = {'en': ['<', '>', ':', '"', '/',
+                                              '\\', '|', '?', '*', '\0', '.']}
 
-    _alphabet_characters_lower = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                                  'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    _alphabet_characters_upper = [char.upper() for char in _alphabet_characters_lower]
+    _alphabet_characters_lower = {'en': ['a', 'b', 'c', 'd', 'e', 'f', 'g',
+                                         'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                                         'o', 'p', 'q', 'r', 's', 't', 'u',
+                                         'v', 'w', 'x', 'y', 'z']}
+    _alphabet_characters_upper = {'en': [char.upper() for char in _alphabet_characters_lower['en']],
+                                  'ja': [],  # no upper case in japanese
+                                  'zh': []}  # no upper case in chinese
 
-    _alphabet_characters_all = _alphabet_characters_lower + _alphabet_characters_upper
+    _alphabet_characters_all = {'en': (_alphabet_characters_lower['en'] +
+                                       _alphabet_characters_upper['en'])}
 
-    _alpha_numeric_characters = _alphabet_characters_all + _number_character_set
+    _alpha_numeric_characters = {'en': (_alphabet_characters_all['en'] +
+                                        _number_character_set['en'])}
 
     def __init__(self,
                  relative_rect: pygame.Rect,
@@ -720,11 +727,23 @@ class UITextEntryLine(UIElement):
         """
         if isinstance(allowed_characters, str):
             if allowed_characters == 'numbers':
-                self.allowed_characters = UITextEntryLine._number_character_set
+                if self.ui_manager.get_locale() in UITextEntryLine._number_character_set:
+                    self.allowed_characters = UITextEntryLine._number_character_set[
+                        self.ui_manager.get_locale()]
+                else:
+                    self.allowed_characters = UITextEntryLine._number_character_set['en']
             elif allowed_characters == 'letters':
-                self.allowed_characters = UITextEntryLine._alphabet_characters_all
+                if self.ui_manager.get_locale() in UITextEntryLine._alphabet_characters_all:
+                    self.allowed_characters = UITextEntryLine._alphabet_characters_all[
+                        self.ui_manager.get_locale()]
+                else:
+                    self.allowed_characters = UITextEntryLine._alphabet_characters_all['en']
             elif allowed_characters == 'alpha_numeric':
-                self.allowed_characters = UITextEntryLine._alpha_numeric_characters
+                if self.ui_manager.get_locale() in UITextEntryLine._alpha_numeric_characters:
+                    self.allowed_characters = UITextEntryLine._alpha_numeric_characters[
+                        self.ui_manager.get_locale()]
+                else:
+                    self.allowed_characters = UITextEntryLine._alpha_numeric_characters['en']
             else:
                 warnings.warn('Trying to set allowed characters by type string, but no match: '
                               'did you mean to use a list?')
@@ -747,9 +766,18 @@ class UITextEntryLine(UIElement):
         """
         if isinstance(forbidden_characters, str):
             if forbidden_characters == 'numbers':
-                self.forbidden_characters = UITextEntryLine._number_character_set
+                if self.ui_manager.get_locale() in UITextEntryLine._number_character_set:
+                    self.forbidden_characters = UITextEntryLine._number_character_set[
+                        self.ui_manager.get_locale()]
+                else:
+                    self.forbidden_characters = UITextEntryLine._number_character_set['en']
             elif forbidden_characters == 'forbidden_file_path':
-                self.forbidden_characters = UITextEntryLine._forbidden_file_path_characters
+                if self.ui_manager.get_locale() in UITextEntryLine._forbidden_file_path_characters:
+                    self.forbidden_characters = UITextEntryLine._forbidden_file_path_characters[
+                        self.ui_manager.get_locale()]
+                else:
+                    self.forbidden_characters = (
+                        UITextEntryLine._forbidden_file_path_characters['en'])
             else:
                 warnings.warn('Trying to set forbidden characters by type string, but no match: '
                               'did you mean to use a list?')
