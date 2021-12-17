@@ -9,7 +9,7 @@ from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
 
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.utility import clipboard_paste, clipboard_copy
+from pygame_gui.core.utility import clipboard_paste, clipboard_copy, translate
 
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -899,3 +899,11 @@ class UITextEntryLine(UIElement):
             self.drawable_shape.set_active_state('normal')
             self.background_and_border = self.drawable_shape.get_surface('normal')
             self.redraw()
+
+    def on_locale_changed(self):
+        font = self.ui_theme.get_font(self.combined_element_ids)
+        if font != self.font:
+            self.font = font
+            self.rebuild()
+        else:
+            self.drawable_shape.set_text(translate(self.text))

@@ -1,0 +1,34 @@
+{
+  "ru": {
+    "Confirm": "Подтверждать",
+    "OK": "В ПОРЯДКЕ",
+    "Cancel": "Отмена",
+    "Dismiss": "Увольнять",
+    "English": "английский",
+    "French": "Французский",
+    "Japanese": "японский язык",
+    "German": "Немецкий",
+    "Italian": "Итальянский",
+    "Spanish": "испанский язык",
+    "Indonesian": "индонезийский",
+    "Chinese": "китайский язык",
+    "Portuguese": "португальский",
+    "Russian": "русский",
+    "colour_picker_title_bar": "Палитра цветов",
+    "Saturation_S": "н:",
+    "Value_V": "я:",
+    "Hue_H": "о:",
+    "Red_R": "к:",
+    "Green_G": "з:",
+    "Blue_B": "с:",
+    "console_title_bar": "Консоль",
+    "message_window_title_bar": "Сообщение",
+    "file_dialog_title_bar": "Диалог файла",
+    "Home_directory": "Домашний каталог",
+    "Delete": "Удалить",
+    "Parent_directory": "Родительский каталог",
+    "Refresh_directory": "Обновить каталог",
+    "Delete_filename": "Удалить %{file_name} ?"
+
+  }
+}

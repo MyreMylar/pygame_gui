@@ -68,7 +68,7 @@ class UIManager(IUIManagerInterface):
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme(self.resource_loader)
+        self.ui_theme = UIAppearanceTheme(self.resource_loader, starting_language)
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
@@ -556,6 +556,7 @@ class UIManager(IUIManagerInterface):
 
     def set_locale(self, locale: str):
         i18n.set('locale', locale)
+        self.ui_theme.get_font_dictionary().set_locale(locale)
         for sprite in self.ui_group.sprites():
             if isinstance(sprite, IUIElementInterface):
                 sprite.on_locale_changed()

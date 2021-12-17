@@ -128,3 +128,10 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         a debugging mode.
 
         """
+
+    def set_locale(self, new_locale: str):
+        """
+        This may change the default font.
+
+        :param new_locale: The new locale to set, a two letter country code ISO 639-1
+        """

@@ -63,7 +63,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     For more information on theme files see the specific documentation elsewhere.
     """
 
-    def __init__(self, resource_loader: IResourceLoader):
+    def __init__(self, resource_loader: IResourceLoader, locale: str):
 
         self._resource_loader = resource_loader
 
@@ -73,7 +73,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         # colours for specific elements stored by element id then colour id
         self.ui_element_colours = {}
-        self.font_dictionary = UIFontDictionary(self._resource_loader)
+        self.font_dictionary = UIFontDictionary(self._resource_loader, locale)
         self.shadow_generator = ShadowGenerator()
         self.shape_cache = SurfaceCache()
 
@@ -512,7 +512,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             if combined_element_id in self.ui_element_fonts_info:
                 return self.ui_element_fonts_info[combined_element_id]
 
-        return self.font_dictionary.default_font_info
+        return self.font_dictionary.default_font.info
 
     def get_font(self, combined_element_ids: List[str]) -> pygame.freetype.Font:
         """
@@ -871,7 +871,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         try:
             font_info_dict['size'] = int(file_dict['size'])
         except ValueError:
-            default_size = self.font_dictionary.default_font_size
+            default_size = self.font_dictionary.default_font.size
             font_info_dict['size'] = default_size
         if 'bold' in file_dict:
             try:

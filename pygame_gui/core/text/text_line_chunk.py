@@ -54,9 +54,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
             # expand our text chunk if we have a text shadow
             text_shadow_width = self.text_shadow_data[0]
-        text_width = sum([char_metric[4]
-                          for char_metric in
-                          font.get_metrics(text)]) + (2 * text_shadow_width)
+        text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
         text_height = text_rect.height
         if max_dimensions is not None:
             if max_dimensions[0] != -1:
@@ -157,9 +155,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
         # to make the surface wide enough
-        chunk_draw_width = sum([char_metric[4]
-                                for char_metric in
-                                self.font.get_metrics(final_str_text)])
+        chunk_draw_width = self._text_render_width(final_str_text, self.font)
         chunk_draw_height = row_chunk_height
         chunk_x_origin = 0
         text_shadow_width = 0
@@ -429,9 +425,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (sum([char_metric[4]  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                              for char_metric in
-                              self.font.get_metrics(self.text)]),
+            self.size = (self._text_render_width(self.text, self.font),
                          self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
@@ -493,10 +487,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (sum([char_metric[4] # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                              for char_metric in
-                              self.font.get_metrics(self.text)]),
-                         self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.size = (self._text_render_width(self.text), self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
@@ -554,7 +545,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect('A')
         else:
             text_rect = self.font.get_rect(self.text)
-        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
@@ -579,7 +570,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect('A')
         else:
             text_rect = self.font.get_rect(self.text)
-        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
@@ -604,7 +595,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect('A')
         else:
             text_rect = self.font.get_rect(self.text)
-        text_width = sum([char_metric[4] for char_metric in self.font.get_metrics(self.text)])
+        text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
@@ -663,3 +654,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                           self.row_bg_height,
                           self.layout_x_offset,
                           self.letter_end)
+
+    @staticmethod
+    def _text_render_width(text: str, font):
+        return sum([char_metric[4] if char_metric is not None else 0
+                    for char_metric in font.get_metrics(text)])

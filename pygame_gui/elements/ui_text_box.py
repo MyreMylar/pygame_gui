@@ -728,7 +728,7 @@ class UITextBox(UIElement):
             else:
                 warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
 
-    def rebuild_from_changed_theme_data(self):
+    def rebuild_from_changed_theme_data(self, locale_changed: bool = False):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
@@ -776,7 +776,7 @@ class UITextBox(UIElement):
         if self._check_link_style_changed():
             has_any_changed = True
 
-        if has_any_changed:
+        if has_any_changed or locale_changed:
             self.parser = HTMLParser(self.ui_theme, self.combined_element_ids,
                                      self.link_style, line_spacing=1.25)
             self.rebuild()
@@ -917,4 +917,4 @@ class UITextBox(UIElement):
             self.redraw_from_text_block()
 
     def on_locale_changed(self):
-        self.rebuild()
+        self.rebuild_from_changed_theme_data(locale_changed=True)

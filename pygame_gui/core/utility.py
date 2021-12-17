@@ -27,16 +27,22 @@ import pygame.freetype
 # Only use pre-multiplied alpha if we are using SDL2
 USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2
 
-USE_IMPORT_LIB_RESOURCE = False
-try:
-    from importlib.resources import open_binary, read_binary
-    USE_IMPORT_LIB_RESOURCE = True
-except ImportError:
-    try:
-        from importlib_resources import open_binary, read_binary
-        USE_IMPORT_LIB_RESOURCE = True
-    except ImportError:
-        raise ImportError('pygame-gui requires importlib.resources or importlib_resources')
+
+if sys.version_info < (3, 9):
+    import importlib_resources as resources
+else:
+    from importlib import resources
+
+# USE_IMPORT_LIB_RESOURCE = False
+# try:
+#     from importlib.resources import open_binary, read_binary
+#     USE_IMPORT_LIB_RESOURCE = True
+# except ImportError:
+#     try:
+#         from importlib_resources import open_binary, read_binary
+#         USE_IMPORT_LIB_RESOURCE = True
+#     except ImportError:
+#         raise ImportError('pygame-gui requires importlib.resources or importlib_resources')
 
 PLATFORM = platform.system().upper()
 if PLATFORM == 'WINDOWS':
@@ -401,19 +407,19 @@ class FontResource:
         """
         error = None
         if isinstance(self.location, PackageResource):
-            if USE_IMPORT_LIB_RESOURCE:
-                try:
-                    self.loaded_font = pygame.freetype.Font(
-                        io.BytesIO(read_binary(self.location.package,
-                                               self.location.resource)), self.size, resolution=72)
-                    self.loaded_font.pad = True
-                    self.loaded_font.origin = True
-                    if self.force_style:
-                        self.loaded_font.strong = self.style['bold']
-                        self.loaded_font.oblique = self.style['italic']
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
+            try:
+                self.loaded_font = pygame.freetype.Font(
+                    io.BytesIO((resources.files(self.location.package) /
+                                self.location.resource).read_bytes()),
+                    self.size, resolution=72)
+                self.loaded_font.pad = True
+                self.loaded_font.origin = True
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
             # elif USE_FILE_PATH:
             #     try:
             #         self.loaded_font = pygame.freetype.Font(self.location.to_path(),
@@ -481,14 +487,13 @@ class ImageResource:
         """
         error = None
         if isinstance(self.location, PackageResource):
-            if USE_IMPORT_LIB_RESOURCE:
-                try:
-                    with open_binary(self.location.package,
-                                     self.location.resource) as open_resource:
-                        self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
+            try:
+                with (resources.files(self.location.package) /
+                      self.location.resource).open('rb') as open_resource:
+                    self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
 
             # elif USE_FILE_PATH:
             #     try:

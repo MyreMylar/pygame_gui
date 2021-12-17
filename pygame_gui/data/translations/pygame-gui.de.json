@@ -1,0 +1,34 @@
+{
+  "de": {
+    "Confirm": "Bestätigen",
+    "OK": "OK",
+    "Cancel": "Abbrechen",
+    "Dismiss": "Zurückweisen",
+    "English": "Englisch",
+    "French": "Französisch",
+    "Japanese": "Japanisch",
+    "German": "Deutsch",
+    "Italian": "Italienisch",
+    "Spanish": "Spanisch",
+    "Indonesian": "Indonesisch",
+    "Chinese": "Chinesisch",
+    "Portuguese": "Portugiesisch",
+    "Russian": "Russisch",
+    "colour_picker_title_bar": "Farbauswahl",
+    "Saturation_S": "S:",
+    "Value_V": "L:",
+    "Hue_H": "F:",
+    "Red_R": "R:",
+    "Green_G": "G:",
+    "Blue_B": "B:",
+    "console_title_bar": "Konsole",
+    "message_window_title_bar": "Nachricht",
+    "file_dialog_title_bar": "Dateidialog",
+    "Home_directory": "Home-Verzeichnis",
+    "Delete": "Löschen",
+    "Parent_directory": "Übergeordnetes Verzeichnis",
+    "Refresh_directory": "Verzeichnis aktualisieren",
+    "Delete_filename": "Löschen %{file_name} ?"
+
+  }
+}

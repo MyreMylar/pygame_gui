@@ -220,4 +220,9 @@ class UILabel(UIElement):
             self.drawable_shape.set_active_state('normal')
 
     def on_locale_changed(self):
-        self.drawable_shape.set_text(translate(self.text))
+        font = self.ui_theme.get_font(self.combined_element_ids)
+        if font != self.font:
+            self.font = font
+            self.rebuild()
+        else:
+            self.drawable_shape.set_text(translate(self.text))
