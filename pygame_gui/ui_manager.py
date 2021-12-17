@@ -45,6 +45,7 @@ class UIManager(IUIManagerInterface):
         root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         translations_path = os.path.normpath(os.path.join(root_path,
                                                           'pygame_gui/data/translations/'))
+        i18n.set('file_format', 'json')
         i18n.load_path.append(translations_path)
         if translation_directory_paths is not None:
             for path in translation_directory_paths:
