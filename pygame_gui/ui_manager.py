@@ -559,6 +559,7 @@ class UIManager(IUIManagerInterface):
     def set_locale(self, locale: str):
         self._locale = locale
         i18n.set('locale', self._locale)
+        self.ui_theme.set_locale(self._locale)
         self.ui_theme.get_font_dictionary().set_locale(self._locale)
         for sprite in self.ui_group.sprites():
             if isinstance(sprite, IUIElementInterface):

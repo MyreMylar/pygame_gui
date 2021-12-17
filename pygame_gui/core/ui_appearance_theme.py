@@ -66,7 +66,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def __init__(self, resource_loader: IResourceLoader, locale: str):
 
         self._resource_loader = resource_loader
-
+        self._locale = locale
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element
         self.base_colours = {}
@@ -166,58 +166,60 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Loads all fonts specified in our loaded theme.
         """
-        for element_key, font_info in self.ui_element_fonts_info.items():
+        for element_key, locale_font_info in self.ui_element_fonts_info.items():
+            for locale_key, font_info in locale_font_info.items():
+                if 'regular_path' in font_info:
+                    regular_path = font_info['regular_path']
+                    self.font_dictionary.add_font_path(font_info['name'],
+                                                       regular_path,
+                                                       font_info.get('bold_path', None),
+                                                       font_info.get('italic_path', None),
+                                                       font_info.get('bold_italic_path', None))
+                elif 'regular_resource' in font_info:
+                    bold_resource = None
+                    italic_resource = None
+                    bld_it_resource = None
+                    reg_res_data = font_info['regular_resource']
+                    regular_resource = PackageResource(package=reg_res_data['package'],
+                                                       resource=reg_res_data['resource'])
 
-            if 'regular_path' in font_info:
-                regular_path = font_info['regular_path']
-                self.font_dictionary.add_font_path(font_info['name'],
-                                                   regular_path,
-                                                   font_info.get('bold_path', None),
-                                                   font_info.get('italic_path', None),
-                                                   font_info.get('bold_italic_path', None))
-            elif 'regular_resource' in font_info:
-                bold_resource = None
-                italic_resource = None
-                bld_it_resource = None
-                reg_res_data = font_info['regular_resource']
-                regular_resource = PackageResource(package=reg_res_data['package'],
-                                                   resource=reg_res_data['resource'])
+                    if 'bold_resource' in font_info:
+                        bold_res_data = font_info['bold_resource']
+                        bold_resource = PackageResource(package=bold_res_data['package'],
+                                                        resource=bold_res_data['resource'])
+                    if 'italic_resource' in font_info:
+                        italic_res_data = font_info['italic_resource']
+                        italic_resource = PackageResource(package=italic_res_data['package'],
+                                                          resource=italic_res_data['resource'])
+                    if 'bold_italic_resource' in font_info:
+                        bld_it_res_data = font_info['bold_italic_resource']
+                        bld_it_resource = PackageResource(package=bld_it_res_data['package'],
+                                                          resource=bld_it_res_data['resource'])
 
-                if 'bold_resource' in font_info:
-                    bold_res_data = font_info['bold_resource']
-                    bold_resource = PackageResource(package=bold_res_data['package'],
-                                                    resource=bold_res_data['resource'])
-                if 'italic_resource' in font_info:
-                    italic_res_data = font_info['italic_resource']
-                    italic_resource = PackageResource(package=italic_res_data['package'],
-                                                      resource=italic_res_data['resource'])
-                if 'bold_italic_resource' in font_info:
-                    bld_it_res_data = font_info['bold_italic_resource']
-                    bld_it_resource = PackageResource(package=bld_it_res_data['package'],
-                                                      resource=bld_it_res_data['resource'])
+                    self.font_dictionary.add_font_path(font_info['name'],
+                                                       regular_resource,
+                                                       bold_resource,
+                                                       italic_resource,
+                                                       bld_it_resource)
 
-                self.font_dictionary.add_font_path(font_info['name'],
-                                                   regular_resource,
-                                                   bold_resource,
-                                                   italic_resource,
-                                                   bld_it_resource)
+                font_id = self.font_dictionary.create_font_id(font_info['size'],
+                                                              font_info['name'],
+                                                              font_info['bold'],
+                                                              font_info['italic'])
 
-            font_id = self.font_dictionary.create_font_id(font_info['size'],
-                                                          font_info['name'],
-                                                          font_info['bold'],
-                                                          font_info['italic'])
+                if font_id not in self.font_dictionary.loaded_fonts:
+                    self.font_dictionary.preload_font(font_info['size'],
+                                                      font_info['name'],
+                                                      font_info['bold'],
+                                                      font_info['italic'])
 
-            if font_id not in self.font_dictionary.loaded_fonts:
-                self.font_dictionary.preload_font(font_info['size'],
-                                                  font_info['name'],
-                                                  font_info['bold'],
-                                                  font_info['italic'])
-
-            self.ele_font_res[element_key] = self.font_dictionary.find_font_resource(
-                font_info['size'],
-                font_info['name'],
-                font_info['bold'],
-                font_info['italic'])
+                if element_key not in self.ele_font_res:
+                    self.ele_font_res[element_key] = {}
+                self.ele_font_res[element_key][locale_key] = self.font_dictionary.find_font_resource(
+                    font_info['size'],
+                    font_info['name'],
+                    font_info['bold'],
+                    font_info['italic'])
 
     def _load_images(self):
         """
@@ -510,7 +512,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ui_element_fonts_info:
-                return self.ui_element_fonts_info[combined_element_id]
+                if self._locale in self.ui_element_fonts_info[combined_element_id]:
+                    return self.ui_element_fonts_info[combined_element_id][self._locale]
+                else:
+                    return self.ui_element_fonts_info[combined_element_id]['en']
 
         return self.font_dictionary.default_font.info
 
@@ -528,7 +533,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ele_font_res:
-                return self.ele_font_res[combined_element_id].loaded_font
+                if self._locale in self.ele_font_res[combined_element_id]:
+                    return self.ele_font_res[combined_element_id][self._locale].loaded_font
+                else:
+                    return self.ele_font_res[combined_element_id]['en'].loaded_font
 
         return font
 
@@ -719,8 +727,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             prototype_font = self.ui_element_fonts_info[prototype_id]
             if element_name not in self.ui_element_fonts_info:
                 self.ui_element_fonts_info[element_name] = {}
-            for data_key in prototype_font:
-                self.ui_element_fonts_info[element_name][data_key] = prototype_font[data_key]
+
+            for locale_key in prototype_font:
+                if locale_key not in self.ui_element_fonts_info:
+                    self.ui_element_fonts_info[element_name][locale_key] = {}
+
+                for data_key in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][data_key] = prototype_font[locale_key][data_key]
             found_prototypes.append(prototype_font)
 
         if prototype_id in self.ui_element_colours:
@@ -866,7 +879,15 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         file_dict = theme_dict[element_name][data_type]
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
-        font_info_dict = self.ui_element_fonts_info[element_name]
+
+        locale = 'en'
+        if 'locale' in file_dict:
+            locale = file_dict['locale']
+
+        if locale not in self.ui_element_fonts_info[element_name]:
+            self.ui_element_fonts_info[element_name][locale] = {}
+
+        font_info_dict = self.ui_element_fonts_info[element_name][locale]
         font_info_dict['name'] = file_dict['name']
         try:
             font_info_dict['size'] = int(file_dict['size'])
@@ -992,3 +1013,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             loaded_colour_or_gradient = pygame.Color("#000000")
 
         return loaded_colour_or_gradient
+
+    def set_locale(self, locale: str):
+        self._locale = locale
