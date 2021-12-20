@@ -67,6 +67,8 @@ class UIButton(UIElement):
 
         self.text = text
 
+        self.dynamic_width = False
+        self.dynamic_height = False
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
@@ -651,6 +653,12 @@ class UIButton(UIElement):
         A complete rebuild of the drawable shape used by this button.
 
         """
+        self.rect.width = -1 if self.dynamic_width else self.rect.width
+        self.relative_rect.width = -1 if self.dynamic_width else self.relative_rect.width
+
+        self.rect.height = -1 if self.dynamic_height else self.rect.height
+        self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
+
         theming_parameters = {'normal_bg': self.colours['normal_bg'],
                               'normal_text': self.colours['normal_text'],
                               'normal_text_shadow': self.colours['normal_text_shadow'],
@@ -709,6 +717,10 @@ class UIButton(UIElement):
         self.on_fresh_drawable_shape_ready()
 
         if self.relative_rect.width == -1 or self.relative_rect.height == -1:
+            # TODO: This all seems a bit wrong. Check over the docs and figure out what should
+            #  happen according to those.
+            self.dynamic_width = True if self.relative_rect.width == -1 else False
+            self.dynamic_height = True if self.relative_rect.height == -1 else False
             old_width = self.relative_rect.width
             old_height = self.relative_rect.height
             self.set_dimensions(self.image.get_size())

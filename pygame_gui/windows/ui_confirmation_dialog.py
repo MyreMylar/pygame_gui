@@ -53,17 +53,7 @@ class UIConfirmationDialog(UIWindow):
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
-        self.confirm_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                       text=action_short_name,
-                                       manager=self.ui_manager,
-                                       container=self,
-                                       object_id='#confirm_button',
-                                       anchors={'left': 'right',
-                                                'right': 'right',
-                                                'top': 'bottom',
-                                                'bottom': 'bottom'})
-
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
+        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                       text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
@@ -72,6 +62,19 @@ class UIConfirmationDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
+
+        confirm_button_spacing = self.cancel_button.get_relative_rect().left - 10
+
+        self.confirm_button = UIButton(relative_rect=pygame.Rect(confirm_button_spacing,
+                                                                 -40, -1, 30),
+                                       text=action_short_name,
+                                       manager=self.ui_manager,
+                                       container=self,
+                                       object_id='#confirm_button',
+                                       anchors={'left': 'right',
+                                                'right': 'right',
+                                                'top': 'bottom',
+                                                'bottom': 'bottom'})
 
         text_width = self.get_container().get_size()[0] - 10
         text_height = self.get_container().get_size()[1] - 50
