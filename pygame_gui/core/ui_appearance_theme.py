@@ -685,9 +685,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             self._load_prototype(element_name, theme_dict)
                             for data_type in theme_dict[element_name]:
                                 if data_type == 'font':
-                                    self._load_element_font_data_from_theme(data_type,
-                                                                            element_name,
-                                                                            theme_dict)
+                                    file_dict = theme_dict[element_name][data_type]
+                                    if isinstance(file_dict, list):
+                                        for item in file_dict:
+                                            self._load_element_font_data_from_theme(item,
+                                                                                    element_name)
+                                    else:
+                                        self._load_element_font_data_from_theme(file_dict,
+                                                                                element_name)
 
                                 if data_type == 'colours':
                                     self._load_element_colour_data_from_theme(data_type,
@@ -863,9 +868,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.ui_element_colours[element_name][colour_key] = colour
 
     def _load_element_font_data_from_theme(self,
-                                           data_type: str,
-                                           element_name: str,
-                                           theme_dict: Dict[str, Any]):
+                                           file_dict,
+                                           element_name: str):
         """
         Load font theming data direct from the theme file's data dictionary into our font
         data dictionary.
@@ -876,7 +880,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param element_name: The theming element ID that this data belongs to.
         :param theme_dict: The data dictionary from the theming file to load data from.
         """
-        file_dict = theme_dict[element_name][data_type]
+
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
 
