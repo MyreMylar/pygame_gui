@@ -88,7 +88,7 @@ class UIColourChannelEditor(UIElement):
                                              anchors=anchors,
                                              visible=self.visible)
 
-        default_sizes = {'space_between': 5,
+        default_sizes = {'space_between': 3,
                          'label_width': 17,
                          'entry_width': 43,
                          'line_height': 29,
@@ -96,7 +96,7 @@ class UIColourChannelEditor(UIElement):
                          'slider_vert_space': 4}
 
         self.label = UILabel(pygame.Rect(0, 0,
-                                         default_sizes['label_width'],
+                                         -1,
                                          default_sizes['line_height']),
                              text=name,
                              manager=self.ui_manager,
@@ -122,7 +122,7 @@ class UIColourChannelEditor(UIElement):
         slider_width = (self.entry.rect.left -
                         self.label.rect.right) - (2 * default_sizes['space_between'])
 
-        self.slider = UIHorizontalSlider(pygame.Rect((default_sizes['label_width'] +
+        self.slider = UIHorizontalSlider(pygame.Rect((self.label.get_abs_rect().width +
                                                       default_sizes['space_between']),
                                                      default_sizes['slider_vert_space'],
                                                      slider_width,
@@ -343,17 +343,7 @@ class UIColourPickerDialog(UIWindow):
 
         self.current_colour = initial_colour
 
-        self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                  text='pygame-gui.OK',
-                                  manager=self.ui_manager,
-                                  container=self,
-                                  object_id='#ok_button',
-                                  anchors={'left': 'right',
-                                           'right': 'right',
-                                           'top': 'bottom',
-                                           'bottom': 'bottom'})
-
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
+        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                       text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
@@ -362,6 +352,17 @@ class UIColourPickerDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
+
+        self.ok_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                  text='pygame-gui.OK',
+                                  manager=self.ui_manager,
+                                  container=self,
+                                  object_id='#ok_button',
+                                  anchors={'left': 'right',
+                                           'right': 'right',
+                                           'top': 'bottom',
+                                           'bottom': 'bottom',
+                                           'right_target': self.cancel_button})
 
         default_sizes = {'element_spacing': 20,
                          'channel_spacing': 11,

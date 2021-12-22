@@ -330,3 +330,10 @@ class IUIElementInterface(metaclass=ABCMeta):
     @abstractmethod
     def on_locale_changed(self):
         pass
+
+    @abstractmethod
+    def get_anchor_targets(self) -> list:
+        """
+        Get any anchor targets this element has so we can update them when their targets change
+        :return: the list of anchor targets.
+        """

@@ -69,6 +69,7 @@ class UIButton(UIElement):
 
         self.dynamic_width = False
         self.dynamic_height = False
+        self.dynamic_dimensions_orig_top_left = relative_rect.topleft
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
@@ -447,7 +448,10 @@ class UIButton(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.drawable_shape.set_text(translate(self.text))
+            if self.dynamic_width:
+                self.rebuild()
+            else:
+                self.drawable_shape.set_text(translate(self.text))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -717,25 +721,22 @@ class UIButton(UIElement):
         self.on_fresh_drawable_shape_ready()
 
         if self.relative_rect.width == -1 or self.relative_rect.height == -1:
-            # TODO: This all seems a bit wrong. Check over the docs and figure out what should
-            #  happen according to those.
             self.dynamic_width = True if self.relative_rect.width == -1 else False
             self.dynamic_height = True if self.relative_rect.height == -1 else False
-            old_width = self.relative_rect.width
-            old_height = self.relative_rect.height
+
             self.set_dimensions(self.image.get_size())
 
             # if we have anchored the left side of our button to the right of it's container then
             # changing the width is going to mess up the horiz position as well.
             new_left = self.relative_rect.left
             new_top = self.relative_rect.top
-            if self.anchors['left'] == 'right':
-                left_offset = self.relative_rect.left + old_width
+            if self.anchors['left'] == 'right' and self.dynamic_width:
+                left_offset = self.dynamic_dimensions_orig_top_left[0]
                 new_left = left_offset - self.relative_rect.width
             # if we have anchored the top side of our button to the bottom of it's container then
             # changing the height is going to mess up the vert position as well.
-            if self.anchors['top'] == 'bottom':
-                top_offset = self.relative_rect.top + old_height
+            if self.anchors['top'] == 'bottom' and self.dynamic_height:
+                top_offset = self.dynamic_dimensions_orig_top_left[1]
                 new_top = top_offset - self.relative_rect.height
 
             self.set_relative_position((new_left, new_top))
@@ -754,4 +755,7 @@ class UIButton(UIElement):
             self.font = font
             self.rebuild()
         else:
-            self.drawable_shape.set_text(translate(self.text))
+            if self.dynamic_width:
+                self.rebuild()
+            else:
+                self.drawable_shape.set_text(translate(self.text))

@@ -84,19 +84,7 @@ class UIFileDialog(UIWindow):
         self.current_file_list = None  # type: Union[List[str], None]
         self.update_current_file_list()
 
-        self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                  text='pygame-gui.OK',
-                                  manager=self.ui_manager,
-                                  container=self,
-                                  object_id='#ok_button',
-                                  anchors={'left': 'right',
-                                           'right': 'right',
-                                           'top': 'bottom',
-                                           'bottom': 'bottom'})
-        if not self._validate_file_path(self.current_file_path):
-            self.ok_button.disable()
-
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
+        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                       text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
@@ -105,6 +93,20 @@ class UIFileDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
+
+        self.ok_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                  text='pygame-gui.OK',
+                                  manager=self.ui_manager,
+                                  container=self,
+                                  object_id='#ok_button',
+                                  anchors={'left': 'right',
+                                           'right': 'right',
+                                           'top': 'bottom',
+                                           'bottom': 'bottom',
+                                           'right_target': self.cancel_button})
+
+        if not self._validate_file_path(self.current_file_path):
+            self.ok_button.disable()
 
         self.home_button = UIButton(relative_rect=pygame.Rect(10, 10, 20, 20),
                                     text='⌂',

@@ -377,8 +377,8 @@
         "misc":
         {
             "text_shadow": "0",
-            "text_shadow_size": "1",
-            "text_shadow_offset": "1,1"
+            "text_shadow_size": "0",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "#colour_picker_dialog.colour_channel_editor.horizontal_slider":

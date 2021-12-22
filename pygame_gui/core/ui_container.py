@@ -323,3 +323,9 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     element.hide()
 
             self.visible = 0
+
+    def on_anchor_target_changed(self, target):
+        for element in self.elements:
+            if target in element.get_anchor_targets():
+                element.update_containing_rect_position()
+
