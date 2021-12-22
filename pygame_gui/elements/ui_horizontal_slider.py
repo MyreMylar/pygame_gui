@@ -104,7 +104,7 @@ class UIHorizontalSlider(UIElement):
 
         self.button_container = None
 
-        self.button_held_repeat_time = 0.3
+        self.button_held_repeat_time = 0.2
         self.button_held_repeat_acc = 0.0
 
         self.increment = click_increment
