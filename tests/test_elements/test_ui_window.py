@@ -307,7 +307,7 @@ class TestUIWindow:
 
         assert window.get_top_layer() == 4
         window.update(0.05)
-        assert window.get_top_layer() == 6
+        assert window.get_top_layer() == 5  # This used to be 6, maybe it should be - drop downs?
 
     def test_change_layer(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):

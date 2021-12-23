@@ -720,10 +720,10 @@ class UITextBox(UIElement):
                 effect = TypingAppearEffect(self)
                 self.active_text_effect = effect
             elif effect_name == TEXT_EFFECT_FADE_IN:
-                effect = FadeInEffect(self.text_box_layout)
+                effect = FadeInEffect(self)
                 self.active_text_effect = effect
             elif effect_name == TEXT_EFFECT_FADE_OUT:
-                effect = FadeOutEffect(self.text_box_layout)
+                effect = FadeOutEffect(self)
                 self.active_text_effect = effect
             else:
                 warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')

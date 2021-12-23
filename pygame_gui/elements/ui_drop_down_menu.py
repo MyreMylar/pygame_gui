@@ -656,7 +656,7 @@ class UIDropDownMenu(UIContainer):
                  ):
 
         super().__init__(relative_rect, manager, container=container,
-                         starting_height=2,
+                         starting_height=0,
                          anchors=anchors,
                          visible=visible)
 

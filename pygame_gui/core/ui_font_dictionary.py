@@ -13,19 +13,6 @@ from pygame_gui.core.utility import PackageResource
 from pygame_gui.core.utility import FontResource
 
 
-
-# First try importlib
-# Then importlib_resources - we've made this a dependency now
-# USE_IMPORT_LIB_RESOURCE = False
-
-# # importlib.resources  - added to standard library in Python 3.7
-# RESOURCES_MODULE_SPEC = find_spec(name="importlib.resources")
-# if RESOURCES_MODULE_SPEC is None:
-#     RESOURCES_MODULE_SPEC = find_spec(name="importlib_resources")
-#     USE_IMPORT_LIB_RESOURCE = True
-# else:
-#     USE_IMPORT_LIB_RESOURCE = True
-
 class DefaultFontData:
     def __init__(self, size: int, name: str, style: str,
                  regular_file_name: str,

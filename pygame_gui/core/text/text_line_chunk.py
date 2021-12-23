@@ -487,7 +487,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (self._text_render_width(self.text), self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.size = (self._text_render_width(self.text, self.font), self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
