@@ -31,6 +31,13 @@ The effect will start running immediately after calling this method. You can dea
 
    text_box.set_active_effect(None)
 
+Event when an effect is finished
+--------------------------------
+
+For effects that start, and then end after they have finished doing their thing - rather than looping forever, A GUI
+event is fired that you can check for in your event loop. It is called - UI_TEXT_EFFECT_FINISHED. You can read more
+about it in the :ref:`events` documentation.
+
 Fade In
 --------
 
