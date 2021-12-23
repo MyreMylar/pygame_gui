@@ -5,6 +5,39 @@ Change List
 
 A record of changes between versions of Pygame GUI.
 
+**Version 0.6.0** - The text update
+-----------------------------------------------------------------
+
+The focus of this update was on everything to do with text in the GUI
+
+Major Features
+...............................
+
+ - **Localization Support** - There is now some basic support for switching the language of the GUI to one of ten
+                              supported languages.
+ - **New Console Window** - A new default GUI element that provides support for text shell/console type user
+                            interaction.
+ - **Rewritten & unified text backend** - The text displaying and laying out portions of the GUI have all been
+                                          massively changed and all the GUI elements now all share common code.
+                                          This makes it easier to add new features to the text, and also have
+                                          them work everywhere.
+
+Minor features
+...............................
+
+
+Dropped compatibility
+..............................................
+
+
+Bug Fixes & Other Changes
+.........................................................
+
+
+Further thanks
+.............................
+
+
 **Version 0.5.7** - Hiding and better pygame 2 support
 -----------------------------------------------------------------
 

@@ -183,7 +183,7 @@ When we click on it. To do that we need to check the pygame event queue:
 
 .. code-block:: python
    :linenos:
-   :emphasize-lines: 28, 29, 30, 31
+   :emphasize-lines: 28, 29, 30
 
     import pygame
     import pygame_gui

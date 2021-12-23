@@ -87,6 +87,7 @@ Table of contents
    theme_guide
    events
    text_effects
+   localization
    freezing
    change_list
    modules
