@@ -392,18 +392,6 @@ class FontResource:
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
-            # elif USE_FILE_PATH:
-            #     try:
-            #         self.loaded_font = pygame.freetype.Font(self.location.to_path(),
-            #                                                 self.size, resolution=72)
-            #         self.loaded_font.pad = True
-            #         self.loaded_font.origin = True
-            #         if self.force_style:
-            #             self.loaded_font.strong = self.style['bold']
-            #             self.loaded_font.oblique = self.style['italic']
-            #     except (pygame.error, FileNotFoundError, OSError):
-            #         error = FileNotFoundError('Unable to load resource with path: ' +
-            #                                   str(self.location.to_path()))
 
         elif isinstance(self.location, str):
             try:

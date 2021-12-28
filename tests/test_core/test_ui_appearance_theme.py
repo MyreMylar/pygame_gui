@@ -1,26 +1,15 @@
 import os
-import io
-import base64
 import pytest
 import pygame
-import pygame_gui
 
-from pygame_gui.core._string_data import default_theme
 from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 from pygame_gui import PackageResource
 
 
-pygame_gui.core.ui_appearance_theme.default_theme = default_theme
-
-
 class TestUIAppearanceTheme:
     def test_creation(self, _init_pygame):
         UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-
-    def test_load_default_theme_from_strings(self, _init_pygame):
-        theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-        theme.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
 
     def test_load_non_default_theme_from_package(self, _init_pygame):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')

@@ -62,8 +62,6 @@ class UIConfirmationDialog(UIWindow):
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
 
-        # confirm_button_spacing = self.cancel_button.get_relative_rect().left - 10
-
         self.confirm_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                        text=action_short_name,
                                        manager=self.ui_manager,

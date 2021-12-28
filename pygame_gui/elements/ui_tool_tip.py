@@ -109,7 +109,7 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         """
 
-        window_rect = self.ui_manager.get_root_container().rect
+        window_rect = self.ui_manager.get_root_container().get_rect()
 
         if window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
             self.rect.left = int(position.x)

@@ -3,25 +3,12 @@ from setuptools import setup
 from setuptools.command.develop import develop
 
 
-class DevelopOnlyInstall(develop):
-    def run(self):
-        def _post_install():
-            from stringify import stringify_py
-
-            stringify_py(source_path='pygame_gui/data',
-                         destination_file='pygame_gui/core/_string_data.py')
-
-        atexit.register(_post_install)
-        develop.run(self)
-
-
 setup(
-      cmdclass={'develop': DevelopOnlyInstall},
       name='pygame_gui',
       version='0.6.0',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. "
-                       "Features HTML-style text formatting, "
+                       "Features HTML-style text formatting, localization,"
                        "theme files to control the look and a system to manage"
                        " multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
@@ -52,9 +39,10 @@ setup(
           'Intended Audience :: Developers',
           'Topic :: Software Development :: Build Tools',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
       ],
       )

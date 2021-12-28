@@ -54,12 +54,6 @@ class UIManager(IUIManagerInterface):
 
         i18n.set('locale', self._locale)
 
-        # Pygame compat
-        try:
-            pygame.MOUSEWHEEL
-        except AttributeError:
-            pygame.MOUSEWHEEL = -1
-
         # Threaded loading
         if resource_loader is None:
             auto_load = True
@@ -99,7 +93,7 @@ class UIManager(IUIManagerInterface):
 
         self.resizing_window_cursors = None
         self._load_default_cursors()
-        self.active_user_cursor = pygame.cursors.arrow
+        self.active_user_cursor = pygame.SYSTEM_CURSOR_ARROW
         self._active_cursor = self.active_user_cursor
 
         if auto_load:
@@ -281,14 +275,14 @@ class UIManager(IUIManagerInterface):
                 if new_cursor != self._active_cursor:
                     self._active_cursor = new_cursor
                     try:
-                        pygame.mouse.set_cursor(*self._active_cursor)
+                        pygame.mouse.set_cursor(self._active_cursor)
                     except pygame.error:
                         pass
 
         if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
             self._active_cursor = self.active_user_cursor
             try:
-                pygame.mouse.set_cursor(*self._active_cursor)
+                pygame.mouse.set_cursor(self._active_cursor)
             except pygame.error:
                 pass
 
@@ -484,13 +478,13 @@ class UIManager(IUIManagerInterface):
                                               Tuple[int, ...], Tuple[int, ...]]):
         """
         This is for users of the library to set the currently active cursor, it will be currently
-        only be overriden by the resizing cursors.
+        only be overridden by the resizing cursors.
 
         The expected input is in the same format as the standard pygame cursor module, except
         without expanding the initial Tuple. So, to call this function with the default pygame
         arrow cursor you would do:
 
-            manager.set_active_cursor(pygame.cursors.arrow)
+            manager.set_active_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
         """
 
@@ -541,19 +535,12 @@ class UIManager(IUIManagerInterface):
 
         """
         # cursors for resizing windows
-        x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
-        y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
-        xy_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_xy_strings)
-        list_yx = list(pygame.cursors.sizer_xy_strings)
-        list_yx.reverse()
-        yx_sizer_cursor = pygame.cursors.compile(tuple(list_yx))
-
-        self.resizing_window_cursors = {'xl': ((24, 16), (12, 8), *x_sizer_cursor),
-                                        'xr': ((24, 16), (8, 8), *x_sizer_cursor),
-                                        'yt': ((16, 24), (8, 12), *y_sizer_cursor),
-                                        'yb': ((16, 24), (8, 8), *y_sizer_cursor),
-                                        'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
-                                        'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
+        self.resizing_window_cursors = {'xl': pygame.SYSTEM_CURSOR_SIZEWE,
+                                        'xr': pygame.SYSTEM_CURSOR_SIZEWE,
+                                        'yt': pygame.SYSTEM_CURSOR_SIZENS,
+                                        'yb': pygame.SYSTEM_CURSOR_SIZENS,
+                                        'xy': pygame.SYSTEM_CURSOR_SIZENWSE,
+                                        'yx': pygame.SYSTEM_CURSOR_SIZENESW}
 
     def set_locale(self, locale: str):
         self._locale = locale

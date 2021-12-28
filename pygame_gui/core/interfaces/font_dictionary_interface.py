@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 
-import pygame
 import pygame.freetype
 
 

@@ -14,16 +14,6 @@ from pygame_gui.core.utility import clipboard_paste, clipboard_copy, translate
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    assert pygame.BUTTON_LEFT == 1
-    assert pygame.BUTTON_MIDDLE == 2
-    assert pygame.BUTTON_RIGHT == 3
-except (AttributeError, AssertionError):
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
-
 
 class UITextEntryLine(UIElement):
     """
@@ -339,7 +329,6 @@ class UITextEntryLine(UIElement):
         """
         super().focus()
         pygame.key.set_repeat(500, 25)
-        # self.redraw()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -418,6 +407,7 @@ class UITextEntryLine(UIElement):
                         high_end = max(self.select_range[0], self.select_range[1])
                         self.text = self.text[:low_end] + character + self.text[high_end:]
 
+                        self.drawable_shape.set_text(self.text)
                         self.edit_position = low_end + 1
                         self.select_range = [0, 0]
                     else:
@@ -427,8 +417,7 @@ class UITextEntryLine(UIElement):
                         display_character = character
                         if self.is_text_hidden:
                             display_character = '●'
-                        self.drawable_shape.text_box_layout.insert_text(display_character,
-                                                                        self.edit_position)
+                        self.drawable_shape.insert_text(display_character, self.edit_position)
 
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
@@ -595,7 +584,7 @@ class UITextEntryLine(UIElement):
                         display_new_text = new_text
                         if self.is_text_hidden:
                             display_new_text = '●' * len(new_text)
-                        self.drawable_shape.text_box_layout.insert_text(display_new_text, low_end)
+                        self.drawable_shape.insert_text(display_new_text, low_end)
                         self.edit_position = low_end + len(new_text)
                         self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                         self.select_range = [0, 0]
@@ -612,8 +601,7 @@ class UITextEntryLine(UIElement):
                         display_new_text = new_text
                         if self.is_text_hidden:
                             display_new_text = '●' * len(new_text)
-                        self.drawable_shape.text_box_layout.insert_text(display_new_text,
-                                                                        self.edit_position)
+                        self.drawable_shape.insert_text(display_new_text, self.edit_position)
                         self.edit_position += len(new_text)
                         self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                         self.cursor_has_moved_recently = True

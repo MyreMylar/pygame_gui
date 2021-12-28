@@ -1,7 +1,7 @@
 import math
 
 from collections import deque
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Optional
 
 import pygame
 
@@ -9,6 +9,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.utility import basic_blit
 
 from pygame_gui.core.text import TextLineChunkFTFont, TextBoxLayout
+from pygame_gui.core.text.html_parser import HTMLParser
 
 
 class DrawableShapeState:
@@ -540,6 +541,20 @@ class DrawableShape:
         self.theming['text'] = text
         self.build_text_layout()
         self.redraw_all_states()
+
+    def insert_text(self, text: str, layout_index: int, parser: Optional[HTMLParser] = None):
+        """
+        Update the theming when we insert text, then pass down to the layout to do the actual
+        inserting.
+        :param text: the text to insert
+        :param layout_index: where to insert it
+        :param parser: an optional parser
+        :return:
+        """
+        self.theming['text'] = (self.theming['text'][:layout_index] +
+                                text +
+                                self.theming['text'][layout_index:])
+        self.text_box_layout.insert_text(text, layout_index, parser)
 
     def toggle_text_cursor(self):
         """

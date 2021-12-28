@@ -13,16 +13,6 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleS
 
 from pygame_gui.elements.ui_button import UIButton
 
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    assert pygame.BUTTON_LEFT == 1
-    assert pygame.BUTTON_MIDDLE == 2
-    assert pygame.BUTTON_RIGHT == 3
-except (AttributeError, AssertionError):
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
-
 
 class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     """
@@ -231,7 +221,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 event.button == pygame.BUTTON_LEFT and self.resizing_mode_active):
             self.resizing_mode_active = False
 
-        if (event.type == UI_BUTTON_PRESSED and event.ui_element == self.close_window_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.close_window_button:
             self.on_close_window_button_pressed()
 
         return consumed_event

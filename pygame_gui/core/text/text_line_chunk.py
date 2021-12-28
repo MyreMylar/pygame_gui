@@ -10,14 +10,6 @@ calculations.
 Once a layout for the text chunk is finalised the chunk's render function can be called to add the
 chunk onto it's final destination.
 
-TODO:
-  - Experiment with being font type agnostic as much as possible. I have a suspicion that freetype
-    font might be more useful here because of render_to() and maybe the background colour default
-    but it's worth testing all these assumptions and the speed of both.
-  - Do we need an intermediate type that links together - chunks, the html parser and the layout
-    managers? Mainly thinking about new lines like <br> and /n. Seems unlikely so far?
-  - Performance comparison tests & functionality comparison tests between current system and new.
-    Need to set these up early.
 """
 from typing import Optional, Union, Tuple
 

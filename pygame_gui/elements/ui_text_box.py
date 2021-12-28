@@ -114,7 +114,7 @@ class UITextBox(UIElement):
 
         self.rounded_corner_offset = None
         self.text_box_layout = None  # TextLine()
-        self.text_wrap_rect = None
+        self.text_wrap_rect = None  # type: Union[pygame.Rect, None]
         self.background_surf = None
 
         self.drawable_shape = None
@@ -179,9 +179,9 @@ class UITextBox(UIElement):
                                                   (self.shadow_width * 2) -
                                                   (2 * self.rounded_corner_offset))))
         if self.wrap_to_height or self.rect[3] == -1:
-            self.text_wrap_rect[3] = -1
+            self.text_wrap_rect.height = -1
         if self.rect[2] == -1:
-            self.text_wrap_rect[2] = -1
+            self.text_wrap_rect.width = -1
 
         drawable_area_size = (self.text_wrap_rect[2], self.text_wrap_rect[3])
 

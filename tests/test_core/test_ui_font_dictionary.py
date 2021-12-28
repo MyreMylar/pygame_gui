@@ -1,17 +1,7 @@
 import pytest
-import pygame_gui
-
-
-from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
-from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
 
 from pygame_gui.core import BlockingThreadedResourceLoader
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
-
-pygame_gui.core.ui_font_dictionary.FiraCode_Regular = FiraCode_Regular
-pygame_gui.core.ui_font_dictionary.FiraCode_Bold = FiraCode_Bold
-pygame_gui.core.ui_font_dictionary.FiraMono_BoldItalic = FiraMono_BoldItalic
-pygame_gui.core.ui_font_dictionary.FiraMono_RegularItalic = FiraMono_RegularItalic
 
 
 class TestUIFontDictionary:

@@ -101,6 +101,7 @@ class TextBoxLayoutRow(pygame.Rect):
         option to use a 'center of mass' style centering for right
         facing and left facing triangles.
 
+        :param floating_rects: Any floating rects in the row.
         :param method: this is an ID for the method of centering to use,
                        for almost all cases this will be the default 'rect'
                        style basic centering. However, if you are trying
@@ -171,6 +172,7 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         Align this row to the right.
 
+        :param floating_rects: Any floating rects in the row
         :param start_x: Effectively the padding. Indicates how many pixels from the right edge
                         of the layout to start this row.
         """

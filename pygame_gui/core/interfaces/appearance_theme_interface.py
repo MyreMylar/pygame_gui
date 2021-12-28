@@ -2,10 +2,8 @@ import io
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Union, Dict, Any
-try:
-    from os import PathLike  # for Python 3.6
-except ImportError:
-    PathLike = None
+from os import PathLike
+
 
 import pygame
 
