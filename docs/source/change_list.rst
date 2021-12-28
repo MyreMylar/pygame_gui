@@ -5,38 +5,74 @@ Change List
 
 A record of changes between versions of Pygame GUI.
 
+--------
+
 **Version 0.6.0** - The text update
 -----------------------------------------------------------------
 
 The focus of this update was on everything to do with text in the GUI
 
+Dropped compatibility & Breaking changes
+..............................................
+
+ - **Dropped support for Pygame 1** - Pygame 2 has been out for some time now and switching fully to Pygame 2 allows the library to adopt its new features and remove some old compatibility hacks.
+ - **Dropped support for Python 3.5** - Python 3.5 has been end-of-life for some time. Removing support for it allows the library to use 3.6 onwards features like f strings. This is following pygame 2 also dropping 3.5 (and earlier) support.
+ - **Simplified UI events** - New events are generated with 'type' set to the previous 'user_type' values. This makes event processing code simpler. Old events will continue to exist until 0.8.0 but please move to the new style of events as they are the only ones that will get new attributes, new events added in 0.6.0 are only in the new style.
+
+
 Major Features
 ...............................
 
- - **Localization Support** - There is now some basic support for switching the language of the GUI to one of ten
-                              supported languages.
- - **New Console Window** - A new default GUI element that provides support for text shell/console type user
-                            interaction.
- - **Rewritten & unified text backend** - The text displaying and laying out portions of the GUI have all been
-                                          massively changed and all the GUI elements now all share common code.
-                                          This makes it easier to add new features to the text, and also have
-                                          them work everywhere.
+ - **Localization Support** - There is now some basic support for switching the language of the GUI to one of ten supported languages.
+ - **New Console Window** - A new default GUI element that provides support for text shell/console type user  interaction.
+ - **Rewritten & unified text backend** - The text displaying and laying out portions of the GUI have all been massively changed and all the GUI elements now all share common code. This makes it easier to add new features to the text, and also have them work everywhere.
 
 Minor features
 ...............................
 
-
-Dropped compatibility
-..............................................
+ - **UIButtons & UILabels can now scale based off their text** - passing in -1 for a dimension will cause that dimension to be set based on the height or width of the element's text.
+ - **More default options to allow only certain characters in UITextLine** - 'alpha_numeric' was added as an option for the latin alphabet. The underlying system was adjusted to allow for localised versions of these character sets, but these do not yet exist.
+ - **set_text_hidden() added to UITextLine** - To enable a 'password' style entry line.
+ - **text shadow theming options added to UIButton** - Previously these were only on the UILabel.
+ - **<img> tag images can now be added to to a UITextBox** - Makes it easier to wrap text around images and have inline images in text (colourful emoji?)
+ - **get_relative_mouse_pos() added to UIWindow** - gets a mouse position relative to the UIWindow you call it from.
+ - **UISlider now moves in customisable fixed increments when clicking arrow button** - Makes it easier to have precise sliders.
+ - **UIButton events can now be produced by any mouse button** - new 'mouse_button' attribute on button events & 'generate_click_events_from' parameter to UIButton.
+ - **UIDropDown open/close drop down button width added as theming option** - Called 'open_button_width'.
+ - **Text alignment theming options for UITextBox & UILabel** - See their theming pages for details.
 
 
 Bug Fixes & Other Changes
 .........................................................
 
+ - **PyInstaller should work correctly with pygame_gui** - A 'hook' file has been added to scoop up the default data for pygame_gui, and documentation added on using Pyinstaller & Nuitka with the library. See `(issue #166) <https://github.com/MyreMylar/pygame_gui/issues/166>`_
+ - **Fixed issue with window resolution changes** - Thanks to @lonelycorn `(issue #215) <https://github.com/MyreMylar/pygame_gui/issues/215>`_
+ - **<br> tag fixed to produce blank lines** - See `(issue #217) <https://github.com/MyreMylar/pygame_gui/issues/217>`_
+ - **Fixed missing type cast in UIFileDialog** - Thanks to @GUI-GUY `(issue #207) <https://github.com/MyreMylar/pygame_gui/issues/207>`_
+ - **Fixed issues with adding lines to bottom of UITextBox** - Demonstrated in new UIConsoleWindow window. See issues `(issue #69) <https://github.com/MyreMylar/pygame_gui/issues/69>`_ and `(issue #78) <https://github.com/MyreMylar/pygame_gui/issues/78>`_
+ - **Fixed issues with positioning UIDropDown inside container** -  See issues `(issue #179) <https://github.com/MyreMylar/pygame_gui/issues/179>`_ and `(issue #153) <https://github.com/MyreMylar/pygame_gui/issues/153>`_
+ - **Improved scaling support** - I still don't have the hardware to test this properly, but thanks to @jlaumonier, see `(issue #210) <https://github.com/MyreMylar/pygame_gui/issues/210>`_ it should work a bit better.
+ - **Fixed html link click events firing multiple times in some circumstances** - Thanks to @RedFlames for finding and fixing this. See `(issue #206) <https://github.com/MyreMylar/pygame_gui/issues/206>`_
+ - **Various documentation improvements and updates** - Thanks to everyone who pointed out things they didn't understand on GitHub, in Discord or in person. I've tried to make things clearer wherever I can. Keep letting me know when you get stuck!
 
-Further thanks
-.............................
+Further thanks & Pull Requests
+..............................
 
+While I was very slowly rebuilding the text back end for 0.6.0 the library also received several pull requests that
+will now make their way into the released version. After 1.0.0, when I (@MyreMylar) finish my main work on it, pull
+requests like this will be the main way the library changes from version to version.
+
+For now I'm putting them in their own section of this changes document to highlight them (unless there is a pull request
+that adds a big feature that is going up top as well)
+
+ - **Fixed redundant redrawing of UITextEntryLine()** - Thanks to @glipR, see `(pull #178) <https://github.com/MyreMylar/pygame_gui/pull/178>`_
+ - **Fixed double clicking folder in UIFileDialog** - Thanks to @glipR, see `(pull #197) <https://github.com/MyreMylar/pygame_gui/pull/197>`_
+ - **Fixed hiding & showing disabled buttons** - Thanks to @xirsoi, see `(pull #185) <https://github.com/MyreMylar/pygame_gui/pull/185>`_
+ - **Fixed grammatical errors in index.rst** - Thanks to @nonoesimposible, see `(pull #208) <https://github.com/MyreMylar/pygame_gui/pull/208>`_
+ - **Added ability to set default values for UISelectionList** - Thanks to @teaguejt, see `(pull #213) <https://github.com/MyreMylar/pygame_gui/pull/213>`_
+ - **Fix invalid URL for game project examples** - Thanks to @Grimmys, see `(pull #216) <https://github.com/MyreMylar/pygame_gui/pull/216>`_
+
+--------
 
 **Version 0.5.7** - Hiding and better pygame 2 support
 -----------------------------------------------------------------
@@ -45,37 +81,38 @@ Further thanks
 Major Features
 ...............................
 
-- **show() & hide() feature added to all elements**. Allows you to temporarily hide and show a UIElement or UIWindow rather than having to kill() and recreate it each time when you want it out of sight for a bit. This feature was contributed by @ylenard so all thanks goes to them.
+ - **show() & hide() feature added to all elements**. Allows you to temporarily hide and show a UIElement or UIWindow rather than having to kill() and recreate it each time when you want it out of sight for a bit. This feature was contributed by @ylenard so all thanks goes to them.
 
-- **switch to using premultiplied alpha blending for pygame 2** - For a long while now features like rounded corners have not worked correctly with pygame 2. Thanks to some recent improvements in the latest version of pygame 2.0.0.dev10 pygame_gui has been able to switch to using pre-multiplied alpha blending when dev10 is also installed. This resolves all the visual issues with rounded corners and I think runs a teeny bit faster too.
+ - **switch to using premultiplied alpha blending for pygame 2** - For a long while now features like rounded corners have not worked correctly with pygame 2. Thanks to some recent improvements in the latest version of pygame 2.0.0.dev10 pygame_gui has been able to switch to using pre-multiplied alpha blending when dev10 is also installed. This resolves all the visual issues with rounded corners and I think runs a teeny bit faster too.
 
 
 Minor features
 ...............................
 
-- **enable() & disable() have been added to many more elements and windows** - Maybe all of them now, even where it doesn't really make sense. Disable things to your heart's content.
-- **focus sets** - This is a new concept I'm trialling in the UI to indicate a group of elements that together constitute a thing that should all have interaction focus at the same time. So far it's working fairly well and has made it easy to extend pygame 2's scrollwheel functionality so that you should now scroll the content of what you are hovering with the wheel (at least in most cases). In the future this idea may make it easier to handle keyboard only input and input via controllers.
-- **class IDs for UIElement objects** - UIelement objects could always have an Object ID, but those were designed to be unique specifiers for events as well as theming and sometimes you want to pick out a specific group of elements for theming that all already have unique object IDs. Enter class IDs, there is a new datatype 'ObjectID' that you can pass when you create an element and it lets you set two string IDs, the old unique `object_id` and the new `class_id`. Once you have some objects sharing a `class_id` you can theme theme in a theme file theming block the same way you would with an object ID.  It's also worth noting here that you can load multiple theme files into a single UIManager if you want to organise your theme data some more.
+ - **enable() & disable() have been added to many more elements and windows** - Maybe all of them now, even where it doesn't really make sense. Disable things to your heart's content.
+ - **focus sets** - This is a new concept I'm trialling in the UI to indicate a group of elements that together constitute a thing that should all have interaction focus at the same time. So far it's working fairly well and has made it easy to extend pygame 2's scrollwheel functionality so that you should now scroll the content of what you are hovering with the wheel (at least in most cases). In the future this idea may make it easier to handle keyboard only input and input via controllers.
+ - **class IDs for UIElement objects** - UIelement objects could always have an Object ID, but those were designed to be unique specifiers for events as well as theming and sometimes you want to pick out a specific group of elements for theming that all already have unique object IDs. Enter class IDs, there is a new datatype 'ObjectID' that you can pass when you create an element and it lets you set two string IDs, the old unique `object_id` and the new `class_id`. Once you have some objects sharing a `class_id` you can theme theme in a theme file theming block the same way you would with an object ID.  It's also worth noting here that you can load multiple theme files into a single UIManager if you want to organise your theme data some more.
 
 Dropped compatibility
 ..............................................
 
-- **No longer supporting pygame 1.9.3 & pygame 1.9.4** - Keeping up with the bugs in these old versions of pygame was holding back the GUI so I made the decision to drop support in this version. If you are still using pygame 1.9.3 or 1.9.4, my apologies.
+ - **No longer supporting pygame 1.9.3 & pygame 1.9.4** - Keeping up with the bugs in these old versions of pygame was holding back the GUI so I made the decision to drop support in this version. If you are still using pygame 1.9.3 or 1.9.4, my apologies.
 
 Bug Fixes & Other Changes
 .........................................................
 
  - **Switched to using a custom Sprite and SpriteGroup class as base for UI elements*** - previously I was using the pygame classes but after getting up close and personal with them recently I realised that the existing sprite base was doing things that we weren't using and that a slimmed down sprite could speed things up. In my tests on windows this has made the draw loop about 10% faster.
-- **A series of fixes to the drop down menus** - they should now not break when they would have overlapped previously and correctly set the height of the background when the height of a list item is set to a custom value. Thanks to all the people who submitted bugs with these.
-- **fixed a bunch of LGTM alerts** - gotta have that A+ rating.
+ - **A series of fixes to the drop down menus** - they should now not break when they would have overlapped previously and correctly set the height of the background when the height of a list item is set to a custom value. Thanks to all the people who submitted bugs with these.
+ - **fixed a bunch of LGTM alerts** - gotta have that A+ rating.
 
 
 Further thanks
 .............................
 
-- Thanks once again to @ylenard for all their hard work put into this release.
-- Thank you to everyone who reported issues in the GUI this time around. If you don't report 'em, we can't fix 'em.
+ - Thanks once again to @ylenard for all their hard work put into this release.
+ - Thank you to everyone who reported issues in the GUI this time around. If you don't report 'em, we can't fix 'em.
 
+--------
 
 **Version 0.5.6** - Loading changes & minor optimisations
 -----------------------------------------------------------------
@@ -115,6 +152,7 @@ Bug Fixes & Other Changes
  - Mildly improved exception handling internally - This is an ongoing project.
  - Abstract interface classes now properly enforce their interface on inheriting classes. Oops.
 
+--------
 
 **Version 0.5.5** - The Windows Update, Update
 -----------------------------------------------------
@@ -138,13 +176,14 @@ Bug Fixes & Other Changes
 .........................
 
  - Added more interfaces to the code base which should make autocomplete more reliable when using the methods of the library.
-- Fixed a bug with containers not using 'hover_point()' method for testing hovering collisions with the mouse thus messing up various interactions slightly.
-- Fixed a bug with removing the close button on a window theme not correctly resizing the title bar.
-- Changed UIElement to take a copy of passed in rectangles in case they are re-used elsewhere.
-- Fixed  bugs in UIPanel and UISelection list where anchors and containers of the element were not being copied to their root container leading to shenanigans.
-- Resizing the elemnet container for the UIWindow element was missing off the border leading to overlaps. This is now fixed.
-- Fix for elements owning root containers anchored to the top and bottom of containers having their root containers incorrectly resized before they were positioned, thereby causing a mess of appearance bugs. It was a bad scene. Should now be fixed.
+ - Fixed a bug with containers not using 'hover_point()' method for testing hovering collisions with the mouse thus messing up various interactions slightly.
+ - Fixed a bug with removing the close button on a window theme not correctly resizing the title bar.
+ - Changed UIElement to take a copy of passed in rectangles in case they are re-used elsewhere.
+ - Fixed  bugs in UIPanel and UISelection list where anchors and containers of the element were not being copied to their root container leading to shenanigans.
+ - Resizing the elemnet container for the UIWindow element was missing off the border leading to overlaps. This is now fixed.
+ - Fix for elements owning root containers anchored to the top and bottom of containers having their root containers incorrectly resized before they were positioned, thereby causing a mess of appearance bugs. It was a bad scene. Should now be fixed.
 
+--------
 
 **Version 0.5.1**
 --------------------
@@ -152,9 +191,10 @@ Bug Fixes & Other Changes
 Bug Fixes
 ----------
 
-- Getting the library working with pygame 1.9.3
-- Removing window's title bar now works correctly.
+ - Getting the library working with pygame 1.9.3
+ - Removing window's title bar now works correctly.
 
+--------
 
 **Version 0.5.0** - The Windows Update
 --------------------------------------

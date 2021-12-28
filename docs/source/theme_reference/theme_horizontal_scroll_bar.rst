@@ -1,7 +1,7 @@
 .. _theme-horizontal-scroll-bar:
 
 UIHorizontalScrollBar Theming Parameters
-=======================================
+========================================
 
 
 The :class:`UIHorizontalScrollBar <pygame_gui.elements.UIHorizontalScrollBar>` theming block id is 'horizontal_scroll_bar'.

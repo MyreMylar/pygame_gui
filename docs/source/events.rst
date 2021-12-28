@@ -41,7 +41,7 @@ hovering over it.
                  print('Test button pressed')
 
 :class:`UIButton <pygame_gui.elements.UIButton>` - UI_BUTTON_START_PRESS
-....................................................................
+........................................................................
 
 Fired when a user first presses down a button by clicking on it with a mouse. This is fired before you release the
 mouse button.
@@ -304,7 +304,7 @@ Fired when a window is closed.
                 print("Window closed")
 
 :class:`UIWindow <pygame_gui.elements.UIWindow>` - UI_WINDOW_MOVED_TO_FRONT
-..................................................................
+...........................................................................
 
 Fired when a UI window is moved to the top of the stack. This happens when they are newly created and when they are
 clicked on by a user.
@@ -383,7 +383,7 @@ Fired when a colour has been chosen in a colour picker dialog.
                 print("Colour picked:", event.colour)
 
 :class:`UIColourChannelEditor <pygame_gui.windows.UIColourChannelEditor>` - UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
-.........................................................................................................
+...................................................................................................................
 
 Fired when a colour channel element has had it's value changed. This event is used by the colour picker dialog.
 

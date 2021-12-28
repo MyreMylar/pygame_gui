@@ -121,6 +121,7 @@ container edges. They are specified like this:
 
 .. code-block:: python
    :linenos:
+
    button_3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((-10, -40), (-1, 30)),
                                            text='Anchored', manager=manager,
                                            container=dynamic_dimensions_window,

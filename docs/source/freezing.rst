@@ -19,18 +19,19 @@ PyInstaller
 First things first you will need to have the PyInstaller package from PyPI:
 
 .. code-block:: shell
-   :linenos:
-    pip install pyinstaller
+
+   pip install pyinstaller
 
 Once that is installed you need to create a .spec file for your project that will handle gathering up all the data files
 you are using and any other options you might wish to use. There are a lot of options for spec files and you can read
-more about them in the `pyinstaller documentation<https://pyinstaller.readthedocs.io/en/stable/spec-files.html>`_.
+more about them in the `pyinstaller documentation <https://pyinstaller.readthedocs.io/en/stable/spec-files.html>`_.
 
 Here is one I cooked up for the pyinstaller_example script in the
 `pygame_gui_examples repository <https://github.com/MyreMylar/pygame_gui_examples>`_:
 
 .. code-block:: python
    :linenos:
+
    # -*- mode: python -*-
 
    block_cipher = None
@@ -76,13 +77,13 @@ Once you have your spec file, and made sure it includes any custom data you are 
 sounds, theme files etc) you are ready to try and compile the executable.
 
 .. code-block:: shell
-   :linenos:
+
    pyinstaller path_to_your_spec_file.spec
 
 Pygame GUI now includes a Pyinstaller 'hook' file which should bring in all the data files used by Pygame GUI itself,
 however if you are using other packages that have their own data files you may have to manage this process yourself.
 
-Good luck, and make yourself known on the `GitHub issues page<https://github.com/MyreMylar/pygame_gui/issues>`_ if you
+Good luck, and make yourself known on the `GitHub issues page <https://github.com/MyreMylar/pygame_gui/issues>`_ if you
 have any problems.
 
 Nuitka
@@ -91,7 +92,7 @@ Nuitka
 As with PyInstaller, when using Nuitka the first step is to download it:
 
 .. code-block:: shell
-   :linenos:
+
     pip install nuitka
 
 Once you've done that you need to carefully specify the Nuitka command line to include all the data directories
@@ -100,17 +101,17 @@ for pygame_gui (along with any data directories for any other libraries you are 
 The crucial line is:
 
 .. code-block:: shell
-   :linenos:
+
     --include-plugin-directory=pygame_gui/data
 
 Here is an example command line:
 
 .. code-block:: shell
-   :linenos:
+
    nuitka --onefile --plugin-enable=numpy --plugin-enable=pylint-warnings --include-plugin-directory=pygame_gui/data -o package/YourExeName.exe --output-dir=package
 
 There haven't been as many users of the Pygame GUI asking about Nuitka yet, so I am not as familiar with any other
-issues that may arise. Please check out the `official documentation<https://nuitka.net/doc/>`_ for more information on
+issues that may arise. Please check out the `official documentation <https://nuitka.net/doc/>`_ for more information on
 Nuitka.
 
-As always let us know any issues you have on the `GitHub issues page<https://github.com/MyreMylar/pygame_gui/issues>`_.
+As always let us know any issues you have on the `GitHub issues page <https://github.com/MyreMylar/pygame_gui/issues>`_.

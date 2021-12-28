@@ -18,13 +18,14 @@ Basics of switching locale
 --------------------------
 
 To start with, locales in Pygame GUI are specified via the
-`IS0 639-1 two letter language codes<https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes>`_. These are just a
+`IS0 639-1 two letter language codes <https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes>`_. These are just a
 convenient, standardised way to refer to different languages.
 
 You can set a starting locale for the GUI by passing one of these codes to the UIManager for your application like so:
 
 .. code-block:: python
    :linenos:
+
    manager = UIManager((800, 600), starting_language='ja')
 
 Which would start the GUI in Japanese.
@@ -33,6 +34,7 @@ You can also switch the language of the GUI while it is running by calling `set_
 
 .. code-block:: python
    :linenos:
+
    manager.set_locale('fr')
 
 Which would switch the language to French, and make any other adaptions that might be needed for French speaking
@@ -69,6 +71,7 @@ the default translation files above. Here is a quick example of one from the exa
 .. code-block:: json
    :caption: examples.fr.json
    :linenos:
+
    {
      "fr": {
        "holmes_text_test": "<p>&nbsp;&nbsp;&nbsp;Ce matin-là, M. Sherlock Holmes qui, sauf les cas assez fréquents où il passait les nuits, se levait tard, était assis devant la table de la salle à manger. Je me tenais près de la cheminée, examinant la canne que notre visiteur de la veille avait oubliée. C’était un joli bâton, solide, terminé par une boule — ce qu’on est convenu d'appeler « une permission de minuit ». Immédiatement au-dessous de la pomme, un cercle d’or, large de deux centimètres, portait l’inscription et la date suivantes : « À M. James Mortimer, ses amis du C. C. H. — 1884 ». Cette canne, digne, grave, rassurante, ressemblait à celles dont se servent les médecins « vieux jeu ».</p>",
@@ -81,6 +84,7 @@ UIManager like so:
 
 .. code-block:: python
    :linenos:
+
    manager = UIManager((800, 600),
                        starting_language='en',
                        translation_directory_paths=['data/translations'])
@@ -90,6 +94,7 @@ followed by the keys for each string separated with a full stop. Like so:
 
 .. code-block:: python
    :linenos:
+
    text_box = UITextBox(
            html_text="examples.holmes_text_test",
            relative_rect=pygame.Rect(300, 100, 400, 200),
@@ -111,6 +116,7 @@ The setup in the theme file looks like this:
    :caption: translations_theme.json
    :linenos:
    :emphasize-lines: 16
+
    {
       "label":
       {

@@ -20,6 +20,14 @@ pygame\_gui.windows.ui\_confirmation\_dialog module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.windows.ui\_console\_window module
+-----------------------------------------------------
+
+.. automodule:: pygame_gui.windows.ui_console_window
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.windows.ui\_file\_dialog module
 ---------------------------------------------------
 
