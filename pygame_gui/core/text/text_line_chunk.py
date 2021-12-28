@@ -170,147 +170,24 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.underlined:
             self.font.underline_adjustment = 0.5
         if isinstance(self.colour, ColourGradient):
-            # draw the text first
-            # Anti-aliasing on text is not done with pre-multiplied alpha so we need to bake
-            # this text onto a surface with a normal blit before it can enter the pre-multipled
-            # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
-            # on the normal text colour.
-            if pygame.version.vernum[0] >= 2:
-                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                temp_text_surface = text_surface.copy()
-
-                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=Color('#FFFFFFFF'))
-                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-            else:
-                # pygame 1 version is a bit rubbish
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                text_surface.fill((0, 0, 0, 1))
-                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=Color('#FFFFFFFF'))
-            self.colour.apply_gradient_to_surface(text_surface)
-
-            # then make the background
-            surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
-
-            if isinstance(bg_col, ColourGradient):
-                surface.fill(Color('#FFFFFFFF'))
-                bg_col.apply_gradient_to_surface(surface)
-            else:
-                surface.fill(bg_col)
-
-            # center the text in the line
-            text_rect = text_surface.get_rect()
-            if self.should_centre_from_baseline:
-                padless_origin = self.y_origin - self.font_y_padding
-                half_padless_origin = int(round(0.5 * padless_origin))
-                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
-            else:
-                text_rect.centery = surface.get_rect().centery
-
-            # apply any shadow effects
-            self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                      text_surface, (chunk_x_origin, row_chunk_origin))
-
-            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+            surface = self._draw_text_fg_gradient(bg_col, chunk_draw_height, chunk_draw_width,
+                                                  chunk_x_origin, final_str_text, row_bg_height,
+                                                  row_chunk_origin)
 
         elif isinstance(bg_col, ColourGradient):
-            # draw the text first
-            if pygame.version.vernum[0] >= 2:
-                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                temp_text_surface = text_surface.copy()
-
-                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=self.colour)
-                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-            else:
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                text_surface.fill((0, 0, 0, 1))
-                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=self.colour)
-
-            # then make the background
-            surface = Surface((chunk_draw_width, row_bg_height),
-                              flags=pygame.SRCALPHA, depth=32)
-            surface.fill(Color('#FFFFFFFF'))
-            bg_col.apply_gradient_to_surface(surface)
-
-            # center the text in the line
-            text_rect = text_surface.get_rect()
-            if self.should_centre_from_baseline:
-                padless_origin = self.y_origin - self.font_y_padding
-                half_padless_origin = int(round(0.5 * padless_origin))
-                text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
-            else:
-                text_rect.centery = surface.get_rect().centery
-
-            # apply any shadow effects
-            self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                      text_surface, (chunk_x_origin, row_chunk_origin))
-
-            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+            surface = self._draw_text_bg_gradient(bg_col, chunk_draw_height, chunk_draw_width,
+                                                  chunk_x_origin, final_str_text, row_bg_height,
+                                                  row_chunk_origin)
         else:
-            if pygame.version.vernum[0] >= 2:
-                # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                temp_text_surface = text_surface.copy()
+            surface = self._draw_text_no_gradient(bg_col, chunk_draw_height, chunk_draw_width,
+                                                  chunk_x_origin, final_str_text, row_bg_height,
+                                                  row_chunk_origin)
 
-                self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=self.colour)
-                text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-            else:
-                text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                              flags=pygame.SRCALPHA, depth=32)
-                text_surface.fill((0, 0, 0, 1))
-                self.font.render_to(text_surface, (chunk_x_origin, row_chunk_origin),
-                                    final_str_text, fgcolor=self.colour)
-
-            surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
-            surface.fill(bg_col)
-
-            # center the text in the line
-            text_rect = text_surface.get_rect()
-            if self.should_centre_from_baseline:
-                padless_origin = self.y_origin - self.font_y_padding
-                half_padless_origin = int(round(0.5 * padless_origin))
-                text_rect.y = (surface.get_rect().centery -
-                               self.font_y_padding - half_padless_origin)
-            else:
-                text_rect.centery = surface.get_rect().centery
-
-            # apply any shadow effects
-            self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                      text_surface, (chunk_x_origin, row_chunk_origin))
-
-            surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
-
-        # sort out horizontal scrolling
-        final_pos = (max(target_area.left, self.left - x_scroll_offset), self.top)
-
-        distance_to_lhs_overlap = self.left - target_area.left
-        lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
-
-        remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
-        rhs_overlap = max(0, ((self.width - lhs_overlap) - remaining_rhs_space))
-
-        target_width = (self.width - lhs_overlap) - rhs_overlap + (2 * text_shadow_width)
-
-        final_target = pygame.Rect(lhs_overlap,
-                                   target_area.top,
-                                   # we only want to grab as much as we can show
-                                   min(target_width, target_area.width),
-                                   target_area.height)
-
-        if target_width > 0:
-            target_surface.blit(surface, final_pos, area=final_target,
-                                special_flags=pygame.BLEND_PREMULTIPLIED)
+        target_surface = self._finalise_horizontal_scroll(target_area,
+                                                          text_shadow_width,
+                                                          x_scroll_offset,
+                                                          target_surface,
+                                                          surface)
 
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
@@ -321,6 +198,116 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.layout_x_offset = x_scroll_offset
         self.letter_end = letter_end
 
+    def _finalise_horizontal_scroll(self, target_area, text_shadow_width, x_scroll_offset,
+                                    target_surface, surface):
+        # sort out horizontal scrolling
+        final_pos = (max(target_area.left, self.left - x_scroll_offset), self.top)
+        distance_to_lhs_overlap = self.left - target_area.left
+        lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
+        remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
+        rhs_overlap = max(0, ((self.width - lhs_overlap) - remaining_rhs_space))
+        target_width = (self.width - lhs_overlap) - rhs_overlap + (2 * text_shadow_width)
+        final_target = pygame.Rect(lhs_overlap,
+                                   target_area.top,
+                                   # we only want to grab as much as we can show
+                                   min(target_width, target_area.width),
+                                   target_area.height)
+        if target_width > 0:
+            target_surface.blit(surface, final_pos, area=final_target,
+                                special_flags=pygame.BLEND_PREMULTIPLIED)
+        return target_surface
+
+    def _draw_text_no_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
+                               final_str_text, row_bg_height, row_chunk_origin):
+        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                      flags=pygame.SRCALPHA, depth=32)
+        temp_text_surface = text_surface.copy()
+        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                            final_str_text, fgcolor=self.colour)
+        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
+        surface.fill(bg_col)
+        # center the text in the line
+        text_rect = text_surface.get_rect()
+        if self.should_centre_from_baseline:
+            padless_origin = self.y_origin - self.font_y_padding
+            half_padless_origin = int(round(0.5 * padless_origin))
+            text_rect.y = (surface.get_rect().centery -
+                           self.font_y_padding - half_padless_origin)
+        else:
+            text_rect.centery = surface.get_rect().centery
+        # apply any shadow effects
+        self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                  text_surface, (chunk_x_origin, row_chunk_origin))
+        surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+        return surface
+
+    def _draw_text_bg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
+                               final_str_text, row_bg_height, row_chunk_origin):
+        # draw the text first
+        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                      flags=pygame.SRCALPHA, depth=32)
+        temp_text_surface = text_surface.copy()
+        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                            final_str_text, fgcolor=self.colour)
+        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        # then make the background
+        surface = Surface((chunk_draw_width, row_bg_height),
+                          flags=pygame.SRCALPHA, depth=32)
+        surface.fill(Color('#FFFFFFFF'))
+        bg_col.apply_gradient_to_surface(surface)
+        # center the text in the line
+        text_rect = text_surface.get_rect()
+        if self.should_centre_from_baseline:
+            padless_origin = self.y_origin - self.font_y_padding
+            half_padless_origin = int(round(0.5 * padless_origin))
+            text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+        else:
+            text_rect.centery = surface.get_rect().centery
+        # apply any shadow effects
+        self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                  text_surface, (chunk_x_origin, row_chunk_origin))
+        surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+        return surface
+
+    def _draw_text_fg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
+                               final_str_text, row_bg_height, row_chunk_origin):
+        # draw the text first
+        # Anti-aliasing on text is not done with pre-multiplied alpha so we need to bake
+        # this text onto a surface with a normal blit before it can enter the pre-multipled
+        # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
+        # on the normal text colour.
+        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
+        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+                                      flags=pygame.SRCALPHA, depth=32)
+        temp_text_surface = text_surface.copy()
+        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+                            final_str_text, fgcolor=Color('#FFFFFFFF'))
+        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        self.colour.apply_gradient_to_surface(text_surface)
+        # then make the background
+        surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
+        if isinstance(bg_col, ColourGradient):
+            surface.fill(Color('#FFFFFFFF'))
+            bg_col.apply_gradient_to_surface(surface)
+        else:
+            surface.fill(bg_col)
+        # center the text in the line
+        text_rect = text_surface.get_rect()
+        if self.should_centre_from_baseline:
+            padless_origin = self.y_origin - self.font_y_padding
+            half_padless_origin = int(round(0.5 * padless_origin))
+            text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
+        else:
+            text_rect.centery = surface.get_rect().centery
+        # apply any shadow effects
+        self._apply_shadow_effect(surface, text_rect, final_str_text,
+                                  text_surface, (chunk_x_origin, row_chunk_origin))
+        surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+        return surface
+
     def _apply_shadow_effect(self, surface, text_rect, text_str, text_surface, origin):
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
 
@@ -328,25 +315,16 @@ class TextLineChunkFTFont(TextLayoutRect):
             shadow_offset = (self.text_shadow_data[1], self.text_shadow_data[2])
             shadow_colour = self.shadow_colour
             # we have a shadow
-            if pygame.version.vernum[0] >= 2:
-                # This is a hacky way to convert text to
-                # pre-multiplied alpha with a SDL2 alpha blit
-                shadow_surface = text_surface.copy()
-                temp_shadow_surface = shadow_surface.copy()
+            # This is a hacky way to convert text to
+            # pre-multiplied alpha with a SDL2 alpha blit
+            shadow_surface = text_surface.copy()
+            temp_shadow_surface = shadow_surface.copy()
 
-                self.font.render_to(temp_shadow_surface, origin,
-                                    text_str,
-                                    fgcolor=shadow_colour)
-                shadow_surface.blit(temp_shadow_surface, (0, 0),
-                                    special_flags=pygame.BLEND_ALPHA_SDL2)
-            else:
-                shadow_surface = text_surface.copy()
-                # have to have 1 alpha here to fake convert to pre-multiplied alpha
-                shadow_surface.fill((0, 0, 0, 1))
-
-                self.font.render_to(shadow_surface, origin,
-                                    text_str,
-                                    fgcolor=shadow_colour)
+            self.font.render_to(temp_shadow_surface, origin,
+                                text_str,
+                                fgcolor=shadow_colour)
+            shadow_surface.blit(temp_shadow_surface, (0, 0),
+                                special_flags=pygame.BLEND_ALPHA_SDL2)
 
             for y_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_rect.x + shadow_offset[0],
@@ -425,8 +403,8 @@ class TextLineChunkFTFont(TextLayoutRect):
             # update the data for this chunk
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (self._text_render_width(self.text, self.font),
-                         self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.size = (self._text_render_width(self.text, self.font), # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                         self.height)
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
             return self._split_at(right_side, self.topright, self.target_surface,
@@ -487,7 +465,8 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             self.text = left_side
             self.letter_count = len(self.text)
-            self.size = (self._text_render_width(self.text, self.font), self.height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.size = ( # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self._text_render_width(self.text, self.font), self.height)
 
             self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 

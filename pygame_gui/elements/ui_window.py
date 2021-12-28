@@ -773,4 +773,3 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                              abs_mouse_pos[1] - window_contents_top_left[1])
 
         return rel_mouse_pos
-

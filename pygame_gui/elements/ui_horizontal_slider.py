@@ -251,31 +251,7 @@ class UIHorizontalSlider(UIElement):
         if not (self.alive() and self.is_enabled):
             return
         moved_this_frame = False
-        if self.left_button is not None and (self.left_button.held and
-                                             self.scroll_position > self.left_limit_position):
-
-            if self.button_held_repeat_acc > self.button_held_repeat_time:
-                self.scroll_position -= (250.0 * time_delta)
-                self.scroll_position = max(self.scroll_position, self.left_limit_position)
-                x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
-            else:
-                self.button_held_repeat_acc += time_delta
-        elif self.right_button is not None and (self.right_button.held and
-                                                self.scroll_position < self.right_limit_position):
-            if self.button_held_repeat_acc > self.button_held_repeat_time:
-                self.scroll_position += (250.0 * time_delta)
-                self.scroll_position = min(self.scroll_position, self.right_limit_position)
-                x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
-            else:
-                self.button_held_repeat_acc += time_delta
-        else:
-            self.button_held_repeat_acc = 0.0
+        moved_this_frame = self._update_arrow_buttons(moved_this_frame, time_delta)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
@@ -323,6 +299,34 @@ class UIHorizontalSlider(UIElement):
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
+
+    def _update_arrow_buttons(self, moved_this_frame, time_delta):
+        if self.left_button is not None and (self.left_button.held and
+                                             self.scroll_position > self.left_limit_position):
+
+            if self.button_held_repeat_acc > self.button_held_repeat_time:
+                self.scroll_position -= (250.0 * time_delta)
+                self.scroll_position = max(self.scroll_position, self.left_limit_position)
+                x_pos = (self.scroll_position + self.arrow_button_width)
+                y_pos = 0
+                self.sliding_button.set_relative_position((x_pos, y_pos))
+                moved_this_frame = True
+            else:
+                self.button_held_repeat_acc += time_delta
+        elif self.right_button is not None and (self.right_button.held and
+                                                self.scroll_position < self.right_limit_position):
+            if self.button_held_repeat_acc > self.button_held_repeat_time:
+                self.scroll_position += (250.0 * time_delta)
+                self.scroll_position = min(self.scroll_position, self.right_limit_position)
+                x_pos = (self.scroll_position + self.arrow_button_width)
+                y_pos = 0
+                self.sliding_button.set_relative_position((x_pos, y_pos))
+                moved_this_frame = True
+            else:
+                self.button_held_repeat_acc += time_delta
+        else:
+            self.button_held_repeat_acc = 0.0
+        return moved_this_frame
 
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False

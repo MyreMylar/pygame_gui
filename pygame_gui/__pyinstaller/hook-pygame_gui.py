@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 import os
 import pathlib
 
@@ -11,13 +12,12 @@ datas = []
 
 # A helper to append the relative path of a resource to hook variable - datas
 def _append_to_datas(file_path):
-    global datas
     res_path = os.path.join(pygame_gui_folder, file_path)
     if os.path.exists(res_path):
         datas.append((res_path, "pygame_gui/data"))
 
+
 def _append_translations_to_datas(file_path):
-    global datas
     res_path = os.path.join(pygame_gui_folder, file_path)
     if os.path.exists(res_path):
         datas.append((res_path, "pygame_gui/data/translations"))
@@ -47,4 +47,3 @@ _append_translations_to_datas("data/translations/pygame-gui.ja.json")
 _append_translations_to_datas("data/translations/pygame-gui.pt.json")
 _append_translations_to_datas("data/translations/pygame-gui.ru.json")
 _append_translations_to_datas("data/translations/pygame-gui.zh.json")
-

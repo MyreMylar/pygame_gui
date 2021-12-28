@@ -2,7 +2,6 @@ import warnings
 from typing import Union
 
 import pygame
-import i18n
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED, OldType

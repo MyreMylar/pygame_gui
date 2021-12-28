@@ -35,6 +35,10 @@ TEXT_EFFECT_FADE_OUT = 'fade_out'
 
 
 class OldType(int):
+    """
+    Deprecation class for Old style user events. Can be removed in 0.8.0 along with
+    all the old events.
+    """
     def __new__(cls, x,  *args, **kwargs):
         instance = int.__new__(cls, x, *args, **kwargs)
         return instance

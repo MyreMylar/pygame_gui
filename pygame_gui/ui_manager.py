@@ -1,9 +1,8 @@
+import os
 from typing import Tuple, List, Dict, Union, Set
 
 import pygame
 import i18n
-
-import os
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface

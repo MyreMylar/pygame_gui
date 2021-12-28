@@ -1,6 +1,6 @@
 import math
 
-from collections import deque, OrderedDict
+from collections import deque
 from typing import Dict, List, Union, Tuple
 
 import pygame
@@ -168,7 +168,7 @@ class DrawableShape:
         self.initial_text_layout_size = (self.containing_rect.width,
                                          self.containing_rect.height)
 
-        self.states = OrderedDict()
+        self.states = {}
         for state in states:
             self.states[state] = DrawableShapeState(state)
 

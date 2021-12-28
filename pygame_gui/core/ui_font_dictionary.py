@@ -1,5 +1,4 @@
 import os
-import sys
 import warnings
 
 from typing import Dict, Union, Tuple
@@ -14,6 +13,10 @@ from pygame_gui.core.utility import FontResource
 
 
 class DefaultFontData:
+    """
+    Data class to wrap up all the data for a default font. Used now that we have multiple
+    default fonts for different locales.
+    """
     def __init__(self, size: int, name: str, style: str,
                  regular_file_name: str,
                  bold_file_name: str,
@@ -22,7 +25,7 @@ class DefaultFontData:
         self.size = size
         self.name = name
         self.style = style
-        self.id = (self.name + '_' + self.style + '_' + str(self.size))
+        self.idx = (self.name + '_' + self.style + '_' + str(self.size))
 
         self.regular_file_name = regular_file_name
         self.bold_file_name = bold_file_name
@@ -123,7 +126,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         self._load_default_font()
 
-        self.used_font_ids = [self.default_font.id]
+        self.used_font_ids = [self.default_font.idx]
 
     def set_locale(self, new_locale: str):
         try:
@@ -141,7 +144,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         """
         default_font_res = FontResource(
-            font_id=self.default_font.id,
+            font_id=self.default_font.idx,
             size=self.default_font.size,
             style={'bold': False, 'italic': False},
             location=(
@@ -152,7 +155,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         error = default_font_res.load()
         if error is not None:
             warnings.warn(str(error))
-        self.loaded_fonts[self.default_font.id] = default_font_res
+        self.loaded_fonts[self.default_font.idx] = default_font_res
 
         self.known_font_paths[self.default_font.name] = [
             (PackageResource(package='pygame_gui.data',
@@ -232,7 +235,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True)
             return self.loaded_fonts[font_id]
         else:
-            return self.loaded_fonts[self.default_font.id]
+            return self.loaded_fonts[self.default_font.idx]
 
     def get_default_font(self) -> pygame.freetype.Font:
         """

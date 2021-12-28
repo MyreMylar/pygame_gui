@@ -146,28 +146,7 @@ class UIExpandedDropDownState:
                                                                        list_class_ids,
                                                                        list_object_ids)
 
-        try:
-            list_shadow_width = int(
-                self.ui_manager.get_theme().get_misc_data('shadow_width', final_ids))
-        except (LookupError, ValueError):
-            list_shadow_width = 2
-
-        try:
-            list_border_width = int(
-                self.ui_manager.get_theme().get_misc_data('border_width', final_ids))
-        except (LookupError, ValueError):
-            list_border_width = 1
-
-        try:
-            list_item_height = int(
-                self.ui_manager.get_theme().get_misc_data('list_item_height', final_ids))
-        except (LookupError, ValueError):
-            list_item_height = 20
-
-        options_list_border_and_shadow = list_shadow_width + list_border_width
-        self.options_list_height = ((list_item_height * len(self.options_list)) +
-                                    (2 * options_list_border_and_shadow))
-        self.option_list_y_pos = 0
+        self._calculate_options_list_sizes(final_ids)
         if self.expand_direction is not None:
             if self.expand_direction == 'up':
                 expand_button_symbol = '▲'
@@ -228,6 +207,27 @@ class UIExpandedDropDownState:
 
         if should_rebuild:
             self.rebuild()
+
+    def _calculate_options_list_sizes(self, final_ids):
+        try:
+            list_shadow_width = int(
+                self.ui_manager.get_theme().get_misc_data('shadow_width', final_ids))
+        except (LookupError, ValueError):
+            list_shadow_width = 2
+        try:
+            list_border_width = int(
+                self.ui_manager.get_theme().get_misc_data('border_width', final_ids))
+        except (LookupError, ValueError):
+            list_border_width = 1
+        try:
+            list_item_height = int(
+                self.ui_manager.get_theme().get_misc_data('list_item_height', final_ids))
+        except (LookupError, ValueError):
+            list_item_height = 20
+        options_list_border_and_shadow = list_shadow_width + list_border_width
+        self.options_list_height = ((list_item_height * len(self.options_list)) +
+                                    (2 * options_list_border_and_shadow))
+        self.option_list_y_pos = 0
 
     def finish(self):
         """
@@ -439,16 +439,16 @@ class UIClosedDropDownState:
                               'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
 
         if self.drop_down_menu_ui.shape == 'rectangle':
-            self.drop_down_menu_ui.set_drawable_shape(RectDrawableShape(self.drop_down_menu_ui.rect,
-                                                                        theming_parameters,
-                                                                        ['normal', 'disabled'],
-                                                                        self.ui_manager))
+            self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect,
+                                                                      theming_parameters,
+                                                                      ['normal', 'disabled'],
+                                                                      self.ui_manager)
         elif self.drop_down_menu_ui.shape == 'rounded_rectangle':
             shape_rect = self.drop_down_menu_ui.rect
-            self.drop_down_menu_ui.set_drawable_shape(RoundedRectangleShape(shape_rect,
-                                                                            theming_parameters,
-                                                                            ['normal', 'disabled'],
-                                                                            self.ui_manager))
+            self.drop_down_menu_ui.drawable_shape = RoundedRectangleShape(shape_rect,
+                                                                          theming_parameters,
+                                                                          ['normal', 'disabled'],
+                                                                          self.ui_manager)
 
         self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
@@ -938,6 +938,3 @@ class UIDropDownMenu(UIContainer):
         if self.current_state == self.menu_states['expanded']:
             self.menu_states['expanded'].hide()
         self.menu_states['closed'].hide()
-
-    def set_drawable_shape(self, shape):
-        self.drawable_shape = shape

@@ -8,7 +8,7 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
+from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
 
@@ -78,7 +78,7 @@ class UIElement(GUISprite, IUIElementInterface):
         else:
             self.visible = 0
 
-        self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
+        self.blendmode = pygame.BLEND_PREMULTIPLIED
         # self.source_rect = None
 
         self.relative_bottom_margin = None
@@ -271,7 +271,8 @@ class UIElement(GUISprite, IUIElementInterface):
                              if 'bottom_target' in self.anchors
                              else self.ui_container.get_abs_rect().bottom)
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = (bottom_offset - (new_top + self.relative_rect.height))
+                self.relative_bottom_margin = (bottom_offset -
+                                               (new_top + self.relative_rect.height))
             new_bottom = bottom_offset - self.relative_bottom_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])

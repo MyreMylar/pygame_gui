@@ -436,11 +436,12 @@ class UIFileDialog(UIWindow):
             selected_file_name = self.current_file_path.name
             long_desc = translate("pygame-gui.Delete_filename",
                                   file_name=str(selected_file_name))
-            self.delete_confirmation_dialog = UIConfirmationDialog(rect=confirmation_rect,
-                                                                   manager=self.ui_manager,
-                                                                   action_long_desc=long_desc,
-                                                                   action_short_name='pygame-gui.Delete',
-                                                                   window_title='pygame-gui.Delete')
+            self.delete_confirmation_dialog = UIConfirmationDialog(
+                rect=confirmation_rect,
+                manager=self.ui_manager,
+                action_long_desc=long_desc,
+                action_short_name='pygame-gui.Delete',
+                window_title='pygame-gui.Delete')
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.parent_directory_button:
             self._change_directory_path(Path(self.current_directory_path).parent)
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.refresh_button:

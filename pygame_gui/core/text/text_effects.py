@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pygame_gui.core.text.text_box_layout import TextBoxLayout
-    from pygame_gui.elements.ui_text_box import UITextBox
-
 import pygame
 
 from pygame_gui._constants import UI_TEXT_EFFECT_FINISHED, TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
+
+if TYPE_CHECKING:
+    from pygame_gui.core.text.text_box_layout import TextBoxLayout
+    from pygame_gui.elements.ui_text_box import UITextBox
 
 
 class TextBoxEffect:

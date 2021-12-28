@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict, FrozenSet, Iterable
+from typing import Union, Tuple, Dict, Iterable
 
 import pygame
 
@@ -721,8 +721,8 @@ class UIButton(UIElement):
         self.on_fresh_drawable_shape_ready()
 
         if self.relative_rect.width == -1 or self.relative_rect.height == -1:
-            self.dynamic_width = True if self.relative_rect.width == -1 else False
-            self.dynamic_height = True if self.relative_rect.height == -1 else False
+            self.dynamic_width = self.relative_rect.width == -1
+            self.dynamic_height = self.relative_rect.height == -1
 
             self.set_dimensions(self.image.get_size())
 

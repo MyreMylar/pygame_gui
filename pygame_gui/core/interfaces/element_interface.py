@@ -329,7 +329,10 @@ class IUIElementInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def on_locale_changed(self):
-        pass
+        """
+        Called for each element when the locale is changed on their UIManager
+
+        """
 
     @abstractmethod
     def get_anchor_targets(self) -> list:

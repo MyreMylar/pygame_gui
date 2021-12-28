@@ -421,4 +421,3 @@ class TextBoxLayoutRow(pygame.Rect):
         else:
             raise AttributeError("Trying to insert into empty text row with no Parser"
                                  " for style data - fix this later?")
-

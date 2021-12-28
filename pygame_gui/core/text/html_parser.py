@@ -92,6 +92,9 @@ class HTMLParser(html.parser.HTMLParser):
         self.in_paragraph_block = False
 
     def empty_layout_queue(self):
+        """
+        Clear out the layout queue.
+        """
         self.layout_rect_queue.clear()
 
     def handle_starttag(self, tag: str, attrs: Dict[str, str]):
@@ -124,132 +127,132 @@ class HTMLParser(html.parser.HTMLParser):
             if 'href' in attributes:
                 style["link_href"] = attributes['href']
         elif element == 'shadow':
-            shadow_size = 0
-            shadow_offset = [0, 0]
-            shadow_colour = [50, 50, 50]
-            if 'size' in attributes:
-                shadow_size = int(attributes['size'])
-            if 'offset' in attributes:
-                offset_str = attributes['offset'].split(',')
-                shadow_offset[0] = int(offset_str[0])
-                shadow_offset[1] = int(offset_str[1])
-            if 'color' in attributes:
-                if attributes['color'][0] == '#':
-                    shadow_colour = pygame.color.Color(attributes['color'])
-                else:
-                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
-                                                                         self.combined_ids)
-            style['shadow_data'] = (shadow_size, shadow_offset[0],
-                                    shadow_offset[1], shadow_colour, False)
+            self._handle_shadow_tag(attributes, style)
         elif element == 'font':
-            if 'face' in attributes:
-                font_name = attributes['face'] if len(attributes['face']) > 0 else None
-                style["font_name"] = font_name
-            if 'size' in attributes:
-                if len(attributes['size']) > 0:
-                    font_size = self.font_sizes[float(attributes['size'])]
-                else:
-                    font_size = None
-                style["font_size"] = font_size
-            if 'color' in attributes:
-                if attributes['color'][0] == '#':
-                    style["font_colour"] = pygame.color.Color(attributes['color'])
-                else:
-                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(attributes['color'],
-                                                                                self.combined_ids)
+            self._handle_font_tag(attributes, style)
         elif element == 'body':
-            if 'bgcolor' in attributes:
-                if len(attributes['bgcolor']) > 0:
-                    if attributes['bgcolor'][0] == '#':
-                        style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
-                    else:
-                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
-                            attributes['bgcolor'],
-                            self.combined_ids)
-                else:
-                    style["bg_colour"] = pygame.Color('#00000000')
-
+            self._handle_body_tag(attributes, style)
         elif element == 'br':
-
-            current_font = self.ui_theme.get_font_dictionary().find_font(
-                font_name=self.current_style['font_name'],
-                font_size=self.current_style['font_size'],
-                bold=self.current_style['bold'],
-                italic=self.current_style['italic'])
-
-            dimensions = (current_font.get_rect(' ').width,
-                          int(round(self.current_style['font_size'] *
-                                    self.line_spacing)))
-
-            self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+            self._handle_line_break()
         elif element == 'p':
-            if self.in_paragraph_block:
-                current_font = self.ui_theme.get_font_dictionary().find_font(
-                    font_name=self.current_style['font_name'],
-                    font_size=self.current_style['font_size'],
-                    bold=self.current_style['bold'],
-                    italic=self.current_style['italic'])
-
-                dimensions = (current_font.get_rect(' ').width,
-                              int(round(self.current_style['font_size'] *
-                                        self.line_spacing)))
-
-                self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
-
-            self.in_paragraph_block = True
+            self._handle_p_tag()
         elif element == 'img':
-            image_path = Path('')
-            image_float = TextFloatPosition.NONE
-            padding_top = 0
-            padding_right = 0
-            padding_bottom = 0
-            padding_left = 0
-            if 'src' in attributes:
-                image_path = Path(attributes['src'])
-            if 'float' in attributes:
-                if attributes['float'] == 'left':
-                    image_float = TextFloatPosition.LEFT
-                elif attributes['float'] == 'right':
-                    image_float = TextFloatPosition.RIGHT
-                else:
-                    image_float = TextFloatPosition.NONE
-            if 'padding' in attributes:
-                paddings = attributes['padding'].split(' ')
-                for index, padding in enumerate(paddings):
-                    paddings[index] = int(padding.strip('px'))
-                if len(paddings) == 4:
-                    padding_top = paddings[0]
-                    padding_right = paddings[1]
-                    padding_bottom = paddings[2]
-                    padding_left = paddings[3]
-                elif len(paddings) == 3:
-                    padding_top = paddings[0]
-                    padding_right = paddings[1]
-                    padding_left = paddings[1]
-                    padding_bottom = paddings[2]
-                elif len(paddings) == 2:
-                    padding_top = paddings[0]
-                    padding_right = paddings[1]
-                    padding_left = paddings[1]
-                    padding_bottom = paddings[0]
-                elif len(paddings) == 1:
-                    padding_top = paddings[0]
-                    padding_right = paddings[0]
-                    padding_left = paddings[0]
-                    padding_bottom = paddings[0]
-
-            all_paddings = Padding(padding_top, padding_right, padding_bottom, padding_left)
-
-            self.layout_rect_queue.append(ImageLayoutRect(image_path,
-                                                          image_float,
-                                                          all_paddings))
-
+            self._handle_img_tag(attributes)
         else:
             warning_text = 'Unsupported HTML Tag <' + element + '>. Check documentation' \
                                                                 ' for full range of supported tags.'
             warnings.warn(warning_text, UserWarning)
 
         self.push_style(element, style)
+
+    def _handle_shadow_tag(self, attributes, style):
+        shadow_size = 0
+        shadow_offset = [0, 0]
+        shadow_colour = [50, 50, 50]
+        if 'size' in attributes:
+            shadow_size = int(attributes['size'])
+        if 'offset' in attributes:
+            offset_str = attributes['offset'].split(',')
+            shadow_offset[0] = int(offset_str[0])
+            shadow_offset[1] = int(offset_str[1])
+        if 'color' in attributes:
+            if attributes['color'][0] == '#':
+                shadow_colour = pygame.color.Color(attributes['color'])
+            else:
+                shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
+                                                                     self.combined_ids)
+        style['shadow_data'] = (shadow_size, shadow_offset[0],
+                                shadow_offset[1], shadow_colour, False)
+
+    def _handle_font_tag(self, attributes, style):
+        if 'face' in attributes:
+            font_name = attributes['face'] if len(attributes['face']) > 0 else None
+            style["font_name"] = font_name
+        if 'size' in attributes:
+            if len(attributes['size']) > 0:
+                font_size = self.font_sizes[float(attributes['size'])]
+            else:
+                font_size = None
+            style["font_size"] = font_size
+        if 'color' in attributes:
+            if attributes['color'][0] == '#':
+                style["font_colour"] = pygame.color.Color(attributes['color'])
+            else:
+                style["font_colour"] = self.ui_theme.get_colour_or_gradient(attributes['color'],
+                                                                            self.combined_ids)
+
+    def _handle_body_tag(self, attributes, style):
+        if 'bgcolor' in attributes:
+            if len(attributes['bgcolor']) > 0:
+                if attributes['bgcolor'][0] == '#':
+                    style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
+                else:
+                    style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
+                        attributes['bgcolor'],
+                        self.combined_ids)
+            else:
+                style["bg_colour"] = pygame.Color('#00000000')
+
+    def _handle_line_break(self):
+        current_font = self.ui_theme.get_font_dictionary().find_font(
+            font_name=self.current_style['font_name'],
+            font_size=self.current_style['font_size'],
+            bold=self.current_style['bold'],
+            italic=self.current_style['italic'])
+        dimensions = (current_font.get_rect(' ').width,
+                      int(round(self.current_style['font_size'] *
+                                self.line_spacing)))
+        self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+
+    def _handle_p_tag(self):
+        if self.in_paragraph_block:
+            self._handle_line_break()
+        self.in_paragraph_block = True
+
+    def _handle_img_tag(self, attributes):
+        image_path = Path('')
+        image_float = TextFloatPosition.NONE
+        padding_top = 0
+        padding_right = 0
+        padding_bottom = 0
+        padding_left = 0
+        if 'src' in attributes:
+            image_path = Path(attributes['src'])
+        if 'float' in attributes:
+            if attributes['float'] == 'left':
+                image_float = TextFloatPosition.LEFT
+            elif attributes['float'] == 'right':
+                image_float = TextFloatPosition.RIGHT
+            else:
+                image_float = TextFloatPosition.NONE
+        if 'padding' in attributes:
+            paddings = attributes['padding'].split(' ')
+            for index, padding in enumerate(paddings):
+                paddings[index] = int(padding.strip('px'))
+            if len(paddings) == 4:
+                padding_top = paddings[0]
+                padding_right = paddings[1]
+                padding_bottom = paddings[2]
+                padding_left = paddings[3]
+            elif len(paddings) == 3:
+                padding_top = paddings[0]
+                padding_right = paddings[1]
+                padding_left = paddings[1]
+                padding_bottom = paddings[2]
+            elif len(paddings) == 2:
+                padding_top = paddings[0]
+                padding_right = paddings[1]
+                padding_left = paddings[1]
+                padding_bottom = paddings[0]
+            elif len(paddings) == 1:
+                padding_top = paddings[0]
+                padding_right = paddings[0]
+                padding_left = paddings[0]
+                padding_bottom = paddings[0]
+        all_paddings = Padding(padding_top, padding_right, padding_bottom, padding_left)
+        self.layout_rect_queue.append(ImageLayoutRect(image_path,
+                                                      image_float,
+                                                      all_paddings))
 
     def handle_endtag(self, tag: str):
         """
@@ -267,17 +270,7 @@ class HTMLParser(html.parser.HTMLParser):
 
         if element == 'p':
             self.in_paragraph_block = False
-            current_font = self.ui_theme.get_font_dictionary().find_font(
-                font_name=self.current_style['font_name'],
-                font_size=self.current_style['font_size'],
-                bold=self.current_style['bold'],
-                italic=self.current_style['italic'])
-
-            dimensions = (current_font.get_rect(' ').width,
-                          int(round(self.current_style['font_size'] *
-                                    self.line_spacing)))
-
-            self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+            self._handle_line_break()
 
         result = None
         while result != element:
@@ -347,6 +340,12 @@ class HTMLParser(html.parser.HTMLParser):
         self.layout_rect_queue.append(chunk)
 
     def create_styled_text_chunk(self, text: str):
+        """
+        Create a styled text chunk from the input text string and the current style.
+
+        :param text: The text to style up into a chunk.
+        :return: A text 'chunk' all in the same style.
+        """
         chunk_font = self.ui_theme.get_font_dictionary().find_font(
             font_name=self.current_style['font_name'],
             font_size=self.current_style['font_size'],
@@ -379,4 +378,3 @@ class HTMLParser(html.parser.HTMLParser):
                                         bg_colour=self.current_style['bg_colour'],
                                         text_shadow_data=self.current_style['shadow_data'])
         return chunk
-
