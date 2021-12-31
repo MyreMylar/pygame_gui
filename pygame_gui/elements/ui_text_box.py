@@ -373,7 +373,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.set_image(new_image)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-        should_redraw_from_chunks = False
         should_redraw_from_layout = False
 
         if self.scroll_bar is not None:
@@ -402,8 +401,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 chunk.on_hovered()
                 should_redraw_from_layout = True
 
-        if should_redraw_from_chunks:
-            self.redraw_from_chunks()
         if should_redraw_from_layout:
             self.redraw_from_text_block()
 
@@ -610,9 +607,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         """
         consumed_event = False
-        should_redraw_from_chunks = False
         should_redraw_from_layout = False
-        should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
@@ -678,13 +673,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     chunk.set_inactive()
                     should_redraw_from_layout = True
 
-        if should_redraw_from_chunks:
-            self.redraw_from_chunks()
         if should_redraw_from_layout:
             self.redraw_from_text_block()
-
-        if should_full_redraw:
-            self.full_redraw()
 
         return consumed_event
 

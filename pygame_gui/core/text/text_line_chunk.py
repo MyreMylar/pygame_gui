@@ -729,9 +729,9 @@ class TextLineChunkFTFont(TextLayoutRect):
                 # other chunks
                 self.effects_rotation = rotation
 
-                temp_surf = pygame.Surface(self.size, flags=pygame.SRCALPHA)
+                temp_surf = pygame.surface.Surface(self.size, flags=pygame.SRCALPHA)
                 temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
-                rotated_surf = pygame.transform.rotate(temp_surf, angle=rotation)
+                rotated_surf = pygame.transform.rotate(temp_surf, rotation)
 
                 self.transform_effect_rect = pygame.Rect(self.topleft, rotated_surf.get_size())
                 self.transform_effect_rect.center = self.center
@@ -755,10 +755,9 @@ class TextLineChunkFTFont(TextLayoutRect):
                 # other chunks
                 self.effects_scale = scale
 
-                temp_surf = pygame.Surface(self.size, flags=pygame.SRCALPHA)
+                temp_surf = pygame.surface.Surface(self.size, flags=pygame.SRCALPHA)
                 temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
-                scaled_surf = pygame.transform.rotozoom(temp_surf, angle=0,
-                                                        scale=self.effects_scale)
+                scaled_surf = pygame.transform.rotozoom(temp_surf, 0, self.effects_scale)
 
                 self.transform_effect_rect = pygame.Rect(self.topleft, scaled_surf.get_size())
                 self.transform_effect_rect.center = self.center

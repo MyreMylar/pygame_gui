@@ -13,7 +13,7 @@ jobs:
   include:
     - os: osx
       language: generic
-      env: PYTHON=3.8.0 PYGAME_VERSION=2.0.0
+      env: PYTHON=3.8.0 PYGAME_VERSION=2.0.1
       before_install:
         - brew update
         - brew install openssl readline
@@ -56,25 +56,25 @@ jobs:
 
     - os: linux
       python: 3.6
-      env: PYGAME_VERSION=2.0.0
+      env: PYGAME_VERSION=2.0.1
     - os: linux
       python: 3.6
       env: PYGAME_VERSION=2.1.0
     - os: linux
       python: 3.7
-      env: PYGAME_VERSION=2.0.0
+      env: PYGAME_VERSION=2.0.1
     - os: linux
       python: 3.7
       env: PYGAME_VERSION=2.1.0
     - os: linux
       python: 3.8
-      env: PYGAME_VERSION=2.0.0
+      env: PYGAME_VERSION=2.0.1
     - os: linux
       python: 3.8
       env: PYGAME_VERSION=2.1.0
     - os: linux
       python: 3.9
-      env: PYGAME_VERSION=2.0.0
+      env: PYGAME_VERSION=2.0.1
     - os: linux
       python: 3.10
       env: PYGAME_VERSION=2.1.2

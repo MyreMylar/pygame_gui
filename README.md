@@ -12,7 +12,7 @@ A GUI system for pygame 2.
 ## Requirements
 
  - Python 3.6+
- - Pygame
+ - Pygame 2.0.1+
  - python-i18n (does localization to different languages)
 
 ## How to install

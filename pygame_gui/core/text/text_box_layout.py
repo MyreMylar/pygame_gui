@@ -320,9 +320,9 @@ class TextBoxLayout:
         """
         Finalises our layout to a brand new surface that this method creates.
         """
-        self.finalised_surface = pygame.Surface((self.layout_rect.width + self.edit_buffer,
-                                                 self.layout_rect.height),
-                                                depth=32, flags=pygame.SRCALPHA)
+        self.finalised_surface = pygame.surface.Surface((self.layout_rect.width + self.edit_buffer,
+                                                         self.layout_rect.height),
+                                                        depth=32, flags=pygame.SRCALPHA)
         self.finalised_surface.fill('#00000000')
         self.finalise_to_surf(self.finalised_surface)
 
