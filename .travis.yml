@@ -83,6 +83,7 @@ install:
   - python -m pip install -U pip
   - python -m pip install pytest
   - python -m pip install pytest-cov
+  - python -m pip install pytest-benchmark
   - python -m pip install codecov
   - python -m pip install python-i18n
   - python -m pip install -q pygame==$PYGAME_VERSION
