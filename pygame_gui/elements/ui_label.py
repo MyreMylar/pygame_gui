@@ -1,16 +1,22 @@
 import warnings
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional, Any
 
 import pygame
 from pygame_gui.core.utility import translate
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IUITextOwnerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape
 
+from pygame_gui._constants import UITextEffectType, TEXT_EFFECT_TYPING_APPEAR
+from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
+from pygame_gui.core.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.text import TextLineChunkFTFont
 
-class UILabel(UIElement):
+
+class UILabel(UIElement, IUITextOwnerInterface):
     """
     A label lets us display a single line of text with a single font style. It's a quick to
     rebuild and simple alternative to the text box element.
@@ -69,6 +75,8 @@ class UILabel(UIElement):
         self.text_vert_alignment = 'center'
         self.text_horiz_alignment_padding = 0
         self.text_vert_alignment_padding = 0
+
+        self.active_text_effect = None
 
         self.rebuild_from_changed_theme_data()
 
@@ -266,3 +274,90 @@ class UILabel(UIElement):
                 self.rebuild()
             else:
                 self.drawable_shape.set_text(translate(self.text))
+
+    def update(self, time_delta: float):
+        """
+        Called once every update loop of the UI Manager.
+
+        :param time_delta: The time in seconds between calls to update. Useful for timing things.
+
+        """
+        super().update(time_delta)
+        self.update_text_effect(time_delta)
+
+    # -------------------------------------------------
+    # The Text owner interface
+    # -------------------------------------------------
+    def set_text_alpha(self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        self.drawable_shape.set_text_alpha(alpha)
+
+    def set_text_offset_pos(self, offset: Tuple[int, int],
+                            sub_chunk: Optional[TextLineChunkFTFont]):
+        pass
+
+    def set_text_rotation(self, rotation: int,
+                          sub_chunk: Optional[TextLineChunkFTFont]):
+        pass
+
+    def set_text_scale(self, scale: int,
+                       sub_chunk: Optional[TextLineChunkFTFont]):
+        pass
+
+    def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        self.drawable_shape.text_box_layout.clear_final_surface()
+        self.drawable_shape.text_box_layout.finalise_to_new()
+        self.drawable_shape.redraw_active_state_no_text()
+
+    def get_text_letter_count(self, sub_chunk: Optional[TextLineChunkFTFont] = None) -> int:
+        return self.drawable_shape.text_box_layout.letter_count
+
+    def update_text_end_position(self, end_pos: int,
+                                 sub_chunk: Optional[TextLineChunkFTFont] = None):
+        self.drawable_shape.text_box_layout.current_end_pos = end_pos
+        self.drawable_shape.text_box_layout.finalise_to_new()
+        self.drawable_shape.finalise_text_onto_active_state()
+
+    def set_active_effect(self, effect_type: Optional[UITextEffectType],
+                          params: Optional[Dict[str, Any]] = None,
+                          effect_tag: Optional[str] = None):
+        if effect_tag is not None:
+            warnings.warn('UILabels do not support effect tags')
+
+        if self.active_text_effect is not None:
+            self.clear_all_active_effects()
+        if effect_type is None:
+            self.active_text_effect = None
+        elif isinstance(effect_type, UITextEffectType):
+            if effect_type == TEXT_EFFECT_TYPING_APPEAR:
+                effect = TypingAppearEffect(self, params)
+                self.active_text_effect = effect
+            elif effect_type == TEXT_EFFECT_FADE_IN:
+                effect = FadeInEffect(self, params)
+                self.active_text_effect = effect
+            elif effect_type == TEXT_EFFECT_FADE_OUT:
+                effect = FadeOutEffect(self, params)
+                self.active_text_effect = effect
+            else:
+                warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label')
+        else:
+            warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label')
+
+    def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        self.active_text_effect = None
+
+    def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        self.drawable_shape.text_box_layout.clear_effects()
+        self.active_text_effect = None
+        self.rebuild()
+
+    def update_text_effect(self, time_delta: float):
+        if self.active_text_effect is not None:
+            self.active_text_effect.update(time_delta)
+            # update can set effect to None
+            if (self.active_text_effect is not None and
+                    self.active_text_effect.has_text_changed()):
+                self.active_text_effect.apply_effect()
+                self.on_fresh_drawable_shape_ready()
+
+    def get_object_id(self) -> str:
+        return self.most_specific_combined_id

@@ -83,6 +83,7 @@ class HTMLParser(html.parser.HTMLParser):
         self.default_style['link'] = False
         self.default_style['link_href'] = ''
         self.default_style['shadow_data'] = None
+        self.default_style['effect_id'] = None
 
         # this is the style used before any html is loaded
         self.push_style('default_style', self.default_style)
@@ -126,6 +127,8 @@ class HTMLParser(html.parser.HTMLParser):
             style['link'] = True
             if 'href' in attributes:
                 style["link_href"] = attributes['href']
+        elif element == 'effect':
+            HTMLParser._handle_effect_tag(attributes, style)
         elif element == 'shadow':
             self._handle_shadow_tag(attributes, style)
         elif element == 'font':
@@ -144,6 +147,11 @@ class HTMLParser(html.parser.HTMLParser):
             warnings.warn(warning_text, UserWarning)
 
         self.push_style(element, style)
+
+    @classmethod
+    def _handle_effect_tag(cls, attributes, style):
+        if 'id' in attributes:
+            style['effect_id'] = str(attributes['id'])
 
     def _handle_shadow_tag(self, attributes, style):
         shadow_size = 0
@@ -365,7 +373,8 @@ class HTMLParser(html.parser.HTMLParser):
                                        hover_colour=self.link_style['link_hover'],
                                        active_colour=self.link_style['link_selected'],
                                        hover_underline=self.link_style['link_hover_underline'],
-                                       text_shadow_data=self.current_style['shadow_data'])
+                                       text_shadow_data=self.current_style['shadow_data'],
+                                       effect_id=self.current_style['effect_id'])
         else:
             using_default_text_colour = (self.current_style['font_colour'] ==
                                          self.default_style['font_colour'])
@@ -376,5 +385,6 @@ class HTMLParser(html.parser.HTMLParser):
                                         colour=self.current_style['font_colour'],
                                         using_default_text_colour=using_default_text_colour,
                                         bg_colour=self.current_style['bg_colour'],
-                                        text_shadow_data=self.current_style['shadow_data'])
+                                        text_shadow_data=self.current_style['shadow_data'],
+                                        effect_id=self.current_style['effect_id'])
         return chunk

@@ -147,10 +147,11 @@ class RectDrawableShape(DrawableShape):
         self.click_area_shape.x = point[0] + self.shadow_width
         self.click_area_shape.y = point[1] + self.shadow_width
 
-    def redraw_state(self, state_str: str):
+    def redraw_state(self, state_str: str, add_text: bool = True):
         """
         Redraws the shape's surface for a given UI state.
 
+        :param add_text:
         :param state_str: The ID string of the state to rebuild.
 
         """
@@ -239,7 +240,8 @@ class RectDrawableShape(DrawableShape):
 
         self.finalise_images_and_text(image_state_str, state_str,
                                       text_colour_state_str,
-                                      text_shadow_colour_state_str)
+                                      text_shadow_colour_state_str,
+                                      add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

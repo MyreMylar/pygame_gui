@@ -202,7 +202,8 @@ class TestDrawableShape:
         shape.theming['text_horiz_alignment_padding'] = 5
         shape.theming['text_vert_alignment_padding'] = 5
 
-        shape.finalise_images_and_text('normal_image', 'normal', 'normal_text', 'normal_text_shadow')
+        shape.finalise_images_and_text('normal_image', 'normal',
+                                       'normal_text', 'normal_text_shadow', True)
 
 
 if __name__ == '__main__':

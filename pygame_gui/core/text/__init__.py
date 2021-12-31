@@ -6,8 +6,9 @@ from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
 from pygame_gui.core.text.text_box_layout_row import TextBoxLayoutRow
-from pygame_gui.core.text.text_effects import TextBoxEffect, TypingAppearEffect
+from pygame_gui.core.text.text_effects import TextEffect, TypingAppearEffect
 from pygame_gui.core.text.text_effects import FadeOutEffect, FadeInEffect
+from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
 from pygame_gui.core.text.html_parser import HTMLParser
 
 
@@ -21,7 +22,10 @@ __all__ = ['TextLayoutRect',
            'HTMLParser',
            'TextBoxLayout',
            'TextBoxLayoutRow',
-           'TextBoxEffect',
+           'TextEffect',
            'TypingAppearEffect',
            'FadeOutEffect',
-           'FadeInEffect']
+           'FadeInEffect',
+           'BounceEffect',
+           'TiltEffect',
+           'ExpandContractEffect']

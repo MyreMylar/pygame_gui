@@ -220,14 +220,14 @@ class TestTextBoxLayoutRow:
         # not sure this is right, need to do some more visual testing of vertical
         # alignment of text rects with different height text on a single row.
         assert layout_row.items[0].y == 0
-        assert layout_row.items[1].y == 0
-        assert layout_row.items[2].y == 0
+        assert layout_row.items[1].y == 7
+        assert layout_row.items[2].y == 15
 
         layout_row.vert_align_items_to_row()
 
         assert layout_row.items[0].y == 0
-        assert layout_row.items[1].y == 0
-        assert layout_row.items[2].y == 0
+        assert layout_row.items[1].y == 7
+        assert layout_row.items[2].y == 15
 
     def test_merge_adjacent_compatible_chunks(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([])

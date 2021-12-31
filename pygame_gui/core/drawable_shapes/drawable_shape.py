@@ -200,6 +200,8 @@ class DrawableShape:
         self.background_rect = None
         self.base_surface = None
 
+        self.only_text_changed = False
+
     def _evaluate_contents_for_containing_rect(self):
         if self.containing_rect.width == -1:
             # check to see if we have text and a font, this won't work with HTML
@@ -435,13 +437,15 @@ class DrawableShape:
                                  image_state_str: str,
                                  state_str: str,
                                  text_colour_state_str: str,
-                                 text_shadow_colour_state_str: str):
+                                 text_shadow_colour_state_str: str,
+                                 add_text: bool):
         """
         Rebuilds any text or image used by a specific state in the drawable shape. Effectively
         this means adding them on top of whatever is already in the state's surface. As such it
         should generally be called last in the process of building up a finished drawable shape
         state.
 
+        :param add_text:
         :param image_state_str: image ID of the state we are going to be adding images and text to.
         :param state_str: normal ID of the state we are going to be adding images and text to.
         :param text_colour_state_str: text ID of the state we are going to be adding images and
@@ -457,7 +461,8 @@ class DrawableShape:
                                  int(self.containing_rect.height / 2))
             basic_blit(self.states[state_str].surface,
                        self.theming[image_state_str], image_rect)
-        self.finalise_text(state_str, text_colour_state_str, text_shadow_colour_state_str)
+        if add_text:
+            self.finalise_text(state_str, text_colour_state_str, text_shadow_colour_state_str)
 
     def build_text_layout(self):
         """
@@ -515,21 +520,28 @@ class DrawableShape:
             self.align_all_text_rows()
         return containing_rect_when_text_built
 
-    def finalise_text(self, state_str, text_colour_state_str, text_shadow_colour_state_str):
+    def finalise_text(self, state_str,
+                      text_colour_state_str: str = "",
+                      text_shadow_colour_state_str: str = "",
+                      only_text_changed: bool = False):
         """
         Finalise the text to a surface with some last-minute data that doesn't require the text
         be re-laid out.
 
+        :param only_text_changed:
         :param state_str: The name of the shape's state we are finalising.
         :param text_colour_state_str: The string identifying the text colour to use.
         :param text_shadow_colour_state_str: The string identifying the text shadow
                                              colour to use.
         """
         if self.text_box_layout is not None:
-            self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
-            self.text_box_layout.set_default_text_shadow_colour(
-                self.theming[text_shadow_colour_state_str])
-            self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
+            if only_text_changed:
+                self.text_box_layout.blit_finalised_text_to_surf(self.states[state_str].surface)
+            else:
+                self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
+                self.text_box_layout.set_default_text_shadow_colour(
+                    self.theming[text_shadow_colour_state_str])
+                self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
 
     def set_text(self, text: str):
         """
@@ -541,6 +553,31 @@ class DrawableShape:
         self.theming['text'] = text
         self.build_text_layout()
         self.redraw_all_states()
+
+    def set_text_alpha(self, alpha: int):
+        """
+        Set the alpha of just the text and redraw the shape with the new text on top.
+
+        :param alpha: the alpha to set.
+        """
+        self.text_box_layout.set_alpha(alpha)
+        self.redraw_state(self.active_state.state_id, add_text=False)
+        self.finalise_text(self.active_state.state_id, only_text_changed=True)
+
+    def redraw_active_state_no_text(self):
+        """
+        Redraw the currently active state with no text.
+        """
+        self.redraw_state(self.active_state.state_id, add_text=False)
+
+    def finalise_text_onto_active_state(self):
+        """
+        Lets us draw the active state with no text and then paste the finalised surface from the
+        text layout on top. Handy if we are doing some text effects in the text layout we don't want
+        to lose by recreating the text from scratch.
+        """
+        self.redraw_state(self.active_state.state_id, add_text=False)
+        self.finalise_text(self.active_state.state_id, only_text_changed=True)
 
     def insert_text(self, text: str, layout_index: int, parser: Optional[HTMLParser] = None):
         """
@@ -565,11 +602,12 @@ class DrawableShape:
             self.text_box_layout.toggle_cursor()
             self.active_state.has_fresh_surface = True
 
-    def redraw_state(self, state_str: str):
+    def redraw_state(self, state_str: str, add_text: bool = True):
         """
         This method is declared for derived classes to implement but has no default
         implementation.
 
+        :param add_text:
         :param state_str: The ID/name of the state to redraw.
 
         """

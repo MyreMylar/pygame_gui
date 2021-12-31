@@ -283,7 +283,8 @@ class RoundedRectangleShape(DrawableShape):
                                                                    self.click_area_shape.size))
 
         self.states['normal'].surface = quick_surf
-        self.finalise_images_and_text('normal_image', 'normal', 'normal_text', 'normal_text_shadow')
+        self.finalise_images_and_text('normal_image', 'normal',
+                                      'normal_text', 'normal_text_shadow', True)
         self.states['normal'].has_fresh_surface = True
 
         self.has_been_resized = True
@@ -292,10 +293,11 @@ class RoundedRectangleShape(DrawableShape):
 
         return True
 
-    def redraw_state(self, state_str: str):
+    def redraw_state(self, state_str: str, add_text: bool = True):
         """
         Redraws the shape's surface for a given UI state.
 
+        :param add_text:
         :param state_str: The ID string of the state to rebuild.
 
         """
@@ -319,7 +321,7 @@ class RoundedRectangleShape(DrawableShape):
         if found_shape is not None:
             self.states[state_str].surface = found_shape.copy()
         else:
-            border_corner_radius = self.corner_radius
+            # border_corner_radius = self.corner_radius
 
             self.states[state_str].surface = self.base_surface.copy()
 
@@ -341,7 +343,7 @@ class RoundedRectangleShape(DrawableShape):
 
             dimension_scale = min(self.background_rect.width / max(self.border_rect.width, 1),
                                   self.background_rect.height / max(self.border_rect.height, 1))
-            bg_corner_radius = int(border_corner_radius * dimension_scale)
+            bg_corner_radius = int(self.corner_radius * dimension_scale)
 
             bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
                                                   self.containing_rect.height * aa_amount),
@@ -351,7 +353,7 @@ class RoundedRectangleShape(DrawableShape):
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.border_rect,
                                                                     0,
-                                                                    border_corner_radius,
+                                                                    self.corner_radius,
                                                                     aa_amount=aa_amount,
                                                                     clear=False)
                 if isinstance(border_col, ColourGradient):
@@ -396,7 +398,7 @@ class RoundedRectangleShape(DrawableShape):
 
         self.finalise_images_and_text(state_str + '_image', state_str,
                                       text_colour_state_str,
-                                      text_shadow_colour_state_str)
+                                      text_shadow_colour_state_str, add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

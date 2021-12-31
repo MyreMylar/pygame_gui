@@ -35,24 +35,10 @@ class TextLineChunkFTFont(TextLayoutRect):
                  using_default_text_colour: bool,
                  bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, pygame.Color, bool]] = None,
-                 max_dimensions: Optional[Tuple[int, int]] = None):
-
+                 max_dimensions: Optional[Tuple[int, int]] = None,
+                 effect_id: Optional[str] = None):
         self.text_shadow_data = text_shadow_data
-        if len(text) == 0:
-            text_rect = font.get_rect('A')
-        else:
-            text_rect = font.get_rect(text)
-        text_shadow_width = 0
-        if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
-            # expand our text chunk if we have a text shadow
-            text_shadow_width = self.text_shadow_data[0]
-        text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
-        text_height = text_rect.height
-        if max_dimensions is not None:
-            if max_dimensions[0] != -1:
-                text_width = min(max_dimensions[0], text_width)
-            if max_dimensions[1] != -1:
-                text_height = min(max_dimensions[1], text_height)
+        text_height, text_rect, text_width = self._handle_dimensions(font, max_dimensions, text)
         super().__init__((text_width, text_height), can_split=True)
 
         self.text = text
@@ -80,19 +66,52 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
-        self.target_surface = None
+        self.target_surface: Optional[pygame.Surface] = None
         self.target_surface_area = None
         self.row_chunk_origin = 0
         self.row_chunk_height = 0
         self.row_bg_height = 0
         self.layout_x_offset = 0
-        self.letter_end = 0
 
         self.is_selected = False
         self.is_active = False
         self.selection_colour = pygame.Color(128, 128, 128, 255)
 
         self.should_centre_from_baseline = False
+
+        self.effect_id = effect_id
+
+        # this is the rect before we add it to a row and start moving the origin
+        self.pre_row_rect = pygame.Rect(self.topleft, self.size)
+        self.origin_row_y_adjust = 0
+
+        # effects stuff that should be reset
+        self.letter_end = None
+        self.alpha = 255
+        self.pre_effect_target_surface = None
+
+        self.effects_scale = 1.0
+        self.effects_rotation = 0
+        self.effects_offset_pos = (0, 0)
+        self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
+
+    def _handle_dimensions(self, font, max_dimensions, text):
+        if len(text) == 0:
+            text_rect = font.get_rect('A')
+        else:
+            text_rect = font.get_rect(text)
+        text_shadow_width = 0
+        if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
+            # expand our text chunk if we have a text shadow
+            text_shadow_width = self.text_shadow_data[0]
+        text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
+        text_height = text_rect.height
+        if max_dimensions is not None:
+            if max_dimensions[0] != -1:
+                text_width = min(max_dimensions[0], text_width)
+            if max_dimensions[1] != -1:
+                text_height = min(max_dimensions[1], text_height)
+        return text_height, text_rect, text_width
 
     def _calc_font_padding(self):
         # 'font padding' this determines the amount of padding that
@@ -124,9 +143,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
         match_selected = self.is_selected == other_text_chunk.is_selected
         match_active = self.is_active == other_text_chunk.is_active
+        match_effect_id = self.effect_id == other_text_chunk.effect_id
 
         return (match_fonts and match_underlined and match_colour and
-                match_bg_color and match_shadow_data and match_selected and match_active)
+                match_bg_color and match_shadow_data and match_selected and match_active
+                and match_effect_id)
 
     def finalise(self,
                  target_surface: Surface,
@@ -193,7 +214,8 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _finalise_horizontal_scroll(self, target_area, text_shadow_width, x_scroll_offset,
                                     target_surface, surface):
         # sort out horizontal scrolling
-        final_pos = (max(target_area.left, self.left - x_scroll_offset), self.top)
+        final_pos = (max(target_area.left, self.left - x_scroll_offset),
+                     self.top - self.origin_row_y_adjust)
         distance_to_lhs_overlap = self.left - target_area.left
         lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
@@ -480,12 +502,16 @@ class TextLineChunkFTFont(TextLayoutRect):
         right_side_chunk.should_centre_from_baseline = baseline_centred
         return right_side_chunk
 
-    def clear(self):
+    def clear(self, optional_rect: Optional[pygame.Rect] = None):
         """
         Clear the finalised/rendered text in this chunk to an invisible/empty surface.
         """
         if self.target_surface is not None:
-            self.target_surface.fill(pygame.Color('#00000000'), self)
+            if optional_rect is not None:
+                clear_rect = optional_rect
+            else:
+                clear_rect = self
+            self.target_surface.fill(pygame.Color('#00000000'), clear_rect)
 
     def add_text(self, input_text: str):
         """
@@ -617,7 +643,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         Redraw a surface that has already been finalised once before.
         """
         if self.target_surface is not None:
-            self.clear()
+            if self.pre_effect_target_surface is not None:
+                self.clear(self.transform_effect_rect)
+            else:
+                self.clear()
             self.finalise(self.target_surface,
                           self.target_surface_area,
                           self.row_chunk_origin,
@@ -625,8 +654,137 @@ class TextLineChunkFTFont(TextLayoutRect):
                           self.row_bg_height,
                           self.layout_x_offset,
                           self.letter_end)
+            if self.pre_effect_target_surface is not None:
+                # refresh the pre-target surface
+                self.pre_effect_target_surface = self.target_surface.copy()
+                if self.effects_rotation != 0 or self.effects_offset_pos != (0, 0):
+                    self.clear()
+                if self.effects_rotation != 0:
+                    self.set_rotation(self.effects_rotation)
+                if self.effects_offset_pos != (0, 0):
+                    self.set_offset_pos(self.effects_offset_pos)
+                if self.alpha != 255:
+                    self.set_alpha(self.alpha)
 
     @staticmethod
     def _text_render_width(text: str, font):
         return sum([char_metric[4] if char_metric is not None else 0
                     for char_metric in font.get_metrics(text)])
+
+    def set_alpha(self, alpha: int):
+        """
+        Set the overall alpha level of this text chunk from 0 to 255.
+        This allows us to fade text in and out of view.
+
+        :param alpha: integer from 0 to 255.
+        """
+        if self.alpha != 255 and alpha == 255:
+            self.alpha = alpha
+            self.redraw()
+        else:
+            if self.pre_effect_target_surface is not None:
+                self.alpha = alpha
+                self.target_surface.blit(self.pre_effect_target_surface, self, self)
+                pre_mul_alpha_colour = pygame.Color(self.alpha, self.alpha,
+                                                    self.alpha, self.alpha)
+                self.target_surface.fill(pre_mul_alpha_colour,
+                                         rect=self,
+                                         special_flags=pygame.BLEND_RGBA_MULT)
+
+    def set_offset_pos(self, offset_pos: Tuple[int, int]):
+        """
+        Set an offset that lets us move the text around a bit for effects
+
+        :param offset_pos: integers that offset the x & y position of this text chunk
+        """
+        if self.effects_offset_pos != (0, 0) and offset_pos == (0, 0):
+            # returned to no offset so redraw chunk
+            self.effects_offset_pos = offset_pos
+            self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
+            self.redraw()
+        else:
+            if self.pre_effect_target_surface is not None:
+                self.effects_offset_pos = offset_pos
+                self.transform_effect_rect = pygame.Rect(self.left + self.effects_offset_pos[0],
+                                                         self.top + self.effects_offset_pos[1],
+                                                         self.width, self.height)
+
+                self.target_surface.blit(self.pre_effect_target_surface,
+                                         self.transform_effect_rect, self)
+
+    def set_rotation(self, rotation: int):
+        """
+        Set a rotation that lets us move the text around a bit for effects
+
+        :param rotation: a rotation in degrees
+        """
+        if self.effects_rotation != 0 and rotation == 0:
+            # returned to no rotation so redraw chunk
+            self.effects_rotation = rotation
+            self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
+            self.redraw()
+        else:
+            if self.pre_effect_target_surface is not None:
+                # setup 'background' for effect by clearing any existing effect and redrawing
+                # other chunks
+                self.effects_rotation = rotation
+
+                temp_surf = pygame.Surface(self.size, flags=pygame.SRCALPHA)
+                temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
+                rotated_surf = pygame.transform.rotate(temp_surf, angle=rotation)
+
+                self.transform_effect_rect = pygame.Rect(self.topleft, rotated_surf.get_size())
+                self.transform_effect_rect.center = self.center
+
+                self.target_surface.blit(rotated_surf, self.transform_effect_rect)
+
+    def set_scale(self, scale: float):
+        """
+        Set a scale that lets us move the text around a bit for effects
+
+        :param scale: a rotation in degrees
+        """
+        if self.effects_scale != 1.0 and scale == 1.0:
+            # returned to no rotation so redraw chunk
+            self.effects_scale = scale
+            self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
+            self.redraw()
+        else:
+            if self.pre_effect_target_surface is not None:
+                # setup 'background' for effect by clearing any existing effect and redrawing
+                # other chunks
+                self.effects_scale = scale
+
+                temp_surf = pygame.Surface(self.size, flags=pygame.SRCALPHA)
+                temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
+                scaled_surf = pygame.transform.rotozoom(temp_surf, angle=0,
+                                                        scale=self.effects_scale)
+
+                self.transform_effect_rect = pygame.Rect(self.topleft, scaled_surf.get_size())
+                self.transform_effect_rect.center = self.center
+
+                self.target_surface.blit(scaled_surf, self.transform_effect_rect)
+
+    def clear_effects(self):
+        """
+        Clear any effect parameters stored on the text chunk back to default values.
+        """
+        self.clear(self.transform_effect_rect)
+        self.letter_end = None
+        self.alpha = 255
+        self.pre_effect_target_surface = None
+
+        self.effects_scale = 1.0
+        self.effects_rotation = 0
+        self.effects_offset_pos = (0, 0)
+        self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
+
+    def grab_pre_effect_surface(self):
+        """
+        Grab the 'pre effect' surface, used to get a 'normal' pre-effect surface to apply effects
+        to.
+        TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
+              text surface again. Perhaps only hold the chunk's part?
+        """
+        if self.target_surface is not None:
+            self.pre_effect_target_surface = self.target_surface.copy()

@@ -23,8 +23,10 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                  hover_colour: Color,
                  active_colour: Color,
                  hover_underline: bool,
-                 text_shadow_data: Optional[Tuple[int, int, int]] = None):
-        super().__init__(text, font, underlined, colour, False, bg_colour, text_shadow_data)
+                 text_shadow_data: Optional[Tuple[int, int, int]] = None,
+                 effect_id: Optional[str] = None):
+        super().__init__(text, font, underlined, colour, False, bg_colour,
+                         text_shadow_data, effect_id=effect_id)
 
         self.href = href
         self.is_hovered = False
@@ -90,7 +92,8 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
                                               self.hover_colour,
                                               self.active_colour,
                                               self.hover_underline,
-                                              self.text_shadow_data)
+                                              self.text_shadow_data,
+                                              self.effect_id)
 
         right_side_chunk.topleft = split_pos  # pylint: disable=attribute-defined-outside-init
         right_side_chunk.target_surface = target_surface

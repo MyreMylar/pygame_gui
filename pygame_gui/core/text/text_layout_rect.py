@@ -67,9 +67,11 @@ class TextLayoutRect(pygame.rect.Rect):
         :param letter_end:
         """
 
-    def clear(self):
+    def clear(self, optional_rect: Optional[pygame.Rect] = None):
         """
         Clear the space this rect takes up on the finalised surface.
+
+        :param optional_rect: A rect to clear instead of the default self rect, useful for effects.
         """
 
     def can_split(self):

@@ -1,17 +1,19 @@
 import warnings
 import math
 
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional, Any
 
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED, OldType
-from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR
-from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
+from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED, OldType, UITextEffectType
+from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_TILT
+from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_BOUNCE
+from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
 
 from pygame_gui.core.utility import translate
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IUITextOwnerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.core.utility import basic_blit
@@ -20,10 +22,12 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
 
 
-class UITextBox(UIElement):
+class UITextBox(UIElement, IUITextOwnerInterface):
     """
     A Text Box element lets us display word-wrapped, formatted text. If the text to display is
     longer than the height of the box given then the element will automatically create a vertical
@@ -96,6 +100,7 @@ class UITextBox(UIElement):
         self.link_hover_chunks = []  # container for any link chunks we have
 
         self.active_text_effect = None
+        self.active_text_chunk_effects = []
         self.scroll_bar = None
         self.scroll_bar_width = 20
 
@@ -113,8 +118,8 @@ class UITextBox(UIElement):
         self.link_style = None
 
         self.rounded_corner_offset = None
-        self.text_box_layout = None  # TextLine()
-        self.text_wrap_rect = None  # type: Union[pygame.Rect, None]
+        self.text_box_layout = None  # type: Optional[TextBoxLayout]
+        self.text_wrap_rect = None  # type: Optional[pygame.Rect]
         self.background_surf = None
 
         self.drawable_shape = None
@@ -369,6 +374,7 @@ class UITextBox(UIElement):
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         should_redraw_from_chunks = False
+        should_redraw_from_layout = False
 
         if self.scroll_bar is not None:
             height_adjustment = (self.scroll_bar.start_percentage *
@@ -391,20 +397,17 @@ class UITextBox(UIElement):
                 hovered_currently = True
             if chunk.is_hovered and not hovered_currently:
                 chunk.on_unhovered()
-                should_redraw_from_chunks = True
+                should_redraw_from_layout = True
             elif hovered_currently and not chunk.is_hovered:
                 chunk.on_hovered()
-                should_redraw_from_chunks = True
+                should_redraw_from_layout = True
 
         if should_redraw_from_chunks:
             self.redraw_from_chunks()
+        if should_redraw_from_layout:
+            self.redraw_from_text_block()
 
-        if self.active_text_effect is not None:
-            self.active_text_effect.update(time_delta)
-            # update can set effect to None
-            if (self.active_text_effect is not None and
-                    self.active_text_effect.has_text_block_changed()):
-                self.redraw_from_text_block()
+        self.update_text_effect(time_delta)
 
         if self.should_trigger_full_rebuild and self.full_rebuild_countdown <= 0.0:
             self.rebuild()
@@ -513,7 +516,6 @@ class UITextBox(UIElement):
         rendered text.
         """
 
-        # parser.push_style('body', {"bg_colour": self.background_colour})
         self.parser.feed(translate(self.html_text) + self.appended_text)
 
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
@@ -528,15 +530,6 @@ class UITextBox(UIElement):
 
         self._align_all_text_rows()
         self.text_box_layout.finalise_to_new()
-
-        # self.formatted_text_block = TextBlock(parser.text_data,
-        #                                       self.text_wrap_rect,
-        #                                       parser.indexed_styles,
-        #                                       self.font_dict,
-        #                                       self.link_style,
-        #                                       self.background_colour,
-        #                                       self.wrap_to_height
-        #                                       )
 
     def redraw_from_text_block(self):
         """
@@ -618,6 +611,7 @@ class UITextBox(UIElement):
         """
         consumed_event = False
         should_redraw_from_chunks = False
+        should_redraw_from_layout = False
         should_full_redraw = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
@@ -644,10 +638,7 @@ class UITextBox(UIElement):
                             consumed_event = True
                             if not chunk.is_active:
                                 chunk.set_active()
-                                # if chunk.metrics_changed_after_redraw:
-                                #     should_full_redraw = True
-                                # else:
-                                should_redraw_from_chunks = True
+                                should_redraw_from_layout = True
 
         if self.is_enabled and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.scroll_bar is not None:
@@ -685,48 +676,17 @@ class UITextBox(UIElement):
 
                 if chunk.is_active:
                     chunk.set_inactive()
-                    # if chunk.metrics_changed_after_redraw:
-                    #     should_full_redraw = True
-                    # else:
-                    should_redraw_from_chunks = True
+                    should_redraw_from_layout = True
 
         if should_redraw_from_chunks:
             self.redraw_from_chunks()
+        if should_redraw_from_layout:
+            self.redraw_from_text_block()
 
         if should_full_redraw:
             self.full_redraw()
 
         return consumed_event
-
-    def set_active_effect(self, effect_name: Union[str, None]):
-        """
-        Set an animation effect to run on the text box. The effect will start running immediately
-        after this call.
-
-        These effects are currently supported:
-
-        - 'typing_appear' - Will look as if the text is being typed in.
-        - 'fade_in' - The text will fade in from the background colour (Only supported on Pygame 2)
-        - 'fade_out' - The text will fade out to the background colour (only supported on Pygame 2)
-
-        :param effect_name: The name fo the t to set. If set to None instead it will cancel any
-                            active effect.
-
-        """
-        if effect_name is None:
-            self.active_text_effect = None
-        elif isinstance(effect_name, str):
-            if effect_name == TEXT_EFFECT_TYPING_APPEAR:
-                effect = TypingAppearEffect(self)
-                self.active_text_effect = effect
-            elif effect_name == TEXT_EFFECT_FADE_IN:
-                effect = FadeInEffect(self)
-                self.active_text_effect = effect
-            elif effect_name == TEXT_EFFECT_FADE_OUT:
-                effect = FadeOutEffect(self)
-                self.active_text_effect = effect
-            else:
-                warnings.warn('Unsupported effect name: ' + effect_name + ' for text box')
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -921,3 +881,170 @@ class UITextBox(UIElement):
 
     def on_locale_changed(self):
         self._reparse_and_rebuild()
+
+    # -------------------------------------------------
+    # The Text owner interface
+    # -------------------------------------------------
+    def set_text_alpha(self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            self.text_box_layout.set_alpha(alpha)
+        else:
+            sub_chunk.set_alpha(alpha)
+
+    def set_text_offset_pos(self, offset: Tuple[int, int],
+                            sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            pass
+        else:
+            sub_chunk.set_offset_pos(offset)
+
+    def set_text_rotation(self, rotation: int,
+                          sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            pass
+        else:
+            sub_chunk.set_rotation(rotation)
+
+    def set_text_scale(self, scale: float, sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            pass
+        else:
+            sub_chunk.set_scale(scale)
+
+    def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            self.text_box_layout.clear_final_surface()
+        else:
+            sub_chunk.clear()
+
+    def get_text_letter_count(self, sub_chunk: Optional[TextLineChunkFTFont]) -> int:
+        if sub_chunk is None:
+            return self.text_box_layout.letter_count
+        else:
+            return sub_chunk.letter_count
+
+    def update_text_end_position(self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont]):
+        if sub_chunk is None:
+            self.text_box_layout.update_text_with_new_text_end_pos(end_pos)
+        else:
+            sub_chunk.letter_end = end_pos
+            sub_chunk.redraw()
+
+    def set_active_effect(self, effect_type: Optional[UITextEffectType],
+                          params: Optional[Dict[str, Any]] = None,
+                          effect_tag: Optional[str] = None):
+        if effect_tag is not None:
+            redrew_all_chunks = False
+            if self.active_text_effect is not None:
+                # don't allow mixing of full text box effects and chunk effects
+                self.clear_all_active_effects()
+                self.active_text_effect = None
+                redrew_all_chunks = True
+            # we have a tag so only want to apply our effect to tagged chunks
+            # first see if we have any tagged chunks in the layout
+            for row in self.text_box_layout.layout_rows:
+                for chunk in row.items:
+                    if isinstance(chunk, TextLineChunkFTFont):
+                        if chunk.effect_id == effect_tag:
+                            # need to clear off any old effects on this chunk too if we didn't
+                            # already redraw everything
+                            if not redrew_all_chunks:
+                                self.clear_all_active_effects(chunk)
+                            effect = None
+                            if effect_type == TEXT_EFFECT_TYPING_APPEAR:
+                                effect = TypingAppearEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_FADE_IN:
+                                effect = FadeInEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_FADE_OUT:
+                                effect = FadeOutEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_BOUNCE:
+                                effect = BounceEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_TILT:
+                                effect = TiltEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_EXPAND_CONTRACT:
+                                effect = ExpandContractEffect(self, params, chunk)
+                            else:
+                                warnings.warn('Unsupported effect name: ' + str(
+                                    effect_type) + ' for text chunk')
+                            chunk.grab_pre_effect_surface()
+                            self.active_text_chunk_effects.append({'chunk': chunk,
+                                                                   'effect': effect})
+        else:
+            if self.active_text_effect is not None or len(self.active_text_chunk_effects) != 0:
+                self.clear_all_active_effects()
+            if effect_type is None:
+                self.active_text_effect = None
+            elif isinstance(effect_type, UITextEffectType):
+                if effect_type == TEXT_EFFECT_TYPING_APPEAR:
+                    self.active_text_effect = TypingAppearEffect(self, params)
+                elif effect_type == TEXT_EFFECT_FADE_IN:
+                    self.active_text_effect = FadeInEffect(self, params)
+                elif effect_type == TEXT_EFFECT_FADE_OUT:
+                    self.active_text_effect = FadeOutEffect(self, params)
+                else:
+                    warnings.warn('Unsupported effect name: '
+                                  + str(effect_type) + ' for whole text box')
+            else:
+                warnings.warn('Unsupported effect name: '
+                              + str(effect_type) + ' for whole text box')
+
+    def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        if sub_chunk is None:
+            self.active_text_effect = None
+        else:
+            self.active_text_chunk_effects = [effect_chunk for effect_chunk in
+                                              self.active_text_chunk_effects
+                                              if effect_chunk['chunk'] != sub_chunk]
+
+    def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        if sub_chunk is None:
+            self.active_text_effect = None
+            self.text_box_layout.clear_effects()
+            for effect_chunk in self.active_text_chunk_effects:
+                effect_chunk['chunk'].clear_effects()
+            self.active_text_chunk_effects = []
+            self.text_box_layout.finalise_to_new()
+        else:
+            self.active_text_chunk_effects = [effect_chunk for effect_chunk in
+                                              self.active_text_chunk_effects
+                                              if effect_chunk['chunk'] != sub_chunk]
+            sub_chunk.clear_effects()
+
+            effect_chunks = []
+            for affected_chunk in self.active_text_chunk_effects:
+                effect_chunks.append(affected_chunk['chunk'])
+            self.text_box_layout.redraw_other_chunks(effect_chunks)
+
+            sub_chunk.redraw()
+
+    def update_text_effect(self, time_delta: float):
+        if self.active_text_effect is not None:
+            self.active_text_effect.update(time_delta)
+            # update can set effect to None
+            if (self.active_text_effect is not None and
+                    self.active_text_effect.has_text_changed()):
+                self.active_text_effect.apply_effect()
+                self.redraw_from_text_block()
+
+        if len(self.active_text_chunk_effects) > 0:
+            any_text_changed = False
+            for affected_chunk in self.active_text_chunk_effects:
+                affected_chunk['effect'].update(time_delta)
+                if (affected_chunk['effect'] is not None and
+                        affected_chunk['effect'].has_text_changed()):
+                    any_text_changed = True
+            if any_text_changed:
+                effect_chunks = []
+                for affected_chunk in self.active_text_chunk_effects:
+                    chunk = affected_chunk['chunk']
+                    chunk.clear(chunk.transform_effect_rect)
+                    effect_chunks.append(chunk)
+
+                self.text_box_layout.redraw_other_chunks(effect_chunks)
+
+                for affected_chunk in self.active_text_chunk_effects:
+                    affected_chunk['effect'].apply_effect()
+                self.redraw_from_text_block()
+
+    def get_object_id(self) -> str:
+        return self.most_specific_combined_id

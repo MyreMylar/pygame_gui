@@ -15,6 +15,8 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_box_layout_row import TextBoxLayoutRow
 from pygame_gui.core.text.html_parser import HTMLParser
 
+from pygame_gui.core.utility import basic_blit
+
 
 class TextBoxLayout:
     """
@@ -46,7 +48,7 @@ class TextBoxLayout:
         self.layout_rect_queue = None
         self.finalised_surface = None
         self.floating_rects: List[TextLayoutRect] = []
-        self.layout_rows = []
+        self.layout_rows: List[TextBoxLayoutRow] = []
         self.row_lengths = []
         self.link_chunks = []
         self.letter_count = 0
@@ -304,7 +306,15 @@ class TextBoxLayout:
 
         self.finalised_surface = surface
 
-        # pygame.draw.rect(self.finalised_surface, pygame.Color('#00FF00'), self.layout_rect, 1)
+    def blit_finalised_text_to_surf(self, surface: Surface):
+        """
+        Lets us blit a finalised text surface to an arbitrary surface.
+        Useful for doing stuff with text effects.
+
+        :param surface: the target surface to blit onto.
+        """
+        if self.finalised_surface is not None:
+            basic_blit(surface, self.finalised_surface, (0, 0))
 
     def finalise_to_new(self):
         """
@@ -833,3 +843,23 @@ class TextBoxLayout:
                 else:
                     for row in self.layout_rows[last_row.row_index:]:
                         row.finalise(self.finalised_surface)
+
+    def redraw_other_chunks(self, not_these_chunks):
+        """
+        Useful for text effects.
+        TODO: no idea how this will play with images? Probably badly.
+
+        :param not_these_chunks: The chunks not to redraw
+        :return:
+        """
+        for row in self.layout_rows:
+            for chunk in row.items:
+                if chunk not in not_these_chunks and isinstance(chunk, TextLineChunkFTFont):
+                    chunk.redraw()
+
+    def clear_effects(self):
+        """
+        Clear text layout level text effect parameters.
+        """
+        self.alpha = 255
+        self.current_end_pos = self.letter_count

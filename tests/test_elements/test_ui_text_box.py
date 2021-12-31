@@ -367,7 +367,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
-        text_box.active_text_effect.text_block_changed = True
+        text_box.active_text_effect.text_changed = True
         text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
 
@@ -457,8 +457,8 @@ class TestUITextBox:
                                      pygame.Rect((0, 0), (250, 200)),
                                      manager=manager,
                                      object_id="#text_box_2")
-        htm_text_block_2.set_active_effect('typing_appear')
-        htm_text_block_2.active_text_effect.text_block_changed = True
+        htm_text_block_2.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
+        htm_text_block_2.active_text_effect.text_changed = True
         htm_text_block_2.update(5.0)
         htm_text_block_2.update(5.0)
         assert type(htm_text_block_2.active_text_effect) == pygame_gui.core.text.TypingAppearEffect

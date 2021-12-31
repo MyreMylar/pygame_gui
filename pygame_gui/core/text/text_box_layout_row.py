@@ -53,6 +53,7 @@ class TextBoxLayoutRow(pygame.Rect):
 
         :param item: The new item to add to the text row
         """
+        item.pre_row_rect = pygame.Rect(item.topleft, item.size)
         item.left = self.right
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
@@ -70,6 +71,11 @@ class TextBoxLayoutRow(pygame.Rect):
         if isinstance(item, TextLineChunkFTFont):
             if item.y_origin > self.y_origin:
                 self.y_origin = item.y_origin
+
+            for origin_item in self.items:
+                if isinstance(origin_item, TextLineChunkFTFont):
+                    origin_item.origin_row_y_adjust = self.y_origin - origin_item.y_origin
+                    origin_item.top = origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
 
         self.letter_count += item.letter_count
 
@@ -192,7 +198,10 @@ class TextBoxLayoutRow(pygame.Rect):
         Align items in this row to the row's vertical position.
         """
         for item in self.items:
-            item.y = self.y
+            origin_adjust = 0
+            if isinstance(item, TextLineChunkFTFont):
+                origin_adjust = self.y_origin - item.y_origin
+            item.y = self.y + origin_adjust
 
     def merge_adjacent_compatible_chunks(self):
         """

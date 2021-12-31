@@ -5,6 +5,52 @@ TODO: Using strings for now for compatibility but we could deprecate these to be
 from warnings import warn
 from pygame.event import custom_type
 
+
+class UITextEffectType:
+    """
+    A Type for Text effect constants so we can mess with them later if needs be
+    """
+    def __init__(self, name):
+        self._name = name
+
+    def __repr__(self):
+        return self._name
+
+    def __eq__(self, other):
+        if isinstance(other, UITextEffectType):
+            return self._name == other._name
+        elif isinstance(other, str):
+            return self._name == other
+        return False
+
+    def __add__(self, other):
+        if isinstance(other, str):
+            return self._name + other
+        raise AttributeError("Can't append to anything other than a string")
+
+    def __radd__(self, other):
+        if isinstance(other, str):
+            return other + self._name
+        raise AttributeError("Can't append to anything other than a string")
+
+
+class OldType(int):
+    """
+    Deprecation class for Old style user events. Can be removed in 0.8.0 along with
+    all the old events.
+    """
+    def __new__(cls, x,  *args, **kwargs):
+        instance = int.__new__(cls, x, *args, **kwargs)
+        return instance
+
+    def __eq__(self, other):
+        warn("Pygame GUI event types can now "
+             "be used directly as event.type "
+             "rather than event.user_type. This old style user_type event will "
+             "go away in version 0.8.0", DeprecationWarning, stacklevel=2)
+        return int.__eq__(self, other)
+
+
 # UI Event types
 UI_BUTTON_PRESSED = custom_type()
 UI_BUTTON_START_PRESS = custom_type()
@@ -29,26 +75,12 @@ UI_CONSOLE_COMMAND_ENTERED = custom_type()
 UI_TEXT_EFFECT_FINISHED = custom_type()
 
 # Text effects
-TEXT_EFFECT_TYPING_APPEAR = 'typing_appear'
-TEXT_EFFECT_FADE_IN = 'fade_in'
-TEXT_EFFECT_FADE_OUT = 'fade_out'
-
-
-class OldType(int):
-    """
-    Deprecation class for Old style user events. Can be removed in 0.8.0 along with
-    all the old events.
-    """
-    def __new__(cls, x,  *args, **kwargs):
-        instance = int.__new__(cls, x, *args, **kwargs)
-        return instance
-
-    def __eq__(self, other):
-        warn("Pygame GUI event types can now "
-             "be used directly as event.type "
-             "rather than event.user_type. This old style user_type event will "
-             "go away in version 0.8.0", DeprecationWarning, stacklevel=2)
-        return int.__eq__(self, other)
+TEXT_EFFECT_TYPING_APPEAR = UITextEffectType('typing_appear')
+TEXT_EFFECT_FADE_IN = UITextEffectType('fade_in')
+TEXT_EFFECT_FADE_OUT = UITextEffectType('fade_out')
+TEXT_EFFECT_TILT = UITextEffectType('tilt')
+TEXT_EFFECT_BOUNCE = UITextEffectType('bounce')
+TEXT_EFFECT_EXPAND_CONTRACT = UITextEffectType('expand_contract')
 
 
 __all__ = ['UI_BUTTON_PRESSED',
@@ -75,4 +107,9 @@ __all__ = ['UI_BUTTON_PRESSED',
            'TEXT_EFFECT_TYPING_APPEAR',
            'TEXT_EFFECT_FADE_IN',
            'TEXT_EFFECT_FADE_OUT',
-           'OldType']
+           'TEXT_EFFECT_TILT',
+           'TEXT_EFFECT_BOUNCE',
+           'TEXT_EFFECT_EXPAND_CONTRACT',
+           'UITextEffectType',
+           'OldType'
+           ]

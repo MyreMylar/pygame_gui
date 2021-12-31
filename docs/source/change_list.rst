@@ -40,6 +40,7 @@ Minor features
  - **UIButton events can now be produced by any mouse button** - new 'mouse_button' attribute on button events & 'generate_click_events_from' parameter to UIButton.
  - **UIDropDown open/close drop down button width added as theming option** - Called 'open_button_width'.
  - **Text alignment theming options for UITextBox & UILabel** - See their theming pages for details.
+ - **Improved text effects** - Effects can now be applied to tagged chunks of text in a text box, some effects can also be applied to UILabels. There are parameters for effects, and an event fired when an effect finishes.
 
 
 Bug Fixes & Other Changes
