@@ -183,7 +183,7 @@ When we click on it. To do that we need to check the pygame event queue:
 
 .. code-block:: python
    :linenos:
-   :emphasize-lines: 28, 29, 30, 31
+   :emphasize-lines: 28, 29, 30
 
     import pygame
     import pygame_gui
@@ -212,10 +212,9 @@ When we click on it. To do that we need to check the pygame event queue:
             if event.type == pygame.QUIT:
                 is_running = False
 
-            if event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == hello_button:
-                        print('Hello World!')
+             if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                 if event.ui_element == hello_button:
+                     print('Hello World!')
 
             manager.process_events(event)
 
@@ -226,11 +225,10 @@ When we click on it. To do that we need to check the pygame event queue:
 
         pygame.display.update()
 
-Pygame GUI creates events of the USEREVENT type right now, so we first check for that. Then next we need to know the
-specific type of GUI event which is listed under the 'user_type' attribute. In this case the user_type name for a
-button being pressed is 'ui_button_pressed'. Finally, we do a check to see which specific button has been pressed, since
-we have a variable for our hello_button and the event also includes a reference to the ui_element that created it, we
-can just compare the event's ui_element attribute with our hello_button variable to confirm they are one and the same.
+Pygame GUI creates events of various types, in this case we are after UI_BUTTON_PRESSED. You can find more documentation
+on the different event types under :ref:`events`. Finally, we do a check to see which specific button has been pressed,
+since we have a variable for our hello_button and the event also includes a reference to the ui_element that created it,
+we can just compare the event's ui_element attribute with our hello_button variable to confirm they are one and the same.
 
 Try running the code again and clicking on the button. If it's all worked you should see 'Hello World!' printed to the
 python console each time you click the button.

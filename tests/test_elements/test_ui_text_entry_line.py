@@ -2,8 +2,6 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -115,17 +113,17 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_redraw_cursor(self, _init_pygame, default_ui_manager):
-        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                     manager=default_ui_manager)
-
-        text_entry.set_text("GOLD")
-        text_entry.select_range = [0, 2]
-        text_entry.cursor_on = True
-        text_entry.edit_position = 1
-        text_entry.redraw_cursor()
-
-        assert text_entry.image is not None
+    # def test_redraw_cursor(self, _init_pygame, default_ui_manager):
+    #     text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+    #                                  manager=default_ui_manager)
+    #
+    #     text_entry.set_text("GOLD")
+    #     text_entry.select_range = [0, 2]
+    #     text_entry.cursor_on = True
+    #     text_entry.edit_position = 1
+    #     text_entry.redraw_cursor()
+    #
+    #     assert text_entry.image is not None
 
     def test_focus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -255,7 +253,7 @@ class TestUITextEntryLine:
                                                                            'mod': pygame.KMOD_CTRL,
                                                                            'unicode': 'c'}))
         text_entry.cursor_on = True
-        text_entry.redraw_cursor()
+        #text_entry.redraw_cursor()
 
         assert processed_key_event and clipboard_paste() == 'dan'
 
@@ -750,7 +748,7 @@ class TestUITextEntryLine:
 
         text_entry.update(0.01)
 
-    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None):
+    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -843,7 +841,9 @@ class TestUITextEntryLine:
                                      container=test_container,
                                      manager=default_ui_manager)
 
-        text_entry.set_dimensions((200, -1))
+        assert text_entry.rect.right == 250
+
+        text_entry.set_dimensions((200, 30))
 
         assert text_entry.rect.right == 300
         assert text_entry.drawable_shape.containing_rect.right == 300
@@ -935,3 +935,7 @@ class TestUITextEntryLine:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

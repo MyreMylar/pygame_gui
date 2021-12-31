@@ -3,6 +3,7 @@ from typing import Union, Tuple
 import pygame
 
 from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_BUTTON_PRESSED
+from pygame_gui._constants import OldType
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
@@ -11,16 +12,6 @@ from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
-
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    assert pygame.BUTTON_LEFT == 1
-    assert pygame.BUTTON_MIDDLE == 2
-    assert pygame.BUTTON_RIGHT == 3
-except (AttributeError, AssertionError):
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
 
 
 class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
@@ -230,9 +221,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 event.button == pygame.BUTTON_LEFT and self.resizing_mode_active):
             self.resizing_mode_active = False
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.close_window_button):
-            self.kill()
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.close_window_button:
+            self.on_close_window_button_pressed()
 
         return consumed_event
 
@@ -441,14 +431,28 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 if self._window_root_container.layer_thickness != self.layer_thickness:
                     self.layer_thickness = self._window_root_container.layer_thickness
 
+    def on_close_window_button_pressed(self):
+        """
+        Override this method to call 'hide()' instead if you want to hide a window when the
+        close button is pressed.
+        """
+        self.kill()
+
     def kill(self):
         """
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI
         elements in this window, and remove if from the window stack.
         """
+        # old event - to be removed in 0.6.0
         window_close_event = pygame.event.Event(pygame.USEREVENT,
-                                                {'user_type': UI_WINDOW_CLOSE,
+                                                {'user_type': OldType(UI_WINDOW_CLOSE),
                                                  'ui_element': self,
+                                                 'ui_object_id': self.most_specific_combined_id})
+        pygame.event.post(window_close_event)
+
+        # new event
+        window_close_event = pygame.event.Event(UI_WINDOW_CLOSE,
+                                                {'ui_element': self,
                                                  'ui_object_id': self.most_specific_combined_id})
         pygame.event.post(window_close_event)
 
@@ -685,9 +689,16 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         Called when a window is moved to the front of the stack.
         """
+        # old event - to be removed in 0.8.0
         window_front_event = pygame.event.Event(pygame.USEREVENT,
-                                                {'user_type': UI_WINDOW_MOVED_TO_FRONT,
+                                                {'user_type': OldType(UI_WINDOW_MOVED_TO_FRONT),
                                                  'ui_element': self,
+                                                 'ui_object_id': self.most_specific_combined_id})
+        pygame.event.post(window_front_event)
+
+        # new event
+        window_front_event = pygame.event.Event(UI_WINDOW_MOVED_TO_FRONT,
+                                                {'ui_element': self,
                                                  'ui_object_id': self.most_specific_combined_id})
         pygame.event.post(window_front_event)
 
@@ -733,3 +744,22 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         super().hide()
 
         self._window_root_container.hide()
+
+    def get_relative_mouse_pos(self):
+        """
+        Returns the current mouse position relative to the inside of this window.
+
+        If the cursor is outside the window contents area it returns None
+
+        :return: tuple of relative mouse co-ords or None
+        """
+        abs_mouse_pos = pygame.mouse.get_pos()
+        rel_mouse_pos = None
+        inside_window_rect = self.get_container().get_rect()
+        if inside_window_rect.contains(pygame.Rect(abs_mouse_pos, (1, 1))):
+
+            window_contents_top_left = inside_window_rect.topleft
+            rel_mouse_pos = (abs_mouse_pos[0] - window_contents_top_left[0],
+                             abs_mouse_pos[1] - window_contents_top_left[1])
+
+        return rel_mouse_pos

@@ -24,7 +24,7 @@ class UIMessageWindow(UIWindow):
                  html_message: str,
                  manager: IUIManagerInterface,
                  *,
-                 window_title: str = 'Message',
+                 window_title: str = 'pygame-gui.message_window_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#message_window', None),
                  visible: int = 1):
 
@@ -44,14 +44,14 @@ class UIMessageWindow(UIWindow):
         self.dismiss_button = None
         self.text_block = None
 
-        button_size = (70, 20)
+        button_size = (-1, 24)
         button_spacing = 10
         button_vertical_space = (button_spacing * 2) + button_size[1]
 
         dismiss_button_rect = pygame.Rect((0, 0), button_size)
         dismiss_button_rect.bottomright = (-button_spacing, -button_spacing)
         self.dismiss_button = UIButton(relative_rect=dismiss_button_rect,
-                                       text="Dismiss",
+                                       text="pygame-gui.Dismiss",
                                        manager=manager,
                                        container=self,
                                        tool_tip_text="Click to get rid of this message.",
@@ -86,8 +86,7 @@ class UIMessageWindow(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.dismiss_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.dismiss_button:
             self.kill()
 
         return consumed_event

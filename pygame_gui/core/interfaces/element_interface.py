@@ -326,3 +326,17 @@ class IUIElementInterface(metaclass=ABCMeta):
         Hides the widget, which means the widget will not get drawn and will not process events.
         Clear hovered state.
         """
+
+    @abstractmethod
+    def on_locale_changed(self):
+        """
+        Called for each element when the locale is changed on their UIManager
+
+        """
+
+    @abstractmethod
+    def get_anchor_targets(self) -> list:
+        """
+        Get any anchor targets this element has so we can update them when their targets change
+        :return: the list of anchor targets.
+        """

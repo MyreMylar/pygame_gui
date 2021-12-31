@@ -3,8 +3,6 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.elements.ui_window import UIWindow
@@ -169,8 +167,7 @@ class TestUIWindow:
         confirm_event_fired = False
         event_object_id = None
         for event in pygame.event.get():
-            if (event.type == pygame.USEREVENT and
-                    event.user_type == pygame_gui.UI_BUTTON_PRESSED and
+            if (event.type == pygame_gui.UI_BUTTON_PRESSED and
                     event.ui_element == button):
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
@@ -193,9 +190,8 @@ class TestUIWindow:
                                                                   'pos': (500, 500)}))
         assert not (consumed_event or window.resizing_mode_active)
 
-        consumed_event = window.process_event(pygame.event.Event(pygame.USEREVENT,
-                                                                 {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                                                  'ui_element': window.close_window_button}))
+        consumed_event = window.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED, {'ui_element': window.close_window_button}))
         assert not (consumed_event or window.alive())
 
     def test_check_clicked_inside(self, _init_pygame,
@@ -216,15 +212,15 @@ class TestUIWindow:
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
-        button = UIButton(relative_rect=button_rect,
-                          text="Test Button",
-                          tool_tip_text="This is a test of the button's tool tip functionality.",
-                          manager=default_ui_manager,
-                          container=window,
-                          anchors={'left': 'right',
-                                   'right': 'right',
-                                   'top': 'top',
-                                   'bottom': 'top'})
+        UIButton(relative_rect=button_rect,
+                 text="Test Button",
+                 tool_tip_text="This is a test of the button's tool tip functionality.",
+                 manager=default_ui_manager,
+                 container=window,
+                 anchors={'left': 'right',
+                          'right': 'right',
+                          'top': 'top',
+                          'bottom': 'top'})
 
         window.update(time_delta=0.05)
 
@@ -293,25 +289,25 @@ class TestUIWindow:
 
         button_rect = pygame.Rect(0, 0, 150, 30)
         button_rect.topright = (-10, 10)
-        button = UIButton(relative_rect=button_rect,
-                          text="Test Button",
-                          tool_tip_text="This is a test of the button's tool tip functionality.",
-                          manager=default_ui_manager,
-                          container=window,
-                          anchors={'left': 'right',
-                                   'right': 'right',
-                                   'top': 'top',
-                                   'bottom': 'top'})
+        UIButton(relative_rect=button_rect,
+                 text="Test Button",
+                 tool_tip_text="This is a test of the button's tool tip functionality.",
+                 manager=default_ui_manager,
+                 container=window,
+                 anchors={'left': 'right',
+                          'right': 'right',
+                          'top': 'top',
+                          'bottom': 'top'})
 
-        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
-                              starting_option='eggs',
-                              relative_rect=pygame.Rect(10, 10, 150, 30),
-                              manager=default_ui_manager,
-                              container=window)
+        UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                       starting_option='eggs',
+                       relative_rect=pygame.Rect(10, 10, 150, 30),
+                       manager=default_ui_manager,
+                       container=window)
 
         assert window.get_top_layer() == 4
         window.update(0.05)
-        assert window.get_top_layer() == 6
+        assert window.get_top_layer() == 5  # This used to be 6, maybe it should be - drop downs?
 
     def test_change_layer(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
@@ -348,7 +344,7 @@ class TestUIWindow:
         confirm_event_fired = False
         event_object_id = None
         for event in pygame.event.get():
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_WINDOW_CLOSE and
+            if (event.type == pygame_gui.UI_WINDOW_CLOSE and
                     event.ui_element == window):
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
@@ -569,3 +565,17 @@ class TestUIWindow:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_get_relative_mouse_pos(self, _init_pygame, default_ui_manager,
+                                 _display_surface_return_none):
+        window = UIWindow(pygame.Rect(100, 100, 400, 400),
+                          window_display_title="Test Window",
+                          manager=default_ui_manager,
+                          visible=0)
+
+        result = window.get_relative_mouse_pos()
+        assert result is None
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -3,6 +3,8 @@ import platform
 import pygame
 import pytest
 
+from pygame_gui import UI_BUTTON_PRESSED
+from pygame_gui._constants import OldType
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
@@ -11,8 +13,6 @@ from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 
 
 #  factory of overrides for _update_mouse_position of UIManager - for use in hover tests
@@ -27,6 +27,7 @@ class TestUIManager:
     """
     Testing the UIManager class
     """
+
     def test_creation(self, _init_pygame, _display_surface_return_none):
         """
         Just test whether we can create a UIManager without raising any exceptions.
@@ -38,21 +39,21 @@ class TestUIManager:
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
-        assert(type(theme) == UIAppearanceTheme)
+        assert (type(theme) == UIAppearanceTheme)
 
     def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
-        assert(type(sprite_group) == LayeredGUIGroup)
+        assert (type(sprite_group) == LayeredGUIGroup)
 
     def test_get_window_stack(self, _init_pygame, default_ui_manager):
         """
         Can we get the window stack? Serves as a test of the window stack being successfully created.
         """
         window_stack = default_ui_manager.get_window_stack()
-        assert(type(window_stack) == UIWindowStack)
+        assert (type(window_stack) == UIWindowStack)
 
     def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
@@ -244,9 +245,12 @@ class TestUIManager:
         We sets the path to a font, preload it then try and use it in a text box and see if any errors or warnings
         happen.
         """
-        default_ui_manager.add_font_paths(font_name='roboto', regular_path='tests/data/Roboto-Regular.ttf')
+        default_ui_manager.add_font_paths(font_name='roboto',
+                                          regular_path=os.path.join('tests', 'data', 'Roboto-Regular.ttf'))
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
+        # default_ui_manager.resource_loader.start()
+        # default_ui_manager.resource_loader.update()
 
         UITextBox(html_text="<font face=roboto>Test font pre-loading</font>",
                   relative_rect=pygame.Rect(100, 100, 200, 100),
@@ -290,7 +294,7 @@ class TestUIManager:
             finished, progress = incremental_loader.update()
         assert finished
 
-    def test_hover_of_hidden_elements(self,  _init_pygame, _display_surface_return_none):
+    def test_hover_of_hidden_elements(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
         button1 = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="Lower button test",
                            manager=manager, starting_height=1)
@@ -312,3 +316,28 @@ class TestUIManager:
         manager.update(0.01)
         assert button1.hovered is True
         assert button2.hovered is False
+
+    def test_old_events_warn(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          manager=manager,
+                          allow_double_clicks=True)
+
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                   {'button': pygame.BUTTON_LEFT,
+                                                                    'pos': button.rect.center}))
+
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                                   {'button': pygame.BUTTON_LEFT,
+                                                                    'pos': button.rect.center}))
+
+        with pytest.warns(DeprecationWarning, match="Pygame GUI event types can now"):
+            for event in pygame.event.get():
+                if (event.type == pygame.USEREVENT and
+                        event.user_type == UI_BUTTON_PRESSED and event.ui_element == button):
+                    assert isinstance(event.user_type, OldType)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

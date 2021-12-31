@@ -42,6 +42,11 @@ Misc
  - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "5,5".
  - "**link_normal_underline**" - Set to either "1" or "0". Whether link text is normally underlined. Defaults to "0" (False).
  - "**link_hover_underline**" - Set to either "1" or "0". Whether link text is underlined when they are hovered over with the mouse. Defaults to "1" (True).
+ - "**text_horiz_alignment**" - Set to "default, "left", "right" or "center". Controls the horizontal placement of all the text box text. Default is "default" which will use any in-text alignment set, all other values will override any in-text formatting.
+ - "**text_vert_alignment**" - Set to "default", "top", "bottom or "center". Controls the vertical placement of the text box text. Default is "default" which will use any in-text alignment set, all other values will override any in-text formatting.
+ - "**text_horiz_alignment_padding**" - If horizontal alignment is set to 'left' or 'right' this value will control the buffer between the edge of the box padding and where we start placing the text. Default is "0". Using "padding" is better but these parameters are included for completeness.
+ - "**text_vert_alignment_padding**" - If vertical alignment is set to 'top' or 'bottom' this value will control the buffer between the edge of the box padding and where we start placing the text. Default is "0". Using "padding" is better but these parameters are included for completeness.
+
 
 Sub-elements
 --------------

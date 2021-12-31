@@ -1,8 +1,5 @@
-import os
 import pytest
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.ui_shadow import ShadowGenerator
 
@@ -34,3 +31,7 @@ class TestShadowGenerator:
         generator = ShadowGenerator()
         with pytest.warns(UserWarning, match="Tried to make shadow with width <= 0"):
             generator.create_shadow_corners(shadow_width_param=-1, corner_radius_param=2)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

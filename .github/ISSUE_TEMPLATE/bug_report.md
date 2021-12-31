@@ -24,8 +24,8 @@ If applicable, add screenshots to help explain your problem.
 
 **Platform and software (please complete the following information):**
  - OS: [e.g. Windows, Linux, Mac]
- - Pygame GUI version [e.g. 0.4.0]
- - Pygame version [e.g. 1.9.6]
+ - Pygame GUI version [e.g. 0.6.0]
+ - Pygame version [e.g. 2.0.0, 2.1.0]
 
 **Additional context**
 Add any other context about the problem here.

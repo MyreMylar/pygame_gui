@@ -1,0 +1,34 @@
+{
+  "es": {
+    "Confirm": "Confirmar",
+    "OK": "OK",
+    "Cancel": "Cancelar",
+    "Dismiss": "Despedir",
+    "English": "Inglés",
+    "French": "Franceses",
+    "Japanese": "Japonés",
+    "German": "Alemán",
+    "Italian": "Italiano",
+    "Spanish": "Español",
+    "Indonesian": "Indonesio",
+    "Chinese": "China",
+    "Portuguese": "Portuguesa",
+    "Russian": "Rusa",
+    "colour_picker_title_bar": "Selector de color",
+    "Saturation_S": "S:",
+    "Value_V": "L:",
+    "Hue_H": "M:",
+    "Red_R": "R:",
+    "Green_G": "V:",
+    "Blue_B": "A:",
+    "console_title_bar": "Consola",
+    "message_window_title_bar": "Mensaje",
+    "file_dialog_title_bar": "Diálogo de archivo",
+    "Home_directory": "Directorio de inicio",
+    "Delete": "Borrar",
+    "Parent_directory": "Directorio de padres",
+    "Refresh_directory": "Actualizar directorio",
+    "Delete_filename": "Borrar %{file_name} ?"
+
+  }
+}

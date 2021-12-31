@@ -1,7 +1,7 @@
 
 
 # Pygame GUI
-A GUI system for pygame 2 (it also works OK on pygame 1.9).
+A GUI system for pygame 2.
 
  - [Documentation](https://pygame-gui.readthedocs.io/en/latest/index.html)
  - [GitHub](https://github.com/MyreMylar/pygame_gui)
@@ -11,8 +11,9 @@ A GUI system for pygame 2 (it also works OK on pygame 1.9).
 [![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.5+](https://img.shields.io/badge/python-3.5+-blue.svg)](https://www.python.org/downloads/release/python-350/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Master](https://travis-ci.com/MyreMylar/pygame_gui.svg?branch=master)](https://travis-ci.com/MyreMylar/pygame_gui) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MyreMylar/pygame_gui.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MyreMylar/pygame_gui/context:python) [![Total alerts](https://img.shields.io/lgtm/alerts/g/MyreMylar/pygame_gui.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MyreMylar/pygame_gui/alerts/) [![codecov](https://codecov.io/gh/MyreMylar/pygame_gui/branch/master/graph/badge.svg)](https://codecov.io/gh/MyreMylar/pygame_gui) [![Downloads](https://pepy.tech/badge/pygame-gui)](https://pepy.tech/project/pygame-gui)
 ## Requirements
 
- - Python 3.5+
- - Pygame
+ - Python 3.6+
+ - Pygame 2.0.1+
+ - python-i18n (does localization to different languages)
 
 ## How to install
 

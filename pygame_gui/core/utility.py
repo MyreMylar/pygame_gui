@@ -9,7 +9,6 @@ import contextlib
 import os
 import sys
 import io
-import re
 import base64
 
 from pathlib import Path
@@ -18,29 +17,16 @@ from typing import Union, Dict, Tuple
 from threading import Thread
 from queue import Queue
 
+import i18n
+
 import pygame
+import pygame.freetype
 
-# Only use pre-multiplied alpha if we are using SDL2 past dev 10 where it is decently fast.
-if 'dev' in pygame.ver.split('.')[-1]:
-    PYGAME_DEV_NUM = int(re.findall(r'\d+', pygame.ver.split('.')[-1])[0])
+
+if sys.version_info < (3, 9):
+    import importlib_resources as resources
 else:
-    PYGAME_DEV_NUM = 10
-
-USE_PREMULTIPLIED_ALPHA = pygame.version.vernum[0] >= 2 and PYGAME_DEV_NUM >= 10
-
-USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
-try:
-    from importlib.resources import open_binary, read_binary
-    USE_IMPORT_LIB_RESOURCE = True
-except ImportError:
-    try:
-        from importlib_resources import open_binary, read_binary
-        USE_IMPORT_LIB_RESOURCE = True
-    except ImportError:
-        USE_FILE_PATH = True
-
-ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    from importlib import resources
 
 PLATFORM = platform.system().upper()
 if PLATFORM == 'WINDOWS':
@@ -89,7 +75,7 @@ if PLATFORM == 'WINDOWS':
         Wrapper for platform functions.
         """
         def __init__(self, func):
-            super(CheckedCall, self).__setattr__("func", func)
+            super().__setattr__("func", func)
             self.argtypes = []
             self.restype = None
 
@@ -159,19 +145,25 @@ if PLATFORM == 'WINDOWS':
 elif PLATFORM == 'LINUX':
 
     def __linux_copy(data: str):
-        process = subprocess.Popen(['xsel', '-b', '-i'], stdin=subprocess.PIPE, close_fds=True)
-        process.communicate(input=data.encode('utf-8'))
+        with subprocess.Popen(['xsel', '-b', '-i'],
+                              stdin=subprocess.PIPE,
+                              close_fds=True) as process:
+            process.communicate(input=data.encode('utf-8'))
 
     def __linux_paste():
-        process = subprocess.Popen(['xsel', '-b', '-o'], stdout=subprocess.PIPE, close_fds=True)
-        stdout, _ = process.communicate()
-        return stdout.decode('utf-8')
+        with subprocess.Popen(['xsel', '-b', '-o'],
+                              stdout=subprocess.PIPE,
+                              close_fds=True) as process:
+            stdout, _ = process.communicate()
+            return stdout.decode('utf-8')
 
 else:
     def __mac_copy(data: str):
-        process = subprocess.Popen(
-            'pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
-        process.communicate(data.encode('utf-8'))
+        with subprocess.Popen('pbcopy',
+                              env={'LANG': 'en_US.UTF-8'},
+                              stdin=subprocess.PIPE) as process:
+
+            process.communicate(data.encode('utf-8'))
 
     def __mac_paste():
         return subprocess.check_output(
@@ -231,14 +223,11 @@ def premul_col(original_colour: pygame.Color) -> pygame.Color:
     """
     Perform a pre-multiply alpha operation on a pygame colour
     """
-    if USE_PREMULTIPLIED_ALPHA:
-        alpha_mul = original_colour.a / 255
-        return pygame.Color(int(original_colour.r * alpha_mul),
-                            int(original_colour.g * alpha_mul),
-                            int(original_colour.b * alpha_mul),
-                            original_colour.a)
-    else:
-        return original_colour
+    alpha_mul = original_colour.a / 255
+    return pygame.Color(int(original_colour.r * alpha_mul),
+                        int(original_colour.g * alpha_mul),
+                        int(original_colour.b * alpha_mul),
+                        original_colour.a)
 
 
 def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
@@ -247,48 +236,46 @@ def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
 
     NOTE: Because of the rounding to integers this cannot be exact.
     """
-    if USE_PREMULTIPLIED_ALPHA:
-        inverse_alpha_mul = 1.0 / max(0.001, (premul_colour.a / 255))
+    inverse_alpha_mul = 1.0 / max(0.001, (premul_colour.a / 255))
 
-        return pygame.Color(int(premul_colour.r * inverse_alpha_mul),
-                            int(premul_colour.g * inverse_alpha_mul),
-                            int(premul_colour.b * inverse_alpha_mul),
-                            premul_colour.a)
-    else:
-        return premul_colour
+    return pygame.Color(int(premul_colour.r * inverse_alpha_mul),
+                        int(premul_colour.g * inverse_alpha_mul),
+                        int(premul_colour.b * inverse_alpha_mul),
+                        premul_colour.a)
 
 
 def premul_alpha_surface(surface: pygame.surface.Surface) -> pygame.surface.Surface:
     """
     Perform a pre-multiply alpha operation on a pygame surface's colours.
     """
-    if USE_PREMULTIPLIED_ALPHA:
-        surf_copy = surface.copy()
-        surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
-        manipulate_surf = pygame.surface.Surface(surf_copy.get_size(),
-                                                 flags=pygame.SRCALPHA, depth=32)
-        # Can't be exactly transparent black or we trigger SDL1 'bug'
-        manipulate_surf.fill(pygame.Color('#00000001'))
-        manipulate_surf.blit(surf_copy, (0, 0))
-        surface.blit(manipulate_surf, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+    surf_copy = surface.copy()
+    surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
+    manipulate_surf = pygame.surface.Surface(surf_copy.get_size(),
+                                             flags=pygame.SRCALPHA, depth=32)
+    # Can't be exactly transparent black or we trigger SDL1 'bug'
+    manipulate_surf.fill(pygame.Color('#00000001'))
+    manipulate_surf.blit(surf_copy, (0, 0))
+    surface.blit(manipulate_surf, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
     return surface
 
 
-def render_white_text_alpha_black_bg(font: pygame.font.Font, text: str) -> pygame.surface.Surface:
+def render_white_text_alpha_black_bg(font: pygame.freetype.Font,
+                                     text: str) -> pygame.surface.Surface:
     """
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
     """
-    if USE_PREMULTIPLIED_ALPHA:
-        text_render = font.render(text, True, pygame.Color('#FFFFFFFF'))
-        final_surface = pygame.surface.Surface(text_render.get_size(),
-                                               flags=pygame.SRCALPHA, depth=32)
-        # Can't be exactly transparent black or we trigger SDL1 'bug'
-        final_surface.fill(pygame.Color('#00000001'))
-        final_surface.blit(text_render, (0, 0))
-        return final_surface
-    else:
-        return font.render(text, True, pygame.Color('#FFFFFFFF'))
+    text_surface, text_rect = font.render(text,
+                                          pygame.Color('#FFFFFFFF'),
+                                          pygame.Color('#00000001'))
+    text_rect.height -= 1
+    text_rect.topleft = (0, 0)
+    final_surface = pygame.surface.Surface(text_rect.size,
+                                           flags=pygame.SRCALPHA, depth=32)
+    final_surface.fill(pygame.Color('#00000001'))
+    final_surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+
+    return final_surface
 
 
 def basic_blit(destination: pygame.surface.Surface,
@@ -305,10 +292,7 @@ def basic_blit(destination: pygame.surface.Surface,
     :param area: The area of the source to blit from.
 
     """
-    if USE_PREMULTIPLIED_ALPHA:
-        destination.blit(source, pos, area, special_flags=pygame.BLEND_PREMULTIPLIED)
-    else:
-        destination.blit(source, pos, area)
+    destination.blit(source, pos, area, special_flags=pygame.BLEND_PREMULTIPLIED)
 
 
 def apply_colour_to_surface(colour: pygame.Color,
@@ -345,6 +329,9 @@ class PackageResource:
         self.package = package
         self.resource = resource
 
+    def __repr__(self):
+        return self.package + '.' + self.resource
+
     def to_path(self) -> str:
         """
         If we don't have any importlib module to use, we can try to turn the resource into a file
@@ -374,13 +361,14 @@ class FontResource:
                  font_id: str,
                  size: int,
                  style: Dict[str, bool],
-                 location: Union[PackageResource, str]):
+                 location: Union[Tuple[PackageResource, bool], Tuple[str, bool]]):
 
         self.font_id = font_id
         self.size = size
         self.style = style
-        self.location = location
-        self.loaded_font = None  # type: Union[pygame.font.Font, None]
+        self.location = location[0]
+        self.force_style = location[1]
+        self.loaded_font = None  # type: Union[pygame.freetype.Font, None]
 
     def load(self):
         """
@@ -391,30 +379,28 @@ class FontResource:
         """
         error = None
         if isinstance(self.location, PackageResource):
-            if USE_IMPORT_LIB_RESOURCE:
-                try:
-                    self.loaded_font = pygame.font.Font(
-                        io.BytesIO(read_binary(self.location.package,
-                                               self.location.resource)), self.size)
-                    self.loaded_font.set_bold(self.style['bold'])
-                    self.loaded_font.set_italic(self.style['italic'])
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
-            elif USE_FILE_PATH:
-                try:
-                    self.loaded_font = pygame.font.Font(self.location.to_path(), self.size)
-                    self.loaded_font.set_bold(self.style['bold'])
-                    self.loaded_font.set_italic(self.style['italic'])
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location.to_path()))
+            try:
+                self.loaded_font = pygame.freetype.Font(
+                    io.BytesIO((resources.files(self.location.package) /
+                                self.location.resource).read_bytes()),
+                    self.size, resolution=72)
+                self.loaded_font.pad = True
+                self.loaded_font.origin = True
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
 
         elif isinstance(self.location, str):
             try:
-                self.loaded_font = pygame.font.Font(self.location, self.size)
-                self.loaded_font.set_bold(self.style['bold'])
-                self.loaded_font.set_italic(self.style['italic'])
+                self.loaded_font = pygame.freetype.Font(self.location, self.size, resolution=72)
+                self.loaded_font.pad = True
+                self.loaded_font.origin = True
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -422,9 +408,12 @@ class FontResource:
         elif isinstance(self.location, bytes):
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
-                self.loaded_font = pygame.font.Font(file_obj, self.size)
-                self.loaded_font.set_bold(self.style['bold'])
-                self.loaded_font.set_italic(self.style['italic'])
+                self.loaded_font = pygame.freetype.Font(file_obj, self.size, resolution=72)
+                self.loaded_font.pad = True
+                self.loaded_font.origin = True
+                if self.force_style:
+                    self.loaded_font.strong = self.style['bold']
+                    self.loaded_font.oblique = self.style['italic']
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -458,21 +447,13 @@ class ImageResource:
         """
         error = None
         if isinstance(self.location, PackageResource):
-            if USE_IMPORT_LIB_RESOURCE:
-                try:
-                    with open_binary(self.location.package,
-                                     self.location.resource) as open_resource:
-                        self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
-
-            elif USE_FILE_PATH:
-                try:
-                    self.loaded_surface = pygame.image.load(self.location.to_path()).convert_alpha()
-                except (pygame.error, FileNotFoundError, OSError):
-                    error = FileNotFoundError('Unable to load resource with path: ' +
-                                              str(self.location))
+            try:
+                with (resources.files(self.location.package) /
+                      self.location.resource).open('rb') as open_resource:
+                    self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
+            except (pygame.error, FileNotFoundError, OSError):
+                error = FileNotFoundError('Unable to load resource with path: ' +
+                                          str(self.location))
 
         elif isinstance(self.location, str):
             try:
@@ -598,3 +579,17 @@ class StoppableOutputWorker(Thread):
             self.out_list.put(result)
             if error:
                 self.errors.put(error)
+
+
+def translate(text_to_translate: str, **keywords) -> str:
+    """
+    Translate a translatable string to the current locale.
+
+    :param text_to_translate: Some sort of ID string that points to a variety of different
+                              translation files containing the real text.
+    :param keywords: Some translation strings have keywords to insert into the translation (e.g.
+                     a file name)
+    :return: The translated string if translated successfully, otherwise the original string
+             is passed back.
+    """
+    return i18n.t(text_to_translate, **keywords)

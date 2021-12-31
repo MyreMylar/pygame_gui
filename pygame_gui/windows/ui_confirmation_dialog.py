@@ -4,7 +4,7 @@ from typing import Union
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED
+from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_BUTTON_PRESSED, OldType
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextBox
 
@@ -33,8 +33,8 @@ class UIConfirmationDialog(UIWindow):
                  manager: IUIManagerInterface,
                  action_long_desc: str,
                  *,
-                 window_title: str = 'Confirm',
-                 action_short_name: str = 'OK',
+                 window_title: str = 'pygame-gui.Confirm',
+                 action_short_name: str = 'pygame-gui.OK',
                  blocking: bool = True,
                  object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
                  visible: int = 1):
@@ -52,18 +52,8 @@ class UIConfirmationDialog(UIWindow):
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
-        self.confirm_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                       text=action_short_name,
-                                       manager=self.ui_manager,
-                                       container=self,
-                                       object_id='#confirm_button',
-                                       anchors={'left': 'right',
-                                                'right': 'right',
-                                                'top': 'bottom',
-                                                'bottom': 'bottom'})
-
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
-                                      text='Cancel',
+        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                      text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
                                       object_id='#cancel_button',
@@ -71,6 +61,18 @@ class UIConfirmationDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
+
+        self.confirm_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                       text=action_short_name,
+                                       manager=self.ui_manager,
+                                       container=self,
+                                       object_id='#confirm_button',
+                                       anchors={'left': 'right',
+                                                'right': 'right',
+                                                'top': 'bottom',
+                                                'bottom': 'bottom',
+                                                'left_target': self.cancel_button,
+                                                'right_target': self.cancel_button})
 
         text_width = self.get_container().get_size()[0] - 10
         text_height = self.get_container().get_size()[1] - 50
@@ -102,17 +104,19 @@ class UIConfirmationDialog(UIWindow):
         """
         consumed_event = super().process_event(event)
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.cancel_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.cancel_button:
             self.kill()
 
-        if (event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_PRESSED
-                and event.ui_element == self.confirm_button):
-            event_data = {'user_type': UI_CONFIRMATION_DIALOG_CONFIRMED,
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.confirm_button:
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_CONFIRMATION_DIALOG_CONFIRMED),
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            confirmation_dialog_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(confirmation_dialog_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+            # new event
+            event_data = {'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_CONFIRMATION_DIALOG_CONFIRMED, event_data))
             self.kill()
 
         return consumed_event

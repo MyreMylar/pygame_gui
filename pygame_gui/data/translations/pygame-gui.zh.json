@@ -1,0 +1,34 @@
+{
+  "zh": {
+    "Confirm": "确认",
+    "OK": "行",
+    "Cancel": "取消",
+    "Dismiss": "解雇",
+    "English": "英语",
+    "French": "法语",
+    "Japanese": "日本人",
+    "German": "德语",
+    "Italian": "意大利语",
+    "Spanish": "西班牙语",
+    "Indonesian": "印度尼西亚",
+    "Chinese": "中国人",
+    "Portuguese": "葡萄牙语",
+    "Russian": "俄语",
+    "colour_picker_title_bar": "颜色选择器",
+    "Saturation_S": "饱和:",
+    "Value_V": "亮度:",
+    "Hue_H": "色调:",
+    "Red_R": "红色的:",
+    "Green_G": "绿:",
+    "Blue_B": "蓝色:",
+    "console_title_bar": "控制台",
+    "message_window_title_bar": "信息",
+    "file_dialog_title_bar": "文件对话框",
+    "Home_directory": "主目录",
+    "Delete": "删除",
+    "Parent_directory": "父目录",
+    "Refresh_directory": "刷新目录",
+    "Delete_filename": "删除 %{file_name} ?"
+
+  }
+}

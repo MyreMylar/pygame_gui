@@ -1,8 +1,5 @@
-import os
 import pytest
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
 
 from pygame_gui.core.colour_gradient import ColourGradient
 
@@ -30,3 +27,7 @@ class TestColourGradient:
         after_application_colour = test_surface.get_at((0, 0))
 
         assert after_application_colour == pygame.Color(0, 10, 242, 254)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

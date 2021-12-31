@@ -2,14 +2,19 @@ from sys import version_info
 import warnings
 from collections import namedtuple
 from typing import List, Union, Tuple, Dict, Any, Callable, Set
+from typing import TYPE_CHECKING
 
 import pygame
 
 from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.utility import render_white_text_alpha_black_bg, USE_PREMULTIPLIED_ALPHA
+from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
+
+
+if TYPE_CHECKING:
+    from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
 if version_info.minor >= 7:
     ObjectID = namedtuple('ObjectID',
@@ -73,7 +78,7 @@ class UIElement(GUISprite, IUIElementInterface):
         else:
             self.visible = 0
 
-        self.blendmode = pygame.BLEND_PREMULTIPLIED if USE_PREMULTIPLIED_ALPHA else 0
+        self.blendmode = pygame.BLEND_PREMULTIPLIED
         # self.source_rect = None
 
         self.relative_bottom_margin = None
@@ -99,6 +104,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
+        self.ui_container = None
         self._setup_container(container)
 
         self.dirty = 1
@@ -120,12 +126,18 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _setup_container(self, container):
         if container is None:
+            # no container passed in so make it the root container
             if self.ui_manager.get_root_container() is not None:
                 container = self.ui_manager.get_root_container()
             else:
                 container = self
-        if isinstance(container, IContainerLikeInterface):
-            self.ui_container = container.get_container()
+        elif not isinstance(container, IContainerLikeInterface):
+            # oops, passed in something that wasn't a container so bail
+            raise ValueError("container parameter must be of type "
+                             "IContainerLikeInterface.")
+
+        # by this point container should be a valid container
+        self.ui_container = container.get_container()
         if self.ui_container is not None and self.ui_container is not self:
             self.ui_container.add_element(self)
 
@@ -236,39 +248,62 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         new_top = 0
         if self.anchors['top'] == 'top':
-            new_top = self.relative_rect.top + self.ui_container.get_rect().top
+            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
+                          if 'top_target' in self.anchors
+                          else self.ui_container.get_abs_rect().top)
+            new_top = self.relative_rect.top + top_offset
         elif self.anchors['top'] == 'bottom':
-            new_top = self.relative_rect.top + self.ui_container.get_rect().bottom
+            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
+                             if 'bottom_target' in self.anchors
+                             else self.ui_container.get_abs_rect().bottom)
+            new_top = self.relative_rect.top + bottom_offset
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
 
         new_bottom = 0
         if self.anchors['bottom'] == 'top':
-            new_bottom = self.relative_rect.bottom + self.ui_container.get_rect().top
+            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
+                          if 'top_target' in self.anchors
+                          else self.ui_container.get_abs_rect().top)
+            new_bottom = self.relative_rect.bottom + top_offset
         elif self.anchors['bottom'] == 'bottom':
+            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
+                             if 'bottom_target' in self.anchors
+                             else self.ui_container.get_abs_rect().bottom)
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = (self.ui_container.get_rect().bottom -
+                self.relative_bottom_margin = (bottom_offset -
                                                (new_top + self.relative_rect.height))
-            new_bottom = self.ui_container.get_rect().bottom - self.relative_bottom_margin
+            new_bottom = bottom_offset - self.relative_bottom_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
 
         new_left = 0
         if self.anchors['left'] == 'left':
-            new_left = self.relative_rect.left + self.ui_container.get_rect().left
+            left_offset = (self.anchors['left_target'].get_abs_rect().right
+                           if 'left_target' in self.anchors
+                           else self.ui_container.get_abs_rect().left)
+            new_left = self.relative_rect.left + left_offset
         elif self.anchors['left'] == 'right':
-            new_left = self.relative_rect.left + self.ui_container.get_rect().right
+            right_offset = (self.anchors['right_target'].get_abs_rect().left
+                            if 'right_target' in self.anchors
+                            else self.ui_container.get_abs_rect().right)
+            new_left = self.relative_rect.left + right_offset
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
 
         new_right = 0
         if self.anchors['right'] == 'left':
-            new_right = self.relative_rect.right + self.ui_container.get_rect().left
+            left_offset = (self.anchors['left_target'].get_abs_rect().right
+                           if 'left_target' in self.anchors
+                           else self.ui_container.get_abs_rect().left)
+            new_right = self.relative_rect.right + left_offset
         elif self.anchors['right'] == 'right':
+            right_offset = (self.anchors['right_target'].get_abs_rect().left
+                            if 'right_target' in self.anchors
+                            else self.ui_container.get_abs_rect().right)
             if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = (self.ui_container.get_rect().right -
-                                              (new_left + self.relative_rect.width))
-            new_right = self.ui_container.get_rect().right - self.relative_right_margin
+                self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
+            new_right = right_offset - self.relative_right_margin
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
 
@@ -294,37 +329,61 @@ class UIElement(GUISprite, IUIElementInterface):
 
         new_top = 0
         if self.anchors['top'] == 'top':
-            new_top = self.rect.top - self.ui_container.get_rect().top
+            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
+                          if 'top_target' in self.anchors
+                          else self.ui_container.get_abs_rect().top)
+            new_top = self.rect.top - top_offset
         elif self.anchors['top'] == 'bottom':
-            new_top = self.rect.top - self.ui_container.get_rect().bottom
+            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
+                             if 'bottom_target' in self.anchors
+                             else self.ui_container.get_abs_rect().bottom)
+            new_top = self.rect.top - bottom_offset
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
 
         new_bottom = 0
         if self.anchors['bottom'] == 'top':
-            new_bottom = self.rect.bottom - self.ui_container.get_rect().top
+            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
+                          if 'top_target' in self.anchors
+                          else self.ui_container.get_abs_rect().top)
+            new_bottom = self.rect.bottom - top_offset
         elif self.anchors['bottom'] == 'bottom':
+            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
+                             if 'bottom_target' in self.anchors
+                             else self.ui_container.get_abs_rect().bottom)
             if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = self.ui_container.get_rect().bottom - self.rect.bottom
-            new_bottom = self.rect.bottom - self.ui_container.get_rect().bottom
+                self.relative_bottom_margin = bottom_offset - self.rect.bottom
+            new_bottom = self.rect.bottom - bottom_offset
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
 
         new_left = 0
         if self.anchors['left'] == 'left':
-            new_left = self.rect.left - self.ui_container.get_rect().left
+            left_offset = (self.anchors['left_target'].get_abs_rect().right
+                           if 'left_target' in self.anchors
+                           else self.ui_container.get_abs_rect().left)
+            new_left = self.rect.left - left_offset
         elif self.anchors['left'] == 'right':
-            new_left = self.rect.left - self.ui_container.get_rect().right
+            right_offset = (self.anchors['right_target'].get_abs_rect().left
+                            if 'right_target' in self.anchors
+                            else self.ui_container.get_abs_rect().right)
+            new_left = self.rect.left - right_offset
         else:
             warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
 
         new_right = 0
         if self.anchors['right'] == 'left':
-            new_right = self.rect.right - self.ui_container.get_rect().left
+            left_offset = (self.anchors['left_target'].get_abs_rect().right
+                           if 'left_target' in self.anchors
+                           else self.ui_container.get_abs_rect().left)
+            new_right = self.rect.right - left_offset
         elif self.anchors['right'] == 'right':
+            right_offset = (self.anchors['right_target'].get_abs_rect().left
+                            if 'right_target' in self.anchors
+                            else self.ui_container.get_abs_rect().right)
             if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = self.ui_container.get_rect().right - self.rect.right
-            new_right = self.rect.right - self.ui_container.get_rect().right
+                self.relative_right_margin = right_offset - self.rect.right
+            new_right = self.rect.right - right_offset
         else:
             warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
 
@@ -412,6 +471,7 @@ class UIElement(GUISprite, IUIElementInterface):
             self.drawable_shape.set_position(self.rect.topleft)
 
         self._update_container_clip()
+        self.ui_container.on_anchor_target_changed(self)
 
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
@@ -429,6 +489,7 @@ class UIElement(GUISprite, IUIElementInterface):
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
         self._update_container_clip()
+        self.ui_container.on_anchor_target_changed(self)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -450,11 +511,12 @@ class UIElement(GUISprite, IUIElementInterface):
             self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
             if self.drawable_shape is not None:
-                self.drawable_shape.set_dimensions(self.relative_rect.size)
-                # needed to stop resizing 'lag'
-                self.set_image(self.drawable_shape.get_fresh_surface())
+                if self.drawable_shape.set_dimensions(self.relative_rect.size):
+                    # needed to stop resizing 'lag'
+                    self.set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
+            self.ui_container.on_anchor_target_changed(self)
 
     def update(self, time_delta: float):
         """
@@ -689,10 +751,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         """
         if rect is not None:
-            if rect.width < 0:
-                rect.width = 0
-            if rect.height < 0:
-                rect.height = 0
+            rect.width = max(rect.width, 0)
+            rect.height = max(rect.height, 0)
 
             if self._pre_clipped_image is None and self.image is not None:
                 self._pre_clipped_image = self.image.copy()
@@ -849,3 +909,29 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self.hovered = False
         self.hover_time = 0.0
+
+    def _get_appropriate_state_name(self):
+        """
+        Returns a string representing the appropriate state for the widgets DrawableShapes.
+        Currently only returns either 'normal' or 'disabled' based on is_enabled.
+        """
+
+        if self.is_enabled:
+            return "normal"
+        return "disabled"
+
+    def on_locale_changed(self):
+        pass
+
+    def get_anchor_targets(self) -> list:
+        targets = []
+        if 'left_target' in self.anchors:
+            targets.append(self.anchors['left_target'])
+        if 'right_target' in self.anchors:
+            targets.append(self.anchors['right_target'])
+        if 'top_target' in self.anchors:
+            targets.append(self.anchors['top_target'])
+        if 'bottom_target' in self.anchors:
+            targets.append(self.anchors['bottom_target'])
+
+        return targets

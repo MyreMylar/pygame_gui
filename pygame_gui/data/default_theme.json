@@ -15,6 +15,11 @@
             "disabled_text": "#808080",
             "selected_text": "#bbbbbb",
             "active_text": "#bbbbbb",
+            "normal_text_shadow": "#10101070",
+            "hovered_text_shadow": "#10101070",
+            "disabled_text_shadow": "#10101070",
+            "selected_text_shadow": "#10101070",
+            "active_text_shadow": "#10101070",
             "normal_border": "#5c6062",
             "hovered_border": "#73787b",
             "disabled_border": "#35393e",
@@ -35,7 +40,8 @@
             "shape": "rectangle",
             "border_width": "1",
             "shadow_width": "2",
-            "shape_corner_radius": "2"
+            "shape_corner_radius": "2",
+            "text_horiz_alignment_padding": "10"
         }
     },
     "#no_frills_button":
@@ -45,7 +51,8 @@
             "shape": "rectangle",
             "border_width": "0",
             "shadow_width": "0",
-            "shape_corner_radius": "2"
+            "shape_corner_radius": "2",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "button":
@@ -87,6 +94,20 @@
     {
         "prototype": "#no_frills_button"
     },
+    "horizontal_slider.#left_button":
+    {
+        "misc":
+        {
+            "text_horiz_alignment_method": "left_triangle"
+        }
+    },
+    "horizontal_slider.#right_button":
+    {
+        "misc":
+        {
+            "text_horiz_alignment_method": "right_triangle"
+        }
+    },
     "horizontal_slider.#sliding_button":
     {
         "misc":
@@ -99,9 +120,8 @@
     {
         "misc":
         {
-            "text_shadow": "0",
-            "text_shadow_size": "1",
-            "text_shadow_offset": "1,1"
+            "text_shadow_size": "0",
+            "text_shadow_offset": "0,0"
         }
     },
     "panel":
@@ -111,6 +131,15 @@
     "screen_space_health_bar":
     {
         "prototype": "#default_shape_style"
+    },
+    "progress_bar":
+    {
+        "prototype": "#default_shape_style",
+        "colours":
+        {
+            "filled_bar": "#6c7062",
+            "unfilled_bar": "#21382d"
+        }
     },
     "selection_list":
     {
@@ -137,7 +166,9 @@
         "prototype": "#default_shape_style",
         "misc":
         {
-            "padding": "5,5"
+            "padding": "5,5",
+            "text_horiz_alignment_padding": "0",
+            "text_vert_alignment_padding": "0"
         }
     },
     "text_box.vertical_scroll_bar":
@@ -221,7 +252,8 @@
         {
             "shape": "rectangle",
             "shadow_width": "0",
-            "border_width": "1"
+            "border_width": "1",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "world_space_health_bar":
@@ -250,7 +282,8 @@
             "border_width": "1",
             "shadow_width": "1",
             "text_vert_alignment": "top",
-            "text_vert_alignment_padding": "-2"
+            "text_vert_alignment_padding": "0",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "#file_dialog.#file_display_list.vertical_scroll_bar":
@@ -305,7 +338,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "-1"
+            "text_vert_alignment_padding": "0"
         }
     },
     "#file_dialog.#parent_icon_button":
@@ -317,7 +350,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "1"
+            "text_vert_alignment_padding": "0"
         }
     },
     "#message_window.text_box":
@@ -344,8 +377,8 @@
         "misc":
         {
             "text_shadow": "0",
-            "text_shadow_size": "1",
-            "text_shadow_offset": "1,1"
+            "text_shadow_size": "0",
+            "text_horiz_alignment_padding": "0"
         }
     },
     "#colour_picker_dialog.colour_channel_editor.horizontal_slider":

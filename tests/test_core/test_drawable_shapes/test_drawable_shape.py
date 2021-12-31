@@ -1,8 +1,6 @@
 import pygame
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
-
 from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape, DrawableShapeState, DrawableStateTransition
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.utility import apply_colour_to_surface
@@ -70,7 +68,7 @@ class TestDrawableShape:
 
     def test_set_active_state(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
-                              theming_parameters={}, states=['normal','hovered'],
+                              theming_parameters={}, states=['normal', 'hovered'],
                               manager=default_ui_manager)
 
         shape.set_active_state('hovered')
@@ -126,38 +124,6 @@ class TestDrawableShape:
 
         assert len(shape.states_to_redraw_queue) == 1
 
-    def test_compute_aligned_text_rect(self, _init_pygame, default_ui_manager: UIManager):
-        shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
-                              theming_parameters={'text': 'doop doop',
-                                                  'font': default_ui_manager.get_theme().get_font([]),
-                                                  'shadow_width': 0,
-                                                  'border_width': 0},
-                              states=['normal', 'hovered'], manager=default_ui_manager)
-
-        shape.theming['text_horiz_alignment'] = 'left'
-        shape.theming['text_vert_alignment'] = 'top'
-        shape.theming['text_horiz_alignment_padding'] = 5
-        shape.theming['text_vert_alignment_padding'] = 5
-        shape.compute_aligned_text_rect()
-        assert shape.aligned_text_rect.x == 5
-        assert shape.aligned_text_rect.y == 5
-
-        shape.theming['text_horiz_alignment'] = 'center'
-        shape.theming['text_vert_alignment'] = 'center'
-        shape.theming['text_horiz_alignment_padding'] = 5
-        shape.theming['text_vert_alignment_padding'] = 5
-        shape.compute_aligned_text_rect()
-        assert shape.aligned_text_rect.x == 14
-        assert shape.aligned_text_rect.y == 41
-
-        shape.theming['text_horiz_alignment'] = 'right'
-        shape.theming['text_vert_alignment'] = 'bottom'
-        shape.theming['text_horiz_alignment_padding'] = 5
-        shape.theming['text_vert_alignment_padding'] = 5
-        shape.compute_aligned_text_rect()
-        assert shape.aligned_text_rect.right == 95
-        assert shape.aligned_text_rect.bottom == 95
-
     def test_get_active_surface(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
@@ -188,11 +154,11 @@ class TestDrawableShape:
 
     def test_apply_colour_to_surface(self, _init_pygame, default_ui_manager: UIManager, default_display_surface):
 
-        shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
-                              theming_parameters={}, states=['normal'], manager=default_ui_manager)
+        DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
+                      theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
         test_surface = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
-        test_surface.fill(pygame.Color(255,255,255,255))
+        test_surface.fill(pygame.Color(255, 255, 255, 255))
 
         apply_colour_to_surface(pygame.Color(50, 100, 50, 255), test_surface)
 
@@ -219,10 +185,16 @@ class TestDrawableShape:
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'doop doop',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'normal_image': pygame.image.load('tests/data/images/splat.png'),
-                                                  'text_shadow': pygame.Color(0,0,0,255)},
+                                                  'text_shadow': (0,
+                                                                  0,
+                                                                  0,
+                                                                  pygame.Color('#000000'),
+                                                                  False)},
                               states=['normal'], manager=default_ui_manager)
 
         shape.theming['text_horiz_alignment'] = 'left'
@@ -230,8 +202,9 @@ class TestDrawableShape:
         shape.theming['text_horiz_alignment_padding'] = 5
         shape.theming['text_vert_alignment_padding'] = 5
 
-        shape.compute_aligned_text_rect()
-        shape.rebuild_images_and_text('normal_image', 'normal', 'normal_text')
+        shape.finalise_images_and_text('normal_image', 'normal',
+                                       'normal_text', 'normal_text_shadow', True)
 
 
-
+if __name__ == '__main__':
+    pytest.console_main()

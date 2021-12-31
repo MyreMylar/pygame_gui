@@ -21,7 +21,7 @@ Colours
    parameters named for the different button states e.g. the parameter 'hovered_bg' themes the same area as 'normal_bg'
    when the button is in the hovered state.
 
-:class:`UIButton <pygame_gui.elements.UIButton>` makes use of these colour parameters in a 'colours' block. All of
+:class:`UIButton <pygame_gui.elements.UIButton>` makes use of these colour parameters in a 'colours' block. Most of
 these colours can also be a colour gradient:
 
  - "**normal_bg**" - The background colour/gradient of the button in the default state.
@@ -39,6 +39,11 @@ these colours can also be a colour gradient:
  - "**disabled_border**" - The colour/gradient of the border around the button (if it has one), in the disabled state.
  - "**selected_border**" - The colour/gradient of the border around the button (if it has one), in the selected state.
  - "**active_border**" - The colour/gradient of the border around the button (if it has one), in the active state.
+ - "**normal_text_shadow**" - The colour of the shadow behind the button's text (if it has one), in the default state.
+ - "**hovered_text_shadow**" - The colour of the shadow behind the button's text (if it has one), in the hovered state.
+ - "**disabled_text_shadow**" - The colour of the shadow behind the button's text (if it has one), in the disabled state.
+ - "**selected_text_shadow**" - The colour of the shadow behind the button's text (if it has one), in the selected state.
+ - "**active_text_shadow**" - The colour of the shadow behind the button's text (if it has one), in the active state.
 
 Font
 -----
@@ -47,6 +52,7 @@ Font
 block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
+ - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the button.
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
@@ -124,6 +130,8 @@ Misc
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the button text, if this button has any text. Default is "center".
  - "**text_horiz_alignment_padding**" - If horizontal alignment is set to 'left' or 'right' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".
  - "**text_vert_alignment_padding**" - If vertical alignment is set to 'top' or 'bottom' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".
+ - "**text_shadow_size**" - The increased size in pixels of the text's shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together. Defaults to "0", no shadow.
+ - "**text_shadow_offset**" - Pixel offset in horizontal (x) and vertical (y) dimensions for where the text shadow is drawn. In the format "x,y". Defaults to "0,0".
  - "**state_transitions**" - A block of parameters that define any fade transitions between button states. Normally buttons states visually change instantly, if you setup values here the button will instead fade from one state to the next. Transition definitions are one way, if you want to go in both directions, use two parameters. Transition parameters have this format:
 
    - "**startstate_targetstate**" - Can be set to any positive floating point value, representing the transition time in seconds.
@@ -156,7 +164,12 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "hovered_border": "#B0B0B0",
                 "disabled_border": "#808080",
                 "selected_border": "#8080B0",
-                "active_border": "#8080B0"
+                "active_border": "#8080B0",
+                "normal_text_shadow": "#10101070",
+                "hovered_text_shadow": "#10101070",
+                "disabled_text_shadow": "#10101070",
+                "selected_text_shadow": "#10101070",
+                "active_text_shadow": "#10101070"
             },
             "font":
             {
@@ -214,6 +227,8 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "text_vert_alignment": "top",
                 "text_horiz_alignment_padding": "10",
                 "text_vert_alignment_padding": "5",
+                "text_shadow_size": "1",
+                "text_shadow_offset": "0,0",
                 "state_transitions":
                 {
                     "normal_hovered": "0.5",

@@ -2,8 +2,6 @@ import os
 import pygame
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -237,3 +235,6 @@ class TestUIMessageWindow:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+
+if __name__ == '__main__':
+    pytest.console_main()
