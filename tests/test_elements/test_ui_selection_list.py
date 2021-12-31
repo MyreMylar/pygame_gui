@@ -897,9 +897,8 @@ class TestUISelectionList:
             manager=manager
         )
 
-        event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                      'ui_element': single_list.item_list_container.elements[new_selection]}
-        select_event = pygame.event.Event(pygame.USEREVENT, event_data)
+        event_data = {'ui_element': single_list.item_list_container.elements[new_selection]}
+        select_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, event_data)
         single_list.process_event(select_event)
 
         assert lst[new_selection] == single_list.get_single_selection()
@@ -917,9 +916,8 @@ class TestUISelectionList:
         )
 
         for selection in selections:
-            event_data = {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                          'ui_element': multi_list.item_list_container.elements[selection]}
-            select_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            event_data = {'ui_element': multi_list.item_list_container.elements[selection]}
+            select_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, event_data)
             multi_list.process_event(select_event)
 
         final_vals = multi_list.get_multi_selection()
