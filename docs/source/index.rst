@@ -2,8 +2,8 @@
 Documentation - Home Page
 ===================================================
 
-Pygame GUI is a module to help you make graphical user interfaces in for games written in pygame 2. The module is firmly
-forward looking and designed to work with Pygame 2 and Python 3.
+Pygame GUI is a module to help you make graphical user interfaces for games written in pygame. The module is firmly
+forward looking and is designed to work on Pygame 2 and Python 3.
 
 
 Features
@@ -74,8 +74,8 @@ library can do in action.
 Game projects using Pygame GUI
 ------------------------------
 
- - `Tower Defence <https://github.com/MyreMylar/tower_defence/tree/new_gui>`_ - A tower defence demo game.
- - `Christmas Adventure <https://github.com/MyreMylar/christmas_adventure/tree/new_gui>`_ - A text adventure demo.
+ - `Tower Defence <https://github.com/MyreMylar/tower_defence>`_ - A tower defence demo game.
+ - `Christmas Adventure <https://github.com/MyreMylar/christmas_adventure>`_ - A text adventure demo.
 
 
 Table of contents
