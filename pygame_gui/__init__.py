@@ -25,6 +25,7 @@ from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED, UI_TEXT_EFFECT_FIN
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_FADE_IN
 from pygame_gui._constants import TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_BOUNCE, TEXT_EFFECT_TILT
 from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
+from pygame_gui._constants import UITextEffectType
 from pygame_gui.core.utility import PackageResource
 
 __all__ = ['UIManager',
@@ -33,6 +34,7 @@ __all__ = ['UIManager',
            'windows',
            'data',
            'PackageResource',
+           'UITextEffectType',
            'UI_BUTTON_PRESSED',
            'UI_BUTTON_START_PRESS',
            'UI_BUTTON_DOUBLE_CLICKED',

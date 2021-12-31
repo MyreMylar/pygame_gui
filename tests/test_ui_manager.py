@@ -3,6 +3,8 @@ import platform
 import pygame
 import pytest
 
+from pygame_gui import UI_BUTTON_PRESSED
+from pygame_gui._constants import OldType
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
@@ -314,6 +316,27 @@ class TestUIManager:
         manager.update(0.01)
         assert button1.hovered is True
         assert button2.hovered is False
+
+    def test_old_events_warn(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          manager=manager,
+                          allow_double_clicks=True)
+
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                                   {'button': pygame.BUTTON_LEFT,
+                                                                    'pos': button.rect.center}))
+
+        button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                                   {'button': pygame.BUTTON_LEFT,
+                                                                    'pos': button.rect.center}))
+
+        with pytest.warns(DeprecationWarning, match="Pygame GUI event types can now"):
+            for event in pygame.event.get():
+                if (event.type == pygame.USEREVENT and
+                        event.user_type == UI_BUTTON_PRESSED and event.ui_element == button):
+                    assert isinstance(event.user_type, OldType)
 
 
 if __name__ == '__main__':

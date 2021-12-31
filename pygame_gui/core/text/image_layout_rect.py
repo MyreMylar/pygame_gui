@@ -12,6 +12,7 @@ class ImageLayoutRect(TextLayoutRect):
     Represents an image that sits in the text.
     """
     def __init__(self, image_path, float_position, padding: Padding):
+        self.image_path = image_path
         self.image_surf = load(image_path)
         self.padding = padding
         self.size_with_padding = (self.image_surf.get_width() + padding.left + padding.right,
