@@ -9,16 +9,6 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInte
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    assert pygame.BUTTON_LEFT == 1
-    assert pygame.BUTTON_MIDDLE == 2
-    assert pygame.BUTTON_RIGHT == 3
-except (AttributeError, AssertionError):
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
-
 
 class UIPanel(UIElement, IContainerLikeInterface):
     """

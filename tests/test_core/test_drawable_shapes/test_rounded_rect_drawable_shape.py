@@ -1,9 +1,6 @@
 import pygame
 import pytest
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
-
 from pygame_gui.core.drawable_shapes.rounded_rect_drawable_shape import RoundedRectangleShape
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.colour_gradient import ColourGradient
@@ -14,6 +11,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'normal_border': pygame.Color('#FFFFFF'),
@@ -27,6 +26,10 @@ class TestRoundedRectangleShape:
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
+                                                          'hovered_text': pygame.Color('#A0A0FF'),
+                                                          'hovered_text_shadow': pygame.Color('#000000'),
                                                           'shadow_width': 2,
                                                           'border_width': 1,
                                                           'normal_border': pygame.Color('#FFFFFF'),
@@ -45,6 +48,8 @@ class TestRoundedRectangleShape:
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
+                                                      'normal_text': pygame.Color('#FFFFFF'),
+                                                      'normal_text_shadow': pygame.Color('#000000'),
                                                       'shadow_width': -10,
                                                       'border_width': -10,
                                                       'normal_border': pygame.Color('#FFFFFF'),
@@ -59,6 +64,8 @@ class TestRoundedRectangleShape:
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
+                                                      'normal_text': pygame.Color('#FFFFFF'),
+                                                      'normal_text_shadow': pygame.Color('#000000'),
                                                       'shadow_width': 2,
                                                       'border_width': 1,
                                                       'normal_border': pygame.Color('#FFFFFF'),
@@ -73,6 +80,8 @@ class TestRoundedRectangleShape:
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 25, 25),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
+                                                      'normal_text': pygame.Color('#FFFFFF'),
+                                                      'normal_text_shadow': pygame.Color('#000000'),
                                                       'shadow_width': 20,
                                                       'border_width': 20,
                                                       'shape_corner_radius': 20,
@@ -87,6 +96,8 @@ class TestRoundedRectangleShape:
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 50, 50),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
+                                                      'normal_text': pygame.Color('#FFFFFF'),
+                                                      'normal_text_shadow': pygame.Color('#000000'),
                                                       'shadow_width': 1,
                                                       'border_width': 2,
                                                       'shape_corner_radius': 30,
@@ -100,6 +111,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 50, 50),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.ui_theme.get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 2,
                                                   'shape_corner_radius': 30,
@@ -113,6 +126,8 @@ class TestRoundedRectangleShape:
         with pytest.warns(UserWarning, match='Clamping shape_corner_radius'):
             theming_params = {'text': 'test',
                               'font': default_ui_manager.ui_theme.get_font([]),
+                              'normal_text': pygame.Color('#FFFFFF'),
+                              'normal_text_shadow': pygame.Color('#000000'),
                               'shadow_width': 1,
                               'border_width': 0,
                               'shape_corner_radius': 3,
@@ -127,6 +142,8 @@ class TestRoundedRectangleShape:
     def test_collide_point(self, _init_pygame, default_ui_manager: UIManager):
         theming_params = {'text': 'test',
                           'font': default_ui_manager.ui_theme.get_font([]),
+                          'normal_text': pygame.Color('#FFFFFF'),
+                          'normal_text_shadow': pygame.Color('#000000'),
                           'shadow_width': 0,
                           'border_width': 0,
                           'shape_corner_radius': 40,
@@ -147,6 +164,8 @@ class TestRoundedRectangleShape:
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
                                                           'shadow_width': 0,
                                                           'border_width': 0,
                                                           'shape_corner_radius': 2,
@@ -161,6 +180,8 @@ class TestRoundedRectangleShape:
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
                                                           'shadow_width': 0,
                                                           'border_width': 0,
                                                           'shape_corner_radius': 2,
@@ -175,6 +196,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'normal_border': ColourGradient(0, pygame.Color('#000000'),
@@ -190,6 +213,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 2,
                                                   'border_width': 1,
                                                   'normal_border': ColourGradient(0, pygame.Color('#000000'),
@@ -208,6 +233,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 2,
                                                   'border_width': 1,
                                                   'normal_border': ColourGradient(0, pygame.Color('#000000'),
@@ -225,6 +252,8 @@ class TestRoundedRectangleShape:
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
+                                                  'normal_text': pygame.Color('#FFFFFF'),
+                                                  'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 2,
                                                   'border_width': 1,
                                                   'normal_border': pygame.Color('#FFFFFF'),
@@ -240,6 +269,8 @@ class TestRoundedRectangleShape:
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
                                                           'shadow_width': 0,
                                                           'border_width': 0,
                                                           'shape_corner_radius': 2,
@@ -259,3 +290,7 @@ class TestRoundedRectangleShape:
 
         shape.clear_and_create_shape_surface(pygame.Surface((100, 100)), pygame.Rect(0, 0, 75, 75), overlap=0,
                                              corner_radius=40, aa_amount=4)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

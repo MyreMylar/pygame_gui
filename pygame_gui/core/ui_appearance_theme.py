@@ -1,12 +1,9 @@
 import json
 import io
-import sys
 import os
-import base64
 import warnings
 
 from contextlib import contextmanager
-from collections import OrderedDict
 from typing import Union, List, Dict, Any
 
 import pygame
@@ -22,37 +19,15 @@ from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
 
-
-if sys.version_info.minor < 6:
-    os.PathLike = None
-
-
 # First try importlib
 # Then importlib_resources
-# If that fails fall back to __file__
-# Finally fall back to stringified data
-USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
-USE_STRINGIFIED_DATA = False
-
 try:
     from importlib.resources import path, read_text
 except ImportError:
     try:
         from importlib_resources import path, read_text
-    except ImportError:
-        ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        THEME_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/default_theme.json'))
-        if os.path.exists(THEME_PATH):
-            USE_FILE_PATH = True
-        else:
-            USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import default_theme  # noqa: E501 pylint: disable=ungrouped-imports
-    else:
-        USE_IMPORT_LIB_RESOURCE = True
-
-else:
-    USE_IMPORT_LIB_RESOURCE = True
+    except ImportError as no_import_lib:
+        raise ImportError from no_import_lib
 
 
 class UIAppearanceTheme(IUIAppearanceThemeInterface):
@@ -71,17 +46,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     For more information on theme files see the specific documentation elsewhere.
     """
 
-    def __init__(self, resource_loader: IResourceLoader):
+    def __init__(self, resource_loader: IResourceLoader, locale: str):
 
         self._resource_loader = resource_loader
-
+        self._locale = locale
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element
         self.base_colours = {}
 
         # colours for specific elements stored by element id then colour id
         self.ui_element_colours = {}
-        self.font_dictionary = UIFontDictionary(self._resource_loader)
+        self.font_dict = UIFontDictionary(self._resource_loader, locale)
         self.shadow_generator = ShadowGenerator()
         self.shape_cache = SurfaceCache()
 
@@ -105,16 +80,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def _load_default_theme_file(self):
         """
-        Loads the default theme file, either from the file directly or from string data if we have
-        been turned into an exe by a program like PyInstaller.
-
+        Loads the default theme file.
         """
-        if USE_IMPORT_LIB_RESOURCE:
-            self.load_theme(PackageResource('pygame_gui.data', 'default_theme.json'))
-        elif USE_FILE_PATH:
-            self.load_theme(THEME_PATH)
-        elif USE_STRINGIFIED_DATA:
-            self.load_theme(io.StringIO(base64.standard_b64decode(default_theme).decode("utf-8")))
+        self.load_theme(PackageResource('pygame_gui.data', 'default_theme.json'))
 
     def get_font_dictionary(self) -> IUIFontDictionaryInterface:
         """
@@ -123,7 +91,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return: The font dictionary.
         """
-        return self.font_dictionary
+        return self.font_dict
 
     def check_need_to_reload(self) -> bool:
         """
@@ -157,7 +125,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def update_caching(self, time_delta: float):
         """
         Updates the various surface caches.
-
         """
         if self.st_cache_clear_timer > self.st_cache_duration:
             self.st_cache_clear_timer = 0.0
@@ -178,66 +145,66 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Loads all fonts specified in our loaded theme.
         """
-        for element_key in self.ui_element_fonts_info:
-            font_info = self.ui_element_fonts_info[element_key]
+        for element_key, locale_font_info in self.ui_element_fonts_info.items():
+            for locale_key, font_info in locale_font_info.items():
+                if 'regular_path' in font_info:
+                    regular_path = font_info['regular_path']
+                    self.font_dict.add_font_path(font_info['name'],
+                                                 regular_path,
+                                                 font_info.get('bold_path', None),
+                                                 font_info.get('italic_path', None),
+                                                 font_info.get('bold_italic_path', None))
+                elif 'regular_resource' in font_info:
+                    bold_resource = None
+                    italic_resource = None
+                    bld_it_resource = None
+                    reg_res_data = font_info['regular_resource']
+                    regular_resource = PackageResource(package=reg_res_data['package'],
+                                                       resource=reg_res_data['resource'])
 
-            if 'regular_path' in font_info:
-                regular_path = font_info['regular_path']
-                self.font_dictionary.add_font_path(font_info['name'],
-                                                   regular_path,
-                                                   font_info.get('bold_path', None),
-                                                   font_info.get('italic_path', None),
-                                                   font_info.get('bold_italic_path', None))
-            elif 'regular_resource' in font_info:
-                bold_resource = None
-                italic_resource = None
-                bld_it_resource = None
-                reg_res_data = font_info['regular_resource']
-                regular_resource = PackageResource(package=reg_res_data['package'],
-                                                   resource=reg_res_data['resource'])
+                    if 'bold_resource' in font_info:
+                        bold_res_data = font_info['bold_resource']
+                        bold_resource = PackageResource(package=bold_res_data['package'],
+                                                        resource=bold_res_data['resource'])
+                    if 'italic_resource' in font_info:
+                        italic_res_data = font_info['italic_resource']
+                        italic_resource = PackageResource(package=italic_res_data['package'],
+                                                          resource=italic_res_data['resource'])
+                    if 'bold_italic_resource' in font_info:
+                        bld_it_res_data = font_info['bold_italic_resource']
+                        bld_it_resource = PackageResource(package=bld_it_res_data['package'],
+                                                          resource=bld_it_res_data['resource'])
 
-                if 'bold_resource' in font_info:
-                    bold_res_data = font_info['bold_resource']
-                    bold_resource = PackageResource(package=bold_res_data['package'],
-                                                    resource=bold_res_data['resource'])
-                if 'italic_resource' in font_info:
-                    italic_res_data = font_info['italic_resource']
-                    italic_resource = PackageResource(package=italic_res_data['package'],
-                                                      resource=italic_res_data['resource'])
-                if 'bold_italic_resource' in font_info:
-                    bld_it_res_data = font_info['bold_italic_resource']
-                    bld_it_resource = PackageResource(package=bld_it_res_data['package'],
-                                                      resource=bld_it_res_data['resource'])
+                    self.font_dict.add_font_path(font_info['name'],
+                                                 regular_resource,
+                                                 bold_resource,
+                                                 italic_resource,
+                                                 bld_it_resource)
 
-                self.font_dictionary.add_font_path(font_info['name'],
-                                                   regular_resource,
-                                                   bold_resource,
-                                                   italic_resource,
-                                                   bld_it_resource)
+                font_id = self.font_dict.create_font_id(font_info['size'],
+                                                        font_info['name'],
+                                                        font_info['bold'],
+                                                        font_info['italic'])
 
-            font_id = self.font_dictionary.create_font_id(font_info['size'],
-                                                          font_info['name'],
-                                                          font_info['bold'],
-                                                          font_info['italic'])
+                if font_id not in self.font_dict.loaded_fonts:
+                    self.font_dict.preload_font(font_info['size'],
+                                                font_info['name'],
+                                                font_info['bold'],
+                                                font_info['italic'])
 
-            if font_id not in self.font_dictionary.loaded_fonts:
-                self.font_dictionary.preload_font(font_info['size'],
-                                                  font_info['name'],
-                                                  font_info['bold'],
-                                                  font_info['italic'])
-
-            self.ele_font_res[element_key] = self.font_dictionary.find_font_resource(
-                font_info['size'],
-                font_info['name'],
-                font_info['bold'],
-                font_info['italic'])
+                if element_key not in self.ele_font_res:
+                    self.ele_font_res[element_key] = {}
+                self.ele_font_res[element_key][locale_key] = self.font_dict.find_font_resource(
+                    font_info['size'],
+                    font_info['name'],
+                    font_info['bold'],
+                    font_info['italic'])
 
     def _load_images(self):
         """
         Loads all images in our loaded theme.
         """
-        for element_key in self.ui_element_image_locs:
-            image_ids_dict = self.ui_element_image_locs[element_key]
+        for element_key, image_ids_dict in self.ui_element_image_locs.items():
             if element_key not in self.ui_element_image_surfaces:
                 self.ui_element_image_surfaces[element_key] = {}
             for image_id in image_ids_dict:
@@ -245,38 +212,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 if image_resource_data['changed']:
                     image_resource = None
                     if 'package' in image_resource_data and 'resource' in image_resource_data:
-
-                        resource_id = (str(image_resource_data['package']) + '/' +
-                                       str(image_resource_data['resource']))
-                        if resource_id in self.image_resources:
-                            image_resource = self.image_resources[resource_id]
-                        else:
-                            package_resource = PackageResource(
-                                package=image_resource_data['package'],
-                                resource=image_resource_data['resource'])
-                            if USE_IMPORT_LIB_RESOURCE:
-                                image_resource = ImageResource(
-                                    image_id=resource_id,
-                                    location=package_resource)
-                            else:
-                                image_resource = ImageResource(
-                                    image_id=resource_id,
-                                    location=package_resource.to_path())
-
-                            self._resource_loader.add_resource(image_resource)
-                            self.image_resources[resource_id] = image_resource
-
+                        image_resource = self._load_image_resource(image_resource_data)
                     elif 'path' in image_resource_data:
-                        resource_id = image_resource_data['path']
-                        if resource_id in self.image_resources:
-                            image_resource = self.image_resources[resource_id]
-                        else:
-                            image_resource = ImageResource(image_id=resource_id,
-                                                           location=image_resource_data['path'])
-
-                            self._resource_loader.add_resource(image_resource)
-                            self.image_resources[resource_id] = image_resource
-
+                        image_resource = self._load_image_from_path(image_resource_data)
                     else:
                         warnings.warn('Unable to find image with id: ' + str(image_id))
 
@@ -291,7 +229,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                     image_resource=image_resource,
                                     sub_surface_rect=image_resource_data['sub_surface_rect'])
                                 self.surface_resources[surface_id] = surf_resource
-                                self._resource_loader.add_resource(surf_resource)
+                                if self._resource_loader.started():
+                                    error = surf_resource.load()
+                                    if error is not None:
+                                        warnings.warn(str(error))
+                                else:
+                                    self._resource_loader.add_resource(surf_resource)
                         else:
                             surface_id = image_resource.image_id
                             if surface_id in self.surface_resources:
@@ -302,6 +245,38 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                 surf_resource.surface = surf_resource.image_resource.loaded_surface
 
                         self.ui_element_image_surfaces[element_key][image_id] = surf_resource
+
+    def _load_image_from_path(self, res_data):
+        resource_id = res_data['path']
+        if resource_id in self.image_resources:
+            image_resource = self.image_resources[resource_id]
+        else:
+            image_resource = ImageResource(resource_id, res_data['path'])
+            if self._resource_loader.started():
+                error = image_resource.load()
+                if error is not None:
+                    warnings.warn(str(error))
+            else:
+                self._resource_loader.add_resource(image_resource)
+
+            self.image_resources[resource_id] = image_resource
+        return image_resource
+
+    def _load_image_resource(self, res_data):
+        resource_id = (str(res_data['package']) + '/' + str(res_data['resource']))
+        if resource_id in self.image_resources:
+            image_resource = self.image_resources[resource_id]
+        else:
+            package_resource = PackageResource(res_data['package'], res_data['resource'])
+            image_resource = ImageResource(resource_id, package_resource)
+            if self._resource_loader.started():
+                error = image_resource.load()
+                if error is not None:
+                    warnings.warn(str(error))
+            else:
+                self._resource_loader.add_resource(image_resource)
+            self.image_resources[resource_id] = image_resource
+        return image_resource
 
     def _preload_shadow_edges(self):
         """
@@ -314,12 +289,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         later clamped by the UI, plus, it is helpful if any rounded rectangles that set a corner
         radius also set a shadow width at the same time.
         """
-        for misc_id in self.ui_element_misc_data:
+        for _, misc_data in self.ui_element_misc_data.items():
 
             shape = 'rectangle'
             shadow_width = 2
             shape_corner_radius = 2
-            element_misc_data = self.ui_element_misc_data[misc_id]
+            element_misc_data = misc_data
             if 'shape' in element_misc_data:
                 shape = element_misc_data['shape']
 
@@ -339,18 +314,18 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     shape_corner_radius = 2
                     warnings.warn(
                         "Invalid value: " +
-                        self.ui_element_misc_data[misc_id]['shape_corner_radius'] +
+                        misc_data['shape_corner_radius'] +
                         " for shape_corner_radius")
 
             if shape in ['rounded_rectangle', 'rectangle'] and shadow_width > 0:
-                if ('shadow_width' in self.ui_element_misc_data[misc_id] and
-                        'shape_corner_radius' in self.ui_element_misc_data[misc_id]):
+                if ('shadow_width' in misc_data and
+                        'shape_corner_radius' in misc_data):
                     shadow_id = str(shadow_width) + 'x' + str(shadow_width + shape_corner_radius)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width,
                                                                     shadow_width +
                                                                     shape_corner_radius)
-                elif 'shadow_width' in self.ui_element_misc_data[misc_id]:
+                elif 'shadow_width' in misc_data:
                     # have a shadow width but no idea on the corners, try most common -
                     shadow_id_1 = str(shadow_width) + 'x' + str(2)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -358,7 +333,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
-                elif 'shape_corner_radius' in self.ui_element_misc_data[misc_id]:
+                elif 'shape_corner_radius' in misc_data:
                     # have a corner radius but no idea on the shadow width, try most common -
                     shadow_id_1 = str(1) + 'x' + str(1 + shape_corner_radius)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
@@ -505,32 +480,38 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Uses some data about a UIElement to get font data as dictionary
 
-       :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in a
                                      interleaved hierarchy of elements.
 
         :return dictionary: Data about the font requested
         """
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ui_element_fonts_info:
-                return self.ui_element_fonts_info[combined_element_id]
+                if self._locale in self.ui_element_fonts_info[combined_element_id]:
+                    return self.ui_element_fonts_info[combined_element_id][self._locale]
+                else:
+                    return self.ui_element_fonts_info[combined_element_id]['en']
 
-        return self.font_dictionary.default_font_info
+        return self.font_dict.default_font.info
 
-    def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
+    def get_font(self, combined_element_ids: List[str]) -> pygame.freetype.Font:
         """
         Uses some data about a UIElement to get a font object.
 
         :param combined_element_ids: A list of IDs representing an element's location in a
                                      interleaved hierarchy of elements.
 
-        :return pygame.font.Font: A pygame font object.
+        :return pygame.freetype.Font: A pygame font object.
         """
         # set the default font as the final fall back
-        font = self.font_dictionary.get_default_font()
+        font = self.font_dict.get_default_font()
 
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ele_font_res:
-                return self.ele_font_res[combined_element_id].loaded_font
+                if self._locale in self.ele_font_res[combined_element_id]:
+                    return self.ele_font_res[combined_element_id][self._locale].loaded_font
+                else:
+                    return self.ele_font_res[combined_element_id]['en'].loaded_font
 
         return font
 
@@ -601,23 +582,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         colour_parts = colour_id.split('_')
         best_fit_key_count = 0
         best_fit_colour = self.base_colours['normal_bg']
-        for key in self.base_colours:
+        for key, colour in self.base_colours.items():
             key_words = key.split('_')
             count = sum(el in colour_parts for el in key_words)
             if count > best_fit_key_count:
                 best_fit_key_count = count
-                best_fit_colour = self.base_colours[key]
+                best_fit_colour = colour
         return best_fit_colour
 
     @staticmethod
     @contextmanager
-    def _opened_w_error(filename: Any, mode: str = "r"):
+    def _opened_w_error(filename: Any, mode: str = "rt", encoding: str = "utf-8"):
         """
         Wraps file open in some exception handling.
         """
         if not isinstance(filename, io.StringIO):
             try:
-                file = open(filename, mode)
+                file = open(filename, mode, encoding=encoding)
             except IOError as err:
                 yield None, err
             else:
@@ -639,15 +620,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :param file_path: The path to the theme we want to load.
         """
-        used_file_path = None
         if isinstance(file_path, PackageResource):
-            if USE_IMPORT_LIB_RESOURCE:
-                used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
-                self._theme_file_path = file_path
-                with path(file_path.package, file_path.resource) as package_file_path:
-                    self._theme_file_last_modified = os.stat(package_file_path).st_mtime
-            elif USE_FILE_PATH:
-                used_file_path = file_path.to_path()
+            used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
+            self._theme_file_path = file_path
+            with path(file_path.package, file_path.resource) as package_file_path:
+                self._theme_file_last_modified = os.stat(package_file_path).st_mtime
 
         elif not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)
@@ -659,13 +636,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         else:
             used_file_path = file_path
 
-        with self._opened_w_error(used_file_path, 'r') as (theme_file, error):
+        with self._opened_w_error(used_file_path, 'rt') as (theme_file, error):
             if error:
                 warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False
             else:
                 try:
-                    theme_dict = json.load(theme_file, object_pairs_hook=OrderedDict)
+                    theme_dict = json.load(theme_file)
                 except json.decoder.JSONDecodeError:
                     warnings.warn("Failed to load current theme file, check syntax", UserWarning)
                     load_success = False
@@ -681,9 +658,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             self._load_prototype(element_name, theme_dict)
                             for data_type in theme_dict[element_name]:
                                 if data_type == 'font':
-                                    self._load_element_font_data_from_theme(data_type,
-                                                                            element_name,
-                                                                            theme_dict)
+                                    file_dict = theme_dict[element_name][data_type]
+                                    if isinstance(file_dict, list):
+                                        for item in file_dict:
+                                            self._load_element_font_data_from_theme(item,
+                                                                                    element_name)
+                                    else:
+                                        self._load_element_font_data_from_theme(file_dict,
+                                                                                element_name)
 
                                 if data_type == 'colours':
                                     self._load_element_colour_data_from_theme(data_type,
@@ -723,8 +705,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             prototype_font = self.ui_element_fonts_info[prototype_id]
             if element_name not in self.ui_element_fonts_info:
                 self.ui_element_fonts_info[element_name] = {}
-            for data_key in prototype_font:
-                self.ui_element_fonts_info[element_name][data_key] = prototype_font[data_key]
+
+            for locale_key in prototype_font:
+                if locale_key not in self.ui_element_fonts_info:
+                    self.ui_element_fonts_info[element_name][locale_key] = {}
+
+                for data_key in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][data_key] = (
+                        prototype_font[locale_key][data_key])
             found_prototypes.append(prototype_font)
 
         if prototype_id in self.ui_element_colours:
@@ -854,28 +842,33 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.ui_element_colours[element_name][colour_key] = colour
 
     def _load_element_font_data_from_theme(self,
-                                           data_type: str,
-                                           element_name: str,
-                                           theme_dict: Dict[str, Any]):
+                                           file_dict,
+                                           element_name: str):
         """
         Load font theming data direct from the theme file's data dictionary into our font
-        data dictionary.
+        data dictionary. Data is stored by it's combined element ID and an ID specific to the
+        type of data it is.
 
-        Data is stored by it's combined element ID and an ID specific to the type of data it is.
-
-        :param data_type: The type of font data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
-        :param theme_dict: The data dictionary from the theming file to load data from.
+        :param file_dict: The file dictionary from the theming file to load data from.
         """
-        file_dict = theme_dict[element_name][data_type]
+
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
-        font_info_dict = self.ui_element_fonts_info[element_name]
+
+        locale = 'en'
+        if 'locale' in file_dict:
+            locale = file_dict['locale']
+
+        if locale not in self.ui_element_fonts_info[element_name]:
+            self.ui_element_fonts_info[element_name][locale] = {}
+
+        font_info_dict = self.ui_element_fonts_info[element_name][locale]
         font_info_dict['name'] = file_dict['name']
         try:
             font_info_dict['size'] = int(file_dict['size'])
         except ValueError:
-            default_size = self.font_dictionary.default_font_size
+            default_size = self.font_dict.default_font.size
             font_info_dict['size'] = default_size
         if 'bold' in file_dict:
             try:
@@ -981,14 +974,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     warnings.warn("Invalid gradient: " + string_data +
                                   " for id:" + colour_id + " in theme file")
         else:
-            # expecting a regular hex colour in string data
-            try:
+            try:  # expecting a regular hex colour in string data
                 loaded_colour_or_gradient = premul_col(pygame.Color(string_data))
             except ValueError:
-                warnings.warn("Colour hex code: " +
-                              string_data +
-                              " for id:" +
-                              colour_id +
+                warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id +
                               " invalid in theme file")
 
         if loaded_colour_or_gradient is None:
@@ -996,3 +985,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             loaded_colour_or_gradient = pygame.Color("#000000")
 
         return loaded_colour_or_gradient
+
+    def set_locale(self, locale: str):
+        """
+        Set the locale used in the appearance theme.
+
+        :param locale: a two letter ISO country code.
+        """
+        self._locale = locale

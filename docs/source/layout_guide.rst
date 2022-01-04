@@ -98,6 +98,46 @@ And here's what happens to it when we resize the UIWindow to be a bit larger:
 
 You'll note the gaps between the edges of the window have been maintained.
 
+Anchor targets
+--------------
+
+What if you don't want to position elements relative to container edges, but relative to other elements inside the
+container? For that we have anchor targets.
+
+The first thing to appreciate about anchor targets is that because they are inside the container with the element being
+positioned, rather than the element being inside of them, the sides we are anchoring to are reversed. For example,
+anchoring the right hand side of our element to be positioned, to the right of the container is straight forward,
+but if we add an element as a 'right_target' we will actually anchor to the left hand side of this element, for the
+purposes of positioning.
+
+You might get some strange results if you mix up anchoring direction schemes and anchor targets, generally it is a good
+idea to match the direction scheme of the element you are anchoring to.
+
+Anchor targets are most useful when you have dynamically sized elements where you don't know how large the button next
+to you is going to be but you know you want your right hand side to be ten pixels away from it's left hand side.
+
+Anchor targets are optional, just don't add them if you don't want to use them and positioning will default to the
+container edges. They are specified like this:
+
+.. code-block:: python
+   :linenos:
+
+   button_3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((-10, -40), (-1, 30)),
+                                           text='Anchored', manager=manager,
+                                           container=dynamic_dimensions_window,
+                                           anchors={'top': 'bottom',
+                                                    'left': 'right',
+                                                    'bottom': 'bottom',
+                                                    'right': 'right',
+                                                    'bottom_target': button_1,
+                                                    'right_target': button_2})
+
+Dynamically sized elements
+--------------------------
+
+Certain elements, such as UIButtons, can have dynamic sizes where their size is determined by the contents (Usually by
+passing in -1). In these cases positioning the top left in the relative rectangle should be done as if the dynamic
+dimension was 0 length. When the dimension is eventually calculated it will be added into the positioning formula.
 
 UI Layers
 ---------

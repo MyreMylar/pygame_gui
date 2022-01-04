@@ -1,0 +1,34 @@
+{
+  "id": {
+    "Confirm": "Mengonfirmasi",
+    "OK": "Oke",
+    "Cancel": "Membatalkan",
+    "Dismiss": "Memberhentikan",
+    "English": "Inggris",
+    "French": "Perancis",
+    "Japanese": "Jepang",
+    "German": "Jerman",
+    "Italian": "Italia",
+    "Spanish": "Spanyol",
+    "Indonesian": "Indo",
+    "Chinese": "Cina",
+    "Portuguese": "Portugis",
+    "Russian": "Rusia",
+    "colour_picker_title_bar": "Pemilih warna",
+    "Saturation_S": "K:",
+    "Value_V": "P:",
+    "Hue_H": "W:",
+    "Red_R": "M:",
+    "Green_G": "H:",
+    "Blue_B": "B:",
+    "console_title_bar": "Konsol",
+    "message_window_title_bar": "Pesan",
+    "file_dialog_title_bar": "Dialog Berkas",
+    "Home_directory": "Direktori beranda",
+    "Delete": "Menghapus",
+    "Parent_directory": "Direktori induk",
+    "Refresh_directory": "Segarkan direktori",
+    "Delete_filename": "Menghapus %{file_name} ?"
+
+  }
+}

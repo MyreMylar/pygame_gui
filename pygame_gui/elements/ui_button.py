@@ -1,15 +1,15 @@
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Iterable
 
 import pygame
 
+from pygame_gui.core.utility import translate
+from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED, OldType
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
-from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
-
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
 from pygame_gui.core.drawable_shapes import RectDrawableShape
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.ui_element import UIElement
 
 
 class UIButton(UIElement):
@@ -39,6 +39,7 @@ class UIButton(UIElement):
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
     """
+
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
                  manager: IUIManagerInterface,
@@ -49,6 +50,7 @@ class UIButton(UIElement):
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
                  allow_double_clicks: bool = False,
+                 generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
                  visible: int = 1
                  ):
 
@@ -65,6 +67,9 @@ class UIButton(UIElement):
 
         self.text = text
 
+        self.dynamic_width = False
+        self.dynamic_height = False
+        self.dynamic_dimensions_orig_top_left = relative_rect.topleft
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None
@@ -82,8 +87,11 @@ class UIButton(UIElement):
         self.hover_time = 0.0
 
         # timer for double clicks
+        self.last_click_button = None
         self.allow_double_clicks = allow_double_clicks
         self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
+
+        self.generate_click_events_from = generate_click_events_from
 
         self.text_surface = None
         self.aligned_text_rect = None
@@ -107,9 +115,12 @@ class UIButton(UIElement):
 
         self.text_horiz_alignment = 'center'
         self.text_vert_alignment = 'center'
-        self.text_horiz_alignment_padding = 1
-        self.text_vert_alignment_padding = 1
+        self.text_horiz_alignment_padding = 0
+        self.text_vert_alignment_padding = 0
+        self.text_horiz_alignment_method = 'rect'
         self.shape = 'rectangle'
+        self.text_shadow_size = 0
+        self.text_shadow_offset = (0, 0)
 
         self.state_transitions = {}
 
@@ -214,10 +225,16 @@ class UIButton(UIElement):
         """
         self.drawable_shape.set_active_state('hovered')
         self.hover_time = 0.0
-        event_data = {'user_type': UI_BUTTON_ON_HOVERED,
+
+        # old event to remove in 0.8.0
+        event_data = {'user_type': OldType(UI_BUTTON_ON_HOVERED),
                       'ui_element': self,
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        # new event
+        event_data = {'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_BUTTON_ON_HOVERED, event_data))
 
     def while_hovering(self, time_delta: float,
                        mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -245,15 +262,21 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any
         tooltip that was created while we were hovering the button.
         """
-        self.drawable_shape.set_active_state('normal')
+        self.drawable_shape.set_active_state(self._get_appropriate_state_name())
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
 
-        event_data = {'user_type': UI_BUTTON_ON_UNHOVERED,
+        # old event to remove in 0.8.0
+        event_data = {'user_type': OldType(UI_BUTTON_ON_UNHOVERED),
                       'ui_element': self,
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+        # new event
+        event_data = {'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_BUTTON_ON_UNHOVERED, event_data))
 
     def update(self, time_delta: float):
         """
@@ -288,22 +311,37 @@ class UIButton(UIElement):
         """
         consumed_event = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
-                    if (self.allow_double_clicks and
+                    if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        event_data = {'user_type': UI_BUTTON_DOUBLE_CLICKED,
+                        # old event to remove in 0.8.0
+                        event_data = {'user_type': OldType(UI_BUTTON_DOUBLE_CLICKED),
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id,
+                                      'mouse_button': event.button}
+                        pygame.event.post(pygame.event.Event(UI_BUTTON_DOUBLE_CLICKED, event_data))
                     else:
-                        event_data = {'user_type': UI_BUTTON_START_PRESS,
+                        # old event to remove in 0.8.0
+                        event_data = {'user_type': OldType(UI_BUTTON_START_PRESS),
                                       'ui_element': self,
                                       'ui_object_id': self.most_specific_combined_id}
                         pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id,
+                                      'mouse_button': event.button}
+                        pygame.event.post(pygame.event.Event(UI_BUTTON_START_PRESS, event_data))
                         self.double_click_timer = 0.0
+                        self.last_click_button = event.button
                         self.held = True
                         self._set_active()
                         self.hover_time = 0.0
@@ -311,7 +349,7 @@ class UIButton(UIElement):
                             self.tool_tip.kill()
                             self.tool_tip = None
                 consumed_event = True
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONUP and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if (self.is_enabled and
                     self.drawable_shape.collide_point(scaled_mouse_pos) and
@@ -321,10 +359,17 @@ class UIButton(UIElement):
                 consumed_event = True
                 self.pressed_event = True
 
-                event_data = {'user_type': UI_BUTTON_PRESSED,
+                # old event
+                event_data = {'user_type': OldType(UI_BUTTON_PRESSED),
                               'ui_element': self,
                               'ui_object_id': self.most_specific_combined_id}
                 pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                # new event
+                event_data = {'ui_element': self,
+                              'ui_object_id': self.most_specific_combined_id,
+                              'mouse_button': event.button}
+                pygame.event.post(pygame.event.Event(UI_BUTTON_PRESSED, event_data))
 
             if self.is_enabled and self.held:
                 self.held = False
@@ -403,10 +448,10 @@ class UIButton(UIElement):
         """
         if text != self.text:
             self.text = text
-            self.drawable_shape.theming['text'] = self.text
-            # recompute aligned_text_rect before rebuild
-            self.drawable_shape.compute_aligned_text_rect()
-            self.drawable_shape.redraw_all_states()
+            if self.dynamic_width:
+                self.rebuild()
+            else:
+                self.drawable_shape.set_text(translate(self.text))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -457,36 +502,56 @@ class UIButton(UIElement):
             self.font = font
             has_any_changed = True
 
-        cols = {'normal_bg': self.ui_theme.get_colour_or_gradient('normal_bg',
-                                                                  self.combined_element_ids),
-                'hovered_bg': self.ui_theme.get_colour_or_gradient('hovered_bg',
-                                                                   self.combined_element_ids),
-                'disabled_bg': self.ui_theme.get_colour_or_gradient('disabled_bg',
-                                                                    self.combined_element_ids),
-                'selected_bg': self.ui_theme.get_colour_or_gradient('selected_bg',
-                                                                    self.combined_element_ids),
-                'active_bg': self.ui_theme.get_colour_or_gradient('active_bg',
-                                                                  self.combined_element_ids),
-                'normal_text': self.ui_theme.get_colour_or_gradient('normal_text',
-                                                                    self.combined_element_ids),
-                'hovered_text': self.ui_theme.get_colour_or_gradient('hovered_text',
-                                                                     self.combined_element_ids),
-                'disabled_text': self.ui_theme.get_colour_or_gradient('disabled_text',
-                                                                      self.combined_element_ids),
-                'selected_text': self.ui_theme.get_colour_or_gradient('selected_text',
-                                                                      self.combined_element_ids),
-                'active_text': self.ui_theme.get_colour_or_gradient('active_text',
-                                                                    self.combined_element_ids),
-                'normal_border': self.ui_theme.get_colour_or_gradient('normal_border',
-                                                                      self.combined_element_ids),
-                'hovered_border': self.ui_theme.get_colour_or_gradient('hovered_border',
-                                                                       self.combined_element_ids),
-                'disabled_border': self.ui_theme.get_colour_or_gradient('disabled_border',
-                                                                        self.combined_element_ids),
-                'selected_border': self.ui_theme.get_colour_or_gradient('selected_border',
-                                                                        self.combined_element_ids),
-                'active_border': self.ui_theme.get_colour_or_gradient('active_border',
-                                                                      self.combined_element_ids)}
+        cols = {'normal_bg':
+                self.ui_theme.get_colour_or_gradient('normal_bg', self.combined_element_ids),
+                'hovered_bg':
+                self.ui_theme.get_colour_or_gradient('hovered_bg', self.combined_element_ids),
+                'disabled_bg':
+                self.ui_theme.get_colour_or_gradient('disabled_bg', self.combined_element_ids),
+                'selected_bg':
+                self.ui_theme.get_colour_or_gradient('selected_bg', self.combined_element_ids),
+                'active_bg':
+                self.ui_theme.get_colour_or_gradient('active_bg', self.combined_element_ids),
+                'normal_text':
+                self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids),
+                'hovered_text':
+                self.ui_theme.get_colour_or_gradient('hovered_text', self.combined_element_ids),
+                'disabled_text':
+                self.ui_theme.get_colour_or_gradient('disabled_text', self.combined_element_ids),
+                'selected_text':
+                self.ui_theme.get_colour_or_gradient('selected_text', self.combined_element_ids),
+                'active_text':
+                self.ui_theme.get_colour_or_gradient('active_text', self.combined_element_ids),
+                'normal_text_shadow':
+                self.ui_theme.get_colour_or_gradient('normal_text_shadow',
+                                                     self.combined_element_ids),
+                'hovered_text_shadow':
+                self.ui_theme.get_colour_or_gradient('hovered_text_shadow',
+                                                     self.combined_element_ids),
+                'disabled_text_shadow':
+                self.ui_theme.get_colour_or_gradient('disabled_text_shadow',
+                                                     self.combined_element_ids),
+                'selected_text_shadow':
+                self.ui_theme.get_colour_or_gradient('selected_text_shadow',
+                                                     self.combined_element_ids),
+                'active_text_shadow':
+                self.ui_theme.get_colour_or_gradient('active_text_shadow',
+                                                     self.combined_element_ids),
+                'normal_border':
+                self.ui_theme.get_colour_or_gradient('normal_border',
+                                                     self.combined_element_ids),
+                'hovered_border':
+                self.ui_theme.get_colour_or_gradient('hovered_border',
+                                                     self.combined_element_ids),
+                'disabled_border':
+                self.ui_theme.get_colour_or_gradient('disabled_border',
+                                                     self.combined_element_ids),
+                'selected_border':
+                self.ui_theme.get_colour_or_gradient('selected_border',
+                                                     self.combined_element_ids),
+                'active_border':
+                self.ui_theme.get_colour_or_gradient('active_border',
+                                                     self.combined_element_ids)}
 
         if cols != self.colours:
             self.colours = cols
@@ -515,6 +580,19 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_text_alignment_theming():
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_size',
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
+
+        if self._check_misc_theme_data_changed(attribute_name='text_shadow_offset',
+                                               default_value=(0, 0),
+                                               casting_func=tuple_extract):
             has_any_changed = True
 
         try:
@@ -553,8 +631,13 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_padding',
-                                               default_value=1,
+                                               default_value=0,
                                                casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment_method',
+                                               default_value='rect',
+                                               casting_func=str):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment',
@@ -563,7 +646,7 @@ class UIButton(UIElement):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='text_vert_alignment_padding',
-                                               default_value=1,
+                                               default_value=0,
                                                casting_func=int):
             has_any_changed = True
 
@@ -574,33 +657,50 @@ class UIButton(UIElement):
         A complete rebuild of the drawable shape used by this button.
 
         """
+        self.rect.width = -1 if self.dynamic_width else self.rect.width
+        self.relative_rect.width = -1 if self.dynamic_width else self.relative_rect.width
+
+        self.rect.height = -1 if self.dynamic_height else self.rect.height
+        self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
+
         theming_parameters = {'normal_bg': self.colours['normal_bg'],
                               'normal_text': self.colours['normal_text'],
+                              'normal_text_shadow': self.colours['normal_text_shadow'],
                               'normal_border': self.colours['normal_border'],
                               'normal_image': self.normal_image,
                               'hovered_bg': self.colours['hovered_bg'],
                               'hovered_text': self.colours['hovered_text'],
+                              'hovered_text_shadow': self.colours['hovered_text_shadow'],
                               'hovered_border': self.colours['hovered_border'],
                               'hovered_image': self.hovered_image,
                               'disabled_bg': self.colours['disabled_bg'],
                               'disabled_text': self.colours['disabled_text'],
+                              'disabled_text_shadow': self.colours['disabled_text_shadow'],
                               'disabled_border': self.colours['disabled_border'],
                               'disabled_image': self.disabled_image,
                               'selected_bg': self.colours['selected_bg'],
                               'selected_text': self.colours['selected_text'],
+                              'selected_text_shadow': self.colours['selected_text_shadow'],
                               'selected_border': self.colours['selected_border'],
                               'selected_image': self.selected_image,
                               'active_bg': self.colours['active_bg'],
                               'active_border': self.colours['active_border'],
                               'active_text': self.colours['active_text'],
+                              'active_text_shadow': self.colours['active_text_shadow'],
                               'active_image': self.selected_image,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
-                              'text': self.text,
+                              'text': translate(self.text),
+                              'text_shadow': (self.text_shadow_size,
+                                              self.text_shadow_offset[0],
+                                              self.text_shadow_offset[1],
+                                              self.colours['normal_text_shadow'],
+                                              True),
                               'text_horiz_alignment': self.text_horiz_alignment,
                               'text_vert_alignment': self.text_vert_alignment,
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                              'text_horiz_alignment_method': self.text_horiz_alignment_method,
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
                               'shape_corner_radius': self.shape_corner_radius,
                               'transitions': self.state_transitions}
@@ -620,6 +720,27 @@ class UIButton(UIElement):
 
         self.on_fresh_drawable_shape_ready()
 
+        if self.relative_rect.width == -1 or self.relative_rect.height == -1:
+            self.dynamic_width = self.relative_rect.width == -1
+            self.dynamic_height = self.relative_rect.height == -1
+
+            self.set_dimensions(self.image.get_size())
+
+            # if we have anchored the left side of our button to the right of it's container then
+            # changing the width is going to mess up the horiz position as well.
+            new_left = self.relative_rect.left
+            new_top = self.relative_rect.top
+            if self.anchors['left'] == 'right' and self.dynamic_width:
+                left_offset = self.dynamic_dimensions_orig_top_left[0]
+                new_left = left_offset - self.relative_rect.width
+            # if we have anchored the top side of our button to the bottom of it's container then
+            # changing the height is going to mess up the vert position as well.
+            if self.anchors['top'] == 'bottom' and self.dynamic_height:
+                top_offset = self.dynamic_dimensions_orig_top_left[1]
+                new_top = top_offset - self.relative_rect.height
+
+            self.set_relative_position((new_left, new_top))
+
     def hide(self):
         """
         In addition to the base UIElement.hide() - Change the hovered state to a normal state.
@@ -627,3 +748,14 @@ class UIButton(UIElement):
         super().hide()
 
         self.on_unhovered()
+
+    def on_locale_changed(self):
+        font = self.ui_theme.get_font(self.combined_element_ids)
+        if font != self.font:
+            self.font = font
+            self.rebuild()
+        else:
+            if self.dynamic_width:
+                self.rebuild()
+            else:
+                self.drawable_shape.set_text(translate(self.text))

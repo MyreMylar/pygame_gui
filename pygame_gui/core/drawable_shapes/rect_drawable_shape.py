@@ -49,8 +49,8 @@ class RectDrawableShape(DrawableShape):
                                    math.floor(self.containing_rect.height / 2)):
             self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                     math.floor(self.containing_rect.height / 2))
-        if self.shadow_width < 0:
-            self.shadow_width = 0
+
+        self.shadow_width = max(self.shadow_width, 0)
 
         if self.border_width > min(math.floor((self.containing_rect.width -
                                                (self.shadow_width * 2)) / 2),
@@ -60,8 +60,8 @@ class RectDrawableShape(DrawableShape):
                                                 (self.shadow_width * 2)) / 2),
                                     math.floor((self.containing_rect.height -
                                                 (self.shadow_width * 2)) / 2))
-        if self.border_width < 0:
-            self.border_width = 0
+
+        self.border_width = max(self.border_width, 0)
 
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
@@ -86,8 +86,6 @@ class RectDrawableShape(DrawableShape):
             self.base_surface = pygame.surface.Surface(self.containing_rect.size,
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)
-
-        self.compute_aligned_text_rect()
 
         self.border_rect = pygame.Rect((self.shadow_width,
                                         self.shadow_width),
@@ -123,7 +121,7 @@ class RectDrawableShape(DrawableShape):
         """
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
-            return
+            return False
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
         self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
@@ -132,6 +130,8 @@ class RectDrawableShape(DrawableShape):
         self.has_been_resized = True
 
         self.full_rebuild_on_size_change()
+
+        return True
 
     def set_position(self, point: Union[pygame.math.Vector2,
                                         Tuple[int, int],
@@ -147,16 +147,18 @@ class RectDrawableShape(DrawableShape):
         self.click_area_shape.x = point[0] + self.shadow_width
         self.click_area_shape.y = point[1] + self.shadow_width
 
-    def redraw_state(self, state_str: str):
+    def redraw_state(self, state_str: str, add_text: bool = True):
         """
         Redraws the shape's surface for a given UI state.
 
+        :param add_text:
         :param state_str: The ID string of the state to rebuild.
 
         """
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
+        text_shadow_colour_state_str = state_str + '_text_shadow'
         image_state_str = state_str + '_image'
 
         found_shape = None
@@ -236,7 +238,10 @@ class RectDrawableShape(DrawableShape):
                                                       shape_id)
                 self.states[state_str].cached_background_id = shape_id
 
-        self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
+        self.finalise_images_and_text(image_state_str, state_str,
+                                      text_colour_state_str,
+                                      text_shadow_colour_state_str,
+                                      add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

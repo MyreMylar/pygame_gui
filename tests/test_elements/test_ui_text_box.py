@@ -1,14 +1,12 @@
 import os
-import pytest
+
 import pygame
+import pytest
+
 import pygame_gui
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
-from tests.shared_comparators import compare_surfaces
-
-from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_box import UITextBox
+from pygame_gui.ui_manager import UIManager
+from tests.shared_comparators import compare_surfaces
 
 
 class TestUITextBox:
@@ -30,7 +28,8 @@ class TestUITextBox:
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
-                                       "<i>styles</i>. Hey hey hey, what is this? More text padding this out a little."
+                                       "<i>styles</i>. Hey hey hey, what is this? More text padding this "
+                                       "out a little."
                                        "Well OK.",
                              relative_rect=pygame.Rect(100, 100, -1, 50),
                              manager=default_ui_manager)
@@ -51,24 +50,40 @@ class TestUITextBox:
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextBox(html_text=''
-                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
+                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
+                                       '<br><br><br>'
                                        'ipsum dolor sit amet</b></font>,'
-                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
-                                       'rub a la clob slip the perry tin fo glorp yip dorp'
-                                       'skorp si pork flum de dum be dung, slob be robble glurp destination flum kin slum. '
+                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de '
+                                       'dib do '
+                                       '<p>rub a la clob slip the perry tin fo glorp yip dorp'
+                                       'skorp si pork flum de dum be '
+                                       '<shadow size=1 offset=0,0 color=#306090>dung</shadow>, '
+                                       'slob be robble glurp destination flum'
+                                       ' kin slum. </p>'
                                        'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>Vestibulum'
-                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere ullamcorper '
+                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                       'Vestibulum'
+                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere '
+                                       'ullamcorper '
                                        'sem pulvinar.'
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>tellus a'
+                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>'
+                                       'tellus a'
                                        'tortor. a<br>'
+                                       '<img src="tests/data/images/test_emoji.png" float=left '
+                                       'padding="5px 10px 5px 5px">'
+                                       '<img src="tests/data/images/test_emoji.png" float=right '
+                                       'padding="5px 10px">'
+                                       '<img src="tests/data/images/test_emoji.png" '
+                                       'padding="5px">'
                                        'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
                                        'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.'
+                                       '<br>Morbi '
                                        'accumsan, lectus at '
                                        'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
                                        'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                       'pharetra a ante '
                                        'sollicitudin.</font></font>'
                                        '<br><br>'
                                        '<b>consectetur</b> adipiscing elit. in a<br>'
@@ -79,11 +94,13 @@ class TestUITextBox:
                                        'Maecenas at <font size=6><b>tellus a tortor. a<br>'
                                        'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
                                        'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec '
+                                       'porttitor.<br>Morbi '
                                        'accumsan, lectus at'
                                        'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
                                        'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                       'pharetra a ante '
                                        'sollicitudin.</font></font>',
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
@@ -122,24 +139,32 @@ class TestUITextBox:
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
                                           {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextBox(html_text=''
-                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u><br><br><br>'
+                                       '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
+                                       '<br><br><br>'
                                        'ipsum dolor sit amet</b></font>,'
-                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de dib do '
+                                       ' <b><a href="test">consectetur</a></b> adipiscing elit. in a flibb de '
+                                       'dib do '
                                        'rub a la clob slip the perry tin fo glorp yip dorp'
-                                       'skorp si pork flum de dum be dung, slob be robble glurp destination flum kin slum. '
+                                       'skorp si pork flum de dum be dung, slob be robble glurp destination flum '
+                                       'kin slum. '
                                        'Ram slim gordo, fem tulip squirrel slippers save socks certainly.<br>'
-                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>Vestibulum'
-                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere ullamcorper '
+                                       'Vestibulum in <i>commodo me</i> tellus in nisi finibus a sodales.<br>'
+                                       'Vestibulum'
+                                       '<font size=2>hendrerit mi <i>sed nulla</i> scelerisque</font>, posuere '
+                                       'ullamcorper '
                                        'sem pulvinar.'
-                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>tellus a'
+                                       'Nulla at pulvinar a odio, a dictum dolor.<br>Maecenas at <font size=6><b>'
+                                       'tellus a'
                                        'tortor. a<br>'
                                        'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
                                        'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.'
+                                       '<br>Morbi '
                                        'accumsan, lectus at '
                                        'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
                                        'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on '
+                                       'pharetra a ante '
                                        'sollicitudin.</font></font>'
                                        '<br><br>'
                                        '<b>consectetur</b> adipiscing elit. in a<br>'
@@ -150,11 +175,13 @@ class TestUITextBox:
                                        'Maecenas at <font size=6><b>tellus a tortor. a<br>'
                                        'In <i>bibendum</i> orci et velit</b> gravida lacinia.<br><br>'
                                        'In hac a habitasse to platea dictumst.<br>'
-                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec porttitor.<br>Morbi '
+                                       '<font color=#4CD656 size=4>Vivamus I interdum mollis lacus nec '
+                                       'porttitor.<br>Morbi '
                                        'accumsan, lectus at'
                                        'tincidunt to dictum, neque <font color=#879AF6>erat tristique erat</font>, '
                                        'sed a tempus for <b>nunc</b> dolor in nibh.<br>'
-                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet on pharetra a ante '
+                                       'Suspendisse in viverra dui <i>fringilla dolor laoreet</i>, sit amet '
+                                       'on pharetra a ante '
                                        'sollicitudin.</font></font>',
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
@@ -348,9 +375,9 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
-        text_box.active_text_effect.time_to_redraw = True
+        text_box.active_text_effect.text_changed = True
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
 
     def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
@@ -366,7 +393,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeInEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeInEffect
 
     def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager,
                                         _display_surface_return_none: None):
@@ -382,7 +409,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.elements.text.FadeOutEffect
+        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeOutEffect
 
     def test_set_active_effect_invalid(self, _init_pygame: None,
                                        default_ui_manager: UIManager,
@@ -398,7 +425,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         with pytest.warns(UserWarning, match="Unsupported effect name"):
-            text_box.set_active_effect(pygame_gui.UI_BUTTON_PRESSED)
+            text_box.set_active_effect("ghost_text")
 
     def test_set_active_effect_none(self, _init_pygame: None,
                                     default_ui_manager: UIManager,
@@ -438,11 +465,11 @@ class TestUITextBox:
                                      pygame.Rect((0, 0), (250, 200)),
                                      manager=manager,
                                      object_id="#text_box_2")
-        htm_text_block_2.set_active_effect('typing_appear')
-        htm_text_block_2.active_text_effect.time_to_redraw = True
+        htm_text_block_2.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
+        htm_text_block_2.active_text_effect.text_changed = True
         htm_text_block_2.update(5.0)
         htm_text_block_2.update(5.0)
-        assert type(htm_text_block_2.active_text_effect) == pygame_gui.elements.text.TypingAppearEffect
+        assert type(htm_text_block_2.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
 
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None,
                                                         default_ui_manager: UIManager,
@@ -665,9 +692,9 @@ class TestUITextBox:
     def test_show_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         x = 640
         y = 360
-        width = 320
-        height = 10
-        text = "this is a test"
+        width = 100
+        height = 32
+        text = "this is a test, this is a test, this is a test, this is a test, this is a test"
 
         rect = pygame.Rect((x, y), (width, height))
 
@@ -726,9 +753,9 @@ class TestUITextBox:
     def test_hide_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         x = 640
         y = 360
-        width = 320
-        height = 10
-        text = "this is a test"
+        width = 100
+        height = 32
+        text = "this is a test, this is a test, this is a test, this is a test, this is a test, this is a test"
 
         rect = pygame.Rect((x, y), (width, height))
 
@@ -786,3 +813,7 @@ class TestUITextBox:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

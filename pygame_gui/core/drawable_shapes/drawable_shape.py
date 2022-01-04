@@ -1,12 +1,15 @@
-from collections import deque, OrderedDict
-from typing import Dict, List, Union, Tuple
+import math
+
+from collections import deque
+from typing import Dict, List, Union, Tuple, Optional
 
 import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface
-from pygame_gui.core.colour_gradient import ColourGradient
-from pygame_gui.core.utility import render_white_text_alpha_black_bg, apply_colour_to_surface
 from pygame_gui.core.utility import basic_blit
+
+from pygame_gui.core.text import TextLineChunkFTFont, TextBoxLayout
+from pygame_gui.core.text.html_parser import HTMLParser
 
 
 class DrawableShapeState:
@@ -139,18 +142,34 @@ class DrawableShape:
                  states: List[str],
                  manager: IUIManagerInterface):
 
-        self.containing_rect = containing_rect.copy()
-        if self.containing_rect.width < 1:
-            self.containing_rect.width = 1
-        if self.containing_rect.height < 1:
-            self.containing_rect.height = 1
-
         self.theming = theming_parameters
+        self.containing_rect = containing_rect.copy()
+        self.text_view_rect = None
 
         self.shadow_width = 0
         self.border_width = 0
+        self.shape_corner_radius = 0
+        self.rounded_corner_offset = 0
+        if 'shadow_width' in self.theming:
+            self.shadow_width = self.theming['shadow_width']
+        if 'border_width' in self.theming:
+            self.border_width = self.theming['border_width']
+        if 'shape_corner_radius' in self.theming:
+            self.shape_corner_radius = self.theming['shape_corner_radius']
+            self.rounded_corner_offset = int(self.shape_corner_radius -
+                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
 
-        self.states = OrderedDict()
+        self.text_box_layout = None
+        self.build_text_layout()
+
+        self._evaluate_contents_for_containing_rect()
+        self.containing_rect.width = max(self.containing_rect.width, 1)
+        self.containing_rect.height = max(self.containing_rect.height, 1)
+
+        self.initial_text_layout_size = (self.containing_rect.width,
+                                         self.containing_rect.height)
+
+        self.states = {}
         for state in states:
             self.states[state] = DrawableShapeState(state)
 
@@ -169,9 +188,6 @@ class DrawableShape:
         self.ui_manager = manager
         self.shape_cache = self.ui_manager.get_theme().shape_cache
 
-        self.aligned_text_rect = None
-        self.click_area_shape = None
-
         self.states_to_redraw_queue = deque([])
         self.need_to_clean_up = True
 
@@ -182,8 +198,52 @@ class DrawableShape:
         self.click_area_shape = None
         self.border_rect = None
         self.background_rect = None
-        self.aligned_text_rect = None
         self.base_surface = None
+
+        self.only_text_changed = False
+
+    def _evaluate_contents_for_containing_rect(self):
+        if self.containing_rect.width == -1:
+            # check to see if we have text and a font, this won't work with HTML
+            # text - throw a warning?
+            # What we really need to to is process the html text layout by this
+            # point but hold off finalising and passing default colours until later?
+            if self.text_box_layout is not None:
+                text_width = self.text_box_layout.layout_rect.width
+
+                horiz_padding = 0
+                if 'text_horiz_alignment_padding' in self.theming:
+                    horiz_padding = self.theming['text_horiz_alignment_padding']
+
+                # As well as the text width we want to throw in the borders,
+                # shadows and any text padding
+                final_width = (text_width +
+                               (2 * self.shadow_width) +
+                               (2 * self.border_width) +
+                               (2 * self.rounded_corner_offset) +
+                               (2 * horiz_padding))
+
+                self.text_view_rect.width = text_width
+                self.text_box_layout.view_rect.width = self.text_view_rect.width
+                self.containing_rect.width = final_width
+        if self.containing_rect.height == -1:
+            if self.text_box_layout is not None:
+                text_height = self.text_box_layout.layout_rect.height
+
+                vert_padding = 0
+                if 'text_vert_alignment_padding' in self.theming:
+                    vert_padding = self.theming['text_vert_alignment_padding']
+
+                # As well as the text height we want to throw in the borders,
+                # shadows and any text padding
+                final_height = (text_height +
+                                (2 * self.shadow_width) +
+                                (2 * self.border_width) +
+                                (2 * self.rounded_corner_offset) +
+                                (2 * vert_padding))
+                self.text_view_rect.height = text_height
+                self.text_box_layout.view_rect.height = self.text_view_rect.height
+                self.containing_rect.height = final_height
 
     def set_active_state(self, state_id: str):
         """
@@ -234,7 +294,7 @@ class DrawableShape:
         """
         Updates the drawable shape to process rebuilds and update blends between states.
 
-        :param time_delta: amount fo time passed between now and the previous frame in seconds.
+        :param time_delta: amount of time passed between now and the previous frame in seconds.
 
         """
         if len(self.states_to_redraw_queue) > 0:
@@ -259,10 +319,22 @@ class DrawableShape:
         to account for it.
 
         """
-        if 'shadow_width' in self.theming:
+        shape_params_changed = False
+        if 'shadow_width' in self.theming and self.shadow_width != self.theming['shadow_width']:
             self.shadow_width = self.theming['shadow_width']
-        if 'border_width' in self.theming:
+            shape_params_changed = True
+        if 'border_width' in self.theming and self.border_width != self.theming['border_width']:
             self.border_width = self.theming['border_width']
+            shape_params_changed = True
+        if ('shape_corner_radius' in self.theming and
+                self.shape_corner_radius != self.theming['shape_corner_radius']):
+            self.shape_corner_radius = self.theming['shape_corner_radius']
+            self.rounded_corner_offset = int(self.shape_corner_radius -
+                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            shape_params_changed = True
+
+        if shape_params_changed or self.initial_text_layout_size != self.containing_rect.size:
+            self.build_text_layout()
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
@@ -277,39 +349,40 @@ class DrawableShape:
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 
-    def compute_aligned_text_rect(self):
+    def align_all_text_rows(self):
         """
         Aligns the text drawing position correctly according to our theming options.
 
         """
-        if ('text' not in self.theming or
-                len(self.theming['text']) <= 0 or
-                'font' not in self.theming):
-            return
-        # first we need to create rectangle the size of the text, if there is any text to draw
-        self.aligned_text_rect = pygame.Rect((0, 0),
-                                             self.theming['font'].size(self.theming['text']))
+        # Horizontal alignment
+        if 'text_horiz_alignment' in self.theming:
+            if (self.theming['text_horiz_alignment'] == 'center' or
+                    self.theming['text_horiz_alignment'] not in ['left', 'right']):
+                method = 'rect'
+                if 'text_horiz_alignment_method' in self.theming:
+                    method = self.theming['text_horiz_alignment_method']
+                self.text_box_layout.horiz_center_all_rows(method)
+            elif self.theming['text_horiz_alignment'] == 'left':
+                self.text_box_layout.align_left_all_rows(0)
+            else:
+                self.text_box_layout.align_right_all_rows(0)
+        else:
+            method = 'rect'
+            if 'text_horiz_alignment_method' in self.theming:
+                method = self.theming['text_horiz_alignment_method']
+            self.text_box_layout.horiz_center_all_rows(method)
 
-        if (self.theming['text_horiz_alignment'] == 'center' or
-                self.theming['text_horiz_alignment'] not in ['left', 'right']):
-            self.aligned_text_rect.centerx = int(self.containing_rect.width / 2)
-        elif self.theming['text_horiz_alignment'] == 'left':
-            self.aligned_text_rect.x = (self.theming['text_horiz_alignment_padding'] +
-                                        self.shadow_width + self.border_width)
+        # Vertical alignment
+        if 'text_vert_alignment' in self.theming:
+            if (self.theming['text_vert_alignment'] == 'center' or
+                    self.theming['text_vert_alignment'] not in ['top', 'bottom']):
+                self.text_box_layout.vert_center_all_rows()
+            elif self.theming['text_vert_alignment'] == 'top':
+                self.text_box_layout.vert_align_top_all_rows(0)
+            else:
+                self.text_box_layout.vert_align_bottom_all_rows(0)
         else:
-            x_pos = (self.containing_rect.width - self.theming['text_horiz_alignment_padding'] -
-                     self.aligned_text_rect.width - self.shadow_width - self.border_width)
-            self.aligned_text_rect.x = x_pos
-        if (self.theming['text_vert_alignment'] == 'center' or
-                self.theming['text_vert_alignment'] not in ['top', 'bottom']):
-            self.aligned_text_rect.centery = int(self.containing_rect.height / 2)
-        elif self.theming['text_vert_alignment'] == 'top':
-            self.aligned_text_rect.y = (self.theming['text_vert_alignment_padding'] +
-                                        self.shadow_width + self.border_width)
-        else:
-            self.aligned_text_rect.y = (self.containing_rect.height - self.aligned_text_rect.height
-                                        - self.theming['text_vert_alignment_padding'] -
-                                        self.shadow_width - self.border_width)
+            self.text_box_layout.vert_center_all_rows()
 
     def get_active_state_surface(self) -> pygame.surface.Surface:
         """
@@ -360,20 +433,25 @@ class DrawableShape:
         """
         return self.active_state.has_fresh_surface
 
-    def rebuild_images_and_text(self,
-                                image_state_str: str,
-                                state_str: str,
-                                text_colour_state_str: str):
+    def finalise_images_and_text(self,
+                                 image_state_str: str,
+                                 state_str: str,
+                                 text_colour_state_str: str,
+                                 text_shadow_colour_state_str: str,
+                                 add_text: bool):
         """
         Rebuilds any text or image used by a specific state in the drawable shape. Effectively
         this means adding them on top of whatever is already in the state's surface. As such it
         should generally be called last in the process of building up a finished drawable shape
         state.
 
+        :param add_text:
         :param image_state_str: image ID of the state we are going to be adding images and text to.
         :param state_str: normal ID of the state we are going to be adding images and text to.
         :param text_colour_state_str: text ID of the state we are going to be adding images and
                                       text to.
+        :param text_shadow_colour_state_str: text shadow ID of the state we are going to be adding
+                                             images and text to.
 
         """
         # Draw any themed images
@@ -383,45 +461,153 @@ class DrawableShape:
                                  int(self.containing_rect.height / 2))
             basic_blit(self.states[state_str].surface,
                        self.theming[image_state_str], image_rect)
+        if add_text:
+            self.finalise_text(state_str, text_colour_state_str, text_shadow_colour_state_str)
+
+    def build_text_layout(self):
+        """
+        Build a text box layout for this drawable shape if it has some text.
+        """
+        containing_rect_when_text_built = self.containing_rect.copy()
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
-            if len(self.theming['text']) > 0 and text_colour_state_str in self.theming:
-                text_surface = render_white_text_alpha_black_bg(font=self.theming['font'],
-                                                                text=self.theming['text'])
-                if isinstance(self.theming[text_colour_state_str], ColourGradient):
-                    self.theming[text_colour_state_str].apply_gradient_to_surface(text_surface)
-                else:
-                    apply_colour_to_surface(self.theming[text_colour_state_str], text_surface)
-            else:
-                text_surface = None
+            # we need two rectangles for the text. One is has actual area the
+            # text surface takes up, which may be larger than the displayed area,
+            # and its position on the final surface. The other is the amount of
+            # area of the text surface which we blit from, which may be much smaller
+            # than the total text area.
 
+            horiz_padding = 0
+            if 'text_horiz_alignment_padding' in self.theming:
+                horiz_padding = self.theming['text_horiz_alignment_padding']
+
+            vert_padding = 0
+            if 'text_vert_alignment_padding' in self.theming:
+                vert_padding = self.theming['text_vert_alignment_padding']
+
+            total_text_buffer = self.shadow_width + self.border_width + self.rounded_corner_offset
+            self.text_view_rect = self.containing_rect.copy()
+            self.text_view_rect.x = 0
+            self.text_view_rect.y = 0
+            if self.text_view_rect.width != -1:
+                self.text_view_rect.width -= ((total_text_buffer * 2) + (2 * horiz_padding))
+            if self.text_view_rect.height != -1:
+                self.text_view_rect.height -= ((total_text_buffer * 2) + (2 * vert_padding))
+
+            text_actual_area_rect = self.text_view_rect.copy()
+            text_actual_area_rect.x = total_text_buffer + horiz_padding
+            text_actual_area_rect.y = total_text_buffer + vert_padding
+            if 'text_width' in self.theming:
+                text_actual_area_rect.width = self.theming['text_width']
+            if 'text_height' in self.theming:
+                text_actual_area_rect.height = self.theming['text_height']
+
+            text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
-                text_shadow = render_white_text_alpha_black_bg(font=self.theming['font'],
-                                                               text=self.theming['text'])
-                apply_colour_to_surface(self.theming['text_shadow'], text_shadow)
+                text_shadow_data = self.theming['text_shadow']
+            text_chunk = TextLineChunkFTFont(self.theming['text'],
+                                             self.theming['font'],
+                                             underlined=False,
+                                             colour=pygame.Color('#FFFFFFFF'),
+                                             using_default_text_colour=True,
+                                             bg_colour=pygame.Color('#00000000'),
+                                             text_shadow_data=text_shadow_data,
+                                             max_dimensions=(text_actual_area_rect.width,
+                                                             text_actual_area_rect.height))
+            text_chunk.should_centre_from_baseline = True
+            self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
+                                                 self.text_view_rect, line_spacing=1.25)
+            self.align_all_text_rows()
+        return containing_rect_when_text_built
 
-                basic_blit(self.states[state_str].surface, text_shadow,
-                           (self.aligned_text_rect.x,
-                            self.aligned_text_rect.y + 1))
-                basic_blit(self.states[state_str].surface, text_shadow,
-                           (self.aligned_text_rect.x,
-                            self.aligned_text_rect.y - 1))
-                basic_blit(self.states[state_str].surface, text_shadow,
-                           (self.aligned_text_rect.x + 1,
-                            self.aligned_text_rect.y))
-                basic_blit(self.states[state_str].surface, text_shadow,
-                           (self.aligned_text_rect.x - 1,
-                            self.aligned_text_rect.y))
-
-            if text_surface is not None and self.aligned_text_rect is not None:
-                basic_blit(self.states[state_str].surface,
-                           text_surface,
-                           self.aligned_text_rect)
-
-    def redraw_state(self, state_str: str):
+    def finalise_text(self, state_str,
+                      text_colour_state_str: str = "",
+                      text_shadow_colour_state_str: str = "",
+                      only_text_changed: bool = False):
         """
-        This method is declared for derived classes to implement but has no default implementation.
+        Finalise the text to a surface with some last-minute data that doesn't require the text
+        be re-laid out.
 
+        :param only_text_changed:
+        :param state_str: The name of the shape's state we are finalising.
+        :param text_colour_state_str: The string identifying the text colour to use.
+        :param text_shadow_colour_state_str: The string identifying the text shadow
+                                             colour to use.
+        """
+        if self.text_box_layout is not None:
+            if only_text_changed:
+                self.text_box_layout.blit_finalised_text_to_surf(self.states[state_str].surface)
+            else:
+                self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
+                self.text_box_layout.set_default_text_shadow_colour(
+                    self.theming[text_shadow_colour_state_str])
+                self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
+
+    def set_text(self, text: str):
+        """
+        Set the visible text that the drawable shape has on it. This call will build a text
+        layout and then redraw the final shape with the new, laid out text on top.
+
+        :param text: the new string of text to stick on the shape.
+        """
+        self.theming['text'] = text
+        self.build_text_layout()
+        self.redraw_all_states()
+
+    def set_text_alpha(self, alpha: int):
+        """
+        Set the alpha of just the text and redraw the shape with the new text on top.
+
+        :param alpha: the alpha to set.
+        """
+        self.text_box_layout.set_alpha(alpha)
+        self.redraw_state(self.active_state.state_id, add_text=False)
+        self.finalise_text(self.active_state.state_id, only_text_changed=True)
+
+    def redraw_active_state_no_text(self):
+        """
+        Redraw the currently active state with no text.
+        """
+        self.redraw_state(self.active_state.state_id, add_text=False)
+
+    def finalise_text_onto_active_state(self):
+        """
+        Lets us draw the active state with no text and then paste the finalised surface from the
+        text layout on top. Handy if we are doing some text effects in the text layout we don't want
+        to lose by recreating the text from scratch.
+        """
+        self.redraw_state(self.active_state.state_id, add_text=False)
+        self.finalise_text(self.active_state.state_id, only_text_changed=True)
+
+    def insert_text(self, text: str, layout_index: int, parser: Optional[HTMLParser] = None):
+        """
+        Update the theming when we insert text, then pass down to the layout to do the actual
+        inserting.
+        :param text: the text to insert
+        :param layout_index: where to insert it
+        :param parser: an optional parser
+        :return:
+        """
+        self.theming['text'] = (self.theming['text'][:layout_index] +
+                                text +
+                                self.theming['text'][layout_index:])
+        self.text_box_layout.insert_text(text, layout_index, parser)
+
+    def toggle_text_cursor(self):
+        """
+        Toggle the edit text cursor/carat between visible and invisible. Usually this is run to
+        make the cursor appear to flash so it catches user attention.
+        """
+        if self.text_box_layout is not None:
+            self.text_box_layout.toggle_cursor()
+            self.active_state.has_fresh_surface = True
+
+    def redraw_state(self, state_str: str, add_text: bool = True):
+        """
+        This method is declared for derived classes to implement but has no default
+        implementation.
+
+        :param add_text:
         :param state_str: The ID/name of the state to redraw.
 
         """

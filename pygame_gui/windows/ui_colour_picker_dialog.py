@@ -5,23 +5,13 @@ import pygame
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_HORIZONTAL_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED
-from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
+from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
 from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage
 from pygame_gui.elements import UIHorizontalSlider, UILabel, UITextEntryLine
-
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    assert pygame.BUTTON_LEFT == 1
-    assert pygame.BUTTON_MIDDLE == 2
-    assert pygame.BUTTON_RIGHT == 3
-except (AttributeError, AssertionError):
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
 
 
 class UIColourChannelEditor(UIElement):
@@ -88,7 +78,7 @@ class UIColourChannelEditor(UIElement):
                                              anchors=anchors,
                                              visible=self.visible)
 
-        default_sizes = {'space_between': 5,
+        default_sizes = {'space_between': 3,
                          'label_width': 17,
                          'entry_width': 43,
                          'line_height': 29,
@@ -96,7 +86,7 @@ class UIColourChannelEditor(UIElement):
                          'slider_vert_space': 4}
 
         self.label = UILabel(pygame.Rect(0, 0,
-                                         default_sizes['label_width'],
+                                         -1,
                                          default_sizes['line_height']),
                              text=name,
                              manager=self.ui_manager,
@@ -122,7 +112,7 @@ class UIColourChannelEditor(UIElement):
         slider_width = (self.entry.rect.left -
                         self.label.rect.right) - (2 * default_sizes['space_between'])
 
-        self.slider = UIHorizontalSlider(pygame.Rect((default_sizes['label_width'] +
+        self.slider = UIHorizontalSlider(pygame.Rect((self.label.get_abs_rect().width +
                                                       default_sizes['space_between']),
                                                      default_sizes['slider_vert_space'],
                                                      slider_width,
@@ -153,10 +143,7 @@ class UIColourChannelEditor(UIElement):
 
         """
         consumed_event = super().process_event(event)
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_TEXT_ENTRY_FINISHED and
-                event.ui_element == self.entry):
-
+        if event.type == UI_TEXT_ENTRY_FINISHED and event.ui_element == self.entry:
             int_value = self.current_value
             try:
                 int_value = int(self.entry.get_text())
@@ -165,10 +152,7 @@ class UIColourChannelEditor(UIElement):
             finally:
                 self._set_value_from_entry(int_value)
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_HORIZONTAL_SLIDER_MOVED and
-                event.ui_element == self.slider):
-
+        if event.type == UI_HORIZONTAL_SLIDER_MOVED and event.ui_element == self.slider:
             int_value = self.current_value
             try:
                 int_value = int(self.slider.get_current_value())
@@ -191,13 +175,21 @@ class UIColourChannelEditor(UIElement):
         if clipped_value != self.current_value:
             self.current_value = clipped_value
             self.entry.set_text(str(self.current_value))
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
                           'value': self.current_value,
                           'channel_index': self.channel_index,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            colour_channel_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(colour_channel_changed_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = {'value': self.current_value,
+                          'channel_index': self.channel_index,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+                                                 event_data))
 
     def _set_value_from_entry(self, new_value: int):
         """
@@ -215,12 +207,22 @@ class UIColourChannelEditor(UIElement):
         if clipped_value != self.current_value:
             self.current_value = clipped_value
             self.slider.set_current_value(self.current_value)
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
                           'value': self.current_value,
                           'channel_index': self.channel_index,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
             colour_channel_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
+            pygame.event.post(colour_channel_changed_event)
+
+            event_data = {'value': self.current_value,
+                          'channel_index': self.channel_index,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            colour_channel_changed_event = pygame.event.Event(
+                UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, event_data)
             pygame.event.post(colour_channel_changed_event)
 
     def set_value(self, new_value: int):
@@ -312,7 +314,7 @@ class UIColourPickerDialog(UIWindow):
                  manager: IUIManagerInterface,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
-                 window_title: str = "Colour Picker",
+                 window_title: str = "pygame-gui.colour_picker_title_bar",
                  object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None),
                  visible: int = 1):
 
@@ -331,18 +333,8 @@ class UIColourPickerDialog(UIWindow):
 
         self.current_colour = initial_colour
 
-        self.ok_button = UIButton(relative_rect=pygame.Rect(-220, -40, 100, 30),
-                                  text='OK',
-                                  manager=self.ui_manager,
-                                  container=self,
-                                  object_id='#ok_button',
-                                  anchors={'left': 'right',
-                                           'right': 'right',
-                                           'top': 'bottom',
-                                           'bottom': 'bottom'})
-
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-110, -40, 100, 30),
-                                      text='Cancel',
+        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                      text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
                                       container=self,
                                       object_id='#cancel_button',
@@ -350,6 +342,17 @@ class UIColourPickerDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
+
+        self.ok_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
+                                  text='pygame-gui.OK',
+                                  manager=self.ui_manager,
+                                  container=self,
+                                  object_id='#ok_button',
+                                  anchors={'left': 'right',
+                                           'right': 'right',
+                                           'top': 'bottom',
+                                           'bottom': 'bottom',
+                                           'right_target': self.cancel_button})
 
         default_sizes = {'element_spacing': 20,
                          'channel_spacing': 11,
@@ -413,7 +416,7 @@ class UIColourPickerDialog(UIWindow):
                                                              default_sizes['channel_height']),
                                                  manager=self.ui_manager,
                                                  container=self,
-                                                 name='H:',
+                                                 name='pygame-gui.Hue_H',
                                                  channel_index=0,
                                                  initial_value=int(self.current_colour.hsva[0]),
                                                  value_range=(0, 360),
@@ -429,7 +432,7 @@ class UIColourPickerDialog(UIWindow):
                                                              default_sizes['channel_height']),
                                                  manager=self.ui_manager,
                                                  container=self,
-                                                 name='S:',
+                                                 name='pygame-gui.Saturation_S',
                                                  channel_index=0,
                                                  initial_value=int(self.current_colour.hsva[1]),
                                                  value_range=(0, 100),
@@ -445,7 +448,7 @@ class UIColourPickerDialog(UIWindow):
                                                                default_sizes['channel_height']),
                                                    manager=self.ui_manager,
                                                    container=self,
-                                                   name='V:',
+                                                   name='pygame-gui.Value_V',
                                                    channel_index=2,
                                                    initial_value=int(self.current_colour.hsva[2]),
                                                    value_range=(0, 100),
@@ -461,7 +464,7 @@ class UIColourPickerDialog(UIWindow):
                                                              default_sizes['channel_height']),
                                                  manager=self.ui_manager,
                                                  container=self,
-                                                 name='R:',
+                                                 name='pygame-gui.Red_R',
                                                  channel_index=0,
                                                  initial_value=self.current_colour.r,
                                                  value_range=(0, 255),
@@ -477,7 +480,7 @@ class UIColourPickerDialog(UIWindow):
                                                                default_sizes['channel_height']),
                                                    manager=self.ui_manager,
                                                    container=self,
-                                                   name='G:',
+                                                   name='pygame-gui.Green_G',
                                                    channel_index=1,
                                                    initial_value=self.current_colour.g,
                                                    value_range=(0, 255),
@@ -493,7 +496,7 @@ class UIColourPickerDialog(UIWindow):
                                                               default_sizes['channel_height']),
                                                   manager=self.ui_manager,
                                                   container=self,
-                                                  name='B:',
+                                                  name='pygame-gui.Blue_B',
                                                   channel_index=2,
                                                   initial_value=self.current_colour.b,
                                                   value_range=(0, 255),
@@ -515,24 +518,24 @@ class UIColourPickerDialog(UIWindow):
 
         """
         consumed_event = super().process_event(event)
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element == self.cancel_button):
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.cancel_button:
             self.kill()
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_BUTTON_PRESSED and
-                event.ui_element == self.ok_button):
-            event_data = {'user_type': UI_COLOUR_PICKER_COLOUR_PICKED,
+        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.ok_button:
+            # old event - to be removed in 0.8.0
+            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_PICKED),
                           'colour': self.current_colour,
                           'ui_element': self,
                           'ui_object_id': self.most_specific_combined_id}
-            new_colour_chosen_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(new_colour_chosen_event)
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+            # new event
+            event_data = {'colour': self.current_colour,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_PICKED, event_data))
             self.kill()
 
-        if (event.type == pygame.USEREVENT and
-                event.user_type == UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED):
+        if event.type == UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED:
             if event.ui_element in [self.hue_channel, self.sat_channel, self.value_channel]:
                 self.current_colour.hsva = (self.hue_channel.current_value,
                                             self.sat_channel.current_value,

@@ -3,8 +3,6 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -95,9 +93,8 @@ class TestUIDropDownMenu:
                               manager=default_ui_manager)
 
         # process a mouse button down event
-        menu.process_event(pygame.event.Event(pygame.USEREVENT,
-                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                               'ui_element': menu.menu_states['closed'].open_button}))
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED, {'ui_element': menu.menu_states['closed'].open_button}))
 
         assert menu.current_state.should_transition
 
@@ -105,9 +102,9 @@ class TestUIDropDownMenu:
 
         assert not menu.current_state.should_transition
 
-        menu.process_event(pygame.event.Event(pygame.USEREVENT,
-                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                               'ui_element': menu.menu_states['expanded'].close_button}))
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED,
+            {'ui_element': menu.menu_states['expanded'].close_button}))
 
         assert menu.current_state.should_transition
 
@@ -115,9 +112,9 @@ class TestUIDropDownMenu:
 
         assert not menu.current_state.should_transition
 
-        menu.process_event(pygame.event.Event(pygame.USEREVENT,
-                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                               'ui_element': menu.menu_states['closed'].selected_option_button}))
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED,
+            {'ui_element': menu.menu_states['closed'].selected_option_button}))
 
         assert menu.current_state.should_transition
 
@@ -125,13 +122,13 @@ class TestUIDropDownMenu:
 
         assert not menu.current_state.should_transition
 
-        menu.process_event(pygame.event.Event(pygame.USEREVENT,
-                                              {'user_type': pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
-                                               'ui_element': menu.menu_states['expanded'].options_selection_list}))
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
+            {'ui_element': menu.menu_states['expanded'].options_selection_list}))
 
         confirm_drop_down_changed_event_fired = False
         for event in pygame.event.get():
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED and
+            if (event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED and
                     event.ui_element == menu):
                 confirm_drop_down_changed_event_fired = True
 
@@ -242,10 +239,10 @@ class TestUIDropDownMenu:
         menu.set_dimensions((300, 50))
 
         assert (menu.current_state.open_button.relative_rect.right ==
-                (100 + 300) - (menu.border_width + menu.shadow_width))
+                300 - (menu.border_width + menu.shadow_width))
 
         assert (menu.current_state.open_button.relative_rect.bottom ==
-                (100 + 50) - (menu.border_width + menu.shadow_width))
+                50 - (menu.border_width + menu.shadow_width))
 
         # try to click on the menu
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
@@ -505,9 +502,9 @@ class TestUIDropDownMenu:
                               relative_rect=pygame.Rect(10, 10, 200, 30),
                               manager=default_ui_manager)
 
-        menu.process_event(pygame.event.Event(pygame.USEREVENT,
-                                              {'user_type': pygame_gui.UI_BUTTON_PRESSED,
-                                               'ui_element': menu.menu_states['closed'].open_button}))
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED,
+            {'ui_element': menu.menu_states['closed'].open_button}))
         menu.update(0.01)
 
         assert menu.visible == 1
@@ -522,7 +519,8 @@ class TestUIDropDownMenu:
         assert menu.menu_states["closed"].selected_option_button.visible == 0
         assert menu.menu_states["closed"].open_button.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame,
+                                 default_ui_manager, _display_surface_return_none):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -591,3 +589,7 @@ class TestUIDropDownMenu:
                                              '#test_object_1',
                                              '@test_class',
                                              'drop_down_menu']
+
+
+if __name__ == '__main__':
+    pytest.console_main()

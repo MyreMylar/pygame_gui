@@ -2,8 +2,6 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.core.interfaces import IUIManagerInterface
@@ -507,7 +505,7 @@ class TestUIPanel:
         assert button_1.check_pressed() is True
 
     def test_panel_children_inheriting_hidden_status(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                         _display_surface_return_none):
+                                                     _display_surface_return_none):
         panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel, visible=1)
@@ -515,7 +513,7 @@ class TestUIPanel:
         assert button.visible == 0
 
     def test_hidden_panel_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                         _display_surface_return_none):
+                                                     _display_surface_return_none):
         panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel)
@@ -527,7 +525,7 @@ class TestUIPanel:
 
     def test_visible_panel_children_behaviour_on_show(self, _init_pygame,
                                                       default_ui_manager: IUIManagerInterface,
-                                                          _display_surface_return_none):
+                                                      _display_surface_return_none):
         panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager,
                         visible=1, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
@@ -574,8 +572,8 @@ class TestUIPanel:
         manager = UIManager(resolution)
 
         panel = UIPanel(pygame.Rect(25, 25, 375, 150), manager=manager, visible=0, starting_layer_height=1)
-        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
-                          manager=manager, container=panel)
+        UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
+                 manager=manager, container=panel)
 
         manager.update(0.01)
         manager.draw_ui(surface)
@@ -592,3 +590,7 @@ class TestUIPanel:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-import pygame
+import pygame.freetype
 
 
 class IUIFontDictionaryInterface(metaclass=ABCMeta):
@@ -13,7 +13,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> pygame.font.Font:
+                  bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -28,12 +28,12 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
 
-        :return pygame.font.Font: Returns either the font we asked for, or the default font.
+        :return pygame.freetype.Font: Returns either the font we asked for, or the default font.
 
         """
 
     @abstractmethod
-    def get_default_font(self) -> pygame.font.Font:
+    def get_default_font(self) -> pygame.freetype.Font:
         """
         Grab the default font.
 
@@ -105,7 +105,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
         :param html_size: Size in HTML style.
 
-        :return int: A 'point' font size we can use with pygame.font
+        :return int: A 'point' font size we can use with pygame.freetype.font
 
         """
 
@@ -126,4 +126,11 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         Ensure the font we use for debugging purposes is loaded. Generally called after we start
         a debugging mode.
 
+        """
+
+    def set_locale(self, new_locale: str):
+        """
+        This may change the default font.
+
+        :param new_locale: The new locale to set, a two letter country code ISO 639-1
         """

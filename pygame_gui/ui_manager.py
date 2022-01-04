@@ -1,6 +1,8 @@
+import os
 from typing import Tuple, List, Dict, Union, Set
 
 import pygame
+import i18n
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
@@ -34,13 +36,23 @@ class UIManager(IUIManagerInterface):
                  window_resolution: Tuple[int, int],
                  theme_path: Union[str, PackageResource] = None,
                  enable_live_theme_updates: bool = True,
-                 resource_loader: IResourceLoader = None):
+                 resource_loader: IResourceLoader = None,
+                 starting_language: str = 'en',
+                 translation_directory_paths: List[str] = None):
 
-        # Pygame compat
-        try:
-            pygame.MOUSEWHEEL
-        except AttributeError:
-            pygame.MOUSEWHEEL = -1
+        # Translation stuff
+        self._locale = starting_language
+        root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        translations_path = os.path.normpath(os.path.join(root_path,
+                                                          'pygame_gui/data/translations/'))
+        i18n.set('file_format', 'json')
+        i18n.load_path.append(translations_path)
+        if translation_directory_paths is not None:
+            for path in translation_directory_paths:
+                # check this is a valid path
+                i18n.load_path.append(path)
+
+        i18n.set('locale', self._locale)
 
         # Threaded loading
         if resource_loader is None:
@@ -51,7 +63,7 @@ class UIManager(IUIManagerInterface):
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme(self.resource_loader)
+        self.ui_theme = UIAppearanceTheme(self.resource_loader, self._locale)
         if theme_path is not None:
             self.ui_theme.load_theme(theme_path)
 
@@ -81,7 +93,7 @@ class UIManager(IUIManagerInterface):
 
         self.resizing_window_cursors = None
         self._load_default_cursors()
-        self.active_user_cursor = pygame.cursors.arrow
+        self.active_user_cursor = pygame.SYSTEM_CURSOR_ARROW
         self._active_cursor = self.active_user_cursor
 
         if auto_load:
@@ -155,6 +167,8 @@ class UIManager(IUIManagerInterface):
         :param window_resolution: the resolution to set.
         """
         self.window_resolution = window_resolution
+        self.ui_window_stack.window_resolution = window_resolution
+        self.root_container.set_dimensions(window_resolution)
 
     def clear_and_reset(self):
         """
@@ -198,7 +212,7 @@ class UIManager(IUIManagerInterface):
                     if ui_element.visible:
                         # Only process events for visible elements - ignore hidden elements
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                            mouse_x, mouse_y = event.pos
+                            mouse_x, mouse_y = self.calculate_scaled_mouse_position(event.pos)
                             if ui_element.hover_point(mouse_x, mouse_y):
                                 # self.unset_focus_element()
                                 self.set_focus_set(ui_element.get_focus_set())
@@ -261,14 +275,14 @@ class UIManager(IUIManagerInterface):
                 if new_cursor != self._active_cursor:
                     self._active_cursor = new_cursor
                     try:
-                        pygame.mouse.set_cursor(*self._active_cursor)
+                        pygame.mouse.set_cursor(self._active_cursor)
                     except pygame.error:
                         pass
 
         if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
             self._active_cursor = self.active_user_cursor
             try:
-                pygame.mouse.set_cursor(*self._active_cursor)
+                pygame.mouse.set_cursor(self._active_cursor)
             except pygame.error:
                 pass
 
@@ -464,13 +478,13 @@ class UIManager(IUIManagerInterface):
                                               Tuple[int, ...], Tuple[int, ...]]):
         """
         This is for users of the library to set the currently active cursor, it will be currently
-        only be overriden by the resizing cursors.
+        only be overridden by the resizing cursors.
 
         The expected input is in the same format as the standard pygame cursor module, except
         without expanding the initial Tuple. So, to call this function with the default pygame
         arrow cursor you would do:
 
-            manager.set_active_cursor(pygame.cursors.arrow)
+            manager.set_active_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
         """
 
@@ -521,16 +535,21 @@ class UIManager(IUIManagerInterface):
 
         """
         # cursors for resizing windows
-        x_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_x_strings)
-        y_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_y_strings)
-        xy_sizer_cursor = pygame.cursors.compile(pygame.cursors.sizer_xy_strings)
-        list_yx = list(pygame.cursors.sizer_xy_strings)
-        list_yx.reverse()
-        yx_sizer_cursor = pygame.cursors.compile(tuple(list_yx))
+        self.resizing_window_cursors = {'xl': pygame.SYSTEM_CURSOR_SIZEWE,
+                                        'xr': pygame.SYSTEM_CURSOR_SIZEWE,
+                                        'yt': pygame.SYSTEM_CURSOR_SIZENS,
+                                        'yb': pygame.SYSTEM_CURSOR_SIZENS,
+                                        'xy': pygame.SYSTEM_CURSOR_SIZENWSE,
+                                        'yx': pygame.SYSTEM_CURSOR_SIZENESW}
 
-        self.resizing_window_cursors = {'xl': ((24, 16), (12, 8), *x_sizer_cursor),
-                                        'xr': ((24, 16), (8, 8), *x_sizer_cursor),
-                                        'yt': ((16, 24), (8, 12), *y_sizer_cursor),
-                                        'yb': ((16, 24), (8, 8), *y_sizer_cursor),
-                                        'xy': ((24, 16), (8, 8), *xy_sizer_cursor),
-                                        'yx': ((24, 16), (8, 8), *yx_sizer_cursor)}
+    def set_locale(self, locale: str):
+        self._locale = locale
+        i18n.set('locale', self._locale)
+        self.ui_theme.set_locale(self._locale)
+        self.ui_theme.get_font_dictionary().set_locale(self._locale)
+        for sprite in self.ui_group.sprites():
+            if isinstance(sprite, IUIElementInterface):
+                sprite.on_locale_changed()
+
+    def get_locale(self):
+        return self._locale

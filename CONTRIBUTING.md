@@ -19,10 +19,6 @@ Building the library
 
 Building Pygame GUI as a developer has a few additional dependecies.
 
-For building the library you will need:
-
-  - stringify
-
 For building the documentation you will need:
 
   - sphinx

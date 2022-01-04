@@ -45,7 +45,7 @@ Sub-elements
 
 You can reference all of the buttons that are sub elements of the slider with a theming block id of
 'horizontal_slider.button'. You can reference both of the arrow buttons with the class_id: '@arrow_button'.
- You can also reference the buttons individually by adding their object IDs:
+You can also reference the buttons individually by adding their object IDs:
 
  - 'horizontal_slider.#left_button'
  - 'horizontal_slider.#right_button'

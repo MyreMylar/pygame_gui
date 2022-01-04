@@ -2,8 +2,6 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -73,10 +71,10 @@ class TestUIHorizontalSlider:
         # scroll down a bit then up again to exercise update
         scroll_bar.get_current_value()  # Clear has moved this turn
         scroll_bar.left_button.held = True
-        scroll_bar.update(0.3)
+        scroll_bar.update(0.5)
         scroll_bar.left_button.held = False
         scroll_bar.right_button.held = True
-        scroll_bar.update(0.3)
+        scroll_bar.update(0.5)
 
         assert scroll_bar.has_moved_recently is True
 
@@ -277,7 +275,8 @@ class TestUIHorizontalSlider:
             pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
                                                         'pos': slider.left_button.rect.center}))
 
-        slider.update(0.1)
+        slider.update(0.5)
+        slider.update(0.5)
 
         # process a mouse button up event
         slider.left_button.process_event(
@@ -390,3 +389,7 @@ class TestUIHorizontalSlider:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

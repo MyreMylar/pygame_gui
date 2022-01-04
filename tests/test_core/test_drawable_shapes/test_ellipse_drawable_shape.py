@@ -1,7 +1,5 @@
 import pygame
-
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
+import pytest
 
 from pygame_gui.core.drawable_shapes.ellipse_drawable_shape import EllipseDrawableShape
 from pygame_gui.ui_manager import UIManager
@@ -13,6 +11,8 @@ class TestEllipseDrawableShape:
         EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                              theming_parameters={'text': 'test',
                                                  'font': default_ui_manager.get_theme().get_font([]),
+                                                 'normal_text': pygame.Color('#FFFFFF'),
+                                                 'normal_text_shadow': pygame.Color('#000000'),
                                                  'shadow_width': 0,
                                                  'border_width': 0,
                                                  'normal_border': pygame.Color('#FFFFFF'),
@@ -25,6 +25,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': -10,
                                                          'border_width': -10,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -38,6 +40,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 25, 25),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': 20,
                                                          'border_width': 20,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -51,6 +55,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 2, 2),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': 1,
                                                          'border_width': 0,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -64,6 +70,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': 0,
                                                          'border_width': 0,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -77,6 +85,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': 0,
                                                          'border_width': 0,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -90,6 +100,8 @@ class TestEllipseDrawableShape:
         shape = EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                      theming_parameters={'text': 'test',
                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                         'normal_text': pygame.Color('#FFFFFF'),
+                                                         'normal_text_shadow': pygame.Color('#000000'),
                                                          'shadow_width': 0,
                                                          'border_width': 0,
                                                          'normal_border': pygame.Color('#FFFFFF'),
@@ -103,6 +115,8 @@ class TestEllipseDrawableShape:
         EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                              theming_parameters={'text': 'test',
                                                  'font': default_ui_manager.get_theme().get_font([]),
+                                                 'normal_text': pygame.Color('#FFFFFF'),
+                                                 'normal_text_shadow': pygame.Color('#000000'),
                                                  'shadow_width': 2,
                                                  'border_width': 2,
                                                  'normal_border': ColourGradient(0, pygame.Color('#000000'),
@@ -113,3 +127,7 @@ class TestEllipseDrawableShape:
                                                  'text_horiz_alignment': 'center',
                                                  'text_vert_alignment': 'center'},
                              states=['normal'], manager=default_ui_manager)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

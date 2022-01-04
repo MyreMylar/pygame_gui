@@ -1,8 +1,6 @@
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, _display_surface_return_none
-
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape
@@ -543,7 +541,7 @@ class TestUIElement:
         element.set_visual_debug_mode(False)
         assert element.pre_debug_image is None
 
-    def test_set_image_clip(self,_init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_set_image_clip(self, _init_pygame, default_ui_manager: IUIManagerInterface):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -630,3 +628,7 @@ class TestUIElement:
 
         assert element.hovered is False
         assert element.hover_time == 0.0
+
+
+if __name__ == '__main__':
+    pytest.console_main()

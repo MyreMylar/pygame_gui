@@ -323,3 +323,14 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     element.hide()
 
             self.visible = 0
+
+    def on_anchor_target_changed(self, target: UIElement):
+        """
+        Update the contents of this container that one of their layout anchors may have moved, or
+        been resized.
+
+        :param target: the UI element that has been benn moved or resized.
+        """
+        for element in self.elements:
+            if target in element.get_anchor_targets():
+                element.update_containing_rect_position()

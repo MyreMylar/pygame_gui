@@ -1,13 +1,9 @@
-import os
 import pygame
 import pytest
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
-from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
@@ -72,10 +68,8 @@ class TestUIColourChannelEditor:
 
         channel_editor.slider.current_value = 100
 
-        default_ui_manager.process_events(pygame.event.Event(pygame.USEREVENT,
-                                                             {'user_type': pygame_gui.UI_HORIZONTAL_SLIDER_MOVED,
-                                                              'ui_element': channel_editor.slider}
-                                                             ))
+        default_ui_manager.process_events(pygame.event.Event(pygame_gui.UI_HORIZONTAL_SLIDER_MOVED,
+                                                             {'ui_element': channel_editor.slider}))
         assert channel_editor.entry.get_text() == '100'
 
     def test_set_value(self, _init_pygame, default_ui_manager,
@@ -293,7 +287,7 @@ class TestUIColourPickerDialog:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_COLOUR_PICKER_COLOUR_PICKED and
+            if (event.type == pygame_gui.UI_COLOUR_PICKER_COLOUR_PICKED and
                     event.ui_element == colour_picker):
                 confirm_event_fired = True
                 event_colour = event.colour
@@ -343,8 +337,7 @@ class TestUIColourPickerDialog:
         confirm_event_fired = False
         for event in pygame.event.get():
 
-            if (event.type == pygame.USEREVENT and
-                    event.user_type == pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED and
+            if (event.type == pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED and
                     event.ui_element == colour_picker.red_channel):
                 confirm_event_fired = True
 
@@ -374,8 +367,9 @@ class TestUIColourPickerDialog:
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
 
-        pixel_colour = colour_picker.current_colour_image.image.get_at((int(colour_picker.current_colour_image.rect.width/2),
-                                                                        int(colour_picker.current_colour_image.rect.height/2)))
+        pixel_colour = colour_picker.current_colour_image.image.get_at(
+            (int(colour_picker.current_colour_image.rect.width/2),
+             int(colour_picker.current_colour_image.rect.height/2)))
 
         pixel_colour = restore_premul_col(pixel_colour)  # this is going to be slightly inaccurate
 
@@ -555,3 +549,7 @@ class TestUIColourPickerDialog:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

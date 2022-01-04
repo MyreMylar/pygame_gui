@@ -1,9 +1,6 @@
-import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, default_display_surface, \
-    _display_surface_return_none
 
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements.ui_button import UIButton
@@ -235,3 +232,7 @@ class TestUIContainer:
         container.hide()
         assert container.visible == 0
         assert button.visible == 1
+
+
+if __name__ == '__main__':
+    pytest.console_main()

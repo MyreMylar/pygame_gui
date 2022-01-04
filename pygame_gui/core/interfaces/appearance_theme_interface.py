@@ -2,10 +2,8 @@ import io
 
 from abc import ABCMeta, abstractmethod
 from typing import List, Union, Dict, Any
-try:
-    from os import PathLike  # for Python 3.6
-except ImportError:
-    PathLike = None
+from os import PathLike
+
 
 import pygame
 
@@ -95,14 +93,14 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
+    def get_font(self, combined_element_ids: List[str]) -> pygame.freetype.Font:
         """
         Uses some data about a UIElement to get a font object.
 
         :param combined_element_ids: A list of IDs representing an element's location in a
                                      interleaved hierarchy of elements.
 
-        :return pygame.font.Font: A pygame font object.
+        :return pygame.freetype.Font: A pygame font object.
         """
 
     @abstractmethod

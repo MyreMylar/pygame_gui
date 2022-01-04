@@ -2,10 +2,6 @@ import os
 import pytest
 import pygame
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
-from tests.shared_comparators import compare_surfaces
-
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_tool_tip import UITooltip
 
@@ -143,7 +139,7 @@ class TestUIToolTip:
         assert tool_tip.rect.topleft == (150, 30)
 
         assert tool_tip.text_block.ui_container.rect.topleft == (0, 0)
-        assert tool_tip.text_block.relative_rect.bottom == 65
+        assert tool_tip.text_block.relative_rect.bottom == 71
 
         assert tool_tip.text_block.rect.topleft == (150, 30)
 
@@ -171,3 +167,7 @@ class TestUIToolTip:
                              manager=default_ui_manager)
         with pytest.warns(Warning):
             tool_tip.hide()
+
+
+if __name__ == '__main__':
+    pytest.console_main()

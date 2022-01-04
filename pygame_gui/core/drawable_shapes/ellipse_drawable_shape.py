@@ -44,8 +44,8 @@ class EllipseDrawableShape(DrawableShape):
                                    math.floor(self.containing_rect.height / 2)):
             self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                     math.floor(self.containing_rect.height / 2))
-        if self.shadow_width < 0:
-            self.shadow_width = 0
+
+        self.shadow_width = max(self.shadow_width, 0)
 
         if self.border_width > min(math.floor((self.containing_rect.width -
                                                (self.shadow_width * 2)) / 2),
@@ -55,8 +55,8 @@ class EllipseDrawableShape(DrawableShape):
                                                 (self.shadow_width * 2)) / 2),
                                     math.floor((self.containing_rect.height -
                                                 (self.shadow_width * 2)) / 2))
-        if self.border_width < 0:
-            self.border_width = 0
+
+        self.border_width = max(self.border_width, 0)
 
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect((self.containing_rect.x + self.shadow_width,
@@ -73,8 +73,6 @@ class EllipseDrawableShape(DrawableShape):
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)
             self.base_surface.fill(pygame.Color('#00000000'))
-
-        self.compute_aligned_text_rect()
 
         self.border_rect = pygame.Rect((self.shadow_width,
                                         self.shadow_width),
@@ -114,6 +112,9 @@ class EllipseDrawableShape(DrawableShape):
         :param dimensions: The new size to set the shape to.
 
         """
+        if (dimensions[0] == self.containing_rect.width and
+                dimensions[1] == self.containing_rect.height):
+            return False
         self.containing_rect.width = dimensions[0]
         self.containing_rect.height = dimensions[1]
         self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
@@ -123,6 +124,8 @@ class EllipseDrawableShape(DrawableShape):
                                        0.5 * self.containing_rect.height)
 
         self.full_rebuild_on_size_change()
+
+        return True
 
     def set_position(self, point: Union[pygame.math.Vector2,
                                         Tuple[int, int],
@@ -140,16 +143,18 @@ class EllipseDrawableShape(DrawableShape):
 
         self.ellipse_center = self.click_area_shape.center
 
-    def redraw_state(self, state_str: str):
+    def redraw_state(self, state_str: str, add_text: bool = True):
         """
         Redraws the shape's surface for a given UI state.
 
+        :param add_text: Whether to add the text to the shape in this redraw.
         :param state_str: The ID string of the state to rebuild.
 
         """
         border_colour_state_str = state_str + '_border'
         bg_colour_state_str = state_str + '_bg'
         text_colour_state_str = state_str + '_text'
+        text_shadow_colour_state_str = state_str + '_text_shadow'
         image_state_str = state_str + '_image'
 
         found_shape = None
@@ -243,7 +248,10 @@ class EllipseDrawableShape(DrawableShape):
                 self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
                                                       shape_id)
 
-        self.rebuild_images_and_text(image_state_str, state_str, text_colour_state_str)
+        self.finalise_images_and_text(image_state_str, state_str,
+                                      text_colour_state_str,
+                                      text_shadow_colour_state_str,
+                                      add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

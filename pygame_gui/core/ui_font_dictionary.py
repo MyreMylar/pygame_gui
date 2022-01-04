@@ -1,8 +1,7 @@
 import os
 import warnings
 
-from typing import Dict, Union
-from importlib.util import find_spec
+from typing import Dict, Union, Tuple
 
 
 import pygame
@@ -12,30 +11,31 @@ from pygame_gui.core.resource_loaders import IResourceLoader
 from pygame_gui.core.utility import PackageResource
 from pygame_gui.core.utility import FontResource
 
-# First try importlib
-# Then importlib_resources
-# If that fails fall back to __file__
-# Finally fall back to stringified data
-USE_IMPORT_LIB_RESOURCE = False
-USE_FILE_PATH = False
-USE_STRINGIFIED_DATA = False
 
-RESOURCES_MODULE_SPEC = find_spec(name="importlib.resources")
-if RESOURCES_MODULE_SPEC is None:
-    RESOURCES_MODULE_SPEC = find_spec(name="importlib_resources")
-    if RESOURCES_MODULE_SPEC is None:
-        ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        FONT_PATH = os.path.normpath(os.path.join(ROOT_PATH, 'data/FiraCode-Regular.ttf'))
-        if not os.path.exists(FONT_PATH):
-            USE_STRINGIFIED_DATA = True
-            from pygame_gui.core._string_data import FiraCode_Regular, FiraCode_Bold
-            from pygame_gui.core._string_data import FiraMono_BoldItalic, FiraMono_RegularItalic
-        else:
-            USE_FILE_PATH = True
-    else:
-        USE_IMPORT_LIB_RESOURCE = True
-else:
-    USE_IMPORT_LIB_RESOURCE = True
+class DefaultFontData:
+    """
+    Data class to wrap up all the data for a default font. Used now that we have multiple
+    default fonts for different locales.
+    """
+    def __init__(self, size: int, name: str, style: str,
+                 regular_file_name: str,
+                 bold_file_name: str,
+                 italic_file_name: str,
+                 bold_italic_file_name: str):
+        self.size = size
+        self.name = name
+        self.style = style
+        self.idx = (self.name + '_' + self.style + '_' + str(self.size))
+
+        self.regular_file_name = regular_file_name
+        self.bold_file_name = bold_file_name
+        self.italic_file_name = italic_file_name
+        self.bold_italic_file_name = bold_italic_file_name
+
+        self.info = {'name': self.name,
+                     'size': self.size,
+                     'bold': False,
+                     'italic': False}
 
 
 class UIFontDictionary(IUIFontDictionaryInterface):
@@ -74,22 +74,50 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         48: 7
     }
 
-    def __init__(self, resource_loader: IResourceLoader):
+    def __init__(self, resource_loader: IResourceLoader, locale: str):
         # , use_threaded_loading: bool = False, loading_queue: ClosableQueue = None
         # self.use_threaded_loading = use_threaded_loading
         # self.loading_queue = loading_queue
         self._resource_loader = resource_loader
 
-        self.default_font_size = 14
-        self.default_font_name = "fira_code"
-        self.default_font_style = "regular"
-        self.default_font_id = (self.default_font_name + '_' + self.default_font_style
-                                + '_' + str(self.default_font_size))
+        # match up two letter locale ids with a font that supports their alphabet
+        self._latin_font = DefaultFontData(14,
+                                           'fira_code',
+                                           'regular',
+                                           'FiraCode-Regular.ttf',
+                                           'FiraCode-Bold.ttf',
+                                           'FiraMono-RegularItalic.ttf',
+                                           'FiraMono-BoldItalic.ttf')
 
-        self.default_font_info = {'name': self.default_font_name,
-                                  'size': self.default_font_size,
-                                  'bold': False,
-                                  'italic': False}
+        self._japanese_font = DefaultFontData(14,
+                                              'noto_sans_jp',
+                                              'regular',
+                                              'NotoSansJP-Regular.otf',
+                                              'NotoSansJP-Bold.otf',
+                                              'NotoSansJP-Regular.otf',
+                                              'NotoSansJP-Bold.otf')
+        self._chinese_font = DefaultFontData(14,
+                                             'noto_sans_sc',
+                                             'regular',
+                                             'NotoSansSC-Regular.otf',
+                                             'NotoSansSC-Bold.otf',
+                                             'NotoSansSC-Regular.otf',
+                                             'NotoSansSC-Bold.otf')
+        self.default_font_dictionary = {'en': self._latin_font,
+                                        'fr': self._latin_font,
+                                        'de': self._latin_font,
+                                        'it': self._latin_font,
+                                        'es': self._latin_font,
+                                        'ru': self._latin_font,
+                                        'id': self._latin_font,
+                                        'pt': self._latin_font,
+                                        'ja': self._japanese_font,
+                                        'zh': self._chinese_font}
+
+        try:
+            self.default_font = self.default_font_dictionary[locale]
+        except KeyError:
+            self.default_font = self._latin_font
 
         self.debug_font_size = 8
 
@@ -98,47 +126,49 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         self._load_default_font()
 
-        self.used_font_ids = [self.default_font_id]
+        self.used_font_ids = [self.default_font.idx]
+
+    def set_locale(self, new_locale: str):
+        try:
+            new_font = self.default_font_dictionary[new_locale]
+        except KeyError:
+            new_font = self._latin_font
+
+        if self.default_font != new_font:
+            self.default_font = new_font
+            self._load_default_font()
 
     def _load_default_font(self):
         """
-        Load the default font.
+        Load a default font.
 
         """
-        default_font_res = FontResource(font_id=self.default_font_id,
-                                        size=self.default_font_size,
-                                        style={'bold': False, 'italic': False},
-                                        location=PackageResource(package='pygame_gui.data',
-                                                                 resource='FiraCode-Regular.ttf'))
-        if not USE_STRINGIFIED_DATA:
-            error = default_font_res.load()
-            if error is not None:
-                warnings.warn(str(error))
-            self.loaded_fonts[self.default_font_id] = default_font_res
+        default_font_res = FontResource(
+            font_id=self.default_font.idx,
+            size=self.default_font.size,
+            style={'bold': False, 'italic': False},
+            location=(
+                PackageResource(package='pygame_gui.data',
+                                resource=self.default_font.regular_file_name),
+                False))
 
-            self.known_font_paths['fira_code'] = [
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraCode-Regular.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraCode-Bold.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraMono-RegularItalic.ttf'),
-                PackageResource(package='pygame_gui.data',
-                                resource='FiraMono-BoldItalic.ttf')]
-        else:
-            default_font_res.location = FiraCode_Regular
-            error = default_font_res.load()
-            if error is not None:
-                warnings.warn(str(error))
-            self.loaded_fonts[self.default_font_id] = default_font_res
+        error = default_font_res.load()
+        if error is not None:
+            warnings.warn(str(error))
+        self.loaded_fonts[self.default_font.idx] = default_font_res
 
-            self.known_font_paths['fira_code'] = [FiraCode_Regular,
-                                                  FiraCode_Bold,
-                                                  FiraMono_RegularItalic,
-                                                  FiraMono_BoldItalic]
+        self.known_font_paths[self.default_font.name] = [
+            (PackageResource(package='pygame_gui.data',
+                             resource=self.default_font.regular_file_name), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource=self.default_font.bold_file_name), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource=self.default_font.italic_file_name), False),
+            (PackageResource(package='pygame_gui.data',
+                             resource=self.default_font.bold_italic_file_name), False)]
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> pygame.font.Font:
+                  bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -153,7 +183,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
 
-        :return pygame.font.Font: Returns either the font we asked for, or the default font.
+        :return pygame.freetype.Font: Returns either the font we asked for, or the default font.
 
         """
         return self.find_font_resource(font_size, font_name, bold, italic).loaded_font
@@ -164,7 +194,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         Find a loaded font resource from the font dictionary. Will load a font if it does not
         already exist and we have paths to the needed files, however it will issue a warning
         after doing so because dynamic file loading is normally a bad idea as you will get frame
-        rate hitches hile the running program waits for the font to load.
+        rate hitches while the running program waits for the font to load.
 
         Instead it's best to preload all your needed files at another time in your program when
         you have more control over the user experience.
@@ -205,16 +235,16 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True)
             return self.loaded_fonts[font_id]
         else:
-            return self.loaded_fonts[self.default_font_id]
+            return self.loaded_fonts[self.default_font.idx]
 
-    def get_default_font(self) -> pygame.font.Font:
+    def get_default_font(self) -> pygame.freetype.Font:
         """
         Grab the default font.
 
         :return: The default font.
 
         """
-        return self.find_font(self.default_font_size, self.default_font_name)
+        return self.find_font(self.default_font.size, self.default_font.name)
 
     def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
         """
@@ -229,7 +259,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         """
         if font_size <= 0:
-            font_size = self.default_font_size
+            font_size = self.default_font.size
             warnings.warn("Font size less than or equal to 0", UserWarning)
         if bold and italic:
             font_style_string = "bold_italic"
@@ -301,7 +331,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
 
     def _load_single_font_style(self,
-                                font_loc: Union[str, PackageResource, bytes],
+                                font_loc: Union[Tuple[str, bool],
+                                                Tuple[PackageResource, bool],
+                                                Tuple[bytes, bool]],
                                 font_id: str,
                                 font_size: int,
                                 font_style: Dict[str, bool],
@@ -353,17 +385,17 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             regular_font_loc = os.path.abspath(font_path)
 
-        style_locations = [bold_path, italic_path, bold_italic_path]
+        style_locations = [(bold_path, False), (italic_path, False), (bold_italic_path, False)]
         for index, location in enumerate(style_locations):
-            if location is None:
-                style_locations[index] = regular_font_loc
-            elif not isinstance(location, PackageResource):
-                style_locations[index] = os.path.abspath(location)
+            if location[0] is None:
+                style_locations[index] = (regular_font_loc, True)
+            elif not isinstance(location[0], PackageResource):
+                style_locations[index] = (os.path.abspath(location[0]), False)
 
-            self.known_font_paths[font_name] = [regular_font_loc,
-                                                style_locations[0],
-                                                style_locations[1],
-                                                style_locations[2]]
+        self.known_font_paths[font_name] = [(regular_font_loc, False),
+                                            style_locations[0],
+                                            style_locations[1],
+                                            style_locations[2]]
 
     def print_unused_loaded_fonts(self):
         """
@@ -388,13 +420,13 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         :param html_size: Size in HTML style.
 
-        :return int: A 'point' font size we can use with pygame.font
+        :return int: A 'point' font size we can use with pygame.freetype
 
         """
         if html_size in UIFontDictionary._html_font_sizes:
             return UIFontDictionary._html_font_sizes[html_size]
         else:
-            return self.default_font_size
+            return self.default_font.size
 
     def check_font_preloaded(self, font_id: str) -> bool:
         """
@@ -413,8 +445,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         a debugging mode.
 
         """
-        if not self.check_font_preloaded(self.default_font_name + '_'
-                                         + self.default_font_style +
+        if not self.check_font_preloaded(self.default_font.name + '_'
+                                         + self.default_font.style +
                                          '_' + str(self.debug_font_size)):
-            self.preload_font(self.debug_font_size, self.default_font_name,
+            self.preload_font(self.debug_font_size, self.default_font.name,
                               force_immediate_load=True)

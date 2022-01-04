@@ -9,7 +9,6 @@ from pygame_gui import core
 from pygame_gui import elements
 from pygame_gui import windows
 from pygame_gui import data
-from pygame_gui.elements import text
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_BUTTON_DOUBLE_CLICKED, UI_BUTTON_START_PRESS
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
@@ -22,8 +21,11 @@ from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT
 from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED
 from pygame_gui._constants import UI_FILE_DIALOG_PATH_PICKED, UI_COLOUR_PICKER_COLOUR_PICKED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
+from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED, UI_TEXT_EFFECT_FINISHED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_FADE_IN
-from pygame_gui._constants import TEXT_EFFECT_FADE_OUT
+from pygame_gui._constants import TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_BOUNCE, TEXT_EFFECT_TILT
+from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
+from pygame_gui._constants import UITextEffectType
 from pygame_gui.core.utility import PackageResource
 
 __all__ = ['UIManager',
@@ -31,13 +33,13 @@ __all__ = ['UIManager',
            'elements',
            'windows',
            'data',
-           'text',
            'PackageResource',
+           'UITextEffectType',
            'UI_BUTTON_PRESSED',
            'UI_BUTTON_START_PRESS',
+           'UI_BUTTON_DOUBLE_CLICKED',
            'UI_BUTTON_ON_HOVERED',
            'UI_BUTTON_ON_UNHOVERED',
-           'UI_BUTTON_DOUBLE_CLICKED',
            'UI_TEXT_BOX_LINK_CLICKED',
            'UI_TEXT_ENTRY_CHANGED',
            'UI_TEXT_ENTRY_FINISHED',
@@ -52,7 +54,12 @@ __all__ = ['UIManager',
            'UI_FILE_DIALOG_PATH_PICKED',
            'UI_COLOUR_PICKER_COLOUR_PICKED',
            'UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED',
+           'UI_CONSOLE_COMMAND_ENTERED',
+           'UI_TEXT_EFFECT_FINISHED',
            'TEXT_EFFECT_TYPING_APPEAR',
            'TEXT_EFFECT_FADE_IN',
-           'TEXT_EFFECT_FADE_OUT'
+           'TEXT_EFFECT_FADE_OUT',
+           'TEXT_EFFECT_BOUNCE',
+           'TEXT_EFFECT_TILT',
+           'TEXT_EFFECT_EXPAND_CONTRACT'
            ]

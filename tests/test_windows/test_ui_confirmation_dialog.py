@@ -3,7 +3,6 @@ import pygame
 import pytest
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -121,7 +120,7 @@ class TestUIConfirmationDialog:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-            if (event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
+            if (event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED and
                     event.ui_element == confirm_dialog):
                 confirm_event_fired = True
         is_dead_post_events = not confirm_dialog.alive()
@@ -273,3 +272,7 @@ class TestUIConfirmationDialog:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+
+if __name__ == '__main__':
+    pytest.console_main()

@@ -166,8 +166,7 @@ class GUISprite:
         #                          "instead.")
 
     def __repr__(self):
-        return "<%s GUISprite(in %d groups)>" % (self.__class__.__name__,
-                                                 len(self.groups()))
+        return f"<{self.__class__.__name__} GUISprite(in {len(self.groups())} groups)>"
 
     @property
     def image(self):
@@ -270,10 +269,10 @@ class LayeredGUIGroup(LayeredUpdates):
         surface.blits(self.visible)
 
     def update(self, *args, **kwargs) -> None:
+        super().update(*args, **kwargs)
         if self.should_update_visibility:
             self.should_update_visibility = False
             self.update_visibility()
-        super().update(*args, **kwargs)
 
     def update_visibility(self):
         """

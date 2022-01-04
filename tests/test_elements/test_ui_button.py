@@ -4,24 +4,12 @@ import pytest
 import pygame
 import pygame_gui
 
-from tests.shared_fixtures import _init_pygame, default_ui_manager
-from tests.shared_fixtures import default_display_surface, _display_surface_return_none
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui import PackageResource
-
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    pygame.BUTTON_LEFT
-    pygame.BUTTON_MIDDLE
-    pygame.BUTTON_RIGHT
-except AttributeError:
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
 
 
 class TestUIButton:
@@ -133,8 +121,7 @@ class TestUIButton:
                           manager=default_ui_manager)
         button.on_hovered()
 
-        confirm_on_hovered_event_fired = any((event.type == pygame.USEREVENT and
-                                              event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED and
+        confirm_on_hovered_event_fired = any((event.type == pygame_gui.UI_BUTTON_ON_HOVERED and
                                               event.ui_element == button) for event in
                                              pygame.event.get())
 
@@ -180,8 +167,7 @@ class TestUIButton:
         # stop hovering and kill the tool tip
         button.on_unhovered()
 
-        unhovered_event_fired = any((event.type == pygame.USEREVENT and
-                                     event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED and
+        unhovered_event_fired = any((event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED and
                                      event.ui_element == button) for event in
                                     pygame.event.get())
 
@@ -217,8 +203,8 @@ class TestUIButton:
 
         button.set_relative_position(pygame.math.Vector2(150.0, 30.0))
 
-        assert button.rect.topleft == (
-        250, 130) and button.drawable_shape.containing_rect.topleft == (250, 130)
+        assert (button.rect.topleft == (250, 130) and
+                button.drawable_shape.containing_rect.topleft == (250, 130))
 
     def test_set_position(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
@@ -232,8 +218,8 @@ class TestUIButton:
 
         button.set_position(pygame.math.Vector2(150.0, 30.0))
 
-        assert button.relative_rect.topleft == (
-        50, -70) and button.drawable_shape.containing_rect.topleft == (150, 30)
+        assert (button.relative_rect.topleft == (50, -70) and
+                button.drawable_shape.containing_rect.topleft == (150, 30))
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager,
                             _display_surface_return_none):
@@ -280,8 +266,7 @@ class TestUIButton:
 
         confirm_double_click_event_fired = False
         for event in pygame.event.get():
-            if (
-                    event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
+            if (event.type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
                     event.ui_element == button):
                 confirm_double_click_event_fired = True
 
@@ -513,14 +498,11 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        old_text_rect = button.drawable_shape.aligned_text_rect.copy()
-
         button.set_text('Ipsum')
 
         full_queue = len(button.drawable_shape.states_to_redraw_queue)
 
         assert (empty_queue == 0 and full_queue != 0 and
-                button.drawable_shape.aligned_text_rect != old_text_rect and
                 button.drawable_shape.theming['text'] == 'Ipsum' and button.text == 'Ipsum')
 
     def test_set_text_same(self, _init_pygame: None, default_ui_manager: UIManager,
@@ -538,14 +520,11 @@ class TestUIButton:
 
         empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
-        old_text_rect = button.drawable_shape.aligned_text_rect.copy()
-
         button.set_text('Test Button')
 
         still_empty_queue = len(button.drawable_shape.states_to_redraw_queue)
 
         assert (empty_queue == 0 and still_empty_queue == 0 and
-                button.drawable_shape.aligned_text_rect == old_text_rect and
                 button.drawable_shape.theming[
                     'text'] == 'Test Button' and button.text == 'Test Button')
 
@@ -694,6 +673,16 @@ class TestUIButton:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_hide_and_show_of_disabled_button(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 100, 100), text="button test",
+                          manager=manager, starting_height=1)
+
+        button.disable()
+        button.hide()
+        button.show()
+        assert button.drawable_shape.active_state.state_id == 'disabled'
+
     def test_class_theming_id(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),
                             PackageResource('tests.data.themes',
@@ -736,3 +725,7 @@ class TestUIButton:
                                                '#test_object_1',
                                                '@test_class',
                                                'button']
+
+
+if __name__ == '__main__':
+    pytest.console_main()

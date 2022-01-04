@@ -3,8 +3,7 @@ Documentation - Home Page
 ===================================================
 
 Pygame GUI is a module to help you make graphical user interfaces for games written in pygame. The module is firmly
-forward looking and is designed to work on Pygame 2 and Python 3. Some features may not work on earlier versions of
-pygame, and it's doubtful whether any of it works under Python 2.
+forward looking and is designed to work on Pygame 2 and Python 3.
 
 
 Features
@@ -19,6 +18,8 @@ Features
  - Buttons, text entry, scroll bars and drop down menus all supported, with more on the way.
 
  - A window stack that will let you keep a bunch of moveable windows of 'stuff' around and correctly sorted.
+
+ - Support for localizing your GUI into different languages.
 
  - As closely respecting of the pygame way of doing things as possible.
 
@@ -40,6 +41,16 @@ source, navigating to the project's directory (the one with setup.py in it) and 
 
     python setup.py install
     pip install . -U
+
+Why is your package called pygame-gui on PyPI?
+----------------------------------------------
+
+PyPI converts all non-letter characters in package names to dashes for web search optimisation reasons. I can assure you
+that the pygame-gui package on PyPI is this library pygame_gui. Conversely, Python does not allow dashes in package
+names. So it is not possible to standardise around either convention unless you forgo any kind of non-lowercase letter,
+pygamegui is already taken as a name on PyPI - so here we are.
+
+Please live with the inconsistency.
 
 
 Source code on GitHub
@@ -77,6 +88,8 @@ Table of contents
    theme_guide
    events
    text_effects
+   localization
+   freezing
    change_list
    modules
 
