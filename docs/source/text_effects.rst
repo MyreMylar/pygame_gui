@@ -131,7 +131,7 @@ Params
  - **'time_to_complete_rotation'** - A float that controls the time in seconds to do a complete tilt. Defaults to 5.0.
 
 Expand & Contract
---------------
+-----------------
 
 This effect makes the text in a chunk expand to a maximum scale and then return back to 1.0 (default size).
 
