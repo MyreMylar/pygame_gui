@@ -1,1 +1,2 @@
 pygame
+python-i18n
