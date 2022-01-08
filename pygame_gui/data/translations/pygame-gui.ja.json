@@ -1,27 +1,27 @@
 {
   "ja": {
     "Confirm": "確認",
-    "OK": "わかった",
-    "Cancel": "キャンセル",
+    "OK": "了解",
+    "Cancel": "取消",
     "Dismiss": "解散",
     "English": "英語",
     "French": "フランス語",
-    "Japanese": "日本",
-    "German": "ドイツ人",
+    "Japanese": "日本語",
+    "German": "ドイツ語",
     "Italian": "イタリア語",
     "Spanish": "スペイン語",
     "Indonesian": "インドネシア語",
     "Chinese": "中国語",
     "Portuguese": "ポルトガル語",
-    "Russian": "ロシア",
-    "colour_picker_title_bar": "カラーピッカー",
+    "Russian": "ロシア語",
+    "colour_picker_title_bar": "色選択",
     "Saturation_S": "彩度:",
     "Value_V": "光度:",
     "Hue_H": "色合い:",
     "Red_R": "赤:",
     "Green_G": "緑:",
     "Blue_B": "青:",
-    "console_title_bar": "コンソールのコ",
+    "console_title_bar": "コンソール",
     "message_window_title_bar": "メッセージ",
     "file_dialog_title_bar": "ファイルダイアログ",
     "Home_directory": "ホームディレクトリ",
@@ -29,6 +29,5 @@
     "Parent_directory": "親ディレクトリ",
     "Refresh_directory": "ディレクトリを更新",
     "Delete_filename": "消去 %{file_name} ?"
-
   }
 }
