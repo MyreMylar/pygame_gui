@@ -357,7 +357,7 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 self.text_entered = False  # reset text input entry
 
         if self.text != initial_text_state:
@@ -435,7 +435,8 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_RETURN and not self.text_entered:
+        if ((event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER)
+                and not self.text_entered):
             # old event - to be removed in 0.8.0
             event_data = {'user_type': OldType(UI_TEXT_ENTRY_FINISHED),
                           'text': self.text,

@@ -443,7 +443,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI
         elements in this window, and remove if from the window stack.
         """
-        # old event - to be removed in 0.6.0
+        # old event - to be removed in 0.8.0
         window_close_event = pygame.event.Event(pygame.USEREVENT,
                                                 {'user_type': OldType(UI_WINDOW_CLOSE),
                                                  'ui_element': self,
