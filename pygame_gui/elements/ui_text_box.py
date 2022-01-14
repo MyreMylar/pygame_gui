@@ -875,52 +875,55 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     # -------------------------------------------------
     # The Text owner interface
     # -------------------------------------------------
-    def set_text_alpha(self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont]):
+    def set_text_alpha(self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             self.text_box_layout.set_alpha(alpha)
         else:
             sub_chunk.set_alpha(alpha)
 
     def set_text_offset_pos(self, offset: Tuple[int, int],
-                            sub_chunk: Optional[TextLineChunkFTFont]):
+                            sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             pass
         else:
             sub_chunk.set_offset_pos(offset)
 
     def set_text_rotation(self, rotation: int,
-                          sub_chunk: Optional[TextLineChunkFTFont]):
+                          sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             pass
         else:
             sub_chunk.set_rotation(rotation)
 
-    def set_text_scale(self, scale: float, sub_chunk: Optional[TextLineChunkFTFont]):
+    def set_text_scale(self, scale: float, sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             pass
         else:
             sub_chunk.set_scale(scale)
 
-    def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont]):
+    def clear_text_surface(self,
+                           sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             self.text_box_layout.clear_final_surface()
         else:
             sub_chunk.clear()
 
-    def get_text_letter_count(self, sub_chunk: Optional[TextLineChunkFTFont]) -> int:
+    def get_text_letter_count(self,
+                              sub_chunk: Optional[TextLineChunkFTFont] = None) -> int:
         if sub_chunk is None:
             return self.text_box_layout.letter_count
         else:
             return sub_chunk.letter_count
 
-    def update_text_end_position(self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont]):
+    def update_text_end_position(self, end_pos: int,
+                                 sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
             self.text_box_layout.update_text_with_new_text_end_pos(end_pos)
         else:
             sub_chunk.letter_end = end_pos
             sub_chunk.redraw()
 
-    def set_active_effect(self, effect_type: Optional[UITextEffectType],
+    def set_active_effect(self, effect_type: Optional[UITextEffectType] = None,
                           params: Optional[Dict[str, Any]] = None,
                           effect_tag: Optional[str] = None):
         if effect_tag is not None:
