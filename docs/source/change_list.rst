@@ -7,6 +7,33 @@ A record of changes between versions of Pygame GUI.
 
 --------
 
+**Version 0.6.1**
+-----------------------------------------------------------------
+
+A quick bug fix release.
+
+
+Bug Fixes & Other Changes
+.........................................................
+
+ - **PyInstaller should work correctly with pygame_gui** - Fixed PyInstaller hook added in 0.6.0 not being picked up.
+ - **Added set_text() to UITextBox** - There were several requests for it.
+ - **Minor fixes to TextEffect interface** - Added default 'None' in a few places.
+ - **Fixed API docs not building on read** -  the docs (thanks to @lionel42)
+ - **Made K_KP_ENTER key behave the same as K_RETURN for UITextEntryLine** - Thanks to @Jamieakuma on the discord.
+
+Further thanks & Pull Requests
+..............................
+
+Several people stepped up to help improve the google translate localization efforts since the 0.6.0 release.
+
+ - **Improved Japanese localization** - Thanks to @KansaiGaijin, see `(pull #231) <https://github.com/MyreMylar/pygame_gui/pull/231>`_
+ - **Improved Indonesian localization** - Thanks to @avaxar, see `(pull #232) <https://github.com/MyreMylar/pygame_gui/pull/232>`_
+ - **Improved Russian localization** - Thanks to @SophieSilver, see `(pull #237) <https://github.com/MyreMylar/pygame_gui/pull/237>`_
+
+
+--------
+
 **Version 0.6.0** - The text update
 -----------------------------------------------------------------
 

@@ -1041,3 +1041,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def get_object_id(self) -> str:
         return self.most_specific_combined_id
+
+    def set_text(self, html_text: str):
+        self.html_text = html_text
+        self._reparse_and_rebuild()
+
