@@ -11,7 +11,7 @@ setup(
                        " multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_060.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_061.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
