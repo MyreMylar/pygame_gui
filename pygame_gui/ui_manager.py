@@ -349,15 +349,15 @@ class UIManager(IUIManagerInterface):
         'fira_code' font) you must first add the paths to the files for those fonts, then load the
         specific fonts with a list of font descriptions in a dictionary form like so:
 
-        code:`{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}`
+            ``{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}``
 
         You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style
         sizes with 'html_size'. Style options are:
 
-        - 'regular'
-        - 'italic'
-        - 'bold'
-        - 'bold_italic'
+        - ``'regular'``
+        - ``'italic'``
+        - ``'bold'``
+        - ``'bold_italic'``
 
         The name parameter here must match the one you used when you added the file paths.
 
@@ -482,7 +482,7 @@ class UIManager(IUIManagerInterface):
 
         The expected input is in the same format as the standard pygame cursor module, except
         without expanding the initial Tuple. So, to call this function with the default pygame
-        arrow cursor you would do:
+        arrow cursor you would do::
 
             manager.set_active_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
