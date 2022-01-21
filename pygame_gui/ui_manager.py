@@ -226,7 +226,7 @@ class UIManager(IUIManagerInterface):
                             # this is not a mistake.
 
                             break
-            return consumed_event
+        return consumed_event
 
     def update(self, time_delta: float):
         """
