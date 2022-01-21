@@ -195,6 +195,7 @@ class UIManager(IUIManagerInterface):
         windows from receiving input.
 
         :param event:  pygame.event.Event - the event to process.
+        :return: A boolean indicating whether the event was consumed.
         """
         consumed_event = False
         sorting_consumed_event = False
@@ -225,6 +226,7 @@ class UIManager(IUIManagerInterface):
                             # this is not a mistake.
 
                             break
+            return consumed_event
 
     def update(self, time_delta: float):
         """
