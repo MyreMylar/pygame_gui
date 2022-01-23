@@ -115,10 +115,10 @@ class EllipseDrawableShape(DrawableShape):
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
             return False
-        self.containing_rect.width = dimensions[0]
-        self.containing_rect.height = dimensions[1]
-        self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
-        self.click_area_shape.height = dimensions[1] - (2 * self.shadow_width)
+        self.containing_rect.width = int(dimensions[0])
+        self.containing_rect.height = int(dimensions[1])
+        self.click_area_shape.width = int(dimensions[0]) - (2 * self.shadow_width)
+        self.click_area_shape.height = int(dimensions[1]) - (2 * self.shadow_width)
 
         self.ellipse_half_diameters = (0.5 * self.containing_rect.width,
                                        0.5 * self.containing_rect.height)
@@ -136,10 +136,10 @@ class EllipseDrawableShape(DrawableShape):
         :param point: The new position to move it to.
 
         """
-        self.containing_rect.x = point[0]
-        self.containing_rect.y = point[1]
-        self.click_area_shape.x = point[0] + self.shadow_width
-        self.click_area_shape.y = point[1] + self.shadow_width
+        self.containing_rect.x = int(point[0])
+        self.containing_rect.y = int(point[1])
+        self.click_area_shape.x = int(point[0]) + self.shadow_width
+        self.click_area_shape.y = int(point[1]) + self.shadow_width
 
         self.ellipse_center = self.click_area_shape.center
 

@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from typing import Dict, Union, Tuple
+from typing import Dict, Union, Tuple, List, Optional
 
 
 import pygame
@@ -122,7 +122,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         self.debug_font_size = 8
 
         self.loaded_fonts = {}  # type: Dict[str, FontResource]
-        self.known_font_paths = {}
+        self.known_font_paths: Dict[str, List[Tuple[Union[str, PackageResource, bytes], bool]]] = {}
 
         self._load_default_font()
 
@@ -331,9 +331,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
 
     def _load_single_font_style(self,
-                                font_loc: Union[Tuple[str, bool],
-                                                Tuple[PackageResource, bool],
-                                                Tuple[bytes, bool]],
+                                font_loc: Tuple[Union[str, PackageResource, bytes], bool],
                                 font_id: str,
                                 font_size: int,
                                 font_style: Dict[str, bool],
@@ -364,9 +362,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
     def add_font_path(self,
                       font_name: str,
                       font_path: Union[str, PackageResource],
-                      bold_path: Union[str, PackageResource] = None,
-                      italic_path: Union[str, PackageResource] = None,
-                      bold_italic_path: Union[str, PackageResource] = None):
+                      bold_path: Optional[Union[str, PackageResource]] = None,
+                      italic_path: Optional[Union[str, PackageResource]] = None,
+                      bold_italic_path: Optional[Union[str, PackageResource]] = None):
         """
         Adds paths to different font files for a font name.
 
@@ -381,21 +379,16 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             return
 
         if isinstance(font_path, PackageResource):
-            regular_font_loc = font_path
+            regular_font_loc: Union[str, PackageResource, bytes] = font_path
         else:
             regular_font_loc = os.path.abspath(font_path)
 
-        style_locations = [(bold_path, False), (italic_path, False), (bold_italic_path, False)]
-        for index, location in enumerate(style_locations):
-            if location[0] is None:
-                style_locations[index] = (regular_font_loc, True)
-            elif not isinstance(location[0], PackageResource):
-                style_locations[index] = (os.path.abspath(location[0]), False)
-
-        self.known_font_paths[font_name] = [(regular_font_loc, False),
-                                            style_locations[0],
-                                            style_locations[1],
-                                            style_locations[2]]
+        self.known_font_paths[font_name] = [
+            (regular_font_loc, False),
+            (bold_path, False) if bold_path is not None else (regular_font_loc, False),
+            (italic_path, False) if italic_path is not None else (regular_font_loc, False),
+            (bold_italic_path, False) if bold_italic_path is not None
+            else (regular_font_loc, False)]
 
     def print_unused_loaded_fonts(self):
         """

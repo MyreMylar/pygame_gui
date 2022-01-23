@@ -161,7 +161,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             return
 
         if self.is_selected:
-            bg_col = self.selection_colour
+            bg_col: Union[Color, ColourGradient] = self.selection_colour
         else:
             bg_col = self.bg_colour
 

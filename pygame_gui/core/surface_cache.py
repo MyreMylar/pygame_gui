@@ -71,7 +71,8 @@ class SurfaceCache:
         :param string_id: The ID of the surface in the cache.
         """
 
-        if cached_item[0].get_size() > self.cache_surface_size:
+        if (isinstance(cached_item[0], pygame.Surface) and
+                cached_item[0].get_size() > self.cache_surface_size):
             warnings.warn('Unable to cache surfaces larger than ' + str(self.cache_surface_size))
             return None
         else:
