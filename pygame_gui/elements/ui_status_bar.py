@@ -64,10 +64,8 @@ class UIStatusBar(UIElement):
         self.status_changed = False
 
         self.border_colour = None
-        self.health_empty_colour = None
         self.bar_filled_colour = None
         self.bar_unfilled_colour = None
-        self.health_colour = None
         self.hover_height = None
         self.border_width = None
         self.shadow_width = None
