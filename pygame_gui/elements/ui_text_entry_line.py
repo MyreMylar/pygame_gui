@@ -78,6 +78,7 @@ class UITextEntryLine(UIElement):
 
         self.text = ""
         self.is_text_hidden = False
+        self.hidden_text_char = '●'
 
         # theme font
         self.font = None
@@ -89,7 +90,6 @@ class UITextEntryLine(UIElement):
         self.cursor = None
         self.background_and_border = None
         self.text_image_rect = None
-        # self.text_image = None
 
         # colours from theme
         self.background_colour = None
@@ -173,7 +173,16 @@ class UITextEntryLine(UIElement):
 
         display_text = self.text
         if self.is_text_hidden:
-            display_text = '●'*len(self.text)
+            # test if self.hidden_text_char is supported by font here
+            if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                self.hidden_text_char = '*'
+                if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                    self.hidden_text_char = '.'
+                    if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                        raise ValueError('Selected font for UITextEntryLine does not contain '
+                                         '●, * or . characters used for hidden text. Please choose'
+                                         'a different font for this element')
+                display_text = self.hidden_text_char*len(self.text)
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
@@ -244,7 +253,7 @@ class UITextEntryLine(UIElement):
                 self.edit_position = len(self.text)
                 display_text = self.text
                 if self.is_text_hidden:
-                    display_text = '●' * len(self.text)
+                    display_text = self.hidden_text_char * len(self.text)
                 self.drawable_shape.set_text(display_text)
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             else:
@@ -416,7 +425,7 @@ class UITextEntryLine(UIElement):
                         self.text = start_str + character + end_str
                         display_character = character
                         if self.is_text_hidden:
-                            display_character = '●'
+                            display_character = self.hidden_text_char
                         self.drawable_shape.insert_text(display_character, self.edit_position)
 
                         self.edit_position += 1
@@ -584,7 +593,7 @@ class UITextEntryLine(UIElement):
                         self.drawable_shape.text_box_layout.delete_selected_text()
                         display_new_text = new_text
                         if self.is_text_hidden:
-                            display_new_text = '●' * len(new_text)
+                            display_new_text = self.hidden_text_char * len(new_text)
                         self.drawable_shape.insert_text(display_new_text, low_end)
                         self.edit_position = low_end + len(new_text)
                         self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
@@ -601,7 +610,7 @@ class UITextEntryLine(UIElement):
                         self.text = final_text
                         display_new_text = new_text
                         if self.is_text_hidden:
-                            display_new_text = '●' * len(new_text)
+                            display_new_text = self.hidden_text_char * len(new_text)
                         self.drawable_shape.insert_text(display_new_text, self.edit_position)
                         self.edit_position += len(new_text)
                         self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
