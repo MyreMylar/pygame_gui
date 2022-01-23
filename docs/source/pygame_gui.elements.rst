@@ -68,6 +68,14 @@ pygame\_gui.elements.ui\_selection\_list module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.elements.ui\_status\_bar module
+----------------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_status_bar
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.elements.ui\_text\_box module
 -----------------------------------------
 
