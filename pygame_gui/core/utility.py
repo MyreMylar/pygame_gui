@@ -12,7 +12,7 @@ import io
 import base64
 
 from pathlib import Path
-from typing import Union, Dict, Tuple
+from typing import Union, Dict, Tuple, Optional
 
 from threading import Thread
 from queue import Queue
@@ -361,7 +361,7 @@ class FontResource:
                  font_id: str,
                  size: int,
                  style: Dict[str, bool],
-                 location: Union[Tuple[PackageResource, bool], Tuple[str, bool]]):
+                 location: Tuple[Union[str, PackageResource, bytes], bool]):
 
         self.font_id = font_id
         self.size = size
@@ -436,7 +436,7 @@ class ImageResource:
                  location: Union[PackageResource, str]):
         self.image_id = image_id
         self.location = location
-        self.loaded_surface = None
+        self.loaded_surface: Optional[pygame.Surface] = None
 
     def load(self) -> Union[Exception, None]:
         """
@@ -463,7 +463,7 @@ class ImageResource:
                                           str(self.location))
 
         # perform pre-multiply alpha operation
-        if error is None:
+        if error is None and self.loaded_surface is not None:
             premul_alpha_surface(self.loaded_surface)
 
         return error
@@ -485,7 +485,7 @@ class SurfaceResource:
 
         self.image_resource = image_resource
         self.sub_surface_rect = sub_surface_rect
-        self._surface = None
+        self._surface: Optional[pygame.surface.Surface] = None
 
     def load(self) -> Union[Exception, None]:
         """
@@ -494,7 +494,7 @@ class SurfaceResource:
                  Threads to handle neatly later.
         """
         error = None
-        if self.sub_surface_rect:
+        if self.sub_surface_rect and self.image_resource.loaded_surface is not None:
             try:
                 self.surface = self.image_resource.loaded_surface.subsurface(self.sub_surface_rect)
             except(pygame.error, OSError) as err:
@@ -506,7 +506,12 @@ class SurfaceResource:
         """
         Get the Pygame Surface
         """
-        return self._surface if self._surface is not None else self.image_resource.loaded_surface
+        if self._surface is not None:
+            return self._surface
+        elif self.image_resource.loaded_surface is not None:
+            return self.image_resource.loaded_surface
+
+        return pygame.Surface((0, 0))  # Return an empty surface here, error elsewhere
 
     @surface.setter
     def surface(self, surface: pygame.surface.Surface):

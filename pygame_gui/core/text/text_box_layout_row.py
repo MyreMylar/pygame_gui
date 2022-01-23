@@ -259,7 +259,7 @@ class TextBoxLayoutRow(pygame.Rect):
             cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
                                                     flags=pygame.SRCALPHA, depth=32)
 
-            cursor_surface.fill(pygame.Color('#FFFFFFFF'))
+            cursor_surface.fill(self.layout.get_cursor_colour())
             self.cursor_rect = pygame.Rect((self.x +
                                             self.cursor_draw_width -
                                             self.layout.x_scroll_offset),

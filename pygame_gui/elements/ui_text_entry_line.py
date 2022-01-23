@@ -1,9 +1,11 @@
 import re
 import warnings
 
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple, Dict, Optional
 
 import pygame
+
+import pygame.freetype
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
@@ -48,12 +50,13 @@ class UITextEntryLine(UIElement):
                                          'h', 'i', 'j', 'k', 'l', 'm', 'n',
                                          'o', 'p', 'q', 'r', 's', 't', 'u',
                                          'v', 'w', 'x', 'y', 'z']}
-    _alphabet_characters_upper = {'en': [char.upper() for char in _alphabet_characters_lower['en']],
-                                  'ja': [],  # no upper case in japanese
-                                  'zh': []}  # no upper case in chinese
+    _alphabet_characters_upper: Dict[str, List[str]] = {
+        'en': [char.upper() for char in _alphabet_characters_lower['en']],
+        'ja': [],  # no upper case in japanese
+        'zh': []}  # no upper case in chinese
 
-    _alphabet_characters_all = {'en': (_alphabet_characters_lower['en'] +
-                                       _alphabet_characters_upper['en'])}
+    _alphabet_characters_all = {'en': _alphabet_characters_lower['en'] +
+                                _alphabet_characters_upper['en']}
 
     _alpha_numeric_characters = {'en': (_alphabet_characters_all['en'] +
                                         _number_character_set['en'])}
@@ -78,9 +81,10 @@ class UITextEntryLine(UIElement):
 
         self.text = ""
         self.is_text_hidden = False
+        self.hidden_text_char = '●'
 
         # theme font
-        self.font = None
+        self.font: Optional[pygame.freetype.Font] = None
 
         self.shadow_width = None
         self.border_width = None
@@ -89,7 +93,6 @@ class UITextEntryLine(UIElement):
         self.cursor = None
         self.background_and_border = None
         self.text_image_rect = None
-        # self.text_image = None
 
         # colours from theme
         self.background_colour = None
@@ -100,6 +103,7 @@ class UITextEntryLine(UIElement):
         self.disabled_background_colour = None
         self.disabled_border_colour = None
         self.disabled_text_colour = None
+        self.text_cursor_colour = None
         self.padding = (0, 0)
 
         self.drawable_shape = None
@@ -126,9 +130,9 @@ class UITextEntryLine(UIElement):
         self.text_entered = False  # Reset when enter key up or focus lost
 
         # restrictions on text input
-        self.allowed_characters = None
-        self.forbidden_characters = None
-        self.length_limit = None
+        self.allowed_characters: Optional[List[str]] = None
+        self.forbidden_characters: Optional[List[str]] = None
+        self.length_limit: Optional[int] = None
 
         self.rebuild_from_changed_theme_data()
 
@@ -148,7 +152,8 @@ class UITextEntryLine(UIElement):
         self._select_range = value
         start_select = min(self._select_range[0], self._select_range[1])
         end_select = max(self._select_range[0], self._select_range[1])
-        self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
+        if self.drawable_shape is not None:
+            self.drawable_shape.text_box_layout.set_text_selection(start_select, end_select)
 
     def set_text_hidden(self, is_hidden=True):
         """
@@ -173,7 +178,16 @@ class UITextEntryLine(UIElement):
 
         display_text = self.text
         if self.is_text_hidden:
-            display_text = '●'*len(self.text)
+            # test if self.hidden_text_char is supported by font here
+            if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                self.hidden_text_char = '*'
+                if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                    self.hidden_text_char = '.'
+                    if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                        raise ValueError('Selected font for UITextEntryLine does not contain '
+                                         '●, * or . characters used for hidden text. Please choose'
+                                         'a different font for this element')
+                display_text = self.hidden_text_char*len(self.text)
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
@@ -184,6 +198,7 @@ class UITextEntryLine(UIElement):
                               'disabled_text_shadow': pygame.Color('#000000'),
                               'disabled_border': self.disabled_border_colour,
                               'selected_text': self.selected_text_colour,
+                              'text_cursor_colour': self.text_cursor_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
@@ -202,9 +217,10 @@ class UITextEntryLine(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'disabled'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_fresh_surface())
-        if self.rect.width == -1 or self.rect.height == -1:
-            self.set_dimensions(self.drawable_shape.containing_rect.size)
+        if self.drawable_shape is not None:
+            self.set_image(self.drawable_shape.get_fresh_surface())
+            if self.rect.width == -1 or self.rect.height == -1:
+                self.set_dimensions(self.drawable_shape.containing_rect.size)
 
     def set_text_length_limit(self, limit: int):
         """
@@ -244,9 +260,10 @@ class UITextEntryLine(UIElement):
                 self.edit_position = len(self.text)
                 display_text = self.text
                 if self.is_text_hidden:
-                    display_text = '●' * len(self.text)
-                self.drawable_shape.set_text(display_text)
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                    display_text = self.hidden_text_char * len(self.text)
+                if self.drawable_shape is not None:
+                    self.drawable_shape.set_text(display_text)
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             else:
                 warnings.warn("Tried to set text string that is too long on text entry element")
         else:
@@ -257,8 +274,9 @@ class UITextEntryLine(UIElement):
         Redraws the entire text entry element onto the underlying sprite image. Usually called
         when the displayed text has been edited or changed in some fashion.
         """
-        self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-        self.drawable_shape.redraw_all_states()
+        if self.drawable_shape is not None:
+            self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+            self.drawable_shape.redraw_all_states()
 
     def update(self, time_delta: float):
         """
@@ -278,33 +296,37 @@ class UITextEntryLine(UIElement):
             mouse_pos = self.ui_manager.get_mouse_position()
             drawable_shape_space_click = (mouse_pos[0] - self.rect.left,
                                           mouse_pos[1] - self.rect.top)
-            self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
-                drawable_shape_space_click)
-            select_end_pos = self.drawable_shape.text_box_layout.get_cursor_index()
-            new_range = [self.select_range[0], select_end_pos]
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                    drawable_shape_space_click)
+                select_end_pos = self.drawable_shape.text_box_layout.get_cursor_index()
+                new_range = [self.select_range[0], select_end_pos]
 
-            if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
-                self.select_range = [new_range[0], new_range[1]]
+                if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
+                    self.select_range = [new_range[0], new_range[1]]
 
-                self.edit_position = self.select_range[1]
-                self.cursor_has_moved_recently = True
+                    self.edit_position = self.select_range[1]
+                    self.cursor_has_moved_recently = True
 
         if self.cursor_has_moved_recently:
             self.cursor_has_moved_recently = False
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
-            self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-            self.drawable_shape.toggle_text_cursor()
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.drawable_shape.toggle_text_cursor()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
             if self.blink_cursor_time_acc >= self.blink_cursor_time:
                 self.blink_cursor_time_acc = 0.0
                 if self.cursor_on:
                     self.cursor_on = False
-                    self.drawable_shape.toggle_text_cursor()
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.toggle_text_cursor()
                 elif self.is_focused:
                     self.cursor_on = True
-                    self.drawable_shape.toggle_text_cursor()
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.toggle_text_cursor()
             else:
                 self.blink_cursor_time_acc += time_delta
         else:
@@ -390,7 +412,7 @@ class UITextEntryLine(UIElement):
                      abs(self.select_range[0] -
                          self.select_range[1])) >= self.length_limit):
             within_length_limit = False
-        if within_length_limit and hasattr(event, 'unicode'):
+        if within_length_limit and hasattr(event, 'unicode') and self.font is not None:
             character = event.unicode
             char_metrics = self.font.get_metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
@@ -407,7 +429,8 @@ class UITextEntryLine(UIElement):
                         high_end = max(self.select_range[0], self.select_range[1])
                         self.text = self.text[:low_end] + character + self.text[high_end:]
 
-                        self.drawable_shape.set_text(self.text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.set_text(self.text)
                         self.edit_position = low_end + 1
                         self.select_range = [0, 0]
                     else:
@@ -416,8 +439,9 @@ class UITextEntryLine(UIElement):
                         self.text = start_str + character + end_str
                         display_character = character
                         if self.is_text_hidden:
-                            display_character = '●'
-                        self.drawable_shape.insert_text(display_character, self.edit_position)
+                            display_character = self.hidden_text_char
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.insert_text(display_character, self.edit_position)
 
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
@@ -453,39 +477,45 @@ class UITextEntryLine(UIElement):
             self.text_entered = True
         elif event.key == pygame.K_BACKSPACE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.drawable_shape.text_box_layout.delete_selected_text()
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.delete_selected_text()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.text = self.text[:low_end] + self.text[high_end:]
                 self.edit_position = low_end
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-            elif self.edit_position > 0:
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+            elif self.edit_position > 0 and self.font is not None:
                 if self.start_text_offset > 0:
                     self.start_text_offset -= self.font.get_rect(
                         self.text[self.edit_position - 1]).width
                 self.text = self.text[:self.edit_position - 1] + self.text[self.edit_position:]
                 self.edit_position -= 1
                 self.cursor_has_moved_recently = True
-                self.drawable_shape.text_box_layout.backspace_at_cursor()
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.backspace_at_cursor()
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             consumed_event = True
         elif event.key == pygame.K_DELETE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.drawable_shape.text_box_layout.delete_selected_text()
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.delete_selected_text()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.text = self.text[:low_end] + self.text[high_end:]
                 self.edit_position = low_end
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
             elif self.edit_position < len(self.text):
                 self.text = self.text[:self.edit_position] + self.text[self.edit_position + 1:]
                 self.edit_position = self.edit_position
                 self.cursor_has_moved_recently = True
-                self.drawable_shape.text_box_layout.delete_at_cursor()
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.delete_at_cursor()
             consumed_event = True
         elif self._process_edit_pos_move_key(event):
             consumed_event = True
@@ -542,10 +572,12 @@ class UITextEntryLine(UIElement):
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 clipboard_copy(self.text[low_end:high_end])
-                self.drawable_shape.text_box_layout.delete_selected_text()
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.delete_selected_text()
                 self.edit_position = low_end
                 self.text = self.text[:low_end] + self.text[high_end:]
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
                 consumed_event = True
@@ -581,13 +613,17 @@ class UITextEntryLine(UIElement):
                         within_length_limit = False
                     if within_length_limit:
                         self.text = final_text
-                        self.drawable_shape.text_box_layout.delete_selected_text()
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.delete_selected_text()
                         display_new_text = new_text
                         if self.is_text_hidden:
-                            display_new_text = '●' * len(new_text)
-                        self.drawable_shape.insert_text(display_new_text, low_end)
+                            display_new_text = self.hidden_text_char * len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.insert_text(display_new_text, low_end)
                         self.edit_position = low_end + len(new_text)
-                        self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.set_cursor_position(
+                                self.edit_position)
                         self.select_range = [0, 0]
                         self.cursor_has_moved_recently = True
                 elif len(new_text) > 0:
@@ -601,10 +637,13 @@ class UITextEntryLine(UIElement):
                         self.text = final_text
                         display_new_text = new_text
                         if self.is_text_hidden:
-                            display_new_text = '●' * len(new_text)
-                        self.drawable_shape.insert_text(display_new_text, self.edit_position)
+                            display_new_text = self.hidden_text_char * len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.insert_text(display_new_text, self.edit_position)
                         self.edit_position += len(new_text)
-                        self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.set_cursor_position(
+                                self.edit_position)
                         self.cursor_has_moved_recently = True
                 consumed_event = True
         return consumed_event
@@ -626,9 +665,10 @@ class UITextEntryLine(UIElement):
                 if self.is_enabled:
                     drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
                                                   scaled_mouse_pos[1] - self.rect.top)
-                    self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
-                        drawable_shape_space_click)
-                    self.edit_position = self.drawable_shape.text_box_layout.get_cursor_index()
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                            drawable_shape_space_click)
+                        self.edit_position = self.drawable_shape.text_box_layout.get_cursor_index()
                     double_clicking = False
                     if self.double_click_timer < self.ui_manager.get_double_click_time():
                         if self._calculate_double_click_word_selection():
@@ -645,17 +685,18 @@ class UITextEntryLine(UIElement):
                 event.button == pygame.BUTTON_LEFT and
                 self.selection_in_progress):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
-            if self.drawable_shape.collide_point(scaled_mouse_pos):
-                consumed_event = True
-                drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
-                                              scaled_mouse_pos[1] - self.rect.top)
-                self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
-                    drawable_shape_space_click)
-                new_edit_pos = self.drawable_shape.text_box_layout.get_cursor_index()
-                if new_edit_pos != self.edit_position:
-                    self.edit_position = new_edit_pos
-                    self.cursor_has_moved_recently = True
-                    self.select_range = [self.select_range[0], self.edit_position]
+            if self.drawable_shape is not None:
+                if self.drawable_shape.collide_point(scaled_mouse_pos):
+                    consumed_event = True
+                    drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
+                                                  scaled_mouse_pos[1] - self.rect.top)
+                    self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
+                        drawable_shape_space_click)
+                    new_edit_pos = self.drawable_shape.text_box_layout.get_cursor_index()
+                    if new_edit_pos != self.edit_position:
+                        self.edit_position = new_edit_pos
+                        self.cursor_has_moved_recently = True
+                        self.select_range = [self.select_range[0], self.edit_position]
             self.selection_in_progress = False
         return consumed_event
 
@@ -885,6 +926,12 @@ class UITextEntryLine(UIElement):
             self.disabled_text_colour = disabled_text_colour
             has_any_changed = True
 
+        text_cursor_colour = self.ui_theme.get_colour_or_gradient('text_cursor',
+                                                                  self.combined_element_ids)
+        if text_cursor_colour != self.text_cursor_colour:
+            self.text_cursor_colour = text_cursor_colour
+            has_any_changed = True
+
         return has_any_changed
 
     def disable(self):
@@ -900,8 +947,9 @@ class UITextEntryLine(UIElement):
             self.cursor_on = False
             self.cursor_has_moved_recently = False
 
-            self.drawable_shape.set_active_state('disabled')
-            self.background_and_border = self.drawable_shape.get_surface('disabled')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
+                self.background_and_border = self.drawable_shape.get_surface('disabled')
             self.edit_position = 0
             self.select_range = [0, 0]
             self.redraw()
@@ -913,8 +961,9 @@ class UITextEntryLine(UIElement):
         if not self.is_enabled:
             self.is_enabled = True
             self.text_entered = False
-            self.drawable_shape.set_active_state('normal')
-            self.background_and_border = self.drawable_shape.get_surface('normal')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('normal')
+                self.background_and_border = self.drawable_shape.get_surface('normal')
             self.redraw()
 
     def on_locale_changed(self):
@@ -923,4 +972,5 @@ class UITextEntryLine(UIElement):
             self.font = font
             self.rebuild()
         else:
-            self.drawable_shape.set_text(translate(self.text))
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_text(translate(self.text))

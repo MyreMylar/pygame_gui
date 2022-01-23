@@ -20,13 +20,14 @@ Colours
    A diagram of which part of the element is themed by which colour parameter.
 
 :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` makes use of these colour parameters in a 'colours' block. All of these colours can
-also be a colour gradient:
+also be a colour gradient except the text cursor:
 
  - "**dark_bg**" -  The default colour/gradient of the background to the entry line element.
  - "**selected_bg**" - The colour/gradient the background changes to when the text above it is selected.
  - "**normal_text**" - The default colour/gradient of text entered into the element.
  - "**selected_text**" - The colour/gradient of text when it has been selected.
  - "**normal_border**" - The colour/gradient of the border around the text entry element.
+ - "**text_cursor**" - The colour of the text cursor.
 
 Font
 -----

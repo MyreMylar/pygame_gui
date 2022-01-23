@@ -73,6 +73,8 @@ class TextBoxLayout:
 
         self.x_scroll_offset = 0
 
+        self.cursor_colour = pygame.Color('#FFFFFFFF')
+
     def reprocess_layout_queue(self, layout_rect):
         """
         Re-lays out already parsed text data. Useful to call if the layout requirements have
@@ -873,3 +875,19 @@ class TextBoxLayout:
         """
         self.alpha = 255
         self.current_end_pos = self.letter_count
+
+    def set_cursor_colour(self, colour: pygame.Color):
+        """
+        Set the colour of the editing carat/text cursor for this text layout.
+
+        :param colour: The colour to set it to.
+        """
+        self.cursor_colour = colour
+
+    def get_cursor_colour(self) -> pygame.Color:
+        """
+        Get the current colour of the editing carat/text cursor.
+
+        :return: a pygame.Color object containing the current colour.
+        """
+        return self.cursor_colour

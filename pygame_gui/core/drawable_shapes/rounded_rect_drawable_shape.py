@@ -1,6 +1,6 @@
 import math
 import warnings
-from typing import Dict, List, Union, Tuple, Any
+from typing import Dict, List, Union, Tuple, Any, Optional
 
 import pygame
 from pygame.math import Vector2
@@ -30,10 +30,10 @@ class RoundedRectangleShape(DrawableShape):
                  manager: IUIManagerInterface):
         super().__init__(containing_rect, theming_parameters, states, manager)
 
-        self.corner_radius = None
-        self.temp_additive_shape = None
-        self.temp_subtractive_shape = None
-        self.temp_shadow_subtractive_shape = None
+        self.corner_radius = 0
+        self.temp_additive_shape: Optional[pygame.Surface] = None
+        self.temp_subtractive_shape: Optional[pygame.Surface] = None
+        self.temp_shadow_subtractive_shape: Optional[pygame.Surface] = None
         self.has_been_resized = False
 
         self.full_rebuild_on_size_change()
@@ -232,10 +232,10 @@ class RoundedRectangleShape(DrawableShape):
         :param point: The new position to move it to.
 
         """
-        self.containing_rect.x = point[0]
-        self.containing_rect.y = point[1]
-        self.click_area_shape.x = point[0] + self.shadow_width
-        self.click_area_shape.y = point[1] + self.shadow_width
+        self.containing_rect.x = int(point[0])
+        self.containing_rect.y = int(point[1])
+        self.click_area_shape.x = int(point[0]) + self.shadow_width
+        self.click_area_shape.y = int(point[1]) + self.shadow_width
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -251,10 +251,10 @@ class RoundedRectangleShape(DrawableShape):
         if (dimensions[0] == self.containing_rect.width and
                 dimensions[1] == self.containing_rect.height):
             return False
-        self.containing_rect.width = dimensions[0]
-        self.containing_rect.height = dimensions[1]
-        self.click_area_shape.width = dimensions[0] - (2 * self.shadow_width)
-        self.click_area_shape.height = dimensions[1] - (2 * self.shadow_width)
+        self.containing_rect.width = int(dimensions[0])
+        self.containing_rect.height = int(dimensions[1])
+        self.click_area_shape.width = int(dimensions[0]) - (2 * self.shadow_width)
+        self.click_area_shape.height = int(dimensions[1]) - (2 * self.shadow_width)
 
         if self.shadow_width > 0:
             quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
@@ -322,8 +322,8 @@ class RoundedRectangleShape(DrawableShape):
             self.states[state_str].surface = found_shape.copy()
         else:
             # border_corner_radius = self.corner_radius
-
-            self.states[state_str].surface = self.base_surface.copy()
+            if self.base_surface is not None:
+                self.states[state_str].surface = self.base_surface.copy()
 
             # Try one AA call method
             aa_amount = 4
@@ -457,7 +457,7 @@ class RoundedRectangleShape(DrawableShape):
 
         # lock the corner radius to a maximum size of half the smallest dimension and greater than 0
         if corner_radius > min(rect.width / 2, rect.height / 2):
-            corner_radius = min(rect.width / 2, rect.height / 2)
+            corner_radius = int(min(rect.width / 2, rect.height / 2))
 
         large_corner_radius = max(corner_radius, 0) * aa_amount
 

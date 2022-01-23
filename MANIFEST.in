@@ -4,3 +4,4 @@ include pygame_gui/data/*.ttf
 include pygame_gui/data/*.otf
 include pygame_gui/data/*.json
 include pygame_gui/data/translations/*.json
+include pygame_gui/py.typed

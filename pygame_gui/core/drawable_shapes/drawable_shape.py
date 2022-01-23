@@ -144,7 +144,7 @@ class DrawableShape:
 
         self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
-        self.text_view_rect = None
+        self.text_view_rect: Optional[pygame.Rect] = None
 
         self.shadow_width = 0
         self.border_width = 0
@@ -159,7 +159,7 @@ class DrawableShape:
             self.rounded_corner_offset = int(self.shape_corner_radius -
                                              (math.sin(math.pi / 4) * self.shape_corner_radius))
 
-        self.text_box_layout = None
+        self.text_box_layout: Optional[TextBoxLayout] = None
         self.build_text_layout()
 
         self._evaluate_contents_for_containing_rect()
@@ -178,7 +178,7 @@ class DrawableShape:
         else:
             raise NotImplementedError("No 'normal' state id supplied for drawable shape")
 
-        self.previous_state = None
+        self.previous_state: Optional[DrawableShapeState] = None
 
         if 'transitions' in self.theming:
             self.state_transition_times = self.theming['transitions']
@@ -195,10 +195,10 @@ class DrawableShape:
         self.time_until_full_rebuild_after_changing_size = 0.35
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-        self.click_area_shape = None
-        self.border_rect = None
-        self.background_rect = None
-        self.base_surface = None
+        self.click_area_shape = self.containing_rect.copy()
+        self.border_rect = self.containing_rect.copy()
+        self.background_rect = self.containing_rect.copy()
+        self.base_surface: Optional[pygame.Surface] = None
 
         self.only_text_changed = False
 
@@ -517,6 +517,8 @@ class DrawableShape:
             text_chunk.should_centre_from_baseline = True
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
                                                  self.text_view_rect, line_spacing=1.25)
+            if 'text_cursor_colour' in self.theming:
+                self.text_box_layout.set_cursor_colour(self.theming['text_cursor_colour'])
             self.align_all_text_rows()
         return containing_rect_when_text_built
 
