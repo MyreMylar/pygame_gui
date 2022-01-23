@@ -100,6 +100,7 @@ class UITextEntryLine(UIElement):
         self.disabled_background_colour = None
         self.disabled_border_colour = None
         self.disabled_text_colour = None
+        self.text_cursor_colour = None
         self.padding = (0, 0)
 
         self.drawable_shape = None
@@ -193,6 +194,7 @@ class UITextEntryLine(UIElement):
                               'disabled_text_shadow': pygame.Color('#000000'),
                               'disabled_border': self.disabled_border_colour,
                               'selected_text': self.selected_text_colour,
+                              'text_cursor_colour': self.text_cursor_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
@@ -892,6 +894,12 @@ class UITextEntryLine(UIElement):
                                                                     self.combined_element_ids)
         if disabled_text_colour != self.disabled_text_colour:
             self.disabled_text_colour = disabled_text_colour
+            has_any_changed = True
+
+        text_cursor_colour = self.ui_theme.get_colour_or_gradient('text_cursor',
+                                                                  self.combined_element_ids)
+        if text_cursor_colour != self.text_cursor_colour:
+            self.text_cursor_colour = text_cursor_colour
             has_any_changed = True
 
         return has_any_changed
