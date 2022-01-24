@@ -148,44 +148,50 @@ class UIStatusBar(UIElement):
 
             # If they've provided a method to call, we'll track previous value in percent_full.
             if self.percent_method:
-                current_percent = self.percent_method()
-                if current_percent != self.percent_full:
-                    # This triggers status_changed.
-                    self.percent_full = current_percent
+                # This triggers status_changed if necessary.
+                self.percent_full = self.percent_method()
 
             if self.status_changed:
                 self.status_changed = False
                 self.redraw()
 
-    def redraw(self):
+    def redraw(self, theming_parameters=None):
         """
         Redraw the health bar when something, other than it's position has changed.
+
+        :param theming_parameters: allows subclasses to fill in their own theming parameters and pass this along.
         """
-        theming_parameters = {'normal_bg': self.bar_unfilled_colour,
-                              'normal_border': self.border_colour,
-                              'border_width': self.border_width,
-                              'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius,
-                              'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width_percentage': self.percent_full}
+        if theming_parameters is None:
+            theming_parameters = {}
+
+        parameters = {'normal_bg': self.bar_unfilled_colour,
+                      'normal_border': self.border_colour,
+                      'border_width': self.border_width,
+                      'shadow_width': self.shadow_width,
+                      'shape_corner_radius': self.shape_corner_radius,
+                      'filled_bar': self.bar_filled_colour,
+                      'filled_bar_width_percentage': self.percent_full}
+
+        # This allows subclasses to overwrite my values.
+        parameters.update(theming_parameters)
 
         if self.shape == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+            self.drawable_shape = RectDrawableShape(self.rect, parameters,
                                                     ['normal'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+            self.drawable_shape = RoundedRectangleShape(self.rect, parameters,
                                                         ['normal'], self.ui_manager)
 
         self.set_image(self.drawable_shape.get_fresh_surface())
 
-    def rebuild_from_changed_theme_data(self):
+    def rebuild_from_changed_theme_data(self, has_any_changed=False):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
+
+        :param has_any_changed: allows subclasses to do their own theme check and pass this along.
         """
         super().rebuild_from_changed_theme_data()
-
-        has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='shape',
                                                default_value='rectangle',
