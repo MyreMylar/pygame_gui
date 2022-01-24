@@ -86,6 +86,7 @@ class UIStatusBar(UIElement):
 
     @property
     def percent_full(self):
+        """ Use this property to directly change the status bar. """
         return self._percent_full
 
     @percent_full.setter
@@ -99,7 +100,7 @@ class UIStatusBar(UIElement):
 
     def rebuild(self):
         """
-        Rebuild the health bar entirely because the theming data has changed.
+        Rebuild the status bar entirely because the theming data has changed.
 
         """
 
@@ -127,7 +128,7 @@ class UIStatusBar(UIElement):
 
     def update(self, time_delta: float):
         """
-        Updates the health bar sprite's image and rectangle with the latest health and position
+        Updates the status bar sprite's image and rectangle with the latest status and position
         data from the sprite we are monitoring
 
         :param time_delta: time passed in seconds between one call to this method and the next.
@@ -157,7 +158,7 @@ class UIStatusBar(UIElement):
 
     def redraw(self, theming_parameters=None):
         """
-        Redraw the health bar when something, other than it's position has changed.
+        Redraw the status bar when something, other than it's position has changed.
 
         :param theming_parameters: allows subclasses to fill in their own theming parameters and pass this along.
         """
