@@ -66,7 +66,7 @@ class UIWorldSpaceHealthBar(UIStatusBar):
 
         super().__init__(relative_rect=relative_rect,
                          manager=manager,
-                         display_sprite=sprite_to_monitor,
+                         sprite=sprite_to_monitor,
                          percent_method=self.health_percent,
                          container=container,
                          parent_element=parent_element,

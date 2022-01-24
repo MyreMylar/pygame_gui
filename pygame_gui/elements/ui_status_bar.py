@@ -19,8 +19,13 @@ class UIStatusBar(UIElement):
     You can use the percent_full attribute to manually set the status, or you can provide a pointer to a method
     that will provide the percentage information.
 
+    This is a kitchen sink class with several ways to use it; you may want to look at the subclasses built on top
+    of it that are designed to be simpler to use, such as UIProgressBar, UIWorldSpaceHealthBar, and
+    UIScreenSpaceHealthBar.
+
     :param relative_rect: The rectangle that defines the size of the health bar.
-    :param display_sprite: Optional sprite to attach the bar to.
+    :param sprite: Optional sprite to monitor for status info, and for drawing the bar with the sprite.
+    :param follow_sprite: If there's a sprite, this indicates whether the bar should be drawn at the sprite's location.
     :param percent_method: Optional method signature to call to get the percent complete. (To provide a method signature,
                            simply reference the method without parenthesis, such as self.health_percent.)
     :param manager: The UIManager that manages this element.
@@ -38,7 +43,8 @@ class UIStatusBar(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
-                 display_sprite: Union[pygame.sprite.Sprite, None] = None,
+                 sprite: Union[pygame.sprite.Sprite, None] = None,
+                 follow_sprite: bool = True,
                  percent_method: Union[Callable[[], float], None] = None,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
@@ -52,23 +58,14 @@ class UIStatusBar(UIElement):
                          anchors=anchors,
                          visible=visible)
 
-        # Subclasses may have already set these values.
-        # Doing this check allows for more flexibility in subclassing (see UIScreenSpaceHealthBar).
-        try:
-            self.display_sprite
-        except AttributeError:
-            self.display_sprite = display_sprite
-
-        try:
-            self.percent_method
-        except AttributeError:
-            self.percent_method = percent_method
-
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
                                object_id=object_id,
                                element_id=self.element_id)
 
+        self.sprite = sprite
+        self.follow_sprite = follow_sprite
+        self.percent_method = percent_method
         self._percent_full = 0
         self.status_changed = False
 
@@ -88,6 +85,16 @@ class UIStatusBar(UIElement):
         self.drawable_shape = None
         self.shape = 'rectangle'
         self.shape_corner_radius = None
+
+        self.font = None
+        self.text_shadow_colour = None
+        self.text_colour = None
+        self.text_horiz_alignment = 'center'
+        self.text_vert_alignment = 'center'
+        self.text_horiz_alignment_padding = 1
+        self.text_vert_alignment_padding = 1
+        self.background_text = None
+        self.foreground_text = None
 
         self.set_image(None)
 
@@ -113,9 +120,9 @@ class UIStatusBar(UIElement):
 
         """
 
-        if self.display_sprite:
-            self.position = [self.display_sprite.rect.x,
-                             self.display_sprite.rect.y - self.hover_height]
+        if self.sprite and self.follow_sprite:
+            self.position = [self.sprite.rect.x,
+                             self.sprite.rect.y - self.hover_height]
         else:
             self.position = [self.relative_rect.x,
                              self.relative_rect.y]
@@ -145,9 +152,9 @@ class UIStatusBar(UIElement):
         """
         super().update(time_delta)
         if self.alive():
-            if self.display_sprite:
-                self.position = [self.display_sprite.rect.x,
-                                 self.display_sprite.rect.y - self.hover_height]
+            if self.sprite and self.follow_sprite:
+                self.position = [self.sprite.rect.x,
+                                 self.sprite.rect.y - self.hover_height]
             else:
                 self.position = [self.relative_rect.x,
                                  self.relative_rect.y]
@@ -165,44 +172,58 @@ class UIStatusBar(UIElement):
                 self.status_changed = False
                 self.redraw()
 
-    def redraw(self, theming_parameters=None):
+    def status_text(self):
+        """ To display text in the bar, subclass UIStatusBar and override this method. """
+        return None
+
+    def redraw(self):
         """
         Redraw the status bar when something, other than it's position has changed.
 
         :param theming_parameters: allows subclasses to fill in their own theming parameters and pass this along.
         """
-        if theming_parameters is None:
-            theming_parameters = {}
+        theming_parameters = {'normal_bg': self.bar_unfilled_colour,
+                              'normal_border': self.border_colour,
+                              'border_width': self.border_width,
+                              'shadow_width': self.shadow_width,
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'filled_bar': self.bar_filled_colour,
+                              'filled_bar_width_percentage': self.percent_full}
 
-        parameters = {'normal_bg': self.bar_unfilled_colour,
-                      'normal_border': self.border_colour,
-                      'border_width': self.border_width,
-                      'shadow_width': self.shadow_width,
-                      'shape_corner_radius': self.shape_corner_radius,
-                      'filled_bar': self.bar_filled_colour,
-                      'filled_bar_width_percentage': self.percent_full}
-
-        # This allows subclasses to overwrite my values.
-        parameters.update(theming_parameters)
+        text = self.status_text()
+        if text:
+            text_parameters = {'font': self.font,
+                               'text': text,
+                               'normal_text': self.text_colour,
+                               'normal_text_shadow': self.text_shadow_colour,
+                               'text_shadow': (1,
+                                               0,
+                                               0,
+                                               self.text_shadow_colour,
+                                               False),
+                               'text_horiz_alignment': self.text_horiz_alignment,
+                               'text_vert_alignment': self.text_vert_alignment,
+                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
+                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
+                              }
+            theming_parameters.update(text_parameters)
 
         if self.shape == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.rect, parameters,
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, parameters,
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
-
         self.set_image(self.drawable_shape.get_fresh_surface())
 
-    def rebuild_from_changed_theme_data(self, has_any_changed=False):
+    def rebuild_from_changed_theme_data(self):
         """
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
 
         :param has_any_changed: allows subclasses to do their own theme check and pass this along.
         """
-        super().rebuild_from_changed_theme_data()
-
+        has_any_changed = False
         if self._check_misc_theme_data_changed(attribute_name='shape',
                                                default_value='rectangle',
                                                casting_func=str,
@@ -237,6 +258,22 @@ class UIStatusBar(UIElement):
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
+
+        if self.status_text:
+            font = self.ui_theme.get_font(self.combined_element_ids)
+            if font != self.font:
+                self.font = font
+                has_any_changed = True
+
+            text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
+            if text_shadow_colour != self.text_shadow_colour:
+                self.text_shadow_colour = text_shadow_colour
+                has_any_changed = True
+
+            text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
+            if text_colour != self.text_colour:
+                self.text_colour = text_colour
+                has_any_changed = True
 
         if has_any_changed:
             self.rebuild()

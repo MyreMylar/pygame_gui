@@ -36,20 +36,8 @@ class UIProgressBar(UIStatusBar):
         self.current_progress = 0.0
         self.maximum_progress = 100.0
 
-        self.font = None
-        self.text_shadow_colour = None
-        self.text_colour = None
-        self.text_horiz_alignment = 'center'
-        self.text_vert_alignment = 'center'
-        self.text_horiz_alignment_padding = 1
-        self.text_vert_alignment_padding = 1
-        self.background_text = None
-        self.foreground_text = None
-
         super().__init__(relative_rect=relative_rect,
                          manager=manager,
-                         display_sprite=None,
-                         percent_method=None,
                          container=container,
                          parent_element=parent_element,
                          object_id=object_id,
@@ -60,39 +48,9 @@ class UIProgressBar(UIStatusBar):
     def progress_percentage(self):
         return self.current_progress / self.maximum_progress
 
-    @property
-    def status_string(self):
-        """ Subclass and override this property to change what text is displayed, or to suppress the text. """
+    def status_text(self):
+        """ Subclass and override this method to change what text is displayed, or to suppress the text. """
         return f"{self.current_progress:0.1f}/{self.maximum_progress:0.1f}"
-
-    def redraw(self, theming_parameters: dict = None):
-        """
-        Redraws the progress bar rectangles and text onto the underlying sprite's image surface.
-        Takes a little while so we only do it when the progress has changed.
-
-        :param theming_parameters: allows subclasses to fill in their own theming parameters and pass this along.
-        """
-        if theming_parameters is None:
-            theming_parameters = {}
-
-        parameters = {'font': self.font,
-                      'text': self.status_string,
-                      'normal_text': self.text_colour,
-                      'normal_text_shadow': self.text_shadow_colour,
-                      'text_shadow': (1,
-                                      0,
-                                      0,
-                                      self.text_shadow_colour,
-                                      False),
-                      'text_horiz_alignment': self.text_horiz_alignment,
-                      'text_vert_alignment': self.text_vert_alignment,
-                      'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
-                      'text_vert_alignment_padding': self.text_vert_alignment_padding,
-                     }
-
-        # If there are duplicate entries, let the subclass's values overwrite mine.
-        parameters.update(theming_parameters)
-        super().redraw(parameters)
 
     def set_current_progress(self, progress: float):
         # Now that we subclass UIStatusBar, set_current_progress() and self.current_progress are mostly here for backward compatibility.
@@ -100,28 +58,3 @@ class UIProgressBar(UIStatusBar):
 
         # Setting this triggers updating if necessary.
         self.percent_full = progress
-
-    def rebuild_from_changed_theme_data(self, has_any_changed=False):
-        """
-        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
-        for this element when the theme data has changed.
-
-        :param has_any_changed: allows subclasses to do their own theme check and pass this along.
-        """
-
-        font = self.ui_theme.get_font(self.combined_element_ids)
-        if font != self.font:
-            self.font = font
-            has_any_changed = True
-
-        text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
-        if text_shadow_colour != self.text_shadow_colour:
-            self.text_shadow_colour = text_shadow_colour
-            has_any_changed = True
-
-        text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
-        if text_colour != self.text_colour:
-            self.text_colour = text_colour
-            has_any_changed = True
-
-        super().rebuild_from_changed_theme_data(has_any_changed)
