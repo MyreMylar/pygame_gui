@@ -61,7 +61,7 @@ class UIProgressBar(UIStatusBar):
         return self.current_progress / self.maximum_progress
 
     @property
-    def progress_string(self):
+    def status_string(self):
         """ Subclass and override this property to change what text is displayed, or to suppress the text. """
         return f"{self.current_progress:0.1f}/{self.maximum_progress:0.1f}"
 
@@ -76,7 +76,7 @@ class UIProgressBar(UIStatusBar):
             theming_parameters = {}
 
         parameters = {'font': self.font,
-                      'text': self.progress_string,
+                      'text': self.status_string,
                       'normal_text': self.text_colour,
                       'normal_text_shadow': self.text_shadow_colour,
                       'text_shadow': (1,
@@ -95,11 +95,6 @@ class UIProgressBar(UIStatusBar):
         super().redraw(parameters)
 
     def set_current_progress(self, progress: float):
-        """
-        Set the current progress of the bar.
-
-        :param progress: The level of progress to set from 0 to 100.0
-        """
         # Now that we subclass UIStatusBar, set_current_progress() and self.current_progress are mostly here for backward compatibility.
         self.current_progress = progress
 

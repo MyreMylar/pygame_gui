@@ -52,8 +52,17 @@ class UIStatusBar(UIElement):
                          anchors=anchors,
                          visible=visible)
 
-        self.display_sprite = display_sprite
-        self.percent_method = percent_method
+        # Subclasses may have already set these values.
+        # Doing this check allows for more flexibility in subclassing (see UIScreenSpaceHealthBar).
+        try:
+            self.display_sprite
+        except AttributeError:
+            self.display_sprite = display_sprite
+
+        try:
+            self.percent_method
+        except AttributeError:
+            self.percent_method = percent_method
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
