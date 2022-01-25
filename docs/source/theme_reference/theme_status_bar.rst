@@ -25,7 +25,7 @@ Misc
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
- - "**hover_height**" - The height in pixels that the health bar will appear over the sprite. Defaults to "10".
+ - "**follow_sprite_offset**" - The x,y offset values for when the bar follows a sprite. Defaults to "0,0".
  - "**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
  - "**shadow_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
 
