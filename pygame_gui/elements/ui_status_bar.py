@@ -1,4 +1,4 @@
-from typing import Union, Dict, Callable, Tuple
+from typing import Union, Dict, Callable
 
 import pygame
 
@@ -206,8 +206,11 @@ class UIStatusBar(UIElement):
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+            try:
+                self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                            ['normal'], self.ui_manager)
+            except:
+                print('hey')
         self.set_image(self.drawable_shape.get_fresh_surface())
 
     def rebuild_from_changed_theme_data(self):

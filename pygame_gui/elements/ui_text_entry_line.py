@@ -1,7 +1,7 @@
 import re
 import warnings
 
-from typing import Union, List, Tuple, Dict, Optional
+from typing import Union, List, Dict, Optional
 
 import pygame
 
