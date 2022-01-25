@@ -49,7 +49,7 @@ Here is an example of a world space health bar block in a JSON theme file using 
             },
             "misc":
             {
-                "hover_height": "5",
+                "follow_sprite_offset": "-5, 32",
                 "border_width": "0"
             }
         }
