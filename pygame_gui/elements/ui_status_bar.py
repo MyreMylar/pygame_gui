@@ -1,4 +1,4 @@
-from typing import Union, Dict, Callable
+from typing import Union, Dict, Callable, Tuple
 
 import pygame
 
@@ -65,6 +65,8 @@ class UIStatusBar(UIElement):
 
         self.sprite = sprite
         self.follow_sprite = follow_sprite
+        self.follow_sprite_offset = (0, 0)
+
         self.percent_method = percent_method
         self._percent_full = 0
         self.status_changed = False
@@ -75,7 +77,6 @@ class UIStatusBar(UIElement):
         self.hover_height = None
         self.border_width = None
         self.shadow_width = None
-        self.position = None
         self.border_rect = None
         self.capacity_width = None
         self.capacity_height = None
@@ -114,21 +115,21 @@ class UIStatusBar(UIElement):
             self._percent_full = value
             self.status_changed = True
 
+    @property
+    def position(self):
+        if self.sprite and self.follow_sprite:
+            offset_x = self.sprite.rect.x + self.follow_sprite_offset[0]
+            offset_y = self.sprite.rect.y + self.follow_sprite_offset[1] - self.hover_height
+            return offset_x, offset_y
+        else:
+            return self.relative_rect.x, self.relative_rect.y
+
     def rebuild(self):
         """
         Rebuild the status bar entirely because the theming data has changed.
 
         """
-
-        if self.sprite and self.follow_sprite:
-            self.position = [self.sprite.rect.x,
-                             self.sprite.rect.y - self.hover_height]
-        else:
-            self.position = [self.relative_rect.x,
-                             self.relative_rect.y]
-
-        self.rect.x = self.position[0]
-        self.rect.y = self.position[1]
+        self.rect.x, self.rect.y = self.position
 
         self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
                                        (self.rect.width - (self.shadow_width * 2),
@@ -152,15 +153,7 @@ class UIStatusBar(UIElement):
         """
         super().update(time_delta)
         if self.alive():
-            if self.sprite and self.follow_sprite:
-                self.position = [self.sprite.rect.x,
-                                 self.sprite.rect.y - self.hover_height]
-            else:
-                self.position = [self.relative_rect.x,
-                                 self.relative_rect.y]
-
-            self.rect.x = self.position[0]
-            self.rect.y = self.position[1]
+            self.rect.x, self.rect.y = self.position
             self.relative_rect.topleft = self.rect.topleft
 
             # If they've provided a method to call, we'll track previous value in percent_full.
@@ -188,7 +181,8 @@ class UIStatusBar(UIElement):
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius,
                               'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width_percentage': self.percent_full}
+                              'filled_bar_width_percentage': self.percent_full,
+                              'follow_sprite_offset': self.follow_sprite_offset}
 
         text = self.status_text()
         if text:
@@ -224,6 +218,16 @@ class UIStatusBar(UIElement):
         :param has_any_changed: allows subclasses to do their own theme check and pass this along.
         """
         has_any_changed = False
+
+        # TODO: tuple_extrct is also defined in UIButton (maybe elsewhere also?), shouldn't be copy/pasted.
+        def tuple_extract(str_data: str) -> Tuple[int, int]:
+            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
+
+        if self._check_misc_theme_data_changed(attribute_name='follow_sprite_offset',
+                                               default_value=(0, 0),
+                                               casting_func=tuple_extract):
+            has_any_changed = True
+
         if self._check_misc_theme_data_changed(attribute_name='shape',
                                                default_value='rectangle',
                                                casting_func=str,
