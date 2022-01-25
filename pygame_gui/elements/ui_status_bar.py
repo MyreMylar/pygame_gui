@@ -219,13 +219,9 @@ class UIStatusBar(UIElement):
         """
         has_any_changed = False
 
-        # TODO: tuple_extrct is also defined in UIButton (maybe elsewhere also?), shouldn't be copy/pasted.
-        def tuple_extract(str_data: str) -> Tuple[int, int]:
-            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
-
         if self._check_misc_theme_data_changed(attribute_name='follow_sprite_offset',
                                                default_value=(0, 0),
-                                               casting_func=tuple_extract):
+                                               casting_func=self.tuple_extract):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='shape',
