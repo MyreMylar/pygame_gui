@@ -331,17 +331,16 @@ class UIHorizontalSlider(UIElement):
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False
         if event.type == UI_BUTTON_PRESSED:
-            if event.ui_element == self.left_button:
-                if self.button_held_repeat_acc < self.button_held_repeat_time:
-                    if self.get_current_value() > self.value_range[0]:
-                        self.set_current_value(self.get_current_value() - self.increment, False)
-                        processed_event = True
+            if (event.ui_element in [self.left_button, self.right_button] and
+                    self.button_held_repeat_acc < self.button_held_repeat_time and
+                    (self.value_range[0] < self.get_current_value() < self.value_range[1])):
+                self.set_current_value(self.get_current_value() - self.increment, False)
+                processed_event = True
+                event_data = {'value': self.current_value,
+                              'ui_element': self,
+                              'ui_object_id': self.most_specific_combined_id}
+                pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
 
-            elif event.ui_element == self.right_button:
-                if self.button_held_repeat_acc < self.button_held_repeat_time:
-                    if self.get_current_value() < self.value_range[1]:
-                        self.set_current_value(self.get_current_value() + self.increment, False)
-                        processed_event = True
         return processed_event
 
     def get_current_value(self) -> Union[float, int]:
