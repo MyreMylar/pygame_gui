@@ -173,7 +173,6 @@ class UIStatusBar(UIElement):
         """
         Redraw the status bar when something, other than it's position has changed.
 
-        :param theming_parameters: allows subclasses to fill in their own theming parameters and pass this along.
         """
         theming_parameters = {'normal_bg': self.bar_unfilled_colour,
                               'normal_border': self.border_colour,
@@ -199,18 +198,16 @@ class UIStatusBar(UIElement):
                                'text_vert_alignment': self.text_vert_alignment,
                                'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
                                'text_vert_alignment_padding': self.text_vert_alignment_padding,
-                              }
+                               }
             theming_parameters.update(text_parameters)
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
-            try:
-                self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                            ['normal'], self.ui_manager)
-            except:
-                print('hey')
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ['normal'], self.ui_manager)
+
         self.set_image(self.drawable_shape.get_fresh_surface())
 
     def rebuild_from_changed_theme_data(self):
@@ -218,7 +215,6 @@ class UIStatusBar(UIElement):
         Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
         for this element when the theme data has changed.
 
-        :param has_any_changed: allows subclasses to do their own theme check and pass this along.
         """
         has_any_changed = False
 

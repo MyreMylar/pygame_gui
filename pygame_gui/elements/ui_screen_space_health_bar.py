@@ -83,5 +83,5 @@ class UIScreenSpaceHealthBar(UIStatusBar):
 
     def status_text(self):
         """ Subclass and override this method to change what text is displayed, or to suppress the text. """
-        return f"{self.current_health:0.1f}/{self.health_capacity:0.1f}"
+        return f"{int(self.current_health)}/{int(self.health_capacity)}"
 
