@@ -587,12 +587,9 @@ class UIButton(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
-        def tuple_extract(str_data: str) -> Tuple[int, int]:
-            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
-
         if self._check_misc_theme_data_changed(attribute_name='text_shadow_offset',
                                                default_value=(0, 0),
-                                               casting_func=tuple_extract):
+                                               casting_func=self.tuple_extract):
             has_any_changed = True
 
         try:

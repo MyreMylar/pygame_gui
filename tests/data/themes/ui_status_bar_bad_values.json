@@ -1,0 +1,19 @@
+{
+    "status_bar":
+    {
+        "colours":
+         {
+             "normal_border": "black",
+             "filled_bar": "#f4251b,#FF0000AA,90",
+             "unfilled_bar": "slipper"
+         },
+         "misc":
+         {
+             "shape": "rounded_wrecktangle",
+             "shape_corner_radius": "6.0",
+             "hover_height": "5.0",
+             "border_width": "flip",
+             "shadow_width": "flop"
+         }
+    }
+}

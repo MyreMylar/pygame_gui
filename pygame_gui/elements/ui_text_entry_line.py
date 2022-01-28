@@ -1,7 +1,7 @@
 import re
 import warnings
 
-from typing import Union, List, Tuple, Dict, Optional
+from typing import Union, List, Dict, Optional
 
 import pygame
 
@@ -861,12 +861,9 @@ class UITextEntryLine(UIElement):
                                                        'shape_corner_radius': 2}):
             has_any_changed = True
 
-        def tuple_extract(str_data: str) -> Tuple[int, int]:
-            return int(str_data.split(',')[0]), int(str_data.split(',')[1])
-
         if self._check_misc_theme_data_changed(attribute_name='padding',
                                                default_value=(2, 2),
-                                               casting_func=tuple_extract):
+                                               casting_func=self.tuple_extract):
             has_any_changed = True
 
         if self._check_theme_colours_changed():

@@ -935,3 +935,9 @@ class UIElement(GUISprite, IUIElementInterface):
             targets.append(self.anchors['bottom_target'])
 
         return targets
+
+    @staticmethod
+    def tuple_extract(str_data: str) -> Tuple[int, int]:
+        # Used for parsing coordinate tuples in themes.
+        x, y = str_data.split(',')
+        return int(x), int(y)

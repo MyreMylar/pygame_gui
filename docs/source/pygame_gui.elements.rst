@@ -52,6 +52,14 @@ pygame\_gui.elements.ui\_panel module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.elements.ui\_progress\_bar module
+---------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_progress_bar
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.elements.ui\_screen\_space\_health\_bar module
 ----------------------------------------------------------
 
@@ -64,6 +72,14 @@ pygame\_gui.elements.ui\_selection\_list module
 -----------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_selection_list
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_status\_bar module
+----------------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_status_bar
    :members:
    :no-undoc-members:
    :show-inheritance:
