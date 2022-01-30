@@ -123,6 +123,10 @@
         {
             "text_shadow_size": "0",
             "text_shadow_offset": "0,0"
+        },
+        "colours":
+        {
+            "dark_bg": "#21282d00"
         }
     },
     "panel":
