@@ -30,6 +30,10 @@ class DrawableShapeState:
         self.should_auto_pregen = self.state_id != 'disabled'
         self.generated = False
 
+        # created if we have text
+        self.text_surface: Optional[pygame.Surface] = None
+        self.pre_text_surface: Optional[pygame.Surface] = None
+
     def get_surface(self) -> pygame.surface.Surface:
         """
         Gets the pygame.surface.Surface of this state. Will be a blend of this state and
@@ -537,13 +541,36 @@ class DrawableShape:
                                              colour to use.
         """
         if self.text_box_layout is not None:
+            # copy the pre-text surface & create a new empty text surface for this state
+            self.states[state_str].pre_text_surface = self.states[state_str].surface.copy()
+            self.states[state_str].text_surface = pygame.surface.Surface(
+                self.states[state_str].surface.get_size(), flags=pygame.SRCALPHA, depth=32)
+            self.states[state_str].text_surface.fill('#00000000')
+
             if only_text_changed:
-                self.text_box_layout.blit_finalised_text_to_surf(self.states[state_str].surface)
+
+                self.text_box_layout.blit_finalised_text_to_surf(
+                    self.states[state_str].text_surface)
+                basic_blit(self.states[state_str].surface, self.states[state_str].text_surface,
+                           (0, 0))
             else:
                 self.text_box_layout.set_default_text_colour(self.theming[text_colour_state_str])
                 self.text_box_layout.set_default_text_shadow_colour(
                     self.theming[text_shadow_colour_state_str])
-                self.text_box_layout.finalise_to_surf(self.states[state_str].surface)
+                self.text_box_layout.finalise_to_surf(self.states[state_str].text_surface)
+                basic_blit(self.states[state_str].surface, self.states[state_str].text_surface,
+                           (0, 0))
+
+    def apply_active_text_changes(self):
+        """
+        Updates the shape surface with any changes to the text surface. Useful when we've made
+        small edits to the text surface
+        """
+        if self.text_box_layout is not None:
+            for state_id, state in self.states.items():
+                if state.pre_text_surface is not None and state.text_surface is not None:
+                    state.surface = state.pre_text_surface.copy()
+                    basic_blit(state.surface, state.text_surface, (0, 0))
 
     def set_text(self, text: str):
         """
@@ -602,6 +629,7 @@ class DrawableShape:
         """
         if self.text_box_layout is not None:
             self.text_box_layout.toggle_cursor()
+            self.apply_active_text_changes()
             self.active_state.has_fresh_surface = True
 
     def redraw_state(self, state_str: str, add_text: bool = True):

@@ -511,7 +511,10 @@ class SurfaceResource:
         elif self.image_resource.loaded_surface is not None:
             return self.image_resource.loaded_surface
 
-        return pygame.Surface((0, 0))  # Return an empty surface here, error elsewhere
+        # Return an empty surface here, error elsewhere
+        return pygame.surface.Surface((0, 0),
+                                      depth=32,
+                                      flags=pygame.SRCALPHA)
 
     @surface.setter
     def surface(self, surface: pygame.surface.Surface):
