@@ -7,6 +7,35 @@ A record of changes between versions of Pygame GUI.
 
 --------
 
+**Version 0.6.2**
+-----------------------------------------------------------------
+
+Another smallish release, with some bug fixes and a new type of element - the UIStatusBar by @ConquerProgramming1.
+There should be a new example in the examples project demonstrating the new status bar
+
+
+Bug Fixes & Other Changes
+.........................................................
+
+ - **Fix bug with UITextLine background** - Should now remain the background colour when clicked on.
+ - **Fix bug with UISlider changed event** - They weren't generating on a single arrow button click.
+ - **Added fallback characters for hidden text int text entry line** - Some fonts don't have the circle character.
+ - **Added support for py.typed** - Thanks to @ChrisChou-freeman for mentioning this (there are still lots of mypy typing errors to fix)
+ - **Made K_KP_ENTER key behave the same as K_RETURN for UITextEntryLine** - Thanks to @Jamieakuma on the discord.
+ - **New theming option for the text cursor in the UITextLine** - No more hardcoded white, now you can match it to your UI theme a lot easier.
+ - **Add a 'pixel_size' option to the html subset font tag** - so you can set the font size directly.
+
+Further thanks & Pull Requests
+..............................
+
+Several people stepped up to help improve the google translate localization efforts since the 0.6.0 release.
+
+ - **New UIStatusBar element** - Thanks to @ConquerProgramming1, see `(pull #246) <https://github.com/MyreMylar/pygame_gui/pull/246>`_
+ - **Fixed typos in Russian localization** - Thanks to @SophieSilver, see `(pull #241) <https://github.com/MyreMylar/pygame_gui/pull/241>`_
+ - **Fixes to UIManager docs** - Thanks again to @ConquerProgramming1, see `(pull #240) <https://github.com/MyreMylar/pygame_gui/pull/240>`_
+ - **Change UIManager process_events() to return True if it uses the event** - Thanks once more to @ConquerProgramming1, see `(pull #239) <https://github.com/MyreMylar/pygame_gui/pull/239>`_
+
+
 **Version 0.6.1**
 -----------------------------------------------------------------
 
