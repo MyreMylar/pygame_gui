@@ -176,9 +176,22 @@ class HTMLParser(html.parser.HTMLParser):
         if 'face' in attributes:
             font_name = attributes['face'] if len(attributes['face']) > 0 else None
             style["font_name"] = font_name
-        if 'size' in attributes:
+        if 'pixel_size' in attributes:
+            if len(attributes['pixel_size']) > 0:
+                font_size = int(attributes['pixel_size'])
+            else:
+                font_size = None
+            style["font_size"] = font_size
+        elif 'size' in attributes:
             if len(attributes['size']) > 0:
-                font_size = self.font_sizes[float(attributes['size'])]
+                if float(attributes['size']) in self.font_sizes:
+                    font_size = self.font_sizes[float(attributes['size'])]
+                else:
+                    warnings.warn('Size of: ' + str(float(attributes['size'])) +
+                                  " - is not a supported html style size."
+                                  " Try .5 increments between 1 & 7 or use 'pixel_size' instead to "
+                                  "set the font size directly")
+                    font_size = self.default_style['font_size']
             else:
                 font_size = None
             style["font_size"] = font_size
