@@ -334,7 +334,10 @@ class UIHorizontalSlider(UIElement):
             if (event.ui_element in [self.left_button, self.right_button] and
                     self.button_held_repeat_acc < self.button_held_repeat_time and
                     (self.value_range[0] < self.get_current_value() < self.value_range[1])):
-                self.set_current_value(self.get_current_value() - self.increment, False)
+                old_value = self.get_current_value()
+                new_value = (old_value - self.increment if event.ui_element == self.left_button
+                             else old_value + self.increment)
+                self.set_current_value(new_value, False)
                 processed_event = True
                 event_data = {'value': self.current_value,
                               'ui_element': self,
