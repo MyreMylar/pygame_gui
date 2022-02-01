@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
       name='pygame_gui',
-      version='0.6.2',
+      version='0.6.3',
       description='A GUI module for pygame 2',
       long_description="Helps create GUIs for games made using pygame 2. "
                        "Features HTML-style text formatting, localization,"
@@ -11,7 +11,7 @@ setup(
                        " multiple windows of GUI stuff.",
       keywords=["pygame", "gui", "ui"],
       url='https://github.com/MyreMylar/pygame_gui',
-      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_062.tar.gz',
+      download_url='https://github.com/MyreMylar/pygame_gui/archive/v_063.tar.gz',
       author='Dan Lawrence',
       author_email='danintheshed@gmail.com',
       license='MIT',
