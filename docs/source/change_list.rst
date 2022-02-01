@@ -7,6 +7,12 @@ A record of changes between versions of Pygame GUI.
 
 --------
 
+**Version 0.6.3**
+-----------------------------------------------------------------
+
+Quick release to fix the slider I broke in a new way in 0.6.2.
+
+
 **Version 0.6.2**
 -----------------------------------------------------------------
 
