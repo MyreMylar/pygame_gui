@@ -34,9 +34,9 @@ copyright = '2019, Dan Lawrence'
 author = 'Dan Lawrence'
 
 # The short X.Y version
-version = '0.6.4'
+version = '0.6.5'
 # The full version, including alpha/beta/rc tags
-release = '0.6.4'
+release = '0.6.5'
 
 
 # -- General configuration ---------------------------------------------------
