@@ -254,3 +254,13 @@ class IUIManagerInterface(metaclass=ABCMeta):
 
         :return: A two letter ISO 639-1 code for the current locale.
         """
+
+    @abstractmethod
+    def set_text_input_hovered(self, hovering_text_input: bool):
+        """
+        Set to true when hovering an area text can be input into.
+
+        Currently switches the cursor to the I-Beam cursor.
+
+        :param hovering_text_input: set to True to toggle the I-Beam cursor
+        """

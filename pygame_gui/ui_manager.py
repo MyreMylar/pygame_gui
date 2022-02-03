@@ -95,6 +95,7 @@ class UIManager(IUIManagerInterface):
         self._load_default_cursors()
         self.active_user_cursor = pygame.SYSTEM_CURSOR_ARROW
         self._active_cursor = self.active_user_cursor
+        self.text_input_hovered = False
 
         if auto_load:
             self.resource_loader.start()
@@ -268,6 +269,15 @@ class UIManager(IUIManagerInterface):
         self.ui_group.update(time_delta)
 
         # handle mouse cursors
+        if self.text_input_hovered:
+            new_cursor = pygame.SYSTEM_CURSOR_IBEAM
+            if new_cursor != self._active_cursor:
+                self._active_cursor = new_cursor
+                try:
+                    pygame.mouse.set_cursor(self._active_cursor)
+                except pygame.error:
+                    pass
+
         any_window_edge_hovered = False
         for window in self.ui_window_stack.stack:
             if window.should_use_window_edge_resize_cursor():
@@ -281,7 +291,8 @@ class UIManager(IUIManagerInterface):
                     except pygame.error:
                         pass
 
-        if not any_window_edge_hovered and self._active_cursor != self.active_user_cursor:
+        if (not any_window_edge_hovered and not self.text_input_hovered and
+                self._active_cursor != self.active_user_cursor):
             self._active_cursor = self.active_user_cursor
             try:
                 pygame.mouse.set_cursor(self._active_cursor)
@@ -555,3 +566,6 @@ class UIManager(IUIManagerInterface):
 
     def get_locale(self):
         return self._locale
+
+    def set_text_input_hovered(self, hovering_text_input: bool):
+        self.text_input_hovered = hovering_text_input

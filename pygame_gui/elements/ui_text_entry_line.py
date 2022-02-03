@@ -292,6 +292,11 @@ class UITextEntryLine(UIElement):
 
         if not self.alive():
             return
+        scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(pygame.mouse.get_pos())
+        if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+            self.ui_manager.set_text_input_hovered(True)
+        else:
+            self.ui_manager.set_text_input_hovered(False)
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
         if self.selection_in_progress:
