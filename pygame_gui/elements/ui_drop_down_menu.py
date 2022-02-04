@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple, Dict, Callable
 
 import pygame
 
@@ -23,6 +23,7 @@ class UIExpandedDropDownState:
 
     :param drop_down_menu_ui: The UIDropDownElement this state belongs to.
     :param options_list: The list of options in this drop down.
+    :param options_dict: Optional dictionary of methods to call when an option is chosen.
     :param selected_option: The currently selected option.
     :param base_position_rect: Position and dimensions rectangle.
     :param close_button_width: Width of close button.
@@ -36,6 +37,7 @@ class UIExpandedDropDownState:
     def __init__(self,
                  drop_down_menu_ui: 'UIDropDownMenu',
                  options_list: List[str],
+                 options_dict: Union[Dict[str, Callable[..., None]], None],
                  selected_option: str,
                  base_position_rect: Union[pygame.Rect, None],
                  close_button_width: int,
@@ -47,6 +49,7 @@ class UIExpandedDropDownState:
 
         self.drop_down_menu_ui = drop_down_menu_ui
         self.options_list = options_list
+        self.options_dict = options_dict
         self.selected_option = selected_option
         self.base_position_rect = base_position_rect
 
@@ -257,15 +260,21 @@ class UIExpandedDropDownState:
             self.drop_down_menu_ui.selected_option = selection
             self.should_transition = True
 
+            # If they provided a dictionary with a callable, use that.
+            selected_text = self.drop_down_menu_ui.selected_option
+            if selected_text and self.options_dict and self.options_dict[selected_text]:
+                self.options_dict[selected_text]()
+                return True     # In this case, consume the event.
+
             # old event - to be removed in 0.8.0
             event_data = {'user_type': OldType(UI_DROP_DOWN_MENU_CHANGED),
-                          'text': self.drop_down_menu_ui.selected_option,
+                          'text': selected_text,
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
             # new event
-            event_data = {'text': self.drop_down_menu_ui.selected_option,
+            event_data = {'text': selected_text,
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_DROP_DOWN_MENU_CHANGED, event_data))
@@ -627,7 +636,16 @@ class UIDropDownMenu(UIContainer):
     The drop down is implemented through two states, one representing the 'closed' menu state
     and one for when it has been 'expanded'.
 
-    :param options_list: The list of of options to choose from. They must be strings.
+    :param options_list: The list of options to choose from. They must be strings.
+
+                         Alternatively, you can provide a dictionary with the strings as keys and
+                         method pointers (callables) as the values; if you provide a dictionary and
+                         a method pointer is specified for an option, that method will be called
+                         directly instead of an event being sent. To specify a method pointer, just
+                         refer to the method without parenthesis::
+
+                            options_list = {'flour': self.flour_option_chosen}
+
     :param starting_option: The starting option, selected when the menu is first created.
     :param relative_rect: The size and position of the element when not expanded.
     :param manager: The UIManager that manages this element.
@@ -643,7 +661,7 @@ class UIDropDownMenu(UIContainer):
     """
 
     def __init__(self,
-                 options_list: List[str],
+                 options_list: Union[List[str], Dict[str, Callable[..., None]]],
                  starting_option: str,
                  relative_rect: pygame.Rect,
                  manager: IUIManagerInterface,
@@ -665,7 +683,16 @@ class UIDropDownMenu(UIContainer):
                                object_id=object_id,
                                element_id='drop_down_menu')
 
-        self.options_list = options_list
+        # options_list may be a list of strings, or a dictionary of strings and callables.
+        self.options_list = None
+        self.options_dict = None
+
+        if isinstance(options_list, dict):
+            self.options_list = list(options_list.keys())
+            self.options_dict = options_list
+        else:
+            self.options_list = options_list
+
         self.selected_option = starting_option
         self.open_button_width = 20
 
@@ -700,6 +727,7 @@ class UIDropDownMenu(UIContainer):
                                                             self.visible),
                             'expanded': UIExpandedDropDownState(self,
                                                                 self.options_list,
+                                                                self.options_dict,
                                                                 self.selected_option,
                                                                 self.background_rect,
                                                                 self.open_button_width,

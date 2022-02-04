@@ -372,6 +372,48 @@ class TestUIDropDownMenu:
 
         assert menu.selected_option == 'flour'
 
+    def test_options_dictionary(self, _init_pygame, default_ui_manager,
+                                _display_surface_return_none):
+        # Inline function can modify a mutable type in the enclosure, such as a list.
+        menu_items_called = []
+
+        def flour_menu_item():
+            menu_items_called.append('flour')
+
+        test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
+                                     manager=default_ui_manager)
+
+        menu = UIDropDownMenu(options_list={'eggs': None, 'flour': flour_menu_item},
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager,
+                              container=test_container)
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
+            {'ui_element': menu.menu_states['expanded'].options_selection_list}))
+
+        flour_button = menu.current_state.options_selection_list.item_list_container.elements[1]
+
+        flour_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                      {'button': pygame.BUTTON_LEFT,
+                                                       'pos': flour_button.rect.center}))
+
+        flour_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                      {'button': pygame.BUTTON_LEFT,
+                                                       'pos': flour_button.rect.center}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert menu_items_called[0] == 'flour'
+
     def test_disable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
                                      manager=default_ui_manager)
