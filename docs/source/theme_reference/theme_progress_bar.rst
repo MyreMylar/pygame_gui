@@ -1,4 +1,4 @@
-.. _screen-space-health-bar:
+.. _progress-bar:
 
 UIProgressBar Theming Parameters
 =========================================
