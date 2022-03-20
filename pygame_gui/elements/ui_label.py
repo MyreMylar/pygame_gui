@@ -41,7 +41,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, str] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 **text_kwargs: str):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
@@ -59,6 +60,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.dynamic_dimensions_orig_top_left = relative_rect.topleft
 
         self.text = text
+        self.text_kwargs = text_kwargs
 
         # initialise theme params
         self.font = None
@@ -80,19 +82,24 @@ class UILabel(UIElement, IUITextOwnerInterface):
 
         self.rebuild_from_changed_theme_data()
 
-    def set_text(self, text: str):
+    def set_text(self, text: str, **text_kwargs: str):
         """
         Changes the string displayed by the label element. Labels do not support HTML styling.
 
         :param text: the text to set the label to.
 
         """
+        any_changed = False
         if text != self.text:
             self.text = text
+        if text_kwargs != self.text_kwargs:
+            self.text_kwargs = text_kwargs
+
+        if any_changed:
             if self.dynamic_width:
                 self.rebuild()
             else:
-                self.drawable_shape.set_text(translate(self.text))
+                self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def rebuild(self):
         """
@@ -106,13 +113,13 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.rect.height = -1 if self.dynamic_height else self.rect.height
         self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
 
-        text_size = self.font.get_rect(translate(self.text)).size
+        text_size = self.font.get_rect(translate(self.text, **self.text_kwargs)).size
         if ((self.rect.height != -1 and text_size[1] > self.relative_rect.height) or
                 (self.rect.width != -1 and text_size[0] > self.relative_rect.width)):
             width_overlap = self.relative_rect.width - text_size[0]
             height_overlap = self.relative_rect.height - text_size[1]
             warn_text = ('Label Rect is too small for text: '
-                         '' + translate(self.text) + ' - size diff: ' + str((width_overlap,
+                         '' + translate(self.text, **self.text_kwargs) + ' - size diff: ' + str((width_overlap,
                                                                              height_overlap)))
             warnings.warn(warn_text, UserWarning)
 
@@ -127,7 +134,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
                               'border_width': 0,
                               'shadow_width': 0,
                               'font': self.font,
-                              'text': translate(self.text),
+                              'text': translate(self.text, **self.text_kwargs),
                               'text_shadow': (self.text_shadow_size,
                                               self.text_shadow_offset[0],
                                               self.text_shadow_offset[1],
@@ -270,7 +277,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             if self.dynamic_width:
                 self.rebuild()
             else:
-                self.drawable_shape.set_text(translate(self.text))
+                self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def update(self, time_delta: float):
         """
