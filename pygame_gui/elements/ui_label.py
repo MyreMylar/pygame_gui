@@ -92,8 +92,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
         any_changed = False
         if text != self.text:
             self.text = text
+            any_changed = True
         if text_kwargs != self.text_kwargs:
             self.text_kwargs = text_kwargs
+            any_changed = True
 
         if any_changed:
             if self.dynamic_width:
