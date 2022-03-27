@@ -291,8 +291,8 @@ files with different stuff defined in each one into a single UI Manger:
    :linenos:
 
     manager = pygame_gui.UIManager((800, 600), 'base_theme.json')
-    manager.load_theme('menu_theme.json')
-    manager.load_theme('hud_theme.json')
+    manager.get_theme().load_theme('menu_theme.json')
+    manager.get_theme().load_theme('hud_theme.json')
 
 As long as you keep your IDs distinct you can divide your theming up into lots
 of different files.
