@@ -129,7 +129,9 @@ class UIStatusBar(UIElement):
         Rebuild the status bar entirely because the theming data has changed.
 
         """
-        self.rect.x, self.rect.y = self.position
+        if self.percent_method:
+            # This triggers status_changed if necessary.
+            self.percent_full = self.percent_method()
 
         self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
                                        (self.rect.width - (self.shadow_width * 2),
@@ -153,8 +155,8 @@ class UIStatusBar(UIElement):
         """
         super().update(time_delta)
         if self.alive():
-            self.rect.x, self.rect.y = self.position
-            self.relative_rect.topleft = self.rect.topleft
+            if self.sprite is not None and self.follow_sprite:
+                self.set_relative_position(self.position)
 
             # If they've provided a method to call, we'll track previous value in percent_full.
             if self.percent_method:
