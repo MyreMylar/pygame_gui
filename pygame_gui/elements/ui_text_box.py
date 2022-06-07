@@ -1041,5 +1041,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def set_text(self, html_text: str):
         self.html_text = html_text
+        self.appended_text = ""  # clear appended text as it feels odd to set the text and still have appended text
         self._reparse_and_rebuild()
 

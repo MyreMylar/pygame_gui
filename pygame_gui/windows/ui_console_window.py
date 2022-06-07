@@ -195,3 +195,13 @@ class UIConsoleWindow(UIWindow):
         self.current_logged_command = None
         while len(self.logged_commands_below) > 0:
             self.logged_commands_above.append(self.logged_commands_below.pop())
+
+    def clear_log(self):
+        """
+        Clear the console log, re-starting  with a fresh, empty console with no old commands.
+        """
+        self.logged_commands_above = []
+        self.current_logged_command = None
+        self.logged_commands_below = []
+
+        self.log.set_text("")
