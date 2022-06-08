@@ -764,6 +764,22 @@ class TestUITextEntryLine:
 
         text_entry.update(0.01)
 
+    def test_update_newline_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes",
+                                                     "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                     manager=manager)
+
+        text_entry.set_text('Wow testing is great so amazing\n\n')
+        text_entry.focus()
+
+        text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
+                                                                             'pos': (30, 15)}))
+        default_ui_manager.mouse_position = (70, 15)
+
+        text_entry.update(0.01)
+
     def test_update_after_long_wait(self,  _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
