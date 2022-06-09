@@ -354,13 +354,13 @@ class TextBoxLayoutRow(pygame.Rect):
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric in
                                                   chunk.font.get_metrics(
-                                                      chunk.text[:letter_index])])
+                                                      chunk.text[:letter_index]) if char_metric])
                         letter_acc += letter_index
                         found_chunk = True
                     else:
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric in
-                                                  chunk.font.get_metrics(chunk.text)])
+                                                  chunk.font.get_metrics(chunk.text) if char_metric])
                         letter_acc += chunk.letter_count
         if not found_chunk:
             # not inside chunk so move to start of line
@@ -387,14 +387,14 @@ class TextBoxLayoutRow(pygame.Rect):
                 chunk_letter_pos = cursor_pos - letter_acc
                 cursor_draw_width += sum([char_metric[4]
                                           for char_metric
-                                          in chunk.font.get_metrics(chunk.text[:chunk_letter_pos])])
+                                          in chunk.font.get_metrics(chunk.text[:chunk_letter_pos]) if char_metric])
 
                 break
 
             letter_acc += chunk.letter_count
             cursor_draw_width += sum([char_metric[4]
                                       for char_metric in
-                                      chunk.font.get_metrics(chunk.text)])
+                                      chunk.font.get_metrics(chunk.text) if char_metric])
 
         self.cursor_draw_width = cursor_draw_width
 
