@@ -740,6 +740,7 @@ class TestUITextEntryLine:
         text_entry.redraw()
 
     def test_update(self,  _init_pygame):
+        pygame.display.init()
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -765,6 +766,7 @@ class TestUITextEntryLine:
         text_entry.update(0.01)
 
     def test_update_after_long_wait(self,  _init_pygame):
+        pygame.display.init()
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
