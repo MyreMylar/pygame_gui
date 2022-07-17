@@ -69,7 +69,7 @@ class UIColourChannelEditor(UIElement):
         self.current_value = initial_value
         self.channel_index = channel_index
 
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
 
         self.element_container = UIContainer(relative_rect,
                                              self.ui_manager,
@@ -579,7 +579,7 @@ class UIColourPickerDialog(UIWindow):
         """
         current_colour_surface = pygame.surface.Surface((64, 64), flags=pygame.SRCALPHA, depth=32)
         current_colour_surface.fill(self.current_colour)
-        self.current_colour_image.set_image(current_colour_surface)
+        self.current_colour_image._set_image(current_colour_surface)
 
     def update_saturation_value_square(self):
         """
@@ -601,7 +601,7 @@ class UIColourPickerDialog(UIWindow):
         hue_colour.hsva = (int(self.hue_channel.current_value),
                            100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
-        self.sat_value_square.set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
+        self.sat_value_square._set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
 
     def changed_hsv_update_rgb(self):
         """

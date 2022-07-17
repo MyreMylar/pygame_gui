@@ -534,7 +534,7 @@ class TestUIElement:
 
         coloured_surface = pygame.Surface((50, 50))
         coloured_surface.fill(pygame.Color(200, 80, 80, 255))
-        element.set_image(coloured_surface)
+        element._set_image(coloured_surface)
         assert element.pre_debug_image is None
         element.set_visual_debug_mode(True)
         assert element.pre_debug_image is not None
@@ -550,23 +550,23 @@ class TestUIElement:
 
         coloured_surface = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         coloured_surface.fill(pygame.Color(200, 80, 80, 255))
-        element.set_image(coloured_surface)
+        element._set_image(coloured_surface)
 
         after_clip_in_clip_colour = element.image.get_at((15, 25))
         after_clip_out_clip_colour = element.image.get_at((35, 25))
         assert after_clip_in_clip_colour == pygame.Color(200, 80, 80, 255)
         assert after_clip_out_clip_colour == pygame.Color(200, 80, 80, 255)
-        element.set_image_clip(None)
+        element._set_image_clip(None)
         after_clip_in_clip_colour = element.image.get_at((15, 25))
         after_clip_out_clip_colour = element.image.get_at((35, 25))
         assert after_clip_in_clip_colour == pygame.Color(200, 80, 80, 255)
         assert after_clip_out_clip_colour == pygame.Color(200, 80, 80, 255)
-        element.set_image_clip(pygame.Rect(0, 0, 25, 50))
+        element._set_image_clip(pygame.Rect(0, 0, 25, 50))
         after_clip_in_clip_colour = element.image.get_at((15, 25))
         after_clip_out_clip_colour = element.image.get_at((35, 25))
         assert after_clip_in_clip_colour == pygame.Color(200, 80, 80, 255)
         assert after_clip_out_clip_colour == pygame.Color(0, 0, 0, 0)
-        element.set_image_clip(None)
+        element._set_image_clip(None)
         after_clip_in_clip_colour = element.image.get_at((15, 25))
         after_clip_out_clip_colour = element.image.get_at((35, 25))
         assert after_clip_in_clip_colour == pygame.Color(200, 80, 80, 255)
@@ -581,21 +581,21 @@ class TestUIElement:
 
         coloured_surface_1 = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         coloured_surface_1.fill(pygame.Color(200, 80, 80, 255))
-        element.set_image(coloured_surface_1)
+        element._set_image(coloured_surface_1)
         assert element.image.get_at((10, 10)) == pygame.Color(200, 80, 80, 255)
 
         coloured_surface_2 = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         coloured_surface_2.fill(pygame.Color(200, 150, 180, 255))
-        element.set_image_clip(pygame.Rect(0, 0, 25, 50))
-        element.set_image(coloured_surface_2)
+        element._set_image_clip(pygame.Rect(0, 0, 25, 50))
+        element._set_image(coloured_surface_2)
         assert element.image.get_at((10, 10)) == pygame.Color(200, 150, 180, 255)
 
-        element.set_image_clip(pygame.Rect(0, 0, 0, 0))
-        element.set_image(coloured_surface_1)
+        element._set_image_clip(pygame.Rect(0, 0, 0, 0))
+        element._set_image(coloured_surface_1)
         assert element.image == default_ui_manager.get_universal_empty_surface()
 
-        element.set_image_clip(None)
-        element.set_image(None)
+        element._set_image_clip(None)
+        element._set_image(None)
         assert element.image is None
 
     def test_show(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):

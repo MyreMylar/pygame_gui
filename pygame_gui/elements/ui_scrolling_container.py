@@ -62,7 +62,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self.vert_scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
         self.horiz_scroll_bar = None  # type: Union[UIHorizontalScrollBar, None]
 
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
 
         # this contains the scroll bars and the 'view' container
         self._root_container = UIContainer(relative_rect=relative_rect,

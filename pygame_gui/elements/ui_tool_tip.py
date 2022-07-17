@@ -66,14 +66,14 @@ class UITooltip(UIElement, IUITooltipInterface):
         self.rect_width = self.text_block.rect.size[0]
         super().set_dimensions(self.text_block.rect.size)
 
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
 
     def rebuild(self):
         """
         Rebuild anything that might need rebuilding.
 
         """
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
 
         if self.text_block is not None:
             self.text_block.set_dimensions((self.rect_width, -1))

@@ -297,7 +297,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     self.shadow_width + self.rounded_corner_offset),
                    drawable_area)
 
-        self.set_image(new_image)
+        self._set_image(new_image)
         self.link_hover_chunks = []
         self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
@@ -370,7 +370,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                         self.shadow_width +
                         self.rounded_corner_offset),
                        drawable_area)
-            self.set_image(new_image)
+            self._set_image(new_image)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         should_redraw_from_layout = False
@@ -491,7 +491,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                        depth=32)
                     new_image.fill(pygame.Color('#00000000'))
                     basic_blit(new_image, self.image, (0, 0))
-                    self.set_image(new_image)
+                    self._set_image(new_image)
 
                     if self.scroll_bar is not None:
                         self.scroll_bar.set_dimensions((self.scroll_bar.relative_rect.width,
@@ -565,7 +565,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     self.padding[1] + self.border_width +
                     self.shadow_width + self.rounded_corner_offset),
                    drawable_area)
-        self.set_image(new_image)
+        self._set_image(new_image)
 
     def redraw_from_chunks(self):
         """

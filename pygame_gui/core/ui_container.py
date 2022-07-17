@@ -57,7 +57,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                                element_id='container')
 
         self.sprite_group = self.ui_manager.get_sprite_group()
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
 
         self.max_element_top_layer = 0  # default to top layer 0
         self.layer_thickness = 0  # default to 0 thickness for an empty container

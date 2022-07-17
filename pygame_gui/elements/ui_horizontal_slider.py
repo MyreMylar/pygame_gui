@@ -158,7 +158,7 @@ class UIHorizontalSlider(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'disabled'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_fresh_surface())
+        self._set_image(self.drawable_shape.get_fresh_surface())
 
         if self.button_container is None:
             self.button_container = UIContainer(self.background_rect,
