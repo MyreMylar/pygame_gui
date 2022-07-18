@@ -165,7 +165,11 @@ class TestDrawableShape:
         after_application_colour = test_surface.get_at((0, 0))
 
         # multiply blend always appears to be 1 pixel down in every channel
-        assert after_application_colour == pygame.Color(50-1, 100-1, 50-1, 255-1)
+        # this is now fixed in the next version of pygame (2.1.3)
+        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+            assert after_application_colour == pygame.Color(50, 100, 50, 255)
+        else:
+            assert after_application_colour == pygame.Color(50-1, 100-1, 50-1, 255-1)
 
         test_surface_2 = pygame.Surface((50, 50), flags=pygame.SRCALPHA, depth=32)
         test_surface_2.fill(pygame.Color(255, 255, 255, 255))
@@ -176,7 +180,11 @@ class TestDrawableShape:
         after_application_colour = test_surface_2.get_at((0, 0))
 
         # multiply blend always appears to be 1 pixel down in every channel
-        assert after_application_colour == pygame.Color(150 - 1, 100 - 1, 150 - 1, 255 - 1)
+        # this is now fixed in the next version of pygame (2.1.3)
+        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+            assert after_application_colour == pygame.Color(150, 100, 150, 255)
+        else:
+            assert after_application_colour == pygame.Color(150 - 1, 100 - 1, 150 - 1, 255 - 1)
 
         after_application_colour = test_surface_2.get_at((30, 0))
         assert after_application_colour == pygame.Color(255, 255, 255, 255)

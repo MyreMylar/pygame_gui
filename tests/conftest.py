@@ -11,8 +11,6 @@ def _init_pygame():
     # os.environ['SDL_VIDEODRIVER'] = 'dummy'
     # os.environ['SDL_AUDIODRIVER'] = 'disk'
     pygame.init()
-    yield
-    pygame.quit()
 
 @pytest.fixture()
 def default_ui_manager() -> IUIManagerInterface:

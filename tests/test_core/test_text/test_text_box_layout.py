@@ -154,7 +154,11 @@ class TestTextBoxLayout:
         assert layout_surface.get_at((4, 4)) != pygame.Color(0, 0, 0, 0)
         layout.set_alpha(128)
         layout_surface = layout.finalised_surface
-        assert layout_surface.get_at((4, 4)).a == 127
+        # this is now properly fixed in the next version of pygame (2.1.3)
+        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+            assert layout_surface.get_at((4, 4)).a == 128
+        else:
+            assert layout_surface.get_at((4, 4)).a == 127
 
     def test_add_chunks_to_hover_group(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([TextLineChunkFTFont(text='hello',
