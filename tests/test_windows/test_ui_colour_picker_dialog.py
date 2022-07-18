@@ -45,7 +45,26 @@ class TestUIColourChannelEditor:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
         assert channel_editor.slider.current_value == 50
+
+        with pytest.warns(UserWarning, match="Tried to set text string with "
+                                             "invalid characters on text entry element"):
+            channel_editor.entry.set_text('dog')
+
+        channel_editor.entry.text = 'dog'
+        channel_editor.entry.is_focused = True
+        channel_editor.entry.text_entered = False
+
+        channel_editor.entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_RETURN}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert channel_editor.slider.current_value == 0
+
 
     def test_slider_moved_finished(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):

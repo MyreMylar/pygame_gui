@@ -153,13 +153,8 @@ class UIColourChannelEditor(UIElement):
                 self._set_value_from_entry(int_value)
 
         if event.type == UI_HORIZONTAL_SLIDER_MOVED and event.ui_element == self.slider:
-            int_value = self.current_value
-            try:
-                int_value = int(self.slider.get_current_value())
-            except ValueError:
-                int_value = 0
-            finally:
-                self._set_value_from_slider(int_value)
+            # slider get current value can only return an int or a float so safe to assume cast works
+            self._set_value_from_slider(int(self.slider.get_current_value()))
 
         return consumed_event
 
