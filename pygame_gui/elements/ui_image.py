@@ -29,6 +29,7 @@ class UIImage(UIElement):
                  relative_rect: pygame.Rect,
                  image_surface: pygame.surface.Surface,
                  manager: IUIManagerInterface,
+                 image_is_alpha_premultiplied: bool = False,
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
@@ -48,15 +49,8 @@ class UIImage(UIElement):
                                element_id='image')
 
         self.original_image = None
-        # GUI images must support an alpha channel & must have their alpha channel pre-multiplied
-        # with their colours.
-        image_surface = premul_alpha_surface(image_surface.convert_alpha())
-        if (image_surface.get_width() != self.rect.width or
-                image_surface.get_height() != self.rect.height):
-            self.original_image = image_surface
-            self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
-        else:
-            self.set_image(image_surface)
+
+        self.set_image(image_surface, image_is_alpha_premultiplied)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -75,4 +69,28 @@ class UIImage(UIElement):
                     self.original_image = self._pre_clipped_image
                 else:
                     self.original_image = self.image
-            self.set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
+            self._set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
+
+    def set_image(self,
+                  new_image: Union[pygame.surface.Surface, None],
+                  image_is_alpha_premultiplied: bool = False) -> None:
+        """
+        Allows users to change the image displayed on a UIImage element during run time, without recreating
+        the element.
+
+        GUI images are converted to the correct format for the GUI if the supplied image is not the dimensions
+        of the UIImage element it will be scaled to fit. In this situation, an original size image is retained
+        as well in case of future resizing events.
+
+        :param new_image: the new image surface to use in the UIIamge element.
+        :param image_is_alpha_premultiplied: set to True if the image is already in alpha multiplied colour format.
+        """
+        image_surface = new_image.convert_alpha()
+        if not image_is_alpha_premultiplied:
+            image_surface = premul_alpha_surface(image_surface)
+        if (image_surface.get_width() != self.rect.width or
+                image_surface.get_height() != self.rect.height):
+            self.original_image = image_surface
+            self._set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
+        else:
+            self._set_image(image_surface)

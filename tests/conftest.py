@@ -5,13 +5,12 @@ from pygame_gui.ui_manager import UIManager
 from pygame_gui.core.interfaces import IUIManagerInterface
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def _init_pygame():
     # Enable these variables to test in same environment as Travis.
     # os.environ['SDL_VIDEODRIVER'] = 'dummy'
     # os.environ['SDL_AUDIODRIVER'] = 'disk'
     pygame.init()
-
 
 @pytest.fixture()
 def default_ui_manager() -> IUIManagerInterface:

@@ -1,4 +1,5 @@
 from sys import version_info
+
 import warnings
 from collections import namedtuple
 from typing import List, Union, Tuple, Dict, Any, Callable, Set
@@ -513,7 +514,7 @@ class UIElement(GUISprite, IUIElementInterface):
             if self.drawable_shape is not None:
                 if self.drawable_shape.set_dimensions(self.relative_rect.size):
                     # needed to stop resizing 'lag'
-                    self.set_image(self.drawable_shape.get_fresh_surface())
+                    self._set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
             self.ui_container.on_anchor_target_changed(self)
@@ -589,7 +590,7 @@ class UIElement(GUISprite, IUIElementInterface):
         Called when our drawable shape has finished rebuilding the active surface. This is needed
         because sometimes we defer rebuilding until a more advantageous (read quieter) moment.
         """
-        self.set_image(self.drawable_shape.get_fresh_surface())
+        self._set_image(self.drawable_shape.get_fresh_surface())
 
     def on_hovered(self):
         """
@@ -682,7 +683,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         """
         if self._visual_debug_mode:
-            self.set_image(self.pre_debug_image)
+            self._set_image(self.pre_debug_image)
             self.pre_debug_image = None
 
     def set_visual_debug_mode(self, activate_mode: bool):
@@ -717,10 +718,10 @@ class UIElement(GUISprite, IUIElementInterface):
                                                          flags=pygame.SRCALPHA,
                                                          depth=32)
                     basic_blit(new_surface, self.image, (0, 0))
-                    self.set_image(new_surface)
+                    self._set_image(new_surface)
                 basic_blit(self.image, layer_text_render, (0, 0))
             else:
-                self.set_image(layer_text_render)
+                self._set_image(layer_text_render)
             self._visual_debug_mode = True
         else:
             self.rebuild()
@@ -733,16 +734,16 @@ class UIElement(GUISprite, IUIElementInterface):
         :param clip_rect: The clipping rectangle.
 
         """
-        self.set_image_clip(clip_rect)
+        self._set_image_clip(clip_rect)
 
     def _restore_container_clipped_images(self):
         """
         Clear the image clip.
 
         """
-        self.set_image_clip(None)
+        self._set_image_clip(None)
 
-    def set_image_clip(self, rect: Union[pygame.Rect, None]):
+    def _set_image_clip(self, rect: Union[pygame.Rect, None]):
         """
         Sets a clipping rectangle on this element's image determining what portion of it will
         actually be displayed when this element is blitted to the screen.
@@ -764,7 +765,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         elif self._image_clip is not None:
             self._image_clip = None
-            self.set_image(self._pre_clipped_image)
+            self._set_image(self._pre_clipped_image)
         else:
             self._image_clip = None
 
@@ -778,6 +779,19 @@ class UIElement(GUISprite, IUIElementInterface):
         return self._image_clip
 
     def set_image(self, new_image: Union[pygame.surface.Surface, None]):
+        """
+        This used to be the way to set the proper way to set the .image property of a UIElement (inherited from
+        pygame.Sprite), but it is intended for internal use in the library - not for adding actual images/pictures
+        on UIElements. As such I've renamed the original function to make it protected and not part of the interface
+        and deprecated this one for most elements.
+
+        :return:
+        """
+        warnings.warn("This method will be removed for "
+                      "most elements from version 0.8.0", DeprecationWarning, stacklevel=2)
+        self._set_image(new_image)
+
+    def _set_image(self, new_image: Union[pygame.surface.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
         clip on the image at the same time.

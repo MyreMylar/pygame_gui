@@ -97,7 +97,7 @@ class UIStatusBar(UIElement):
         self.background_text = None
         self.foreground_text = None
 
-        self.set_image(None)
+        self._set_image(None)
 
         self.rebuild_from_changed_theme_data()
 
@@ -210,7 +210,7 @@ class UIStatusBar(UIElement):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_fresh_surface())
+        self._set_image(self.drawable_shape.get_fresh_surface())
 
     def rebuild_from_changed_theme_data(self):
         """

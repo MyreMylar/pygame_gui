@@ -219,7 +219,7 @@ class UITextEntryLine(UIElement):
                                                         ['normal', 'disabled'], self.ui_manager)
 
         if self.drawable_shape is not None:
-            self.set_image(self.drawable_shape.get_fresh_surface())
+            self._set_image(self.drawable_shape.get_fresh_surface())
             if self.rect.width == -1 or self.rect.height == -1:
                 self.set_dimensions(self.drawable_shape.containing_rect.size)
 

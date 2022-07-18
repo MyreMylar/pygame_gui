@@ -59,7 +59,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                object_id=object_id,
                                element_id=element_id)
 
-        self.set_image(self.ui_manager.get_universal_empty_surface())
+        self._set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True
 
         self.is_blocking = False  # blocks all clicking events from interacting beyond this window
@@ -510,7 +510,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal'], self.ui_manager)
 
-        self.set_image(self.drawable_shape.get_fresh_surface())
+        self._set_image(self.drawable_shape.get_fresh_surface())
 
         self.set_dimensions(self.relative_rect.size)
 

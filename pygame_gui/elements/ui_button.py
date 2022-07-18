@@ -96,7 +96,7 @@ class UIButton(UIElement):
         self.text_surface = None
         self.aligned_text_rect = None
 
-        self.set_image(None)
+        self._set_image(None)
 
         # default range at which we 'let go' of a button
         self.hold_range = (0, 0)

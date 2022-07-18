@@ -96,7 +96,7 @@ class UIExpandedDropDownState:
                                                                           ['normal'],
                                                                           self.ui_manager)
 
-        self.on_fresh_drawable_shape_ready()
+        self.drop_down_menu_ui.on_fresh_drawable_shape_ready()
 
         # extra
         if self.close_button is not None:
@@ -342,15 +342,6 @@ class UIExpandedDropDownState:
                                               self.base_position_rect.height))
             self.close_button.set_relative_position((close_button_x, border_and_shadow))
 
-    def on_fresh_drawable_shape_ready(self):
-        """
-        Called by an element's drawable shape when it has a new image surface ready for use,
-        normally after a rebuilding/redrawing of some kind.
-
-        In this case the result is to set the UI element's image to the new surface.
-        """
-        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
-
     def hide(self):
         """
         Transition from expanded state to closed state.
@@ -450,7 +441,7 @@ class UIClosedDropDownState:
                                                                           ['normal', 'disabled'],
                                                                           self.ui_manager)
 
-        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
+        self.drop_down_menu_ui._set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
         # extra
         if self.open_button is not None:
@@ -584,15 +575,6 @@ class UIClosedDropDownState:
             self.open_button.set_dimensions((self.open_button_width,
                                              self.base_position_rect.height))
             self.open_button.set_relative_position((open_button_x, border_and_shadow))
-
-    def on_fresh_drawable_shape_ready(self):
-        """
-        Called by an element's drawable shape when it has a new image surface ready for use,
-        normally after a rebuilding/redrawing of some kind.
-
-        In this case the result is to set the UI element's image to the new surface.
-        """
-        self.drop_down_menu_ui.set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
 
     def show(self):
         """
@@ -878,7 +860,7 @@ class UIDropDownMenu(UIContainer):
         Called by an element's drawable shape when it has a new image surface ready for use,
         normally after a rebuilding/redrawing of some kind.
         """
-        self.current_state.on_fresh_drawable_shape_ready()
+        self._set_image(self.drawable_shape.get_fresh_surface())
 
     def hover_point(self, hover_x: float, hover_y: float) -> bool:
         """

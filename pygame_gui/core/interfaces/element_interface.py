@@ -220,7 +220,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_image_clip(self, rect: Union[pygame.Rect, None]):
+    def _set_image_clip(self, rect: Union[pygame.Rect, None]):
         """
         Sets a clipping rectangle on this element's image determining what portion of it will
         actually be displayed when this element is blitted to the screen.
@@ -240,6 +240,17 @@ class IUIElementInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def set_image(self, new_image: Union[pygame.surface.Surface, None]):
+        """
+        Deprecated for most elements - to avoid confusion with setting the image for the UIImage element.
+
+        Generally the average user shouldn't be directly setting what this was setting.
+
+        :param new_image: The new image to set.
+
+        """
+
+    @abstractmethod
+    def _set_image(self, new_image: Union[pygame.surface.Surface, None]):
         """
         Wraps setting the image variable of this element so that we also set the current image
         clip on the image at the same time.
