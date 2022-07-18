@@ -12,16 +12,6 @@ from pygame_gui import UIManager
 
 from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    pygame.BUTTON_LEFT
-    pygame.BUTTON_MIDDLE
-    pygame.BUTTON_RIGHT
-except AttributeError:
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
-
 
 class TestUIWindow:
     def test_creation(self, _init_pygame, default_ui_manager,
