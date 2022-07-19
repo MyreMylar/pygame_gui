@@ -32,6 +32,11 @@ class TestUIVerticalScrollBar:
         scroll_bar.rebuild()
         assert scroll_bar.image is not None
 
+        scroll_bar.enable_arrow_buttons = False
+
+        scroll_bar.rebuild()
+        assert scroll_bar.image is not None
+
     def test_check_has_moved_recently(self, _init_pygame, default_ui_manager,
                                       _display_surface_return_none):
         scroll_bar = UIVerticalScrollBar(relative_rect=pygame.Rect(100, 100, 30, 150),

@@ -346,24 +346,8 @@ class UIVerticalScrollBar(UIElement):
         y_pos = (self.scroll_position + self.arrow_button_height)
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
-        if self.sliding_button is None:
-            self.sliding_button = UIButton(pygame.Rect(int(x_pos),
-                                                       int(y_pos),
-                                                       self.background_rect.width,
-                                                       scroll_bar_height),
-                                           '', self.ui_manager,
-                                           container=self.button_container,
-                                           starting_height=1,
-                                           parent_element=self,
-                                           object_id="#sliding_button",
-                                           anchors={'left': 'left',
-                                                    'right': 'right',
-                                                    'top': 'top',
-                                                    'bottom': 'top'})
-            self.join_focus_sets(self.sliding_button)
-        else:
-            self.sliding_button.set_relative_position(self.sliding_rect_position)
-            self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
+        self.sliding_button.set_relative_position(self.sliding_rect_position)
+        self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 
     def set_visible_percentage(self, percentage: float):
