@@ -9,16 +9,6 @@ from pygame_gui.windows import UIColourPickerDialog
 from pygame_gui.windows.ui_colour_picker_dialog import UIColourChannelEditor
 from pygame_gui.core.utility import restore_premul_col
 
-try:
-    # mouse button constants not defined in pygame 1.9.3
-    pygame.BUTTON_LEFT
-    pygame.BUTTON_MIDDLE
-    pygame.BUTTON_RIGHT
-except AttributeError:
-    pygame.BUTTON_LEFT = 1
-    pygame.BUTTON_MIDDLE = 2
-    pygame.BUTTON_RIGHT = 3
-
 
 class TestUIColourChannelEditor:
     def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
@@ -55,7 +45,25 @@ class TestUIColourChannelEditor:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
         assert channel_editor.slider.current_value == 50
+
+        with pytest.warns(UserWarning, match="Tried to set text string with "
+                                             "invalid characters on text entry element"):
+            channel_editor.entry.set_text('dog')
+
+        channel_editor.entry.text = 'dog'
+        channel_editor.entry.is_focused = True
+        channel_editor.entry.text_entered = False
+
+        channel_editor.entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_RETURN}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert channel_editor.slider.current_value == 0
 
     def test_slider_moved_finished(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):

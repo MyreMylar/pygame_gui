@@ -76,6 +76,8 @@ class UIFileDialog(UIWindow):
                 self.current_directory_path = str(pathed_initial_file_path.parent.resolve())
                 self.current_file_path = (Path(initial_file_path).parent.resolve() /
                                           Path(initial_file_path).name)
+            else:
+                self.current_directory_path = str(Path('.').resolve())
         else:
             self.current_directory_path = str(Path('.').resolve())
 
