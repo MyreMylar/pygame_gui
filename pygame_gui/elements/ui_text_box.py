@@ -155,6 +155,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.scroll_bar is not None:
             self.scroll_bar.kill()
+            self.scroll_bar = None
 
         # The text_wrap_area is the part of the text box that we try to keep the text inside
         # of so that none  of it overlaps. Essentially we start with the containing box,
@@ -257,6 +258,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                       visible=self.visible)
                 self.join_focus_sets(self.scroll_bar)
             else:
+                # we don't need a scroll bar, make sure our text box is aligned to the top
                 new_dimensions = (self.rect[2], self.rect[3])
                 self.set_dimensions(new_dimensions)
 
@@ -372,37 +374,37 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                        drawable_area)
             self._set_image(new_image)
 
-        mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-        should_redraw_from_layout = False
+        if len(self.link_hover_chunks) > 0:
+            mouse_x, mouse_y = self.ui_manager.get_mouse_position()
+            should_redraw_from_layout = False
+            if self.scroll_bar is not None:
+                height_adjustment = (self.scroll_bar.start_percentage *
+                                     self.text_box_layout.layout_rect.height)
+            else:
+                height_adjustment = 0
+            base_x = int(self.rect[0] + self.padding[0] + self.border_width +
+                         self.shadow_width + self.rounded_corner_offset)
+            base_y = int(self.rect[1] + self.padding[1] + self.border_width +
+                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
 
-        if self.scroll_bar is not None:
-            height_adjustment = (self.scroll_bar.start_percentage *
-                                 self.text_box_layout.layout_rect.height)
-        else:
-            height_adjustment = 0
-        base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                     self.shadow_width + self.rounded_corner_offset)
-        base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                     self.shadow_width + self.rounded_corner_offset - height_adjustment)
+            for chunk in self.link_hover_chunks:
+                hovered_currently = False
 
-        for chunk in self.link_hover_chunks:
-            hovered_currently = False
+                hover_rect = pygame.Rect((base_x + chunk.x,
+                                          base_y + chunk.y),
+                                         chunk.size)
+                if hover_rect.collidepoint(mouse_x, mouse_y) and self.rect.collidepoint(mouse_x,
+                                                                                        mouse_y):
+                    hovered_currently = True
+                if chunk.is_hovered and not hovered_currently:
+                    chunk.on_unhovered()
+                    should_redraw_from_layout = True
+                elif hovered_currently and not chunk.is_hovered:
+                    chunk.on_hovered()
+                    should_redraw_from_layout = True
 
-            hover_rect = pygame.Rect((base_x + chunk.x,
-                                      base_y + chunk.y),
-                                     chunk.size)
-            if hover_rect.collidepoint(mouse_x, mouse_y) and self.rect.collidepoint(mouse_x,
-                                                                                    mouse_y):
-                hovered_currently = True
-            if chunk.is_hovered and not hovered_currently:
-                chunk.on_unhovered()
-                should_redraw_from_layout = True
-            elif hovered_currently and not chunk.is_hovered:
-                chunk.on_hovered()
-                should_redraw_from_layout = True
-
-        if should_redraw_from_layout:
-            self.redraw_from_text_block()
+            if should_redraw_from_layout:
+                self.redraw_from_text_block()
 
         self.update_text_effect(time_delta)
 
