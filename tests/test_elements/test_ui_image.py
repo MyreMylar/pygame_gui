@@ -6,6 +6,7 @@ from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_image import UIImage
+from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 
 
 class TestUIImage:
@@ -49,6 +50,24 @@ class TestUIImage:
         ui_image.set_dimensions((200, 200))
 
         assert ui_image.image.get_size() == (200, 200) and ui_image.rect.size == (200, 200)
+
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager)
+
+        ui_image = UIImage(relative_rect=pygame.Rect(10, 10, 128, 128),
+                           image_surface=loaded_image,
+                           manager=default_ui_manager,
+                           container=container)
+
+        ui_image.set_dimensions((50, 50))
+        ui_image.set_dimensions((128, 128))
+
+        container.set_dimensions((50, 50))
+        ui_image.set_dimensions((35, 35))
+        container.set_dimensions((300, 300))
+        ui_image.set_dimensions((128, 128))
+
+        assert ui_image.image.get_size() == (128, 128) and ui_image.rect.size == (128, 128)
 
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
