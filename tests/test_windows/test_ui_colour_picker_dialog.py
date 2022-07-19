@@ -65,7 +65,6 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.slider.current_value == 0
 
-
     def test_slider_moved_finished(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),

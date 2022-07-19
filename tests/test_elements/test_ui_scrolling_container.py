@@ -75,6 +75,16 @@ class TestUIScrollingContainer:
 
         assert container.rect.size == (50, 50)
 
+        container.set_scrollable_area_dimensions((500, 600))
+
+        container.set_dimensions((400, 500))
+
+        assert container.rect.size == (400, 500)
+
+        container.set_dimensions((500, 600))
+
+        assert container.rect.size == (500, 600)
+
     def test_kill(self, _init_pygame, default_ui_manager,
                   _display_surface_return_none):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
@@ -118,6 +128,14 @@ class TestUIScrollingContainer:
         container.update(0.02)
 
         assert container.get_container().relative_rect.x == -18
+
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -1.0
+        container.vert_scroll_bar.update(0.02)
+
+        container.update(0.02)
+
+        assert container.get_container().relative_rect.y == -67
 
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
                      _display_surface_return_none: None):
