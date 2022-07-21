@@ -577,12 +577,15 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
+        if (event.key == pygame.K_a and
+                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)):
             self.select_range = [0, len(self.text)]
             self.edit_position = len(self.text)
             self.cursor_has_moved_recently = True
             consumed_event = True
-        elif event.key == pygame.K_x and event.mod & pygame.KMOD_CTRL and not self.is_text_hidden:
+        elif (event.key == pygame.K_x and
+              (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+              not self.is_text_hidden):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -598,7 +601,9 @@ class UITextEntryLine(UIElement):
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
                 consumed_event = True
-        elif event.key == pygame.K_c and event.mod & pygame.KMOD_CTRL and not self.is_text_hidden:
+        elif (event.key == pygame.K_c and
+              (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+              not self.is_text_hidden):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -618,7 +623,7 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
+        if event.key == pygame.K_v and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META):
             new_text = clipboard_paste()
             if self.validate_text_string(new_text):
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
