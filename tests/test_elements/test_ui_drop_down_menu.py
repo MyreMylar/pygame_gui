@@ -20,6 +20,27 @@ class TestUIDropDownMenu:
                               manager=default_ui_manager)
         assert menu.image is not None
 
+    def test_addition(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager)
+
+        menu.add_options(['spam', 'bad spam'])
+
+        assert menu.options_list[-1] == 'bad spam'
+
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        assert menu.current_state == menu.menu_states['expanded']
+
+        menu.add_options(['steak'])
+
+        assert menu.options_list[-1] == 'steak'
+        assert menu.current_state == menu.menu_states['closed']
+
     def test_kill(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',

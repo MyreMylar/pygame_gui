@@ -19,6 +19,16 @@ class TestUISelectionList:
                         item_list=['green', 'eggs', 'and', 'ham'],
                         manager=default_ui_manager)
 
+    def test_addition(self, _init_pygame, default_ui_manager,
+                      _display_surface_return_none):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager)
+
+        selection_list.add_items(['spam', ('bad spam', 'bad_spam')])
+
+        assert selection_list.item_list[-1]['text'] == 'bad spam'
+
     def test_get_single_selection(self, _init_pygame, default_ui_manager,
                                   _display_surface_return_none):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
