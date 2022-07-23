@@ -118,6 +118,16 @@ class UISelectionList(UIElement):
         self._raw_item_list.extend(new_items)
         self.set_item_list(self._raw_item_list)
 
+    def remove_items(self, items_to_remove: Union[List[str], List[Tuple[str, str]]]) -> None:
+        """
+        Will remove all instances of the items provided. The full tuple is required for items with a
+        display name and an object ID.
+
+        :param items_to_remove: The list of new options to remove.
+        """
+        self._raw_item_list = [item for item in self._raw_item_list if item not in items_to_remove]
+        self.set_item_list(self._raw_item_list)
+
     def get_single_selection(self) -> Union[str, None]:
         """
         Get the selected item in a list, if any. Only works if this is a single-selection list.

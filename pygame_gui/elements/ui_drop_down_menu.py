@@ -703,9 +703,24 @@ class UIDropDownMenu(UIContainer):
         :param new_options: The list of new options to add.
         """
         self.options_list.extend(new_options)
-        self.menu_states['expanded'].options_list.extend(new_options)
+        self.menu_states['expanded'].options_list = self.options_list
 
         # if we have the dropdown open, close it so it can be reopened with the new options in place
+        self._close_dropdown_if_open()
+
+    def remove_options(self, options_to_remove: List[str]) -> None:
+        """
+        Will remove all instances of the options provided.
+
+        :param options_to_remove: The list of new options to remove.
+        """
+        self.options_list = [option for option in self.options_list if option not in options_to_remove]
+        self.menu_states['expanded'].options_list = self.options_list
+
+        # if we have the dropdown open, close it so it can be reopened with the new options in place
+        self._close_dropdown_if_open()
+
+    def _close_dropdown_if_open(self):
         if self.current_state == self.menu_states['expanded']:
             self.current_state.finish()
             self.current_state = self.menu_states['closed']

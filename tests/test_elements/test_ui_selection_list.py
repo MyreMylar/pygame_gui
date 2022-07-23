@@ -29,6 +29,16 @@ class TestUISelectionList:
 
         assert selection_list.item_list[-1]['text'] == 'bad spam'
 
+    def test_removal(self, _init_pygame, default_ui_manager,
+                     _display_surface_return_none):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham', ('bad spam', 'bad_spam')],
+                                         manager=default_ui_manager)
+
+        selection_list.remove_items(['ham', ('bad spam', 'bad_spam')])
+
+        assert selection_list.item_list[-1]['text'] == 'and'
+
     def test_get_single_selection(self, _init_pygame, default_ui_manager,
                                   _display_surface_return_none):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
