@@ -470,6 +470,38 @@ class UISelectionList(UIElement):
         container_width = self.relative_rect.width - (2 * border_and_shadow)
         container_height = self.relative_rect.height - (2 * border_and_shadow)
         self.list_and_scroll_bar_container.set_dimensions((container_width, container_height))
+        self.lowest_list_pos = (self.total_height_of_list -
+                                self.list_and_scroll_bar_container.relative_rect.height)
+        inner_visible_area_height = self.list_and_scroll_bar_container.relative_rect.height
+        if self.total_height_of_list > inner_visible_area_height:
+            # we need a scroll bar
+            self.current_scroll_bar_width = self.scroll_bar_width
+            percentage_visible = inner_visible_area_height / max(self.total_height_of_list, 1)
+            if self.scroll_bar is not None:
+                self.scroll_bar.set_visible_percentage(percentage_visible)
+            else:
+                self.scroll_bar = UIVerticalScrollBar(pygame.Rect(-self.scroll_bar_width,
+                                                                  0,
+                                                                  self.scroll_bar_width,
+                                                                  inner_visible_area_height),
+                                                      visible_percentage=percentage_visible,
+                                                      manager=self.ui_manager,
+                                                      parent_element=self,
+                                                      container=self.list_and_scroll_bar_container,
+                                                      anchors={'left': 'right',
+                                                               'right': 'right',
+                                                               'top': 'top',
+                                                               'bottom': 'bottom'})
+                self.join_focus_sets(self.scroll_bar)
+        else:
+            if self.scroll_bar is not None:
+                self.scroll_bar.kill()
+                self.scroll_bar = None
+            self.current_scroll_bar_width = 0
+
+        if self.scroll_bar is not None:
+            self.scroll_bar.has_moved_recently = True
+            self.update(0.0)
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
