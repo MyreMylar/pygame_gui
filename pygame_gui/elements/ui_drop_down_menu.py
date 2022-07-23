@@ -694,6 +694,39 @@ class UIDropDownMenu(UIContainer):
         self.current_state = self.menu_states['closed']
         self.current_state.start(should_rebuild=True)
 
+    def add_options(self, new_options: List[str]) -> None:
+        """
+        Add new options to the drop down. Will close the drop down if it is currently open.
+
+        In many cases it may be easier just to recreate the drop down with whatever the new options list is.
+
+        :param new_options: The list of new options to add.
+        """
+        self.options_list.extend(new_options)
+        self.menu_states['expanded'].options_list = self.options_list
+
+        # if we have the dropdown open, close it so it can be reopened with the new options in place
+        self._close_dropdown_if_open()
+
+    def remove_options(self, options_to_remove: List[str]) -> None:
+        """
+        Will remove all instances of the options provided.
+
+        :param options_to_remove: The list of new options to remove.
+        """
+        self.options_list = [option for option in self.options_list if option not in options_to_remove]
+        self.menu_states['expanded'].options_list = self.options_list
+
+        # if we have the dropdown open, close it so it can be reopened with the new options in place
+        self._close_dropdown_if_open()
+
+    def _close_dropdown_if_open(self):
+        if self.current_state == self.menu_states['expanded']:
+            self.current_state.finish()
+            self.current_state = self.menu_states['closed']
+            self.current_state.selected_option = self.selected_option
+            self.current_state.start()
+
     def kill(self):
         """
         Overrides the standard sprite kill to also properly kill/finish the current state of the
