@@ -552,6 +552,30 @@ class TestUISelectionList:
         assert selection_list.relative_right_margin == 200
         assert selection_list.relative_bottom_margin == 200
 
+        selection_list = UISelectionList(relative_rect=pygame.Rect(30, 30, 100, 500),
+                                         item_list=['item 1', 'item 2', 'item 3', 'item 4',
+                                                    'item 5', 'item 6', 'item 7', 'item 8',
+                                                    'item 9', 'item 10', 'item 11', 'item 12',
+                                                    'item 13', 'item 14', 'item 15', 'item 16'],
+                                         manager=default_ui_manager,
+                                         container=test_container,
+                                         allow_multi_select=True,
+                                         anchors={'left': 'left',
+                                                  'right': 'left',
+                                                  'top': 'top',
+                                                  'bottom': 'top'})
+
+        # check creating an destroying scrollbar by resizing
+        assert selection_list.scroll_bar is None
+
+        selection_list.set_dimensions((100, 50))
+
+        assert selection_list.scroll_bar is not None
+
+        selection_list.set_dimensions((100, 500))
+
+        assert selection_list.scroll_bar is None
+
     def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                   _display_surface_return_none):
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
