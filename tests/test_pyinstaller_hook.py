@@ -1,3 +1,4 @@
+import os
 import pytest
 import importlib
 
@@ -11,4 +12,4 @@ class TestPyInstallerHook:
     """
 
     def test_get_hooks_dir(self):
-        assert get_hook_dirs()[0].split("\\")[-1] == "__pyinstaller"
+        assert os.path.basename(os.path.normpath(get_hook_dirs()[0])) == "__pyinstaller"
