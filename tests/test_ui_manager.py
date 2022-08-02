@@ -317,8 +317,11 @@ class TestUIManager:
 
     def test_set_visual_debug(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
-        manager.set_visual_debug_mode(True)
 
+        UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                 text="Test", manager=manager)
+
+        manager.set_visual_debug_mode(True)
         assert manager.visual_debug_active is True
 
         manager.set_visual_debug_mode(False)

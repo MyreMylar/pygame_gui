@@ -59,6 +59,7 @@ class TestUIImage:
                            manager=default_ui_manager,
                            container=container)
 
+        ui_image.set_dimensions((350, 350))
         ui_image.set_dimensions((50, 50))
         ui_image.set_dimensions((128, 128))
 
