@@ -26,11 +26,37 @@ class TestUILabel:
         label.set_text("new text")
         assert label.image is not None
 
+    def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
+                             _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+        label.set_text("Hello %{name}", name="Dan")
+        assert label.image is not None
+
     def test_rebuild(self, _init_pygame, default_ui_manager,
                      _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
+        label.rebuild()
+        assert label.image is not None
+
+    def test_rebuild_anchors(self, _init_pygame, default_ui_manager,
+                             _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, -1, 30),
+                        text="Test Label",
+                        manager=default_ui_manager,
+                        anchors={"right": "right",
+                                 "left": "right"})
+        label.rebuild()
+        assert label.image is not None
+
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, -1),
+                        text="Test Label",
+                        manager=default_ui_manager,
+                        anchors={"top": "bottom",
+                                 "bottom": "bottom"})
         label.rebuild()
         assert label.image is not None
 
@@ -173,6 +199,21 @@ class TestUILabel:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_change_locale(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        label = UILabel(pygame.Rect((10, 100), (150, 30)),
+                        'pygame-gui.English',
+                        default_ui_manager)
+        default_ui_manager.set_locale('fr')
+
+        assert label.drawable_shape.theming['text'] == "Anglaise"
+
+        label = UILabel(pygame.Rect((10, 100), (-1, -1)),
+                        'pygame-gui.English',
+                        default_ui_manager)
+        default_ui_manager.set_locale('ja')
+
+        assert label.drawable_shape.theming['text'] == "英語"
 
 
 if __name__ == '__main__':

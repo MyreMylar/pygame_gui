@@ -131,11 +131,11 @@ class FadeInEffect(TextEffect):
     care of fading up an alpha value over time.
 
     """
-    def __init__(self, text_box: IUITextOwnerInterface,
+    def __init__(self, text_owner: IUITextOwnerInterface,
                  params: Optional[Dict[str, Any]] = None,
                  text_sub_chunk: Optional[TextLineChunkFTFont] = None):
         super().__init__()
-        self.text_owner = text_box
+        self.text_owner = text_owner
         self.text_sub_chunk = text_sub_chunk
         self.alpha_value = 0
         self.time_per_alpha_change = 0.01
