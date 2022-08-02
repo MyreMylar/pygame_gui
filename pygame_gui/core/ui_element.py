@@ -65,12 +65,29 @@ class UIElement(GUISprite, IUIElementInterface):
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
 
-        self.anchors = anchors
-        if self.anchors is None:
-            self.anchors = {'left': 'left',
-                            'top': 'top',
-                            'right': 'left',
-                            'bottom': 'top'}
+        self.anchors = {'left': 'left',
+                        'top': 'top',
+                        'right': 'left',
+                        'bottom': 'top'}
+        if anchors is not None:
+            if 'left' in anchors:
+                self.anchors['left'] = anchors['left']
+            if 'right' in anchors:
+                self.anchors['right'] = anchors['right']
+            if 'top' in anchors:
+                self.anchors['top'] = anchors['top']
+            if 'bottom' in anchors:
+                self.anchors['bottom'] = anchors['bottom']
+
+            if 'left_target' in anchors:
+                self.anchors['left_target'] = anchors['left_target']
+            if 'right_target' in anchors:
+                self.anchors['right_target'] = anchors['right_target']
+            if 'top_target' in anchors:
+                self.anchors['top_target'] = anchors['top_target']
+            if 'bottom_target' in anchors:
+                self.anchors['bottom_target'] = anchors['bottom_target']
+
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
 

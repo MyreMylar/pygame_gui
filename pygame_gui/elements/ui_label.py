@@ -122,7 +122,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             height_overlap = self.relative_rect.height - text_size[1]
             warn_text = ('Label Rect is too small for text: '
                          '' + translate(self.text, **self.text_kwargs) + ' - size diff: ' + str((width_overlap,
-                                                                             height_overlap)))
+                                                                                                 height_overlap)))
             warnings.warn(warn_text, UserWarning)
 
         theming_parameters = {'normal_bg': self.bg_colour,
@@ -327,7 +327,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
                           params: Optional[Dict[str, Any]] = None,
                           effect_tag: Optional[str] = None):
         if effect_tag is not None:
-            warnings.warn('UILabels do not support effect tags')
+            warnings.warn('UILabels do not support effect tags', category=UserWarning)
 
         if self.active_text_effect is not None:
             self.clear_all_active_effects()
@@ -344,9 +344,9 @@ class UILabel(UIElement, IUITextOwnerInterface):
                 effect = FadeOutEffect(self, params)
                 self.active_text_effect = effect
             else:
-                warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label')
+                warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label', category=UserWarning)
         else:
-            warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label')
+            warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label', category=UserWarning)
 
     def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
         self.active_text_effect = None
