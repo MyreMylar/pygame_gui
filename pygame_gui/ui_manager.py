@@ -426,8 +426,7 @@ class UIManager(IUIManagerInterface):
                 if isinstance(focus, set):
                     if item not in focus:
                         item.unfocus()
-                    else:
-                        pass  # do nothing in this case because the item is also in new focus set
+                    # do nothing if the item is also in new focus set
                 else:
                     item.unfocus()
             self.focused_set = None

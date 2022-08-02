@@ -344,6 +344,40 @@ class TestUIWindow:
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
 
+    def test_set_display_title(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                               _display_surface_return_none):
+        window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, element_id='window')
+
+        window.set_display_title("New Title")
+
+        assert window.title_bar.text == "New Title"
+
+    def test_rebuild_options(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                             _display_surface_return_none):
+        window = UIWindow(pygame.Rect(200, 200, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, element_id='window')
+
+        window.enable_close_button = False
+
+        window.rebuild()
+
+        assert window.close_window_button is None
+
+        window.enable_close_button = True
+
+        window.rebuild()
+
+        assert window.close_window_button is not None
+        assert window.title_bar is not None
+
+        window.enable_title_bar = False
+
+        window.rebuild()
+
+        assert window.close_window_button is None
+        assert window.title_bar is None
+
     def test_rebuild_from_changed_theme_data_non_default(self, _init_pygame,
                                                          _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
