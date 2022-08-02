@@ -8,6 +8,12 @@ class TestShadowGenerator:
     def test_creation(self, _init_pygame):
         ShadowGenerator()
 
+    def test_clear_short_term_caches(self, _init_pygame):
+        generator = ShadowGenerator()
+        generator.clear_short_term_caches()
+
+        assert generator.short_term_rect_cache == {}
+
     def test_find_closest_shadow_scale_to_size_invalid(self, _init_pygame):
         generator = ShadowGenerator()
         assert generator.find_closest_shadow_scale_to_size(size=(100, 100), shape='triangle') is None
