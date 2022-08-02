@@ -349,7 +349,6 @@ class TestUIColourPickerDialog:
                     event.ui_element == colour_picker.red_channel):
                 confirm_event_fired = True
 
-        for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
         assert confirm_event_fired
@@ -377,7 +376,6 @@ class TestUIColourPickerDialog:
                     event.ui_element == colour_picker.hue_channel):
                 confirm_event_fired = True
 
-        for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
         assert confirm_event_fired
