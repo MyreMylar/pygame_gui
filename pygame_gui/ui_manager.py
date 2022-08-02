@@ -93,7 +93,7 @@ class UIManager(IUIManagerInterface):
 
         self.resizing_window_cursors = None
         self._load_default_cursors()
-        self.active_user_cursor = pygame.SYSTEM_CURSOR_ARROW
+        self.active_user_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
         self._active_cursor = self.active_user_cursor
         self.text_input_hovered = False
 
@@ -270,7 +270,7 @@ class UIManager(IUIManagerInterface):
 
         # handle mouse cursors
         if self.text_input_hovered:
-            new_cursor = pygame.SYSTEM_CURSOR_IBEAM
+            new_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)
             if new_cursor != self._active_cursor:
                 self._active_cursor = new_cursor
                 try:
@@ -487,17 +487,14 @@ class UIManager(IUIManagerInterface):
                     print(str(element.most_specific_combined_id))
             print(' ')
 
-    def set_active_cursor(self, cursor: Tuple[Tuple[int, int], Tuple[int, int],
-                                              Tuple[int, ...], Tuple[int, ...]]):
+    def set_active_cursor(self, cursor: pygame.cursors.Cursor):
         """
         This is for users of the library to set the currently active cursor, it will be currently
         only be overridden by the resizing cursors.
 
-        The expected input is in the same format as the standard pygame cursor module, except
-        without expanding the initial Tuple. So, to call this function with the default pygame
-        arrow cursor you would do::
+        The expected input is a pygame.cursors.Cursor::
 
-            manager.set_active_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            manager.set_active_cursor(pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW))
 
         """
 
@@ -548,12 +545,12 @@ class UIManager(IUIManagerInterface):
 
         """
         # cursors for resizing windows
-        self.resizing_window_cursors = {'xl': pygame.SYSTEM_CURSOR_SIZEWE,
-                                        'xr': pygame.SYSTEM_CURSOR_SIZEWE,
-                                        'yt': pygame.SYSTEM_CURSOR_SIZENS,
-                                        'yb': pygame.SYSTEM_CURSOR_SIZENS,
-                                        'xy': pygame.SYSTEM_CURSOR_SIZENWSE,
-                                        'yx': pygame.SYSTEM_CURSOR_SIZENESW}
+        self.resizing_window_cursors = {'xl': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEWE),
+                                        'xr': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEWE),
+                                        'yt': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZENS),
+                                        'yb': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZENS),
+                                        'xy': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZENWSE),
+                                        'yx': pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZENESW)}
 
     def set_locale(self, locale: str):
         self._locale = locale

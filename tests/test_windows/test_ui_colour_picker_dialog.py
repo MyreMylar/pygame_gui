@@ -349,6 +349,37 @@ class TestUIColourPickerDialog:
                     event.ui_element == colour_picker.red_channel):
                 confirm_event_fired = True
 
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert confirm_event_fired
+
+        colour_picker.hue_channel.entry.set_text('512')
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': pygame.BUTTON_LEFT,
+                                                              'pos': colour_picker.hue_channel.entry.rect.center}
+                                                             ))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP,
+                                                             {'button': pygame.BUTTON_LEFT,
+                                                              'pos': colour_picker.hue_channel.entry.rect.center}
+                                                             ))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
+                                                             {'key': pygame.K_RETURN}
+                                                             ))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        confirm_event_fired = False
+        for event in pygame.event.get():
+
+            if (event.type == pygame_gui.UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED and
+                    event.ui_element == colour_picker.hue_channel):
+                confirm_event_fired = True
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
         assert confirm_event_fired
 
     def test_update_saturation_value_square(self, _init_pygame, default_ui_manager, _display_surface_return_none):

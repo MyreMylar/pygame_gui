@@ -285,6 +285,21 @@ class TestUIConsoleWindow:
 
         assert console_window.command_entry.get_text() == 'A second command'
 
+    def test_clear_log(self, _init_pygame, default_ui_manager,
+                       _display_surface_return_none):
+        console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
+                                         manager=default_ui_manager)
+
+        console_window.command_entry.set_text('<b>A line of text to log</b>')
+
+        console_window.add_output_line_to_log('line to add')
+
+        console_window.clear_log()
+
+        assert console_window.logged_commands_above == []
+        assert console_window.current_logged_command is None
+        assert console_window.logged_commands_below == []
+
 
 if __name__ == '__main__':
     pytest.console_main()

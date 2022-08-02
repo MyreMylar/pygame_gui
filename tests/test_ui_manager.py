@@ -3,8 +3,6 @@ import platform
 import pygame
 import pytest
 
-from pygame_gui import UI_BUTTON_PRESSED
-from pygame_gui._constants import OldType
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
@@ -326,6 +324,25 @@ class TestUIManager:
         manager.set_visual_debug_mode(False)
 
         assert manager.visual_debug_active is False
+
+    def test_set_active_cursor(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        manager.set_active_cursor(pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_HAND))
+
+        manager.update(0.5)
+
+        assert manager._active_cursor == pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def test_set_hovering_text(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+
+        manager.set_text_input_hovered(True)
+
+        manager.update(0.5)
+        assert manager._active_cursor == pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)
+
+    def test_translation_dir_path(self):
+        manager = UIManager((800, 600), translation_directory_paths=['pygame_gui/data/translations/'])
 
 
 if __name__ == '__main__':
