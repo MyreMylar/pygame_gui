@@ -14,19 +14,43 @@ class MyProperSprite(GUISprite):
         pass
 
 
-class MyDodgySprite1(GUISprite):
+class MyDodgySprite1:
     def __init__(self, *groups):
-        super().__init__(*groups)
         self.blendmode = 0
+
+        self.__g = {}
+        if groups:
+            self.add(*groups)
+
+    def add(self, *groups):
+        has = self.__g.__contains__
+        for group in groups:
+            if hasattr(group, '_spritegroup'):
+                if not has(group):
+                    group.add_internal(self)
+            else:
+                self.add(*group)
 
     def update(self, time_delta: float):
         pass
 
 
-class MyDodgySprite2(GUISprite):
+class MyDodgySprite2:
     def __init__(self, *groups):
-        super().__init__(*groups)
         self.visible = 1
+
+        self.__g = {}
+        if groups:
+            self.add(*groups)
+
+    def add(self, *groups):
+        has = self.__g.__contains__
+        for group in groups:
+            if hasattr(group, '_spritegroup'):
+                if not has(group):
+                    group.add_internal(self)
+            else:
+                self.add(*group)
 
     def update(self, time_delta: float):
         pass
@@ -34,9 +58,9 @@ class MyDodgySprite2(GUISprite):
 
 class MyDodgySprite3(pygame.sprite.Sprite):
     def __init__(self, *groups):
-        super().__init__(*groups)
         self.blendmode = 0
         self.visible = 1
+        super().__init__(*groups)
 
 
 class TestUIElement:
@@ -67,7 +91,7 @@ class TestUIElement:
         with pytest.raises(AttributeError):
             MyDodgySprite2(group)
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(TypeError):
             MyDodgySprite3(group)
 
     def test_sprite_set_layer_before_add(self, _init_pygame, default_ui_manager):
