@@ -1,0 +1,12 @@
+{
+     "button":
+     {
+         "misc":
+         {
+             "state_transitions":
+             {
+                "normal_hovered": "dog"
+             }
+         }
+     }
+ }
