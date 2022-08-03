@@ -47,6 +47,45 @@ class TestUITextEntryLine:
                                 " characters on text entry element"):
             text_entry.set_text("1,2,3,4,5")
 
+    def test_hidden_text(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text_hidden(False)
+        text_entry.set_text("Some basic text")
+        text_entry.set_text_hidden(True)
+        text_entry.set_text("Some other basic text")
+        text_entry.set_text_hidden(False)
+        text_entry.set_text_hidden(True)
+
+        text_entry.focus()
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_d, 'mod': 0,
+                                                                     'unicode': 'd'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_a, 'mod': 0,
+                                                                     'unicode': 'a'}))
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_n, 'mod': 0,
+                                                                     'unicode': 'n'}))
+
+        text_entry.set_text_hidden(False)
+
+        text_entry.set_text('dan')
+        text_entry.focus()
+        text_entry.select_range = [1, 3]
+
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_c,
+                                                                     'mod': pygame.KMOD_CTRL,
+                                                                     'unicode': 'c'}))
+        text_entry.set_text_hidden(True)
+        text_entry.select_range = [0, 0]
+        text_entry.edit_position = 3
+        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                    {'key': pygame.K_v,
+                                                     'mod': pygame.KMOD_CTRL,
+                                                     'unicode': 'v'}))
+
+        assert text_entry.image is not None
+
     def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -138,7 +177,7 @@ class TestUITextEntryLine:
                                      manager=default_ui_manager)
 
         text_entry.focus()
-        # process a mouse button down event
+
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_d,
                                                                            'mod': 0,
@@ -883,6 +922,8 @@ class TestUITextEntryLine:
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
+        text_entry.disable()
+
         text_entry.focus()
         text_entry.enable()
 
@@ -943,6 +984,17 @@ class TestUITextEntryLine:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_change_locale(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+        text_entry.set_text("Some basic text")
+
+        default_ui_manager.set_locale('fr')
+
+        default_ui_manager.set_locale('ja')
+
+        assert text_entry.get_text() == "Some basic text"
 
 
 if __name__ == '__main__':
