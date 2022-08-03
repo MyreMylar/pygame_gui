@@ -259,6 +259,7 @@ class TestUIButton:
         consumed_event_1 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                    {'button': pygame.BUTTON_LEFT,
                                                                     'pos': button.rect.center}))
+        button.update(0.001)
 
         consumed_event_2 = button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                    {'button': pygame.BUTTON_LEFT,
@@ -505,6 +506,14 @@ class TestUIButton:
         assert (empty_queue == 0 and full_queue != 0 and
                 button.drawable_shape.theming['text'] == 'Ipsum' and button.text == 'Ipsum')
 
+        dynamic_width_button = UIButton(relative_rect=pygame.Rect(10, 10, -1, 30),
+                                        text="Test Button",
+                                        tool_tip_text="This is a test of the button's tool tip functionality.",
+                                        manager=default_ui_manager)
+
+        dynamic_width_button.set_text('Ipsum')
+        assert dynamic_width_button.text == "Ipsum"
+
     def test_set_text_same(self, _init_pygame: None, default_ui_manager: UIManager,
                            _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
@@ -606,6 +615,18 @@ class TestUIButton:
 
         assert button.image is not None
 
+    def test_rebuild_from_changed_theme_data_bad_values_2(self, _init_pygame,
+                                                          _display_surface_return_none):
+        manager = UIManager((800, 600),
+                            os.path.join("tests", "data", "themes", "ui_button_bad_values_2.json"))
+
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=manager)
+
+        assert button.state_transitions[("normal", "hovered")] == 0.0
+
     def test_rebuild_shape(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),
                             os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
@@ -624,6 +645,20 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
+        button.rebuild()
+
+        assert button.image is not None
+
+    def test_rebuild_anchors_dynamic_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, -1),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          anchors={'top': 'bottom', 'bottom': 'bottom'})
+
+        assert button.dynamic_height
+
         button.rebuild()
 
         assert button.image is not None
@@ -737,15 +772,19 @@ class TestUIButton:
 
         assert button.text == "Test Button"
 
+        default_ui_manager.set_locale('en')
+
         dynamic_width_button = UIButton(relative_rect=pygame.Rect(100, 100, -1, 30),
                                         text="Test Button",
                                         tool_tip_text="This is a test of the button's tool tip functionality.",
                                         manager=default_ui_manager)
 
+        assert dynamic_width_button.dynamic_width
+
         default_ui_manager.set_locale('fr')
-        default_ui_manager.set_locale('ja')
 
         assert dynamic_width_button.text == "Test Button"
+
 
 if __name__ == '__main__':
     pytest.console_main()
