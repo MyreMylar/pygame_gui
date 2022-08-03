@@ -380,6 +380,24 @@ class TestUIPanel:
                                      'top': 'top',
                                      'bottom': 'bottom'})
 
+        button = UIButton(relative_rect=pygame.Rect(0, 40, 10, 10), text="A",
+                          manager=default_ui_manager,
+                          container=element_5,
+                          anchors={'left': 'left',
+                                   'right': 'left',
+                                   'top': 'bottom',
+                                   'bottom': 'bottom'}
+                          )
+
+        button_2 = UIButton(relative_rect=pygame.Rect(40, 0, 10, 10), text="A",
+                            manager=default_ui_manager,
+                            container=element_5,
+                            anchors={'left': 'right',
+                                     'right': 'right',
+                                     'top': 'top',
+                                     'bottom': 'top'}
+                            )
+
         assert element_5.relative_right_margin == 240
         assert element_5.relative_bottom_margin == 240
 

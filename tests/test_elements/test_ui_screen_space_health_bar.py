@@ -91,6 +91,15 @@ class TestUIScreenSpaceHealthBar:
         health_bar.update(0.01)
         assert health_bar.image is not None
 
+    def test_health_percentage(self, _init_pygame, default_ui_manager):
+        healthy_sprite = HealthySprite()
+        health_bar = UIScreenSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                            sprite_to_monitor=healthy_sprite,
+                                            manager=default_ui_manager)
+        healthy_sprite.current_health = 50
+        health_bar.update(0.01)
+        assert health_bar.health_percentage == 0.5
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_screen_health_bar_non_default.json"))

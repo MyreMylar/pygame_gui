@@ -14,15 +14,16 @@ class MyProperSprite(GUISprite):
         pass
 
 
-class MyDodgySprite1(pygame.sprite.Sprite):
+class MyDodgySprite1(GUISprite):
     def __init__(self, *groups):
         super().__init__(*groups)
+        self.blendmode = 0
 
     def update(self, time_delta: float):
         pass
 
 
-class MyDodgySprite2(pygame.sprite.Sprite):
+class MyDodgySprite2(GUISprite):
     def __init__(self, *groups):
         super().__init__(*groups)
         self.visible = 1
@@ -42,12 +43,20 @@ class TestUIElement:
     def test_remove_sprite_from_group(self, _init_pygame, default_ui_manager):
 
         group = LayeredGUIGroup()
+        group_2 = LayeredGUIGroup()
 
         proper_sprite = MyProperSprite(group)
 
+        proper_sprite_2 = MyProperSprite([group])
+
+        proper_sprite_3 = MyProperSprite([[group], [group_2]])
+
         proper_sprite.remove(group)
+        proper_sprite_2.remove([group])
+        proper_sprite_3.remove([[group], [group_2]])
 
         assert len(group.sprites()) == 0
+        assert len(group_2.sprites()) == 0
 
     def test_add_dodgy_sprites(self, _init_pygame, default_ui_manager):
         group = LayeredGUIGroup()

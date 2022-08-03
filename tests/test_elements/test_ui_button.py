@@ -726,6 +726,26 @@ class TestUIButton:
                                                '@test_class',
                                                'button']
 
+    def test_change_locale(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager)
+
+        default_ui_manager.set_locale('fr')
+        default_ui_manager.set_locale('ja')
+
+        assert button.text == "Test Button"
+
+        dynamic_width_button = UIButton(relative_rect=pygame.Rect(100, 100, -1, 30),
+                                        text="Test Button",
+                                        tool_tip_text="This is a test of the button's tool tip functionality.",
+                                        manager=default_ui_manager)
+
+        default_ui_manager.set_locale('fr')
+        default_ui_manager.set_locale('ja')
+
+        assert dynamic_width_button.text == "Test Button"
 
 if __name__ == '__main__':
     pytest.console_main()
