@@ -753,7 +753,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         :return: tuple of relative mouse co-ords or None
         """
-        abs_mouse_pos = pygame.mouse.get_pos()
+        abs_mouse_pos = self.ui_manager.get_mouse_position()
         rel_mouse_pos = None
         inside_window_rect = self.get_container().get_rect()
         if inside_window_rect.contains(pygame.Rect(abs_mouse_pos, (1, 1))):

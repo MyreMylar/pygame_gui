@@ -58,6 +58,8 @@ class TestUITextEntryLine:
         text_entry.set_text_hidden(False)
         text_entry.set_text_hidden(True)
 
+        assert text_entry.image is not None
+
         text_entry.focus()
 
         text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_d, 'mod': 0,
@@ -91,11 +93,27 @@ class TestUITextEntryLine:
                                                      'mod': pygame.KMOD_CTRL,
                                                      'unicode': 'v'}))
 
-        text_entry.set_text_hidden(False)
-        default_ui_manager.set_locale('jp')
+        assert text_entry.image is not None
+
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes",
+                                                     "ui_text_entry_line_non_default.json"))
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+        text_entry.set_text('dan')
         text_entry.set_text_hidden(True)
 
         assert text_entry.image is not None
+
+        manager = UIManager((800, 600), os.path.join("tests", "data",
+                                                     "themes",
+                                                     "ui_text_entry_line_symbol_font.json"))
+
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=manager)
+        text_entry.set_text('dan')
+        with pytest.raises(ValueError, match='Selected font for UITextEntryLine'):
+            text_entry.set_text_hidden(True)
 
     def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
@@ -820,9 +838,18 @@ class TestUITextEntryLine:
 
         text_entry.update(0.01)
 
+        assert text_entry.alive()
+        assert not manager.text_input_hovered
+
+        manager.mouse_position = (150, 115)
+        text_entry.update(0.01)
+        assert manager.text_input_hovered
+
         text_entry.kill()
 
         text_entry.update(0.01)
+
+        assert not text_entry.alive()
 
     def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
         manager = UIManager((800, 600), os.path.join("tests", "data",
