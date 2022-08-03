@@ -292,7 +292,7 @@ class UITextEntryLine(UIElement):
 
         if not self.alive():
             return
-        scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(pygame.mouse.get_pos())
+        scaled_mouse_pos = self.ui_manager.get_mouse_position()
         if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
             self.ui_manager.set_text_input_hovered(True)
         else:
@@ -735,31 +735,33 @@ class UITextEntryLine(UIElement):
         if self.edit_position != self.select_range[0]:
             return False
         index = min(self.edit_position, len(self.text) - 1)
-        if index > 0:
+        if index >= 0:
             char = self.text[index]
             # Check we clicked in the same place on a our second click.
-            pattern = re.compile(r"[\w']+")
-            while not pattern.match(char):
-                index -= 1
-                if index > 0:
-                    char = self.text[index]
-                else:
-                    break
-            while pattern.match(char):
-                index -= 1
-                if index > 0:
-                    char = self.text[index]
-                else:
-                    break
+            if index > 0:
+                pattern = re.compile(r"[\w']+")
+                while not pattern.match(char):
+                    index -= 1
+                    if index > 0:
+                        char = self.text[index]
+                    else:
+                        break
+                while pattern.match(char):
+                    index -= 1
+                    if index > 0:
+                        char = self.text[index]
+                    else:
+                        break
             start_select_index = index + 1 if index > 0 else index
             index += 1
-            char = self.text[index]
-            while index < len(self.text) and pattern.match(char):
-                index += 1
-                if index < len(self.text):
-                    char = self.text[index]
+            if index < len(self.text):
+                char = self.text[index]
+                while index < len(self.text) and pattern.match(char):
+                    index += 1
+                    if index < len(self.text):
+                        char = self.text[index]
             end_select_index = index
-
+            print([start_select_index, end_select_index])
             self.select_range = [start_select_index, end_select_index]
             self.edit_position = end_select_index
             self.cursor_has_moved_recently = True
