@@ -34,6 +34,18 @@ class TestUIDropDownMenu:
 
         assert not menu.is_focused
 
+        # test expanded too
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
+        menu.focus()
+
+        assert menu.is_focused
+
+        menu.unfocus()
+
+        assert not menu.is_focused
+
     def test_addition(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -213,6 +225,26 @@ class TestUIDropDownMenu:
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
                               manager=manager)
+        assert menu.image is not None
+
+    @pytest.mark.filterwarnings("ignore:Invalid value")
+    @pytest.mark.filterwarnings("ignore:Colour hex code")
+    def test_rebuild_from_theme_data_bad_values_live(self, _init_pygame,
+                                                     _display_surface_return_none):
+        manager = UIManager((800, 600))
+
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=manager)
+
+        # load new theme
+        manager.ui_theme.load_theme(os.path.join("tests", "data", "themes", "ui_drop_down_menu_bad_values.json"))
+
+        # switch to expanded state
+        menu.current_state.should_transition = True
+        menu.update(0.01)
+
         assert menu.image is not None
 
     def test_set_position(self, _init_pygame, default_ui_manager,

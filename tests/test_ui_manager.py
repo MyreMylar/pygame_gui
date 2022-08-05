@@ -349,4 +349,5 @@ class TestUIManager:
 
 
 if __name__ == '__main__':
+    os.chdir('..')
     pytest.console_main()
