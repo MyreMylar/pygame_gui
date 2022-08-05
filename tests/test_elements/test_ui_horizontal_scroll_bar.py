@@ -32,6 +32,12 @@ class TestUIHorizontalScrollBar:
         scroll_bar.rebuild()
         assert scroll_bar.image is not None
 
+        scroll_bar.enable_arrow_buttons = False
+
+        scroll_bar.rebuild()
+
+        assert scroll_bar.left_button is None and scroll_bar.right_button is None
+
     def test_check_has_moved_recently(self, _init_pygame, default_ui_manager,
                                       _display_surface_return_none):
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -81,6 +87,12 @@ class TestUIHorizontalScrollBar:
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            visible_percentage=0.7,
                                            manager=default_ui_manager)
+        scroll_bar.redraw_scrollbar()
+        assert scroll_bar.sliding_button is not None
+
+        scroll_bar.sliding_button.kill()
+        scroll_bar.sliding_button = None
+
         scroll_bar.redraw_scrollbar()
         assert scroll_bar.sliding_button is not None
 
@@ -241,6 +253,12 @@ class TestUIHorizontalScrollBar:
                      _display_surface_return_none: None):
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(0, 0, 200, 30),
                                            visible_percentage=0.25, manager=default_ui_manager)
+
+        assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
+
+        scroll_bar.disable()
+
+        assert not scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
 
         scroll_bar.disable()
 
