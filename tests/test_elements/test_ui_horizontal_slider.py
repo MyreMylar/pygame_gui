@@ -79,9 +79,13 @@ class TestUIHorizontalSlider:
         # scroll down a bit then up again to exercise update
         slider.get_current_value()  # Clear has moved this turn
         slider.left_button.held = True
+        slider.update(0.01)
+        slider.update(0.01)
         slider.update(0.5)
         slider.left_button.held = False
         slider.right_button.held = True
+        slider.update(0.01)
+        slider.update(0.01)
         slider.update(0.5)
 
         assert slider.has_moved_recently is True

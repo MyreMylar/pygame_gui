@@ -31,22 +31,22 @@ class TestTypingAppearEffect:
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
-        typing_effect = TypingAppearEffect(text_owner=text_box)
+        text_box.set_active_effect(TEXT_EFFECT_TYPING_APPEAR)
 
-        assert typing_effect.text_progress == 0
+        assert text_box.active_text_effect.text_progress == 0
 
-        typing_effect.update(time_delta=0.06)
-        typing_effect.update(time_delta=0.06)
-        typing_effect.update(time_delta=0.06)
-        typing_effect.update(time_delta=0.06)
+        text_box.active_text_effect.update(time_delta=0.06)
+        text_box.active_text_effect.update(time_delta=0.06)
+        text_box.active_text_effect.update(time_delta=0.06)
+        text_box.active_text_effect.update(time_delta=0.06)
 
-        assert typing_effect.text_progress == 2
+        assert text_box.active_text_effect.text_progress == 2
 
         label = UILabel(pygame.Rect((10, 10), (200, 100)), 'Hell',
                         default_ui_manager)
-        label_typing_effect = TypingAppearEffect(text_owner=label)
+        label.set_active_effect(TEXT_EFFECT_TYPING_APPEAR)
 
-        assert label_typing_effect.text_progress == 0
+        assert label.active_text_effect.text_progress == 0
 
         label.update(time_delta=0.06)
         label.update(time_delta=0.06)
@@ -57,7 +57,11 @@ class TestTypingAppearEffect:
         label.update(time_delta=0.06)
         label.update(time_delta=0.06)
 
-        assert label_typing_effect.text_progress == 0
+        assert label.active_text_effect.text_progress == 4
+
+        label.stop_finished_effect()
+
+        assert label.active_text_effect is None
 
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
