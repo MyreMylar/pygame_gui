@@ -37,8 +37,12 @@ class TestUIStatusBar:
         health_bar.update(0.01)
         assert health_bar.image is not None
 
+        health_bar.percent_full = 50
+
+        assert health_bar.percent_full == 0.5
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame):
-        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_status_bar_no_default.json"))
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_status_bar_non_default.json"))
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -64,6 +68,11 @@ class TestUIStatusBar:
         health_bar.set_position((150.0, 30.0))
 
         assert health_bar.rect.topleft == (150, 30)
+
+        other_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                manager=default_ui_manager)
+
+        assert other_bar.position == (100, 100)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager):
         healthy_sprite = HealthySprite()

@@ -13,7 +13,8 @@
              "shape_corner_radius": "6",
              "hover_height": "5",
              "border_width": "0",
-             "shadow_width": "3"
+             "shadow_width": "3",
+             "follow_sprite_offset": "0, 32"
          }
     }
 }

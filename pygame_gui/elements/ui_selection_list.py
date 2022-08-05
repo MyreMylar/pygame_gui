@@ -106,7 +106,7 @@ class UISelectionList(UIElement):
         self.rebuild_from_changed_theme_data()
 
         if self._default_selection is not None:
-            self.set_default_selection()
+            self._set_default_selection()
 
     def add_items(self, new_items: Union[List[str], List[Tuple[str, str]]]) -> None:
         """
@@ -327,7 +327,7 @@ class UISelectionList(UIElement):
             else:
                 break
 
-    def set_default_selection(self):
+    def _set_default_selection(self):
         """
         Set the default selection of the list. The default selection type must be a string or (str,
         str) tuple for single selection lists. For multi-selection lists, they can be a single
