@@ -42,18 +42,22 @@ class TestTypingAppearEffect:
 
         assert typing_effect.text_progress == 2
 
-        label = UILabel(pygame.Rect((10, 10), (200, 100)), 'Hello world',
+        label = UILabel(pygame.Rect((10, 10), (200, 100)), 'Hell',
                         default_ui_manager)
         label_typing_effect = TypingAppearEffect(text_owner=label)
 
         assert label_typing_effect.text_progress == 0
 
-        label_typing_effect.update(time_delta=0.06)
-        label_typing_effect.update(time_delta=0.06)
-        label_typing_effect.update(time_delta=0.06)
-        label_typing_effect.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
+        label.update(time_delta=0.06)
 
-        assert label_typing_effect.text_progress == 2
+        assert label_typing_effect.text_progress == 0
 
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',

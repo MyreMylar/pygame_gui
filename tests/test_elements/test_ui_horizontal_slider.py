@@ -1,130 +1,142 @@
 import os
-import pytest
+
 import pygame
+import pytest
 
-from tests.shared_comparators import compare_surfaces
-
-from pygame_gui.ui_manager import UIManager
-from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
-from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
+from pygame_gui.ui_manager import UIManager
+from tests.shared_comparators import compare_surfaces
+from pygame_gui import UI_BUTTON_PRESSED
 
 
 class TestUIHorizontalSlider:
 
     def test_creation(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                       _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
-        assert scroll_bar.image is not None
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
+        assert slider.image is not None
 
     def test_rebuild(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                      _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
-        scroll_bar.rebuild()
-        assert scroll_bar.image is not None
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
+        slider.rebuild()
+
+        assert slider.image is not None
+
+        slider.enable_arrow_buttons = False
+
+        slider.rebuild()
+
+        assert slider.left_button is None and slider.right_button is None
 
     def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                   _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
         assert len(default_ui_manager.get_root_container().elements) == 2
         assert len(default_ui_manager.get_sprite_group().sprites()) == 6
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
-                                                                   scroll_bar,
-                                                                   scroll_bar.button_container,
-                                                                   scroll_bar.left_button,
-                                                                   scroll_bar.right_button,
-                                                                   scroll_bar.sliding_button]
-        scroll_bar.kill()
+                                                                   slider,
+                                                                   slider.button_container,
+                                                                   slider.left_button,
+                                                                   slider.right_button,
+                                                                   slider.sliding_button]
+        slider.kill()
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
 
     def test_check_has_moved_recently(self, _init_pygame, default_ui_manager,
                                       _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
         # move the scroll bar a bit
-        scroll_bar.left_button.held = True
-        scroll_bar.update(0.2)
-        assert scroll_bar.has_moved_recently is True
+        slider.left_button.held = True
+        slider.update(0.2)
+        assert slider.has_moved_recently is True
 
     def test_check_update_buttons(self, _init_pygame, default_ui_manager,
                                   _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
-        scroll_bar.get_current_value()  # Clear has moved this turn
-        scroll_bar.left_button.held = True
-        scroll_bar.update(0.5)
-        scroll_bar.left_button.held = False
-        scroll_bar.right_button.held = True
-        scroll_bar.update(0.5)
+        slider.get_current_value()  # Clear has moved this turn
+        slider.left_button.held = True
+        slider.update(0.5)
+        slider.left_button.held = False
+        slider.right_button.held = True
+        slider.update(0.5)
 
-        assert scroll_bar.has_moved_recently is True
+        assert slider.has_moved_recently is True
 
     def test_check_update_sliding_bar(self, _init_pygame, default_ui_manager,
                                       _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
         default_ui_manager.mouse_position = (100, 15)
-        scroll_bar.sliding_button.held = True
-        scroll_bar.update(0.3)
+        slider.sliding_button.held = True
+        slider.update(0.3)
 
-        assert scroll_bar.grabbed_slider is True
+        assert slider.grabbed_slider is True
 
-        scroll_bar.sliding_button.held = False
-        scroll_bar.update(0.3)
+        slider.sliding_button.held = False
+        slider.update(0.3)
 
-        assert scroll_bar.grabbed_slider is False
+        assert slider.grabbed_slider is False
 
     def test_get_current_value(self, _init_pygame, default_ui_manager,
                                _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
-        assert scroll_bar.get_current_value() == 50
+        assert slider.get_current_value() == 50
 
     def test_set_current_value_in_range(self, _init_pygame, default_ui_manager,
                                         _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
-        scroll_bar.set_current_value(75)
-        assert scroll_bar.get_current_value() == 75
+        slider.set_current_value(75)
+        assert slider.get_current_value() == 75
 
     def test_set_current_value_out_of_range(self, _init_pygame, default_ui_manager,
                                             _display_surface_return_none):
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=default_ui_manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=default_ui_manager)
 
         with pytest.warns(UserWarning, match='value not in range'):
-            scroll_bar.set_current_value(200)
+            slider.set_current_value(200)
+
+        slider.set_current_value(200, warn=False)
+
+        assert slider.current_value == 100
 
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
@@ -132,11 +144,11 @@ class TestUIHorizontalSlider:
                                                      "themes",
                                                      "ui_horizontal_slider_non_default.json"))
 
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=manager)
-        assert scroll_bar.image is not None
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=manager)
+        assert slider.image is not None
 
     def test_rebuild_from_theme_data_no_arrow_buttons(self, _init_pygame,
                                                       _display_surface_return_none):
@@ -145,14 +157,14 @@ class TestUIHorizontalSlider:
                                                      "themes",
                                                      "ui_horizontal_slider_no_arrows.json"))
 
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=50,
-                                        value_range=(0, 100),
-                                        manager=manager)
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=50,
+                                    value_range=(0, 100),
+                                    manager=manager)
 
-        assert scroll_bar.left_button is None
-        assert scroll_bar.right_button is None
-        assert scroll_bar.image is not None
+        assert slider.left_button is None
+        assert slider.right_button is None
+        assert slider.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
@@ -163,11 +175,11 @@ class TestUIHorizontalSlider:
                                                      "themes",
                                                      "ui_horizontal_slider_bad_values.json"))
 
-        scroll_bar = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                        start_value=51,
-                                        value_range=(0, 100),
-                                        manager=manager)
-        assert scroll_bar.image is not None
+        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    start_value=51,
+                                    value_range=(0, 100),
+                                    manager=manager)
+        assert slider.image is not None
 
     def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(300, 400, 150, 40), start_value=50,
@@ -245,6 +257,9 @@ class TestUIHorizontalSlider:
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
                                     value_range=(0, 200), manager=default_ui_manager)
 
+        assert slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': slider.left_button}))
+        assert not slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': None}))
+
         slider.disable()
 
         # process a mouse button down event
@@ -259,7 +274,7 @@ class TestUIHorizontalSlider:
             pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
                                                       'pos': slider.left_button.rect.center}))
 
-        assert slider.get_current_value() == 50 and slider.is_enabled is False
+        assert slider.get_current_value() == 49 and slider.is_enabled is False
 
     def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
                     _display_surface_return_none: None):

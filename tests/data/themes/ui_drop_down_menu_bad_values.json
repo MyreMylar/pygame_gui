@@ -14,5 +14,14 @@
              "border_width": "0.6",
              "shadow_width": "french"
          }
+    },
+    "drop_down_menu.#drop_down_options_list":
+    {
+      "misc":
+      {
+        "shadow_width": "goose",
+        "border_width": "goose",
+        "list_item_height": "goose"
+      }
     }
 }

@@ -26,6 +26,13 @@ class TestUILabel:
         label.set_text("new text")
         assert label.image is not None
 
+        # dynamic width
+        label = UILabel(relative_rect=pygame.Rect(100, 100, -1, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+        label.set_text("new text")
+        assert label.image is not None and label.rect.width == 64
+
     def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -208,12 +215,32 @@ class TestUILabel:
 
         assert label.drawable_shape.theming['text'] == "Anglaise"
 
+        label = UILabel(pygame.Rect((10, 100), (-1, 30)),
+                        'pygame-gui.English',
+                        default_ui_manager)
+        default_ui_manager.set_locale('fr')
+
+        assert label.drawable_shape.theming['text'] == "Anglaise"
+
         label = UILabel(pygame.Rect((10, 100), (-1, -1)),
                         'pygame-gui.English',
                         default_ui_manager)
         default_ui_manager.set_locale('ja')
 
         assert label.drawable_shape.theming['text'] == "英語"
+
+    def test_text_owner_interface(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager)
+
+        # right now these functions do nothing for the label
+        label.set_text_offset_pos((0, 0))
+        label.set_text_rotation(0)
+        label.set_text_scale(0)
+
+        assert label.image is not None
 
 
 if __name__ == '__main__':
