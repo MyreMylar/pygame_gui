@@ -12,7 +12,8 @@
              "shape_corner_radius": "6",
              "expand_direction": "up",
              "border_width": "0",
-             "shadow_width": "3"
+             "shadow_width": "3",
+             "open_button_width": "25"
 
          }
     },
