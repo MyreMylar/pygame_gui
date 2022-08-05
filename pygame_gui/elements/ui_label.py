@@ -298,15 +298,15 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.drawable_shape.set_text_alpha(alpha)
 
     def set_text_offset_pos(self, offset: Tuple[int, int],
-                            sub_chunk: Optional[TextLineChunkFTFont]):
+                            sub_chunk: Optional[TextLineChunkFTFont] = None):
         pass
 
     def set_text_rotation(self, rotation: int,
-                          sub_chunk: Optional[TextLineChunkFTFont]):
+                          sub_chunk: Optional[TextLineChunkFTFont] = None):
         pass
 
     def set_text_scale(self, scale: int,
-                       sub_chunk: Optional[TextLineChunkFTFont]):
+                       sub_chunk: Optional[TextLineChunkFTFont] = None):
         pass
 
     def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):

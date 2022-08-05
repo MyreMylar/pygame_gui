@@ -59,8 +59,18 @@ class TestUIImage:
                            manager=default_ui_manager,
                            container=container)
 
-        ui_image.set_dimensions((50, 50))
         ui_image.set_dimensions((350, 350))
+        ui_image.set_dimensions((128, 128))
+
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager)
+
+        ui_image = UIImage(relative_rect=pygame.Rect(10, 10, 128, 128),
+                           image_surface=loaded_image,
+                           manager=default_ui_manager,
+                           container=container)
+
+        ui_image.set_dimensions((50, 50))
         ui_image.set_dimensions((128, 128))
 
         container.set_dimensions((50, 50))

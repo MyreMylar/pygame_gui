@@ -14,7 +14,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def set_text_alpha(self, alpha: int, sub_chunk: Optional['TextLineChunkFTFont']):
+    def set_text_alpha(self, alpha: int, sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Set the global alpha value for the text
 
@@ -24,7 +24,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def set_text_offset_pos(self, offset: Tuple[int, int],
-                            sub_chunk: Optional['TextLineChunkFTFont']):
+                            sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Move the text around by this offset.
 
@@ -35,7 +35,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def set_text_rotation(self, rotation: int,
-                          sub_chunk: Optional['TextLineChunkFTFont']):
+                          sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         rotate the text by this int in degrees
 
@@ -45,7 +45,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_text_scale(self, scale: float,  sub_chunk: Optional['TextLineChunkFTFont']):
+    def set_text_scale(self, scale: float,  sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Scale the text by this float
 
@@ -55,7 +55,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def clear_text_surface(self, sub_chunk: Optional['TextLineChunkFTFont']):
+    def clear_text_surface(self, sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Clear the text surface
 
@@ -63,7 +63,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_text_letter_count(self, sub_chunk: Optional['TextLineChunkFTFont']) -> int:
+    def get_text_letter_count(self, sub_chunk: Optional['TextLineChunkFTFont'] = None) -> int:
         """
         The amount of letters in the text
 
@@ -72,7 +72,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         :return: number of letters as an int
         """
     @abstractmethod
-    def update_text_end_position(self, end_pos: int, sub_chunk: Optional['TextLineChunkFTFont']):
+    def update_text_end_position(self, end_pos: int, sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         The position in the text to render up to.
 
@@ -120,7 +120,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def stop_finished_effect(self, sub_chunk: Optional['TextLineChunkFTFont']):
+    def stop_finished_effect(self, sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Stops a finished effect. Will leave effected text in the state it was in when effect
         ended. Used when an effect reaches a natural end where we might want to keep it in
@@ -130,7 +130,7 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def clear_all_active_effects(self, sub_chunk: Optional['TextLineChunkFTFont']):
+    def clear_all_active_effects(self, sub_chunk: Optional['TextLineChunkFTFont'] = None):
         """
         Clears any active effects and redraws the text. A full reset, usually called before
         firing off a new effect if one is already in progress.

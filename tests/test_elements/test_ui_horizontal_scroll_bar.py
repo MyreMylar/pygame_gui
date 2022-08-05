@@ -254,13 +254,13 @@ class TestUIHorizontalScrollBar:
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(0, 0, 200, 30),
                                            visible_percentage=0.25, manager=default_ui_manager)
 
+        scroll_bar.sliding_button.hovered = True
+
         assert scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
 
         scroll_bar.disable()
 
         assert not scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
-
-        scroll_bar.disable()
 
         # process a mouse button down event
         scroll_bar.right_button.process_event(

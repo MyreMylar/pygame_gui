@@ -8,6 +8,7 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
 from pygame_gui.ui_manager import UIManager
 from tests.shared_comparators import compare_surfaces
+from pygame_gui import UI_BUTTON_PRESSED
 
 
 class TestUIHorizontalSlider:
@@ -133,6 +134,10 @@ class TestUIHorizontalSlider:
         with pytest.warns(UserWarning, match='value not in range'):
             slider.set_current_value(200)
 
+        slider.set_current_value(200, warn=False)
+
+        assert slider.current_value == 100
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
@@ -252,11 +257,10 @@ class TestUIHorizontalSlider:
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
                                     value_range=(0, 200), manager=default_ui_manager)
 
-        assert slider.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
+        assert slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': slider.left_button}))
+        assert not slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': None}))
 
         slider.disable()
-
-        assert not slider.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': 1.0}))
 
         # process a mouse button down event
         slider.left_button.process_event(
@@ -270,7 +274,7 @@ class TestUIHorizontalSlider:
             pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
                                                       'pos': slider.left_button.rect.center}))
 
-        assert slider.get_current_value() == 50 and slider.is_enabled is False
+        assert slider.get_current_value() == 49 and slider.is_enabled is False
 
     def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
                     _display_surface_return_none: None):
