@@ -38,11 +38,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  element_id: Union[str, None] = None,
                  object_id: Union[ObjectID, str, None] = None,
                  resizable: bool = False,
-                 visible: int = 1):
+                 visible: int = 1,
+                 draggable: bool = True):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Union[UIContainer, None]
         self.resizable = resizable
+        self.draggable = draggable
         self.minimum_dimensions = (100, 100)
         self.edge_hovering = [False, False, False, False]
 
@@ -285,7 +287,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                        current_grab_difference[1] -
                                        self.starting_grab_difference[1])
 
-                self.set_relative_position((self.relative_rect.x + adjustment_required[0],
+                if self.draggable:
+                    self.set_relative_position((self.relative_rect.x + adjustment_required[0],
                                             self.relative_rect.y + adjustment_required[1]))
             else:
                 self.grabbed_window = False
