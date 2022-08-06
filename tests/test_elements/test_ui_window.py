@@ -605,7 +605,7 @@ class TestUIWindow:
         assert window.get_relative_mouse_pos() is None
 
         default_ui_manager.mouse_position = (200, 200)
-        assert window.get_relative_mouse_pos() == (100, 100)
+        assert window.get_relative_mouse_pos() == (84, 57)
 
 
 if __name__ == '__main__':
