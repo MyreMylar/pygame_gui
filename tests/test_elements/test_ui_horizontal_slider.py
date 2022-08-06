@@ -81,6 +81,7 @@ class TestUIHorizontalSlider:
         slider.left_button.held = True
         slider.update(0.5)
         slider.left_button.held = False
+        slider.button_held_repeat_acc = 0.0
         slider.right_button.held = True
         slider.update(0.01)
         slider.update(0.01)
