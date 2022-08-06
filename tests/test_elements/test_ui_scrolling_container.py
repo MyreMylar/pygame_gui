@@ -158,6 +158,9 @@ class TestUIScrollingContainer:
         container.update(0.02)
 
         container.scrollable_container.set_dimensions((150, 600))
+        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
 
         container.vert_scroll_bar.scroll_wheel_moved = True
         container.vert_scroll_bar.scroll_wheel_amount = -5.0
