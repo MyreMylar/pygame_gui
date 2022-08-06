@@ -139,12 +139,14 @@ class TestUIScrollingContainer:
 
         container.horiz_scroll_bar.scroll_wheel_right = True
         container.horiz_scroll_bar.update(0.02)
+        container.horiz_scroll_bar.start_percentage = 0.6
         container.update(0.02)
         container.horiz_scroll_bar.scroll_wheel_right = True
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
         container.horiz_scroll_bar.scroll_wheel_right = True
         container.horiz_scroll_bar.update(0.02)
+        container.scrolling_right = container._view_container.rect.right - 1
         container.update(0.02)
 
         container.horiz_scroll_bar.scroll_wheel_left = True
