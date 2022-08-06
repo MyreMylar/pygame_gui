@@ -242,6 +242,15 @@ class TestUILabel:
 
         assert label.image is not None
 
+    def test_get_objectID(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
+        label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                        text="Test Label",
+                        manager=default_ui_manager,
+                        object_id="#test_label")
+
+        assert label.get_object_id() == "#test_label"
+
 
 if __name__ == '__main__':
     pytest.console_main()
