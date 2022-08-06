@@ -137,6 +137,65 @@ class TestUIScrollingContainer:
 
         assert container.get_container().relative_rect.y == -67
 
+        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.update(0.02)
+        container.horiz_scroll_bar.start_percentage = 0.6
+        container.update(0.02)
+        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.update(0.02)
+        container.scrolling_right = container._view_container.rect.right - 1
+        container.update(0.02)
+
+        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        container.scrollable_container.set_dimensions((150, 600))
+        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = 5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = 5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = 5.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        container.scrollable_container.set_dimensions((150, 150))
+
+        container.update(0.02)
+        container.update(0.02)
+        container.update(0.02)
+
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
                      _display_surface_return_none: None):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
