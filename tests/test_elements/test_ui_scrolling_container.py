@@ -167,17 +167,8 @@ class TestUIScrollingContainer:
 
         container.set_scrollable_area_dimensions((150, 150))
 
-        container.vert_scroll_bar.scroll_wheel_moved = True
-        container.vert_scroll_bar.scroll_wheel_amount = 5.0
-        container.vert_scroll_bar.update(0.02)
         container.update(0.02)
-        container.vert_scroll_bar.scroll_wheel_moved = True
-        container.vert_scroll_bar.scroll_wheel_amount = 5.0
-        container.vert_scroll_bar.update(0.02)
         container.update(0.02)
-        container.vert_scroll_bar.scroll_wheel_moved = True
-        container.vert_scroll_bar.scroll_wheel_amount = 5.0
-        container.vert_scroll_bar.update(0.02)
         container.update(0.02)
 
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
