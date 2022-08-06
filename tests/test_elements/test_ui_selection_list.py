@@ -19,6 +19,14 @@ class TestUISelectionList:
                         item_list=['green', 'eggs', 'and', 'ham'],
                         manager=default_ui_manager)
 
+    def test_rebuild(self, _init_pygame, default_ui_manager,
+                     _display_surface_return_none):
+        list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                               item_list=['green', 'eggs', 'and', 'ham'],
+                               manager=default_ui_manager)
+
+        list.rebuild()
+
     def test_addition(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
@@ -150,6 +158,9 @@ class TestUISelectionList:
         visible_items = [item['text'] for item in selection_list.item_list
                          if item['button_element'] is not None]
         assert visible_items == ['another item 1', 'another item 2']
+
+        with pytest.raises(ValueError):
+            selection_list.set_item_list([1, 2, 3])
 
     def test_process_event(self, _init_pygame, default_ui_manager,
                            _display_surface_return_none: None):
@@ -918,6 +929,18 @@ class TestUISelectionList:
 
         assert selection == multi_list.get_multi_selection()
 
+        selection = [("Item 2", "#item_2"), ("Item 3", "#item_3")]
+        # tuple list
+        multi_list = UISelectionList(
+            relative_rect=pygame.Rect(100, 100, 400, 400),
+            item_list=[("Item 1", "#item_1"), ("Item 2", "#item_2"), ("Item 3", "#item_3")],
+            default_selection=selection,
+            allow_multi_select=True,
+            manager=manager
+        )
+
+        assert multi_list.get_multi_selection() == ["Item 2", "Item 3"]
+
     def test_default_selection_changes(
         self,
         _init_pygame,
@@ -971,6 +994,26 @@ class TestUISelectionList:
         assert lst[4] in final_vals
         assert lst[15] in final_vals
         assert lst[17] in final_vals
+
+    def test_set_default_selection(self, _init_pygame, default_ui_manager,
+                                   _display_surface_return_none):
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager,
+                                         allow_multi_select=True)
+
+        assert selection_list.get_multi_selection() == []
+
+        event_data = {'ui_element': selection_list.item_list_container.elements[0]}
+        press_list_item_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, event_data)
+        default_ui_manager.process_events(press_list_item_event)
+
+        assert selection_list.get_multi_selection() == ['green']
+
+        selection_list._default_selection = ['eggs']
+        selection_list._set_default_selection()
+
+        assert selection_list.get_multi_selection() == ['green']
 
 
 if __name__ == '__main__':
