@@ -231,6 +231,10 @@ class TestUIWindow:
         window.edge_hovering[3] = True
         window.update(time_delta=0.05)
 
+        window.start_resize_rect = pygame.Rect(0, 0, 190, 190)
+        default_ui_manager.mouse_position = (25, 25)
+        window.update(time_delta=0.05)
+
     def test_check_hover(self, _init_pygame, default_ui_manager: UIManager,
                          _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
@@ -591,14 +595,17 @@ class TestUIWindow:
         assert compare_surfaces(empty_surface, surface)
 
     def test_get_relative_mouse_pos(self, _init_pygame, default_ui_manager,
-                                 _display_surface_return_none):
+                                    _display_surface_return_none):
         window = UIWindow(pygame.Rect(100, 100, 400, 400),
                           window_display_title="Test Window",
                           manager=default_ui_manager,
                           visible=0)
 
-        result = window.get_relative_mouse_pos()
-        assert result is None
+        default_ui_manager.mouse_position = (0, 0)
+        assert window.get_relative_mouse_pos() is None
+
+        default_ui_manager.mouse_position = (200, 200)
+        assert window.get_relative_mouse_pos() == (100, 100)
 
 
 if __name__ == '__main__':
