@@ -100,6 +100,7 @@ class TestUISelectionList:
                                                     'item 9', 'item 10', 'item 11', 'item 12',
                                                     'item 13', 'item 14', 'item 15', 'item 16'],
                                          manager=default_ui_manager,
+                                         default_selection=['item 7'],
                                          allow_multi_select=True)
 
         assert selection_list.scroll_bar is not None
