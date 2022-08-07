@@ -302,7 +302,7 @@ class UIFileDialog(UIWindow):
                 or event.ui_element != self.file_path_text_line):
             return
         entered_file_path = Path(self.file_path_text_line.get_text()).absolute()
-        if self._validate_file_or_dir_path(entered_file_path):
+        if self._validate_file_or_dir_path(entered_file_path.parent):
             if len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
                                                     not entered_file_path.exists()):
                 self.current_file_path = entered_file_path
