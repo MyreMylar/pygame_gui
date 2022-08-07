@@ -274,7 +274,8 @@ class TestUIUIFileDialog:
 
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
-                                   initial_file_path='tests/data/')
+                                   initial_file_path='tests/data/',
+                                   allow_picking_directories=True)
 
         select_event = pygame.event.Event(pygame_gui.UI_SELECTION_LIST_NEW_SELECTION,
                                           {'ui_element': file_dialog.file_selection_list,
@@ -395,6 +396,13 @@ class TestUIUIFileDialog:
 
         assert Path(file_dialog.current_directory_path).name == 'images'
 
+        file_dialog.file_path_text_line.set_text('/')
+
+        file_dialog.process_event(pygame.event.Event(UI_TEXT_ENTRY_FINISHED,
+                                                     {'ui_element': file_dialog.file_path_text_line}))
+
+        assert Path(file_dialog.current_directory_path).name == ''
+
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                                    manager=default_ui_manager,
@@ -486,6 +494,15 @@ class TestUIUIFileDialog:
         file_dialog._change_directory_path(Path('blep/blep/'))
 
         assert Path(file_dialog.current_directory_path).name == "images"
+
+    def test_highlight_file_name_for_editing(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=default_ui_manager,
+                                   initial_file_path='')
+
+        file_dialog.current_file_path = None
+        file_dialog._highlight_file_name_for_editing()
+
 
 if __name__ == '__main__':
     pytest.console_main()
