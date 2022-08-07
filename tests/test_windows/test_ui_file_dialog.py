@@ -17,6 +17,11 @@ class TestUIUIFileDialog:
         UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
                      manager=default_ui_manager)
 
+        UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                     manager=default_ui_manager,
+                     allow_picking_directories=True,
+                     initial_file_path='tests/data/images')
+
     def test_create_too_small(self, _init_pygame, default_ui_manager,
                               _display_surface_return_none):
         with pytest.warns(UserWarning, match="Initial size"):
@@ -129,6 +134,13 @@ class TestUIUIFileDialog:
 
         assert file_dialog.delete_confirmation_dialog is not None
 
+        # fail to delete
+        file_dialog.current_file_path = Path('tests/data/images/not_a_file.png')
+        confirm_delete_event = pygame.event.Event(pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED,
+                                                  {'ui_element': file_dialog.delete_confirmation_dialog})
+
+        default_ui_manager.process_events(confirm_delete_event)
+        # cancel
         event_data = {'ui_element': file_dialog.delete_confirmation_dialog.cancel_button}
         cancel_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, event_data)
 
@@ -466,6 +478,14 @@ class TestUIUIFileDialog:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_change_directory_path(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=default_ui_manager,
+                                   initial_file_path='tests/data/images')
+
+        file_dialog._change_directory_path(Path('blep/blep/'))
+
+        assert Path(file_dialog.current_directory_path).name == "images"
 
 if __name__ == '__main__':
     pytest.console_main()
