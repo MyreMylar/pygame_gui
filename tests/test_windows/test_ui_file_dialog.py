@@ -7,6 +7,7 @@ import pygame_gui
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.windows import UIFileDialog
+from pygame_gui import UI_TEXT_ENTRY_CHANGED, UI_TEXT_ENTRY_FINISHED
 
 
 class TestUIUIFileDialog:
@@ -197,6 +198,16 @@ class TestUIUIFileDialog:
 
         assert Path(file_dialog.current_directory_path).name == 'images'
 
+        file_dialog.current_file_path = Path('tests/data/images/splat.png')
+
+        parent_event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
+                                          {'ui_element': file_dialog.refresh_button})
+
+        default_ui_manager.process_events(parent_event)
+
+        assert Path(file_dialog.current_directory_path).name == 'images'
+        assert Path(file_dialog.current_file_path).name == 'splat.png'
+
     def test_press_home_button(self, _init_pygame, default_ui_manager,
                                _display_surface_return_none):
 
@@ -279,6 +290,44 @@ class TestUIUIFileDialog:
         assert str(Path(file_dialog.current_directory_path).parts[-1]) == 'images'
 
         assert ('splat.png', '#file_list_item') in file_dialog.current_file_list
+
+        file_dialog.file_path_text_line.set_text('tests/data/images/splat.png')
+
+        event_data = {'button': pygame.BUTTON_LEFT,
+                      'pos': file_dialog.file_path_text_line.rect.center}
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
+                                                             {'key': pygame.K_RETURN}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        assert Path(file_dialog.current_directory_path).name == 'images'
+
+    def test_process_event(self, default_ui_manager, _display_surface_return_none):
+
+        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+                                   manager=default_ui_manager)
+
+        assert not file_dialog.delete_button.is_enabled
+
+        file_dialog.file_path_text_line.set_text('tests/data/images/splat.png')
+
+        file_dialog.process_event(pygame.event.Event(UI_TEXT_ENTRY_CHANGED,
+                                                     {'ui_element': file_dialog.file_path_text_line}))
+
+        assert file_dialog.delete_button.is_enabled
+
+        file_dialog.file_path_text_line.set_text('tests/data/images/splot.png')
+
+        file_dialog.process_event(pygame.event.Event(UI_TEXT_ENTRY_CHANGED,
+                                                     {'ui_element': file_dialog.file_path_text_line}))
+
+        assert not file_dialog.delete_button.is_enabled
 
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
