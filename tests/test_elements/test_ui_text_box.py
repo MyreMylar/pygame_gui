@@ -823,6 +823,27 @@ class TestUITextBox:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_on_locale_changed(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al'
+                                       'al alalalal lfed alal alal alal al'
+                                       'ala lalalal lasda lal a lalalal slapl'
+                                       'alalala lal la blop lal alal aferlal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        default_ui_manager.set_locale('fr')
+
+        default_ui_manager.set_locale('ja')
+
+        assert text_box.image is not None
+
 
 if __name__ == '__main__':
     pytest.console_main()
