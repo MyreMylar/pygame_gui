@@ -27,7 +27,11 @@
              "shadow_width": "4",
              "padding": "6,3",
              "link_normal_underline": "1",
-             "link_hover_underline": "0"
+             "link_hover_underline": "0",
+             "text_horiz_alignment": "center",
+             "text_horiz_alignment_padding": "5",
+             "text_vert_alignment": "center",
+             "text_vert_alignment_padding": "3"
          }
      },
 
@@ -48,7 +52,11 @@
             "border_width": "6",
             "padding": "5,5",
             "link_normal_underline": "0",
-            "link_hover_underline": "0"
+            "link_hover_underline": "1",
+            "text_horiz_alignment": "right",
+            "text_horiz_alignment_padding": "3",
+            "text_vert_alignment": "bottom",
+            "text_vert_alignment_padding": "3"
 
         }
     }

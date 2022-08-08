@@ -196,6 +196,7 @@ class TestUITextBox:
                                                                    text_box.scroll_bar.bottom_button,
                                                                    text_box.scroll_bar.sliding_button]
         text_box.kill()
+        text_box.update(0.01)
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
@@ -275,6 +276,14 @@ class TestUITextBox:
         text_box.scroll_bar.has_moved_recently = True
         text_box.update(5.0)
         assert text_box.image is not None
+
+        text_box.set_dimensions((0, 0))
+        text_box.update(0.02)
+
+        text_box.set_dimensions((150, 200))
+        text_box.update(0.02)
+        text_box.update(0.02)
+        text_box.update(0.2)
 
     def test_update_without_scrollbar(self, _init_pygame: None,
                                       default_ui_manager: UIManager,
