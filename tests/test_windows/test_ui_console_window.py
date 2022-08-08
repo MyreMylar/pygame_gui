@@ -18,7 +18,7 @@ class TestUIConsoleWindow:
 
     def test_command_entry_finished(self, _init_pygame, default_ui_manager,
                                     _display_surface_return_none):
-        console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
+        console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (300, 200)),
                                          manager=default_ui_manager)
 
         console_window.command_entry.set_text('<b>A line of text to log</b>')
@@ -66,6 +66,74 @@ class TestUIConsoleWindow:
 
         assert console_window.log.appended_text == logged_lines
         assert console_window.command_entry.get_text() == ''
+
+        # add a lot of text
+        console_window.command_entry.set_text('More text to fill up the log, blah, blah, blah, blah. '
+                                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+                                              ' Nunc accumsan aliquet massa a pharetra. Nam ultricies '
+                                              'non est in ultrices. Pellentesque blandit vulputate augue'
+                                              ' ac porta. Maecenas porta ex ut erat semper, a efficitur '
+                                              'lectus vehicula. Proin finibus id tortor eu finibus. '
+                                              'Pellentesque sodales est semper sem condimentum, quis '
+                                              'ultricies odio ultrices. Nulla aliquet est sed blandit '
+                                              'congue. Sed quam justo, consequat ac orci et, pharetra '
+                                              'elementum massa. Ut pulvinar varius nulla, eu elementum '
+                                              'nisi tempor quis. Nulla ante sapien, elementum tincidunt '
+                                              'nulla a, blandit lobortis urna. Ut ut tortor lacinia, '
+                                              'malesuada nunc faucibus, maximus est. Etiam ornare '
+                                              'molestie nisi eu condimentum. Class aptent taciti '
+                                              'sociosqu ad litora torquent per conubia nostra, '
+                                              'per inceptos himenaeos. Suspendisse ut euismod lorem, '
+                                              'eget consequat velit.')
+
+        event_data = {'button': pygame.BUTTON_LEFT,
+                      'pos': console_window.command_entry.rect.center}
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
+                                                             {'key': pygame.K_RETURN}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYUP,
+                                                             {'key': pygame.K_RETURN}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        # add a lot of text again
+        console_window.command_entry.set_text('More text to fill up the log, blah, blah, blah, blah. '
+                                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+                                              ' Nunc accumsan aliquet massa a pharetra. Nam ultricies '
+                                              'non est in ultrices. Pellentesque blandit vulputate augue'
+                                              ' ac porta. Maecenas porta ex ut erat semper, a efficitur '
+                                              'lectus vehicula. Proin finibus id tortor eu finibus. '
+                                              'Pellentesque sodales est semper sem condimentum, quis '
+                                              'ultricies odio ultrices. Nulla aliquet est sed blandit '
+                                              'congue. Sed quam justo, consequat ac orci et, pharetra '
+                                              'elementum massa. Ut pulvinar varius nulla, eu elementum '
+                                              'nisi tempor quis. Nulla ante sapien, elementum tincidunt '
+                                              'nulla a, blandit lobortis urna. Ut ut tortor lacinia, '
+                                              'malesuada nunc faucibus, maximus est. Etiam ornare '
+                                              'molestie nisi eu condimentum. Class aptent taciti '
+                                              'sociosqu ad litora torquent per conubia nostra, '
+                                              'per inceptos himenaeos. Suspendisse ut euismod lorem, '
+                                              'eget consequat velit.')
+
+        event_data = {'button': pygame.BUTTON_LEFT,
+                      'pos': console_window.command_entry.rect.center}
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONUP, event_data))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYDOWN,
+                                                             {'key': pygame.K_RETURN}))
+        default_ui_manager.process_events(pygame.event.Event(pygame.KEYUP,
+                                                             {'key': pygame.K_RETURN}))
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
+
+        for event in pygame.event.get():
+            default_ui_manager.process_events(event)
 
     def test_log_prefix(self, _init_pygame, default_ui_manager,
                         _display_surface_return_none):

@@ -8,6 +8,7 @@ from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.ui_manager import UIManager
 from tests.shared_comparators import compare_surfaces
 
+from pygame_gui import UITextEffectType
 
 class TestUITextBox:
 
@@ -196,6 +197,7 @@ class TestUITextBox:
                                                                    text_box.scroll_bar.bottom_button,
                                                                    text_box.scroll_bar.sliding_button]
         text_box.kill()
+        text_box.update(0.01)
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
         assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
@@ -276,6 +278,20 @@ class TestUITextBox:
         text_box.update(5.0)
         assert text_box.image is not None
 
+        text_box.set_dimensions((0, 0))
+        text_box.update(0.02)
+
+        text_box.set_dimensions((150, 200))
+        text_box.update(0.02)
+        text_box.update(0.02)
+        text_box.update(0.2)
+
+        # trigger rebuild from update
+        text_box.should_trigger_full_rebuild = True
+        text_box.full_rebuild_countdown = 0.0
+        text_box.update(0.01)
+        assert text_box.image is not None
+
     def test_update_without_scrollbar(self, _init_pygame: None,
                                       default_ui_manager: UIManager,
                                       _display_surface_return_none: None):
@@ -303,6 +319,12 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.redraw_from_text_block()
+
+        assert text_box.image is not None
+
+        text_box.rect.width = 0
+        text_box.redraw_from_text_block()  # should return
+
         assert text_box.image is not None
 
     def test_redraw_from_text_block_no_scrollbar(self, _init_pygame: None,
@@ -371,13 +393,17 @@ class TestUITextBox:
                                        'alalalala alalalalalal alal'
                                        'alalalala <a href=none>alala<a/> '
                                        'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                       'alalalalal lalal <effect id=test>alalalal</effect> al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
         text_box.active_text_effect.text_changed = True
         text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
+
+        # try setting a nonsense effect on a chunk
+        with pytest.warns(UserWarning, match="Unsupported effect name: blork for text chunk"):
+            text_box.set_active_effect(effect_type=UITextEffectType('blork'), effect_tag='test')
 
     def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):
@@ -504,6 +530,23 @@ class TestUITextBox:
 
         assert processed_down_event is True
 
+    def test_rebuild(self, _init_pygame,
+                     default_ui_manager: UIManager,
+                     _display_surface_return_none):
+        text_box = UITextBox(html_text='hello',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        text_box.rebuild()
+
+        assert text_box.image is not None
+
+        # try with 0 height rect, should return
+        text_box.rect.height = 0
+        text_box.rebuild()
+
+        assert text_box.image is not None
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
@@ -513,7 +556,7 @@ class TestUITextBox:
                                {"name": "fira_code", "size:": 14, "style": "italic"}])
         text_box = UITextBox(html_text="<font color=#FF0000 face=fira_code>Some "
                                        "<font color=regular_text>text</font> "
-                                       "in a <b>bold box</b> using "
+                                       "in a <b>bold box</b> <a>using</a> "
                                        "colours and <i>styles</i>.</font>",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=manager)
@@ -813,6 +856,50 @@ class TestUITextBox:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_on_locale_changed(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al'
+                                       'al alalalal lfed alal alal alal al'
+                                       'ala lalalal lasda lal a lalalal slapl'
+                                       'alalala lal la blop lal alal aferlal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        default_ui_manager.set_locale('fr')
+
+        default_ui_manager.set_locale('ja')
+
+        assert text_box.image is not None
+
+    def test_text_owner_interface(self, _init_pygame, default_ui_manager,
+                                  _display_surface_return_none):
+        text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                       'LLALAALALA ALALA ALAL ALA'
+                                       'LAALA ALALA ALALA AAaal aa'
+                                       'ALALAa laalal alalal alala'
+                                       'alalalala alalalalalal alal'
+                                       'alalalala <a href=none>alala<a/> '
+                                       'alalala ala'
+                                       'alalalalal lalal alalalal al'
+                                       'al alalalal lfed alal alal alal al'
+                                       'ala lalalal lasda lal a lalalal slapl'
+                                       'alalala lal la blop lal alal aferlal al',
+                             relative_rect=pygame.Rect(0, 0, 150, 100),
+                             manager=default_ui_manager)
+
+        # these do nothing right now for full block effects
+        text_box.set_text_offset_pos((0, 0))
+        text_box.set_text_rotation(0)
+        text_box.set_text_scale(0)
+
+        assert text_box.image is not None
 
 
 if __name__ == '__main__':
