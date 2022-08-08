@@ -219,8 +219,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             else:
                 self._remove_vert_scrollbar()
 
-            if self.scrolling_bottom < self._view_container.rect.bottom:
-                start_height = min(start_height, self._view_container.rect.height)
+            # Think this code is unreachable due to clamping
+            # if self.scrolling_bottom < self._view_container.rect.bottom:
+            #     start_height = min(start_height, self._view_container.rect.height)
 
             new_pos = (self.scrollable_container.relative_rect.x,
                        -start_height)
@@ -246,8 +247,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             else:
                 self._remove_horiz_scrollbar()
 
-            if self.scrolling_right < self._view_container.rect.right:
-                start_width = min(start_width, self._view_container.rect.width)
+            # Think this code is unreachable due to clamping
+            # if self.scrolling_right < self._view_container.rect.right:
+            #     start_width = min(start_width, self._view_container.rect.width)
             new_pos = (-start_width,
                        self.scrollable_container.relative_rect.y)
             self.scrollable_container.set_relative_position(new_pos)

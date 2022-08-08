@@ -607,6 +607,43 @@ class TestUIWindow:
         default_ui_manager.mouse_position = (200, 200)
         assert window.get_relative_mouse_pos() == (84, 57)
 
+    def test_drag_resizing(self, _init_pygame, default_ui_manager,
+                           _display_surface_return_none):
+        window = UIWindow(pygame.Rect(0, 0, 101, 101),
+                          window_display_title="Test Window",
+                          manager=default_ui_manager,
+                          visible=0)
+
+        window.start_resize_point = (50, 101)
+        window.start_resize_rect = window.rect.copy()
+        window.edge_hovering[3] = True
+        default_ui_manager.mouse_position = (50, 99)
+        window._update_drag_resizing()
+        window.edge_hovering[3] = False
+
+        window.start_resize_point = (50, 0)
+        window.start_resize_rect = window.rect.copy()
+        window.edge_hovering[1] = True
+        default_ui_manager.mouse_position = (50, 5)
+        window._update_drag_resizing()
+        window.edge_hovering[1] = False
+
+        window.start_resize_point = (101, 50)
+        window.start_resize_rect = window.rect.copy()
+        window.edge_hovering[2] = True
+        default_ui_manager.mouse_position = (99, 50)
+        window._update_drag_resizing()
+        window.edge_hovering[2] = False
+
+        window.start_resize_point = (0, 50)
+        window.start_resize_rect = window.rect.copy()
+        window.edge_hovering[0] = True
+        default_ui_manager.mouse_position = (5, 50)
+        window._update_drag_resizing()
+        window.edge_hovering[0] = False
+
+        assert window.rect.width == 100 and window.rect.height == 100
+
 
 if __name__ == '__main__':
     pytest.console_main()

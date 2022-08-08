@@ -196,6 +196,18 @@ class TestUIScrollingContainer:
         container.update(0.02)
         container.update(0.02)
 
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager)
+
+        container.set_scrollable_area_dimensions((500, 600))
+
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = 5.0
+        container.vert_scroll_bar.update(0.02)
+
+        container.scrollable_container.rect.top = -500  # scroll it too high and then update
+        container.update(0.02)
+
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
                      _display_surface_return_none: None):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),

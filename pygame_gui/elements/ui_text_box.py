@@ -773,14 +773,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         has_any_changed = False
 
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
         if self._check_misc_theme_data_changed(attribute_name='link_normal_underline',
                                                default_value=True,
-                                               casting_func=bool):
+                                               casting_func=parse_to_bool):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='link_hover_underline',
                                                default_value=True,
-                                               casting_func=bool):
+                                               casting_func=parse_to_bool):
             has_any_changed = True
 
         link_normal_colour = self.ui_theme.get_colour_or_gradient('link_text',
