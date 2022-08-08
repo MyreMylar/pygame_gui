@@ -8,6 +8,7 @@ from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.ui_manager import UIManager
 from tests.shared_comparators import compare_surfaces
 
+from pygame_gui import UITextEffectType
 
 class TestUITextBox:
 
@@ -380,13 +381,17 @@ class TestUITextBox:
                                        'alalalala alalalalalal alal'
                                        'alalalala <a href=none>alala<a/> '
                                        'alalala ala'
-                                       'alalalalal lalal alalalal al',
+                                       'alalalalal lalal <effect id=test>alalalal</effect> al',
                              relative_rect=pygame.Rect(100, 100, 150, 100),
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
         text_box.active_text_effect.text_changed = True
         text_box.update(5.0)
         assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
+
+        # try setting a nonsense effect on a chunk
+        with pytest.warns(UserWarning, match="Unsupported effect name: blork for text chunk"):
+            text_box.set_active_effect(effect_type=UITextEffectType('blork'), effect_tag='test')
 
     def test_set_active_effect_fade_in(self, _init_pygame: None, default_ui_manager: UIManager,
                                        _display_surface_return_none: None):

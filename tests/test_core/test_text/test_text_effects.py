@@ -23,9 +23,20 @@ class TestTypingAppearEffect:
 
         label = UILabel(pygame.Rect((10, 10), (200, 100)), 'Hello world',
                         default_ui_manager)
-        label_typing_effect = TypingAppearEffect(text_owner=label)
+        label.set_active_effect(TEXT_EFFECT_TYPING_APPEAR)
 
-        assert label_typing_effect.text_owner == label
+        assert label.active_text_effect.text_owner == label
+
+    def test_switching(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+        text_box.set_active_effect(TEXT_EFFECT_FADE_IN)
+        text_box.update(0.02)
+        text_box.set_active_effect(TEXT_EFFECT_TYPING_APPEAR)
+        text_box.update(0.02)
+
+        assert type(text_box.active_text_effect) is TypingAppearEffect
 
     def test_update(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
@@ -41,6 +52,8 @@ class TestTypingAppearEffect:
         text_box.active_text_effect.update(time_delta=0.06)
 
         assert text_box.active_text_effect.text_progress == 2
+
+        text_box.stop_finished_effect()
 
         label = UILabel(pygame.Rect((10, 10), (200, 100)), 'Hell',
                         default_ui_manager)
@@ -421,11 +434,13 @@ class TestBounceEffect:
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], BounceEffect)
 
     def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
-        text_box = UITextBox('<effect id=test>Hello world</effect> other text',
+        text_box = UITextBox('<effect id=test>Hello world</effect> other <effect id=test2>text</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
 
         text_box.set_active_effect(TEXT_EFFECT_BOUNCE, effect_tag='test',
+                                   params={'loop': False})
+        text_box.set_active_effect(TEXT_EFFECT_BOUNCE, effect_tag='test2',
                                    params={'loop': False})
         effect: BounceEffect = text_box.active_text_chunk_effects[0]['effect']
 
@@ -439,7 +454,7 @@ class TestBounceEffect:
             if event.type == UI_TEXT_EFFECT_FINISHED:
                 assert event.effect == TEXT_EFFECT_BOUNCE
 
-        text_box.set_active_effect(TEXT_EFFECT_BOUNCE, effect_tag='test',
+        text_box.set_active_effect(TEXT_EFFECT_TILT, effect_tag='test',
                                    params={'loop': False})
 
         text_box.clear_all_active_effects()

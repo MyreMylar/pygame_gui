@@ -23,7 +23,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
-from pygame_gui.core.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.text.text_effects import TextEffect, TypingAppearEffect, FadeInEffect, FadeOutEffect
 from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
 
 
@@ -99,7 +99,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.wrap_to_height = wrap_to_height
         self.link_hover_chunks = []  # container for any link chunks we have
 
-        self.active_text_effect = None
+        self.active_text_effect = None  # type: Optional[TextEffect]
         self.active_text_chunk_effects = []
         self.scroll_bar = None
         self.scroll_bar_width = 20
