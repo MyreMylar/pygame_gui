@@ -720,6 +720,7 @@ class TestUIElement:
 
             anchor_element.set_dimensions((30, 30))
             anchor_element.set_relative_position((45, 45))
+            anchor_element.set_position((45, 45))
 
     def test_enable_disable(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
