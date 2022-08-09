@@ -18,7 +18,7 @@ class TestUIFontDictionary:
 
         assert font_dictionary.loaded_fonts is not None
 
-    def load_bad_default_font(self, _init_pygame):
+    def test_load_bad_default_font(self, _init_pygame):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='derp')
         bad_font = DefaultFontData(14,
                                    'bad-font',
