@@ -216,10 +216,25 @@ class TestUIButton:
                           container=test_container,
                           manager=default_ui_manager)
 
+        button_2 = UIButton(relative_rect=pygame.Rect(200, 0, 50, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            container=test_container,
+                            manager=default_ui_manager,
+                            anchors={'left_target': button})
+
+        assert button.rect.topleft == (100, 100)
+        assert button_2.rect.topleft == (450, 100)
+
         button.set_position(pygame.math.Vector2(150.0, 30.0))
+
+        assert button.rect.topleft == (150, 30)
+        assert button_2.rect.topleft == (500, 100)
 
         assert (button.relative_rect.topleft == (50, -70) and
                 button.drawable_shape.containing_rect.topleft == (150, 30))
+
+        assert button_2.relative_rect.topleft == (200, 0)
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager,
                             _display_surface_return_none):

@@ -47,7 +47,7 @@ class UIElement(GUISprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 anchors: Dict[str, str] = None,
+                 anchors: Dict[str, Union[str, 'UIElement']] = None,
                  visible: int = 1):
 
         self._layer = 0

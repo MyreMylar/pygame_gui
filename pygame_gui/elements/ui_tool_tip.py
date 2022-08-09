@@ -37,7 +37,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  manager: IUIManagerInterface,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None):
+                 anchors: Dict[str, Union[str, UIElement]] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
