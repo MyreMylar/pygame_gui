@@ -703,6 +703,24 @@ class TestUIElement:
         anchor_element.set_dimensions((30, 30))
         anchor_element.set_relative_position((45, 45))
 
+        with pytest.warns(match="Unsupported anchor"):
+            anchor_element = UIElement(relative_rect=pygame.Rect(50, 50, 40, 40),
+                                       manager=default_ui_manager,
+                                       container=None,
+                                       starting_height=0,
+                                       layer_thickness=1,
+                                       anchors={'top': 'trop',
+                                                'bottom': 'bettom',
+                                                'left': 'laft',
+                                                'right': 'roight',
+                                                'left_target': element_1,
+                                                'right_target': element_2,
+                                                'top_target': element_3,
+                                                'bottom_target': element_4})
+
+            anchor_element.set_dimensions((30, 30))
+            anchor_element.set_relative_position((45, 45))
+
     def test_enable_disable(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
