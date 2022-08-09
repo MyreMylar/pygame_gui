@@ -633,7 +633,7 @@ class UIDropDownMenu(UIContainer):
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  expansion_height_limit: Union[int, None] = None,
-                 anchors: Dict[str, str] = None,
+                 anchors: Dict[str, Union[str, UIElement]] = None,
                  visible: int = 1
                  ):
 

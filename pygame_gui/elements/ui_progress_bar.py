@@ -30,7 +30,7 @@ class UIProgressBar(UIStatusBar):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None,
+                 anchors: Dict[str, Union[str, UIElement]] = None,
                  visible: int = 1):
 
         self.current_progress = 0.0

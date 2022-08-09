@@ -48,7 +48,7 @@ class UIButton(UIElement):
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None,
+                 anchors: Dict[str, Union[str, UIElement]] = None,
                  allow_double_clicks: bool = False,
                  generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
                  visible: int = 1

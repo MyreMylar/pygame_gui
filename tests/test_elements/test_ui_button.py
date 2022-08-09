@@ -216,10 +216,25 @@ class TestUIButton:
                           container=test_container,
                           manager=default_ui_manager)
 
+        button_2 = UIButton(relative_rect=pygame.Rect(200, 0, 50, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            container=test_container,
+                            manager=default_ui_manager,
+                            anchors={'left_target': button})
+
+        assert button.rect.topleft == (100, 100)
+        assert button_2.rect.topleft == (450, 100)
+
         button.set_position(pygame.math.Vector2(150.0, 30.0))
+
+        assert button.rect.topleft == (150, 30)
+        assert button_2.rect.topleft == (500, 100)
 
         assert (button.relative_rect.topleft == (50, -70) and
                 button.drawable_shape.containing_rect.topleft == (150, 30))
+
+        assert button_2.relative_rect.topleft == (200, 0)
 
     def test_set_dimensions(self, _init_pygame, default_ui_manager,
                             _display_surface_return_none):
@@ -637,6 +652,29 @@ class TestUIButton:
         button.rebuild()
 
         assert button.image is not None
+
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=manager)
+        assert button.shape_corner_radius == 2
+        manager.get_theme().load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
+        button.rebuild_from_changed_theme_data()
+
+        assert button.shape_corner_radius == 10
+
+        manager = UIManager((800, 600))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=manager)
+        assert button.shape_corner_radius == 2
+        manager.get_theme().load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
+        button.drawable_shape.theming['shape_corner_radius'] = 10
+        button.set_dimensions((200, 30))
+
+        assert button.drawable_shape.shape_corner_radius == 10
 
     def test_rebuild_shape_ellipse(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),

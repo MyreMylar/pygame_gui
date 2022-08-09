@@ -57,7 +57,7 @@ class UISelectionList(UIElement):
                  starting_height: int = 1,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None,
+                 anchors: Dict[str, Union[str, UIElement]] = None,
                  visible: int = 1,
                  default_selection: Union[
                     str, Tuple[str, str],               # Single-selection lists
