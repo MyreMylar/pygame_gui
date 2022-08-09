@@ -3,6 +3,7 @@ import html.parser
 from collections import deque
 from typing import List, Dict, Any
 from pathlib import Path
+from _markupbase import ParserBase
 
 import pygame
 import pygame.freetype
@@ -59,6 +60,7 @@ class HTMLParser(html.parser.HTMLParser):
                  line_spacing: float = 1.0):
 
         super().__init__()
+        ParserBase.__init__(self)
         self.ui_theme = ui_theme
         self.combined_ids = combined_ids
         self.line_spacing = line_spacing
