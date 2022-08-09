@@ -153,8 +153,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                 False))
 
         error = default_font_res.load()
-        if error is not None:
-            warnings.warn(str(error))
+        if error is not None and isinstance(Exception):
+            raise error
         self.loaded_fonts[self.default_font.idx] = default_font_res
 
         self.known_font_paths[self.default_font.name] = [

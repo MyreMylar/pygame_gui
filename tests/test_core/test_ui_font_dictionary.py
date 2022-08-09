@@ -1,7 +1,7 @@
 import pytest
 
 from pygame_gui.core import BlockingThreadedResourceLoader
-from pygame_gui.core.ui_font_dictionary import UIFontDictionary
+from pygame_gui.core.ui_font_dictionary import UIFontDictionary, DefaultFontData
 
 
 class TestUIFontDictionary:
@@ -17,6 +17,20 @@ class TestUIFontDictionary:
         font_dictionary.preload_font(font_size=14, font_name='fira_code', bold=True, italic=True)
 
         assert font_dictionary.loaded_fonts is not None
+
+    def load_bad_default_font(self, _init_pygame):
+        font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='derp')
+        bad_font = DefaultFontData(14,
+                                   'bad-font',
+                                   'regular',
+                                   'not_a_real_font.ttf',
+                                   'not_a_real_font.ttf',
+                                   'not_a_real_font.ttf',
+                                   'not_a_real_font.ttf')
+        font_dictionary.default_font_dictionary['zzap'] = bad_font
+
+        with pytest.raises(FileNotFoundError):
+            font_dictionary.set_locale('zzap')
 
     def test_find_font_unloaded_size(self, _init_pygame):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
