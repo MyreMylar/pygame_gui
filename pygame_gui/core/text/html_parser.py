@@ -3,7 +3,7 @@ import html.parser
 from collections import deque
 from typing import List, Dict, Any
 from pathlib import Path
-from html.parser._markupbase import ParserBase
+from _markupbase import ParserBase
 
 import pygame
 import pygame.freetype
