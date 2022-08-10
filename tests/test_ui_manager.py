@@ -350,6 +350,7 @@ class TestUIManager:
 
     def test_incremental_loading_something(self, _init_pygame, _display_surface_return_none):
         incremental_loader = IncrementalThreadedResourceLoader()
+        incremental_loader.set_update_time_budget(0.001)
 
         theme_package = PackageResource('tests.data.themes', 'image_loading_test.json')
         print(theme_package.to_path())

@@ -14,5 +14,13 @@
         "resource": "test_emoji.png"
       }
     }
+  },
+  "#3": {
+    "images": {
+      "normal_image": {
+        "package": "tests.data.images",
+        "resource": "space_1.jpg"
+      }
+    }
   }
 }
