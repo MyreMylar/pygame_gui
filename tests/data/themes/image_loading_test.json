@@ -1,0 +1,18 @@
+{
+  "#1": {
+    "images": {
+      "normal_image": {
+        "package": "tests.data.images",
+        "resource": "splat.png"
+      }
+    }
+  },
+  "#2": {
+    "images": {
+      "normal_image": {
+        "package": "tests.data.images",
+        "resource": "test_emoji.png"
+      }
+    }
+  }
+}

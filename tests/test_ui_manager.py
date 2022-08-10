@@ -9,6 +9,7 @@ from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
+from pygame_gui import PackageResource
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
@@ -346,6 +347,21 @@ class TestUIManager:
 
     def test_translation_dir_path(self):
         manager = UIManager((800, 600), translation_directory_paths=['pygame_gui/data/translations/'])
+
+    def test_incremental_loading_something(self, _init_pygame, _display_surface_return_none):
+        incremental_loader = IncrementalThreadedResourceLoader()
+
+        theme_package = PackageResource('tests.data.themes', 'image_loading_test.json')
+        print(theme_package.to_path())
+
+        UIManager((800, 600), theme_package,
+                  resource_loader=incremental_loader)
+
+        incremental_loader.start()
+        finished = False
+        while not finished:
+            finished, _ = incremental_loader.update()
+        assert finished
 
 
 if __name__ == '__main__':
