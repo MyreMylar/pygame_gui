@@ -632,8 +632,9 @@ class TestUIButton:
 
     def test_rebuild_from_changed_theme_data_bad_values_2(self, _init_pygame,
                                                           _display_surface_return_none):
-        manager = UIManager((800, 600),
-                            os.path.join("tests", "data", "themes", "ui_button_bad_values_2.json"))
+        with pytest.warns(UserWarning, match="Unable to find image with id"):
+            manager = UIManager((800, 600),
+                                os.path.join("tests", "data", "themes", "ui_button_bad_values_2.json"))
 
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",

@@ -7,6 +7,22 @@
              {
                 "normal_hovered": "dog"
              }
+         },
+         "images":
+         {
+             "normal_image": {
+                 "sub_surface_rect": "0,0,32,32"
+             },
+             "hovered_image": {
+                 "sub_surface_rect": "32,0,32,32"
+             },
+             "selected_image": {
+                 "sub_surface_rect": "64,0,32,32"
+             },
+             "disabled_image": {
+                 "sub_surface_rect": "96,0,32,32"
+             }
+
          }
      }
  }

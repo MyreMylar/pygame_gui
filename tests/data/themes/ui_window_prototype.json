@@ -12,7 +12,25 @@
             "shape": "rounded_rectangle",
             "border_width": "2",
             "shadow_width": "1"
-        }
+        },
+        "font":
+         {
+             "name": "roboto",
+             "size": "14",
+             "bold": "0",
+             "italic": "0",
+             "locale": "en",
+             "regular_path": "tests/data/Roboto-Regular.ttf",
+             "bold_path": "tests/data/Roboto-Regular.ttf",
+             "italic_path": "tests/data/Roboto-Regular.ttf",
+             "bold_italic_path": "tests/data/Roboto-Regular.ttf"
+         },
+         "images": {
+             "normal_image": {
+                 "path": "tests/data/images/splat.png",
+                 "sub_surface_rect": "0,0,32,32"
+             }
+         }
     },
     "window":
     {

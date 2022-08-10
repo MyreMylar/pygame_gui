@@ -23,9 +23,12 @@
          {
              "name": "roboto",
              "size": "14",
-             "bold": "0",
-             "italic": "0",
-             "regular_path": "tests/data/Roboto-Regular.ttf"
+             "bold": "1",
+             "italic": "1",
+             "regular_resource": { "package": "tests.data", "resource": "Roboto-Regular.ttf"},
+             "bold_resource": { "package": "tests.data", "resource": "Roboto-Regular.ttf"},
+             "italic_resource": { "package": "tests.data", "resource": "Roboto-Regular.ttf"},
+             "bold_italic_resource": { "package": "tests.data", "resource": "Roboto-Regular.ttf"}
          },
          "images":
          {
@@ -45,5 +48,14 @@
              "text_horiz_alignment_padding": "6",
              "text_vert_alignment_padding": "7"
          }
-     }
+     },
+    "#other_button": {
+        "images":
+         {
+             "normal_image": {
+                 "package": "tests.data.images",
+                 "resource": "splat.png"
+             }
+         }
+    }
  }
