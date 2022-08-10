@@ -629,6 +629,111 @@ class TestUIElement:
         assert element.hovered is False
         assert element.hover_time == 0.0
 
+    def test_get_relative_rect(self, _init_pygame, default_ui_manager):
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=None,
+                            starting_height=0,
+                            layer_thickness=1)
+
+        assert element.get_relative_rect() == pygame.Rect(0, 0, 50, 50)
+
+    def test_get_element_ids(self, _init_pygame, default_ui_manager):
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=None,
+                            starting_height=0,
+                            layer_thickness=1)
+
+        assert element.get_element_ids() is None
+
+    def test_invalid_container(self, _init_pygame, default_ui_manager):
+        bad_container = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                                  manager=default_ui_manager,
+                                  container=None,
+                                  starting_height=0,
+                                  layer_thickness=1)
+
+        with pytest.raises(ValueError):
+            element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                                manager=default_ui_manager,
+                                container=bad_container,
+                                starting_height=0,
+                                layer_thickness=1)
+
+    def test_anchor_targets(self, _init_pygame, default_ui_manager):
+        element_1 = UIElement(relative_rect=pygame.Rect(100, 50, 40, 40),
+                              manager=default_ui_manager,
+                              container=None,
+                              starting_height=0,
+                              layer_thickness=1)
+
+        element_2 = UIElement(relative_rect=pygame.Rect(0, 50, 40, 40),
+                              manager=default_ui_manager,
+                              container=None,
+                              starting_height=0,
+                              layer_thickness=1)
+
+        element_3 = UIElement(relative_rect=pygame.Rect(50, 0, 40, 40),
+                              manager=default_ui_manager,
+                              container=None,
+                              starting_height=0,
+                              layer_thickness=1)
+
+        element_4 = UIElement(relative_rect=pygame.Rect(50, 100, 40, 40),
+                              manager=default_ui_manager,
+                              container=None,
+                              starting_height=0,
+                              layer_thickness=1)
+
+        anchor_element = UIElement(relative_rect=pygame.Rect(50, 50, 40, 40),
+                                   manager=default_ui_manager,
+                                   container=None,
+                                   starting_height=0,
+                                   layer_thickness=1,
+                                   anchors={'top': 'top',
+                                            'bottom': 'bottom',
+                                            'left': 'left',
+                                            'right': 'right',
+                                            'left_target': element_1,
+                                            'right_target': element_2,
+                                            'top_target': element_3,
+                                            'bottom_target': element_4})
+
+        anchor_element.set_dimensions((30, 30))
+        anchor_element.set_relative_position((45, 45))
+
+        with pytest.warns(match="Unsupported anchor"):
+            anchor_element = UIElement(relative_rect=pygame.Rect(50, 50, 40, 40),
+                                       manager=default_ui_manager,
+                                       container=None,
+                                       starting_height=0,
+                                       layer_thickness=1,
+                                       anchors={'top': 'trop',
+                                                'bottom': 'bettom',
+                                                'left': 'laft',
+                                                'right': 'roight',
+                                                'left_target': element_1,
+                                                'right_target': element_2,
+                                                'top_target': element_3,
+                                                'bottom_target': element_4})
+
+            anchor_element.set_dimensions((30, 30))
+            anchor_element.set_relative_position((45, 45))
+            anchor_element.set_position((45, 45))
+
+    def test_enable_disable(self, _init_pygame, default_ui_manager):
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=None,
+                            starting_height=0,
+                            layer_thickness=1)
+
+        element.disable()
+        assert not element.is_enabled
+        element.enable()
+        assert element.is_enabled
+
 
 if __name__ == '__main__':
     pytest.console_main()

@@ -255,10 +255,8 @@ class UIElement(GUISprite, IUIElementInterface):
             self.element_ids,
             self.class_ids,
             self.object_ids)
-        if self.combined_element_ids is not None and len(self.combined_element_ids) > 0:
-            self.most_specific_combined_id = self.combined_element_ids[0]
-        else:
-            self.most_specific_combined_id = 'no_id'
+
+        self.most_specific_combined_id = self.combined_element_ids[0]
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
