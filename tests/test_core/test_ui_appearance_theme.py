@@ -82,10 +82,19 @@ class TestUIAppearanceTheme:
         theme.check_need_to_reload()
         assert theme.check_need_to_reload() is False
 
+    def test_check_need_to_reload_no_theme(self, _init_pygame):
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
+        theme._theme_file_path = None
+        assert theme.check_need_to_reload() is False
+
     def test_update_shape_cache(self, _init_pygame):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
         theme.update_caching(0.1)
         theme.update_caching(10.0)
+
+        theme.st_cache_clear_timer = 15.0
+        theme.update_caching(0.1)
+        assert theme.st_cache_clear_timer == 0.0
 
     def test_load_images_bad_path(self, _init_pygame):
         loader = BlockingThreadedResourceLoader()
