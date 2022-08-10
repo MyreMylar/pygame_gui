@@ -170,6 +170,12 @@ class TestUIAppearanceTheme:
         assert border_width == '2'
         assert shadow_width == '0'
 
+    def test_get_font(self, _init_pygame, _display_surface_return_none: None):
+        theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='nonsense_locale')
+        theme.load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
+        assert theme.get_font_info(['button']) == theme.ui_element_fonts_info['button']['en']
+        assert theme.get_font(['button']) == theme.ele_font_res['button']['en'].loaded_font
+
 
 if __name__ == '__main__':
     pytest.console_main()
