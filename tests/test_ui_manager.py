@@ -3,6 +3,8 @@ import platform
 import pygame
 import pytest
 
+from pathlib import Path
+
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
@@ -353,6 +355,7 @@ class TestUIManager:
         incremental_loader.set_update_time_budget(0.001)
 
         theme_package = PackageResource('tests.data.themes', 'image_loading_test.json')
+        assert Path(theme_package.to_path()).name == 'image_loading_test.json'
 
         UIManager((800, 600), theme_package,
                   resource_loader=incremental_loader)
