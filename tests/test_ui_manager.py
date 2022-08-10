@@ -353,7 +353,6 @@ class TestUIManager:
         incremental_loader.set_update_time_budget(0.001)
 
         theme_package = PackageResource('tests.data.themes', 'image_loading_test.json')
-        print(theme_package.to_path())
 
         UIManager((800, 600), theme_package,
                   resource_loader=incremental_loader)

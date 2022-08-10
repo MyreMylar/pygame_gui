@@ -19,7 +19,8 @@
     "images": {
       "normal_image": {
         "package": "tests.data.images",
-        "resource": "space_1.jpg"
+        "resource": "space_1.jpg",
+        "sub_surface_rect": "0,0,32,32"
       }
     }
   }
