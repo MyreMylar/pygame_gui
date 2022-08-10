@@ -25,6 +25,7 @@
              "size": "14",
              "bold": "0",
              "italic": "0",
+             "locale": "en",
              "regular_path": "tests/data/Roboto-Regular.ttf",
              "bold_path": "tests/data/Roboto-Regular.ttf",
              "italic_path": "tests/data/Roboto-Regular.ttf",
