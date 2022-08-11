@@ -87,9 +87,8 @@ class TypingAppearEffect(TextEffect):
         :param time_delta: time in seconds since last frame.
         """
         if self.text_progress < self.text_owner.get_text_letter_count(self.text_sub_chunk):
-            if self.time_per_letter_acc < self.current_time_per_letter:
-                self.time_per_letter_acc += time_delta
-            else:
+            self.time_per_letter_acc += time_delta
+            if self.time_per_letter_acc >= self.current_time_per_letter:
                 self.time_per_letter_acc = 0.0
                 self.text_progress += 1
                 self.text_changed = True
@@ -302,7 +301,12 @@ class BounceEffect(TextEffect):
     def _load_params(self, params: Optional[Dict[str, Any]]):
         if params is not None:
             if 'loop' in params:
-                self.loop = bool(params['loop'])
+                if isinstance(params['loop'], bool):
+                    self.loop = params['loop']
+                elif isinstance(params['loop'], str):
+                    self.loop = bool(int(params['loop']))
+                else:
+                    self.loop = bool(params['loop'])
             if 'bounce_max_height' in params:
                 self.bounce_max_height = int(params['bounce_max_height'])
             if 'time_to_complete_bounce' in params:
@@ -383,7 +387,12 @@ class TiltEffect(TextEffect):
     def _load_params(self, params: Optional[Dict[str, Any]]):
         if params is not None:
             if 'loop' in params:
-                self.loop = bool(params['loop'])
+                if isinstance(params['loop'], bool):
+                    self.loop = params['loop']
+                elif isinstance(params['loop'], str):
+                    self.loop = bool(int(params['loop']))
+                else:
+                    self.loop = bool(params['loop'])
             if 'max_rotation' in params:
                 self.max_rotation = int(params['max_rotation'])
             if 'time_to_complete_rotation' in params:
@@ -463,7 +472,12 @@ class ExpandContractEffect(TextEffect):
     def _load_params(self, params: Optional[Dict[str, Any]]):
         if params is not None:
             if 'loop' in params:
-                self.loop = bool(params['loop'])
+                if isinstance(params['loop'], bool):
+                    self.loop = params['loop']
+                elif isinstance(params['loop'], str):
+                    self.loop = bool(int(params['loop']))
+                else:
+                    self.loop = bool(params['loop'])
             if 'max_scale' in params:
                 self.max_scale = float(params['max_scale'])
             if 'time_to_complete_expand_contract' in params:

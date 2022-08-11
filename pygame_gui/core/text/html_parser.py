@@ -1,7 +1,7 @@
 import warnings
 import html.parser
 from collections import deque
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from pathlib import Path
 from _markupbase import ParserBase
 
@@ -100,7 +100,7 @@ class HTMLParser(html.parser.HTMLParser):
         """
         self.layout_rect_queue.clear()
 
-    def handle_starttag(self, tag: str, attrs: Dict[str, str]):
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, str]]):
         """
         Process an HTML 'start tag' (e.g. 'b' - tags are stripped of their angle brackets)
         where we have a start and an end tag enclosing a range of text this is the first
@@ -192,7 +192,7 @@ class HTMLParser(html.parser.HTMLParser):
                     warnings.warn('Size of: ' + str(float(attributes['size'])) +
                                   " - is not a supported html style size."
                                   " Try .5 increments between 1 & 7 or use 'pixel_size' instead to "
-                                  "set the font size directly")
+                                  "set the font size directly", category=UserWarning)
                     font_size = self.default_style['font_size']
             else:
                 font_size = None

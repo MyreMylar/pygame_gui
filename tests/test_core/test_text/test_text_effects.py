@@ -2,7 +2,7 @@ import pygame
 import pygame.freetype
 import pytest
 
-from pygame_gui.core.text import TypingAppearEffect, FadeInEffect, FadeOutEffect
+from pygame_gui.core.text import TypingAppearEffect, FadeInEffect, FadeOutEffect, TextEffect
 from pygame_gui.core.text import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
 from pygame_gui.ui_manager import UIManager
@@ -11,6 +11,18 @@ from pygame_gui.elements.ui_label import UILabel
 from pygame_gui import TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_FADE_IN, TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui import TEXT_EFFECT_BOUNCE, TEXT_EFFECT_TILT, TEXT_EFFECT_EXPAND_CONTRACT
 from pygame_gui import UITextEffectType, UI_TEXT_EFFECT_FINISHED
+
+
+class TestTextEffect:
+    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+        text_effect = TextEffect()
+
+        assert text_effect.get_final_alpha() == 255
+
+    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+        text_effect = TextEffect()
+
+        assert not text_effect.has_text_changed()
 
 
 class TestTypingAppearEffect:
@@ -48,8 +60,6 @@ class TestTypingAppearEffect:
 
         text_box.active_text_effect.update(time_delta=0.06)
         text_box.active_text_effect.update(time_delta=0.06)
-        text_box.active_text_effect.update(time_delta=0.06)
-        text_box.active_text_effect.update(time_delta=0.06)
 
         assert text_box.active_text_effect.text_progress == 2
 
@@ -65,14 +75,10 @@ class TestTypingAppearEffect:
         label.update(time_delta=0.06)
         label.update(time_delta=0.06)
         label.update(time_delta=0.06)
-        label.update(time_delta=0.06)
-        label.update(time_delta=0.06)
-        label.update(time_delta=0.06)
-        label.update(time_delta=0.06)
 
         assert label.active_text_effect.text_progress == 4
 
-        label.stop_finished_effect()
+        label.update(time_delta=0.06)
 
         assert label.active_text_effect is None
 
@@ -253,6 +259,16 @@ class TestFadeInEffect:
             if event.type == UI_TEXT_EFFECT_FINISHED:
                 assert event.effect == TEXT_EFFECT_FADE_IN
 
+    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('Hello world',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_FADE_IN,
+                                   params={'time_per_alpha_change': 19.0})
+
+        assert text_box.active_text_effect.get_final_alpha() == 0
+
 
 class TestFadeOutEffect:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
@@ -342,6 +358,16 @@ class TestFadeOutEffect:
             if event.type == UI_TEXT_EFFECT_FINISHED:
                 assert event.effect == TEXT_EFFECT_FADE_OUT
 
+    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('Hello world',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_FADE_OUT,
+                                   params={'time_per_alpha_change': 19.0})
+
+        assert text_box.active_text_effect.get_final_alpha() == 255
+
 
 class TestBounceEffect:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
@@ -378,6 +404,22 @@ class TestBounceEffect:
                              default_ui_manager)
 
         text_box.set_active_effect(TEXT_EFFECT_BOUNCE, effect_tag='test')
+
+        effect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert effect.bounce_height == 0
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+
+        assert effect.bounce_height != 0
+
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_BOUNCE, params={'loop': "1"}, effect_tag='test')
+        text_box.set_active_effect(TEXT_EFFECT_BOUNCE, params={'loop': 1}, effect_tag='test')
 
         effect = text_box.active_text_chunk_effects[0]['effect']
 
@@ -488,6 +530,23 @@ class TestTiltEffect:
 
         assert effect.current_rotation != 0
 
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_TILT, params={'loop': "1"}, effect_tag='test')
+        text_box.set_active_effect(TEXT_EFFECT_TILT, params={'loop': 1}, effect_tag='test')
+        text_box.set_active_effect(TEXT_EFFECT_TILT, params={'loop': True}, effect_tag='test')
+
+        effect: TiltEffect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert effect.current_rotation == 0
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+
+        assert effect.current_rotation != 0
+
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
@@ -569,6 +628,22 @@ class TestExpandContractEffect:
                              default_ui_manager)
 
         text_box.set_active_effect(TEXT_EFFECT_EXPAND_CONTRACT, effect_tag='test')
+
+        effect: ExpandContractEffect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert effect.current_scale == 1.0
+
+        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=0.06)
+
+        assert effect.current_scale != 1.0
+
+        text_box = UITextBox('<effect id=test>Hello world</effect> other text',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_EXPAND_CONTRACT, params={'loop': 1}, effect_tag='test')
+        text_box.set_active_effect(TEXT_EFFECT_EXPAND_CONTRACT, params={'loop': "1"}, effect_tag='test')
 
         effect: ExpandContractEffect = text_box.active_text_chunk_effects[0]['effect']
 
