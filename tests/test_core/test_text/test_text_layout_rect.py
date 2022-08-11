@@ -74,6 +74,9 @@ class TestTextLayoutRect:
         with pytest.raises(ValueError, match='Line width is too narrow'):
             layout_rect.split(requested_x=0, line_width=0, row_start_x=0)
 
+        with pytest.raises(ValueError, match='Row start must be 0 or greater'):
+            layout_rect.split(requested_x=50, line_width=50, row_start_x=-20)
+
         new_rect = layout_rect.split(requested_x=50, line_width=50, row_start_x=0)
 
         assert layout_rect.width == 50
