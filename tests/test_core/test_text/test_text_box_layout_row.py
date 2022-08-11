@@ -4,7 +4,8 @@ import pygame
 import pygame.freetype
 import pytest
 
-from pygame_gui.core.text import TextBoxLayoutRow, TextBoxLayout, SimpleTestLayoutRect, TextLineChunkFTFont
+from pygame_gui.core.text import HTMLParser, TextBoxLayoutRow, TextBoxLayout, TextFloatPosition
+from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont
 from pygame_gui.ui_manager import UIManager
 
 
@@ -118,6 +119,13 @@ class TestTextBoxLayoutRow:
         assert layout_row.items[2].right == 150
         assert layout_row.right == 150
 
+        simple_rect = SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.LEFT)
+        simple_rect_2 = SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.RIGHT)
+        text_box_layout.floating_rects.append(simple_rect)
+        text_box_layout.floating_rects.append(simple_rect_2)
+
+        layout_row.horiz_center_row(text_box_layout.floating_rects)
+
     def test_align_left_row(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
@@ -178,6 +186,14 @@ class TestTextBoxLayoutRow:
         assert layout_row.items[2].x == 165
         assert layout_row.items[2].right == 195
         assert layout_row.right == 195
+
+        simple_rect = SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.LEFT)
+        simple_rect_2 = SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.RIGHT)
+        text_box_layout.floating_rects.append(simple_rect)
+        text_box_layout.floating_rects.append(simple_rect_2)
+
+        layout_row.align_right_row(floating_rects=text_box_layout.floating_rects,
+                                   start_x=text_box_layout.layout_rect.width - 5)
 
     def test_vert_align_items_to_row(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([])
@@ -465,6 +481,10 @@ class TestTextBoxLayoutRow:
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
+        layout_row.set_cursor_from_click_pos((180, 5))
+
+        assert layout_row.cursor_index == 4
+
     def test_set_cursor_position(self):
         input_data = deque([])
         line_spacing = 1.25
@@ -510,7 +530,20 @@ class TestTextBoxLayoutRow:
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
-    def test_insert_text(self):
+    def test_insert_text(self, _init_pygame, default_ui_manager: UIManager):
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+                                                                             ['@test_text'],
+                                                                             ['#test_text_1'])
+        link_style = {'link_text': pygame.Color('#80A0F0'),
+                      'link_hover': pygame.Color('#5080C0'),
+                      'link_selected': pygame.Color('#8050C0'),
+                      'link_normal_underline': True,
+                      'link_hover_underline': True}
+        parser = HTMLParser(ui_theme=default_ui_manager.get_theme(),
+                            combined_ids=combined_ids,
+                            link_style=link_style,
+                            line_spacing=1.25)
+
         input_data = deque([])
         line_spacing = 1.25
         text_box_layout = TextBoxLayout(input_data_queue=input_data,
@@ -523,17 +556,22 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
-        text_chunk_1 = TextLineChunkFTFont(text='test',
-                                           font=font_1,
-                                           underlined=False,
-                                           colour=pygame.Color('#FFFFFF'),
-                                           using_default_text_colour=False,
-                                           bg_colour=pygame.Color('#00000000'))
+        with pytest.raises(AttributeError, match="Trying to insert into empty text row with no Parser"):
+            layout_row.insert_text('bad text', 0)
 
-        layout_row.add_item(text_chunk_1)
+        layout_row.insert_text('test', 0, parser=parser)
+
+        # font_1 = pygame.freetype.Font(None, 30)
+        # font_1.origin = True
+        # font_1.pad = True
+        # text_chunk_1 = TextLineChunkFTFont(text='test',
+        #                                    font=font_1,
+        #                                    underlined=False,
+        #                                    colour=pygame.Color('#FFFFFF'),
+        #                                    using_default_text_colour=False,
+        #                                    bg_colour=pygame.Color('#00000000'))
+        #
+        # layout_row.add_item(text_chunk_1)
 
         layout_row.insert_text(' this', 4)
 
