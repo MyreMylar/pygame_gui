@@ -57,6 +57,13 @@ class TestSimpleTestLayoutRect:
         assert another_rect.width == 56
         assert another_rect.height == 30
 
+        simple_rect = SimpleTestLayoutRect(dimensions=(200, 30), create_split_points=False)
+
+        assert simple_rect.split_points == []
+
+        with pytest.raises(ValueError, match="Line width is too narrow"):
+            simple_rect.split(requested_x=10, line_width=0, row_start_x=0)
+
 
 if __name__ == '__main__':
     pytest.console_main()
