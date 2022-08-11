@@ -36,6 +36,7 @@ class TestHorizRuleLayoutRect:
         horiz_rule = HorizRuleLayoutRect(height=20,
                                          colour_or_gradient=pygame.Color('#FFFFFF'),
                                          rule_dimensions=(100, 5))
+        horiz_rule.width = 200
 
         horiz_rule.finalise(target_surface=rule_surface,
                             target_area=pygame.Rect(0, 0, 200, 20),
@@ -48,6 +49,7 @@ class TestHorizRuleLayoutRect:
                                          rule_dimensions=(100, 5),
                                          alignment=HorizRuleLayoutRect.ALIGN_RIGHT,
                                          has_shade=False)
+        horiz_rule.width = 200
 
         horiz_rule.finalise(target_surface=rule_surface,
                             target_area=pygame.Rect(0, 0, 200, 20),
