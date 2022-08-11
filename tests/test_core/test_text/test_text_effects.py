@@ -82,6 +82,20 @@ class TestTypingAppearEffect:
 
         assert label.active_text_effect is None
 
+        text_box = UITextBox('<effect id=test>Hell</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_TYPING_APPEAR,
+                                   effect_tag='test')
+        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=0.06)
+
+        assert text_box.active_text_chunk_effects == []
+
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
@@ -425,10 +439,11 @@ class TestBounceEffect:
 
         assert effect.bounce_height == 0
 
-        effect.update(time_delta=0.06)
-        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.2)
+        effect.update(time_delta=0.2)
+        effect.update(time_delta=0.2)
 
-        assert effect.bounce_height != 0
+        assert effect.time_acc == 0.0
 
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
@@ -542,10 +557,10 @@ class TestTiltEffect:
 
         assert effect.current_rotation == 0
 
-        effect.update(time_delta=0.06)
-        effect.update(time_delta=0.06)
+        effect.update(time_delta=4.0)
+        effect.update(time_delta=4.0)
 
-        assert effect.current_rotation != 0
+        assert effect.time_acc == 0.0
 
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
@@ -649,10 +664,10 @@ class TestExpandContractEffect:
 
         assert effect.current_scale == 1.0
 
-        text_box.update(time_delta=0.06)
-        text_box.update(time_delta=0.06)
+        text_box.update(time_delta=1.1)
+        text_box.update(time_delta=1.1)
 
-        assert effect.current_scale != 1.0
+        assert effect.time_acc == 0.0
 
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',

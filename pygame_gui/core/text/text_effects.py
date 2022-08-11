@@ -318,8 +318,8 @@ class BounceEffect(TextEffect):
 
         :param time_delta: time in seconds since last frame.
         """
+        self.time_acc += time_delta
         if self.time_acc < self.time_to_complete_bounce:
-            self.time_acc += time_delta
 
             bounce_progress = self.time_acc / max(self.time_to_complete_bounce, 0.000001)
             if bounce_progress < 0.5:
@@ -404,9 +404,8 @@ class TiltEffect(TextEffect):
 
         :param time_delta: time in seconds since last frame.
         """
+        self.time_acc += time_delta
         if self.time_acc < self.time_to_complete_rotation:
-            self.time_acc += time_delta
-
             spin_progress = self.time_acc / max(self.time_to_complete_rotation, 0.000001)
             if spin_progress < 0.5:
                 current_rotation = int(((spin_progress * 2) ** 2) * self.max_rotation)
@@ -490,8 +489,8 @@ class ExpandContractEffect(TextEffect):
 
         :param time_delta: time in seconds since last frame.
         """
+        self.time_acc += time_delta
         if self.time_acc < self.time_to_complete_expand_contract:
-            self.time_acc += time_delta
 
             scale_progress = self.time_acc / max(self.time_to_complete_expand_contract, 0.000001)
             if scale_progress < 0.5:
