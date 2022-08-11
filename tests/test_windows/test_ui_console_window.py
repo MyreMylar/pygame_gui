@@ -9,15 +9,14 @@ from pygame_gui.windows.ui_console_window import UIConsoleWindow
 
 
 class TestUIConsoleWindow:
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
-
+    def test_creation(self, _init_pygame, default_ui_manager):
+        pygame.display.set_mode((800, 600))
         UIConsoleWindow(
             rect=pygame.rect.Rect((0, 0), (700, 500)),
             manager=default_ui_manager)
 
-    def test_command_entry_finished(self, _init_pygame, default_ui_manager,
-                                    _display_surface_return_none):
+    def test_command_entry_finished(self, _init_pygame, default_ui_manager):
+        pygame.display.set_mode((800, 600))
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (300, 200)),
                                          manager=default_ui_manager)
 

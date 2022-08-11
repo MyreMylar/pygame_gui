@@ -73,6 +73,10 @@ class TestHTMLParser:
 
         assert parser.current_style['font_size'] is None
 
+        parser.handle_starttag(tag='font', attrs=[('size', "")])
+
+        assert parser.current_style['font_size'] is None
+
         with pytest.warns(UserWarning, match="not a supported html style size"):
             parser.handle_starttag(tag='font', attrs=[('size', "8")])
 

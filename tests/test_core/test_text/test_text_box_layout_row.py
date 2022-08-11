@@ -485,6 +485,11 @@ class TestTextBoxLayoutRow:
 
         assert layout_row.cursor_index == 4
 
+        layout_row.set_cursor_from_click_pos((-1, 5))
+
+        assert layout_row.left == 0
+        assert layout_row.cursor_index == 0
+
     def test_set_cursor_position(self):
         input_data = deque([])
         line_spacing = 1.25
