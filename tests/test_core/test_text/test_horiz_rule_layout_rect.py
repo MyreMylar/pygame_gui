@@ -11,16 +11,6 @@ class TestHorizRuleLayoutRect:
         HorizRuleLayoutRect(height=20,
                             colour_or_gradient=pygame.Color('#FFFFFF'))
 
-        HorizRuleLayoutRect(height=20,
-                            colour_or_gradient=pygame.Color('#FFFFFF'),
-                            rule_dimensions=(100, 5))
-
-        HorizRuleLayoutRect(height=20,
-                            colour_or_gradient=pygame.Color('#FFFFFF'),
-                            rule_dimensions=(100, 5),
-                            alignment=HorizRuleLayoutRect.ALIGN_RIGHT,
-                            has_shade=False)
-
     def test_finalise(self):
         horiz_rule = HorizRuleLayoutRect(height=20,
                                          rule_dimensions=(-1, 1),
@@ -42,6 +32,28 @@ class TestHorizRuleLayoutRect:
         assert rule_surface.get_at((10, 2)) == pygame.Color(0, 0, 0, 0)
         assert rule_surface.get_at((10, 10)) == pygame.Color(255, 255, 255, 255)
         assert rule_surface.get_at((10, 11)) == pygame.Color(255, 255, 255, 63)
+
+        horiz_rule = HorizRuleLayoutRect(height=20,
+                                         colour_or_gradient=pygame.Color('#FFFFFF'),
+                                         rule_dimensions=(100, 5))
+
+        horiz_rule.finalise(target_surface=rule_surface,
+                            target_area=pygame.Rect(0, 0, 200, 20),
+                            row_chunk_origin=0,
+                            row_chunk_height=20,
+                            row_bg_height=20)
+
+        horiz_rule = HorizRuleLayoutRect(height=20,
+                                         colour_or_gradient=pygame.Color('#FFFFFF'),
+                                         rule_dimensions=(100, 5),
+                                         alignment=HorizRuleLayoutRect.ALIGN_RIGHT,
+                                         has_shade=False)
+
+        horiz_rule.finalise(target_surface=rule_surface,
+                            target_area=pygame.Rect(0, 0, 200, 20),
+                            row_chunk_origin=0,
+                            row_chunk_height=20,
+                            row_bg_height=20)
 
 
 if __name__ == '__main__':
