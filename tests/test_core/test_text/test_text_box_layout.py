@@ -346,7 +346,7 @@ class TestTextBoxLayout:
         layout.insert_layout_rects(layout_rects=insert_data,
                                    row_index=0,
                                    item_index=0,
-                                   chunk_index=31)
+                                   chunk_index=50)  # deliberately high, our find function should clamp this
 
         row = layout.layout_rows[1]
         chunk = row.items[0]
