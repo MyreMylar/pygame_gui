@@ -5,8 +5,10 @@ import pytest
 
 from pygame_gui.ui_manager import UIManager
 
-from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from pygame_gui.core.text.text_box_layout import TextBoxLayout, TextFloatPosition
 from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont, HyperlinkTextChunk
+from pygame_gui.core.text import ImageLayoutRect, HorizRuleLayoutRect
+from pygame_gui.core.text.text_layout_rect import Padding
 
 
 class TestTextBoxLayout:
@@ -25,14 +27,115 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(50, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(90, 20)),
-                            SimpleTestLayoutRect(dimensions=(175, 20))])
+                            SimpleTestLayoutRect(dimensions=(175, 20)),
+                            HorizRuleLayoutRect(height=1, colour_or_gradient=pygame.Color(255, 255, 255)),
+                            SimpleTestLayoutRect(dimensions=(110, 20)),
+                            SimpleTestLayoutRect(dimensions=(100, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(100, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(33, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20))
+                            ])
 
         layout = TextBoxLayout(input_data_queue=input_data,
-                               layout_rect=pygame.Rect(0, 0, 200, 300),
+                               layout_rect=pygame.Rect(0, 0, 200, 110),
                                view_rect=pygame.Rect(0, 0, 200, 150),
                                line_spacing=1.0)
 
         assert len(layout.layout_rows) > 0
+
+        input_data = deque([SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(25, 30), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(21, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(23, 20), float_pos=TextFloatPosition.LEFT)])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 110),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
+        input_data = deque([SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(25, 30), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(21, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(23, 20), float_pos=TextFloatPosition.RIGHT)])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 110),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
+        input_data = deque([ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0))])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 90),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
+    def test_too_wide_image(self, _init_pygame, default_ui_manager: UIManager):
+        input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(90, 20)),
+                            SimpleTestLayoutRect(dimensions=(175, 20)),
+                            SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            ImageLayoutRect(image_path='tests/data/images/space_1.jpg',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0))])
+
+        with pytest.warns(UserWarning, match="too wide for text layout"):
+            TextBoxLayout(input_data_queue=input_data,
+                          layout_rect=pygame.Rect(0, 0, 200, 300),
+                          view_rect=pygame.Rect(0, 0, 200, 150),
+                          line_spacing=1.0)
 
     def test_reprocess_layout_queue(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
@@ -210,8 +313,8 @@ class TestTextBoxLayout:
                             ])
 
         layout = TextBoxLayout(input_data_queue=input_data,
-                               layout_rect=pygame.Rect(0, 0, 500, 300),
-                               view_rect=pygame.Rect(0, 0, 500, 150),
+                               layout_rect=pygame.Rect(0, 0, 300, 150),
+                               view_rect=pygame.Rect(0, 0, 300, 150),
                                line_spacing=1.0)
 
         insert_data = deque([TextLineChunkFTFont(text='n insertion',
@@ -230,6 +333,50 @@ class TestTextBoxLayout:
         chunk = row.items[1]
 
         assert chunk.text == 'this is an insertion'
+
+        layout_surface = layout.finalise_to_new()
+
+        insert_data = deque([TextLineChunkFTFont(text=' with more text',
+                                                 font=the_font,
+                                                 underlined=False,
+                                                 colour=pygame.Color('#FFFFFF'),
+                                                 using_default_text_colour=False,
+                                                 bg_colour=pygame.Color('#FF0000'))])
+
+        layout.insert_layout_rects(layout_rects=insert_data,
+                                   row_index=0,
+                                   item_index=0,
+                                   chunk_index=31)
+
+        row = layout.layout_rows[1]
+        chunk = row.items[0]
+
+        assert chunk.text == 'with more text'
+
+        insert_data = deque([TextLineChunkFTFont(text=' and then even more text, text forever. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.',
+                                                 font=the_font,
+                                                 underlined=False,
+                                                 colour=pygame.Color('#FFFFFF'),
+                                                 using_default_text_colour=False,
+                                                 bg_colour=pygame.Color('#FF0000'))])
+
+        layout.insert_layout_rects(layout_rects=insert_data,
+                                   row_index=0,
+                                   item_index=0,
+                                   chunk_index=46)
 
     def test_horiz_centre_all_rows(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
@@ -468,6 +615,9 @@ class TestTextBoxLayout:
         assert layout.cursor_text_row.cursor_index == 2
         assert layout.cursor_text_row.cursor_draw_width == 17
 
+        layout.cursor_text_row.edit_cursor_active = True
+        layout.set_cursor_position(10)
+
     def test_set_cursor_from_click_pos(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
         input_data = deque([TextLineChunkFTFont(text='hello ',
@@ -499,6 +649,9 @@ class TestTextBoxLayout:
         assert layout.cursor_text_row is not None
         assert layout.cursor_text_row.cursor_index == 2
         assert layout.cursor_text_row.cursor_draw_width == 17
+
+        layout.cursor_text_row.edit_cursor_active = True
+        layout.set_cursor_from_click_pos((17, 24))
 
     def test_toggle_cursor(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
@@ -556,6 +709,12 @@ class TestTextBoxLayout:
                                                 colour=pygame.Color('#FFFFFF'),
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
+                            TextLineChunkFTFont(text=' end chunk',
+                                                font=the_font,
+                                                underlined=False,
+                                                colour=pygame.Color('#FF0000'),
+                                                using_default_text_colour=False,
+                                                bg_colour=pygame.Color('#FF0000'))
                             ])
 
         layout = TextBoxLayout(input_data_queue=input_data,
@@ -573,6 +732,8 @@ class TestTextBoxLayout:
             selected_text += chunk.text
 
         assert selected_text == ' this is a t'
+
+        layout.set_text_selection(5, 20)
 
     def test_set_default_text_colour(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
@@ -639,6 +800,16 @@ class TestTextBoxLayout:
 
         assert chunk.text == 'this is another insertion'
 
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 500, 300),
+                               view_rect=pygame.Rect(0, 0, 500, 150),
+                               line_spacing=1.0)
+
+        layout.layout_rows = []
+
+        with pytest.raises(RuntimeError, match="no rows in text box layout"):
+            layout.insert_text('this should fail', 0)
+
     def test_delete_selected_text(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
         input_data = deque([TextLineChunkFTFont(text='hello ',
@@ -694,6 +865,40 @@ class TestTextBoxLayout:
                 remaining_text += chunk.text
 
         assert remaining_text == 'helloest'
+
+        layout.set_text_selection(0, 0)
+
+        with pytest.raises(IndexError, match='No selected rows.'):
+            layout.delete_selected_text()
+
+        insert_data = deque([TextLineChunkFTFont(text=' and then even more text, text forever. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. <a href=none>loads of text</a>. '
+                                                      'loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.',
+                                                 font=the_font,
+                                                 underlined=False,
+                                                 colour=pygame.Color('#FFFFFF'),
+                                                 using_default_text_colour=False,
+                                                 bg_colour=pygame.Color('#FF0000'))])
+
+        layout.insert_layout_rects(layout_rects=insert_data,
+                                   row_index=0,
+                                   item_index=0,
+                                   chunk_index=8)
+
+        layout.set_text_selection(62, 112)
+        layout.delete_selected_text()
 
     def test_delete_at_cursor(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)

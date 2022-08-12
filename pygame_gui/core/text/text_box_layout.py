@@ -36,6 +36,7 @@ class TextBoxLayout:
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
+        self.last_row_height = int(14 * self.line_spacing)
 
         self.view_rect = view_rect
 
@@ -120,14 +121,20 @@ class TextBoxLayout:
             else:
                 current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
         # make sure we add the last row to the layout
-        self._add_row_to_layout(current_row)
+        self._add_row_to_layout(current_row, last_row=True)
 
-    def _add_row_to_layout(self, current_row):
+    def _add_row_to_layout(self, current_row: TextBoxLayoutRow, last_row=False):
+        # handle an empty row being added to layout
+        # otherwise we add infinite rows with no height
+        # instead add a line break rect to an empty row.
+        if len(current_row.items) == 0 and not last_row:
+            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height)))
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)
         if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
             self.layout_rect.height = current_row.bottom - self.layout_rect.y
         self._refresh_row_letter_counts()
+        self.last_row_height = current_row.height
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 
@@ -172,6 +179,7 @@ class TextBoxLayout:
                     current_row,
                     self.layout_rect.width,
                     test_layout_rect,
+                    input_queue,
                     max_floater_line_height)
             else:
                 self.floating_rects.append(test_layout_rect)
@@ -197,6 +205,7 @@ class TextBoxLayout:
                     current_row,
                     self.layout_rect.width,
                     test_layout_rect,
+                    input_queue,
                     max_floater_line_height)
             else:
                 self._add_floating_rect(current_row, test_layout_rect, input_queue)
@@ -270,9 +279,9 @@ class TextBoxLayout:
             except ValueError:
                 warnings.warn('Unable to split word into chunks because text box is too narrow')
                 current_row.add_item(test_layout_rect)
+
                 if isinstance(test_layout_rect, HyperlinkTextChunk):
                     self.link_chunks.append(test_layout_rect)
-                    return current_row
 
         else:
             # can't split, have to move whole chunk down a line.
@@ -431,7 +440,8 @@ class TextBoxLayout:
         self._process_layout_queue(temp_layout_queue, row)
 
         if self.finalised_surface is not None:
-            if self.layout_rect.size != self.finalised_surface.get_size():
+            if ((self.layout_rect.width + self.edit_buffer,
+                 self.layout_rect.height) != self.finalised_surface.get_size()):
                 self.finalise_to_new()
             else:
                 for row in self.layout_rows[row_index:]:
@@ -640,17 +650,19 @@ class TextBoxLayout:
         found_chunk = None
         letter_index = 0
         letter_accumulator = 0
-        chunk_row, index_in_row = self._find_row_from_text_box_index(index)
-        row_index = chunk_row.row_index
         chunk_in_row_index = 0
-        for chunk in chunk_row.items:
-            if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
-                if index_in_row < letter_accumulator + chunk.letter_count:
-                    letter_index = index_in_row - letter_accumulator
-                    found_chunk = chunk
-                    break
-                letter_accumulator += chunk.letter_count
-                chunk_in_row_index += 1
+        row_index = 0
+        chunk_row, index_in_row = self._find_row_from_text_box_index(index)
+        if chunk_row is not None:
+            row_index = chunk_row.row_index
+            for chunk in chunk_row.items:
+                if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
+                    if index_in_row < letter_accumulator + chunk.letter_count:
+                        letter_index = index_in_row - letter_accumulator
+                        found_chunk = chunk
+                        break
+                    letter_accumulator += chunk.letter_count
+                    chunk_in_row_index += 1
 
         if letter_index != 0:
             # split the chunk
@@ -693,19 +705,22 @@ class TextBoxLayout:
         :param parser: An optional HTML parser for text styling data
         """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
-        current_row.insert_text(text, index_in_row, parser)
+        if current_row is not None:
+            current_row.insert_text(text, index_in_row, parser)
 
-        temp_layout_queue = deque([])
-        for row in reversed(self.layout_rows[current_row.row_index:]):
-            row.rewind_row(temp_layout_queue)
+            temp_layout_queue = deque([])
+            for row in reversed(self.layout_rows[current_row.row_index:]):
+                row.rewind_row(temp_layout_queue)
 
-        self.layout_rows = self.layout_rows[:current_row.row_index]
+            self.layout_rows = self.layout_rows[:current_row.row_index]
 
-        self._process_layout_queue(temp_layout_queue, current_row)
+            self._process_layout_queue(temp_layout_queue, current_row)
 
-        if self.finalised_surface is not None:
-            for row in self.layout_rows[current_row.row_index:]:
-                row.finalise(self.finalised_surface)
+            if self.finalised_surface is not None:
+                for row in self.layout_rows[current_row.row_index:]:
+                    row.finalise(self.finalised_surface)
+        else:
+            raise RuntimeError("no rows in text box layout")
 
     def delete_selected_text(self):
         """
@@ -817,7 +832,7 @@ class TextBoxLayout:
                     row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
-        if self.layout_rows != 0:
+        if len(self.layout_rows) != 0:
             row_index = bisect_left(self.row_lengths, text_box_index)
             if row_index >= len(self.layout_rows):
                 row_index = len(self.layout_rows) - 1
@@ -850,7 +865,9 @@ class TextBoxLayout:
         self._process_layout_queue(new_queue, last_row)
         if self.finalised_surface is not None:
             if self.finalised_surface is not None:
-                if self.layout_rect.size != self.finalised_surface.get_size():
+
+                if ((self.layout_rect.width + self.edit_buffer,
+                     self.layout_rect.height) != self.finalised_surface.get_size()):
                     self.finalise_to_new()
                 else:
                     for row in self.layout_rows[last_row.row_index:]:
