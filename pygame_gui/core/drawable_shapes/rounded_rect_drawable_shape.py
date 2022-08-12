@@ -57,6 +57,7 @@ class RoundedRectangleShape(DrawableShape):
         """
         super().full_rebuild_on_size_change()
 
+        self.base_surface = None
         self.temp_additive_shape = None
         self.temp_subtractive_shape = None
         self.temp_shadow_subtractive_shape = None
@@ -125,12 +126,7 @@ class RoundedRectangleShape(DrawableShape):
                                                                self.shadow_width))
             if shadow is not None:
                 self.base_surface = shadow
-            else:
-                warnings.warn("shape created too small to fit in"
-                              " selected shadow width and corner radius")
-                self.base_surface = pygame.surface.Surface(self.containing_rect.size,
-                                                           flags=pygame.SRCALPHA,
-                                                           depth=32)
+
         else:
             self.click_area_shape = self.containing_rect.copy()
 
@@ -141,6 +137,7 @@ class RoundedRectangleShape(DrawableShape):
 
             self.corner_radius = max(corner_radius, 0)
 
+        if self.base_surface is None:
             self.base_surface = pygame.surface.Surface(self.containing_rect.size,
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)

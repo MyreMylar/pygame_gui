@@ -291,6 +291,64 @@ class TestRoundedRectangleShape:
         shape.clear_and_create_shape_surface(pygame.Surface((100, 100)), pygame.Rect(0, 0, 75, 75), overlap=0,
                                              corner_radius=40, aa_amount=4)
 
+    def test_redraw_state(self, _init_pygame, default_ui_manager: UIManager):
+        shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
+                                      theming_parameters={'text': 'test',
+                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
+                                                          'hovered_text': pygame.Color('#A0A0FF'),
+                                                          'hovered_text_shadow': pygame.Color('#000000'),
+                                                          'shadow_width': 2,
+                                                          'border_width': 1,
+                                                          'normal_border': pygame.Color('#FFFFFF'),
+                                                          'normal_bg': pygame.Color('#000000'),
+                                                          'hovered_border': pygame.Color('#000000'),
+                                                          'hovered_bg': pygame.Color('#FFFFFF'),
+                                                          'shape_corner_radius': 2,
+                                                          'text_horiz_alignment': 'center',
+                                                          'text_vert_alignment': 'center'},
+                                      states=['normal', 'hovered'], manager=default_ui_manager)
+
+        shape.redraw_state('hovered')
+        shape.shadow_width = 3
+        shape.redraw_state('hovered')
+
+    def test_clear_and_create_shape_surface_double_call(self, _init_pygame, default_ui_manager: UIManager):
+        shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
+                                      theming_parameters={'text': 'test',
+                                                          'font': default_ui_manager.ui_theme.get_font([]),
+                                                          'normal_text': pygame.Color('#FFFFFF'),
+                                                          'normal_text_shadow': pygame.Color('#000000'),
+                                                          'hovered_text': pygame.Color('#A0A0FF'),
+                                                          'hovered_text_shadow': pygame.Color('#000000'),
+                                                          'shadow_width': 2,
+                                                          'border_width': 1,
+                                                          'normal_border': pygame.Color('#FFFFFF'),
+                                                          'normal_bg': pygame.Color('#000000'),
+                                                          'hovered_border': pygame.Color('#000000'),
+                                                          'hovered_bg': pygame.Color('#FFFFFF'),
+                                                          'shape_corner_radius': 2,
+                                                          'text_horiz_alignment': 'center',
+                                                          'text_vert_alignment': 'center'},
+                                      states=['normal', 'hovered'], manager=default_ui_manager)
+
+        bab_surface = pygame.surface.Surface((shape.containing_rect.width * 2,
+                                              shape.containing_rect.height * 2),
+                                             flags=pygame.SRCALPHA, depth=32)
+
+        shape.clear_and_create_shape_surface(bab_surface,
+                                             shape.background_rect,
+                                             0,
+                                             2,
+                                             aa_amount=2)
+
+        shape.clear_and_create_shape_surface(bab_surface,
+                                             shape.background_rect,
+                                             0,
+                                             2,
+                                             aa_amount=2)
+
 
 if __name__ == '__main__':
     pytest.console_main()

@@ -41,9 +41,10 @@ class RectDrawableShape(DrawableShape):
         Everything needs rebuilding if we change the size of the containing rectangle.
 
         """
-
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
         super().full_rebuild_on_size_change()
+
+        self.base_surface = None
 
         if self.shadow_width > min(math.floor(self.containing_rect.width / 2),
                                    math.floor(self.containing_rect.height / 2)):
@@ -75,14 +76,11 @@ class RectDrawableShape(DrawableShape):
                                                 corner_radius=self.shadow_width)
             if shadow is not None:
                 self.base_surface = shadow
-            else:
-                warnings.warn(
-                    "shape created too small to fit in selected shadow width and corner radius")
-                self.base_surface = pygame.surface.Surface(self.containing_rect.size,
-                                                           flags=pygame.SRCALPHA,
-                                                           depth=32)
+
         else:
             self.click_area_shape = self.containing_rect.copy()
+
+        if self.base_surface is None:
             self.base_surface = pygame.surface.Surface(self.containing_rect.size,
                                                        flags=pygame.SRCALPHA,
                                                        depth=32)
