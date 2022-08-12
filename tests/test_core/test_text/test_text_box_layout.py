@@ -800,6 +800,8 @@ class TestTextBoxLayout:
 
         assert chunk.text == 'this is another insertion'
 
+        layout.insert_text('text on the end', 51)  # deliberately high number that should get clamped
+
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
