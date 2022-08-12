@@ -440,7 +440,8 @@ class TextBoxLayout:
         self._process_layout_queue(temp_layout_queue, row)
 
         if self.finalised_surface is not None:
-            if self.layout_rect.size != self.finalised_surface.get_size():
+            if ((self.layout_rect.width + self.edit_buffer,
+                 self.layout_rect.height) != self.finalised_surface.get_size()):
                 self.finalise_to_new()
             else:
                 for row in self.layout_rows[row_index:]:
@@ -864,7 +865,9 @@ class TextBoxLayout:
         self._process_layout_queue(new_queue, last_row)
         if self.finalised_surface is not None:
             if self.finalised_surface is not None:
-                if self.layout_rect.size != self.finalised_surface.get_size():
+
+                if ((self.layout_rect.width + self.edit_buffer,
+                     self.layout_rect.height) != self.finalised_surface.get_size()):
                     self.finalise_to_new()
                 else:
                     for row in self.layout_rows[last_row.row_index:]:
