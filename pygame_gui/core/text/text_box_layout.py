@@ -279,9 +279,9 @@ class TextBoxLayout:
             except ValueError:
                 warnings.warn('Unable to split word into chunks because text box is too narrow')
                 current_row.add_item(test_layout_rect)
+
                 if isinstance(test_layout_rect, HyperlinkTextChunk):
                     self.link_chunks.append(test_layout_rect)
-                    return current_row
 
         else:
             # can't split, have to move whole chunk down a line.

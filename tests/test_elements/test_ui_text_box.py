@@ -118,7 +118,7 @@ class TestUITextBox:
                                            'LLALAALALA ALALA ALAL ALA'
                                            'LAALA ALALA ALALA AAaal aa'
                                            'ALALAa laalal alalal alala'
-                                           'alalalala alalalalalal alal'
+                                           '<a>alalalala</a> alalalalalal alal'
                                            'alalalala alala alalala ala'
                                            'alalalalal lalal alalalal al',
                                  relative_rect=pygame.Rect(100, 100, 5, 50),

@@ -97,6 +97,29 @@ class TestTextBoxLayout:
 
         assert len(layout.layout_rows) > 0
 
+        input_data = deque([ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0)),
+                            ImageLayoutRect(image_path='tests/data/images/test_emoji.png',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0))])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 90),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
     def test_too_wide_image(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),

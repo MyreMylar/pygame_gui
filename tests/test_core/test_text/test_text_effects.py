@@ -96,6 +96,17 @@ class TestTypingAppearEffect:
 
         assert text_box.active_text_chunk_effects == []
 
+        text_box = UITextBox('Hello World this is a test of a longer bit of typing text',
+                             pygame.Rect((10, 10), (90, 150)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_TYPING_APPEAR)
+
+        for _ in range(0, 30):
+            text_box.update(time_delta=0.06)
+
+        assert label.active_text_effect is None
+
     def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
