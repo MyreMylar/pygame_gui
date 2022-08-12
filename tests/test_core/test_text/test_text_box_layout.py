@@ -32,8 +32,10 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(110, 20)),
                             SimpleTestLayoutRect(dimensions=(100, 20), float_pos=TextFloatPosition.LEFT),
                             SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.LEFT),
-                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.LEFT),
-                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.LEFT),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
@@ -44,8 +46,10 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(100, 20), float_pos=TextFloatPosition.RIGHT),
                             SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.RIGHT),
-                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.RIGHT),
-                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(20, 30), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(33, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(32, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.RIGHT),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
@@ -59,7 +63,7 @@ class TestTextBoxLayout:
                             ])
 
         layout = TextBoxLayout(input_data_queue=input_data,
-                               layout_rect=pygame.Rect(0, 0, 200, 300),
+                               layout_rect=pygame.Rect(0, 0, 200, 110),
                                view_rect=pygame.Rect(0, 0, 200, 150),
                                line_spacing=1.0)
 
