@@ -800,6 +800,16 @@ class TestTextBoxLayout:
 
         assert chunk.text == 'this is another insertion'
 
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 500, 300),
+                               view_rect=pygame.Rect(0, 0, 500, 150),
+                               line_spacing=1.0)
+
+        layout.layout_rows = []
+
+        with pytest.raises(RuntimeError, match="no rows in text box layout"):
+            layout.insert_text('this should fail', 0)
+
     def test_delete_selected_text(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)
         input_data = deque([TextLineChunkFTFont(text='hello ',
@@ -861,6 +871,34 @@ class TestTextBoxLayout:
         with pytest.raises(IndexError, match='No selected rows.'):
             layout.delete_selected_text()
 
+        insert_data = deque([TextLineChunkFTFont(text=' and then even more text, text forever. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. <a href=none>loads of text</a>. '
+                                                      'loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text. '
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.'
+                                                      'loads of text. loads of text. loads of text. loads of text.',
+                                                 font=the_font,
+                                                 underlined=False,
+                                                 colour=pygame.Color('#FFFFFF'),
+                                                 using_default_text_colour=False,
+                                                 bg_colour=pygame.Color('#FF0000'))])
+
+        layout.insert_layout_rects(layout_rects=insert_data,
+                                   row_index=0,
+                                   item_index=0,
+                                   chunk_index=8)
+
+        layout.set_text_selection(62, 112)
+        layout.delete_selected_text()
 
     def test_delete_at_cursor(self, _init_pygame, default_ui_manager: UIManager):
         the_font = pygame.freetype.Font(None, 20)

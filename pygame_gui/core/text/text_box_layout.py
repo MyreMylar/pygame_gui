@@ -649,17 +649,19 @@ class TextBoxLayout:
         found_chunk = None
         letter_index = 0
         letter_accumulator = 0
-        chunk_row, index_in_row = self._find_row_from_text_box_index(index)
-        row_index = chunk_row.row_index
         chunk_in_row_index = 0
-        for chunk in chunk_row.items:
-            if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
-                if index_in_row < letter_accumulator + chunk.letter_count:
-                    letter_index = index_in_row - letter_accumulator
-                    found_chunk = chunk
-                    break
-                letter_accumulator += chunk.letter_count
-                chunk_in_row_index += 1
+        row_index = 0
+        chunk_row, index_in_row = self._find_row_from_text_box_index(index)
+        if chunk_row is not None:
+            row_index = chunk_row.row_index
+            for chunk in chunk_row.items:
+                if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
+                    if index_in_row < letter_accumulator + chunk.letter_count:
+                        letter_index = index_in_row - letter_accumulator
+                        found_chunk = chunk
+                        break
+                    letter_accumulator += chunk.letter_count
+                    chunk_in_row_index += 1
 
         if letter_index != 0:
             # split the chunk
@@ -702,19 +704,22 @@ class TextBoxLayout:
         :param parser: An optional HTML parser for text styling data
         """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
-        current_row.insert_text(text, index_in_row, parser)
+        if current_row is not None:
+            current_row.insert_text(text, index_in_row, parser)
 
-        temp_layout_queue = deque([])
-        for row in reversed(self.layout_rows[current_row.row_index:]):
-            row.rewind_row(temp_layout_queue)
+            temp_layout_queue = deque([])
+            for row in reversed(self.layout_rows[current_row.row_index:]):
+                row.rewind_row(temp_layout_queue)
 
-        self.layout_rows = self.layout_rows[:current_row.row_index]
+            self.layout_rows = self.layout_rows[:current_row.row_index]
 
-        self._process_layout_queue(temp_layout_queue, current_row)
+            self._process_layout_queue(temp_layout_queue, current_row)
 
-        if self.finalised_surface is not None:
-            for row in self.layout_rows[current_row.row_index:]:
-                row.finalise(self.finalised_surface)
+            if self.finalised_surface is not None:
+                for row in self.layout_rows[current_row.row_index:]:
+                    row.finalise(self.finalised_surface)
+        else:
+            raise RuntimeError("no rows in text box layout")
 
     def delete_selected_text(self):
         """
@@ -826,7 +831,7 @@ class TextBoxLayout:
                     row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
-        if self.layout_rows != 0:
+        if len(self.layout_rows) != 0:
             row_index = bisect_left(self.row_lengths, text_box_index)
             if row_index >= len(self.layout_rows):
                 row_index = len(self.layout_rows) - 1
