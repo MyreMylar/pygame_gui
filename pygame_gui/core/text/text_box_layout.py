@@ -36,6 +36,7 @@ class TextBoxLayout:
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
+        self.last_row_height = int(14 * self.line_spacing)
 
         self.view_rect = view_rect
 
@@ -120,14 +121,20 @@ class TextBoxLayout:
             else:
                 current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
         # make sure we add the last row to the layout
-        self._add_row_to_layout(current_row)
+        self._add_row_to_layout(current_row, last_row=True)
 
-    def _add_row_to_layout(self, current_row):
+    def _add_row_to_layout(self, current_row: TextBoxLayoutRow, last_row=False):
+        # handle an empty row being added to layout
+        # otherwise we add infinite rows with no height
+        # instead add a line break rect to an empty row.
+        if len(current_row.items) == 0 and not last_row:
+            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height)))
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)
         if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
             self.layout_rect.height = current_row.bottom - self.layout_rect.y
         self._refresh_row_letter_counts()
+        self.last_row_height = current_row.height
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 

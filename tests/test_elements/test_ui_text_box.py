@@ -887,10 +887,10 @@ class TestUITextBox:
                                        'alalalala alalalalalal alal'
                                        'alalalala <a href=none>alala<a/> '
                                        'alalala ala'
-                                       'alalalalal lalal alalalal al'
+                                       '<a href=none>alalalalal lalal alalalal al'
                                        'al alalalal lfed alal alal alal al'
                                        'ala lalalal lasda lal a lalalal slapl'
-                                       'alalala lal la blop lal alal aferlal al',
+                                       'alalala lal la blop lal alal aferlal al</a>',
                              relative_rect=pygame.Rect(0, 0, 150, 100),
                              manager=default_ui_manager)
 

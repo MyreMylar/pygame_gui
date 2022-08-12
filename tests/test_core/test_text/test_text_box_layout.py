@@ -5,8 +5,10 @@ import pytest
 
 from pygame_gui.ui_manager import UIManager
 
-from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from pygame_gui.core.text.text_box_layout import TextBoxLayout, TextFloatPosition
 from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont, HyperlinkTextChunk
+from pygame_gui.core.text import ImageLayoutRect, HorizRuleLayoutRect
+from pygame_gui.core.text.text_layout_rect import Padding
 
 
 class TestTextBoxLayout:
@@ -25,7 +27,11 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(50, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(90, 20)),
-                            SimpleTestLayoutRect(dimensions=(175, 20))])
+                            SimpleTestLayoutRect(dimensions=(175, 20)),
+                            HorizRuleLayoutRect(height=1, colour_or_gradient=pygame.Color(255, 255, 255)),
+                            SimpleTestLayoutRect(dimensions=(110, 20)),
+                            SimpleTestLayoutRect(dimensions=(100, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(20, 20), float_pos=TextFloatPosition.LEFT)])
 
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
@@ -33,6 +39,23 @@ class TestTextBoxLayout:
                                line_spacing=1.0)
 
         assert len(layout.layout_rows) > 0
+
+    def test_too_wide_image(self, _init_pygame, default_ui_manager: UIManager):
+        input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            SimpleTestLayoutRect(dimensions=(90, 20)),
+                            SimpleTestLayoutRect(dimensions=(175, 20)),
+                            SimpleTestLayoutRect(dimensions=(50, 20)),
+                            SimpleTestLayoutRect(dimensions=(30, 20)),
+                            ImageLayoutRect(image_path='tests/data/images/space_1.jpg',
+                                            float_position=TextFloatPosition.RIGHT,
+                                            padding=Padding(0, 0, 0, 0))])
+
+        with pytest.warns(UserWarning, match="too wide for text layout"):
+            TextBoxLayout(input_data_queue=input_data,
+                          layout_rect=pygame.Rect(0, 0, 200, 300),
+                          view_rect=pygame.Rect(0, 0, 200, 150),
+                          line_spacing=1.0)
 
     def test_reprocess_layout_queue(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
