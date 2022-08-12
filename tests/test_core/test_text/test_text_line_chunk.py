@@ -300,6 +300,7 @@ class TestTextLineChunkFTFont:
                                     bg_colour=pygame.Color('#FF00FF'))
 
         assert chunk.text == ''
+        chunk.insert_text(input_text='', index=0)
         chunk.insert_text(input_text='start from no text', index=0)
 
         assert chunk.text == 'start from no text'
@@ -525,6 +526,7 @@ class TestTextLineChunkFTFont:
         chunk.grab_pre_effect_surface()
         chunk.set_alpha(128)
         chunk.set_alpha(50)
+        chunk.redraw()
         chunk.set_alpha(255)
         chunk.grab_pre_effect_surface()
         chunk.set_alpha(0)
@@ -550,7 +552,7 @@ class TestTextLineChunkFTFont:
                        chunk.height)
         chunk.grab_pre_effect_surface()
         chunk.set_offset_pos((10, 10))
-
+        chunk.redraw()
         chunk.set_offset_pos((0, 0))
 
         assert chunk.effects_offset_pos == (0, 0)
@@ -574,6 +576,7 @@ class TestTextLineChunkFTFont:
                        chunk.height)
         chunk.grab_pre_effect_surface()
         chunk.set_scale(2.0)
+        chunk.redraw()
         chunk.set_scale(1.0)
 
         assert chunk.effects_scale == 1.0
@@ -597,6 +600,7 @@ class TestTextLineChunkFTFont:
                        chunk.height)
         chunk.grab_pre_effect_surface()
         chunk.set_rotation(45)
+        chunk.redraw()
         chunk.set_rotation(180)
         chunk.set_rotation(0)
 
