@@ -179,6 +179,7 @@ class TextBoxLayout:
                     current_row,
                     self.layout_rect.width,
                     test_layout_rect,
+                    input_queue,
                     max_floater_line_height)
             else:
                 self.floating_rects.append(test_layout_rect)
@@ -204,6 +205,7 @@ class TextBoxLayout:
                     current_row,
                     self.layout_rect.width,
                     test_layout_rect,
+                    input_queue,
                     max_floater_line_height)
             else:
                 self._add_floating_rect(current_row, test_layout_rect, input_queue)

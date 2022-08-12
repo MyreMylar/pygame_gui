@@ -69,6 +69,34 @@ class TestTextBoxLayout:
 
         assert len(layout.layout_rows) > 0
 
+        input_data = deque([SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(25, 30), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(21, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.LEFT),
+                            SimpleTestLayoutRect(dimensions=(23, 20), float_pos=TextFloatPosition.LEFT)])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 110),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
+        input_data = deque([SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(25, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(25, 30), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(21, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(22, 20), float_pos=TextFloatPosition.RIGHT),
+                            SimpleTestLayoutRect(dimensions=(23, 20), float_pos=TextFloatPosition.RIGHT)])
+
+        layout = TextBoxLayout(input_data_queue=input_data,
+                               layout_rect=pygame.Rect(0, 0, 100, 110),
+                               view_rect=pygame.Rect(0, 0, 200, 150),
+                               line_spacing=1.0)
+
+        assert len(layout.layout_rows) > 0
+
     def test_too_wide_image(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20)),
