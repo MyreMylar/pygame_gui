@@ -341,13 +341,15 @@ class TestRoundedRectangleShape:
                                              shape.background_rect,
                                              0,
                                              2,
-                                             aa_amount=2)
+                                             aa_amount=2,
+                                             clear=True)
 
         shape.clear_and_create_shape_surface(bab_surface,
                                              shape.background_rect,
                                              0,
                                              2,
-                                             aa_amount=2)
+                                             aa_amount=2,
+                                             clear=True)
 
 
 if __name__ == '__main__':
