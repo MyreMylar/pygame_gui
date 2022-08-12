@@ -346,7 +346,7 @@ class TestTextBoxLayout:
         layout.insert_layout_rects(layout_rects=insert_data,
                                    row_index=0,
                                    item_index=0,
-                                   chunk_index=31)
+                                   chunk_index=50)  # deliberately high, our find function should clamp this
 
         row = layout.layout_rows[1]
         chunk = row.items[0]
@@ -799,6 +799,8 @@ class TestTextBoxLayout:
         chunk = row.items[1]
 
         assert chunk.text == 'this is another insertion'
+
+        layout.insert_text('text on the end', 51)  # deliberately high number that should get clamped
 
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),

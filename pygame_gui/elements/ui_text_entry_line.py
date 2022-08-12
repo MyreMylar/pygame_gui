@@ -199,6 +199,7 @@ class UITextEntryLine(UIElement):
                               'disabled_text_shadow': pygame.Color('#000000'),
                               'disabled_border': self.disabled_border_colour,
                               'selected_text': self.selected_text_colour,
+                              'selected_bg': self.selected_bg_colour,
                               'text_cursor_colour': self.text_cursor_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
