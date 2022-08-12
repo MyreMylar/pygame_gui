@@ -6,8 +6,8 @@
              "normal_text": "#000000,#FF0000AA,260",
              "text_shadow": "#FFFFFF",
              "normal_border": "#AAAAAA,#FFFFFF,0",
-             "filled_bar": "#f4251b,#FF0000AA,90",
-             "unfilled_bar": "#CCCCCF"
+             "filled_bar": "#f4251b",
+             "unfilled_bar": "#f4251b,#FF0000AA,90"
          },
          "font":
          {

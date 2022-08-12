@@ -109,7 +109,9 @@ class TestEllipseDrawableShape:
                                                          'text_horiz_alignment': 'center',
                                                          'text_vert_alignment': 'center'},
                                      states=['normal'], manager=default_ui_manager)
-        shape.set_dimensions((50, 50))
+        assert shape.set_dimensions((50, 50))
+
+        assert not shape.set_dimensions(shape.containing_rect.size)
 
     def test_creation_with_gradients(self, _init_pygame, default_ui_manager: UIManager):
         EllipseDrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),

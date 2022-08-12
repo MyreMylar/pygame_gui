@@ -140,6 +140,11 @@ class TestDrawableShape:
         assert shape.get_surface('normal').get_width() == 0
         assert shape.get_surface('test_fail').get_height() == 0
 
+        shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
+                              theming_parameters={}, states=['normal', 'hovered'], manager=default_ui_manager)
+        shape.states['hovered'].surface = None
+        assert shape.get_surface('hovered') == shape.states['normal'].surface
+
     def test_get_fresh_surface(self, _init_pygame, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
@@ -197,6 +202,7 @@ class TestDrawableShape:
                                                   'normal_text_shadow': pygame.Color('#000000'),
                                                   'shadow_width': 0,
                                                   'border_width': 0,
+                                                  'text_height': 30,
                                                   'normal_image': pygame.image.load('tests/data/images/splat.png'),
                                                   'text_shadow': (0,
                                                                   0,
