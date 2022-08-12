@@ -96,7 +96,8 @@ class TestTypingAppearEffect:
 
         assert text_box.active_text_chunk_effects == []
 
-        text_box = UITextBox('Hello World this is a test of a longer bit of typing text',
+        text_box = UITextBox('<a href=none>Hello</a> World <a href=none>this is</a> a test <a href=none>of a longer</a> '
+                             'bit <a href=none>of typing</a> text',
                              pygame.Rect((10, 10), (90, 150)),
                              default_ui_manager)
 
