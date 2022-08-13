@@ -348,6 +348,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
         else:
             warnings.warn('Unsupported effect name: ' + str(effect_type) + ' for label', category=UserWarning)
 
+        if self.active_text_effect is not None:
+            self.active_text_effect.text_changed = True
+            self.update_text_effect(0.0)
+
     def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
         self.active_text_effect = None
 
