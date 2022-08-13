@@ -371,11 +371,8 @@ class UITextEntryLine(UIElement):
         super().focus()
         pygame.key.set_repeat(500, 25)
         if len(self.text) == 0:
-            display_text = self.text
-            if self.is_text_hidden:
-                display_text = self.hidden_text_char * len(self.text)
             if self.drawable_shape is not None:
-                self.drawable_shape.set_text(display_text)
+                self.drawable_shape.set_text(self.text)
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.drawable_shape.apply_active_text_changes()
 
