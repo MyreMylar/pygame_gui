@@ -964,6 +964,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                             chunk.grab_pre_effect_surface()
                             self.active_text_chunk_effects.append({'chunk': chunk,
                                                                    'effect': effect})
+                            if effect is not None:
+                                effect.text_changed = True
+                                self.update_text_effect(0.0)
         else:
             if self.active_text_effect is not None or len(self.active_text_chunk_effects) != 0:
                 self.clear_all_active_effects()
@@ -982,6 +985,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             else:
                 warnings.warn('Unsupported effect name: '
                               + str(effect_type) + ' for whole text box')
+
+            if self.active_text_effect is not None:
+                self.active_text_effect.text_changed = True
+                self.update_text_effect(0.0)
 
     def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
         if sub_chunk is None:
