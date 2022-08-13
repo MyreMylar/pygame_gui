@@ -243,9 +243,10 @@ class UIVerticalScrollBar(UIElement):
         if (self.is_enabled and
                 self._check_is_focus_set_hovered() and
                 event.type == pygame.MOUSEWHEEL):
-            self.scroll_wheel_moved = True
-            self.scroll_wheel_amount = event.y
-            consumed_event = True
+            if event.y != 0:
+                self.scroll_wheel_moved = True
+                self.scroll_wheel_amount = event.y
+                consumed_event = True
 
         return consumed_event
 

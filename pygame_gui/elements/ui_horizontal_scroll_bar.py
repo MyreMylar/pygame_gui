@@ -243,11 +243,12 @@ class UIHorizontalScrollBar(UIElement):
         if (self.is_enabled and
                 self._check_is_focus_set_hovered() and
                 event.type == pygame.MOUSEWHEEL):
-            if event.x > 0:
-                self.scroll_wheel_left = True
-            elif event.x < 0:
-                self.scroll_wheel_right = True
-            return True
+            if event.x != 0:
+                if event.x > 0:
+                    self.scroll_wheel_left = True
+                elif event.x < 0:
+                    self.scroll_wheel_right = True
+                return True
 
         return False
 
@@ -279,8 +280,12 @@ class UIHorizontalScrollBar(UIElement):
             moved_this_frame = False
             if ((self.left_button is not None and self.left_button.held) or
                     (self.scroll_wheel_left and self.scroll_position > self.left_limit)):
+                scroll_speed = 250.0
+                if self.scroll_wheel_left:
+                    # wheel events are less frequent than every frame so increase the speed
+                    scroll_speed *= 2
                 self.scroll_wheel_left = False
-                self.scroll_position -= (250.0 * time_delta)
+                self.scroll_position -= (scroll_speed * time_delta)
                 self.scroll_position = max(self.scroll_position, self.left_limit)
                 x_pos = (self.scroll_position + self.arrow_button_width)
                 y_pos = 0
@@ -288,8 +293,12 @@ class UIHorizontalScrollBar(UIElement):
                 moved_this_frame = True
             elif ((self.right_button is not None and self.right_button.held) or
                   (self.scroll_wheel_right and self.scroll_position < self.right_limit)):
+                scroll_speed = 250.0
+                if self.scroll_wheel_right:
+                    # wheel events are less frequent than every frame so increase the speed
+                    scroll_speed *= 2
                 self.scroll_wheel_right = False
-                self.scroll_position += (250.0 * time_delta)
+                self.scroll_position += (scroll_speed * time_delta)
                 self.scroll_position = min(self.scroll_position,
                                            self.right_limit -
                                            self.sliding_button.relative_rect.width)
