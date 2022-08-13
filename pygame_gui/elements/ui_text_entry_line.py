@@ -68,7 +68,9 @@ class UITextEntryLine(UIElement):
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, Union[str, UIElement]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 *,
+                 placeholder_text: Optional[str] = None):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
@@ -82,6 +84,9 @@ class UITextEntryLine(UIElement):
         self.text = ""
         self.is_text_hidden = False
         self.hidden_text_char = '●'
+        self.placeholder_text = ""
+        if placeholder_text is not None:
+            self.placeholder_text = placeholder_text
 
         # theme font
         self.font: Optional[pygame.freetype.Font] = None
@@ -106,7 +111,6 @@ class UITextEntryLine(UIElement):
         self.text_cursor_colour = None
         self.padding = (0, 0)
 
-        self.drawable_shape = None
         self.shape = 'rectangle'
         self.shape_corner_radius = None
 
@@ -204,7 +208,7 @@ class UITextEntryLine(UIElement):
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
-                              'text': display_text,
+                              'text': display_text if len(display_text) > 0 else self.placeholder_text,
                               'text_width': -1,
                               'text_horiz_alignment': 'left',
                               'text_vert_alignment': 'centre',
@@ -264,7 +268,7 @@ class UITextEntryLine(UIElement):
                 if self.is_text_hidden:
                     display_text = self.hidden_text_char * len(self.text)
                 if self.drawable_shape is not None:
-                    self.drawable_shape.set_text(display_text)
+                    self.drawable_shape.set_text(display_text if len(display_text) > 0 else self.placeholder_text)
                     self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                     self.drawable_shape.apply_active_text_changes()
             else:
@@ -352,6 +356,11 @@ class UITextEntryLine(UIElement):
         self.edit_position = 0
         self.cursor_on = False
         self.text_entered = False
+        if len(self.text) == 0:
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_text(self.placeholder_text)
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.drawable_shape.apply_active_text_changes()
         self.redraw()
 
     def focus(self):
@@ -361,6 +370,11 @@ class UITextEntryLine(UIElement):
         """
         super().focus()
         pygame.key.set_repeat(500, 25)
+        if len(self.text) == 0:
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_text(self.text)
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.drawable_shape.apply_active_text_changes()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
