@@ -1055,3 +1055,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.html_text = html_text
         self.appended_text = ""  # clear appended text as it feels odd to set the text and still have appended text
         self._reparse_and_rebuild()
+
+    def clear(self):
+        self.set_text("")

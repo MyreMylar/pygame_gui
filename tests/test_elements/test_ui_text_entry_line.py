@@ -42,6 +42,25 @@ class TestUITextEntryLine:
 
         assert text_entry.drawable_shape.theming['text'] == "Enter name..."
 
+    def test_initial_text(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager,
+                                     initial_text="Bob")
+        assert text_entry.image is not None
+        assert text_entry.drawable_shape.theming['text'] == "Bob"
+
+    def test_clear(self, _init_pygame, default_ui_manager):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager,
+                                     initial_text="Bob")
+        assert text_entry.image is not None
+        assert text_entry.drawable_shape.theming['text'] == "Bob"
+
+        text_entry.clear()
+
+        assert text_entry.image is not None
+        assert text_entry.drawable_shape.theming['text'] == ""
+
     def test_set_text_length_limit(self, _init_pygame, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
