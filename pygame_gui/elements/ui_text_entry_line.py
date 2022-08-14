@@ -37,6 +37,10 @@ class UITextEntryLine(UIElement):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param: initial_text: A string that will start in this box. This text will remain when box is focused
+                          for editing.
+    :param: placeholder_text: If the text line is empty, and not focused, this placeholder text will be
+                              shown instead.
     """
 
     _number_character_set = {'en': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
@@ -70,6 +74,7 @@ class UITextEntryLine(UIElement):
                  anchors: Dict[str, Union[str, UIElement]] = None,
                  visible: int = 1,
                  *,
+                 initial_text: Optional[str] = None,
                  placeholder_text: Optional[str] = None):
 
         super().__init__(relative_rect, manager, container,
@@ -82,6 +87,8 @@ class UITextEntryLine(UIElement):
                                element_id='text_entry_line')
 
         self.text = ""
+        if initial_text is not None:
+            self.text = initial_text
         self.is_text_hidden = False
         self.hidden_text_char = '●'
         self.placeholder_text = ""
@@ -1015,3 +1022,6 @@ class UITextEntryLine(UIElement):
         else:
             if self.drawable_shape is not None:
                 self.drawable_shape.set_text(translate(self.text))
+
+    def clear(self):
+        self.set_text("")

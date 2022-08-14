@@ -10,6 +10,7 @@ from tests.shared_comparators import compare_surfaces
 
 from pygame_gui import UITextEffectType
 
+
 class TestUITextBox:
 
     def test_creation(self, _init_pygame: None,
@@ -21,6 +22,34 @@ class TestUITextBox:
                                        "<i>styles</i>.",
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
+        assert text_box.image is not None
+
+    def test_set_text(self, _init_pygame: None,
+                      default_ui_manager: UIManager,
+                      _display_surface_return_none):
+        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                                       "<i>styles</i>.",
+                             relative_rect=pygame.Rect(100, 100, 200, 300),
+                             manager=default_ui_manager)
+        assert text_box.image is not None
+
+        text_box.set_text("<b>Changed text</b>")
+        assert text_box.image is not None
+
+    def test_clear(self, _init_pygame: None,
+                   default_ui_manager: UIManager,
+                   _display_surface_return_none):
+        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                                       "<i>styles</i>.",
+                             relative_rect=pygame.Rect(100, 100, 200, 300),
+                             manager=default_ui_manager)
+        assert text_box.image is not None
+
+        text_box.clear()
         assert text_box.image is not None
 
     def test_creation_grow_to_fit_width(self, _init_pygame: None,
