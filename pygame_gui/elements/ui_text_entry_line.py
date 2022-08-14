@@ -587,6 +587,18 @@ class UITextEntryLine(UIElement):
                 self.edit_position += 1
                 self.cursor_has_moved_recently = True
             consumed_event = True
+        elif event.key == pygame.K_HOME:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.select_range = [0, 0]
+            self.edit_position = 0
+            self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_END:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.select_range = [0, 0]
+            self.edit_position = len(self.text)
+            self.cursor_has_moved_recently = True
+            consumed_event = True
         return consumed_event
 
     def _process_keyboard_shortcut_event(self, event: pygame.event.Event) -> bool:
