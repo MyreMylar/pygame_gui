@@ -678,11 +678,45 @@ class TestUITextEntryLine:
 
         text_entry.set_text('dan')
         text_entry.focus()
+        assert text_entry.edit_position == 3
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_LEFT}))
 
         assert processed_key_event
+        assert text_entry.edit_position == 2
+
+    def test_process_event_home(self, _init_pygame: None, default_ui_manager: UIManager,
+                                _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.focus()
+        text_entry.select_range = [0, 2]
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_HOME}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 0]
+        assert text_entry.edit_position == 0
+
+    def test_process_event_end(self, _init_pygame: None, default_ui_manager: UIManager,
+                               _display_surface_return_none: None):
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager)
+
+        text_entry.set_text('dan')
+        text_entry.focus()
+        text_entry.select_range = [0, 2]
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_END}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 0]
+        assert text_entry.edit_position == 3
 
     def test_process_event_text_right_select_range(self, _init_pygame: None,
                                                    default_ui_manager: UIManager,
