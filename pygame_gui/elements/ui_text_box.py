@@ -78,7 +78,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Dict[str, Union[str, UIElement]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 *,
+                 pre_parsing_enabled: bool = True):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -95,6 +97,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.html_text = html_text
         self.appended_text = ""
         self.font_dict = self.ui_theme.get_font_dictionary()
+
+        self._pre_parsing_enabled = pre_parsing_enabled
 
         self.wrap_to_height = wrap_to_height
         self.link_hover_chunks = []  # container for any link chunks we have
@@ -122,7 +126,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.text_wrap_rect = None  # type: Optional[pygame.Rect]
         self.background_surf = None
 
-        self.drawable_shape = None
         self.shape = 'rectangle'
         self.shape_corner_radius = None
 
@@ -135,7 +138,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.time_until_full_rebuild_after_changing_size = 0.2
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-        self.parser = None
+        self.parser = None  # type: Optional[HTMLParser]
 
         self.rebuild_from_changed_theme_data()
 
@@ -515,7 +518,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         rendered text.
         """
 
-        self.parser.feed(translate(self.html_text) + self.appended_text)
+        self.parser.feed(self._pre_parse_text(translate(self.html_text) + self.appended_text))
 
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
@@ -854,7 +857,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
         self.appended_text += new_html_str
-        self.parser.feed(new_html_str)
+        self.parser.feed(self._pre_parse_text(new_html_str))
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
 
@@ -1058,3 +1061,18 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def clear(self):
         self.set_text("")
+
+    def _pre_parse_text(self, input_text: str):
+        """
+        Some optional automatic pre-parsing/clean-up on input text before parsing it onto the html parser.
+
+        :param input_text: the text to pre parse
+
+        :return: a string with the cleaned up text.
+        """
+        pre_parsed_text = input_text
+        if self._pre_parsing_enabled:
+            # replace \n with <br>
+            pre_parsed_text = pre_parsed_text.replace('\n', '<br>')
+
+        return pre_parsed_text

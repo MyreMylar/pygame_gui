@@ -930,6 +930,17 @@ class TestUITextBox:
 
         assert text_box.image is not None
 
+    def test_pre_parsing(self, _init_pygame: None,
+                         default_ui_manager: UIManager,
+                         _display_surface_return_none):
+        text_box = UITextBox(html_text="Some text\n"
+                                       "On different lines with backslash n\n"
+                                       "Done.",
+                             relative_rect=pygame.Rect(100, 100, 500, 300),
+                             manager=default_ui_manager)
+        assert text_box.image is not None
+        assert len(text_box.text_box_layout.layout_rows) == 3
+
 
 if __name__ == '__main__':
     pytest.console_main()
