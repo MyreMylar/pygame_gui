@@ -192,6 +192,38 @@ class TestUIDropDownMenu:
 
         assert confirm_drop_down_changed_event_fired
 
+        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
+                              starting_option='eggs',
+                              relative_rect=pygame.Rect(100, 100, 200, 30),
+                              manager=default_ui_manager,
+                              expand_on_option_click=False)
+
+        # process a mouse button down event
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED, {'ui_element': menu.menu_states['closed'].open_button}))
+
+        assert menu.current_state.should_transition
+
+        menu.update(0.01)
+
+        assert not menu.current_state.should_transition
+
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED,
+            {'ui_element': menu.menu_states['expanded'].close_button}))
+
+        assert menu.current_state.should_transition
+
+        menu.update(0.01)
+
+        assert not menu.current_state.should_transition
+
+        menu.process_event(pygame.event.Event(
+            pygame_gui.UI_BUTTON_PRESSED,
+            {'ui_element': menu.menu_states['closed'].selected_option_button}))
+
+        assert not menu.current_state.should_transition
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",

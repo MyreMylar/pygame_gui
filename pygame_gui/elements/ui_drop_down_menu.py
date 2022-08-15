@@ -43,7 +43,8 @@ class UIExpandedDropDownState:
                  manager: IUIManagerInterface,
                  container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
-                 element_ids: Union[List[str], None]):
+                 element_ids: Union[List[str], None],
+                 expand_on_option_click):
 
         self.drop_down_menu_ui = drop_down_menu_ui
         self.options_list = options_list
@@ -55,6 +56,7 @@ class UIExpandedDropDownState:
         self.ui_container = container
         self.element_ids = element_ids
         self.object_ids = object_ids
+        self.expand_on_option_click = expand_on_option_click
 
         # sizing variables
         self.options_list_height = 0
@@ -248,8 +250,12 @@ class UIExpandedDropDownState:
                  rest of the UI.
 
         """
-        if event.type == UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
-            self.should_transition = True
+        if event.type == UI_BUTTON_PRESSED:
+            if ((self.expand_on_option_click and event.ui_element in self.active_buttons) or
+                    (not self.expand_on_option_click and
+                     self.close_button is not None and event.ui_element == self.close_button)):
+                self.should_transition = True
+                return True
 
         if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.options_selection_list):
@@ -377,7 +383,8 @@ class UIClosedDropDownState:
                  container: IContainerLikeInterface,
                  object_ids: Union[List[Union[str, None]], None],
                  element_ids: Union[List[str], None],
-                 visible: int = 1):
+                 visible: int = 1,
+                 expand_on_option_click=True):
 
         self.drop_down_menu_ui = drop_down_menu_ui
         self.selected_option_button = None
@@ -391,6 +398,8 @@ class UIClosedDropDownState:
         self.object_ids = object_ids
 
         self.open_button_width = open_button_width
+
+        self.expand_on_option_click = expand_on_option_click
 
         self.should_transition = False
         self.target_state = 'expanded'
@@ -521,8 +530,12 @@ class UIClosedDropDownState:
         :return: Return True if we want to consume this event so it is not passed on to the
                  rest of the UI.
         """
-        if event.type == UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
-            self.should_transition = True
+        if event.type == UI_BUTTON_PRESSED:
+            if ((self.expand_on_option_click and event.ui_element in self.active_buttons) or
+                    (not self.expand_on_option_click and
+                     self.open_button is not None and event.ui_element == self.open_button)):
+                self.should_transition = True
+                return True
 
         return False
 
@@ -623,6 +636,9 @@ class UIDropDownMenu(UIContainer):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param expand_on_option_click: If this is set to False the drop down will only expand when
+                                   the open/close button is pressed and not when the selected
+                                   option is pressed.
     """
 
     def __init__(self,
@@ -635,7 +651,9 @@ class UIDropDownMenu(UIContainer):
                  object_id: Union[ObjectID, str, None] = None,
                  expansion_height_limit: Union[int, None] = None,
                  anchors: Dict[str, Union[str, UIElement]] = None,
-                 visible: int = 1
+                 visible: int = 1,
+                 *,
+                 expand_on_option_click: bool = True
                  ):
 
         super().__init__(relative_rect, manager, container=container,
@@ -653,6 +671,7 @@ class UIDropDownMenu(UIContainer):
         self.open_button_width = 20
 
         self.expansion_height_limit = expansion_height_limit
+        self.expand_on_option_click = expand_on_option_click
 
         self.border_width = None
         self.shadow_width = None
@@ -680,7 +699,8 @@ class UIDropDownMenu(UIContainer):
                                                             self,
                                                             self.element_ids,
                                                             self.object_ids,
-                                                            self.visible),
+                                                            self.visible,
+                                                            self.expand_on_option_click),
                             'expanded': UIExpandedDropDownState(self,
                                                                 self.options_list,
                                                                 self.selected_option,
@@ -690,7 +710,8 @@ class UIDropDownMenu(UIContainer):
                                                                 self.ui_manager,
                                                                 self,
                                                                 self.element_ids,
-                                                                self.object_ids
+                                                                self.object_ids,
+                                                                self.expand_on_option_click
                                                                 )}
         self.current_state = self.menu_states['closed']
         self.current_state.start(should_rebuild=True)
