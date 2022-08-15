@@ -61,6 +61,5 @@ __all__ = ['UIManager',
            'TEXT_EFFECT_FADE_OUT',
            'TEXT_EFFECT_BOUNCE',
            'TEXT_EFFECT_TILT',
-           'TEXT_EFFECT_EXPAND_CONTRACT',
-           'get_default_manager'
+           'TEXT_EFFECT_EXPAND_CONTRACT'
            ]

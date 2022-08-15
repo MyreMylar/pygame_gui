@@ -1,7 +1,6 @@
 from typing import Union, Tuple, Dict, Iterable, Optional
 
 import pygame
-from pygame import Rect, Vector2
 
 from pygame_gui.core.utility import translate
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED, OldType
@@ -44,7 +43,7 @@ class UIButton(UIElement):
                     override this.
     """
 
-    def __init__(self, relative_rect: Union[Rect, Tuple[float, float], Vector2],
+    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[float, float], pygame.Vector2],
                  text: str,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -58,7 +57,8 @@ class UIButton(UIElement):
                  visible: int = 1
                  ):
 
-        rel_rect = relative_rect if isinstance(relative_rect, Rect) else Rect(relative_rect, (-1, -1))
+        rel_rect = (relative_rect if isinstance(relative_rect, pygame.Rect)
+                    else pygame.Rect(relative_rect, (-1, -1)))
         super().__init__(rel_rect,
                          manager, container,
                          starting_height=starting_height,

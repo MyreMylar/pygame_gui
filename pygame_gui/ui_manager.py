@@ -34,11 +34,11 @@ class UIManager(IUIManagerInterface):
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: Union[str, PackageResource] = None,
+                 theme_path: Optional[Union[str, PackageResource]] = None,
                  enable_live_theme_updates: bool = True,
-                 resource_loader: IResourceLoader = None,
+                 resource_loader: Optional[IResourceLoader] = None,
                  starting_language: str = 'en',
-                 translation_directory_paths: List[str] = None):
+                 translation_directory_paths: Optional[List[str]] = None):
 
         if get_default_manager() is None:
             set_default_manager(self)
