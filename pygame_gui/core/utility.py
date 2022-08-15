@@ -22,6 +22,21 @@ import i18n
 import pygame
 import pygame.freetype
 
+from pygame_gui.core.interfaces import IUIManagerInterface
+
+
+__default_manager = None  # type: Optional[IUIManagerInterface]
+
+
+def get_default_manager():
+    global __default_manager
+    return __default_manager
+
+
+def set_default_manager(manager: Optional[IUIManagerInterface] = None):
+    global __default_manager
+    __default_manager = manager
+
 
 if sys.version_info < (3, 9):
     import importlib_resources as resources

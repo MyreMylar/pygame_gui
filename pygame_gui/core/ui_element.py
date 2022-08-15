@@ -2,7 +2,7 @@ from sys import version_info
 
 import warnings
 from collections import namedtuple
-from typing import List, Union, Tuple, Dict, Any, Callable, Set
+from typing import List, Union, Tuple, Dict, Any, Callable, Set, Optional
 from typing import TYPE_CHECKING
 
 import pygame
@@ -12,6 +12,7 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
+from pygame_gui.core.utility import get_default_manager
 
 
 if TYPE_CHECKING:
@@ -42,8 +43,8 @@ class UIElement(GUISprite, IUIElementInterface):
                     override this.
     """
     def __init__(self, relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
-                 container: Union[IContainerLikeInterface, None],
+                 manager: Optional[IUIManagerInterface],
+                 container: Optional[IContainerLikeInterface],
                  *,
                  starting_height: int,
                  layer_thickness: int,
@@ -52,6 +53,10 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._layer = 0
         self.ui_manager = manager
+        if self.ui_manager is None:
+            self.ui_manager = get_default_manager()
+        if self.ui_manager is None:
+            raise ValueError("Need to create at least one UIManager to create UIElements")
 
         super().__init__(self.ui_manager.get_sprite_group())
         self.relative_rect = relative_rect.copy()

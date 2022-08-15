@@ -24,9 +24,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
     :param relative_rect: The rectangle that contains and positions the label relative to it's
                           container.
     :param text: The text to display in the label.
-    :param manager: The UIManager that manages this label.
-    :param container: The container that this element is within. If set to None will be the root
-                      window's container.
+    :param manager: The UIManager that manages this label. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
+    :param container: The container that this element is within. If not provided or set to None
+                      will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -36,11 +37,11 @@ class UILabel(UIElement, IUITextOwnerInterface):
 
     def __init__(self, relative_rect: pygame.Rect,
                  text: str,
-                 manager: IUIManagerInterface,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  **text_kwargs: str):
 

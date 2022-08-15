@@ -5,6 +5,7 @@ from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.utility import set_default_manager
 
 
 class TestUIElement:
@@ -14,6 +15,21 @@ class TestUIElement:
                   container=None,
                   starting_height=0,
                   layer_thickness=1)
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                  manager=None,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1)
+
+        set_default_manager(None)
+
+        with pytest.raises(ValueError, match="Need to create at least one UIManager to create UIElements"):
+            UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                      manager=None,
+                      container=None,
+                      starting_height=0,
+                      layer_thickness=1)
 
     def test_create_valid_id(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),

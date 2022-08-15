@@ -1,5 +1,5 @@
 import warnings
-from typing import Union
+from typing import Union, Optional
 
 import pygame
 
@@ -15,14 +15,15 @@ class UIMessageWindow(UIWindow):
 
     :param rect: The size and position of the window, includes the menu bar across the top.
     :param html_message: The message itself. Can make use of HTML (a subset of) to style the text.
-    :param manager: The UIManager that manages this UIElement.
+    :param manager: The UIManager that manages this UIElement. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param window_title: The title of the  window.
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#message_window'.
     :param visible: Whether the element is visible by default.
     """
     def __init__(self, rect: pygame.Rect,
                  html_message: str,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  window_title: str = 'pygame-gui.message_window_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#message_window', None),

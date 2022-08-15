@@ -1,6 +1,6 @@
 import warnings
 
-from typing import Union, List
+from typing import Union, List, Optional
 from pathlib import Path
 
 import pygame
@@ -26,7 +26,8 @@ class UIFileDialog(UIWindow):
 
     :param rect: The size and position of the file dialog window. Includes the size of shadow,
                  border and title bar.
-    :param manager: The manager for the whole of the UI.
+    :param manager: The manager for the whole of the UI. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param window_title: The title for the window, defaults to 'File Dialog'
     :param initial_file_path: The initial path to open the file dialog at.
     :param object_id: The object ID for the window, used for theming - defaults to '#file_dialog'
@@ -35,9 +36,9 @@ class UIFileDialog(UIWindow):
 
     def __init__(self,
                  rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface],
                  window_title: str = 'pygame-gui.file_dialog_title_bar',
-                 initial_file_path: Union[str, None] = None,
+                 initial_file_path: Optional[str] = None,
                  object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
                  allow_picking_directories: bool = False,
@@ -440,8 +441,8 @@ class UIFileDialog(UIWindow):
                                   file_name=str(selected_file_name))
             self.delete_confirmation_dialog = UIConfirmationDialog(
                 rect=confirmation_rect,
-                manager=self.ui_manager,
                 action_long_desc=long_desc,
+                manager=self.ui_manager,
                 action_short_name='pygame-gui.Delete',
                 window_title='pygame-gui.Delete')
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.parent_directory_button:

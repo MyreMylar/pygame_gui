@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
@@ -23,13 +23,14 @@ class UIColourChannelEditor(UIElement):
 
     :param relative_rect: The relative rectangle for sizing and positioning the element, relative
                           to the anchors.
-    :param manager: The UI manager for the UI system.
     :param name: Name for this colour channel, (e.g 'R:' or 'B:'). Used for the label.
     :param channel_index: Index for the colour channel (e.g. red is 0, blue is 1, hue is also 0,
                           saturation is 1)
     :param value_range: Range of values for this channel (0 to 255 for R,G,B - 0 to 360 for hue, 0
                         to 100 for the rest)
     :param initial_value: Starting value for this colour channel.
+    :param manager: The UI manager for the UI system. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param container: UI container for this element.
     :param parent_element: An element to parent this element, used for theming hierarchies and
                            events.
@@ -41,15 +42,15 @@ class UIColourChannelEditor(UIElement):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
                  name: str,
                  channel_index: int,
                  value_range: Tuple[int, int],
                  initial_value: int,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, str] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors:  Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
 
         super().__init__(relative_rect,
@@ -298,7 +299,8 @@ class UIColourPickerDialog(UIWindow):
 
     :param rect: The size and position of the colour picker window. Includes the size of shadow,
                  border and title bar.
-    :param manager: The manager for the whole of the UI.
+    :param manager: The manager for the whole of the UI. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param initial_colour: The starting colour for the colour picker, defaults to black.
     :param window_title: The title for the window, defaults to 'Colour Picker'
     :param object_id: The object ID for the window, used for theming - defaults to
@@ -306,7 +308,7 @@ class UIColourPickerDialog(UIWindow):
     :param visible: Whether the element is visible by default.
     """
     def __init__(self, rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "pygame-gui.colour_picker_title_bar",

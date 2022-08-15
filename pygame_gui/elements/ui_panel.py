@@ -1,4 +1,4 @@
-from typing import Union, Dict, Tuple
+from typing import Union, Dict, Tuple, Optional
 
 import pygame
 
@@ -25,10 +25,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
                           guide for details.
     :param starting_layer_height: How many layers above its container to place this panel on.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
-                    between elements.
+                    between elements. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param margins: Controls the distance between the edge of the panel and where it's
                     container should begin.
-    :param container: The container this panel is inside of distinct from this panel's own
+    :param container: The container this panel is inside of - distinct from this panel's own
                       container.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in
                            theming and events.
@@ -42,14 +43,14 @@ class UIPanel(UIElement, IContainerLikeInterface):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  starting_layer_height: int,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  element_id: str = 'panel',
-                 margins: Dict[str, int] = None,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 margins: Optional[Dict[str, int]] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1
                  ):
 

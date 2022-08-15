@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple, Dict, Optional
 
 import pygame
 
@@ -612,7 +612,8 @@ class UIDropDownMenu(UIContainer):
     :param options_list: The list of of options to choose from. They must be strings.
     :param starting_option: The starting option, selected when the menu is first created.
     :param relative_rect: The size and position of the element when not expanded.
-    :param manager: The UIManager that manages this element.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
@@ -628,8 +629,8 @@ class UIDropDownMenu(UIContainer):
                  options_list: List[str],
                  starting_option: str,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
-                 container: Union[IContainerLikeInterface, None] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 container: Optional[IContainerLikeInterface] = None,
                  parent_element: UIElement = None,
                  object_id: Union[ObjectID, str, None] = None,
                  expansion_height_limit: Union[int, None] = None,

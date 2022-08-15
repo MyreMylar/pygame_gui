@@ -1,4 +1,4 @@
-from typing import Union, Dict, Tuple, List
+from typing import Union, Dict, Tuple, List, Optional
 
 import pygame
 
@@ -28,7 +28,8 @@ class UISelectionList(UIElement):
                               tuple for single-selection lists or a list of strings or list of
                               (str, str) tuples for multi-selection lists.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
-                    between elements.
+                    between elements. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param allow_multi_select: True if we are allowed to pick multiple things from the selection
                                list.
     :param allow_double_clicks: True if we can double click on items in the selection list.
@@ -49,21 +50,20 @@ class UISelectionList(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  item_list: Union[List[str], List[Tuple[str, str]]],
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  allow_multi_select: bool = False,
                  allow_double_clicks: bool = True,
-                 container: Union[IContainerLikeInterface, None] = None,
+                 container: Optional[IContainerLikeInterface] = None,
                  starting_height: int = 1,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
-                 default_selection: Union[
-                    str, Tuple[str, str],               # Single-selection lists
-                    List[str], List[Tuple[str, str]],   # Multi-selection lists
-                    None
-                 ] = None,
+                 default_selection: Optional[Union[
+                    str, Tuple[str, str],             # Single-selection lists
+                    List[str], List[Tuple[str, str]]  # Multi-selection lists
+                    ]] = None,
                  ):
 
         super().__init__(relative_rect,

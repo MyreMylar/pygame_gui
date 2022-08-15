@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
@@ -16,9 +16,10 @@ class UIImage(UIElement):
     :param relative_rect: The rectangle that contains, positions and scales the image relative to
                           it's container.
     :param image_surface: A pygame surface to display.
-    :param manager: The UIManager that manages this element.
-    :param container: The container that this element is within. If set to None will be the root
-                      window's container.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
+    :param container: The container that this element is within. If not provided or set to None
+                      will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -28,12 +29,12 @@ class UIImage(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  image_surface: pygame.surface.Surface,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  image_is_alpha_premultiplied: bool = False,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
 
         super().__init__(relative_rect, manager, container,

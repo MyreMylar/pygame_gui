@@ -1,4 +1,4 @@
-from typing import Union, Dict, Callable
+from typing import Union, Dict, Callable, Optional
 
 import pygame
 
@@ -28,7 +28,8 @@ class UIStatusBar(UIElement):
     :param follow_sprite: If there's a sprite, this indicates whether the bar should be drawn at the sprite's location.
     :param percent_method: Optional method signature to call to get the percent complete. (To provide a method signature,
                            simply reference the method without parenthesis, such as self.health_percent.)
-    :param manager: The UIManager that manages this element.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
@@ -42,7 +43,7 @@ class UIStatusBar(UIElement):
 
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  sprite: Union[pygame.sprite.Sprite, None] = None,
                  follow_sprite: bool = True,
                  percent_method: Union[Callable[[], float], None] = None,

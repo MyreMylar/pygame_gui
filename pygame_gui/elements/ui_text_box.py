@@ -54,13 +54,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     :param html_text: The HTML formatted text to display in this text box.
     :param relative_rect: The 'visible area' rectangle, positioned relative to it's container.
-    :param manager: The UIManager that manages this element.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
                            match the text within.
     :param layer_starting_height: Sets the height, above it's container, to start placing the text
                                   box at.
-    :param container: The container that this element is within. If set to None will be the root
-                      window's container.
+    :param container: The container that this element is within. If not provided or set to None
+                      will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -71,13 +72,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def __init__(self,
                  html_text: str,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  *,
                  pre_parsing_enabled: bool = True):

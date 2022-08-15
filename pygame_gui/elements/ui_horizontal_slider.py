@@ -21,7 +21,8 @@ class UIHorizontalSlider(UIElement):
     :param relative_rect: A rectangle describing the position and dimensions of the element.
     :param start_value: The value to start the slider at.
     :param value_range: The full range of values.
-    :param manager: The UIManager that manages this element.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
@@ -35,11 +36,11 @@ class UIHorizontalSlider(UIElement):
                  relative_rect: pygame.Rect,
                  start_value: Union[float, int],
                  value_range: Tuple[Union[float, int], Union[float, int]],
-                 manager: IUIManagerInterface,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  click_increment: Union[float, int] = 1
                  ):
