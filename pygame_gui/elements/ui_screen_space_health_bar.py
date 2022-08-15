@@ -1,6 +1,7 @@
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 
 import pygame
+from pygame.sprite import Sprite
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -14,7 +15,8 @@ class UIScreenSpaceHealthBar(UIStatusBar):
     That means it won't move with the camera. This is a good choice for a user/player sprite.
 
     :param relative_rect: The rectangle that defines the size and position of the health bar.
-    :param manager: The UIManager that manages this element.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param sprite_to_monitor: The sprite we are displaying the health of.
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
@@ -28,12 +30,12 @@ class UIScreenSpaceHealthBar(UIStatusBar):
 
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
-                 sprite_to_monitor: Union[pygame.sprite.Sprite, None] = None,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 sprite_to_monitor: Optional[Sprite] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
 
         # Setting this here because UIProgressBar doesn't accept a percent_method in __init__.

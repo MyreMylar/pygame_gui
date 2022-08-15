@@ -18,8 +18,7 @@ class TestUIButton:
                       _display_surface_return_none):
         button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
                           text="Test Button",
-                          tool_tip_text="This is a test of the button's tool tip functionality.",
-                          manager=default_ui_manager)
+                          tool_tip_text="This is a test of the button's tool tip functionality.")
         assert button.image is not None
 
     @pytest.mark.filterwarnings("ignore:DeprecationWarning")

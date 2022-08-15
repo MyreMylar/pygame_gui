@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple, Dict, Optional
 
 import pygame
 
@@ -18,7 +18,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
     :param relative_rect: The size and relative position of the container. This will also be the
                           starting size of the scrolling area.
-    :param manager: The UI manager for this element.
+    :param manager: The UI manager for this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param starting_height: The starting layer height of this container above it's container.
                             Defaults to 1.
     :param container: The container this container is within. Defaults to None (which is the root
@@ -32,13 +33,13 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  starting_height: int = 1,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: Union[UIElement, None] = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Union[Dict[str, str], None] = None,
+                 container: Optional[IContainerLikeInterface] = None,
+                 parent_element: Optional[UIElement] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
 
         super().__init__(relative_rect,

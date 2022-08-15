@@ -1,5 +1,5 @@
 import warnings
-from typing import Union
+from typing import Union, Optional
 
 import pygame
 
@@ -17,9 +17,10 @@ class UIConfirmationDialog(UIWindow):
     or, 'Rename' for a file rename operation.
 
     :param rect: The size and position of the window, includes the menu bar across the top.
-    :param manager: The UIManager that manages this UIElement.
     :param action_long_desc: Long-ish description of action. Can make use of HTML to
                              style the text.
+    :param manager: The UIManager that manages this UIElement. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param window_title: The title of the  window.
     :param action_short_name: Short, one or two word description of action for button.
     :param blocking: Whether this window should block all other mouse interactions with the GUI
@@ -30,8 +31,8 @@ class UIConfirmationDialog(UIWindow):
     """
 
     def __init__(self, rect: pygame.Rect,
-                 manager: IUIManagerInterface,
                  action_long_desc: str,
+                 manager: Optional[IUIManagerInterface] = None,
                  *,
                  window_title: str = 'pygame-gui.Confirm',
                  action_short_name: str = 'pygame-gui.OK',

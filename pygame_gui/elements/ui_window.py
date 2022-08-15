@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 import pygame
 
@@ -20,7 +20,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     :param rect: A rectangle, representing size and position of the window (including title bar,
                  shadow and borders).
-    :param manager: The UIManager that manages this UIWindow.
+    :param manager: The UIManager that manages this UIWindow. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param window_display_title: A string that will appear in the windows title bar if it has one.
     :param element_id: An element ID for this window, if one is not supplied it defaults to
                        'window'.
@@ -33,15 +34,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     def __init__(self,
                  rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  window_display_title: str = "",
-                 element_id: Union[str, None] = None,
-                 object_id: Union[ObjectID, str, None] = None,
+                 element_id: Optional[str] = None,
+                 object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
                  visible: int = 1):
 
         self.window_display_title = window_display_title
-        self._window_root_container = None  # type: Union[UIContainer, None]
+        self._window_root_container = None  # type: Optional[UIContainer]
         self.resizable = resizable
         self.minimum_dimensions = (100, 100)
         self.edge_hovering = [False, False, False, False]
@@ -66,7 +67,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.resizing_mode_active = False
         self.start_resize_point = (0, 0)
-        self.start_resize_rect = None  # type: Union[pygame.Rect, None]
+        self.start_resize_rect = None  # type: Optional[pygame.Rect]
 
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
@@ -80,9 +81,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.title_bar_close_button_width = self.title_bar_height
 
         # UI elements
-        self.window_element_container = None  # type: Union[UIContainer, None]
-        self.title_bar = None  # type: Union[UIButton, None]
-        self.close_window_button = None  # type: Union[UIButton, None]
+        self.window_element_container = None  # type: Optional[UIContainer]
+        self.title_bar = None  # type: Optional[UIButton]
+        self.close_window_button = None  # type: Optional[UIButton]
 
         self.rebuild_from_changed_theme_data()
 

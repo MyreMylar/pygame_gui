@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict, Iterable
+from typing import Union, Tuple, Dict, Iterable, Optional
 
 import pygame
 
@@ -21,12 +21,15 @@ class UIButton(UIElement):
     The button element is reused throughout the UI as part of other elements as it happens to be a
     very flexible interactive element.
 
-    :param relative_rect: A rectangle describing the position (relative to its container) and
-                          dimensions.
+    :param relative_rect: Normally a rectangle describing the position (relative to its container) and
+                          dimensions. Also accepts a position Tuple, or Vector2 where the dimensions
+                          will be dynamic depending on the button's contents. Dynamic dimensions can
+                          be requested by setting the required dimension to -1.
     :param text: Text for the button.
-    :param manager: The UIManager that manages this element.
-    :param container: The container that this element is within. If set to None will be the root
-                      window's container.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
+    :param container: The container that this element is within. If not provided or set to None
+                      will be the root window's container.
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
                           appear on hover.
     :param starting_height: The height in layers above it's container that this element will be
@@ -40,10 +43,10 @@ class UIButton(UIElement):
                     override this.
     """
 
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[float, float], pygame.Vector2],
                  text: str,
-                 manager: IUIManagerInterface,
-                 container: Union[IContainerLikeInterface, None] = None,
+                 manager: Optional[IUIManagerInterface] = None,
+                 container: Optional[IContainerLikeInterface] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
@@ -54,7 +57,10 @@ class UIButton(UIElement):
                  visible: int = 1
                  ):
 
-        super().__init__(relative_rect, manager, container,
+        rel_rect = (relative_rect if isinstance(relative_rect, pygame.Rect)
+                    else pygame.Rect(relative_rect, (-1, -1)))
+        super().__init__(rel_rect,
+                         manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
@@ -69,7 +75,7 @@ class UIButton(UIElement):
 
         self.dynamic_width = False
         self.dynamic_height = False
-        self.dynamic_dimensions_orig_top_left = relative_rect.topleft
+        self.dynamic_dimensions_orig_top_left = rel_rect.topleft
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
         self.tool_tip = None

@@ -1,5 +1,5 @@
 import html
-from typing import Union
+from typing import Union, Optional
 
 import pygame
 
@@ -21,7 +21,8 @@ class UIConsoleWindow(UIWindow):
     Python Interactive Shell.
 
     :param rect: A rect determining the size and position of the console window.
-    :param manager: The UI manager.
+    :param manager: The UI manager. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
     :param window_title: The title displayed in the windows title bar.
     :param object_id: The object ID for the window, used for theming - defaults to
                       '#console_window'
@@ -29,7 +30,7 @@ class UIConsoleWindow(UIWindow):
     """
     def __init__(self,
                  rect: pygame.Rect,
-                 manager: IUIManagerInterface,
+                 manager: Optional[IUIManagerInterface] = None,
                  window_title: str = 'pygame-gui.console_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#console_window', None),
                  visible: int = 1,

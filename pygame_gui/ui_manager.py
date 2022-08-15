@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, List, Dict, Union, Set
+from typing import Tuple, List, Dict, Union, Set, Optional
 
 import pygame
 import i18n
@@ -14,7 +14,7 @@ from pygame_gui.core.ui_appearance_theme import UIAppearanceTheme
 from pygame_gui.core.ui_window_stack import UIWindowStack
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
-from pygame_gui.core.utility import PackageResource
+from pygame_gui.core.utility import PackageResource, get_default_manager, set_default_manager
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
 from pygame_gui.elements import UITooltip
@@ -34,12 +34,14 @@ class UIManager(IUIManagerInterface):
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: Union[str, PackageResource] = None,
+                 theme_path: Optional[Union[str, PackageResource]] = None,
                  enable_live_theme_updates: bool = True,
-                 resource_loader: IResourceLoader = None,
+                 resource_loader: Optional[IResourceLoader] = None,
                  starting_language: str = 'en',
-                 translation_directory_paths: List[str] = None):
+                 translation_directory_paths: Optional[List[str]] = None):
 
+        if get_default_manager() is None:
+            set_default_manager(self)
         # Translation stuff
         self._locale = starting_language
         root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
