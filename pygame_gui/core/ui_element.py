@@ -167,18 +167,20 @@ class UIElement(GUISprite, IUIElementInterface):
     def get_focus_set(self) -> Set['UIElement']:
         return self._focus_set
 
-    def set_focus_set(self, focus_set: Set['UIElement']):
+    def set_focus_set(self, focus_set: Optional[Set['UIElement']]):
         if self.ui_manager.get_focus_set() is self._focus_set:
             self.ui_manager.set_focus_set(focus_set)
         self._focus_set = focus_set
 
     def join_focus_sets(self, element: 'UIElement'):
-        union_of_sets = set(self._focus_set | element.get_focus_set())
-        for item in union_of_sets:
-            item.set_focus_set(union_of_sets)
+        if self._focus_set is not None:
+            union_of_sets = set(self._focus_set | element.get_focus_set())
+            for item in union_of_sets:
+                item.set_focus_set(union_of_sets)
 
     def remove_element_from_focus_set(self, element):
-        self._focus_set.discard(element)
+        if self._focus_set is not None:
+            self._focus_set.discard(element)
 
     def get_relative_rect(self) -> pygame.Rect:
         """
@@ -603,7 +605,7 @@ class UIElement(GUISprite, IUIElementInterface):
                     self.on_unhovered()
         elif self.hovered:
             self.hovered = False
-        return hovered_higher_element
+        return self.hovered
 
     def on_fresh_drawable_shape_ready(self):
         """

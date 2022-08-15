@@ -167,6 +167,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         Gets the focused set.
 
         :return: The set of elements that currently have interactive focus.
+                 If None, nothing is currently focused.
         """
 
     @abstractmethod
@@ -263,4 +264,13 @@ class IUIManagerInterface(metaclass=ABCMeta):
         Currently switches the cursor to the I-Beam cursor.
 
         :param hovering_text_input: set to True to toggle the I-Beam cursor
+        """
+
+    @abstractmethod
+    def get_hovering_any_element(self) -> bool:
+        """
+        True if any UI element (other than the root container) is hovered by the mouse.
+
+        Combined with 'get_focus_set()' and the return value from process_events(), it should make
+        it easier to switch input events between the UI and other parts of an application.
         """

@@ -366,6 +366,21 @@ class TestUIManager:
             finished, _ = incremental_loader.update()
         assert finished
 
+    def test_get_hovering_any_element(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+
+        UIButton((100, 100), "Test Button", manager=manager)
+
+        manager.mouse_position = (400, 300)
+        manager._handle_hovering(0.05)
+
+        assert not manager.get_hovering_any_element()
+
+        manager.mouse_position = (120, 115)
+        manager._handle_hovering(0.05)
+
+        assert manager.get_hovering_any_element()
+
 
 if __name__ == '__main__':
     os.chdir('..')

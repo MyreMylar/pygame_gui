@@ -405,7 +405,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         else:
             self.hovered = False
 
-        return hovered_higher_element
+        return self.hovered
 
     def get_top_layer(self) -> int:
         """

@@ -278,7 +278,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
         elif self.hovered:
             self.hovered = False
-        return hovered_higher_element
+        return self.hovered
 
     def disable(self):
         """

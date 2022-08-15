@@ -80,6 +80,7 @@ class UIManager(IUIManagerInterface):
                                           self, starting_height=1,
                                           container=None, parent_element=None,
                                           object_id='#root_container')
+        self.root_container.set_focus_set(None)
 
         self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
 
@@ -98,6 +99,7 @@ class UIManager(IUIManagerInterface):
         self.active_user_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
         self._active_cursor = self.active_user_cursor
         self.text_input_hovered = False
+        self.hovering_any_ui_element = False
 
         if auto_load:
             self.resource_loader.start()
@@ -218,7 +220,6 @@ class UIManager(IUIManagerInterface):
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                             mouse_x, mouse_y = self.calculate_scaled_mouse_position(event.pos)
                             if ui_element.hover_point(mouse_x, mouse_y):
-                                # self.unset_focus_element()
                                 self.set_focus_set(ui_element.get_focus_set())
 
                         consumed_event = ui_element.process_event(event)
@@ -257,16 +258,7 @@ class UIManager(IUIManagerInterface):
         self.ui_theme.update_caching(time_delta)
 
         self._update_mouse_position()
-        hover_handled = False
-        sorted_layers = sorted(self.ui_group.layers(), reverse=True)
-        for layer in sorted_layers:
-            for ui_element in self.ui_group.get_sprites_from_layer(layer):
-                if ui_element.visible:
-                    # Only check hover for visible elements - ignore hidden elements
-
-                    element_handled_hover = ui_element.check_hover(time_delta, hover_handled)
-                    if element_handled_hover:
-                        hover_handled = True
+        self._handle_hovering(time_delta)
 
         self.ui_group.update(time_delta)
 
@@ -300,6 +292,24 @@ class UIManager(IUIManagerInterface):
                 pygame.mouse.set_cursor(self._active_cursor)
             except pygame.error:
                 pass
+
+    def _handle_hovering(self, time_delta):
+        hover_handled = False
+        sorted_layers = sorted(self.ui_group.layers(), reverse=True)
+        for layer in sorted_layers:
+            for ui_element in self.ui_group.get_sprites_from_layer(layer):
+                if ui_element.visible:
+                    # Only check hover for visible elements - ignore hidden elements
+                    # we need to check hover even after already found what we are hovering
+                    # so we can unhover previously hovered stuff
+                    element_is_hovered = ui_element.check_hover(time_delta, hover_handled)
+                    if element_is_hovered and ui_element != self.root_container:
+                        hover_handled = True
+                        self.hovering_any_ui_element = True
+                    elif element_is_hovered and ui_element == self.root_container:
+                        # if we are just hovering over the root container
+                        # set 'hovering any' to False
+                        self.hovering_any_ui_element = False
 
     def get_mouse_position(self) -> Tuple[int, int]:
         """
@@ -567,3 +577,6 @@ class UIManager(IUIManagerInterface):
 
     def set_text_input_hovered(self, hovering_text_input: bool):
         self.text_input_hovered = hovering_text_input
+
+    def get_hovering_any_element(self) -> bool:
+        return self.hovering_any_ui_element
