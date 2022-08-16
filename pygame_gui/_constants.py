@@ -81,6 +81,7 @@ TEXT_EFFECT_FADE_OUT = UITextEffectType('fade_out')
 TEXT_EFFECT_TILT = UITextEffectType('tilt')
 TEXT_EFFECT_BOUNCE = UITextEffectType('bounce')
 TEXT_EFFECT_EXPAND_CONTRACT = UITextEffectType('expand_contract')
+TEXT_EFFECT_SHAKE = UITextEffectType('shake')
 
 
 __all__ = ['UI_BUTTON_PRESSED',
@@ -110,6 +111,7 @@ __all__ = ['UI_BUTTON_PRESSED',
            'TEXT_EFFECT_TILT',
            'TEXT_EFFECT_BOUNCE',
            'TEXT_EFFECT_EXPAND_CONTRACT',
+           'TEXT_EFFECT_SHAKE',
            'UITextEffectType',
            'OldType'
            ]

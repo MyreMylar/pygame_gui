@@ -44,7 +44,7 @@ class TiltEffect(TextEffect):
 
     def update(self, time_delta: float):
         """
-        Updates the fade with amount of time passed since the last call to update.
+        Updates the effect with amount of time passed since the last call to update.
 
         :param time_delta: time in seconds since last frame.
         """
@@ -74,8 +74,7 @@ class TiltEffect(TextEffect):
 
     def has_text_changed(self) -> bool:
         """
-        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us
-        redrawing the text box with the new alpha value.
+        Lets us know when the effect has changed enough to warrant us redrawing the text.
 
         :return: True if it is is time to redraw our text.
         """

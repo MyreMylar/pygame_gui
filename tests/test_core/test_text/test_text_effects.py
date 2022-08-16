@@ -5,11 +5,13 @@ import pytest
 from pygame_gui.core.text import TypingAppearEffect, FadeInEffect, FadeOutEffect, TextEffect
 from pygame_gui.core.text import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
+from pygame_gui.core.text.text_effects import ShakeEffect
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.elements.ui_label import UILabel
 from pygame_gui import TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_FADE_IN, TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui import TEXT_EFFECT_BOUNCE, TEXT_EFFECT_TILT, TEXT_EFFECT_EXPAND_CONTRACT
+from pygame_gui import TEXT_EFFECT_SHAKE
 from pygame_gui import UITextEffectType, UI_TEXT_EFFECT_FINISHED
 
 
@@ -746,18 +748,162 @@ class TestExpandContractEffect:
                 assert event.effect == TEXT_EFFECT_EXPAND_CONTRACT
 
 
+class TestShakeEffect:
+    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        with pytest.warns(UserWarning, match="Unsupported effect name: shake for whole text box"):
+            text_box.set_active_effect(TEXT_EFFECT_SHAKE)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
+
+        assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
+
+    def test_switching_from_full_to_tagged(self, _init_pygame, default_ui_manager: UIManager):
+
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_FADE_IN)
+
+        text_box.update(0.02)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
+
+        text_box.update(0.02)
+
+        assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
+
+    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
+
+        effect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert effect.time_acc == 0.0
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+
+        assert effect.time_acc == 0.12
+
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, params={'loop': "1"}, effect_tag='test')
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, params={'loop': 1}, effect_tag='test')
+
+        effect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert effect.time_acc == 0.0
+
+        effect.update(time_delta=0.59)
+        effect.update(time_delta=0.59)
+        effect.update(time_delta=0.5)
+
+        assert effect.time_acc == 0.0
+
+    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
+        effect: ShakeEffect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert not effect.has_text_changed()
+
+        old_shake = effect.shake
+        effect.update(time_delta=0.6)
+
+        if effect.shake != old_shake:
+            assert effect.has_text_changed()
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+
+    def test_apply_effect(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
+        effect = text_box.active_text_chunk_effects[0]['effect']
+        chunk = text_box.active_text_chunk_effects[0]['chunk']
+
+        assert chunk.effects_offset_pos == effect.shake
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=0.06)
+        effect.apply_effect()
+
+        assert chunk.effects_offset_pos == effect.shake
+
+    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE,
+                                   params={'loop': False,
+                                           'frequency': 10,
+                                           'amplitude': 9,
+                                           'duration': 19.0},
+                                   effect_tag='test')
+
+        assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
+
+    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+        text_box = UITextBox('<effect id=test>Hello world</effect> other <effect id=test2>text</effect>',
+                             pygame.Rect((10, 10), (200, 100)),
+                             default_ui_manager)
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test',
+                                   params={'loop': False})
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test2',
+                                   params={'loop': False})
+        effect: BounceEffect = text_box.active_text_chunk_effects[0]['effect']
+
+        assert not effect.has_text_changed()
+
+        effect.update(time_delta=0.06)
+        effect.update(time_delta=20.0)
+        effect.update(time_delta=0.06)
+
+        for event in pygame.event.get():
+            if event.type == UI_TEXT_EFFECT_FINISHED:
+                assert event.effect == TEXT_EFFECT_SHAKE
+
+        text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test',
+                                   params={'loop': False})
+
+        text_box.clear_all_active_effects()
+
+        assert text_box.active_text_effect is None
+
+
 class TestTextEffectType:
 
-    def basic_tests(self, _init_pygame):
+    def test_basic_tests(self, _init_pygame):
         test_effect_type = UITextEffectType('test_effect')
 
         assert 'this is test_effect' == 'this is ' + test_effect_type
 
         assert 'test_effect this is' == test_effect_type + ' this is'
 
-        assert 'text_effect' == test_effect_type
+        assert 'test_effect' == test_effect_type
 
-        assert 'text_effect' == str(test_effect_type)
+        assert 'test_effect' == str(test_effect_type)
 
         with pytest.raises(AttributeError, match="Can't append to anything other than a string"):
             test_effect_type + 5
