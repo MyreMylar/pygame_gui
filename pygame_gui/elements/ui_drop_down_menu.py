@@ -204,8 +204,15 @@ class UIExpandedDropDownState:
                                                       parent_element=self.drop_down_menu_ui,
                                                       container=self.drop_down_menu_ui.ui_container,
                                                       anchors=self.drop_down_menu_ui.anchors,
-                                                      object_id='#drop_down_options_list')
+                                                      object_id='#drop_down_options_list',
+                                                      default_selection=self.selected_option)
         self.drop_down_menu_ui.join_focus_sets(self.options_selection_list)
+        if self.options_selection_list.scroll_bar is not None:
+            # our options list is long enough to have a scroll bar.
+            # we want to scroll it enough that the currently selected option is on screen.
+            start_percentage = self.options_selection_list.get_single_selection_start_percentage()
+            self.options_selection_list.scroll_bar.set_scroll_from_start_percentage(start_percentage)
+            self.options_selection_list.update(0.0)
 
         if should_rebuild:
             self.rebuild()

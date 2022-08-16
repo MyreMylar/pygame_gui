@@ -366,6 +366,17 @@ class TestUIHorizontalScrollBar:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_set_scroll_from_start_percentage(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(0, 0, 146, 30),
+                                           visible_percentage=0.2,
+                                           manager=default_ui_manager)
+        scroll_bar.reset_scroll_position()
+        assert scroll_bar.scroll_position == 0.0 and scroll_bar.start_percentage == 0.0
+
+        scroll_bar.set_scroll_from_start_percentage(0.5)
+        assert scroll_bar.scrollable_width == 100
+        assert scroll_bar.scroll_position == 50.0 and scroll_bar.start_percentage == 0.5
+
 
 if __name__ == '__main__':
     pytest.console_main()
