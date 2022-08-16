@@ -1029,6 +1029,12 @@ class TestUISelectionList:
                                          default_selection='and')
         assert selection_list.get_single_selection_start_percentage() == 0.5
 
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager,
+                                         allow_multi_select=True)
+        assert selection_list.get_single_selection_start_percentage() == 0.0
+
 
 if __name__ == '__main__':
     pytest.console_main()

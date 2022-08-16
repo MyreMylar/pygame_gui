@@ -212,10 +212,10 @@ class UISelectionList(UIElement):
 
     def get_single_selection_start_percentage(self):
         """
-        The percentage through the height of the list where the top of the selected option is.
+        The percentage through the height of the list where the top of the first selected option is.
         """
         selected_item_heights = [item['height'] for item in self.item_list if item['selected']]
-        if len(selected_item_heights) == 1:
+        if len(selected_item_heights) > 0:
             return float(selected_item_heights[0] / self.total_height_of_list)
         return 0.0
 
