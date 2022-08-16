@@ -24,6 +24,7 @@ from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED
 from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED, UI_TEXT_EFFECT_FINISHED
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_FADE_IN
 from pygame_gui._constants import TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_BOUNCE, TEXT_EFFECT_TILT
+from pygame_gui._constants import TEXT_EFFECT_SHAKE
 from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
 from pygame_gui._constants import UITextEffectType
 from pygame_gui.core.utility import PackageResource
@@ -61,5 +62,6 @@ __all__ = ['UIManager',
            'TEXT_EFFECT_FADE_OUT',
            'TEXT_EFFECT_BOUNCE',
            'TEXT_EFFECT_TILT',
-           'TEXT_EFFECT_EXPAND_CONTRACT'
+           'TEXT_EFFECT_EXPAND_CONTRACT',
+           'TEXT_EFFECT_SHAKE'
            ]

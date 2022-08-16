@@ -21,6 +21,7 @@ setup(
                 'pygame_gui.core.interfaces',
                 'pygame_gui.core.drawable_shapes',
                 'pygame_gui.core.text',
+                'pygame_gui.core.text.text_effects',
                 'pygame_gui.elements',
                 'pygame_gui.windows',
                 'pygame_gui.data',

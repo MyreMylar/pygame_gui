@@ -5,6 +5,7 @@ from pygame_gui.core.text.text_effects.fade_out_effect import FadeOutEffect
 from pygame_gui.core.text.text_effects.bounce_effect import BounceEffect
 from pygame_gui.core.text.text_effects.tilt_effect import TiltEffect
 from pygame_gui.core.text.text_effects.expand_contract_effect import ExpandContractEffect
+from pygame_gui.core.text.text_effects.shake_effect import ShakeEffect
 
 
 __all__ = ['TextEffect',
@@ -13,4 +14,5 @@ __all__ = ['TextEffect',
            'FadeOutEffect',
            'BounceEffect',
            'TiltEffect',
-           'ExpandContractEffect']
+           'ExpandContractEffect',
+           "ShakeEffect"]

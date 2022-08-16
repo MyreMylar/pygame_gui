@@ -9,7 +9,7 @@ from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED, OldType, UITextEffectType
 from pygame_gui._constants import TEXT_EFFECT_TYPING_APPEAR, TEXT_EFFECT_TILT
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT, TEXT_EFFECT_BOUNCE
-from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
+from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT, TEXT_EFFECT_SHAKE
 
 from pygame_gui.core.utility import translate
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -24,7 +24,7 @@ from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import TextEffect, TypingAppearEffect, FadeInEffect, FadeOutEffect
-from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect
+from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect, ShakeEffect
 
 
 class UITextBox(UIElement, IUITextOwnerInterface):
@@ -962,13 +962,15 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                 effect = TiltEffect(self, params, chunk)
                             elif effect_type == TEXT_EFFECT_EXPAND_CONTRACT:
                                 effect = ExpandContractEffect(self, params, chunk)
+                            elif effect_type == TEXT_EFFECT_SHAKE:
+                                effect = ShakeEffect(self, params, chunk)
                             else:
                                 warnings.warn('Unsupported effect name: ' + str(
                                     effect_type) + ' for text chunk')
-                            chunk.grab_pre_effect_surface()
-                            self.active_text_chunk_effects.append({'chunk': chunk,
-                                                                   'effect': effect})
                             if effect is not None:
+                                chunk.grab_pre_effect_surface()
+                                self.active_text_chunk_effects.append({'chunk': chunk,
+                                                                       'effect': effect})
                                 effect.text_changed = True
                                 self.update_text_effect(0.0)
         else:
