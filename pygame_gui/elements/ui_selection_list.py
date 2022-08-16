@@ -210,6 +210,15 @@ class UISelectionList(UIElement):
                         item['button_element'].kill()
                         item['button_element'] = None
 
+    def get_single_selection_start_percentage(self):
+        """
+        The percentage through the height of the list where the top of the selected option is.
+        """
+        selected_item_heights = [item['height'] for item in self.item_list if item['selected']]
+        if len(selected_item_heights) == 1:
+            return float(selected_item_heights[0] / self.total_height_of_list)
+        return 0.0
+
     def set_item_list(self, new_item_list: Union[List[str], List[Tuple[str, str]]]):
         """
         Set a new string list (or tuple of strings & ids list) as the item list for this selection
@@ -227,21 +236,25 @@ class UISelectionList(UIElement):
         """
         self._raw_item_list = new_item_list
         self.item_list = []  # type: List[Dict]
+        index = 0
         for new_item in new_item_list:
             if isinstance(new_item, str):
                 new_item_list_item = {'text': new_item,
                                       'button_element': None,
                                       'selected': False,
-                                      'object_id': '#item_list_item'}
+                                      'object_id': '#item_list_item',
+                                      'height': index * self.list_item_height}
             elif isinstance(new_item, tuple):
                 new_item_list_item = {'text': new_item[0],
                                       'button_element': None,
                                       'selected': False,
-                                      'object_id': new_item[1]}
+                                      'object_id': new_item[1],
+                                      'height': index * self.list_item_height}
             else:
                 raise ValueError('Invalid item list')
 
             self.item_list.append(new_item_list_item)
+            index += 1
 
         self.total_height_of_list = self.list_item_height * len(self.item_list)
         self.lowest_list_pos = (self.total_height_of_list -

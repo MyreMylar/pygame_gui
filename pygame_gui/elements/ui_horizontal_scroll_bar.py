@@ -337,6 +337,26 @@ class UIHorizontalScrollBar(UIElement):
                 if not self.has_moved_recently:
                     self.has_moved_recently = True
 
+    def set_scroll_from_start_percentage(self, new_start_percentage: float):
+        """
+        Set the scroll bar's scrolling position from a percentage between 0.0 and 1.0.
+
+        :param new_start_percentage: the percentage to set.
+        """
+        new_start_percentage = min(1.0, max(new_start_percentage, 0.0))
+        self.start_percentage = new_start_percentage
+
+        new_scroll_position = new_start_percentage * self.scrollable_width
+
+        self.scroll_position = min(max(new_scroll_position, self.left_limit),
+                                   self.right_limit - self.sliding_button.rect.width)
+        self.start_percentage = self.scroll_position / self.scrollable_width
+
+        x_pos = (self.scroll_position + self.arrow_button_width)
+        y_pos = 0
+        self.sliding_button.set_relative_position((x_pos, y_pos))
+        self.has_moved_recently = True
+
     def redraw_scrollbar(self):
         """
         Redraws the 'scrollbar' portion of the whole UI element. Called when we change the
