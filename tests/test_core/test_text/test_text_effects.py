@@ -804,8 +804,8 @@ class TestShakeEffect:
 
         assert effect.time_acc == 0.0
 
-        effect.update(time_delta=0.5)
-        effect.update(time_delta=0.5)
+        effect.update(time_delta=0.59)
+        effect.update(time_delta=0.59)
         effect.update(time_delta=0.5)
 
         assert effect.time_acc == 0.0
