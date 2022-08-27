@@ -67,6 +67,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param text_kwargs: a dictionary of variable arguments to pass to the translated text
+                        useful when you have multiple translations that need variables inserted
+                        in the middle.
     """
 
     def __init__(self,
@@ -81,7 +84,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  *,
-                 pre_parsing_enabled: bool = True):
+                 pre_parsing_enabled: bool = True,
+                 text_kwargs: Optional[Dict[str, str]] = None):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -97,6 +101,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self.html_text = html_text
         self.appended_text = ""
+        self.text_kwargs = {}
+        if text_kwargs is not None:
+            self.text_kwargs = text_kwargs
         self.font_dict = self.ui_theme.get_font_dictionary()
 
         self._pre_parsing_enabled = pre_parsing_enabled
@@ -519,7 +526,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         rendered text.
         """
 
-        self.parser.feed(self._pre_parse_text(translate(self.html_text) + self.appended_text))
+        self.parser.feed(self._pre_parse_text(translate(self.html_text, **self.text_kwargs) + self.appended_text))
 
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
@@ -1057,8 +1064,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def get_object_id(self) -> str:
         return self.most_specific_combined_id
 
-    def set_text(self, html_text: str):
+    def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
         self.html_text = html_text
+        if text_kwargs is not None:
+            self.text_kwargs = text_kwargs
+        else:
+            self.text_kwargs = {}
         self.appended_text = ""  # clear appended text as it feels odd to set the text and still have appended text
         self._reparse_and_rebuild()
 

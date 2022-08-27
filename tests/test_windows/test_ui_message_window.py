@@ -2,11 +2,13 @@ import os
 import pygame
 import pytest
 
+import i18n
+
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows.ui_message_window import UIMessageWindow
-
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 
 class TestUIMessageWindow:
@@ -16,11 +18,24 @@ class TestUIMessageWindow:
         default_ui_manager.preload_fonts([{'name': 'fira_code',
                                            'point_size': 14,
                                            'style': 'bold'}])
+
         UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                         window_title="Test Message",
                         html_message="This is a <b>bold</b> test "
                                      "of the message box functionality.",
                         manager=default_ui_manager)
+
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
+        message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
+                                         window_title="Test Message",
+                                         html_message="translation.test_hello",
+                                         manager=default_ui_manager,
+                                         html_message_text_kwargs={"name": "World"})
+
+        assert message_window.text_block.image is not None
+        text_chunk = message_window.text_block.text_box_layout.layout_rows[0].items[0]
+        assert isinstance(text_chunk, TextLineChunkFTFont)
+        assert text_chunk.text == "Hello World"
 
     def test_create_too_small(self, _init_pygame, default_ui_manager,
                               _display_surface_return_none):

@@ -3,10 +3,13 @@ import os
 import pygame
 import pytest
 
+import i18n
+
 import pygame_gui
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.ui_manager import UIManager
 from tests.shared_comparators import compare_surfaces
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 from pygame_gui import UITextEffectType
 
@@ -23,6 +26,15 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 200, 300),
                              manager=default_ui_manager)
         assert text_box.image is not None
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
+        text_box_with_kwargs = UITextBox(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                         html_text="translation.test_hello",
+                                         manager=default_ui_manager,
+                                         text_kwargs={"name": "World"})
+        assert text_box_with_kwargs.image is not None
+        text_chunk = text_box_with_kwargs.text_box_layout.layout_rows[0].items[0]
+        assert isinstance(text_chunk, TextLineChunkFTFont)
+        assert text_chunk.text == "Hello World"
 
     def test_set_text(self, _init_pygame: None,
                       default_ui_manager: UIManager,
@@ -37,6 +49,21 @@ class TestUITextBox:
 
         text_box.set_text("<b>Changed text</b>")
         assert text_box.image is not None
+
+    def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
+                             _display_surface_return_none):
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
+        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
+                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        text_box = UITextBox(html_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
+                                       "<i>styles</i>.",
+                             relative_rect=pygame.Rect(100, 100, 200, 300),
+                             manager=default_ui_manager)
+        text_box.set_text("translation.test_hello", text_kwargs={"name": "World"})
+        assert text_box.image is not None
+        text_chunk = text_box.text_box_layout.layout_rows[0].items[0]
+        assert isinstance(text_chunk, TextLineChunkFTFont)
+        assert text_chunk.text == "Hello World"
 
     def test_clear(self, _init_pygame: None,
                    default_ui_manager: UIManager,

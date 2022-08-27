@@ -30,6 +30,9 @@ class UITooltip(UIElement, IUITooltipInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+    :param text_kwargs: a dictionary of variable arguments to pass to the translated text
+                        useful when you have multiple translations that need variables inserted
+                        in the middle.
 
     """
     def __init__(self,
@@ -38,7 +41,9 @@ class UITooltip(UIElement, IUITooltipInterface):
                  manager: Optional[IUIManagerInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None):
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+                 *,
+                 text_kwargs: Dict[str, str] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
@@ -62,7 +67,8 @@ class UITooltip(UIElement, IUITooltipInterface):
                                     pygame.Rect(0, 0, self.rect_width, -1),
                                     manager=self.ui_manager,
                                     layer_starting_height=self._layer,
-                                    parent_element=self)
+                                    parent_element=self,
+                                    text_kwargs=text_kwargs)
 
         self.rect_width = self.text_block.rect.size[0]
         super().set_dimensions(self.text_block.rect.size)

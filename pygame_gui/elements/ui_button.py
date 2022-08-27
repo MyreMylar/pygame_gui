@@ -41,6 +41,9 @@ class UIButton(UIElement):
                                 unique event.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
+    :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                        useful when you have multiple translations that need variables inserted
+                        in the middle.
     """
 
     def __init__(self, relative_rect: Union[pygame.Rect, Tuple[float, float], pygame.Vector2],
@@ -54,7 +57,10 @@ class UIButton(UIElement):
                  anchors: Dict[str, Union[str, UIElement]] = None,
                  allow_double_clicks: bool = False,
                  generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
-                 visible: int = 1
+                 visible: int = 1,
+                 *,
+                 text_kwargs: Optional[Dict[str, str]] = None,
+                 tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
                  ):
 
         rel_rect = (relative_rect if isinstance(relative_rect, pygame.Rect)
@@ -72,12 +78,18 @@ class UIButton(UIElement):
                                element_id='button')
 
         self.text = text
+        self.text_kwargs = {}
+        if text_kwargs is not None:
+            self.text_kwargs = text_kwargs
 
         self.dynamic_width = False
         self.dynamic_height = False
         self.dynamic_dimensions_orig_top_left = rel_rect.topleft
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
+        self.tool_tip_text_kwargs = {}
+        if tool_tip_text_kwargs is not None:
+            self.tool_tip_text_kwargs = tool_tip_text_kwargs
         self.tool_tip = None
         self.ui_root_container = self.ui_manager.get_root_container()
 
@@ -259,7 +271,8 @@ class UIButton(UIElement):
                                                             position=(mouse_pos[0],
                                                                       self.rect.centery),
                                                             hover_distance=(0,
-                                                                            hover_height))
+                                                                            hover_height),
+                                                            text_kwargs=self.tool_tip_text_kwargs)
 
         self.hover_time += time_delta
 
@@ -445,19 +458,34 @@ class UIButton(UIElement):
         self.is_selected = False
         self.drawable_shape.set_active_state('normal')
 
-    def set_text(self, text: str):
+    def set_text(self, text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
         """
         Sets the text on the button. The button will rebuild.
 
         :param text: The new text to set.
+        :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                        useful when you have multiple translations that need variables inserted
+                        in the middle.
 
         """
+        any_changed = False
         if text != self.text:
             self.text = text
+            any_changed = True
+
+        if text_kwargs is not None:
+            if text_kwargs != self.text_kwargs:
+                self.text_kwargs = text_kwargs
+                any_changed = True
+        elif self.text_kwargs != {}:
+            self.text_kwargs = {}
+            any_changed = True
+
+        if any_changed:
             if self.dynamic_width:
                 self.rebuild()
             else:
-                self.drawable_shape.set_text(translate(self.text))
+                self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
@@ -694,7 +722,7 @@ class UIButton(UIElement):
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
-                              'text': translate(self.text),
+                              'text': translate(self.text, **self.text_kwargs),
                               'text_shadow': (self.text_shadow_size,
                                               self.text_shadow_offset[0],
                                               self.text_shadow_offset[1],
@@ -761,4 +789,4 @@ class UIButton(UIElement):
             if self.dynamic_width:
                 self.rebuild()
             else:
-                self.drawable_shape.set_text(translate(self.text))
+                self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))

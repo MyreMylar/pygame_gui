@@ -3,10 +3,13 @@ import pygame
 import pytest
 import pygame_gui
 
+import i18n
+
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.windows import UIConfirmationDialog
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 
 class TestUIConfirmationDialog:
@@ -20,6 +23,19 @@ class TestUIConfirmationDialog:
                              manager=default_ui_manager,
                              window_title="Confirm",
                              action_short_name="Confirm")
+
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
+
+        confirmation_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
+                                                   action_long_desc="translation.test_hello",
+                                                   manager=default_ui_manager,
+                                                   window_title="Confirm",
+                                                   action_short_name="Confirm",
+                                                   action_long_desc_text_kwargs={"name": "World"})
+        assert confirmation_dialog.confirmation_text.image is not None
+        text_chunk = confirmation_dialog.confirmation_text.text_box_layout.layout_rows[0].items[0]
+        assert isinstance(text_chunk, TextLineChunkFTFont)
+        assert text_chunk.text == "Hello World"
 
     def test_create_too_small(self, _init_pygame, default_ui_manager,
                               _display_surface_return_none):

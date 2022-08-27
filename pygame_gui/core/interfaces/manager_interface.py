@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, List, Union, Dict, Set
+from typing import Tuple, List, Union, Dict, Set, Optional
 
 import pygame
 
@@ -226,13 +226,18 @@ class IUIManagerInterface(metaclass=ABCMeta):
     def create_tool_tip(self,
                         text: str,
                         position: Tuple[int, int],
-                        hover_distance: Tuple[int, int]) -> IUITooltipInterface:
+                        hover_distance: Tuple[int, int],
+                        *,
+                        text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it.
 
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
         :param position: The screen position to create the tool tip for.
         :param hover_distance: The distance we should hover away from our target position.
+        :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                            useful when you have multiple translations that need variables inserted
+                            in the middle.
 
         :return: A tool tip placed somewhere on the screen.
 

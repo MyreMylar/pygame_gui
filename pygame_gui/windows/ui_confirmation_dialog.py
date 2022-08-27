@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
 import pygame
 
@@ -28,6 +28,9 @@ class UIConfirmationDialog(UIWindow):
     :param object_id: A custom defined ID for fine tuning of theming. Defaults to
                       '#confirmation_dialog'.
     :param visible: Whether the element is visible by default.
+    :param long_desc_text_kwargs: a dictionary of variable arguments to pass to the translated string
+                                  useful when you have multiple translations that need variables inserted
+                                  in the middle.
     """
 
     def __init__(self, rect: pygame.Rect,
@@ -38,7 +41,9 @@ class UIConfirmationDialog(UIWindow):
                  action_short_name: str = 'pygame-gui.OK',
                  blocking: bool = True,
                  object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
-                 visible: int = 1):
+                 visible: int = 1,
+                 action_long_desc_text_kwargs: Optional[Dict[str, str]] = None
+                 ):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
@@ -86,7 +91,8 @@ class UIConfirmationDialog(UIWindow):
                                            anchors={'left': 'left',
                                                     'right': 'right',
                                                     'top': 'top',
-                                                    'bottom': 'bottom'})
+                                                    'bottom': 'bottom'},
+                                           text_kwargs=action_long_desc_text_kwargs)
 
         self.set_blocking(blocking)
 

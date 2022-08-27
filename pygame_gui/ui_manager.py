@@ -521,7 +521,9 @@ class UIManager(IUIManagerInterface):
         return self.universal_empty_surface
 
     def create_tool_tip(self, text: str, position: Tuple[int, int],
-                        hover_distance: Tuple[int, int]) -> IUITooltipInterface:
+                        hover_distance: Tuple[int, int],
+                        *,
+                        text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it
         from other UI elements and create tool tips without creating cyclical import problems.
@@ -529,10 +531,13 @@ class UIManager(IUIManagerInterface):
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
         :param position: The screen position to create the tool tip for.
         :param hover_distance: The distance we should hover away from our target position.
+        :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                            useful when you have multiple translations that need variables inserted
+                            in the middle.
 
         :return: A tool tip placed somewhere on the screen.
         """
-        tool_tip = UITooltip(text, hover_distance, self)
+        tool_tip = UITooltip(text, hover_distance, self, text_kwargs=text_kwargs)
         tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
         return tool_tip
 

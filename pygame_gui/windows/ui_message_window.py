@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
 import pygame
 
@@ -27,7 +27,8 @@ class UIMessageWindow(UIWindow):
                  *,
                  window_title: str = 'pygame-gui.message_window_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#message_window', None),
-                 visible: int = 1):
+                 visible: int = 1,
+                 html_message_text_kwargs: Optional[Dict[str, str]] = None):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
@@ -71,8 +72,8 @@ class UIMessageWindow(UIWindow):
                                     anchors={"left": "left",
                                              "top": "top",
                                              "right": "right",
-                                             "bottom": "bottom"}
-                                    )
+                                             "bottom": "bottom"},
+                                    text_kwargs=html_message_text_kwargs)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

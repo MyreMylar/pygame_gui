@@ -2,8 +2,11 @@ import os
 import pytest
 import pygame
 
+import i18n
+
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_tool_tip import UITooltip
+from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 
 class TestUIToolTip:
@@ -13,6 +16,16 @@ class TestUIToolTip:
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
         assert tool_tip.text_block.image is not None
+
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
+        tool_tip = UITooltip(html_text="translation.test_hello",
+                             hover_distance=(0, 10),
+                             manager=default_ui_manager,
+                             text_kwargs={"name": "World"})
+        assert tool_tip.text_block.image is not None
+        text_chunk = tool_tip.text_block.text_box_layout.layout_rows[0].items[0]
+        assert isinstance(text_chunk, TextLineChunkFTFont)
+        assert text_chunk.text == "Hello World"
 
     def test_rebuild(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         tool_tip = UITooltip(html_text="A tip about tools.",

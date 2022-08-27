@@ -33,6 +33,9 @@ class UILabel(UIElement, IUITextOwnerInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                        useful when you have multiple translations that need variables inserted
+                        in the middle.
     """
 
     def __init__(self, relative_rect: pygame.Rect,
@@ -44,7 +47,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  *,
-                 text_kwargs: Dict[str, str] = None):
+                 text_kwargs: Optional[Dict[str, str]] = None):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
@@ -86,19 +89,26 @@ class UILabel(UIElement, IUITextOwnerInterface):
 
         self.rebuild_from_changed_theme_data()
 
-    def set_text(self, text: str, **text_kwargs: str):
+    def set_text(self, text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
         """
         Changes the string displayed by the label element. Labels do not support HTML styling.
 
         :param text: the text to set the label to.
+        :param text_kwargs: a dictionary of variable arguments to pass to the translated string
+                            useful when you have multiple translations that need variables inserted
+                            in the middle.
 
         """
         any_changed = False
         if text != self.text:
             self.text = text
             any_changed = True
-        if text_kwargs != self.text_kwargs:
-            self.text_kwargs = text_kwargs
+        if text_kwargs is not None:
+            if text_kwargs != self.text_kwargs:
+                self.text_kwargs = text_kwargs
+                any_changed = True
+        elif self.text_kwargs != {}:
+            self.text_kwargs = {}
             any_changed = True
 
         if any_changed:

@@ -3,6 +3,8 @@ import pytest
 import pygame
 import platform
 
+import i18n
+
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -20,6 +22,7 @@ class TestUITextEntryLine:
         assert text_entry.image is not None
 
     def test_placeholder_text(self, _init_pygame, default_ui_manager):
+
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager,
                                      placeholder_text="Enter name...")
@@ -41,6 +44,14 @@ class TestUITextEntryLine:
         text_entry.unfocus()
 
         assert text_entry.drawable_shape.theming['text'] == "Enter name..."
+
+        i18n.add_translation('translation.enter_age', 'Enter age...')
+
+        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                     manager=default_ui_manager,
+                                     placeholder_text='translation.enter_age')
+        assert text_entry.image is not None
+        assert text_entry.drawable_shape.theming['text'] == "Enter age..."
 
     def test_initial_text(self, _init_pygame, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -1147,6 +1158,13 @@ class TestUITextEntryLine:
         default_ui_manager.set_locale('fr')
 
         default_ui_manager.set_locale('ja')
+
+        default_ui_manager.set_locale('en')
+        text_entry.set_text_hidden(True)
+
+        default_ui_manager.set_locale('fr')
+
+        text_entry.set_text_hidden(False)
 
         assert text_entry.get_text() == "Some basic text"
 
