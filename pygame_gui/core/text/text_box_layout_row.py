@@ -18,7 +18,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.line_spacing = line_spacing
         self.row_index = row_index
         self.layout = layout
-        self.items = []
+        self.items: TextLayoutRect = []
 
         self.letter_count = 0
 

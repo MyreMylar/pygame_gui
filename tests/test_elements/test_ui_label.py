@@ -2,6 +2,8 @@ import os
 import pytest
 import pygame
 
+import i18n
+
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
@@ -18,11 +20,13 @@ class TestUILabel:
                         manager=default_ui_manager)
         assert label.image is not None
 
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
         label_with_kwargs = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
-                                    text="Hello %{name}",
+                                    text="translation.test_hello",
                                     manager=default_ui_manager,
-                                    text_kwargs={"name": "Dan"})
+                                    text_kwargs={"name": "World"})
         assert label_with_kwargs.image is not None
+        assert label_with_kwargs.drawable_shape.theming['text'] == "Hello World"
 
     def test_set_text(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
@@ -41,11 +45,13 @@ class TestUILabel:
 
     def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):
+        i18n.add_translation('translation.test_hello', 'Hello %{name}')
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
-        label.set_text("Hello %{name}", name="Dan")
+        label.set_text("translation.test_hello", text_kwargs={"name": "World"})
         assert label.image is not None
+        assert label.drawable_shape.theming['text'] == "Hello World"
 
     def test_rebuild(self, _init_pygame, default_ui_manager,
                      _display_surface_return_none):

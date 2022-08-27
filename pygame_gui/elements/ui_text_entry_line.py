@@ -89,7 +89,7 @@ class UITextEntryLine(UIElement):
 
         self.text = ""
         if initial_text is not None:
-            self.text = initial_text
+            self.text = translate(initial_text)
         self.is_text_hidden = False
         self.hidden_text_char = '●'
         self.placeholder_text = ""
@@ -216,7 +216,7 @@ class UITextEntryLine(UIElement):
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'font': self.font,
-                              'text': display_text if len(display_text) > 0 else self.placeholder_text,
+                              'text': display_text if len(display_text) > 0 else translate(self.placeholder_text),
                               'text_width': -1,
                               'text_horiz_alignment': 'left',
                               'text_vert_alignment': 'centre',
@@ -276,7 +276,8 @@ class UITextEntryLine(UIElement):
                 if self.is_text_hidden:
                     display_text = self.hidden_text_char * len(self.text)
                 if self.drawable_shape is not None:
-                    self.drawable_shape.set_text(display_text if len(display_text) > 0 else self.placeholder_text)
+                    self.drawable_shape.set_text(display_text if len(display_text) > 0
+                                                 else translate(self.placeholder_text))
                     self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                     self.drawable_shape.apply_active_text_changes()
             else:
@@ -366,7 +367,7 @@ class UITextEntryLine(UIElement):
         self.text_entered = False
         if len(self.text) == 0:
             if self.drawable_shape is not None:
-                self.drawable_shape.set_text(self.placeholder_text)
+                self.drawable_shape.set_text(translate(self.placeholder_text))
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.drawable_shape.apply_active_text_changes()
         self.redraw()
@@ -997,7 +998,7 @@ class UITextEntryLine(UIElement):
 
     def disable(self):
         """
-        Disables the button so that it is no longer interactive.
+        Disables the element so that it is no longer interactive.
         """
         if self.is_enabled:
             self.is_enabled = False
@@ -1017,7 +1018,7 @@ class UITextEntryLine(UIElement):
 
     def enable(self):
         """
-        Re-enables the button so we can once again interact with it.
+        Re-enables the element so we can once again interact with it.
         """
         if not self.is_enabled:
             self.is_enabled = True
@@ -1033,8 +1034,12 @@ class UITextEntryLine(UIElement):
             self.font = font
             self.rebuild()
         else:
+            display_text = self.text
+            if self.is_text_hidden:
+                display_text = self.hidden_text_char * len(self.text)
             if self.drawable_shape is not None:
-                self.drawable_shape.set_text(translate(self.text))
+                self.drawable_shape.set_text(display_text if len(display_text) > 0
+                                             else translate(self.placeholder_text))
 
     def clear(self):
         self.set_text("")
