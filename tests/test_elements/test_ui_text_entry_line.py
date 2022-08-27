@@ -1159,9 +1159,10 @@ class TestUITextEntryLine:
 
         default_ui_manager.set_locale('ja')
 
+        default_ui_manager.set_locale('en')
         text_entry.set_text_hidden(True)
 
-        default_ui_manager.set_locale('en')
+        default_ui_manager.set_locale('fr')
 
         text_entry.set_text_hidden(False)
 
