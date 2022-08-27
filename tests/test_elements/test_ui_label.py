@@ -18,6 +18,12 @@ class TestUILabel:
                         manager=default_ui_manager)
         assert label.image is not None
 
+        label_with_kwargs = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                    text="Hello %{name}",
+                                    manager=default_ui_manager,
+                                    text_kwargs={"name": "Dan"})
+        assert label_with_kwargs.image is not None
+
     def test_set_text(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -242,8 +248,8 @@ class TestUILabel:
 
         assert label.image is not None
 
-    def test_get_objectID(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_get_object_id(self, _init_pygame, default_ui_manager,
+                           _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager,

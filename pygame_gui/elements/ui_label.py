@@ -43,7 +43,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
-                 **text_kwargs: str):
+                 *,
+                 text_kwargs: Dict[str, str] = None):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
@@ -61,7 +62,9 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.dynamic_dimensions_orig_top_left = relative_rect.topleft
 
         self.text = text
-        self.text_kwargs = text_kwargs
+        self.text_kwargs = {}
+        if text_kwargs is not None:
+            self.text_kwargs = text_kwargs
 
         # initialise theme params
         self.font = None
