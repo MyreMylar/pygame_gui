@@ -31,6 +31,13 @@ class TestUIButton:
         assert button_with_kwargs.image is not None
         assert button_with_kwargs.drawable_shape.theming['text'] == "Hello World"
 
+        button_with_tt_kwargs = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                                         text="Test Button",
+                                         manager=default_ui_manager,
+                                         tool_tip_text="translation.test_hello",
+                                         tool_tip_text_kwargs={"name": "World"})
+        assert button_with_tt_kwargs.image is not None
+
     def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):
         i18n.add_translation('translation.test_hello', 'Hello %{name}')
@@ -40,6 +47,10 @@ class TestUIButton:
         button.set_text("translation.test_hello", text_kwargs={"name": "World"})
         assert button.image is not None
         assert button.drawable_shape.theming['text'] == "Hello World"
+
+        button.set_text("Clear args")
+        assert button.image is not None
+        assert button.drawable_shape.theming['text'] == "Clear args"
 
     @pytest.mark.filterwarnings("ignore:DeprecationWarning")
     def test_set_any_images_from_theme(self, _init_pygame, _display_surface_return_none):

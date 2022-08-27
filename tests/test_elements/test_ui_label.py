@@ -53,6 +53,10 @@ class TestUILabel:
         assert label.image is not None
         assert label.drawable_shape.theming['text'] == "Hello World"
 
+        label.set_text("Clear args")
+        assert label.image is not None
+        assert label.drawable_shape.theming['text'] == "Clear args"
+
     def test_rebuild(self, _init_pygame, default_ui_manager,
                      _display_surface_return_none):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
