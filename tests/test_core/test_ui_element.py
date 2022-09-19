@@ -772,6 +772,22 @@ class TestUIElement:
                   container=None,
                   starting_height=0,
                   layer_thickness=1,
+                  anchors={'centerx': 'centerx',
+                           'centerx_target': element_1})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'centery': 'centery',
+                           'centery_target': element_2})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
                   anchors={'left': 'left'})
 
         UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
