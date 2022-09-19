@@ -738,12 +738,20 @@ class TestUIElement:
             anchor_element.set_relative_position((45, 45))
             anchor_element.set_position((45, 45))
 
-        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
-                  manager=default_ui_manager,
-                  container=None,
-                  starting_height=0,
-                  layer_thickness=1,
-                  anchors={'center': 'center'})
+        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
+
+        center_element = UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                                   manager=default_ui_manager,
+                                   container=test_container,
+                                   starting_height=0,
+                                   layer_thickness=1,
+                                   anchors={'center': 'center'})
+
+        assert center_element.get_abs_rect().topleft == (230, 230)
+        assert center_element.get_abs_rect().center == (250, 250)
+        assert center_element.get_relative_rect().center == (20, 20)
+        center_element.set_position((230, 230))
+        assert center_element.get_relative_rect().center == (20, 20)
 
         UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
                   manager=default_ui_manager,

@@ -479,8 +479,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
             centery_offset = self._calc_centery_offset()
-            new_top = self.rect.top - self.relative_rect.height//2 - centery_offset
-            new_bottom = self.rect.bottom - self.relative_rect.height//2 - centery_offset
+            new_top = self.rect.top + self.relative_rect.height//2 - centery_offset
+            new_bottom = self.rect.bottom + self.relative_rect.height//2 - centery_offset
 
         if 'top' in self.anchors:
             if self.anchors['top'] == 'top':
@@ -510,8 +510,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
             centerx_offset = self._calc_centerx_offset()
-            new_left = self.rect.left - self.relative_rect.centerx - centerx_offset
-            new_right = self.rect.right - self.relative_rect.centerx - centerx_offset
+            new_left = self.rect.left + self.relative_rect.width//2 - centerx_offset
+            new_right = self.rect.right + self.relative_rect.width//2 - centerx_offset
 
         if 'left' in self.anchors:
             if self.anchors['left'] == 'left':
