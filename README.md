@@ -3,7 +3,7 @@
 # Pygame GUI
 A GUI system for pygame 2.
 
- - [Documentation](https://pygame-gui.readthedocs.io/en/latest/index.html)
+ - [Documentation](https://pygame-gui.readthedocs.io/)
  - [GitHub](https://github.com/MyreMylar/pygame_gui)
  - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
  - [PyPi](https://pypi.org/project/pygame-gui/)
