@@ -5,6 +5,9 @@ Layout Guide
 
 Pygame GUI elements are positioned in three different axes - x (horizontal), y (vertical) and a layer.
 
+Anchors were improved in Version 0.6.5, adding center anchors and removing the need to specify lots of anchors when
+you only want to alter one.
+
 
 Horizontal & Vertical positioning
 ---------------------------------
@@ -57,9 +60,7 @@ being relative to the top left we anchor to, say the bottom right. That would lo
     UIButton(relative_rect=button_layout_rect,
              text='Hello', manager=manager,
              container=ui_window,
-             anchors={'left': 'right',
-                      'right': 'right',
-                      'top': 'bottom',
+             anchors={'right': 'right',
                       'bottom': 'bottom'})
 
 Note that both the left and right sides of the button are anchored to the right of our container, and both the top and
@@ -68,7 +69,37 @@ is and will produce a layout looking a bit like this:
 
 .. figure:: _static/layout_bottom_right_anchors.png
 
-Sometimes though you want a layout to change size with it's container so we make maximum use of the available space. In
+Another common use case of anchors is centering an element inside a container, in one dimension or both.
+
+.. code-block:: python
+   :linenos:
+
+    button_layout_rect = pygame.Rect(0, 0, 100, 20)
+    UIButton(relative_rect=button_layout_rect,
+             text='Hello', manager=manager,
+             container=ui_window,
+             anchors={'center': 'center'})
+
+When centering with an anchor, the normal left & top positions supplied to the element's relative rectangle are
+adjusted to instead be an offset from center to center. This just makes it a little bit easier to handle these common
+positions. Thus a rectangle position of (0, 0) as above will place the centre of the element in the center of the
+container.
+
+If you just want to center in the x dimension, or the y dimension - then the 'centerx' and 'centery' anchors
+are what you need:
+
+.. code-block:: python
+   :linenos:
+
+    button_layout_rect = pygame.Rect(0, -30, 100, 20)
+    UIButton(relative_rect=button_layout_rect,
+             text='Hello', manager=manager,
+             container=ui_window,
+             anchors={'centerx': 'centerx',
+                      'bottom': 'bottom'})
+
+
+Sometimes, you want a layout to change size with it's container so we make maximum use of the available space. In
 those cases we can simply set the appropriate axis anchors of our button to their counterparts on the window. So to
 stretch in the x axis (horizontal) set 'left' to 'left' & 'right' to 'right'. To stretch in the y axis (vertical) set
 'top' to 'top' & 'bottom' to 'bottom'. For example, here is a hello button with a stretch (both x & y axes) anchor
@@ -98,6 +129,24 @@ And here's what happens to it when we resize the UIWindow to be a bit larger:
 
 You'll note the gaps between the edges of the window have been maintained.
 
+Invalid anchors
+-------------
+
+Some anchor combinations are currently invalid. For example, you can't set:
+
+.. code-block:: python
+   :linenos:
+
+    button_layout_rect = pygame.Rect(0, 0, 100, 20)
+    UIButton(relative_rect=button_layout_rect,
+             text='Hello', manager=manager,
+             container=ui_window,
+             anchors={'left': 'right',
+                      'right': 'left'})
+
+Nor, the similar inversion for 'top' and 'bottom'. Currently the 'center' anchor can only be set to anchor to 'center',
+and likewise with 'centerx' and 'centery'. These restrictions were made cleared in Version 0.6.5.
+
 Anchor targets
 --------------
 
@@ -125,9 +174,7 @@ container edges. They are specified like this:
    button_3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((-10, -40), (-1, 30)),
                                            text='Anchored', manager=manager,
                                            container=dynamic_dimensions_window,
-                                           anchors={'top': 'bottom',
-                                                    'left': 'right',
-                                                    'bottom': 'bottom',
+                                           anchors={'bottom': 'bottom',
                                                     'right': 'right',
                                                     'bottom_target': button_1,
                                                     'right_target': button_2})

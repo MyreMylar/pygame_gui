@@ -70,19 +70,30 @@ class UIElement(GUISprite, IUIElementInterface):
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
 
-        self.anchors = {'left': 'left',
-                        'top': 'top',
-                        'right': 'left',
-                        'bottom': 'top'}
+        self.anchors = {}
         if anchors is not None:
-            if 'left' in anchors:
-                self.anchors['left'] = anchors['left']
-            if 'right' in anchors:
-                self.anchors['right'] = anchors['right']
-            if 'top' in anchors:
-                self.anchors['top'] = anchors['top']
-            if 'bottom' in anchors:
-                self.anchors['bottom'] = anchors['bottom']
+            if 'center' in anchors and anchors['center'] == 'center':
+                self.anchors.update({'center': 'center'})
+            else:
+                if self._validate_horizontal_anchors(anchors):
+                    if 'left' in anchors:
+                        self.anchors['left'] = anchors['left']
+                    if 'right' in anchors:
+                        self.anchors['right'] = anchors['right']
+                    if 'centerx' in anchors:
+                        self.anchors['centerx'] = anchors['centerx']
+                else:
+                    self.anchors.update({'left': 'left'})
+
+                if self._validate_vertical_anchors(anchors):
+                    if 'top' in anchors:
+                        self.anchors['top'] = anchors['top']
+                    if 'bottom' in anchors:
+                        self.anchors['bottom'] = anchors['bottom']
+                    if 'centery' in anchors:
+                        self.anchors['centery'] = anchors['centery']
+                else:
+                    self.anchors.update({'top': 'top'})
 
             if 'left_target' in anchors:
                 self.anchors['left_target'] = anchors['left_target']
@@ -92,6 +103,13 @@ class UIElement(GUISprite, IUIElementInterface):
                 self.anchors['top_target'] = anchors['top_target']
             if 'bottom_target' in anchors:
                 self.anchors['bottom_target'] = anchors['bottom_target']
+            if 'centerx_target' in anchors:
+                self.anchors['centerx_target'] = anchors['centerx_target']
+            if 'centery_target' in anchors:
+                self.anchors['centery_target'] = anchors['centery_target']
+        else:
+            self.anchors = {'left': 'left',
+                            'top': 'top'}
 
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
@@ -139,6 +157,66 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
+
+    @staticmethod
+    def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
+        # first make a dictionary of just the horizontal anchors
+        horizontal_anchors = {}
+
+        if 'left' in anchors:
+            horizontal_anchors.update({'left': anchors['left']})
+        if 'right' in anchors:
+            horizontal_anchors.update({'right': anchors['right']})
+        if 'centerx' in anchors:
+            horizontal_anchors.update({'centerx': anchors['centerx']})
+
+        valid_anchor_set = [{'left': 'left', 'right': 'left'},
+                            {'left': 'right', 'right': 'right'},
+                            {'left': 'left', 'right': 'right'},
+                            {'left': 'left'},
+                            {'right': 'right'},
+                            {'left': 'right'},
+                            {'right': 'left'},
+                            {'centerx': 'centerx'}
+                            ]
+
+        if horizontal_anchors in valid_anchor_set:
+            return True
+        elif len(horizontal_anchors) == 0:
+            return False  # no horizontal anchors so just use defaults
+        else:
+            warnings.warn("Supplied horizontal anchors are invalid, defaulting to left", category=UserWarning)
+            return False
+
+    @staticmethod
+    def _validate_vertical_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
+        # first make a dictionary of just the vertical anchors
+        vertical_anchors = {}
+
+        if 'top' in anchors:
+            vertical_anchors.update({'top': anchors['top']})
+        if 'bottom' in anchors:
+            vertical_anchors.update({'bottom': anchors['bottom']})
+        if 'centery' in anchors:
+            vertical_anchors.update({'centery': anchors['centery']})
+
+        valid_anchor_set = [{'top': 'top', 'bottom': 'top'},
+                            {'top': 'bottom', 'bottom': 'bottom'},
+                            {'top': 'top', 'bottom': 'bottom'},
+                            {'top': 'top'},
+                            {'bottom': 'bottom'},
+                            {'top': 'bottom'},
+                            {'bottom': 'top'},
+                            {'centery': 'centery'}
+                            ]
+
+        if vertical_anchors in valid_anchor_set:
+            return True
+        elif len(vertical_anchors) == 0:
+            return False  # no vertical anchors so just use defaults
+        else:
+            warnings.warn("Supplied vertical anchors are invalid, defaulting to top", category=UserWarning)
+            return False
 
     def _setup_visibility(self, visible):
         if visible:
@@ -265,70 +343,109 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self.most_specific_combined_id = self.combined_element_ids[0]
 
+    def _calc_top_offset(self) -> int:
+        return (self.anchors['top_target'].get_abs_rect().bottom
+                if 'top_target' in self.anchors
+                else self.ui_container.get_abs_rect().top)
+
+    def _calc_bottom_offset(self) -> int:
+        return (self.anchors['bottom_target'].get_abs_rect().top
+                if 'bottom_target' in self.anchors
+                else self.ui_container.get_abs_rect().bottom)
+
+    def _calc_centery_offset(self) -> int:
+        return (self.anchors['centery_target'].get_abs_rect().centery
+                if 'centery_target' in self.anchors
+                else self.ui_container.get_abs_rect().centery)
+
+    def _calc_left_offset(self) -> int:
+        return (self.anchors['left_target'].get_abs_rect().right
+                if 'left_target' in self.anchors
+                else self.ui_container.get_abs_rect().left)
+
+    def _calc_right_offset(self) -> int:
+        return (self.anchors['right_target'].get_abs_rect().left
+                if 'right_target' in self.anchors
+                else self.ui_container.get_abs_rect().right)
+
+    def _calc_centerx_offset(self) -> int:
+        return (self.anchors['centerx_target'].get_abs_rect().centerx
+                if 'centerx_target' in self.anchors
+                else self.ui_container.get_abs_rect().centerx)
+
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
         Called when our element's relative position has changed.
         """
         new_top = 0
-        if self.anchors['top'] == 'top':
-            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
-                          if 'top_target' in self.anchors
-                          else self.ui_container.get_abs_rect().top)
-            new_top = self.relative_rect.top + top_offset
-        elif self.anchors['top'] == 'bottom':
-            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
-                             if 'bottom_target' in self.anchors
-                             else self.ui_container.get_abs_rect().bottom)
-            new_top = self.relative_rect.top + bottom_offset
-        else:
-            warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
-
         new_bottom = 0
-        if self.anchors['bottom'] == 'top':
-            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
-                          if 'top_target' in self.anchors
-                          else self.ui_container.get_abs_rect().top)
-            new_bottom = self.relative_rect.bottom + top_offset
-        elif self.anchors['bottom'] == 'bottom':
-            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
-                             if 'bottom_target' in self.anchors
-                             else self.ui_container.get_abs_rect().bottom)
-            if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = (bottom_offset -
-                                               (new_top + self.relative_rect.height))
-            new_bottom = bottom_offset - self.relative_bottom_margin
-        else:
-            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
+        top_offset = self._calc_top_offset()
+        bottom_offset = self._calc_bottom_offset()
+
+        center_x_and_y = False
+
+        if 'center' in self.anchors:
+            if self.anchors['center'] == 'center':
+                center_x_and_y = True
+
+        if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
+            centery_offset = self._calc_centery_offset()
+            new_top = self.relative_rect.top - self.relative_rect.height//2 + centery_offset
+            new_bottom = self.relative_rect.bottom - self.relative_rect.height//2 + centery_offset
+
+        if 'top' in self.anchors:
+            if self.anchors['top'] == 'top':
+                new_top = self.relative_rect.top + top_offset
+                new_bottom = self.relative_rect.bottom + top_offset
+            elif self.anchors['top'] == 'bottom':
+                new_top = self.relative_rect.top + bottom_offset
+                if self.relative_bottom_margin is None or recalculate_margins:
+                    self.relative_bottom_margin = (bottom_offset -
+                                                   (new_top + self.relative_rect.height))
+                new_bottom = bottom_offset - self.relative_bottom_margin
+
+        if 'bottom' in self.anchors:
+            if self.anchors['bottom'] == 'top':
+                new_top = self.relative_rect.top + top_offset
+                new_bottom = self.relative_rect.bottom + top_offset
+            elif self.anchors['bottom'] == 'bottom':
+                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
+                    new_top = self.relative_rect.top + bottom_offset
+                if self.relative_bottom_margin is None or recalculate_margins:
+                    self.relative_bottom_margin = (bottom_offset -
+                                                   (new_top + self.relative_rect.height))
+                new_bottom = bottom_offset - self.relative_bottom_margin
 
         new_left = 0
-        if self.anchors['left'] == 'left':
-            left_offset = (self.anchors['left_target'].get_abs_rect().right
-                           if 'left_target' in self.anchors
-                           else self.ui_container.get_abs_rect().left)
-            new_left = self.relative_rect.left + left_offset
-        elif self.anchors['left'] == 'right':
-            right_offset = (self.anchors['right_target'].get_abs_rect().left
-                            if 'right_target' in self.anchors
-                            else self.ui_container.get_abs_rect().right)
-            new_left = self.relative_rect.left + right_offset
-        else:
-            warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
-
         new_right = 0
-        if self.anchors['right'] == 'left':
-            left_offset = (self.anchors['left_target'].get_abs_rect().right
-                           if 'left_target' in self.anchors
-                           else self.ui_container.get_abs_rect().left)
-            new_right = self.relative_rect.right + left_offset
-        elif self.anchors['right'] == 'right':
-            right_offset = (self.anchors['right_target'].get_abs_rect().left
-                            if 'right_target' in self.anchors
-                            else self.ui_container.get_abs_rect().right)
-            if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
-            new_right = right_offset - self.relative_right_margin
-        else:
-            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
+        left_offset = self._calc_left_offset()
+        right_offset = self._calc_right_offset()
+
+        if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
+            centerx_offset = self._calc_centerx_offset()
+            new_left = self.relative_rect.left - self.relative_rect.width//2 + centerx_offset
+            new_right = self.relative_rect.right - self.relative_rect.width//2 + centerx_offset
+
+        if 'left' in self.anchors:
+            if self.anchors['left'] == 'left':
+                new_left = self.relative_rect.left + left_offset
+                new_right = self.relative_rect.right + left_offset
+            elif self.anchors['left'] == 'right':
+                new_left = self.relative_rect.left + right_offset
+                if self.relative_right_margin is None or recalculate_margins:
+                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
+                new_right = right_offset - self.relative_right_margin
+
+        if 'right' in self.anchors:
+            if self.anchors['right'] == 'left':
+                new_left = self.relative_rect.left + left_offset
+                new_right = self.relative_rect.right + left_offset
+            elif self.anchors['right'] == 'right':
+                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
+                    new_left = self.relative_rect.left + right_offset
+                if self.relative_right_margin is None or recalculate_margins:
+                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
+                new_right = right_offset - self.relative_right_margin
 
         self.rect.left = new_left
         self.rect.top = new_top
@@ -351,64 +468,71 @@ class UIElement(GUISprite, IUIElementInterface):
         self.relative_right_margin = None
 
         new_top = 0
-        if self.anchors['top'] == 'top':
-            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
-                          if 'top_target' in self.anchors
-                          else self.ui_container.get_abs_rect().top)
-            new_top = self.rect.top - top_offset
-        elif self.anchors['top'] == 'bottom':
-            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
-                             if 'bottom_target' in self.anchors
-                             else self.ui_container.get_abs_rect().bottom)
-            new_top = self.rect.top - bottom_offset
-        else:
-            warnings.warn('Unsupported anchor top target: ' + self.anchors['top'])
-
         new_bottom = 0
-        if self.anchors['bottom'] == 'top':
-            top_offset = (self.anchors['top_target'].get_abs_rect().bottom
-                          if 'top_target' in self.anchors
-                          else self.ui_container.get_abs_rect().top)
-            new_bottom = self.rect.bottom - top_offset
-        elif self.anchors['bottom'] == 'bottom':
-            bottom_offset = (self.anchors['bottom_target'].get_abs_rect().top
-                             if 'bottom_target' in self.anchors
-                             else self.ui_container.get_abs_rect().bottom)
-            if self.relative_bottom_margin is None or recalculate_margins:
-                self.relative_bottom_margin = bottom_offset - self.rect.bottom
-            new_bottom = self.rect.bottom - bottom_offset
-        else:
-            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['bottom'])
+        top_offset = self._calc_top_offset()
+        bottom_offset = self._calc_bottom_offset()
+
+        center_x_and_y = False
+        if 'center' in self.anchors:
+            if self.anchors['center'] == 'center':
+                center_x_and_y = True
+
+        if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
+            centery_offset = self._calc_centery_offset()
+            new_top = self.rect.top + self.relative_rect.height//2 - centery_offset
+            new_bottom = self.rect.bottom + self.relative_rect.height//2 - centery_offset
+
+        if 'top' in self.anchors:
+            if self.anchors['top'] == 'top':
+                new_top = self.rect.top - top_offset
+                new_bottom = self.rect.bottom - top_offset
+            elif self.anchors['top'] == 'bottom':
+                new_top = self.rect.top - bottom_offset
+                if self.relative_bottom_margin is None or recalculate_margins:
+                    self.relative_bottom_margin = bottom_offset - self.rect.bottom
+                new_bottom = self.rect.bottom - bottom_offset
+
+        if 'bottom' in self.anchors:
+            if self.anchors['bottom'] == 'top':
+                new_top = self.rect.top - top_offset
+                new_bottom = self.rect.bottom - top_offset
+            elif self.anchors['bottom'] == 'bottom':
+                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
+                    new_top = self.rect.top - bottom_offset
+                if self.relative_bottom_margin is None or recalculate_margins:
+                    self.relative_bottom_margin = bottom_offset - self.rect.bottom
+                new_bottom = self.rect.bottom - bottom_offset
 
         new_left = 0
-        if self.anchors['left'] == 'left':
-            left_offset = (self.anchors['left_target'].get_abs_rect().right
-                           if 'left_target' in self.anchors
-                           else self.ui_container.get_abs_rect().left)
-            new_left = self.rect.left - left_offset
-        elif self.anchors['left'] == 'right':
-            right_offset = (self.anchors['right_target'].get_abs_rect().left
-                            if 'right_target' in self.anchors
-                            else self.ui_container.get_abs_rect().right)
-            new_left = self.rect.left - right_offset
-        else:
-            warnings.warn('Unsupported anchor top target: ' + self.anchors['left'])
-
         new_right = 0
-        if self.anchors['right'] == 'left':
-            left_offset = (self.anchors['left_target'].get_abs_rect().right
-                           if 'left_target' in self.anchors
-                           else self.ui_container.get_abs_rect().left)
-            new_right = self.rect.right - left_offset
-        elif self.anchors['right'] == 'right':
-            right_offset = (self.anchors['right_target'].get_abs_rect().left
-                            if 'right_target' in self.anchors
-                            else self.ui_container.get_abs_rect().right)
-            if self.relative_right_margin is None or recalculate_margins:
-                self.relative_right_margin = right_offset - self.rect.right
-            new_right = self.rect.right - right_offset
-        else:
-            warnings.warn('Unsupported anchor bottom target: ' + self.anchors['right'])
+        left_offset = self._calc_left_offset()
+        right_offset = self._calc_right_offset()
+
+        if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
+            centerx_offset = self._calc_centerx_offset()
+            new_left = self.rect.left + self.relative_rect.width//2 - centerx_offset
+            new_right = self.rect.right + self.relative_rect.width//2 - centerx_offset
+
+        if 'left' in self.anchors:
+            if self.anchors['left'] == 'left':
+                new_left = self.rect.left - left_offset
+                new_right = self.rect.right - left_offset
+            elif self.anchors['left'] == 'right':
+                new_left = self.rect.left - right_offset
+                if self.relative_right_margin is None or recalculate_margins:
+                    self.relative_right_margin = right_offset - self.rect.right
+                new_right = self.rect.right - right_offset
+
+        if 'right' in self.anchors:
+            if self.anchors['right'] == 'left':
+                new_left = self.rect.left - left_offset
+                new_right = self.rect.right - left_offset
+            elif self.anchors['right'] == 'right':
+                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
+                    new_left = self.rect.left - right_offset
+                if self.relative_right_margin is None or recalculate_margins:
+                    self.relative_right_margin = right_offset - self.rect.right
+                new_right = self.rect.right - right_offset
 
         # set bottom and right first in case these are only anchors available
         self.relative_rect.bottom = new_bottom
