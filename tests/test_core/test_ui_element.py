@@ -719,7 +719,7 @@ class TestUIElement:
         anchor_element.set_dimensions((30, 30))
         anchor_element.set_relative_position((45, 45))
 
-        with pytest.warns(match="Unsupported anchor"):
+        with pytest.warns(expected_warning=UserWarning, match="Supplied horizontal anchors are invalid"):
             anchor_element = UIElement(relative_rect=pygame.Rect(50, 50, 40, 40),
                                        manager=default_ui_manager,
                                        container=None,
@@ -737,6 +737,55 @@ class TestUIElement:
             anchor_element.set_dimensions((30, 30))
             anchor_element.set_relative_position((45, 45))
             anchor_element.set_position((45, 45))
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'center': 'center'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'centerx': 'centerx'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'centery': 'centery'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'left': 'left'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'left': 'right'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'right': 'right'})
+
+        UIElement(relative_rect=pygame.Rect(0, 0, 40, 40),
+                  manager=default_ui_manager,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1,
+                  anchors={'right': 'left'})
 
     def test_enable_disable(self, _init_pygame, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
