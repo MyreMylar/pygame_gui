@@ -303,7 +303,7 @@ class UIFileDialog(UIWindow):
                 or event.ui_element != self.file_path_text_line):
             return
         entered_file_path = Path(self.file_path_text_line.get_text()).absolute()
-        if self._validate_file_or_dir_path(entered_file_path.parent):
+        if self._validate_file_path(entered_file_path.parent):
             if len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
                                                     not entered_file_path.exists()):
                 self.current_file_path = entered_file_path
@@ -314,6 +314,10 @@ class UIFileDialog(UIWindow):
                 else:
                     self.delete_button.disable()
                 self.ok_button.enable()
+
+            elif not self.allow_existing_files_only and entered_file_path.parent.exists() and (not entered_file_path.is_dir() or self.allow_picking_directories):
+                self.ok_button.enable()
+
             else:
                 self.current_directory_path = str(entered_file_path)
                 self.current_file_path = None
