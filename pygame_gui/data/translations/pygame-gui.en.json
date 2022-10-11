@@ -14,6 +14,7 @@
     "Chinese": "Chinese",
     "Portuguese": "Portuguese",
     "Russian": "Russian",
+    "Polish": "Polish",
     "colour_picker_title_bar": "Colour picker",
     "Saturation_S": "S:",
     "Value_V": "V:",
@@ -29,6 +30,5 @@
     "Parent_directory": "Parent directory",
     "Refresh_directory": "Refresh directory",
     "Delete_filename": "Delete %{file_name} ?"
-
   }
 }
