@@ -14,6 +14,7 @@
     "Chinese": "中国人",
     "Portuguese": "葡萄牙语",
     "Russian": "俄语",
+    "Polish": "波兰语",
     "colour_picker_title_bar": "颜色选择器",
     "Saturation_S": "饱和:",
     "Value_V": "亮度:",
@@ -29,6 +30,5 @@
     "Parent_directory": "父目录",
     "Refresh_directory": "刷新目录",
     "Delete_filename": "删除 %{file_name} ?"
-
   }
 }
