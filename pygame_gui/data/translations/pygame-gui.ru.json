@@ -14,6 +14,7 @@
     "Chinese": "Китайский",
     "Portuguese": "Португальский",
     "Russian": "Русский",
+    "Polish": "Польский",
     "colour_picker_title_bar": "Палитра цветов",
     "Saturation_S": "н:",
     "Value_V": "я:",
@@ -29,6 +30,5 @@
     "Parent_directory": "Родительский каталог",
     "Refresh_directory": "Обновить каталог",
     "Delete_filename": "Удалить %{file_name} ?"
-
   }
 }
