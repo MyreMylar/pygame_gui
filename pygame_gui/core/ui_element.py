@@ -42,7 +42,7 @@ class UIElement(GUISprite, IUIElementInterface):
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
     """
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface],
                  container: Optional[IContainerLikeInterface],
                  *,
@@ -59,7 +59,10 @@ class UIElement(GUISprite, IUIElementInterface):
             raise ValueError("Need to create at least one UIManager to create UIElements")
 
         super().__init__(self.ui_manager.get_sprite_group())
-        self.relative_rect = relative_rect.copy()
+        if isinstance(relative_rect, pygame.Rect):
+            self.relative_rect = relative_rect.copy()
+        else:
+            self.relative_rect = pygame.Rect(relative_rect)
         self.rect = self.relative_rect.copy()
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
@@ -1101,3 +1104,15 @@ class UIElement(GUISprite, IUIElementInterface):
         # Used for parsing coordinate tuples in themes.
         x, y = str_data.split(',')
         return int(x), int(y)
+
+    def update_theming(self, new_theming_data: str):
+        """
+        Update the theming for this element using the most specific ID assigned to it.
+
+        If you have not given this element a unique ID, this function will also update the theming of other elements
+        of this theming class or of this element type.
+
+        :param new_theming_data: the new theming data in a json string
+        """
+        self.ui_theme.update_single_element_theming(self.most_specific_combined_id, new_theming_data)
+        self.rebuild_from_changed_theme_data()

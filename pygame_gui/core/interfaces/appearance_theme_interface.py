@@ -152,3 +152,22 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         :param file_path: The path to the theme we want to load.
 
         """
+
+    @abstractmethod
+    def update_theming(self, new_theming_data: str, rebuild_all: bool = True):
+        """
+        Update theming data, via string - for the whole UI.
+
+        :param new_theming_data:
+        :param rebuild_all:
+        :return:
+        """
+
+    @abstractmethod
+    def update_single_element_theming(self, element_name: str, new_theming_data: str):
+        """
+        Update theming data, via string - for a single element.
+        :param element_name:
+        :param new_theming_data:
+        :return:
+        """
