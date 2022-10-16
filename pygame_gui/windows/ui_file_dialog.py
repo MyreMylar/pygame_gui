@@ -192,8 +192,7 @@ class UIFileDialog(UIWindow):
             return
         highlight_start = self.file_path_text_line.get_text().find(self.current_file_path.stem)
         highlight_end = highlight_start + len(self.current_file_path.stem)
-        self.file_path_text_line.select_range[0] = highlight_start
-        self.file_path_text_line.select_range[1] = highlight_end
+        self.file_path_text_line.select_range = [highlight_start, highlight_end]
         self.file_path_text_line.cursor_has_moved_recently = True
         self.file_path_text_line.edit_position = highlight_end
 
@@ -305,7 +304,8 @@ class UIFileDialog(UIWindow):
         entered_file_path = Path(self.file_path_text_line.get_text()).absolute()
         if self._validate_file_or_dir_path(entered_file_path.parent):
             if len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
-                                                    not entered_file_path.exists()):
+                                                    (not self.allow_existing_files_only and
+                                                     not entered_file_path.exists())):
                 self.current_file_path = entered_file_path
 
                 if self._validate_path_exists_and_of_allowed_type(self.current_file_path,
@@ -351,7 +351,11 @@ class UIFileDialog(UIWindow):
         """
         if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.file_selection_list):
-            new_selection_file_path = Path(self.current_directory_path) / event.text
+            current_path = Path(self.current_directory_path)
+            if current_path.is_dir():
+                new_selection_file_path = current_path / event.text
+            else:
+                new_selection_file_path = current_path.parent / event.text
             if self._validate_path_exists_and_of_allowed_type(new_selection_file_path,
                                                               self.allow_picking_directories):
                 self.current_file_path = new_selection_file_path
