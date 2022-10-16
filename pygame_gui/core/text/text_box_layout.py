@@ -544,9 +544,26 @@ class TextBoxLayout:
 
         letter_acc = 0
         for row in self.layout_rows:
-            if cursor_pos <= letter_acc + row.letter_count:
+            if cursor_pos < letter_acc + row.letter_count:
                 row.set_cursor_position(cursor_pos - letter_acc)
                 self.cursor_text_row = row
+                break
+            elif cursor_pos == letter_acc + row.letter_count:
+                # if the last character in a row is a space and we have more than one row
+                # we want to jump to the start of the next row
+                last_chunk = row.items[-1]
+                if len(self.layout_rows) > 1 and isinstance(last_chunk, TextLineChunkFTFont):
+                    if len(last_chunk.text) > 0 and last_chunk.text[-1] == " ":
+                        letter_acc += row.letter_count
+                    else:
+                        row.set_cursor_position(cursor_pos - letter_acc)
+                        self.cursor_text_row = row
+                        break
+                else:
+                    row.set_cursor_position(cursor_pos - letter_acc)
+                    self.cursor_text_row = row
+                    break
+
             else:
                 letter_acc += row.letter_count
 
@@ -562,11 +579,32 @@ class TextBoxLayout:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
 
-        for row in self.layout_rows:
-            if click_pos[1] < row.top or click_pos[1] >= row.bottom:
-                continue
+        found_row_pos = False
+        for count, row in enumerate(self.layout_rows):
+            if count < len(self.layout_rows) - 1:
+                if click_pos[1] < row.top or click_pos[1] >= self.layout_rows[count+1].top:
+                    continue
+            else:
+                if click_pos[1] < row.top or click_pos[1] > row.bottom:
+                    continue
+            found_row_pos = True
             self.cursor_text_row = row
-            row.set_cursor_from_click_pos(click_pos)
+            row.set_cursor_from_click_pos(click_pos, len(self.layout_rows))
+            break
+        if not found_row_pos and len(self.layout_rows) > 0:
+            if click_pos[1] > self.layout_rows[-1].bottom:
+                # we are assuming here that the rows are in height order
+                # TODO: check this is always true
+                self.cursor_text_row = self.layout_rows[-1]
+                new_cursor_pos = self.cursor_text_row.midright
+                self.cursor_text_row.set_cursor_from_click_pos(new_cursor_pos, len(self.layout_rows))
+
+            if click_pos[1] < self.layout_rows[0].top:
+                # we are assuming here that the rows are in height order
+                # TODO: check this is always true
+                self.cursor_text_row = self.layout_rows[0]
+                new_cursor_pos = (click_pos[0], self.cursor_text_row.centery)
+                self.cursor_text_row.set_cursor_from_click_pos(new_cursor_pos, len(self.layout_rows))
 
     def get_cursor_index(self):
         """
@@ -577,7 +615,12 @@ class TextBoxLayout:
         """
         cursor_index = 0
         if self.cursor_text_row is not None:
-            cursor_index = self.cursor_text_row.get_cursor_index()
+            for row in self.layout_rows:
+                if row == self.cursor_text_row:
+                    cursor_index += self.cursor_text_row.get_cursor_index()
+                    break
+                else:
+                    cursor_index += row.letter_count
         return cursor_index
 
     def toggle_cursor(self):

@@ -317,6 +317,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
+    def get_text_layout_top_left(self):
+        return (self.rect.left + self.padding[0] + self.border_width +
+                self.shadow_width + self.rounded_corner_offset,
+                self.rect.top + self.padding[1] + self.border_width +
+                self.shadow_width + self.rounded_corner_offset
+                )
+
     def _align_all_text_rows(self):
         """
         Aligns the text drawing position correctly according to our theming options.

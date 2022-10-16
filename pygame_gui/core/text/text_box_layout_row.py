@@ -335,7 +335,7 @@ class TextBoxLayoutRow(pygame.Rect):
             self.layout.x_scroll_offset = max(0, self.cursor_draw_width -
                                               self.edit_cursor_left_margin)
 
-    def set_cursor_from_click_pos(self, click_pos: Tuple[int, int]):
+    def set_cursor_from_click_pos(self, click_pos: Tuple[int, int], num_rows: int):
         """
         Set the current edit cursor position from a pixel position - usually
         originating from a mouse click.
@@ -349,7 +349,13 @@ class TextBoxLayoutRow(pygame.Rect):
         for chunk in self.items:
             if isinstance(chunk, TextLineChunkFTFont):
                 if not found_chunk:
-                    if chunk.collidepoint(scrolled_click_pos):
+                    # we only care about the X position at this point.
+                    if chunk == self.items[0] and scrolled_click_pos[0] < chunk.left:
+                        letter_index = 0
+                        cursor_draw_width = 0
+                        letter_acc += letter_index
+                        found_chunk = True
+                    elif chunk.collidepoint((scrolled_click_pos[0], chunk.centery)):
                         letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric in
@@ -363,11 +369,17 @@ class TextBoxLayoutRow(pygame.Rect):
                                                   chunk.font.get_metrics(chunk.text) if char_metric])
                         letter_acc += chunk.letter_count
         if not found_chunk:
-            # not inside chunk so move to start of line
-            # if we are on left, should be at end of line already
-            if scrolled_click_pos[0] < self.left:
-                cursor_draw_width = 0
-                letter_acc = 0
+            # not inside chunk
+            # if we have more than two rows check if we are on right of whole row and if row has space at the end.
+            # If so stick the edit cursor before the space because this is how it works.
+            if num_rows > 1 and scrolled_click_pos[0] >= self.right:
+                last_chunk = self.items[-1]
+                if isinstance(last_chunk, TextLineChunkFTFont):
+                    if last_chunk.text[-1] == " ":
+                        letter_acc -= 1
+                        char_metric = last_chunk.font.get_metrics(" ")[0]
+                        if char_metric:
+                            cursor_draw_width -= char_metric[4]
         self.cursor_draw_width = cursor_draw_width
         self.cursor_index = min(self.letter_count, max(0, letter_acc))
 

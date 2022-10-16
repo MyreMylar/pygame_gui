@@ -635,7 +635,9 @@ class TextLineChunkFTFont(TextLayoutRect):
                 check_dir *= -1
                 changed_dir += 1
                 step = 1
-
+        if best_index == len(self.text):
+            if self.text[-1] == " ":
+                best_index = max(0, best_index - 1)
         return best_index
 
     def redraw(self):

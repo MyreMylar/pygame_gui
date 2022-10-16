@@ -471,7 +471,7 @@ class TestTextBoxLayoutRow:
         assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
         assert layout_row.cursor_index == 0
 
-        layout_row.set_cursor_from_click_pos((44, 5))
+        layout_row.set_cursor_from_click_pos((44, 5), num_rows=1)
 
         layout_row.toggle_cursor()
         layout_row.toggle_cursor()
@@ -481,11 +481,11 @@ class TestTextBoxLayoutRow:
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
-        layout_row.set_cursor_from_click_pos((180, 5))
+        layout_row.set_cursor_from_click_pos((180, 5), num_rows=1)
 
         assert layout_row.cursor_index == 4
 
-        layout_row.set_cursor_from_click_pos((-1, 5))
+        layout_row.set_cursor_from_click_pos((-1, 5), num_rows=1)
 
         assert layout_row.left == 0
         assert layout_row.cursor_index == 0
