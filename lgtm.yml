@@ -1,5 +1,0 @@
-extraction:
-  python:
-    python_setup:
-      requirements:
-        - pygame==2.1.2
