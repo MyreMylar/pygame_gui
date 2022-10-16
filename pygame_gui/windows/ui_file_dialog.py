@@ -192,8 +192,7 @@ class UIFileDialog(UIWindow):
             return
         highlight_start = self.file_path_text_line.get_text().find(self.current_file_path.stem)
         highlight_end = highlight_start + len(self.current_file_path.stem)
-        self.file_path_text_line.select_range[0] = highlight_start
-        self.file_path_text_line.select_range[1] = highlight_end
+        self.file_path_text_line.select_range = [highlight_start, highlight_end]
         self.file_path_text_line.cursor_has_moved_recently = True
         self.file_path_text_line.edit_position = highlight_end
 
