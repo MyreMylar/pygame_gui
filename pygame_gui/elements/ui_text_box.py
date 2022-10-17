@@ -74,7 +74,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def __init__(self,
                  html_text: str,
-                 relative_rect: pygame.Rect,
+                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface] = None,
                  wrap_to_height: bool = False,
                  layer_starting_height: int = 1,

@@ -78,6 +78,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         self.st_cache_duration = 10.0
         self.st_cache_clear_timer = 0.0
 
+        self.need_to_rebuild_data_manually_changed = False
+
     def _load_default_theme_file(self):
         """
         Loads the default theme file.
@@ -92,6 +94,27 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :return: The font dictionary.
         """
         return self.font_dict
+
+    def check_need_to_rebuild_data_manually_changed(self) -> bool:
+        if self.need_to_rebuild_data_manually_changed:
+            self.need_to_rebuild_data_manually_changed = False
+            return True
+        return False
+
+    def update_theming(self, new_theming_data: str, rebuild_all: bool = True):
+        # parse new_theming data
+        theme_dict = json.loads(new_theming_data)
+        self._parse_theme_data_from_json_dict(theme_dict)
+        if rebuild_all:
+            self.need_to_rebuild_data_manually_changed = True
+
+    def update_single_element_theming(self, element_name: str, new_theming_data: str):
+        element_theming_dict = json.loads(new_theming_data)
+
+        self._parse_single_element_data(element_name, element_theming_dict)
+        self._load_fonts()
+        self._load_images()
+        self._preload_shadow_edges()
 
     def check_need_to_reload(self) -> bool:
         """
@@ -650,42 +673,47 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     load_success = True
 
                 if load_success:
+                    self._parse_theme_data_from_json_dict(theme_dict)
 
-                    for element_name in theme_dict.keys():
-                        if element_name == 'defaults':
-                            self._load_colour_defaults_from_theme(theme_dict)
-                        else:
-                            self._load_prototype(element_name, theme_dict)
-                            for data_type in theme_dict[element_name]:
-                                if data_type == 'font':
-                                    file_dict = theme_dict[element_name][data_type]
-                                    if isinstance(file_dict, list):
-                                        for item in file_dict:
-                                            self._load_element_font_data_from_theme(item,
-                                                                                    element_name)
-                                    else:
-                                        self._load_element_font_data_from_theme(file_dict,
-                                                                                element_name)
+    def _parse_theme_data_from_json_dict(self, theme_dict):
+        for element_name in theme_dict.keys():
+            if element_name == 'defaults':
+                self._load_colour_defaults_from_theme(theme_dict)
+            else:
+                self._load_prototype(element_name, theme_dict)
+                element_theming = theme_dict[element_name]
+                self._parse_single_element_data(element_name, element_theming)
 
-                                if data_type == 'colours':
-                                    self._load_element_colour_data_from_theme(data_type,
-                                                                              element_name,
-                                                                              theme_dict)
+        self._load_fonts()  # save to trigger load with the same data as it won't do anything
+        self._load_images()
+        self._preload_shadow_edges()
 
-                                elif data_type == 'images':
-                                    self._load_element_image_data_from_theme(data_type,
-                                                                             element_name,
-                                                                             theme_dict)
+    def _parse_single_element_data(self, element_name, element_theming):
+        for data_type in element_theming:
+            if data_type == 'font':
+                file_dict = element_theming[data_type]
+                if isinstance(file_dict, list):
+                    for item in file_dict:
+                        self._load_element_font_data_from_theme(item,
+                                                                element_name)
+                else:
+                    self._load_element_font_data_from_theme(file_dict,
+                                                            element_name)
 
-                                elif data_type == 'misc':
-                                    self._load_element_misc_data_from_theme(data_type,
-                                                                            element_name,
-                                                                            theme_dict)
+            if data_type == 'colours':
+                self._load_element_colour_data_from_theme(data_type,
+                                                          element_name,
+                                                          element_theming)
 
-        if load_success:
-            self._load_fonts()  # save to trigger load with the same data as it won't do anything
-            self._load_images()
-            self._preload_shadow_edges()
+            elif data_type == 'images':
+                self._load_element_image_data_from_theme(data_type,
+                                                         element_name,
+                                                         element_theming)
+
+            elif data_type == 'misc':
+                self._load_element_misc_data_from_theme(data_type,
+                                                        element_name,
+                                                        element_theming)
 
     def _load_prototype(self, element_name: str, theme_dict: Dict[str, Any]):
         """
@@ -745,7 +773,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def _load_element_misc_data_from_theme(self,
                                            data_type: str,
                                            element_name: str,
-                                           theme_dict: Dict[str, Any]):
+                                           element_theming: Dict[str, Any]):
         """
         Load miscellaneous theming data direct from the theme file's data dictionary into our
         misc data dictionary.
@@ -754,11 +782,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :param data_type: The type of misc data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
-        :param theme_dict: The data dictionary from the theming file to load data from.
+        :param element_theming: The data dictionary from the theming file to load data from.
         """
         if element_name not in self.ui_element_misc_data:
             self.ui_element_misc_data[element_name] = {}
-        misc_dict = theme_dict[element_name][data_type]
+        misc_dict = element_theming[data_type]
         for misc_data_key in misc_dict:
             if isinstance(misc_dict[misc_data_key], (dict, str)):
                 self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[misc_data_key]
@@ -766,7 +794,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def _load_element_image_data_from_theme(self,
                                             data_type: str,
                                             element_name: str,
-                                            theme_dict: Dict[str, Any]):
+                                            element_theming: Dict[str, Any]):
         """
         Load image theming data direct from the theme file's data dictionary into our image
         data dictionary.
@@ -775,11 +803,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :param data_type: The type of image data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
-        :param theme_dict: The data dictionary from the theming file to load data from.
+        :param element_theming: The data dictionary from the theming file to load data from.
         """
         if element_name not in self.ui_element_image_locs:
             self.ui_element_image_locs[element_name] = {}
-        loaded_img_dict = theme_dict[element_name][data_type]
+        loaded_img_dict = element_theming[data_type]
         for image_key in loaded_img_dict:
             if image_key not in self.ui_element_image_locs[element_name]:
                 self.ui_element_image_locs[element_name][image_key] = {}
@@ -823,7 +851,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def _load_element_colour_data_from_theme(self,
                                              data_type: str,
                                              element_name: str,
-                                             theme_dict: Dict[str, Any]):
+                                             element_theming: Dict[str, Any]):
         """
         Load colour/gradient theming data direct from the theme file's data dictionary into our
         colour data dictionary.
@@ -832,11 +860,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :param data_type: The type of colour data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
-        :param theme_dict: The data dictionary from the theming file to load data from.
+        :param element_theming: The data dictionary from the theming file to load data from.
         """
         if element_name not in self.ui_element_colours:
             self.ui_element_colours[element_name] = {}
-        colours_dict = theme_dict[element_name][data_type]
+        colours_dict = element_theming[data_type]
         for colour_key in colours_dict:
             colour = self._load_colour_or_gradient_from_theme(colours_dict, colour_key)
             self.ui_element_colours[element_name][colour_key] = colour

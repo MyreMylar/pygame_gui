@@ -255,6 +255,10 @@ class UIManager(IUIManagerInterface):
                     for sprite in self.ui_group.sprites():
                         sprite.rebuild_from_changed_theme_data()
 
+        if self.ui_theme.check_need_to_rebuild_data_manually_changed():
+            for sprite in self.ui_group.sprites():
+                sprite.rebuild_from_changed_theme_data()
+
         self.ui_theme.update_caching(time_delta)
 
         self._update_mouse_position()

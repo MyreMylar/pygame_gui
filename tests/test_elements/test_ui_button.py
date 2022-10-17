@@ -854,6 +854,40 @@ class TestUIButton:
 
         assert dynamic_width_button.text == "Test Button"
 
+    def test_update_theming(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager)
+
+        button.update_theming('{'
+                              '"misc":'
+                              '{'
+                              '"shape": "rounded_rectangle",'
+                              '"shape_corner_radius": "10",'
+                              '"border_width": "4",'
+                              '"shadow_width": "4",'
+                              '"tool_tip_delay": "6.0",'
+                              '"text_horiz_alignment": "left",'
+                              '"text_vert_alignment": "top",'
+                              '"text_horiz_alignment_padding": "6",'
+                              '"text_vert_alignment_padding": "7",'
+                              '"text_shadow_size": "3",'
+                              '"text_shadow_offset": "0,2",'
+                              '"state_transitions":'
+                              '{'
+                              '    "normal_hovered": "0.2",'
+                              '    "hovered_normal": "0.5"'
+                              '}'
+                              '}'
+                              '}')
+
+        assert button.shape == "rounded_rectangle"
+        assert button.shape_corner_radius == 10
+        assert button.border_width == 4
+        assert button.shadow_width == 4
+        assert button.tool_tip_delay == 6.0
+
 
 if __name__ == '__main__':
     pytest.console_main()
