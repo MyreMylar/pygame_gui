@@ -27,7 +27,7 @@ jobs:
         python -m pip install pytest-cov
         python -m pip install codecov
         python -m pip install -q pygame==${{ matrix.pygame-version }}
-        python setup.py -q install
+        python -m pip install . -U
         sudo apt-get install xvfb
         sudo apt-get install xclip
         sudo apt-get install xsel
@@ -67,7 +67,7 @@ jobs:
           python -m pip install pytest-cov
           python -m pip install codecov
           python -m pip install -q pygame==${{ matrix.pygame-version }}
-          python setup.py -q install
+          python -m pip install . -U
       - name: Test with pytest
         env:
           SDL_VIDEODRIVER: dummy
@@ -104,7 +104,7 @@ jobs:
           python -m pip install pytest-cov
           python -m pip install codecov
           python -m pip install -q pygame==${{ matrix.pygame-version }}
-          python setup.py -q install
+          python -m pip install . -U
       - name: Test with pytest
         env:
           SDL_VIDEODRIVER: dummy
