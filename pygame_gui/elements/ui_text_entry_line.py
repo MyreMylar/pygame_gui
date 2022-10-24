@@ -313,9 +313,8 @@ class UITextEntryLine(UIElement):
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
         if self.selection_in_progress:
-            mouse_pos = self.ui_manager.get_mouse_position()
-            drawable_shape_space_click = (mouse_pos[0] - self.rect.left,
-                                          mouse_pos[1] - self.rect.top)
+            drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
+                                          scaled_mouse_pos[1] - self.rect.top)
             if self.drawable_shape is not None:
                 self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
                     drawable_shape_space_click)

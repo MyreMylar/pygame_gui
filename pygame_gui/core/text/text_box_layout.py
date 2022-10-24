@@ -52,6 +52,7 @@ class TextBoxLayout:
         self.floating_rects: List[TextLayoutRect] = []
         self.layout_rows: List[TextBoxLayoutRow] = []
         self.row_lengths = []
+        self.row_lengths_no_end_spaces = []
         self.link_chunks = []
         self.letter_count = 0
         self.current_end_pos = 0
@@ -436,7 +437,7 @@ class TextBoxLayout:
             row.rewind_row(temp_layout_queue)
 
         self.layout_rows = self.layout_rows[:row_index]
-
+        self._merge_adjacent_compatible_chunks(temp_layout_queue)
         self._process_layout_queue(temp_layout_queue, row)
 
         if self.finalised_surface is not None:
@@ -567,6 +568,33 @@ class TextBoxLayout:
             else:
                 letter_acc += row.letter_count
 
+    def _find_cursor_row_from_click(self, click_pos):
+        found_row = None
+        cursor_click_pos = (click_pos[0], click_pos[1])
+        for count, row in enumerate(self.layout_rows):
+            if count < len(self.layout_rows) - 1:
+                if cursor_click_pos[1] < row.top or cursor_click_pos[1] >= self.layout_rows[count + 1].top:
+                    continue
+            else:
+                if cursor_click_pos[1] < row.top or cursor_click_pos[1] > row.bottom:
+                    continue
+            found_row = row
+
+        if found_row is None and len(self.layout_rows) > 0:
+            if cursor_click_pos[1] > self.layout_rows[-1].bottom:
+                # we are assuming here that the rows are in height order
+                # TODO: check this is always true
+                found_row = self.layout_rows[-1]
+                cursor_click_pos = found_row.midright
+
+            if cursor_click_pos[1] < self.layout_rows[0].top:
+                # we are assuming here that the rows are in height order
+                # TODO: check this is always true
+                found_row = self.layout_rows[0]
+                cursor_click_pos = (cursor_click_pos[0], found_row.centery)
+
+        return found_row, cursor_click_pos
+
     def set_cursor_from_click_pos(self, click_pos):
         """
         Set the edit cursor position in the text layout from a pixel position. Generally used
@@ -579,32 +607,34 @@ class TextBoxLayout:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
 
-        found_row_pos = False
-        for count, row in enumerate(self.layout_rows):
-            if count < len(self.layout_rows) - 1:
-                if click_pos[1] < row.top or click_pos[1] >= self.layout_rows[count+1].top:
-                    continue
-            else:
-                if click_pos[1] < row.top or click_pos[1] > row.bottom:
-                    continue
-            found_row_pos = True
-            self.cursor_text_row = row
-            row.set_cursor_from_click_pos(click_pos, len(self.layout_rows))
-            break
-        if not found_row_pos and len(self.layout_rows) > 0:
-            if click_pos[1] > self.layout_rows[-1].bottom:
-                # we are assuming here that the rows are in height order
-                # TODO: check this is always true
-                self.cursor_text_row = self.layout_rows[-1]
-                new_cursor_pos = self.cursor_text_row.midright
-                self.cursor_text_row.set_cursor_from_click_pos(new_cursor_pos, len(self.layout_rows))
+        found_row, final_click_pos = self._find_cursor_row_from_click(click_pos)
 
-            if click_pos[1] < self.layout_rows[0].top:
-                # we are assuming here that the rows are in height order
-                # TODO: check this is always true
-                self.cursor_text_row = self.layout_rows[0]
-                new_cursor_pos = (click_pos[0], self.cursor_text_row.centery)
-                self.cursor_text_row.set_cursor_from_click_pos(new_cursor_pos, len(self.layout_rows))
+        self.cursor_text_row = found_row
+        if self.cursor_text_row is not None:
+            self.cursor_text_row.set_cursor_from_click_pos(final_click_pos, len(self.layout_rows))
+
+    def find_cursor_position_from_click_pos(self, click_pos) -> int:
+        """
+        Find an edit text cursor position in the text from a click.
+
+        Here we don't set it, we just find it and return it.
+
+        :param click_pos: This is the pixel position we want to find the nearest cursor spot to.
+        :return: an integer representing the character index position in the text
+        """
+        found_row, final_click_pos = self._find_cursor_row_from_click(click_pos)
+
+        if found_row is not None:
+            cursor_index = 0
+            for row in self.layout_rows:
+                if row == found_row:
+                    cursor_index += found_row.find_cursor_pos_from_click_pos(final_click_pos, len(self.layout_rows))[0]
+                    break
+                else:
+                    cursor_index += row.letter_count
+            return cursor_index
+
+        return 0
 
     def get_cursor_index(self):
         """
@@ -631,6 +661,20 @@ class TextBoxLayout:
         """
         if self.cursor_text_row is not None:
             self.cursor_text_row.toggle_cursor()
+
+    def turn_off_cursor(self):
+        """
+        Makes the edit test cursor invisible.
+        """
+        if self.cursor_text_row is not None:
+            self.cursor_text_row.turn_off_cursor()
+
+    def turn_on_cursor(self):
+        """
+        Makes the edit test cursor visible.
+        """
+        if self.cursor_text_row is not None:
+            self.cursor_text_row.turn_on_cursor()
 
     def set_text_selection(self, start_index, end_index):
         """
@@ -706,6 +750,17 @@ class TextBoxLayout:
                         break
                     letter_accumulator += chunk.letter_count
                     chunk_in_row_index += 1
+            if found_chunk is None:
+                # couldn't find it on this row so use the first chunk of row below
+                if row_index + 1 < len(self.layout_rows):
+                    chunk_row = self.layout_rows[row_index+1]
+                    row_index = chunk_row.row_index
+                    letter_index = 0
+
+                    for chunk in chunk_row.items:
+                        if isinstance(chunk, TextLineChunkFTFont):
+                            found_chunk = chunk
+                            break
 
         if letter_index != 0:
             # split the chunk
@@ -756,7 +811,7 @@ class TextBoxLayout:
                 row.rewind_row(temp_layout_queue)
 
             self.layout_rows = self.layout_rows[:current_row.row_index]
-
+            self._merge_adjacent_compatible_chunks(temp_layout_queue)
             self._process_layout_queue(temp_layout_queue, current_row)
 
             if self.finalised_surface is not None:
@@ -788,15 +843,22 @@ class TextBoxLayout:
         current_row_index = current_row.row_index
         for row in reversed(self.selected_rows):
             row.items = [chunk for chunk in row.items if not chunk.is_selected]
-            row.rewind_row(temp_layout_queue)
+            # row.rewind_row(temp_layout_queue)
             if row.row_index > max_row_index:
                 max_row_index = row.row_index
 
-        for row_index in reversed(range(max_row_index + 1, len(self.layout_rows))):
+        for row_index in reversed(range(current_row_index, len(self.layout_rows))):
             self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
-        self.layout_rows = self.layout_rows[:current_row_index]
+        # clear out rows that may now be empty first
+        newly_empty_rows = self.layout_rows[current_row_index:]
 
+        if self.finalised_surface is not None:
+            for row in newly_empty_rows:
+                row.clear()
+
+        self.layout_rows = self.layout_rows[:current_row_index]
+        self._merge_adjacent_compatible_chunks(temp_layout_queue)
         self._process_layout_queue(temp_layout_queue, current_row)
 
         if len(current_row.items) == 0:
@@ -824,20 +886,31 @@ class TextBoxLayout:
             current_row_index = current_row.row_index
             cursor_pos = self.cursor_text_row.cursor_index
             letter_acc = 0
+            deleted_character = False
             for chunk in self.cursor_text_row.items:
-                if cursor_pos <= letter_acc + (chunk.letter_count - 1):
-                    chunk_letter_pos = cursor_pos - letter_acc
-                    chunk.delete_letter_at_index(chunk_letter_pos)
-                    break
+                if isinstance(chunk, TextLineChunkFTFont):
+                    if cursor_pos <= letter_acc + (chunk.letter_count - 1):
+                        chunk_letter_pos = cursor_pos - letter_acc
+                        chunk.delete_letter_at_index(chunk_letter_pos)
+                        deleted_character = True
+                        break
 
-                letter_acc += chunk.letter_count
+                    letter_acc += chunk.letter_count
+            if not deleted_character:
+                # failed to delete character, must be at end of row - see if we have a row below
+                # if so delete the first character of that row
+                if current_row_index + 1 < len(self.layout_rows):
+                    row_below = self.layout_rows[current_row_index + 1]
+                    for chunk in row_below.items:
+                        if isinstance(chunk, TextLineChunkFTFont):
+                            chunk.delete_letter_at_index(0)
 
             temp_layout_queue = deque([])
             for row_index in reversed(range(current_row_index, len(self.layout_rows))):
                 self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
             self.layout_rows = self.layout_rows[:current_row_index]
-
+            self._merge_adjacent_compatible_chunks(temp_layout_queue)
             self._process_layout_queue(temp_layout_queue, current_row)
 
             if self.finalised_surface is not None:
@@ -867,7 +940,7 @@ class TextBoxLayout:
                 self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
             self.layout_rows = self.layout_rows[:current_row_index]
-
+            self._merge_adjacent_compatible_chunks(temp_layout_queue)
             self._process_layout_queue(temp_layout_queue, current_row)
 
             if self.finalised_surface is not None:
@@ -951,3 +1024,18 @@ class TextBoxLayout:
         :return: a pygame.Color object containing the current colour.
         """
         return self.cursor_colour
+
+    @staticmethod
+    def _merge_adjacent_compatible_chunks(chunk_list: deque):
+
+        index = 0
+        while index < len(chunk_list)-1:
+            current_item = chunk_list[index]
+            next_item = chunk_list[index+1]
+            if (isinstance(current_item, TextLineChunkFTFont) and
+                    isinstance(next_item, TextLineChunkFTFont) and
+                    current_item.style_match(next_item)):
+                current_item.add_text(next_item.text)
+                del chunk_list[index+1]
+            else:
+                index += 1

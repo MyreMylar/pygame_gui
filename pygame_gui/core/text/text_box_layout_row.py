@@ -303,11 +303,30 @@ class TextBoxLayoutRow(pygame.Rect):
 
         Generally used to make it flash on and off to catch the attention of the user.
         """
+
         if self.edit_cursor_active:
             self.edit_cursor_active = False
         else:
             self.edit_cursor_active = True
 
+        if self.target_surface is not None:
+            self.clear()
+            self.finalise(self.target_surface)
+
+    def turn_off_cursor(self):
+        """
+        Makes the edit test cursor invisible.
+        """
+        self.edit_cursor_active = False
+        if self.target_surface is not None:
+            self.clear()
+            self.finalise(self.target_surface)
+
+    def turn_on_cursor(self):
+        """
+        Makes the edit test cursor visible.
+        """
+        self.edit_cursor_active = True
         if self.target_surface is not None:
             self.clear()
             self.finalise(self.target_surface)
@@ -340,6 +359,19 @@ class TextBoxLayoutRow(pygame.Rect):
         Set the current edit cursor position from a pixel position - usually
         originating from a mouse click.
 
+        :param num_rows:
+        :param click_pos: The pixel position to use.
+        """
+        self.cursor_index, self.cursor_draw_width = self.find_cursor_pos_from_click_pos(click_pos, num_rows)
+
+        self._setup_offset_position_from_edit_cursor()
+
+    def find_cursor_pos_from_click_pos(self, click_pos: Tuple[int, int], num_rows: int):
+        """
+        Find an edit cursor position from a pixel position - usually
+        originating from a mouse click.
+
+        :param num_rows:
         :param click_pos: The pixel position to use.
         """
         letter_acc = 0
@@ -380,10 +412,19 @@ class TextBoxLayoutRow(pygame.Rect):
                         char_metric = last_chunk.font.get_metrics(" ")[0]
                         if char_metric:
                             cursor_draw_width -= char_metric[4]
-        self.cursor_draw_width = cursor_draw_width
-        self.cursor_index = min(self.letter_count, max(0, letter_acc))
 
-        self._setup_offset_position_from_edit_cursor()
+        cursor_index = min(self.letter_count, max(0, letter_acc))
+
+        return cursor_index, cursor_draw_width
+
+    def get_last_text_chunk(self):
+        last_item = None
+        for item in reversed(self.items):
+            if isinstance(item, TextLineChunkFTFont):
+                last_item = item
+                break
+
+        return last_item
 
     def set_cursor_position(self, cursor_pos):
         """
