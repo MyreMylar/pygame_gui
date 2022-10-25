@@ -1,5 +1,6 @@
 import warnings
 import math
+import html
 
 from typing import Union, Tuple, Dict, Optional, Any
 
@@ -99,7 +100,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                object_id=object_id,
                                element_id='text_box')
 
-        self.html_text = html_text
+        self.html_text = html.unescape(html_text)
         self.appended_text = ""
         self.text_kwargs = {}
         if text_kwargs is not None:
@@ -561,7 +562,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                     self.text_box_layout.layout_rect.height)
             percentage_visible = (self.text_wrap_rect[3] /
                                   self.text_box_layout.layout_rect.height)
-            self.scroll_bar.set_visible_percentage(percentage_visible)
+            if percentage_visible >= 1.0:
+                self.scroll_bar.kill()
+                self.scroll_bar = None
+                height_adjustment = 0
+            else:
+                self.scroll_bar.set_visible_percentage(percentage_visible)
         else:
             height_adjustment = 0
         drawable_area_size = (max(1, (self.rect[2] -
@@ -871,7 +877,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
-        self.appended_text += new_html_str
+        self.appended_text += html.unescape(new_html_str)
         self.parser.feed(self._pre_parse_text(new_html_str))
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
@@ -1072,7 +1078,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self.most_specific_combined_id
 
     def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
-        self.html_text = html_text
+        self.html_text = html.unescape(html_text)
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
         else:

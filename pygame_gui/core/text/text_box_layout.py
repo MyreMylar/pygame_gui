@@ -550,11 +550,13 @@ class TextBoxLayout:
                 self.cursor_text_row = row
                 break
             elif cursor_pos == letter_acc + row.letter_count:
-                # if the last character in a row is a space and we have more than one row
+                # if the last character in a row is a space, we have more than one row and this isn't the last row
                 # we want to jump to the start of the next row
                 last_chunk = row.items[-1]
                 if len(self.layout_rows) > 1 and isinstance(last_chunk, TextLineChunkFTFont):
-                    if len(last_chunk.text) > 0 and last_chunk.text[-1] == " ":
+                    if (len(last_chunk.text) > 0 and
+                            last_chunk.text[-1] == " " and
+                            row.row_index != (len(self.layout_rows) - 1)):
                         letter_acc += row.letter_count
                     else:
                         row.set_cursor_position(cursor_pos - letter_acc)
@@ -1039,3 +1041,69 @@ class TextBoxLayout:
                 del chunk_list[index+1]
             else:
                 index += 1
+
+    def fit_layout_rect_height_to_rows(self):
+        if len(self.layout_rows) > 0:
+            self.layout_rect.height = self.layout_rows[-1].bottom - self.layout_rect.top
+
+    def get_cursor_y_pos(self):
+        if self.cursor_text_row is not None:
+            return self.cursor_text_row.top, self.cursor_text_row.bottom
+        else:
+            return 0, 0
+
+    def get_cursor_pos_move_up_one_row(self):
+        """
+        Returns a cursor character position in the row directly above the current cursor position
+        if possible.
+        """
+        if self.cursor_text_row is not None:
+            cursor_index = 0
+            if self.cursor_text_row is not None:
+                for i in range(0, len(self.layout_rows)):
+                    row = self.layout_rows[i]
+                    if row == self.cursor_text_row:
+                        if (i - 1) >= 0:
+                            row_above = self.layout_rows[i-1]
+                            cursor_index -= row_above.letter_count
+                            row_above_end = row_above.letter_count
+                            if row_above.row_text_ends_with_a_space():
+                                row_above_end = row_above.letter_count - 1
+                            cursor_index += min(self.cursor_text_row.get_cursor_index(), row_above_end)
+                            break
+                        else:
+                            cursor_index += self.cursor_text_row.get_cursor_index()
+                            break
+                    else:
+                        cursor_index += row.letter_count
+            return cursor_index
+        return 0
+
+    def get_cursor_pos_move_down_one_row(self):
+        """
+        Returns a cursor character position in the row directly above the current cursor position
+        if possible.
+        """
+        if self.cursor_text_row is not None:
+            cursor_index = 0
+            if self.cursor_text_row is not None:
+                for i in range(0, len(self.layout_rows)):
+                    row = self.layout_rows[i]
+                    if row == self.cursor_text_row:
+                        if (i + 1) < len(self.layout_rows):
+                            row_below = self.layout_rows[i+1]
+                            cursor_index += row.letter_count
+                            row_below_end = row_below.letter_count
+                            if row_below.row_text_ends_with_a_space():
+                                row_below_end = row_below.letter_count - 1
+                            cursor_index += min(self.cursor_text_row.get_cursor_index(), row_below_end)
+                            break
+                        else:
+                            cursor_index += self.cursor_text_row.get_cursor_index()
+                            break
+                    else:
+                        cursor_index += row.letter_count
+            return cursor_index
+        return 0
+
+

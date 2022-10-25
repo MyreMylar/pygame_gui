@@ -414,7 +414,6 @@ class TextBoxLayoutRow(pygame.Rect):
                             cursor_draw_width -= char_metric[4]
 
         cursor_index = min(self.letter_count, max(0, letter_acc))
-
         return cursor_index, cursor_draw_width
 
     def get_last_text_chunk(self):
@@ -485,3 +484,10 @@ class TextBoxLayoutRow(pygame.Rect):
         else:
             raise AttributeError("Trying to insert into empty text row with no Parser"
                                  " for style data - fix this later?")
+
+    def row_text_ends_with_a_space(self):
+        for item in reversed(self.items):
+            if isinstance(item, TextLineChunkFTFont):
+                if len(item.text) > 0 and item.text[-1] == " ":
+                    return True
+        return False

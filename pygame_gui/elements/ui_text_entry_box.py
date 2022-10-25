@@ -2,7 +2,7 @@ import re
 from typing import Union, Tuple, Dict, Optional, Any
 
 from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN
-from pygame import K_LEFT, K_RIGHT, K_HOME, K_END, K_BACKSPACE, K_DELETE
+from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE
 from pygame import key
 from pygame.event import Event, post
 from pygame_gui._constants import UI_TEXT_ENTRY_CHANGED
@@ -65,8 +65,6 @@ class UITextEntryBox(UITextBox):
         start_select = min(self._select_range[0], self._select_range[1])
         end_select = max(self._select_range[0], self._select_range[1])
 
-        if start_select == 42:
-            print("Selecting: ", start_select, " ", end_select)
         self.text_box_layout.set_text_selection(start_select, end_select)
         self.redraw_from_text_block()
 
@@ -104,17 +102,14 @@ class UITextEntryBox(UITextBox):
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
         if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-            self.ui_manager.set_text_input_hovered(True)
+            if self.scroll_bar is not None and not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+                self.ui_manager.set_text_input_hovered(True)
 
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
 
         if self.selection_in_progress:
-            text_layout_top_left = self.get_text_layout_top_left()
-            # TODO: need to account for scroll bar scrolling here - see example code
-            text_layout_space_pos = (scaled_mouse_pos[0] - text_layout_top_left[0],
-                                     scaled_mouse_pos[1] - text_layout_top_left[1])
-
+            text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
             select_end_pos = self.text_box_layout.find_cursor_position_from_click_pos(text_layout_space_pos)
             new_range = [self.select_range[0], select_end_pos]
             if new_range[0] != self.select_range[0] or new_range[1] != self.select_range[1]:
@@ -129,6 +124,21 @@ class UITextEntryBox(UITextBox):
             self.cursor_on = True
             self.text_box_layout.set_cursor_position(self.edit_position)
             self.text_box_layout.turn_on_cursor()
+            if self.scroll_bar is not None:
+                cursor_y_pos_top, cursor_y_pos_bottom = self.text_box_layout.get_cursor_y_pos()
+                current_height_adjustment = int(self.scroll_bar.start_percentage *
+                                                self.text_box_layout.layout_rect.height)
+                visible_bottom = current_height_adjustment + self.text_box_layout.view_rect.height
+                # handle cursor moving above current scroll position
+                if cursor_y_pos_top < current_height_adjustment:
+                    new_start_percentage = cursor_y_pos_top / self.text_box_layout.layout_rect.height
+                    self.scroll_bar.set_scroll_from_start_percentage(new_start_percentage)
+                # handle cursor moving below visible area
+                if cursor_y_pos_bottom > visible_bottom:
+                    new_top = cursor_y_pos_bottom - self.text_box_layout.view_rect.height
+                    new_start_percentage = new_top / self.text_box_layout.layout_rect.height
+                    self.scroll_bar.set_scroll_from_start_percentage(new_start_percentage)
+
             self.redraw_from_text_block()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
@@ -146,6 +156,15 @@ class UITextEntryBox(UITextBox):
                 self.blink_cursor_time_acc += time_delta
         else:
             self.cursor_blink_delay_after_moving_acc += time_delta
+
+    def _calculate_text_space_pos(self, scaled_mouse_pos):
+        text_layout_top_left = self.get_text_layout_top_left()
+        height_adjustment = 0
+        if self.scroll_bar is not None:
+            height_adjustment = (self.scroll_bar.start_percentage * self.text_box_layout.layout_rect.height)
+        text_layout_space_pos = (scaled_mouse_pos[0] - text_layout_top_left[0],
+                                 scaled_mouse_pos[1] - text_layout_top_left[1] + height_adjustment)
+        return text_layout_space_pos
 
     def process_event(self, event: Event) -> bool:
         """
@@ -271,6 +290,24 @@ class UITextEntryBox(UITextBox):
                 self.edit_position += 1
                 self.cursor_has_moved_recently = True
             consumed_event = True
+        elif event.key == K_UP:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row()
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            else:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row()
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == K_DOWN:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row()
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            else:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row()
+                self.cursor_has_moved_recently = True
+            consumed_event = True
         elif event.key == K_HOME:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.select_range = [0, 0]
@@ -299,10 +336,7 @@ class UITextEntryBox(UITextBox):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
-                    text_layout_top_left = self.get_text_layout_top_left()
-                    # TODO: need to account for scroll bar scrolling here - see example code
-                    text_layout_space_pos = (scaled_mouse_pos[0] - text_layout_top_left[0],
-                                             scaled_mouse_pos[1] - text_layout_top_left[1])
+                    text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
                     self.text_box_layout.set_cursor_from_click_pos(text_layout_space_pos)
                     self.edit_position = self.text_box_layout.get_cursor_index()
                     self.redraw_from_text_block()
@@ -327,10 +361,7 @@ class UITextEntryBox(UITextBox):
 
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
-                text_layout_top_left = self.get_text_layout_top_left()
-                # TODO: need to account for scroll bar scrolling here - see example code
-                text_layout_space_pos = (scaled_mouse_pos[0] - text_layout_top_left[0],
-                                         scaled_mouse_pos[1] - text_layout_top_left[1])
+                text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
                 self.text_box_layout.set_cursor_from_click_pos(text_layout_space_pos)
                 new_edit_pos = self.text_box_layout.get_cursor_index()
                 if new_edit_pos != self.edit_position:
@@ -383,3 +414,7 @@ class UITextEntryBox(UITextBox):
             return True
         else:
             return False
+
+    def redraw_from_text_block(self):
+        self.text_box_layout.fit_layout_rect_height_to_rows()
+        super().redraw_from_text_block()

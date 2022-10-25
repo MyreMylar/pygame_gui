@@ -365,7 +365,7 @@ class UIVerticalScrollBar(UIElement):
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
 
         x_pos = 0
-        y_pos = (self.scroll_position + self.arrow_button_height)
+        y_pos = min((self.bottom_limit + self.arrow_button_height) - scroll_bar_height, (self.scroll_position + self.arrow_button_height))
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
         self.sliding_button.set_relative_position(self.sliding_rect_position)
