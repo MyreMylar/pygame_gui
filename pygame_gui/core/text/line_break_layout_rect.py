@@ -1,7 +1,9 @@
 from typing import Tuple, Optional
 
+import pygame
 from pygame.surface import Surface
 from pygame.rect import Rect
+from pygame import Color
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 
@@ -15,6 +17,11 @@ class LineBreakLayoutRect(TextLayoutRect):
     """
     def __init__(self, dimensions: Tuple[int, int]):
         super().__init__(dimensions)
+        self.letter_count = 1
+        self.is_selected = False
+        self.selection_colour = Color(128, 128, 128, 255)
+        self.selection_chunk_width = 4
+        self.select_surf = None
 
     def finalise(self,
                  target_surface: Surface,
@@ -24,4 +31,8 @@ class LineBreakLayoutRect(TextLayoutRect):
                  row_bg_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
-        pass
+        if self.is_selected:
+            self.select_surf = Surface((self.selection_chunk_width, row_bg_height), flags=pygame.SRCALPHA)
+            self.select_surf.fill(self.selection_colour)
+            target_surface.blit(self.select_surf, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
+

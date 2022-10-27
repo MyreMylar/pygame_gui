@@ -68,6 +68,7 @@ class TextBoxLayout:
 
         self.edit_buffer = 2
         self.cursor_text_row = None
+        self.last_horiz_cursor_row_pos = 0
 
         self.selection_colour = pygame.Color(128, 128, 200, 255)
         self.selected_chunks = []
@@ -543,13 +544,15 @@ class TextBoxLayout:
                 self.cursor_text_row.toggle_cursor()
             self.cursor_text_row = None
 
-        letter_acc = 0
+        # we figure out how many edit positions there are in the text
+        # each letter counts as one additional position, but so does the start of a new row
+        edit_pos_accumulator = 0
         for row in self.layout_rows:
-            if cursor_pos < letter_acc + row.letter_count:
-                row.set_cursor_position(cursor_pos - letter_acc)
+            if cursor_pos < edit_pos_accumulator + row.letter_count:
+                row.set_cursor_position(cursor_pos - edit_pos_accumulator)
                 self.cursor_text_row = row
                 break
-            elif cursor_pos == letter_acc + row.letter_count:
+            elif cursor_pos == edit_pos_accumulator + row.letter_count:
                 # if the last character in a row is a space, we have more than one row and this isn't the last row
                 # we want to jump to the start of the next row
                 last_chunk = row.items[-1]
@@ -557,18 +560,28 @@ class TextBoxLayout:
                     if (len(last_chunk.text) > 0 and
                             last_chunk.text[-1] == " " and
                             row.row_index != (len(self.layout_rows) - 1)):
-                        letter_acc += row.letter_count
+                        edit_pos_accumulator += row.letter_count
                     else:
-                        row.set_cursor_position(cursor_pos - letter_acc)
+                        row.set_cursor_position(cursor_pos - edit_pos_accumulator)
                         self.cursor_text_row = row
                         break
+                elif (len(self.layout_rows) > 1 and
+                      isinstance(last_chunk, LineBreakLayoutRect) and
+                      row.row_index != (len(self.layout_rows) - 1)):
+                    # if the last chunk in a row is a line break and we have more than one row and this isn't the last row
+                    # we want to jump to the start of the next row
+                    edit_pos_accumulator += row.letter_count
                 else:
-                    row.set_cursor_position(cursor_pos - letter_acc)
+                    row.set_cursor_position(cursor_pos - edit_pos_accumulator)
                     self.cursor_text_row = row
                     break
 
             else:
-                letter_acc += row.letter_count
+                edit_pos_accumulator += row.letter_count
+
+        if edit_pos_accumulator == self.letter_count and len(self.layout_rows) > 0:
+            last_row = self.layout_rows[-1]
+            last_row.set_cursor_position(last_row.letter_count)
 
     def _find_cursor_row_from_click(self, click_pos):
         found_row = None
@@ -610,7 +623,6 @@ class TextBoxLayout:
             self.cursor_text_row = None
 
         found_row, final_click_pos = self._find_cursor_row_from_click(click_pos)
-
         self.cursor_text_row = found_row
         if self.cursor_text_row is not None:
             self.cursor_text_row.set_cursor_from_click_pos(final_click_pos, len(self.layout_rows))
@@ -752,6 +764,11 @@ class TextBoxLayout:
                         break
                     letter_accumulator += chunk.letter_count
                     chunk_in_row_index += 1
+                elif isinstance(chunk, LineBreakLayoutRect):
+                    if index_in_row < letter_accumulator + chunk.letter_count:
+                        letter_index = index_in_row - letter_accumulator
+                        found_chunk = chunk
+                        break
             if found_chunk is None:
                 # couldn't find it on this row so use the first chunk of row below
                 if row_index + 1 < len(self.layout_rows):
@@ -763,8 +780,11 @@ class TextBoxLayout:
                         if isinstance(chunk, TextLineChunkFTFont):
                             found_chunk = chunk
                             break
+                        elif isinstance(chunk, LineBreakLayoutRect):
+                            found_chunk = chunk
+                            break
 
-        if letter_index != 0:
+        if letter_index != 0 and found_chunk is not None and found_chunk.can_split():
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
@@ -889,6 +909,7 @@ class TextBoxLayout:
             cursor_pos = self.cursor_text_row.cursor_index
             letter_acc = 0
             deleted_character = False
+            chunk_to_remove = None
             for chunk in self.cursor_text_row.items:
                 if isinstance(chunk, TextLineChunkFTFont):
                     if cursor_pos <= letter_acc + (chunk.letter_count - 1):
@@ -896,8 +917,16 @@ class TextBoxLayout:
                         chunk.delete_letter_at_index(chunk_letter_pos)
                         deleted_character = True
                         break
+                elif isinstance(chunk, LineBreakLayoutRect):
+                    # delete this chunk
+                    if cursor_pos <= letter_acc + (chunk.letter_count - 1):
+                        chunk_to_remove = chunk
+                        deleted_character = True
+                        break
 
-                    letter_acc += chunk.letter_count
+                letter_acc += chunk.letter_count
+            if chunk_to_remove is not None:
+                current_row.items.remove(chunk_to_remove)
             if not deleted_character:
                 # failed to delete character, must be at end of row - see if we have a row below
                 # if so delete the first character of that row
@@ -929,14 +958,30 @@ class TextBoxLayout:
             current_row_index = current_row.row_index
             cursor_pos = self.cursor_text_row.cursor_index
             letter_acc = 0
-            for chunk in self.cursor_text_row.items:
-                if cursor_pos <= letter_acc + chunk.letter_count:
-                    chunk_letter_pos = cursor_pos - letter_acc
-                    chunk.backspace_letter_at_index(chunk_letter_pos)
-                    break
+            if current_row_index > 0 and cursor_pos == 0:
+                # at start of row with rows above
+                # need to delete from end of row above
+                current_row_index = current_row_index - 1
+                current_row = self.layout_rows[current_row_index]
+                cursor_pos = current_row.letter_count
+
+            chunk_to_remove = None
+            for chunk in current_row.items:
+                if isinstance(chunk, TextLineChunkFTFont):
+                    if cursor_pos <= letter_acc + chunk.letter_count:
+                        chunk_letter_pos = cursor_pos - letter_acc
+                        chunk.backspace_letter_at_index(chunk_letter_pos)
+                        break
+                elif isinstance(chunk, LineBreakLayoutRect):
+                    # delete this chunk, line break has an edit pos length of 1
+                    if cursor_pos <= letter_acc + chunk.letter_count:
+                        chunk_to_remove = chunk
+                        break
 
                 letter_acc += chunk.letter_count
-            self.cursor_text_row.set_cursor_position(cursor_pos - 1)
+            if chunk_to_remove is not None:
+                current_row.items.remove(chunk_to_remove)
+            current_row.set_cursor_position(cursor_pos - 1)
             temp_layout_queue = deque([])
             for row_index in reversed(range(current_row_index, len(self.layout_rows))):
                 self.layout_rows[row_index].rewind_row(temp_layout_queue)
@@ -1052,9 +1097,9 @@ class TextBoxLayout:
         else:
             return 0, 0
 
-    def get_cursor_pos_move_up_one_row(self):
+    def get_cursor_pos_move_up_one_row(self, last_cursor_horiz_index):
         """
-        Returns a cursor character position in the row directly above the current cursor position
+        Returns a cursor character position in the row directly above the last horizontal cursor position
         if possible.
         """
         if self.cursor_text_row is not None:
@@ -1067,19 +1112,21 @@ class TextBoxLayout:
                             row_above = self.layout_rows[i-1]
                             cursor_index -= row_above.letter_count
                             row_above_end = row_above.letter_count
-                            if row_above.row_text_ends_with_a_space():
+                            if (row_above.row_text_ends_with_a_space() or
+                                    (len(row_above.items) > 0 and
+                                     isinstance(row_above.items[-1], LineBreakLayoutRect))):
                                 row_above_end = row_above.letter_count - 1
-                            cursor_index += min(self.cursor_text_row.get_cursor_index(), row_above_end)
+                            cursor_index += min(last_cursor_horiz_index, row_above_end)
                             break
                         else:
-                            cursor_index += self.cursor_text_row.get_cursor_index()
+                            cursor_index += last_cursor_horiz_index
                             break
                     else:
                         cursor_index += row.letter_count
             return cursor_index
         return 0
 
-    def get_cursor_pos_move_down_one_row(self):
+    def get_cursor_pos_move_down_one_row(self, last_cursor_horiz_index):
         """
         Returns a cursor character position in the row directly above the current cursor position
         if possible.
@@ -1094,16 +1141,18 @@ class TextBoxLayout:
                             row_below = self.layout_rows[i+1]
                             cursor_index += row.letter_count
                             row_below_end = row_below.letter_count
-                            if row_below.row_text_ends_with_a_space():
+                            if (row_below.row_text_ends_with_a_space() or
+                                    (len(row_below.items) > 0 and
+                                     isinstance(row_below.items[-1], LineBreakLayoutRect))):
                                 row_below_end = row_below.letter_count - 1
-                            cursor_index += min(self.cursor_text_row.get_cursor_index(), row_below_end)
+                            cursor_index += min(last_cursor_horiz_index, row_below_end)
                             break
                         else:
-                            cursor_index += self.cursor_text_row.get_cursor_index()
+                            cursor_index += last_cursor_horiz_index
                             break
                     else:
                         cursor_index += row.letter_count
-            return cursor_index
+            return min(cursor_index, self.letter_count)
         return 0
 
 

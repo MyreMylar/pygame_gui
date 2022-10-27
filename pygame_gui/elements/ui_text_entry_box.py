@@ -47,6 +47,8 @@ class UITextEntryBox(UITextBox):
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
+        self.vertical_cursor_movement = False
+        self.last_horiz_cursor_index = 0
 
     @property
     def select_range(self):
@@ -102,7 +104,9 @@ class UITextEntryBox(UITextBox):
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
         if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
-            if self.scroll_bar is not None and not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+            if (self.scroll_bar is None or
+                    (self.scroll_bar is not None and
+                     not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]))):
                 self.ui_manager.set_text_input_hovered(True)
 
         if self.double_click_timer < self.ui_manager.get_double_click_time():
@@ -123,6 +127,10 @@ class UITextEntryBox(UITextBox):
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
             self.text_box_layout.set_cursor_position(self.edit_position)
+            if not self.vertical_cursor_movement:
+                if self.text_box_layout.cursor_text_row is not None:
+                    self.last_horiz_cursor_index = self.text_box_layout.cursor_text_row.get_cursor_index()
+            self.vertical_cursor_movement = False
             self.text_box_layout.turn_on_cursor()
             if self.scroll_bar is not None:
                 cursor_y_pos_top, cursor_y_pos_bottom = self.text_box_layout.get_cursor_y_pos()
@@ -292,21 +300,23 @@ class UITextEntryBox(UITextBox):
             consumed_event = True
         elif event.key == K_UP:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row()
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
             else:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row()
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
                 self.cursor_has_moved_recently = True
+            self.vertical_cursor_movement = True
             consumed_event = True
         elif event.key == K_DOWN:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row()
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
                 self.select_range = [0, 0]
                 self.cursor_has_moved_recently = True
             else:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row()
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
                 self.cursor_has_moved_recently = True
+            self.vertical_cursor_movement = True
             consumed_event = True
         elif event.key == K_HOME:
             if abs(self.select_range[0] - self.select_range[1]) > 0:

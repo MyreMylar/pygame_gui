@@ -6,6 +6,7 @@ from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_layout_rect import TextFloatPosition
 from pygame_gui.core.text.html_parser import HTMLParser
+from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -18,7 +19,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.line_spacing = line_spacing
         self.row_index = row_index
         self.layout = layout
-        self.items: TextLayoutRect = []
+        self.items: List[TextLayoutRect] = []
 
         self.letter_count = 0
 
@@ -400,18 +401,16 @@ class TextBoxLayoutRow(pygame.Rect):
                                                   for char_metric in
                                                   chunk.font.get_metrics(chunk.text) if char_metric])
                         letter_acc += chunk.letter_count
-        if not found_chunk:
-            # not inside chunk
+        if (not found_chunk and scrolled_click_pos[0] >= self.right) or (letter_acc == self.letter_count):
             # if we have more than two rows check if we are on right of whole row and if row has space at the end.
             # If so stick the edit cursor before the space because this is how it works.
-            if num_rows > 1 and scrolled_click_pos[0] >= self.right:
-                last_chunk = self.items[-1]
-                if isinstance(last_chunk, TextLineChunkFTFont):
-                    if last_chunk.text[-1] == " ":
-                        letter_acc -= 1
-                        char_metric = last_chunk.font.get_metrics(" ")[0]
-                        if char_metric:
-                            cursor_draw_width -= char_metric[4]
+            if num_rows > 1 and self.row_text_ends_with_a_space():
+                letter_acc -= 1
+                last_chunk = self.get_last_text_chunk()
+                if last_chunk is not None:
+                    char_metric = last_chunk.font.get_metrics(" ")[0]
+                    if char_metric:
+                        cursor_draw_width -= char_metric[4]
 
         cursor_index = min(self.letter_count, max(0, letter_acc))
         return cursor_index, cursor_draw_width
@@ -435,18 +434,21 @@ class TextBoxLayoutRow(pygame.Rect):
         letter_acc = 0
         cursor_draw_width = 0
         for chunk in self.items:
-            if cursor_pos <= letter_acc + chunk.letter_count:
-                chunk_letter_pos = cursor_pos - letter_acc
+            if isinstance(chunk, TextLineChunkFTFont):
+                if cursor_pos <= letter_acc + chunk.letter_count:
+                    chunk_letter_pos = cursor_pos - letter_acc
+                    cursor_draw_width += sum([char_metric[4]
+                                              for char_metric
+                                              in chunk.font.get_metrics(chunk.text[:chunk_letter_pos]) if char_metric])
+
+                    break
+
+                letter_acc += chunk.letter_count
                 cursor_draw_width += sum([char_metric[4]
-                                          for char_metric
-                                          in chunk.font.get_metrics(chunk.text[:chunk_letter_pos]) if char_metric])
-
-                break
-
-            letter_acc += chunk.letter_count
-            cursor_draw_width += sum([char_metric[4]
-                                      for char_metric in
-                                      chunk.font.get_metrics(chunk.text) if char_metric])
+                                          for char_metric in
+                                          chunk.font.get_metrics(chunk.text) if char_metric])
+            elif isinstance(chunk, LineBreakLayoutRect):
+                pass
 
         self.cursor_draw_width = cursor_draw_width
 
@@ -491,3 +493,9 @@ class TextBoxLayoutRow(pygame.Rect):
                 if len(item.text) > 0 and item.text[-1] == " ":
                     return True
         return False
+
+    def get_last_text_chunk(self):
+        for item in reversed(self.items):
+            if isinstance(item, TextLineChunkFTFont):
+                return item
+        return None
