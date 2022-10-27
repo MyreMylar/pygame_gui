@@ -826,6 +826,12 @@ class TextBoxLayout:
         """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
         if current_row is not None:
+            if (index_in_row == current_row.letter_count and
+                    current_row.row_index < (len(self.layout_rows) - 1) and
+                    current_row.last_chunk_is_line_break()):
+                current_row = self.layout_rows[current_row.row_index + 1]
+                index_in_row = 0
+
             current_row.insert_text(text, index_in_row, parser)
 
             temp_layout_queue = deque([])

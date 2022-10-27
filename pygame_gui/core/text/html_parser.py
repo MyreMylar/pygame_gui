@@ -225,7 +225,9 @@ class HTMLParser(html.parser.HTMLParser):
         dimensions = (current_font.get_rect(' ').width,
                       int(round(self.current_style['font_size'] *
                                 self.line_spacing)))
+        chunk = self.create_styled_text_chunk('')
         self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions))
+        self.layout_rect_queue.append(chunk)
 
     def _handle_p_tag(self):
         if self.in_paragraph_block:

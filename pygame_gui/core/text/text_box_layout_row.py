@@ -474,10 +474,11 @@ class TextBoxLayoutRow(pygame.Rect):
         letter_acc = 0
         if len(self.items) > 0:
             for chunk in self.items:
-                if letter_row_index <= letter_acc + chunk.letter_count:
-                    chunk_index = letter_row_index - letter_acc
-                    chunk.insert_text(text, chunk_index)
-                    break
+                if isinstance(chunk, TextLineChunkFTFont):
+                    if letter_row_index <= letter_acc + chunk.letter_count:
+                        chunk_index = letter_row_index - letter_acc
+                        chunk.insert_text(text, chunk_index)
+                        break
 
                 letter_acc += chunk.letter_count
         elif parser is not None:
@@ -499,3 +500,9 @@ class TextBoxLayoutRow(pygame.Rect):
             if isinstance(item, TextLineChunkFTFont):
                 return item
         return None
+
+    def last_chunk_is_line_break(self):
+        if len(self.items) > 0:
+            if isinstance(self.items[-1], LineBreakLayoutRect):
+                return True
+        return False

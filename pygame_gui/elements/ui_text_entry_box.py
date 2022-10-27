@@ -1,8 +1,8 @@
 import re
-from typing import Union, Tuple, Dict, Optional, Any
+from typing import Union, Tuple, Dict, Optional
 
 from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN
-from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE
+from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE, K_RETURN
 from pygame import key
 from pygame.event import Event, post
 from pygame_gui._constants import UI_TEXT_ENTRY_CHANGED
@@ -197,8 +197,8 @@ class UITextEntryBox(UITextBox):
             #     consumed_event = True
             if self._process_action_key_event(event):
                 consumed_event = True
-            # elif self._process_text_entry_key(event):
-            #     consumed_event = True
+            elif self._process_text_entry_key(event):
+                consumed_event = True
 
         if self.html_text != initial_text_state:
             # new event
@@ -224,7 +224,6 @@ class UITextEntryBox(UITextBox):
         if event.key == K_BACKSPACE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.text_box_layout.delete_selected_text()
-                self.redraw_from_text_block()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
@@ -247,7 +246,6 @@ class UITextEntryBox(UITextBox):
         elif event.key == K_DELETE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.text_box_layout.delete_selected_text()
-                self.redraw_from_text_block()
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
                 self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
@@ -381,6 +379,44 @@ class UITextEntryBox(UITextBox):
                     self.redraw_from_text_block()
             self.selection_in_progress = False
 
+        return consumed_event
+
+    def _process_text_entry_key(self, event: Event) -> bool:
+        """
+        Process key input that can be added to the text entry text.
+
+        :param event: The event to process.
+
+        :return: True if consumed.
+        """
+        consumed_event = False
+
+        if hasattr(event, 'unicode'):
+            character = event.unicode
+            # here we really want to get the font metrics for the current active style where the edit cursor is
+            # instead we will make do for now
+            font = self.ui_theme.get_font(self.combined_element_ids)
+            char_metrics = font.get_metrics(character)
+            if len(char_metrics) > 0 and char_metrics[0] is not None:
+                valid_character = True
+                if valid_character:
+                    if abs(self.select_range[0] - self.select_range[1]) > 0:
+                        low_end = min(self.select_range[0], self.select_range[1])
+                        high_end = max(self.select_range[0], self.select_range[1])
+                        self.html_text = self.html_text[:low_end] + character + self.html_text[high_end:]
+                        self.text_box_layout.delete_selected_text()
+                        self.text_box_layout.insert_text(character, low_end, self.parser)
+                        self.edit_position = low_end + 1
+                        self.select_range = [0, 0]
+                    else:
+                        start_str = self.html_text[:self.edit_position]
+                        end_str = self.html_text[self.edit_position:]
+                        self.html_text = start_str + character + end_str
+                        self.text_box_layout.insert_text(character, self.edit_position, self.parser)
+                        self.edit_position += 1
+                    self.redraw_from_text_block()
+                    self.cursor_has_moved_recently = True
+                    consumed_event = True
         return consumed_event
 
     def _calculate_double_click_word_selection(self):
