@@ -29,7 +29,8 @@ class UITextEntryBox(UITextBox):
                          parent_element=parent_element,
                          object_id=object_id,
                          anchors=anchors,
-                         visible=visible)
+                         visible=visible,
+                         allow_split_dashes=False)
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache
@@ -390,8 +391,16 @@ class UITextEntryBox(UITextBox):
         :return: True if consumed.
         """
         consumed_event = False
+        if event.key == K_RETURN:
+            start_str = self.html_text[:self.edit_position]
+            end_str = self.html_text[self.edit_position:]
+            self.html_text = start_str + '\n' + end_str
+            self.text_box_layout.insert_line_break(self.edit_position, self.parser)
+            self.edit_position += 1
+            self.redraw_from_text_block()
+            self.cursor_has_moved_recently = True
 
-        if hasattr(event, 'unicode'):
+        elif hasattr(event, 'unicode'):
             character = event.unicode
             # here we really want to get the font metrics for the current active style where the edit cursor is
             # instead we will make do for now

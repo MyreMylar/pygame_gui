@@ -86,7 +86,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  visible: int = 1,
                  *,
                  pre_parsing_enabled: bool = True,
-                 text_kwargs: Optional[Dict[str, str]] = None):
+                 text_kwargs: Optional[Dict[str, str]] = None,
+                 allow_split_dashes: bool = True):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -106,6 +107,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
         self.font_dict = self.ui_theme.get_font_dictionary()
+        self.allow_split_dashes = allow_split_dashes
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
@@ -541,7 +543,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                                   self.text_wrap_rect[3])),
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
-                                             line_spacing=1.25)
+                                             line_spacing=1.25,
+                                             default_font=self.ui_theme.get_font_dictionary().get_default_font(),
+                                             allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
         if self.text_wrap_rect[3] == -1:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
@@ -557,41 +561,45 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.rect.width <= 0 or self.rect.height <= 0:
             return
-        if self.scroll_bar is not None:
-            height_adjustment = int(self.scroll_bar.start_percentage *
-                                    self.text_box_layout.layout_rect.height)
-            percentage_visible = (self.text_wrap_rect[3] /
-                                  self.text_box_layout.layout_rect.height)
-            if percentage_visible >= 1.0:
-                self.scroll_bar.kill()
-                self.scroll_bar = None
-                height_adjustment = 0
-            else:
-                self.scroll_bar.set_visible_percentage(percentage_visible)
+        if (self.scroll_bar is None and
+                (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
+            self.rebuild()
         else:
-            height_adjustment = 0
-        drawable_area_size = (max(1, (self.rect[2] -
-                                      (self.padding[0] * 2) -
-                                      (self.border_width * 2) -
-                                      (self.shadow_width * 2) -
-                                      (2 * self.rounded_corner_offset))),
-                              max(1, (self.rect[3] -
-                                      (self.padding[1] * 2) -
-                                      (self.border_width * 2) -
-                                      (self.shadow_width * 2) -
-                                      (2 * self.rounded_corner_offset))))
-        drawable_area = pygame.Rect((0, height_adjustment),
-                                    drawable_area_size)
-        new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-        new_image.fill(pygame.Color(0, 0, 0, 0))
-        basic_blit(new_image, self.background_surf, (0, 0))
-        basic_blit(new_image, self.text_box_layout.finalised_surface,
-                   (self.padding[0] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset,
-                    self.padding[1] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset),
-                   drawable_area)
-        self._set_image(new_image)
+            if self.scroll_bar is not None:
+                height_adjustment = int(self.scroll_bar.start_percentage *
+                                        self.text_box_layout.layout_rect.height)
+                percentage_visible = (self.text_wrap_rect[3] /
+                                      self.text_box_layout.layout_rect.height)
+                if percentage_visible >= 1.0:
+                    self.scroll_bar.kill()
+                    self.scroll_bar = None
+                    height_adjustment = 0
+                else:
+                    self.scroll_bar.set_visible_percentage(percentage_visible)
+            else:
+                height_adjustment = 0
+            drawable_area_size = (max(1, (self.rect[2] -
+                                          (self.padding[0] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))),
+                                  max(1, (self.rect[3] -
+                                          (self.padding[1] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))))
+            drawable_area = pygame.Rect((0, height_adjustment),
+                                        drawable_area_size)
+            new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+            new_image.fill(pygame.Color(0, 0, 0, 0))
+            basic_blit(new_image, self.background_surf, (0, 0))
+            basic_blit(new_image, self.text_box_layout.finalised_surface,
+                       (self.padding[0] + self.border_width +
+                        self.shadow_width + self.rounded_corner_offset,
+                        self.padding[1] + self.border_width +
+                        self.shadow_width + self.rounded_corner_offset),
+                       drawable_area)
+            self._set_image(new_image)
 
     def redraw_from_chunks(self):
         """

@@ -31,11 +31,15 @@ class TextBoxLayout:
                  input_data_queue: Deque[TextLayoutRect],
                  layout_rect: pygame.Rect,
                  view_rect: pygame.Rect,
-                 line_spacing: float):
+                 line_spacing: float,
+                 default_font,
+                 allow_split_dashes: bool = True):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
+        self.default_font = default_font  # this is the font used when we don't have anything else
+        self.allow_split_dashes = allow_split_dashes
         self.last_row_height = int(14 * self.line_spacing)
 
         self.view_rect = view_rect
@@ -130,7 +134,8 @@ class TextBoxLayout:
         # otherwise we add infinite rows with no height
         # instead add a line break rect to an empty row.
         if len(current_row.items) == 0 and not last_row:
-            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height)))
+            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height),
+                                                     font=current_row.fall_back_font))
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)
         if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
@@ -224,36 +229,43 @@ class TextBoxLayout:
     def _handle_span_rect(self, current_row, test_layout_rect):
         if not current_row.at_start():
             # not at start of line so end current row...
+            prev_row_font = current_row.fall_back_font
             self._add_row_to_layout(current_row)
             # ...and start new one
             current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
                                            row_start_y=current_row.bottom,
                                            row_index=len(self.layout_rows),
                                            layout=self, line_spacing=self.line_spacing)
+            current_row = prev_row_font
 
         # Make the rect span the current row's full width & add it to the row
         test_layout_rect.width = self.layout_rect.width  # TODO: floating rects?
         current_row.add_item(test_layout_rect)
 
         # add the row to the layout since it's now full up after spanning the full width...
+        prev_row_font = current_row.fall_back_font
         self._add_row_to_layout(current_row)
         # ...then start a new row
         current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
                                        row_start_y=current_row.bottom,
                                        row_index=len(self.layout_rows),
                                        layout=self, line_spacing=self.line_spacing)
+        current_row.fall_back_font = prev_row_font
         return current_row
 
     def _handle_line_break_rect(self, current_row, test_layout_rect):
         # line break, so first end current row...
         current_row.add_item(test_layout_rect)
+        prev_row_font = current_row.fall_back_font
         self._add_row_to_layout(current_row)
 
         # ...then start a new row
-        return TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                row_start_y=current_row.bottom,
-                                row_index=len(self.layout_rows),
-                                layout=self, line_spacing=self.line_spacing)
+        new_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
+                                   row_start_y=current_row.bottom,
+                                   row_index=len(self.layout_rows),
+                                   layout=self, line_spacing=self.line_spacing)
+        new_row.fall_back_font = prev_row_font
+        return new_row
 
     def _split_rect_and_move_to_next_line(self, current_row, rhs_limit,
                                           test_layout_rect,
@@ -267,7 +279,8 @@ class TextBoxLayout:
             try:
                 new_layout_rect = test_layout_rect.split(split_point,
                                                          self.layout_rect.width,
-                                                         self.layout_rect.x)
+                                                         self.layout_rect.x,
+                                                         self.allow_split_dashes)
                 if new_layout_rect is not None:
                     # split successfully...
 
@@ -290,19 +303,22 @@ class TextBoxLayout:
             input_queue.appendleft(test_layout_rect)
 
         # whether we split successfully or not, we need to end the current row...
+        prev_row_font = current_row.fall_back_font
         self._add_row_to_layout(current_row)
 
         # And then start a new one.
         if floater_height is not None:
-            return TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                    row_start_y=floater_height,
-                                    row_index=len(self.layout_rows),
-                                    layout=self, line_spacing=self.line_spacing)
+            new_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
+                                       row_start_y=floater_height,
+                                       row_index=len(self.layout_rows),
+                                       layout=self, line_spacing=self.line_spacing)
         else:
-            return TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                    row_start_y=current_row.bottom,
-                                    row_index=len(self.layout_rows),
-                                    layout=self, line_spacing=self.line_spacing)
+            new_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
+                                       row_start_y=current_row.bottom,
+                                       row_index=len(self.layout_rows),
+                                       layout=self, line_spacing=self.line_spacing)
+        new_row.fall_back_font = prev_row_font
+        return new_row
 
     def finalise_to_surf(self, surface: Surface):
         """
@@ -420,6 +436,8 @@ class TextBoxLayout:
         """
         Insert some new layout rectangles from a queue at specific place in the current layout.
         Hopefully this means we only need to redo the layout after this point... we shall see.
+
+        Warning: this is a test function, it may noit be up to date with current text layout features
 
         :param layout_rects: the new TextLayoutRects to insert.
         :param row_index: which row we are sticking them on.
@@ -555,26 +573,27 @@ class TextBoxLayout:
             elif cursor_pos == edit_pos_accumulator + row.letter_count:
                 # if the last character in a row is a space, we have more than one row and this isn't the last row
                 # we want to jump to the start of the next row
-                last_chunk = row.items[-1]
-                if len(self.layout_rows) > 1 and isinstance(last_chunk, TextLineChunkFTFont):
-                    if (len(last_chunk.text) > 0 and
-                            last_chunk.text[-1] == " " and
-                            row.row_index != (len(self.layout_rows) - 1)):
+                if len(row.items) > 0:
+                    last_chunk = row.items[-1]
+                    if len(self.layout_rows) > 1 and isinstance(last_chunk, TextLineChunkFTFont):
+                        if (len(last_chunk.text) > 0 and
+                                last_chunk.text[-1] == " " and
+                                row.row_index != (len(self.layout_rows) - 1)):
+                            edit_pos_accumulator += row.letter_count
+                        else:
+                            row.set_cursor_position(cursor_pos - edit_pos_accumulator)
+                            self.cursor_text_row = row
+                            break
+                    elif (len(self.layout_rows) > 1 and
+                          isinstance(last_chunk, LineBreakLayoutRect) and
+                          row.row_index != (len(self.layout_rows) - 1)):
+                        # if the last chunk in a row is a line break and we have more than one row and this isn't the last row
+                        # we want to jump to the start of the next row
                         edit_pos_accumulator += row.letter_count
                     else:
                         row.set_cursor_position(cursor_pos - edit_pos_accumulator)
                         self.cursor_text_row = row
                         break
-                elif (len(self.layout_rows) > 1 and
-                      isinstance(last_chunk, LineBreakLayoutRect) and
-                      row.row_index != (len(self.layout_rows) - 1)):
-                    # if the last chunk in a row is a line break and we have more than one row and this isn't the last row
-                    # we want to jump to the start of the next row
-                    edit_pos_accumulator += row.letter_count
-                else:
-                    row.set_cursor_position(cursor_pos - edit_pos_accumulator)
-                    self.cursor_text_row = row
-                    break
 
             else:
                 edit_pos_accumulator += row.letter_count
@@ -728,20 +747,23 @@ class TextBoxLayout:
                 self.selected_rows.append(row)
                 rows_to_finalise.add(row)
                 for chunk in row.items:
-                    if chunk == start_chunk:
-                        start_selection = True
+                    if chunk is not None:
+                        if chunk == start_chunk:
+                            start_selection = True
 
-                    if start_selection and not end_selection:
-                        if chunk == end_chunk and end_letter_index == 0:
-                            # don't select this
-                            pass
-                        else:
-                            chunk.is_selected = True
-                            chunk.selection_colour = self.selection_colour
-                            self.selected_chunks.append(chunk)
+                        if start_selection and not end_selection:
+                            if chunk == end_chunk and end_letter_index == 0:
+                                # don't select this
+                                pass
+                            else:
+                                chunk.is_selected = True
+                                chunk.selection_colour = self.selection_colour
+                                self.selected_chunks.append(chunk)
 
-                    if chunk == end_chunk:
-                        end_selection = True
+                        if chunk == end_chunk:
+                            end_selection = True
+                    else:
+                        print("found None chunk in row: ", row.row_index, " with items: ", row.items)
 
         if self.finalised_surface is not None:
             for row in rows_to_finalise:
@@ -770,6 +792,7 @@ class TextBoxLayout:
                         found_chunk = chunk
                         break
             if found_chunk is None:
+                chunk_in_row_index = 0
                 # couldn't find it on this row so use the first chunk of row below
                 if row_index + 1 < len(self.layout_rows):
                     chunk_row = self.layout_rows[row_index+1]
@@ -784,12 +807,19 @@ class TextBoxLayout:
                             found_chunk = chunk
                             break
 
-        if letter_index != 0 and found_chunk is not None and found_chunk.can_split():
+        if found_chunk is not None and found_chunk.can_split():
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
             new_chunk = found_chunk.split_index(letter_index)
             chunk_row.items.insert(chunk_in_row_index + 1, new_chunk)
+
+            first_half = found_chunk
+            second_half = new_chunk
+            if isinstance(first_half, TextLineChunkFTFont):
+                first_half = first_half.text
+            if isinstance(second_half, TextLineChunkFTFont):
+                second_half = second_half.text
 
             if return_rhs:
                 found_chunk = new_chunk
@@ -834,19 +864,71 @@ class TextBoxLayout:
 
             current_row.insert_text(text, index_in_row, parser)
 
+            row_to_process_from = current_row
+            row_to_process_from_index = current_row.row_index
+            if current_row.row_index > 0:
+                row_to_process_from = self.layout_rows[current_row.row_index - 1]
+                row_to_process_from_index = row_to_process_from.row_index
+
             temp_layout_queue = deque([])
-            for row in reversed(self.layout_rows[current_row.row_index:]):
+            for row in reversed(self.layout_rows[row_to_process_from_index:]):
                 row.rewind_row(temp_layout_queue)
 
-            self.layout_rows = self.layout_rows[:current_row.row_index]
+            self.layout_rows = self.layout_rows[:row_to_process_from_index]
+            self._merge_adjacent_compatible_chunks(temp_layout_queue)
+            self._process_layout_queue(temp_layout_queue, row_to_process_from)
+
+            if self.finalised_surface is not None:
+                for row in self.layout_rows[row_to_process_from_index:]:
+                    row.finalise(self.finalised_surface)
+        else:
+            raise RuntimeError("no rows in text box layout")
+
+    def insert_line_break(self, layout_index: int, parser: Optional[HTMLParser]):
+        """
+        Insert a line break into the text layout at a given point.
+
+        :param layout_index: the character index at which to insert the line break.
+        :param parser: An optional HTML parser for text styling data
+        """
+        found_chunk, index_in_row, row_index = self._find_and_split_chunk(layout_index)
+
+        if len(self.layout_rows) > 0 and found_chunk is not None:
+            current_row = self.layout_rows[row_index]
+            current_row.insert_linebreak_after_chunk(found_chunk, parser)
+
+            temp_layout_queue = deque([])
+            for row in reversed(self.layout_rows[row_index:]):
+                row.rewind_row(temp_layout_queue)
+
+            self.layout_rows = self.layout_rows[:row_index]
             self._merge_adjacent_compatible_chunks(temp_layout_queue)
             self._process_layout_queue(temp_layout_queue, current_row)
 
             if self.finalised_surface is not None:
                 for row in self.layout_rows[current_row.row_index:]:
                     row.finalise(self.finalised_surface)
-        else:
-            raise RuntimeError("no rows in text box layout")
+        if found_chunk is None:
+            if layout_index == self.letter_count:
+                if len(self.layout_rows) > 0:
+                    last_row = self.layout_rows[-1]
+                    last_chunk = last_row.get_last_text_or_line_break_chunk()
+                    if last_chunk is not None:
+                        last_row.insert_linebreak_after_chunk(last_chunk, parser)
+
+                        temp_layout_queue = deque([])
+                        for row in reversed(self.layout_rows[last_row.row_index:]):
+                            row.rewind_row(temp_layout_queue)
+
+                        self.layout_rows = self.layout_rows[:last_row.row_index]
+                        self._merge_adjacent_compatible_chunks(temp_layout_queue)
+                        self._process_layout_queue(temp_layout_queue, last_row)
+
+                        if self.finalised_surface is not None:
+                            for row in self.layout_rows[last_row.row_index:]:
+                                row.finalise(self.finalised_surface)
+            else:
+                print("couldn't find chunk to split at layout index: ", layout_index)
 
     def delete_selected_text(self):
         """
@@ -871,23 +953,28 @@ class TextBoxLayout:
         current_row_index = current_row.row_index
         for row in reversed(self.selected_rows):
             row.items = [chunk for chunk in row.items if not chunk.is_selected]
-            # row.rewind_row(temp_layout_queue)
             if row.row_index > max_row_index:
                 max_row_index = row.row_index
 
-        for row_index in reversed(range(current_row_index, len(self.layout_rows))):
-            self.layout_rows[row_index].rewind_row(temp_layout_queue)
+        row_to_process_from = current_row
+        row_to_process_from_index = current_row.row_index
+        if current_row.row_index > 0:
+            row_to_process_from = self.layout_rows[current_row.row_index - 1]
+            row_to_process_from_index = row_to_process_from.row_index
 
-        # clear out rows that may now be empty first
-        newly_empty_rows = self.layout_rows[current_row_index:]
+        temp_layout_queue = deque([])
+        for row in reversed(self.layout_rows[row_to_process_from_index:]):
+            row.rewind_row(temp_layout_queue)
+
+        newly_empty_rows = self.layout_rows[row_to_process_from_index:]
 
         if self.finalised_surface is not None:
             for row in newly_empty_rows:
                 row.clear()
 
-        self.layout_rows = self.layout_rows[:current_row_index]
+        self.layout_rows = self.layout_rows[:row_to_process_from_index]
         self._merge_adjacent_compatible_chunks(temp_layout_queue)
-        self._process_layout_queue(temp_layout_queue, current_row)
+        self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
         if len(current_row.items) == 0:
             current_row_starting_chunk.text = ''
@@ -898,7 +985,7 @@ class TextBoxLayout:
             current_row.add_item(current_row_starting_chunk)
 
         if self.finalised_surface is not None:
-            for row in self.layout_rows[current_row_index:]:
+            for row in self.layout_rows[row_to_process_from_index:]:
                 row.finalise(self.finalised_surface)
 
         self.selected_rows = []
@@ -942,16 +1029,22 @@ class TextBoxLayout:
                         if isinstance(chunk, TextLineChunkFTFont):
                             chunk.delete_letter_at_index(0)
 
-            temp_layout_queue = deque([])
-            for row_index in reversed(range(current_row_index, len(self.layout_rows))):
-                self.layout_rows[row_index].rewind_row(temp_layout_queue)
+            row_to_process_from = current_row
+            row_to_process_from_index = current_row.row_index
+            if current_row.row_index > 0:
+                row_to_process_from = self.layout_rows[current_row.row_index - 1]
+                row_to_process_from_index = row_to_process_from.row_index
 
-            self.layout_rows = self.layout_rows[:current_row_index]
+            temp_layout_queue = deque([])
+            for row in reversed(self.layout_rows[row_to_process_from_index:]):
+                row.rewind_row(temp_layout_queue)
+
+            self.layout_rows = self.layout_rows[:row_to_process_from_index]
             self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, current_row)
+            self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
             if self.finalised_surface is not None:
-                for row in self.layout_rows[current_row_index:]:
+                for row in self.layout_rows[row_to_process_from_index:]:
                     row.finalise(self.finalised_surface)
 
     def backspace_at_cursor(self):
@@ -988,16 +1081,23 @@ class TextBoxLayout:
             if chunk_to_remove is not None:
                 current_row.items.remove(chunk_to_remove)
             current_row.set_cursor_position(cursor_pos - 1)
-            temp_layout_queue = deque([])
-            for row_index in reversed(range(current_row_index, len(self.layout_rows))):
-                self.layout_rows[row_index].rewind_row(temp_layout_queue)
 
-            self.layout_rows = self.layout_rows[:current_row_index]
+            row_to_process_from = current_row
+            row_to_process_from_index = current_row.row_index
+            if current_row.row_index > 0:
+                row_to_process_from = self.layout_rows[current_row.row_index - 1]
+                row_to_process_from_index = row_to_process_from.row_index
+
+            temp_layout_queue = deque([])
+            for row in reversed(self.layout_rows[row_to_process_from_index:]):
+                row.rewind_row(temp_layout_queue)
+
+            self.layout_rows = self.layout_rows[:row_to_process_from_index]
             self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, current_row)
+            self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
             if self.finalised_surface is not None:
-                for row in self.layout_rows[current_row_index:]:
+                for row in self.layout_rows[row_to_process_from_index:]:
                     row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):

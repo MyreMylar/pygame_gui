@@ -517,7 +517,8 @@ class DrawableShape:
                                                              text_actual_area_rect.height))
             text_chunk.should_centre_from_baseline = True
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
-                                                 self.text_view_rect, line_spacing=1.25)
+                                                 self.text_view_rect, line_spacing=1.25,
+                                                 default_font=self.theming['font'])
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
             if 'text_cursor_colour' in self.theming:

@@ -95,6 +95,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.effects_offset_pos = (0, 0)
         self.transform_effect_rect = pygame.Rect(self.topleft, self.size)
 
+    def __repr__(self):
+        return "< '" + self.text + "' " + super().__repr__() + " >"
+
     def _handle_dimensions(self, font, max_dimensions, text):
         if len(text) == 0:
             text_rect = font.get_rect('A')
@@ -373,7 +376,8 @@ class TextLineChunkFTFont(TextLayoutRect):
     def split(self,
               requested_x: int,
               line_width: int,
-              row_start_x: int) -> Union['TextLayoutRect', None]:
+              row_start_x: int,
+              allow_split_dashes: bool) -> Union['TextLayoutRect', None]:
         """
         Try to perform a split operation on this chunk at the requested pixel position.
 
@@ -381,9 +385,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         the request (i.e. to the left of the request in the common left-to-right
         text layout case) .
 
-        :param requested_x: the requested place to split this rectangle along it's width.
+        :param requested_x: the requested place to split this rectangle along its width.
         :param line_width: the width of the current line.
         :param row_start_x: the x start position of the row.
+        :param allow_split_dashes: whether we allow text to be split with dashes either side.
+                                   allowing this makes direct text editing more annoying.
         """
         # starting heuristic: find the percentage through the chunk width of this split request
         percentage_split = 0
@@ -405,13 +411,18 @@ class TextLineChunkFTFont(TextLayoutRect):
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
             optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
-            if optimum_split_point != 1:
-                # have to be at least wide enough to fit in a dash and another character
-                left_side = self.text[:optimum_split_point] + '-'
-                right_side = '-' + self.text[optimum_split_point:]
-                split_text_ok = True
+            if allow_split_dashes:
+                if optimum_split_point != 1:
+                    # have to be at least wide enough to fit in a dash and another character
+                    left_side = self.text[:optimum_split_point] + '-'
+                    right_side = '-' + self.text[optimum_split_point:]
+                    split_text_ok = True
+                else:
+                    raise ValueError('Line width is too narrow')
             else:
-                raise ValueError('Line width is too narrow')
+                left_side = self.text[:optimum_split_point]
+                right_side = self.text[optimum_split_point:]
+                split_text_ok = True
 
         if split_text_ok:
             # update the data for this chunk
@@ -473,7 +484,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         :param index: the requested index at which to split this rectangle along it's width.
         """
-        if 0 < index < len(self.text):
+        if 0 <= index < len(self.text):
             left_side = self.text[:index]
             right_side = self.text[index:]
 
@@ -486,7 +497,12 @@ class TextLineChunkFTFont(TextLayoutRect):
 
             return self._split_at(right_side, self.topright, self.target_surface,
                                   self.target_surface_area, self.should_centre_from_baseline)
+        elif index == 0 and len(self.text) == 0:
+            # special case
+            return self._split_at("", self.topright, self.target_surface,
+                                  self.target_surface_area, self.should_centre_from_baseline)
         else:
+            print("index is bad at: ", index, "len(self.text): ", len(self.text))
             return None
 
     def _split_at(self, right_side, split_pos, target_surface,
