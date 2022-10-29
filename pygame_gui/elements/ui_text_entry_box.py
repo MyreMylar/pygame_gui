@@ -104,7 +104,7 @@ class UITextEntryBox(UITextBox):
         if not self.alive():
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
-        if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+        if self.hovered:
             if (self.scroll_bar is None or
                     (self.scroll_bar is not None and
                      not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]))):
