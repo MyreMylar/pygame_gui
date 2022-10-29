@@ -1,7 +1,10 @@
 import re
 from typing import Union, Tuple, Dict, Optional
 
+from pygame_gui.core.utility import clipboard_paste, clipboard_copy
+
 from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN
+from pygame import KMOD_META, KMOD_CTRL, K_a, K_x, K_c, K_v
 from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE, K_RETURN
 from pygame import key
 from pygame.event import Event, post
@@ -195,8 +198,8 @@ class UITextEntryBox(UITextBox):
         if self._process_mouse_button_event(event):
             consumed_event = True
         if self.is_enabled and self.is_focused and event.type == KEYDOWN:
-            # if self._process_keyboard_shortcut_event(event):
-            #     consumed_event = True
+            if self._process_keyboard_shortcut_event(event):
+                consumed_event = True
             if self._process_action_key_event(event):
                 consumed_event = True
             elif self._process_text_entry_key(event):
@@ -429,6 +432,82 @@ class UITextEntryBox(UITextBox):
                     consumed_event = True
         return consumed_event
 
+    def _process_keyboard_shortcut_event(self, event: Event) -> bool:
+        """
+        Check if event is one of the CTRL key keyboard shortcuts.
+
+        :param event: event to process.
+
+        :return: True if event consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_a and
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+            self.select_range = [0, len(self.html_text)]
+            self.edit_position = len(self.html_text)
+            self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif (event.key == K_x and
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                clipboard_copy(self.html_text[low_end:high_end])
+                self.text_box_layout.delete_selected_text()
+                self.edit_position = low_end
+                self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.select_range = [0, 0]
+                self.redraw_from_text_block()
+                self.cursor_has_moved_recently = True
+                consumed_event = True
+        elif (event.key == K_c and
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                clipboard_copy(self.html_text[low_end:high_end])
+                consumed_event = True
+        elif self._process_paste_event(event):
+            consumed_event = True
+        return consumed_event
+
+    def _process_paste_event(self, event: Event) -> bool:
+        """
+        Process a paste shortcut event. (CTRL+ V)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if event.key == K_v and (event.mod & KMOD_CTRL or event.mod & KMOD_META):
+            new_text = self.convert_all_line_endings_to_unix(clipboard_paste())
+
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                self.html_text = self.html_text[:low_end] + new_text + self.html_text[high_end:]
+                self.set_text(self.html_text)
+                self.edit_position = low_end + len(new_text)
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.redraw_from_text_block()
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif len(new_text) > 0:
+                self.html_text = (self.html_text[:self.edit_position] +
+                                  new_text +
+                                  self.html_text[self.edit_position:])
+                self.set_text(self.html_text)
+                self.edit_position += len(new_text)
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.redraw_from_text_block()
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        return consumed_event
+
     def _calculate_double_click_word_selection(self):
         """
         If we double clicked on a word in the text, select that word.
@@ -474,3 +553,8 @@ class UITextEntryBox(UITextBox):
     def redraw_from_text_block(self):
         self.text_box_layout.fit_layout_rect_height_to_rows()
         super().redraw_from_text_block()
+
+    @staticmethod
+    def convert_all_line_endings_to_unix(input_str: str):
+        return input_str.replace('\r\n', '\n').replace('\r', '\n')
+
