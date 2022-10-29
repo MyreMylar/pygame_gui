@@ -30,7 +30,8 @@ class UITextEntryBox(UITextBox):
                          object_id=object_id,
                          anchors=anchors,
                          visible=visible,
-                         allow_split_dashes=False)
+                         allow_split_dashes=False,
+                         plain_text_display_only=True)
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache

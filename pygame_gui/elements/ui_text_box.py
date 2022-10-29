@@ -87,7 +87,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  *,
                  pre_parsing_enabled: bool = True,
                  text_kwargs: Optional[Dict[str, str]] = None,
-                 allow_split_dashes: bool = True):
+                 allow_split_dashes: bool = True,
+                 plain_text_display_only: bool = False):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -108,6 +109,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.text_kwargs = text_kwargs
         self.font_dict = self.ui_theme.get_font_dictionary()
         self.allow_split_dashes = allow_split_dashes
+        self.plain_text_display_only = plain_text_display_only
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
@@ -535,16 +537,28 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
+        feed_input = self.html_text
+        if self.plain_text_display_only:
+            feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
+        feed_input = self._pre_parse_text(translate(feed_input, **self.text_kwargs) + self.appended_text)
+        self.parser.feed(feed_input)
 
-        self.parser.feed(self._pre_parse_text(translate(self.html_text, **self.text_kwargs) + self.appended_text))
-
+        default_font = self.ui_theme.get_font_dictionary().find_font(
+            font_name=self.parser.default_style['font_name'],
+            font_size=self.parser.default_style['font_size'],
+            bold=self.parser.default_style['bold'],
+            italic=self.parser.default_style['italic'])
+        default_font_data = {"font": default_font,
+                             "font_colour": self.parser.default_style['font_colour'],
+                             "bg_colour": self.parser.default_style['bg_colour']
+                             }
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
                                              line_spacing=1.25,
-                                             default_font=self.ui_theme.get_font_dictionary().get_default_font(),
+                                             default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
         if self.text_wrap_rect[3] == -1:
@@ -886,7 +900,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
         self.appended_text += html.unescape(new_html_str)
-        self.parser.feed(self._pre_parse_text(new_html_str))
+        feed_input = self.appended_text
+        if self.plain_text_display_only:
+            # if we are supporting only plain text rendering then we turn html input into text at this point
+            feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
+        # this converts plain text special characters to html just for the parser
+        feed_input = self._pre_parse_text(feed_input)
+
+        self.parser.feed(feed_input)
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
 

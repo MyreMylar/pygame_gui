@@ -1,4 +1,4 @@
-from typing import Deque, List, Optional
+from typing import Deque, List, Optional, Dict, Any
 from collections import deque
 from bisect import bisect_left
 
@@ -32,13 +32,17 @@ class TextBoxLayout:
                  layout_rect: pygame.Rect,
                  view_rect: pygame.Rect,
                  line_spacing: float,
-                 default_font,
+                 default_font_data: Dict[str, Any],
                  allow_split_dashes: bool = True):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
-        self.default_font = default_font  # this is the font used when we don't have anything else
+
+        # this is the font used when we don't have anything else
+        self.default_font_data = default_font_data
+        self.default_font = default_font_data["font"]
+
         self.allow_split_dashes = allow_split_dashes
         self.last_row_height = int(14 * self.line_spacing)
 
@@ -68,7 +72,17 @@ class TextBoxLayout:
         current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
                                        row_start_y=self.layout_rect.y, row_index=0,
                                        layout=self, line_spacing=self.line_spacing)
-        self._process_layout_queue(self.layout_rect_queue, current_row)
+        if len(self.layout_rect_queue) > 0:
+            self._process_layout_queue(self.layout_rect_queue, current_row)
+        else:
+            empty_text_chunk = TextLineChunkFTFont("",
+                                                   self.default_font,
+                                                   False,
+                                                   self.default_font_data['font_colour'],
+                                                   True,
+                                                   self.default_font_data['bg_colour'])
+            current_row.add_item(empty_text_chunk)
+            self._add_row_to_layout(current_row, True)
 
         self.edit_buffer = 2
         self.cursor_text_row = None
