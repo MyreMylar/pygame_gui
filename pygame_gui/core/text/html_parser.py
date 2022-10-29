@@ -160,27 +160,44 @@ class HTMLParser(html.parser.HTMLParser):
         shadow_offset = [0, 0]
         shadow_colour = [50, 50, 50]
         if 'size' in attributes:
-            shadow_size = int(attributes['size'])
+            if attributes['size'] is not None and len(attributes['size']) > 0:
+                try:
+                    shadow_size = int(attributes['size'])
+                except ValueError or AttributeError:
+                    shadow_size = 0
+
         if 'offset' in attributes:
-            offset_str = attributes['offset'].split(',')
-            shadow_offset[0] = int(offset_str[0])
-            shadow_offset[1] = int(offset_str[1])
+            if attributes['offset'] is not None and len(attributes['offset']) > 0:
+                try:
+                    offset_str = attributes['offset'].split(',')
+                    if len(offset_str) == 2:
+                        shadow_offset[0] = int(offset_str[0])
+                        shadow_offset[1] = int(offset_str[1])
+                except ValueError or AttributeError:
+                    shadow_offset = [0, 0]
         if 'color' in attributes:
-            if self._is_legal_hex_colour(attributes['color']):
-                shadow_colour = pygame.color.Color(attributes['color'])
-            else:
-                shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
-                                                                     self.combined_ids)
+            try:
+                if self._is_legal_hex_colour(attributes['color']):
+                    shadow_colour = pygame.color.Color(attributes['color'])
+                elif attributes['color'] is not None and len(attributes['color']) > 0:
+                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
+                                                                         self.combined_ids)
+            except ValueError or AttributeError:
+                shadow_colour = [50, 50, 50]
+
         style['shadow_data'] = (shadow_size, shadow_offset[0],
                                 shadow_offset[1], shadow_colour, False)
 
     def _handle_font_tag(self, attributes, style):
-        if 'face' in attributes:
+        if 'face' in attributes and attributes['face'] is not None:
             font_name = attributes['face'] if len(attributes['face']) > 0 else None
             style["font_name"] = font_name
         if 'pixel_size' in attributes:
             if attributes['pixel_size'] is not None and len(attributes['pixel_size']) > 0:
-                font_size = int(attributes['pixel_size'])
+                try:
+                    font_size = int(attributes['pixel_size'])
+                except ValueError or AttributeError:
+                    font_size = self.default_style['font_size']
             else:
                 font_size = self.default_style['font_size']
             style["font_size"] = font_size
@@ -213,13 +230,16 @@ class HTMLParser(html.parser.HTMLParser):
 
     def _handle_body_tag(self, attributes, style):
         if 'bgcolor' in attributes:
-            if len(attributes['bgcolor']) > 0:
-                if self._is_legal_hex_colour(attributes['bgcolor']):
-                    style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
-                else:
-                    style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
-                        attributes['bgcolor'],
-                        self.combined_ids)
+            if attributes['bg_colour'] is not None and len(attributes['bgcolor']) > 0:
+                try:
+                    if self._is_legal_hex_colour(attributes['bgcolor']):
+                        style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
+                    else:
+                        style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
+                            attributes['bgcolor'],
+                            self.combined_ids)
+                except ValueError or AttributeError:
+                    style["bg_colour"] = pygame.Color('#00000000')
             else:
                 style["bg_colour"] = pygame.Color('#00000000')
 
@@ -257,7 +277,7 @@ class HTMLParser(html.parser.HTMLParser):
                 image_float = TextFloatPosition.RIGHT
             else:
                 image_float = TextFloatPosition.NONE
-        if 'padding' in attributes:
+        if 'padding' in attributes and isinstance(attributes['padding'], str):
             paddings = attributes['padding'].split(' ')
             for index, padding in enumerate(paddings):
                 paddings[index] = int(padding.strip('px'))
@@ -281,6 +301,11 @@ class HTMLParser(html.parser.HTMLParser):
                 padding_right = paddings[0]
                 padding_left = paddings[0]
                 padding_bottom = paddings[0]
+            else:
+                padding_top = 0
+                padding_right = 0
+                padding_left = 0
+                padding_bottom = 0
         all_paddings = Padding(padding_top, padding_right, padding_bottom, padding_left)
         self.layout_rect_queue.append(ImageLayoutRect(image_path,
                                                       image_float,
