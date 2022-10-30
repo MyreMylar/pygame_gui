@@ -516,6 +516,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         right_side_chunk.target_surface = target_surface
         right_side_chunk.target_surface_area = target_surface_area
         right_side_chunk.should_centre_from_baseline = baseline_centred
+        right_side_chunk.effect_id = self.effect_id
         return right_side_chunk
 
     def clear(self, optional_rect: Optional[pygame.Rect] = None):
