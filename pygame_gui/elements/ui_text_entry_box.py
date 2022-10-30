@@ -18,7 +18,7 @@ from pygame_gui.elements.ui_text_box import UITextBox
 class UITextEntryBox(UITextBox):
     def __init__(self,
                  relative_rect: Union[Rect, Tuple[int, int, int, int]],
-                 initial_text: str,
+                 initial_text: str = "",
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
@@ -55,6 +55,20 @@ class UITextEntryBox(UITextBox):
         self.cursor_has_moved_recently = False
         self.vertical_cursor_movement = False
         self.last_horiz_cursor_index = 0
+
+    def get_text(self) -> str:
+        """
+        Gets the text in the entry box element.
+
+        :return: A string.
+
+        """
+        return self.html_text
+
+    def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
+        super().set_text(html_text, text_kwargs=text_kwargs)
+        self.edit_position = len(self.html_text)
+        self.cursor_has_moved_recently = True
 
     @property
     def select_range(self):
@@ -201,7 +215,7 @@ class UITextEntryBox(UITextBox):
         if self.is_enabled and self.is_focused and event.type == KEYDOWN:
             if self._process_keyboard_shortcut_event(event):
                 consumed_event = True
-            if self._process_action_key_event(event):
+            elif self._process_action_key_event(event):
                 consumed_event = True
             elif self._process_text_entry_key(event):
                 consumed_event = True
@@ -404,6 +418,7 @@ class UITextEntryBox(UITextBox):
             self.edit_position += 1
             self.redraw_from_text_block()
             self.cursor_has_moved_recently = True
+            consumed_event = True
 
         elif hasattr(event, 'unicode'):
             character = event.unicode
