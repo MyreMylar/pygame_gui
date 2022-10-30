@@ -33,9 +33,10 @@ class UIWindowStack(IUIWindowStackInterface):
         :param window: The window to add.
 
         """
-        new_layer = (self.stack[-1].get_top_layer()
+        new_layer = (self.stack[-1].get_top_layer() + 1
                      if len(self.stack) > 0
-                     else self.root_container.get_top_layer())
+                     else self.root_container.get_top_layer() + 1)
+
         window.change_layer(new_layer)
         self.stack.append(window)
         window.on_moved_to_front()

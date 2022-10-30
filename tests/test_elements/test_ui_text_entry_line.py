@@ -922,9 +922,16 @@ class TestUITextEntryLine:
 
     def test_update(self,  _init_pygame):
         pygame.display.init()
-        manager = UIManager((800, 600), os.path.join("tests", "data",
-                                                     "themes",
-                                                     "ui_text_entry_line_non_default.json"))
+
+        class MouselessManager(UIManager):
+            fixed_mouse_pos = (0, 0)
+
+            def _update_mouse_position(self):
+                self.mouse_position = MouselessManager.fixed_mouse_pos
+
+        manager = MouselessManager((800, 600), os.path.join("tests", "data",
+                                                            "themes",
+                                                            "ui_text_entry_line_non_default.json"))
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=manager)
 
@@ -933,8 +940,8 @@ class TestUITextEntryLine:
         assert text_entry.alive()
         assert not manager.text_input_hovered
 
-        manager.mouse_position = (150, 115)
-        text_entry.update(0.01)
+        MouselessManager.fixed_mouse_pos = (200, 115)
+        manager.update(0.01)
         assert manager.text_input_hovered
 
         text_entry.kill()

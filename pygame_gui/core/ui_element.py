@@ -723,7 +723,6 @@ class UIElement(GUISprite, IUIElementInterface):
                     self.hovered = True
                     self.on_hovered()
 
-                hovered_higher_element = True
                 self.while_hovering(time_delta, mouse_pos)
 
             else:

@@ -516,8 +516,14 @@ class DrawableShape:
                                              max_dimensions=(text_actual_area_rect.width,
                                                              text_actual_area_rect.height))
             text_chunk.should_centre_from_baseline = True
+            default_font_data = {"font": self.theming['font'],
+                                 "font_colour": (self.theming['normal_text']
+                                                 if 'normal_text' in self.theming else
+                                                 self.ui_manager.get_theme().get_colour('normal_text', None)),
+                                 "bg_colour": pygame.Color('#00000000')}
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
-                                                 self.text_view_rect, line_spacing=1.25)
+                                                 self.text_view_rect, line_spacing=1.25,
+                                                 default_font_data=default_font_data)
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
             if 'text_cursor_colour' in self.theming:

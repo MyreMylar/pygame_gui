@@ -14,10 +14,16 @@ from pygame_gui.core.text.text_layout_rect import Padding
 class TestTextBoxLayout:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([])
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         TextBoxLayout(input_data_queue=input_data,
                       layout_rect=pygame.Rect(0, 0, 200, 300),
                       view_rect=pygame.Rect(0, 0, 200, 150),
-                      line_spacing=1.0)
+                      line_spacing=1.0,
+                      default_font_data=default_font_data)
 
     def test_creation_with_data(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
@@ -61,11 +67,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(30, 20))
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 110),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         assert len(layout.layout_rows) > 0
 
@@ -79,7 +90,8 @@ class TestTextBoxLayout:
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 110),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         assert len(layout.layout_rows) > 0
 
@@ -93,7 +105,8 @@ class TestTextBoxLayout:
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 110),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         assert len(layout.layout_rows) > 0
 
@@ -116,7 +129,8 @@ class TestTextBoxLayout:
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 90),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         assert len(layout.layout_rows) > 0
 
@@ -132,10 +146,16 @@ class TestTextBoxLayout:
                                             padding=Padding(0, 0, 0, 0))])
 
         with pytest.warns(UserWarning, match="too wide for text layout"):
+            default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+            default_font_data = {"font": default_font,
+                                 "font_colour": pygame.Color("#FFFFFF"),
+                                 "bg_colour": pygame.Color("#00000000")
+                                 }
             TextBoxLayout(input_data_queue=input_data,
                           layout_rect=pygame.Rect(0, 0, 200, 300),
                           view_rect=pygame.Rect(0, 0, 200, 150),
-                          line_spacing=1.0)
+                          line_spacing=1.0,
+                          default_font_data=default_font_data)
 
     def test_reprocess_layout_queue(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([SimpleTestLayoutRect(dimensions=(50, 20)),
@@ -146,11 +166,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(30, 20)),
                             SimpleTestLayoutRect(dimensions=(90, 20)),
                             SimpleTestLayoutRect(dimensions=(175, 20))])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         assert len(layout.layout_rows) == 4
         layout.reprocess_layout_queue(pygame.Rect(0, 0, 100, 300))
@@ -166,10 +191,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(90, 20)),
                             SimpleTestLayoutRect(dimensions=(175, 20))])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout_surface = pygame.Surface((200, 300), depth=32, flags=pygame.SRCALPHA)
         layout_surface.fill((0, 0, 0, 0))
@@ -187,10 +218,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(90, 20)),
                             SimpleTestLayoutRect(dimensions=(175, 20))])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout_surface = layout.finalise_to_new()
 
@@ -204,10 +241,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000'))])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout_surface = layout.finalise_to_new()
         layout.update_text_with_new_text_end_pos(0)  # this does nothing unless we pass in text
@@ -226,10 +269,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(90, 20)),
                             SimpleTestLayoutRect(dimensions=(175, 20))])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout_surface = layout.finalise_to_new()
 
@@ -247,10 +296,16 @@ class TestTextBoxLayout:
                             SimpleTestLayoutRect(dimensions=(90, 20)),
                             SimpleTestLayoutRect(dimensions=(175, 20))])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout_surface = layout.finalise_to_new()
 
@@ -281,10 +336,16 @@ class TestTextBoxLayout:
                                                hover_underline=False)
                             ])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 200, 300),
                                view_rect=pygame.Rect(0, 0, 200, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         links_found = []
         layout.add_chunks_to_hover_group(links_found)
@@ -312,10 +373,16 @@ class TestTextBoxLayout:
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 300, 150),
                                view_rect=pygame.Rect(0, 0, 300, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         insert_data = deque([TextLineChunkFTFont(text='n insertion',
                                                  font=the_font,
@@ -330,9 +397,9 @@ class TestTextBoxLayout:
                                    chunk_index=9)
 
         row = layout.layout_rows[0]
-        chunk = row.items[1]
+        chunk = row.items[0]
 
-        assert chunk.text == 'this is an insertion'
+        assert chunk.text == 'hello this is an insertion test'
 
         layout_surface = layout.finalise_to_new()
 
@@ -399,11 +466,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.x == 0
@@ -434,10 +506,16 @@ class TestTextBoxLayout:
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
 
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.x == 0
@@ -471,11 +549,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.x == 0
@@ -504,11 +587,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.y == 0
@@ -537,11 +625,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.y == 0
@@ -571,11 +664,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         row = layout.layout_rows[0]
         assert row.y == 0
@@ -603,11 +701,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_cursor_position(13)
 
@@ -639,11 +742,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_cursor_from_click_pos((17, 24))
         assert layout.cursor_text_row is not None
@@ -674,11 +782,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_cursor_from_click_pos((17, 24))
 
@@ -716,11 +829,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000'))
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_text_selection(5, 17)
 
@@ -756,11 +874,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_default_text_colour(pygame.Color('#00FF00'))
         default_chunk_colour = layout.layout_rows[0].items[1].colour
@@ -787,25 +910,31 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.insert_text('nother insertion', 15)
 
         row = layout.layout_rows[0]
-        chunk = row.items[1]
+        chunk = row.items[0]
 
-        assert chunk.text == 'this is another insertion'
+        assert chunk.text == 'hello this is another insertion test'
 
         layout.insert_text('text on the end', 51)  # deliberately high number that should get clamped
 
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 500, 300),
                                view_rect=pygame.Rect(0, 0, 500, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.layout_rows = []
 
@@ -833,11 +962,16 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_text_selection(5, 17)
 
@@ -923,14 +1057,21 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_cursor_position(14)
         layout.delete_at_cursor()
+        # need to reset the cursor position before deleting again as chunks will have merged and been re-processed
+        layout.set_cursor_position(14)
         layout.delete_at_cursor()
 
         remaining_text = ''
@@ -961,14 +1102,21 @@ class TestTextBoxLayout:
                                                 using_default_text_colour=False,
                                                 bg_colour=pygame.Color('#FF0000')),
                             ])
-
+        default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
+        default_font_data = {"font": default_font,
+                             "font_colour": pygame.Color("#FFFFFF"),
+                             "bg_colour": pygame.Color("#00000000")
+                             }
         layout = TextBoxLayout(input_data_queue=input_data,
                                layout_rect=pygame.Rect(0, 0, 100, 300),
                                view_rect=pygame.Rect(0, 0, 100, 150),
-                               line_spacing=1.0)
+                               line_spacing=1.0,
+                               default_font_data=default_font_data)
 
         layout.set_cursor_position(16)
         layout.backspace_at_cursor()
+        # need to reset the cursor position before backspacing again as chunks will have merged and been re-processed
+        layout.set_cursor_position(15)
         layout.backspace_at_cursor()
 
         remaining_text = ''

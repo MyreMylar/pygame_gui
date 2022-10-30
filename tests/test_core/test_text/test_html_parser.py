@@ -71,11 +71,11 @@ class TestHTMLParser:
 
         parser.handle_starttag(tag='font', attrs=[('pixel_size', "")])
 
-        assert parser.current_style['font_size'] is None
+        assert parser.current_style['font_size'] is 14
 
         parser.handle_starttag(tag='font', attrs=[('size', "")])
 
-        assert parser.current_style['font_size'] is None
+        assert parser.current_style['font_size'] is 14
 
         with pytest.warns(UserWarning, match="not a supported html style size"):
             parser.handle_starttag(tag='font', attrs=[('size', "8")])
@@ -92,7 +92,7 @@ class TestHTMLParser:
         parser.handle_starttag(tag='p', attrs=[])
         parser.handle_starttag(tag='p', attrs=[])
 
-        assert isinstance(parser.layout_rect_queue[-1], LineBreakLayoutRect)
+        assert isinstance(parser.layout_rect_queue[-2], LineBreakLayoutRect)
 
         parser.handle_starttag(tag='img', attrs=[('src', 'tests/data/images/splat.png'),
                                                  ('float', 'none'),

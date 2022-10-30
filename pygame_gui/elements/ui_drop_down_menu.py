@@ -673,6 +673,7 @@ class UIDropDownMenu(UIContainer):
                                object_id=object_id,
                                element_id='drop_down_menu')
 
+        self.__layer_thickness_including_expansion = 4
         self.options_list = options_list
         self.selected_option = starting_option
         self.open_button_width = 20
@@ -722,6 +723,15 @@ class UIDropDownMenu(UIContainer):
                                                                 )}
         self.current_state = self.menu_states['closed']
         self.current_state.start(should_rebuild=True)
+
+    @property
+    def layer_thickness(self):
+        return self.__layer_thickness_including_expansion
+
+    @layer_thickness.setter
+    def layer_thickness(self, value):
+        # ignore passed in value and hardcode to 4
+        self.__layer_thickness_including_expansion = 4
 
     def add_options(self, new_options: List[str]) -> None:
         """

@@ -1,7 +1,7 @@
 import re
 import warnings
 
-from typing import Union, List, Dict, Optional
+from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
 
@@ -67,7 +67,7 @@ class UITextEntryLine(UIElement):
                                         _number_character_set['en'])}
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
@@ -307,16 +307,14 @@ class UITextEntryLine(UIElement):
         if not self.alive():
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
-        if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
+        if self.hovered:
             self.ui_manager.set_text_input_hovered(True)
-        else:
-            self.ui_manager.set_text_input_hovered(False)
+
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
         if self.selection_in_progress:
-            mouse_pos = self.ui_manager.get_mouse_position()
-            drawable_shape_space_click = (mouse_pos[0] - self.rect.left,
-                                          mouse_pos[1] - self.rect.top)
+            drawable_shape_space_click = (scaled_mouse_pos[0] - self.rect.left,
+                                          scaled_mouse_pos[1] - self.rect.top)
             if self.drawable_shape is not None:
                 self.drawable_shape.text_box_layout.set_cursor_from_click_pos(
                     drawable_shape_space_click)
@@ -774,8 +772,8 @@ class UITextEntryLine(UIElement):
         if index >= 0:
             char = self.text[index]
             # Check we clicked in the same place on a our second click.
+            pattern = re.compile(r"[\w']+")
             if index > 0:
-                pattern = re.compile(r"[\w']+")
                 while not pattern.match(char):
                     index -= 1
                     if index > 0:
@@ -797,7 +795,6 @@ class UITextEntryLine(UIElement):
                     if index < len(self.text):
                         char = self.text[index]
             end_select_index = index
-            print([start_select_index, end_select_index])
             self.select_range = [start_select_index, end_select_index]
             self.edit_position = end_select_index
             self.cursor_has_moved_recently = True

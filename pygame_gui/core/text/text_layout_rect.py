@@ -106,7 +106,8 @@ class TextLayoutRect(pygame.rect.Rect):
     def split(self,
               requested_x: int,
               line_width: int,
-              row_start_x: int) -> Union['TextLayoutRect', None]:  # noqa
+              row_start_x: int,
+              allow_split_dashes: bool = True) -> Union['TextLayoutRect', None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the
         nearest point that is still less than the request (i.e. to the left of the request in
@@ -115,6 +116,8 @@ class TextLayoutRect(pygame.rect.Rect):
         :param requested_x: the requested place to split this rectangle along it's width.
         :param line_width: the width of the current line.
         :param row_start_x: the x start position of the row.
+        :param allow_split_dashes: whether we allow text to be split with dashes either side.
+                                   allowing this makes direct text editing more annoying.
 
         """
         if line_width < self.smallest_split_size:

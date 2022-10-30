@@ -56,7 +56,7 @@ class UIVerticalScrollBar(UIElement):
         self.top_limit = 0.0
         self.starting_grab_y_difference = 0
         self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
-        self.start_percentage = 0.0
+        self._start_percentage = 0.0
 
         self.grabbed_slider = False
         self.has_moved_recently = False
@@ -106,6 +106,18 @@ class UIVerticalScrollBar(UIElement):
                                                 'bottom': 'top'})
         self.join_focus_sets(self.sliding_button)
         self.sliding_button.set_hold_range((100, self.background_rect.height))
+
+    @property
+    def start_percentage(self):
+        """
+        turning start_percentage into a property so we can round it to mitigate floating point errors
+        """
+        return self._start_percentage
+
+    @start_percentage.setter
+    def start_percentage(self, value):
+        rounded_value = round(value, 4)
+        self._start_percentage = rounded_value
 
     def rebuild(self):
         """
@@ -330,7 +342,8 @@ class UIVerticalScrollBar(UIElement):
                 self.grabbed_slider = False
 
             if moved_this_frame:
-                self.start_percentage = self.scroll_position / self.scrollable_height
+                self.start_percentage = min(self.scroll_position / self.scrollable_height,
+                                            1.0 - self.visible_percentage)
                 if not self.has_moved_recently:
                     self.has_moved_recently = True
 
@@ -365,7 +378,7 @@ class UIVerticalScrollBar(UIElement):
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
 
         x_pos = 0
-        y_pos = (self.scroll_position + self.arrow_button_height)
+        y_pos = min((self.bottom_limit + self.arrow_button_height) - scroll_bar_height, (self.scroll_position + self.arrow_button_height))
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
         self.sliding_button.set_relative_position(self.sliding_rect_position)

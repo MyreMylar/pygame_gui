@@ -1,5 +1,6 @@
 import warnings
 import math
+import html
 
 from typing import Union, Tuple, Dict, Optional, Any
 
@@ -85,7 +86,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  visible: int = 1,
                  *,
                  pre_parsing_enabled: bool = True,
-                 text_kwargs: Optional[Dict[str, str]] = None):
+                 text_kwargs: Optional[Dict[str, str]] = None,
+                 allow_split_dashes: bool = True,
+                 plain_text_display_only: bool = False,
+                 should_html_unescape_input_text: bool = False):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -98,13 +102,18 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                parent_element=parent_element,
                                object_id=object_id,
                                element_id='text_box')
-
-        self.html_text = html_text
+        self.should_html_unescape_input_text = should_html_unescape_input_text
+        if self.should_html_unescape_input_text:
+            self.html_text = html.unescape(html_text)
+        else:
+            self.html_text = html_text
         self.appended_text = ""
         self.text_kwargs = {}
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
         self.font_dict = self.ui_theme.get_font_dictionary()
+        self.allow_split_dashes = allow_split_dashes
+        self.plain_text_display_only = plain_text_display_only
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
@@ -317,6 +326,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
+    def get_text_layout_top_left(self):
+        return (self.rect.left + self.padding[0] + self.border_width +
+                self.shadow_width + self.rounded_corner_offset,
+                self.rect.top + self.padding[1] + self.border_width +
+                self.shadow_width + self.rounded_corner_offset
+                )
+
     def _align_all_text_rows(self):
         """
         Aligns the text drawing position correctly according to our theming options.
@@ -525,15 +541,29 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Parses HTML styled string text into a format more useful for styling pygame.freetype
         rendered text.
         """
+        feed_input = self.html_text
+        if self.plain_text_display_only:
+            feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
+        feed_input = self._pre_parse_text(translate(feed_input, **self.text_kwargs) + self.appended_text)
+        self.parser.feed(feed_input)
 
-        self.parser.feed(self._pre_parse_text(translate(self.html_text, **self.text_kwargs) + self.appended_text))
-
+        default_font = self.ui_theme.get_font_dictionary().find_font(
+            font_name=self.parser.default_style['font_name'],
+            font_size=self.parser.default_style['font_size'],
+            bold=self.parser.default_style['bold'],
+            italic=self.parser.default_style['italic'])
+        default_font_data = {"font": default_font,
+                             "font_colour": self.parser.default_style['font_colour'],
+                             "bg_colour": self.parser.default_style['bg_colour']
+                             }
         self.text_box_layout = TextBoxLayout(self.parser.layout_rect_queue,
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
-                                             line_spacing=1.25)
+                                             line_spacing=1.25,
+                                             default_font_data=default_font_data,
+                                             allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
         if self.text_wrap_rect[3] == -1:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
@@ -549,36 +579,45 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.rect.width <= 0 or self.rect.height <= 0:
             return
-        if self.scroll_bar is not None:
-            height_adjustment = int(self.scroll_bar.start_percentage *
-                                    self.text_box_layout.layout_rect.height)
-            percentage_visible = (self.text_wrap_rect[3] /
-                                  self.text_box_layout.layout_rect.height)
-            self.scroll_bar.set_visible_percentage(percentage_visible)
+        if (self.scroll_bar is None and
+                (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
+            self.rebuild()
         else:
-            height_adjustment = 0
-        drawable_area_size = (max(1, (self.rect[2] -
-                                      (self.padding[0] * 2) -
-                                      (self.border_width * 2) -
-                                      (self.shadow_width * 2) -
-                                      (2 * self.rounded_corner_offset))),
-                              max(1, (self.rect[3] -
-                                      (self.padding[1] * 2) -
-                                      (self.border_width * 2) -
-                                      (self.shadow_width * 2) -
-                                      (2 * self.rounded_corner_offset))))
-        drawable_area = pygame.Rect((0, height_adjustment),
-                                    drawable_area_size)
-        new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
-        new_image.fill(pygame.Color(0, 0, 0, 0))
-        basic_blit(new_image, self.background_surf, (0, 0))
-        basic_blit(new_image, self.text_box_layout.finalised_surface,
-                   (self.padding[0] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset,
-                    self.padding[1] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset),
-                   drawable_area)
-        self._set_image(new_image)
+            if self.scroll_bar is not None:
+                height_adjustment = int(self.scroll_bar.start_percentage *
+                                        self.text_box_layout.layout_rect.height)
+                percentage_visible = (self.text_wrap_rect[3] /
+                                      self.text_box_layout.layout_rect.height)
+                if percentage_visible >= 1.0:
+                    self.scroll_bar.kill()
+                    self.scroll_bar = None
+                    height_adjustment = 0
+                else:
+                    self.scroll_bar.set_visible_percentage(percentage_visible)
+            else:
+                height_adjustment = 0
+            drawable_area_size = (max(1, (self.rect[2] -
+                                          (self.padding[0] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))),
+                                  max(1, (self.rect[3] -
+                                          (self.padding[1] * 2) -
+                                          (self.border_width * 2) -
+                                          (self.shadow_width * 2) -
+                                          (2 * self.rounded_corner_offset))))
+            drawable_area = pygame.Rect((0, height_adjustment),
+                                        drawable_area_size)
+            new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
+            new_image.fill(pygame.Color(0, 0, 0, 0))
+            basic_blit(new_image, self.background_surf, (0, 0))
+            basic_blit(new_image, self.text_box_layout.finalised_surface,
+                       (self.padding[0] + self.border_width +
+                        self.shadow_width + self.rounded_corner_offset,
+                        self.padding[1] + self.border_width +
+                        self.shadow_width + self.rounded_corner_offset),
+                       drawable_area)
+            self._set_image(new_image)
 
     def redraw_from_chunks(self):
         """
@@ -864,8 +903,18 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
-        self.appended_text += new_html_str
-        self.parser.feed(self._pre_parse_text(new_html_str))
+        if self.should_html_unescape_input_text:
+            self.appended_text += html.unescape(new_html_str)
+        else:
+            self.appended_text += new_html_str
+        feed_input = self.appended_text
+        if self.plain_text_display_only:
+            # if we are supporting only plain text rendering then we turn html input into text at this point
+            feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
+        # this converts plain text special characters to html just for the parser
+        feed_input = self._pre_parse_text(feed_input)
+
+        self.parser.feed(feed_input)
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
 
@@ -1065,7 +1114,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self.most_specific_combined_id
 
     def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
-        self.html_text = html_text
+        if self.should_html_unescape_input_text:
+            self.html_text = html.unescape(html_text)
+        else:
+            self.html_text = html_text
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
         else:

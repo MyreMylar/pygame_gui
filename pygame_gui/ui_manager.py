@@ -264,6 +264,8 @@ class UIManager(IUIManagerInterface):
         self._update_mouse_position()
         self._handle_hovering(time_delta)
 
+        self.set_text_input_hovered(False)  # reset the text hovered status each loop
+
         self.ui_group.update(time_delta)
 
         # handle mouse cursors
