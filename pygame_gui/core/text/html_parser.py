@@ -230,7 +230,7 @@ class HTMLParser(html.parser.HTMLParser):
 
     def _handle_body_tag(self, attributes, style):
         if 'bgcolor' in attributes:
-            if attributes['bg_colour'] is not None and len(attributes['bgcolor']) > 0:
+            if attributes['bgcolor'] is not None and len(attributes['bgcolor']) > 0:
                 try:
                     if self._is_legal_hex_colour(attributes['bgcolor']):
                         style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])

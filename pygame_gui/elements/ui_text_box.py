@@ -88,7 +88,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  pre_parsing_enabled: bool = True,
                  text_kwargs: Optional[Dict[str, str]] = None,
                  allow_split_dashes: bool = True,
-                 plain_text_display_only: bool = False):
+                 plain_text_display_only: bool = False,
+                 should_html_unescape_input_text: bool = False):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=layer_starting_height,
@@ -101,8 +102,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                parent_element=parent_element,
                                object_id=object_id,
                                element_id='text_box')
-
-        self.html_text = html.unescape(html_text)
+        self.should_html_unescape_input_text = should_html_unescape_input_text
+        if self.should_html_unescape_input_text:
+            self.html_text = html.unescape(html_text)
+        else:
+            self.html_text = html_text
         self.appended_text = ""
         self.text_kwargs = {}
         if text_kwargs is not None:
@@ -899,7 +903,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
-        self.appended_text += html.unescape(new_html_str)
+        if self.should_html_unescape_input_text:
+            self.appended_text += html.unescape(new_html_str)
+        else:
+            self.appended_text += new_html_str
         feed_input = self.appended_text
         if self.plain_text_display_only:
             # if we are supporting only plain text rendering then we turn html input into text at this point
@@ -1107,7 +1114,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self.most_specific_combined_id
 
     def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
-        self.html_text = html.unescape(html_text)
+        if self.should_html_unescape_input_text:
+            self.html_text = html.unescape(html_text)
+        else:
+            self.html_text = html_text
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
         else:

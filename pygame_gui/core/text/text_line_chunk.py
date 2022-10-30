@@ -377,7 +377,7 @@ class TextLineChunkFTFont(TextLayoutRect):
               requested_x: int,
               line_width: int,
               row_start_x: int,
-              allow_split_dashes: bool) -> Union['TextLayoutRect', None]:
+              allow_split_dashes: bool = True) -> Union['TextLayoutRect', None]:
         """
         Try to perform a split operation on this chunk at the requested pixel position.
 

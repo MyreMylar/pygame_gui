@@ -8,6 +8,7 @@ from pathlib import Path
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.core import UIAppearanceTheme, UIWindowStack
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.windows.ui_message_window import UIMessageWindow
 from pygame_gui.elements.ui_window import UIWindow
@@ -340,9 +341,12 @@ class TestUIManager:
         assert manager._active_cursor == pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_HAND)
 
     def test_set_hovering_text(self, _init_pygame, _display_surface_return_none):
-        manager = UIManager((800, 600))
+        class MouselessManager(UIManager):
+            def _update_mouse_position(self):
+                self.mouse_position = (400, 15)
+        manager = MouselessManager((800, 600))
 
-        manager.set_text_input_hovered(True)
+        text_entry = UITextEntryLine(pygame.Rect(0, 0, 800, 30), manager=manager)
 
         manager.update(0.5)
         assert manager._active_cursor == pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)

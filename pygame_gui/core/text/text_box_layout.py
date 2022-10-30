@@ -250,7 +250,7 @@ class TextBoxLayout:
                                            row_start_y=current_row.bottom,
                                            row_index=len(self.layout_rows),
                                            layout=self, line_spacing=self.line_spacing)
-            current_row = prev_row_font
+            current_row.fall_back_font = prev_row_font
 
         # Make the rect span the current row's full width & add it to the row
         test_layout_rect.width = self.layout_rect.width  # TODO: floating rects?

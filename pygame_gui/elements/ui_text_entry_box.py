@@ -34,7 +34,8 @@ class UITextEntryBox(UITextBox):
                          anchors=anchors,
                          visible=visible,
                          allow_split_dashes=False,
-                         plain_text_display_only=True)
+                         plain_text_display_only=True,
+                         should_html_unescape_input_text=True)
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache
