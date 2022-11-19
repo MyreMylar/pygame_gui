@@ -123,8 +123,8 @@ Misc
 
  - "**shape**" - Can be one of 'rectangle', 'rounded_rectangle' or 'ellipse'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
- - "**border_width**" - the width in pixels of the border around the button. Defaults to 0.
- - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 0.
+ - "**border_width**" - the width in pixels of the border around the button. Defaults to 1.
+ - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 2.
  - "**tool_tip_delay**" - time in seconds before a the buttons tool sip (if it has one) will appear. Default is "1.0".
  - "**text_horiz_alignment**" - Set to "left", "right" or "center". Controls the horizontal placement of the button text, if this button has any text. Default is "center".
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the button text, if this button has any text. Default is "center".
