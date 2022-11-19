@@ -192,7 +192,7 @@ UI Layers
 UI Layers start at 0, which represents the lowest level, and progress upwards as they are needed. Things in higher
 layers will be drawn on top of things in lower layers if they overlap.
 
-Most of the time using Pygame GUI you don not have to interact too much with the layer system. UIs don't tend to
+Most of the time using Pygame GUI you do not have to interact too much with the layer system. UIs don't tend to
 be designed with their interactive bits overlapping that often, and when they do they tend to be in windows.
 The main exception is for groups of elements, used for things like, HUDs which may overlap UI elements that appear
 'in' game worlds; such as monster health bars. For these occasions there is the UIPanel element which works as a
