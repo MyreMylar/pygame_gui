@@ -28,6 +28,7 @@ For running the tests you will need:
 
  - pytest
  - pytest-cov
+ - pytest-benchmark
  
  
  All should be pip installable.
