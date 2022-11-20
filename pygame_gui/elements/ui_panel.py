@@ -42,7 +42,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 starting_layer_height: int,
+                 starting_layer_height: int = 1,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
                  element_id: str = 'panel',
