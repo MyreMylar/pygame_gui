@@ -1,6 +1,6 @@
 import warnings
 
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Set
 from pathlib import Path
 
 import pygame
@@ -38,7 +38,7 @@ class UIFileDialog(UIWindow):
                  rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface],
                  window_title: str = 'pygame-gui.file_dialog_title_bar',
-                 allowed_suffixes: set[str] = {""},
+                 allowed_suffixes: Set[str] = {""},
                  initial_file_path: Optional[str] = None,
                  object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
