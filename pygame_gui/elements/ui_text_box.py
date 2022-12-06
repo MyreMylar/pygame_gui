@@ -904,10 +904,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
         if self.should_html_unescape_input_text:
-            self.appended_text += html.unescape(new_html_str)
+            feed_input = html.unescape(new_html_str)
         else:
-            self.appended_text += new_html_str
-        feed_input = self.appended_text
+            feed_input = new_html_str
+        self.appended_text += feed_input
         if self.plain_text_display_only:
             # if we are supporting only plain text rendering then we turn html input into text at this point
             feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
