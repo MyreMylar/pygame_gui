@@ -55,6 +55,7 @@ Right now the list of languages support by default by Pygame GUI elements and wi
  - Portuguese
  - Russian
  - Simplified Chinese
+ - Polish
 
 Though many of the translations may be imperfect as they were largely not handled by native speakers (yet). If you
 would like to improve an existing translation or add a new one the current default translations are
