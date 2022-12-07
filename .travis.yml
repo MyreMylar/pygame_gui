@@ -55,12 +55,6 @@ jobs:
       env: PYGAME_VERSION=2.0.0
 
     - os: linux
-      python: 3.6
-      env: PYGAME_VERSION=2.0.1
-    - os: linux
-      python: 3.6
-      env: PYGAME_VERSION=2.1.0
-    - os: linux
       python: 3.7
       env: PYGAME_VERSION=2.0.1
     - os: linux
