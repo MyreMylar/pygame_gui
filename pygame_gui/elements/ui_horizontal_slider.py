@@ -110,6 +110,11 @@ class UIHorizontalSlider(UIElement):
 
         self.increment = click_increment
 
+        self.normal_image = None
+        self.hovered_image = None
+        self.selected_image = None
+        self.disabled_image = None
+
         self.rebuild_from_changed_theme_data()
 
         sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
@@ -150,7 +155,9 @@ class UIHorizontalSlider(UIElement):
                               'disabled_border': self.disabled_border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius}
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'normal_image': self.normal_image,
+                              'disabled_image': self.disabled_image}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -401,6 +408,9 @@ class UIHorizontalSlider(UIElement):
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
+        if self._set_any_images_from_theme():
+            has_any_changed = True
+
         if self._check_misc_theme_data_changed(attribute_name='shape',
                                                default_value='rectangle',
                                                casting_func=str,
@@ -452,6 +462,38 @@ class UIHorizontalSlider(UIElement):
 
         if has_any_changed:
             self.rebuild()
+
+    def _set_any_images_from_theme(self) -> bool:
+        """
+        Grabs images for this button from the UI theme if any are set.
+
+        :return: True if any of the images have changed since last time they were set.
+
+        """
+
+        changed = False
+        normal_image = None
+        try:
+            normal_image = self.ui_theme.get_image('normal_image', self.combined_element_ids)
+        except LookupError:
+            normal_image = None
+        finally:
+            if normal_image != self.normal_image:
+                self.normal_image = normal_image
+                self.disabled_image = normal_image
+                changed = True
+
+        disabled_image = None
+        try:
+            disabled_image = self.ui_theme.get_image('disabled_image', self.combined_element_ids)
+        except LookupError:
+            disabled_image = self.normal_image
+        finally:
+            if disabled_image != self.disabled_image:
+                self.disabled_image = disabled_image
+                changed = True
+
+        return changed
 
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
