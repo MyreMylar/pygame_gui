@@ -55,6 +55,46 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
+To add on, you don't only have to use hex values if you prefer, you can use different color models like rgb, rgba, hsl, cmy, and shorthand hex values. It's all up to preference
+
+.. code-block:: json
+    :caption: theme.json
+    :linenos:
+    {
+        "defaults":
+        {
+            "colours":
+            {
+                "normal_bg":"#fff", # Shorthand Hex Value 
+                "hovered_bg":"#ffff", # Shorthand Hex Value with Alpha
+                "disabled_bg":"rgb(200, 150, 60)", #rgb value
+                "selected_bg":"rgba(20, 50, 89, 225)", #rgba value
+                "dark_bg":"hsl(30, 0.6, 0.7)", #hsl value
+                "normal_text":"cmy(0.3, 0.5, 0.7)", #cmy value
+                "hovered_text":"#FFFFFF", #capitalization does not matter
+                "selected_text":"#ff22ff",
+                "disabled_text":"RGB(40, 70, 90)",
+                "link_text": "CMY(50%, 30%, 40%)",
+                "link_hover": "cmy(50%, 30%, 0.7)",
+                "link_selected": "#551A8BFF", # Hex value with alpha channel
+                "text_shadow": "#777777",
+                "normal_border": "hsl(40deg, 28%, 87%)",
+            }
+        }
+    }
+
+
+
+The currently supported color models are as follows
+    Hex, RGB, RGBA, HSL, CMY 
+.. tip::
+    Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same)
+    Degree Values can optionally have the "deg" identifier behind them to be more explicit (e.g. 40 and 40deg are the same)
+
+    RGB and RGBA Values are bounded between 0 and 255
+    HSL Values require 1 degree value and 2 percentage values, describing Hue, Saturation, and Luminence(Lightness) respectively
+    CMY requires 3 percentage values
+
 Of course, colours are not just colours - they can also be gradients, which have a very similar syntax. Like so:
 
 .. code-block:: json
@@ -66,7 +106,8 @@ Of course, colours are not just colours - they can also be gradients, which have
         {
             "colours":
             {
-               "normal_bg":"#45494e,#65696e,90"
+               "normal_bg":"#45494e,#65696e,90",
+               "hovered_bg":"rgb(30, 40, 60),#f3f,rgb(50, 60, 70),90deg"
             }
         }
    }
