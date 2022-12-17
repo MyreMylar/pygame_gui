@@ -4,20 +4,24 @@ import os
 import warnings
 
 from contextlib import contextmanager
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Iterable, Optional, Callable
 
 import pygame
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
-from pygame_gui.core.utility import create_resource_path, PackageResource, premul_col
+from pygame_gui.core.utility import create_resource_path, PackageResource
 from pygame_gui.core.utility import ImageResource, SurfaceResource
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
+from pygame_gui._constants import __colourNames__
+from pygame_gui.core.colour_parser import parse_color_or_gradient, get_commas_outside_parentheses
+
+import enum
 
 # First try importlib
 # Then importlib_resources
@@ -28,6 +32,8 @@ except ImportError:
         from importlib_resources import path, read_text
     except ImportError as no_import_lib:
         raise ImportError from no_import_lib
+
+
 
 
 class UIAppearanceTheme(IUIAppearanceThemeInterface):
@@ -862,6 +868,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param element_name: The theming element ID that this data belongs to.
         :param element_theming: The data dictionary from the theming file to load data from.
         """
+
         if element_name not in self.ui_element_colours:
             self.ui_element_colours[element_name] = {}
         colours_dict = element_theming[data_type]
@@ -953,6 +960,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                                       colour_key)
                     self.base_colours[colour_key] = colour
 
+
     @staticmethod
     def _load_colour_or_gradient_from_theme(theme_colours_dictionary: Dict[str, str],
                                             colour_id: str) -> Union[pygame.Color, ColourGradient]:
@@ -962,57 +970,16 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param theme_colours_dictionary: Part of the theming file data relating to colours.
         :param colour_id: The ID of the colour or gradient to load.
         """
-        loaded_colour_or_gradient = None
+        # loaded_colour_or_gradient = None
         string_data = theme_colours_dictionary[colour_id]
-        if ',' in string_data:
-            # expecting some type of gradient description in string data
-            string_data_list = string_data.split(',')
-
-            try:
-                gradient_direction = int(string_data_list[-1])
-            except ValueError:
-                warnings.warn("Invalid gradient: " + string_data +
-                              " for id:" + colour_id + " in theme file")
+        color: Optional[pygame.Color] = parse_color_or_gradient(string_data)
+        if color is None:
+            if get_commas_outside_parentheses(string_data) > 0:
+                warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
             else:
-                if len(string_data_list) == 3:
-                    # two colour gradient
-                    try:
-                        colour_1 = premul_col(pygame.Color(string_data_list[0]))
-                        colour_2 = premul_col(pygame.Color(string_data_list[1]))
-                        loaded_colour_or_gradient = ColourGradient(gradient_direction,
-                                                                   colour_1,
-                                                                   colour_2)
-                    except ValueError:
-                        warnings.warn("Invalid gradient: " + string_data +
-                                      " for id:" + colour_id + " in theme file")
-                elif len(string_data_list) == 4:
-                    # three colour gradient
-                    try:
-                        colour_1 = premul_col(pygame.Color(string_data_list[0]))
-                        colour_2 = premul_col(pygame.Color(string_data_list[1]))
-                        colour_3 = premul_col(pygame.Color(string_data_list[2]))
-                        loaded_colour_or_gradient = ColourGradient(gradient_direction,
-                                                                   colour_1,
-                                                                   colour_2,
-                                                                   colour_3)
-                    except ValueError:
-                        warnings.warn("Invalid gradient: " + string_data +
-                                      " for id:" + colour_id + " in theme file")
-                else:
-                    warnings.warn("Invalid gradient: " + string_data +
-                                  " for id:" + colour_id + " in theme file")
-        else:
-            try:  # expecting a regular hex colour in string data
-                loaded_colour_or_gradient = premul_col(pygame.Color(string_data))
-            except ValueError:
-                warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id +
-                              " invalid in theme file")
-
-        if loaded_colour_or_gradient is None:
-            # if the colour or gradient data is invalid, return a black default colour
-            loaded_colour_or_gradient = pygame.Color("#000000")
-
-        return loaded_colour_or_gradient
+                warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
+            return pygame.Color("#000000")
+        return color
 
     def set_locale(self, locale: str):
         """
