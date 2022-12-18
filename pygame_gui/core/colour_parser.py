@@ -15,7 +15,7 @@ class NumParserType(enum.Flag):
 
 T = TypeVar("T")
 
-# Supported color strings: Hex, RGB, HSL
+# Supported colour strings: Hex, RGB, HSL
 
 def is_num_str(string: str) -> bool:
     try:
@@ -69,13 +69,13 @@ def is_u8_string(strdata: str) -> bool:
 def parse_u8_string(strdata: str) -> int:
     return int(strdata)
 
-ColorValueValidator = Callable[[str], bool]
-ColorValueParser = Callable[[str], T]
-class ColorValueParserData(TypedDict):
-    validator: ColorValueValidator
-    parser: ColorValueParser
+ColourValueValidator = Callable[[str], bool]
+ColourValueParser = Callable[[str], T]
+class ColourValueParserData(TypedDict):
+    validator: ColourValueValidator
+    parser: ColourValueParser
 
-valueParsers: dict[NumParserType, ColorValueParserData] = {
+valueParsers: dict[NumParserType, ColourValueParserData] = {
     NumParserType.PERCENTAGE: { "validator": is_percentage_string, "parser": parse_percentage_string },
     NumParserType.U8: { "validator": is_u8_string, "parser": parse_u8_string },
     NumParserType.DEGREE: { "validator": is_degree_string, "parser": parse_degree_string },
@@ -83,21 +83,21 @@ valueParsers: dict[NumParserType, ColorValueParserData] = {
     NumParserType.INT: { "validator": is_int_str, "parser": lambda string: int(string) }
 } 
 
-colorModelSchemas: dict[str, list[NumParserType]] = {
+colourModelSchemas: dict[str, list[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "rgb": [NumParserType.U8, NumParserType.U8, NumParserType.U8],
     "rgba": [NumParserType.U8, NumParserType.U8, NumParserType.U8, NumParserType.U8],
     "cmy": [NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE]
 }
 
-def validate_color_model(strdata: str, name: str, types: list[NumParserType]) -> bool:
+def validate_colour_model(strdata: str, name: str, types: list[NumParserType]) -> bool:
     if strdata.lower().startswith(f'{name}(') and strdata.endswith(")"):
         componentStrings = [ component.strip() for component in strdata[(len(name) + 1):-1].split(",") ]
         if len(types) == len(componentStrings):
             return all([ valueParsers[types[i]]["validator"](componentStrings[i]) for i in range(len(componentStrings)) ])
     return False
 
-def parse_color_model(strdata: str, name: str, types: list[NumParserType]) -> tuple:
+def parse_colour_model(strdata: str, name: str, types: list[NumParserType]) -> tuple:
     if strdata.lower().startswith(f'{name}(') and strdata.endswith(")"):
         componentStrings = [ component.strip() for component in strdata[(len(name) + 1):-1].split(",") ]
         return [ valueParsers[types[i]]["parser"](componentStrings[i]) for i in range(len(componentStrings)) ]
@@ -111,10 +111,10 @@ def is_valid_hex_string(strdata: str) -> bool:
     return False
 
 def is_valid_rgba_string(strdata: str) -> bool:
-    return validate_color_model(strdata, "rgba", colorModelSchemas["rgba"])
+    return validate_colour_model(strdata, "rgba", colourModelSchemas["rgba"])
 
 def parse_rgba_string(strdata: str) -> pygame.Color:
-    return pygame.Color(*parse_color_model(strdata, "rgba", colorModelSchemas["rgba"]))
+    return pygame.Color(*parse_colour_model(strdata, "rgba", colourModelSchemas["rgba"]))
 
 def expand_shorthand_hex(strdata: str):
     return ("#" + "".join([ ch * 2 for ch in strdata[1:] ]) ).lower()
@@ -125,44 +125,44 @@ def parse_hex_string(strdata: str) -> pygame.Color:
     return pygame.Color(strdata.lower())
     
 def is_valid_cmy_string(strdata: str) -> bool:
-    return validate_color_model(strdata, "cmy", colorModelSchemas["cmy"])
+    return validate_colour_model(strdata, "cmy", colourModelSchemas["cmy"])
 
 def parse_cmy_string(strdata: str) -> pygame.Color:
-    color = pygame.Color(0, 0, 0)
-    color.cmy = parse_color_model(strdata, "cmy", colorModelSchemas["cmy"]) 
-    return color
+    colour = pygame.Color(0, 0, 0)
+    colour.cmy = parse_colour_model(strdata, "cmy", colourModelSchemas["cmy"]) 
+    return colour
 
 def is_valid_hsl_string(strdata: str) -> bool:
-    return validate_color_model(strdata, "hsl", colorModelSchemas["hsl"])
+    return validate_colour_model(strdata, "hsl", colourModelSchemas["hsl"])
 
 def parse_hsl_string(strdata: str) -> pygame.Color:
-    color = pygame.Color(0, 0, 0)
-    hsl = parse_color_model(strdata, "hsl", colorModelSchemas["hsl"]) 
-    color.hsla = (hsl[0], int(hsl[1] * 100), int(hsl[2] * 100), 100)
-    return color
+    colour = pygame.Color(0, 0, 0)
+    hsl = parse_colour_model(strdata, "hsl", colourModelSchemas["hsl"]) 
+    colour.hsla = (hsl[0], int(hsl[1] * 100), int(hsl[2] * 100), 100)
+    return colour
 
 def parse_rgb_string(strdata: str) -> pygame.Color:
-    return pygame.Color(*parse_color_model(strdata, "rgb", colorModelSchemas["rgb"]))
+    return pygame.Color(*parse_colour_model(strdata, "rgb", colourModelSchemas["rgb"]))
 
 def is_valid_rgb_string(strdata: str):
-    return validate_color_model(strdata, "rgb", colorModelSchemas["rgb"])
+    return validate_colour_model(strdata, "rgb", colourModelSchemas["rgb"])
 
-ColorStringValidator = Callable[[str], bool]
-ColorStringParser = Callable[[str], pygame.Color]
-_colorParsers: list[tuple[ColorStringValidator, ColorStringParser]] = [
+ColourStringValidator = Callable[[str], bool]
+ColourStringParser = Callable[[str], pygame.Color]
+_colourParsers: list[tuple[ColourStringValidator, ColourStringParser]] = [
     (is_valid_hex_string, parse_hex_string),
     (is_valid_rgb_string, parse_rgb_string),
     (is_valid_hsl_string, parse_hsl_string),
     (is_valid_cmy_string, parse_cmy_string),
     (is_valid_rgba_string, parse_rgba_string) ]
 
-def is_valid_color_string(strdata: str) -> bool:
-    return strdata in __colourNames__ or any([ validator(strdata) for validator, _ in _colorParsers])
+def is_valid_colour_string(strdata: str) -> bool:
+    return strdata in __colourNames__ or any([ validator(strdata) for validator, _ in _colourParsers])
 
-def parse_color_string(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
+def parse_colour_string(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
     if strdata in __colourNames__:
         return pygame.Color(__colourNames__[strdata])
-    for validator, parser in _colorParsers:
+    for validator, parser in _colourParsers:
         if validator(strdata):
             return parser(strdata)
     return None
@@ -220,11 +220,11 @@ def is_valid_gradient_string(strdata: str) -> bool:
         gradientData = split_string_at_indices(strdata, get_commas_outside_parentheses(strdata))
         if len(gradientData) in validGradientLengths:
             if is_degree_string(gradientData[-1]):
-                    colorStrings = gradientData[:-1]
-                    return all([  is_valid_color_string(color) for color in colorStrings ])
+                    colourStrings = gradientData[:-1]
+                    return all([  is_valid_colour_string(colour) for colour in colourStrings ])
     return False
 
-def parse_color_or_gradient(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
+def parse_colour_or_gradient(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
     warningHeader: str = fr'Invalid gradient "{strdata}": '
     validGradientLengths = [3, 4]
     if may_be_gradient_string(strdata):
@@ -232,18 +232,18 @@ def parse_color_or_gradient(strdata: str) -> Union[pygame.Color, ColourGradient]
         if len(gradientData) in validGradientLengths:
             if is_degree_string(gradientData[-1]):
                 gradient_direction = parse_degree_string(gradientData[-1])
-                colorStrings = gradientData[:-1]
-                if all([  is_valid_color_string(color) for color in colorStrings ]):
-                    colors = [ premul_col(parse_color_string(color)) for color in colorStrings ]
-                    return ColourGradient(gradient_direction, *colors)
+                colourStrings = gradientData[:-1]
+                if all([  is_valid_colour_string(colour) for colour in colourStrings ]):
+                    colours = [ premul_col(parse_colour_string(colour)) for colour in colourStrings ]
+                    return ColourGradient(gradient_direction, *colours)
                 else:
-                    warnings.warn(fr'{warningHeader} Invalid colour strings {[ colorString for colorString in colorStrings if not is_valid_color_string(colorString) ] } in gradient definition')
+                    warnings.warn(fr'{warningHeader} Invalid colour strings {[ colourString for colourString in colourStrings if not is_valid_colour_string(colourString) ] } in gradient definition')
             else:
                 warnings.warn(fr'{warningHeader} Final argument of gradient must be an integer or a degree between the values of 0 and 360, was given a non degree value of {gradientData[-1]}')
         else:
-            warnings.warn(fr'{warningHeader} Too many arguments given to gradient data, must be a comma separated list of either 2 or 3 colors with final value between 0 to 360 to declare the angle of the gradient')
-    elif is_valid_color_string(strdata):
-        return parse_color_string(strdata)
+            warnings.warn(fr'{warningHeader} Too many arguments given to gradient data, must be a comma separated list of either 2 or 3 colours with final value between 0 to 360 to declare the angle of the gradient')
+    elif is_valid_colour_string(strdata):
+        return parse_colour_string(strdata)
     else:
-        warnings.warn(fr'{warningHeader} String data "{strdata}" could not be determined as a gradient string nor a color string')
+        warnings.warn(fr'{warningHeader} String data "{strdata}" could not be determined as a gradient string nor a colour string')
     return None
