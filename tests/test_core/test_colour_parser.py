@@ -1,6 +1,6 @@
 import pytest
 import pygame
-from pygame_gui.core.colour_parser import parse_colour_or_gradient_string, is_valid_colour_string, is_valid_gradient_string
+from pygame_gui.core.colour_parser import parse_degree_string, is_u8_string, is_degree_string, is_percentage_string, parse_colour_or_gradient_string, is_valid_colour_string, is_valid_gradient_string
 
 
 class TestColourParsing:
@@ -144,6 +144,36 @@ class TestColourParsing:
 
     def test_rgb_floats(self, _init_pygame):
         assert is_valid_colour_string("rgb(3.5, 70, 100)") is False
+
+    def test_is_u8_above_range(self, _init_pygame):
+        assert is_u8_string("257") is False
+
+    def test_is_u8_below_range(self, _init_pygame):
+        assert is_u8_string("-2") is False
+
+    def test_is_u8_on_bounds(self, _init_pygame):
+        assert is_u8_string("0") is True and is_u8_string("255") is True and is_u8_string("-1") is False and is_u8_string("257") is False
+
+    def test_u8_float(self, _init_pygame):
+        assert is_u8_string("4.3") is False
+
+    def test_degree_on_bounds(self, _init_pygame):
+        assert is_degree_string("0") is True and is_degree_string("360") is True and is_degree_string("-1") is False and is_degree_string("361") is False
+
+    def test_degree_unit(self, _init_pygame):
+        assert is_degree_string("40deg") is True
+    
+    def test_degree_only_unit(self, _init_pygame):
+        assert is_degree_string("deg") is False
+    
+    def test_percentage_only_sign(self, _init_pygame):
+        assert is_percentage_string("%") is False
+
+    def test_percentage_float_and_sign(self, _init_pygame):
+        assert is_percentage_string("37.5%") is False
+
+    def test_degree_unit_optionality(self, _init_pygame):
+        assert parse_degree_string("40") == parse_degree_string("40deg")
 
 
 
