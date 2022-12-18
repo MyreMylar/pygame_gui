@@ -1,11 +1,11 @@
 import pytest
 import pygame
-from pygame_gui.core.colour_parser import parse_colour_or_gradient, is_valid_colour_string, is_valid_gradient_string
+from pygame_gui.core.colour_parser import parse_colour_or_gradient_string, is_valid_colour_string, is_valid_gradient_string
 
 
 class TestColourParsing:
     def test_rgb(self, _init_pygame):
-        assert parse_colour_or_gradient("rgb(20, 30, 50)") == pygame.Color(20, 30, 50)
+        assert parse_colour_or_gradient_string("rgb(20, 30, 50)") == pygame.Color(20, 30, 50)
 
     def test_rgb_out_of_range(self, _init_pygame):
         assert is_valid_colour_string("rgb(-20, 30, 50") is False
@@ -95,10 +95,10 @@ class TestColourParsing:
         assert is_valid_colour_string("#222,#ccc,45deg,") is False
 
     def test_hex_shorthand_alpha_parsing(self, _init_pygame):
-        assert (parse_colour_or_gradient("#ffff") == pygame.Color(255, 255, 255, 255)) is True
+        assert (parse_colour_or_gradient_string("#ffff") == pygame.Color(255, 255, 255, 255)) is True
 
     def test_hex_shorthand_parsing(self, _init_pygame):
-        assert (parse_colour_or_gradient("#fff") == pygame.Color(255, 255, 255)) is True
+        assert (parse_colour_or_gradient_string("#fff") == pygame.Color(255, 255, 255)) is True
 
     def test_rgba_validity(self, _init_pygame):
         assert is_valid_colour_string("rgba(0, 20, 40, 30)") is True
@@ -115,7 +115,35 @@ class TestColourParsing:
     def test_reversed_parentheses_gradient(self, _init_pygame):
         assert is_valid_gradient_string("rgb)0, 40, 50(,#fff,40") is False
 
-    
+    def test_hsv_string(self, _init_pygame):
+        assert is_valid_colour_string("hsv(30deg, 0.4, 40%)") is True
+
+    def test_hsva_string(self, _init_pygame):
+        assert is_valid_colour_string("hsva(40, 40%, 20%, 70%)") is True
+
+    def test_hsva_string(self, _init_pygame):
+        assert is_valid_colour_string("hsla(160deg, 72%, 25%, 32%)") is True
+
+    def test_space_separated(self, _init_pygame):
+        assert is_valid_colour_string("rgb(20 20 20)") is False
+
+    def test_space_and_comma_separated(self, _init_pygame):
+        assert is_valid_colour_string("rgb(20, 20 20") is False
+
+    def test_spaces_in_gradient(self, _init_pygame):
+        assert is_valid_gradient_string("#f2f, hsv(30, 0.5, 0.8), 50deg") is True
+
+    def test_whitespace_at_start(self, _init_pygame):
+        assert is_valid_colour_string("   rgb(20, 50, 80)") is False
+
+    def test_whitespace_at_end(self, _init_pygame):
+        assert is_valid_colour_string("rgb(20, 50, 80)    ") is False
+
+    def test_whitespace_on_ends(self, _init_pygame):
+        assert is_valid_colour_string("   rgb(20, 50, 80)    ") is False
+
+    def test_rgb_floats(self, _init_pygame):
+        assert is_valid_colour_string("rgb(3.5, 70, 100)") is False
 
 
 

@@ -110,14 +110,14 @@ within the colours block you can start to set individual colours by their IDs. I
       - cmy(.3, .5, .7)
       - Cyan, Magneta, Yellow
 
-.. note:: **Do I really need to memorize colour values just to get a colour?**
+.. note:: **Do I really need to memorize colour values just to get a colour? That's such a hassle**
     
     | We hear you, anything besides simple primary colors and values are pretty difficult to remember
     |
     | For that reason, colour names like "yellow", "purple", "pink",  etc... are supported as well ( Based on the CSS Color values found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_ ) 
-    | These colour names are not case sensitive either, as a little plus
+    | as a little plus, these colour names are not case sensitive, so don't worry about that
     | 
-    | If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ is a great way to find which color value to use and paste in your theme file
+    | If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ is a great way to choose a color value to use and paste in your theme file
 
 .. code-block:: json
     :caption: theme.json with different color expressions
@@ -152,7 +152,7 @@ within the colours block you can start to set individual colours by their IDs. I
 
     - Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same, and you must include the "%" sign when using percentages)
     - Degree Values can optionally have the "deg" identifier behind them to be more explicit (e.g. 40 and 40deg are the same)
-    - In shorthand hex values like #fff and #ffff, each value represents itself repeated twice. for example: #123 == #112233 and #1234 == #11223344
+    - In shorthand hex values like #fff and #ffff, each value represents itself twice. for example: #123 == #112233 and #1234 == #11223344
     - Color Model names are **not** case sensitive, you can write RGB, rGb, or whatever, it will not affect the validity of the color string
     - Hex values are also **not** case sensitive, #FFF and #fff are exactly the same
 
