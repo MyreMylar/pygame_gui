@@ -535,7 +535,7 @@ def parse_colour_string(strdata: str) -> Optional[pygame.Color]:
     
     :param strdata: The string to parse into a Colour
     :type strdata: str 
-    :return: A Pygame Color Object from the colour data parsed from strdata
+    :return: A Pygame Color Object from the colour data parsed from strdata or None if the strdata is an invalid colour string
     :rtype: pygame.Color or None
     """
 
@@ -650,6 +650,18 @@ def split_string_at_indices(strdata: str, indices: Iterable[int]) -> list[str]:
     return splits
 
 def is_valid_gradient_string(strdata: str) -> bool:
+    """Validate a gradient string
+        A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid colour strings and the last value representing a degree angle for the direction of the gradient
+        Examples:
+            - "red,blue,40deg"
+            - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
+
+    :param strdata: the gradient string to validate
+    :type strdata: str
+    :returns: A boolean indicating whether the gradient string is valid or not
+    :rtype: bool
+    """
+
     if may_be_gradient_string(strdata):
         gradientData = [ dataComponent.strip() for dataComponent in split_string_at_indices(strdata, get_commas_outside_enclosing_glyphs(strdata)) ]
         if is_degree_string(gradientData[-1]):
@@ -658,6 +670,18 @@ def is_valid_gradient_string(strdata: str) -> bool:
     return False
 
 def parse_gradient_string(strdata: str) -> Optional[ColourGradient]:
+    """Parse a gradient string
+        A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid colour strings and the last value representing a degree angle for the direction of the gradient
+        Examples:
+            - "red,blue,40deg"
+            - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
+
+    :param strdata: the gradient string to validate
+    :type strdata: str
+    :returns: A ColourGradient object if strdata is a valid gradient string, otherwise None
+    :rtype: bool or None
+    """
+
     if is_valid_gradient_string(strdata):
         gradientData = [ dataComponent.strip() for dataComponent in split_string_at_indices(strdata, get_commas_outside_enclosing_glyphs(strdata)) ]
         gradient_direction = parse_degree_string(gradientData[-1])
