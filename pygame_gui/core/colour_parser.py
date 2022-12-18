@@ -167,6 +167,17 @@ def parse_color_string(strdata: str) -> Union[pygame.Color, ColourGradient] | No
             return parser(strdata)
     return None
 
+def has_unclosed_parentheses(strdata: str):
+    unclosedParenteses = 0
+    for ch in strdata:
+        if ch == "(":
+            unclosedParenteses += 1
+        elif ch == ")":
+            unclosedParenteses -= 1
+        if unclosedParenteses < 0:
+            return True
+    return unclosedParenteses == 0
+
 def may_be_gradient_string(strdata: str) -> bool:
     unclosedParentheses = 0
     commasOutsideParentheses = 0
