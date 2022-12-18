@@ -108,6 +108,12 @@ class TestColourParsing:
 
     def test_rgb_too_little_components(self, _init_pygame):
         assert is_valid_color_string("rgb(0, 30)") is False
+
+    def test_reversed_parentheses(self, _init_pygame):
+        assert is_valid_color_string("rgb)0, 40, 50(") is False
+
+    def test_reversed_parentheses_gradient(self, _init_pygame):
+        assert is_valid_gradient_string("rgb)0, 40, 50(,#fff,40") is False
     
 
 

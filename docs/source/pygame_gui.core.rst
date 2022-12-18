@@ -20,6 +20,14 @@ pygame\_gui.core.colour\_gradient module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.core.colour\_parser module
+----------------------------------------
+
+.. automodule:: pygame_gui.core.colour_parser
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.core.surface\_cache module
 --------------------------------------
 
