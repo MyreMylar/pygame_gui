@@ -20,7 +20,7 @@ from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
 from pygame_gui._constants import __colourNames__
-from pygame_gui.core.colour_parser import parse_color_or_gradient, get_commas_outside_parentheses
+from pygame_gui.core.colour_parser import parse_colour_or_gradient, get_commas_outside_parentheses
 
 import enum
 
@@ -974,14 +974,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         # loaded_colour_or_gradient = None
         string_data = theme_colours_dictionary[colour_id]
-        color: Optional[pygame.Color] = parse_color_or_gradient(string_data)
-        if color is None:
+        colour: Optional[pygame.Color] = parse_colour_or_gradient(string_data)
+        if colour is None:
             if get_commas_outside_parentheses(string_data) > 0:
                 warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
             else:
                 warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
             return pygame.Color("#000000")
-        return color
+        return colour
 
     def set_locale(self, locale: str):
         """

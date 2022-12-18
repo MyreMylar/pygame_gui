@@ -55,7 +55,7 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
-To add on, you don't only have to use hex values if you prefer, you can use different color models like rgb, rgba, hsl, cmy, and shorthand hex values. It's all up to preference
+To add on, you don't only have to use hex values if you prefer, you can use different colour models like rgb, rgba, hsl, cmy, and shorthand hex values. It's all up to preference
 
 .. code-block:: json
     :caption: theme.json
@@ -85,7 +85,7 @@ To add on, you don't only have to use hex values if you prefer, you can use diff
 
 
 
-The currently supported color models are as follows
+The currently supported colour models are as follows
     Hex, RGB, RGBA, HSL, CMY 
 .. tip::
     Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same)
