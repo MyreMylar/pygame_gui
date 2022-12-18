@@ -972,9 +972,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         # loaded_colour_or_gradient = None
         string_data = theme_colours_dictionary[colour_id]
-        colour: Optional[pygame.Color] = parse_colour_or_gradient(string_data)
+        colour: Optional[Union[pygame.Color, ColourGradient]] = parse_colour_or_gradient(string_data)
         if colour is None:
-            if get_commas_outside_parentheses(string_data) > 0:
+            if len(get_commas_outside_parentheses(string_data)) > 0:
                 warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
             else:
                 warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")

@@ -1,5 +1,5 @@
 import pygame
-from typing import Callable, Union, Iterable, TypeVar, TypedDict, NamedTuple
+from typing import Callable, Union, Iterable, TypeVar, TypedDict, Optional, Type
 import enum
 import warnings
 from pygame_gui.core.colour_gradient import ColourGradient
@@ -16,6 +16,16 @@ class NumParserType(enum.Flag):
 T = TypeVar("T")
 
 # Supported colour strings: Hex, RGB, HSL
+
+class WarningCollector():
+    def __init__(self):
+        self._warnings: dict[Type[Warning], list[str]] = []
+
+    def warn(self):
+        for type, messages in self._warnings.items():
+            for message in messages:
+                warnings.warn(message, type)
+
 
 def is_num_str(string: str) -> bool:
     try:
@@ -85,9 +95,12 @@ valueParsers: dict[NumParserType, ColourValueParserData] = {
 
 colourModelSchemas: dict[str, list[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "hsla": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "hsv": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "hsva": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "rgb": [NumParserType.U8, NumParserType.U8, NumParserType.U8],
     "rgba": [NumParserType.U8, NumParserType.U8, NumParserType.U8, NumParserType.U8],
-    "cmy": [NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE]
+    "cmy": [NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
 }
 
 def validate_colour_model(strdata: str, name: str, types: list[NumParserType]) -> bool:
@@ -141,6 +154,34 @@ def parse_hsl_string(strdata: str) -> pygame.Color:
     colour.hsla = (hsl[0], int(hsl[1] * 100), int(hsl[2] * 100), 100)
     return colour
 
+def is_valid_hsla_string(strdata: str) -> bool:
+    return validate_colour_model(strdata, "hsla", colourModelSchemas["hsla"])
+
+def parse_hsla_string(strdata: str) -> pygame.Color:
+    colour = pygame.Color(0, 0, 0)
+    hsla = parse_colour_model(strdata, "hsla", colourModelSchemas["hsla"]) 
+    colour.hsla = (hsla[0], int(hsla[1] * 100), int(hsla[2] * 100), int(hsla[3] * 100))
+    return colour
+
+def is_valid_hsv_string(strdata: str) -> bool:
+    return validate_colour_model(strdata, "hsv", colourModelSchemas["hsv"])
+
+def parse_hsv_string(strdata: str) -> pygame.Color:
+    colour = pygame.Color(0, 0, 0)
+    hsv = parse_colour_model(strdata, "hsv", colourModelSchemas["hsv"]) 
+    colour.hsva = (hsv[0], int(hsv[1] * 100), int(hsv[2] * 100), 100)
+    return colour
+
+def parse_hsva_string(strdata: str) -> pygame.Color:
+    colour = pygame.Color(0, 0, 0)
+    hsva = parse_colour_model(strdata, "hsva", colourModelSchemas["hsva"]) 
+    colour.hsva = (hsva[0], int(hsva[1] * 100), int(hsva[2] * 100), int(hsva[3] * 100))
+    return colour
+
+def is_valid_hsva_string(strdata: str) -> bool:
+    return validate_colour_model(strdata, "hsva", colourModelSchemas["hsva"])
+
+
 def parse_rgb_string(strdata: str) -> pygame.Color:
     return pygame.Color(*parse_colour_model(strdata, "rgb", colourModelSchemas["rgb"]))
 
@@ -154,13 +195,16 @@ _colourParsers: list[tuple[ColourStringValidator, ColourStringParser]] = [
     (is_valid_rgb_string, parse_rgb_string),
     (is_valid_hsl_string, parse_hsl_string),
     (is_valid_cmy_string, parse_cmy_string),
-    (is_valid_rgba_string, parse_rgba_string) ]
+    (is_valid_rgba_string, parse_rgba_string),
+    (is_valid_hsla_string, parse_hsla_string),
+    (is_valid_hsv_string, parse_hsv_string),
+    (is_valid_hsva_string, parse_hsva_string) ]
 
 def is_valid_colour_string(strdata: str) -> bool:
-    return strdata in __colourNames__ or any([ validator(strdata) for validator, _ in _colourParsers])
+    return strdata.lower() in __colourNames__ or any([ validator(strdata) for validator, _ in _colourParsers])
 
 def parse_colour_string(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
-    if strdata in __colourNames__:
+    if strdata.lower() in __colourNames__:
         return pygame.Color(__colourNames__[strdata])
     for validator, parser in _colourParsers:
         if validator(strdata):
@@ -168,7 +212,7 @@ def parse_colour_string(strdata: str) -> Union[pygame.Color, ColourGradient] | N
     return None
 
 def has_unclosed_parentheses(strdata: str):
-    unclosedParenteses = 0
+    unclosedParenteses: int = 0
     for ch in strdata:
         if ch == "(":
             unclosedParenteses += 1
@@ -224,7 +268,7 @@ def is_valid_gradient_string(strdata: str) -> bool:
                     return all([  is_valid_colour_string(colour) for colour in colourStrings ])
     return False
 
-def parse_colour_or_gradient(strdata: str) -> Union[pygame.Color, ColourGradient] | None:
+def parse_colour_or_gradient(strdata: str) -> Optional[Union[pygame.Color, ColourGradient]]:
     warningHeader: str = fr'Invalid gradient "{strdata}": '
     validGradientLengths = [3, 4]
     if may_be_gradient_string(strdata):
