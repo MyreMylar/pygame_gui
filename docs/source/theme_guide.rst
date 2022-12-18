@@ -55,45 +55,109 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
-To add on, you don't only have to use hex values if you prefer, you can use different colour models like rgb, rgba, hsl, cmy, and shorthand hex values. It's all up to preference
+| To add on, you don't only have to use hex values if you prefer, but you also can use the different supported color model syntax. It's all up to preference
+| 
+
+.. list-table:: Supported Colour models
+    :widths: 10 10 40 40 
+
+    * - Name
+      - Accepted Value Types
+      - Example
+      - Notes
+    * - Hex
+      - 6 Hexidecimal Digits
+      - #A2F3BB
+      - Native Pygame Color
+    * - Hex (With Alpha)
+      - 8 Hexidecimal Digits
+      - #A2F3BBFF
+      - Native Pygame Color
+    * - Shorthand Hex
+      - 3 Hexidecimal Digits
+      - #FAB
+      - Expands doubly (e.g. would be #FFAABB)
+    * - Shorthand Hex (With Alpha)
+      - 4 Hexidecimal Digits
+      - #AF2F
+      - Expands doubly (e.g. would be #AAFF22FF)
+    * - RGB
+      - 3 numbers between 0 and 255
+      - rgb(20, 230, 43)
+      - Red, Green, Blue
+    * - RGBA
+      - 4 numbers between 0 and 255
+      - rgba(20, 230, 43, 255)
+      - Red, Green, Blue, Alpha
+    * - HSL
+      - Degree, 2 Percentage Values
+      - hsl(30deg, 40%, .5)
+      - Hue, Saturation, Luminence
+    * - HSLA
+      - Degree, 3 Percentage Values
+      - hsla(10deg, 40%, .5, 0.7)
+      - Hue, Saturation, Luminence, Alpha
+    * - HSV
+      - Degree, 2 Percentage Values
+      - hsv(60deg, 40%, 12%)
+      - Hue, Saturation, Value
+    * - HSVA
+      - Degree, 3 Percentage Values
+      - hsva(20deg, 40%, .5, 70%)
+      - Hue, Saturation, Value, Alpha
+    * - CMY
+      - 3 percentage values
+      - cmy(.3, .5, .7)
+      - Cyan, Magneta, Yellow
+
+.. note:: **Do I really need to memorize colour values just to get a colour?**
+    
+    | We hear you, anything besides simple primary colors and values are pretty difficult to remember
+    |
+    | For that reason, colour names like "yellow", "purple", "pink",  etc... are supported as well ( Based on the CSS Color values found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_ ) 
+    | These colour names are not case sensitive either, as a little plus
+    | 
+    | If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ is a great way to find which color value to use and paste in your theme file
 
 .. code-block:: json
-    :caption: theme.json
+    :caption: theme.json with different color expressions
     :linenos:
+
     {
         "defaults":
         {
             "colours":
             {
-                "normal_bg":"#fff", # Shorthand Hex Value 
-                "hovered_bg":"#ffff", # Shorthand Hex Value with Alpha
-                "disabled_bg":"rgb(200, 150, 60)", #rgb value
-                "selected_bg":"rgba(20, 50, 89, 225)", #rgba value
-                "dark_bg":"hsl(30, 0.6, 0.7)", #hsl value
-                "normal_text":"cmy(0.3, 0.5, 0.7)", #cmy value
-                "hovered_text":"#FFFFFF", #capitalization does not matter
-                "selected_text":"#ff22ff",
-                "disabled_text":"RGB(40, 70, 90)",
-                "link_text": "CMY(50%, 30%, 40%)",
+                "normal_bg": "#f2f",
+                "hovered_bg": "#ff7a",
+                "disabled_bg": "rgb(200, 150, 60)",
+                "selected_bg": "rgba(20, 50, 89, 225)",
+                "dark_bg": "hsl(30, 0.6, 0.7)",
+                "normal_text": "hsla(3deg, 0.5, 0.7, 90%)",
+                "hovered_text": "#FFFFFF",
+                "selected_text": "purple",
+                "disabled_text": "RGB(40, 70, 90)",
+                "link_text": "HSV(50deg, 30%, 40%)",
                 "link_hover": "cmy(50%, 30%, 0.7)",
-                "link_selected": "#551A8BFF", # Hex value with alpha channel
-                "text_shadow": "#777777",
-                "normal_border": "hsl(40deg, 28%, 87%)",
+                "link_selected": "teal",
+                "text_shadow": "skyblue",
+                "normal_border": "gold",
             }
         }
     }
 
 
 
-The currently supported colour models are as follows
-    Hex, RGB, RGBA, HSL, CMY 
-.. tip::
-    Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same)
-    Degree Values can optionally have the "deg" identifier behind them to be more explicit (e.g. 40 and 40deg are the same)
+.. note:: Colour Semantics
 
-    RGB and RGBA Values are bounded between 0 and 255
-    HSL Values require 1 degree value and 2 percentage values, describing Hue, Saturation, and Luminence(Lightness) respectively
-    CMY requires 3 percentage values
+    - Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same, and you must include the "%" sign when using percentages)
+    - Degree Values can optionally have the "deg" identifier behind them to be more explicit (e.g. 40 and 40deg are the same)
+    - In shorthand hex values like #fff and #ffff, each value represents itself repeated twice. for example: #123 == #112233 and #1234 == #11223344
+    - Color Model names are **not** case sensitive, you can write RGB, rGb, or whatever, it will not affect the validity of the color string
+    - Hex values are also **not** case sensitive, #FFF and #fff are exactly the same
+
+    
+
 
 Of course, colours are not just colours - they can also be gradients, which have a very similar syntax. Like so:
 

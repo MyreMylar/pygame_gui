@@ -1,6 +1,8 @@
 import pytest
 
 from pygame_gui import UITextEffectType
+from pygame_gui.core.colour_parser import is_valid_colour_string
+from pygame_gui._constants import __colourNames__
 
 
 class TestConstants:
@@ -21,3 +23,15 @@ class TestConstants:
 
         with pytest.raises(AttributeError):
             text_effect_type + 5
+        
+    def test_colours(self):
+        invalidColoursFound: tuple[str, str] = {}
+        for colourName, colourValue in __colourNames__.items():
+            if not is_valid_colour_string(colourValue):
+                invalidColoursFound[colourName] = colourValue
+
+        if len(invalidColoursFound) > 0:
+            pytest.fail(f'Found Invalid Colour Name Pairs: { invalidColoursFound  }')
+        assert len(invalidColoursFound) == 0
+            
+
