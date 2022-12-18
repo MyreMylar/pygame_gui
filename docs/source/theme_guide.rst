@@ -110,6 +110,35 @@ within the colours block you can start to set individual colours by their IDs. I
       - cmy(.3, .5, .7)
       - Cyan, Magneta, Yellow
 
+.. list-table:: Value Types
+    :widths: 10 40 20 20 20
+
+    * - Name
+      - Description   
+      - Examples
+      - Invalid Examples
+      - Used In
+    * - Degree
+      - An Integer Value Bounded from 0 to 360
+            * Can optionally have the "deg" unit appended to the end
+      - 270, 30deg, 45deg 
+      - 37.5, 32.8deg, -15deg, -22
+      - HSL, HSLA, HSV, HSVA
+    * - Percentage
+      - Can accept data in two formats:
+            * A float value bounded from 0 to 1
+            * A percentage value with an integer value bounded from 0 to 100
+      - 40%, 0.67, 27%
+      - 0.4%, 2, 200%
+      - HSL, HSLA, HSV, HSVA, CMY
+    * - U8
+      - An integer value bounded from 0 to 255
+      - 12, 55, 154, 243, 255, 0
+      - 12.4, -23, -27.4, 20.0
+      - RGB, RGBA
+
+
+
 .. note:: **Do I really need to memorize colour values just to get a colour? That's such a hassle**
     
     | We hear you, anything besides simple primary colors and values are pretty difficult to remember
@@ -120,7 +149,7 @@ within the colours block you can start to set individual colours by their IDs. I
     | If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ is a great way to choose a color value to use and paste in your theme file
 
 .. code-block:: json
-    :caption: theme.json with different color expressions
+    :caption: theme.json with different valid colour expressions
     :linenos:
 
     {
@@ -148,10 +177,8 @@ within the colours block you can start to set individual colours by their IDs. I
 
 
 
-.. note:: Colour Semantics
+.. note:: Some More Notes About Colours
 
-    - Percentage Values can either be expressed with a decimal number between 0 and 1, or a percentage value between 0 and 100 (e.g. 0.5 or 50% are the same, and you must include the "%" sign when using percentages)
-    - Degree Values can optionally have the "deg" identifier behind them to be more explicit (e.g. 40 and 40deg are the same)
     - In shorthand hex values like #fff and #ffff, each value represents itself twice. for example: #123 == #112233 and #1234 == #11223344
     - Color Model names are **not** case sensitive, you can write RGB, rGb, or whatever, it will not affect the validity of the color string
     - Hex values are also **not** case sensitive, #FFF and #fff are exactly the same
