@@ -116,7 +116,7 @@ __all__ = ['UI_BUTTON_PRESSED',
            'OldType'
            ]
 
-__colourNames__ = {
+_namedColours = {
   "aliceblue": "#f0f8ff",
   "antiquewhite": "#faebd7",
   "aqua": "#00ffff",

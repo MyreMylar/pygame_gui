@@ -1,5 +1,5 @@
 """
-colour_parser.py
+pygame_gui.core.colour_parser.py
 A Functional Based Module for the parsing of Colour Strings in pygame_gui
 
 Use Notes:
@@ -17,12 +17,14 @@ Developer Notes:
         This module works through pairs of validating and parsing functions at the value, colour, and gradient levels
         Hopefully everything should be generic enough that any new colour models or representations can be easily added without much bloat or *magic*
 
-        Parsing A Color:
-            Simply, The parsing of a color is done by simply checking if there is any valid function cashed in the _colourParsers dictionary, then calling the paired parsing function to get its value
-            Therefore, this system should be extremely extensible to add any 2 functions that can validate and parse a developer-determined schema
+        Parsing A Colour:
+            Simply, The parsing of a colour is done by simply checking if there is any valid function cashed in the _colourParsers dictionary, then calling the paired parsing function to get its value
+            Therefore, this system is not conrete at all, and should be extremely extensible to add **any 2 functions that can validate and parse a developer-determined schema** 
 
         Parsing A Gradient:
-            As of now, the gradient parser is implemented in such a way where 
+            As of now, the gradient parser is implemented in such a way where it assumes that all commas outside of an enclosing glyph ( Any comma not inside of a (), [], or {} ) is a separator in a gradient list
+            Generally, if creating new colour string schemas, this will break if there is a new colour which uses commas not enclosed in a glyph. This shouldn't be a problem right now, but it is worth noting as a warning in case of any additions to this parser
+            TL,DR: Dev life will be easier if it is ensured that commas in colour schemas are inside of parentheses, brackets, or curly braces ( like "rgb(20, 20, 20)" )
 """
 
 import pygame
@@ -31,7 +33,7 @@ import enum
 import warnings
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.utility import premul_col
-from pygame_gui._constants import __colourNames__
+from pygame_gui._constants import _namedColours
 
 
 class NumParserType(enum.Enum):
@@ -471,8 +473,9 @@ def is_valid_hsva_string(strdata: str) -> bool:
     return validate_colour_model(strdata, "hsva", _colourModelSchemas["hsva"])
 
 def is_valid_colour_name(strdata: str):
-    """Validate Colour name string to be recognizable by pygame_gui as a valid colour_name
-        As of the writing of these documentations, all colour names defined are from the CSS colours given by all major browsers, which can be found here: https://w3schools.sinsixx.com/css/css_colornames.asp.htm
+    """| Validate Colour name string to be recognizable by pygame_gui as a valid colour_name
+    | As of the writing of these documentations, all colour names defined are from the CSS colours given by all major browsers, which can be found here: https://w3schools.sinsixx.com/css/css_colornames.asp.htm
+    | All colour names are not case-sensitive, so RED, Red, and red all represent the same value
     
     :param strdata: the colour name to validate
     :type strdata: str
@@ -480,11 +483,12 @@ def is_valid_colour_name(strdata: str):
     :rtype: bool
     """
 
-    return strdata.lower() in __colourNames__
+    return strdata.lower() in _namedColours
 
 def parse_colour_name(strdata: str) -> pygame.Color:
-    """Parse Colour name string into its corresponding colour value
-        As of the writing of these documentations, all colour names defined are from the CSS colours given by all major browsers, which can be found here: https://w3schools.sinsixx.com/css/css_colornames.asp.htm
+    """| Parse Colour name string into its corresponding colour value
+    | As of the writing of these documentations, all colour names defined are from the CSS colours given by all major browsers, which can be found here: https://w3schools.sinsixx.com/css/css_colornames.asp.htm
+    | All colour names are not case-sensitive, so RED, Red, and red all represent the same value
 
     :param strdata: The colour name to parse
     :type strdata: str
@@ -493,7 +497,7 @@ def parse_colour_name(strdata: str) -> pygame.Color:
     :raises KeyError: If the colour corresponding to the strdata passed in could not be found ( always call is_valid_colour_name first to check )
     """
 
-    return pygame.Color(__colourNames__[strdata.lower()])
+    return pygame.Color(_namedColours[strdata.lower()])
 
 ColourStringValidator = Callable[[str], bool]
 ColourStringParser = Callable[[str], pygame.Color]
@@ -544,7 +548,7 @@ def valid_enclosing_glyphs(strdata: str) -> tuple[bool, list[str]]:
     """Find if each opening parenthesis in a string has a valid closing parenthesis and vice versa
         Developer Notes:
             - Used to determine which top level commas should be used to separate gradients
-            - Used with the assumption that color values themselves do not have glyphs that are left opened
+            - Used with the assumption that colour values themselves do not have glyphs that are left opened
     
     :param strdata: the string to check
     :type strdata: str
@@ -574,7 +578,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> list[int]:
     """In the colour_parser module, This function is used to determine where to split gradient strings in order to get the full list of colours and the final degrees
         Developer Notes: 
             - Used to determine which top level commas should be used to separate gradients
-            - Used with the assumption that color values themselves do not have glyphs that are left opened
+            - Used with the assumption that colour values themselves do not have glyphs that are left opened
             - Used with the assumption that top level commas used to separate gradients are not within any sort of enclosing glyph
             - An **enclosing glyph** is like a parentheses, bracket, curly brace, or something of the sort
 

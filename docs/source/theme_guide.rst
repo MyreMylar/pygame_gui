@@ -1,3 +1,4 @@
+
 .. _theme-guide:
 
 Theme Guide
@@ -55,59 +56,97 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
-| To add on, you don't only have to use hex values if you prefer, but you also can use the different supported color model syntax. It's all up to preference
-| 
+| To add on, you don't only have to use hex values if you prefer, but you also can use the different supported colour syntax. It's all up to preference
 
-.. list-table:: Supported Colour models
+.. raw:: html
+
+    <style>
+      .red {color:red}
+      .blue {color:blue}
+      .example-hex { color: #A2F3BB }
+      .example-hex-with-alpha { color: #C2558F9F }
+      .example-shorthand-hex { color: #FAB }
+      .example-shorthand-hex-with-alpha { color: #AF2F }
+      .example-rgb { color: rgb(20, 230, 43) }
+      .example-rgba { color: rgba(60, 30, 97, 1) }
+      .example-hsl { color: hsl(190deg, 40%, 50%) }
+      .example-hsla { color: hsla(10deg, 40%, 50%, 70%) }
+      .example-hsv { color: hsl(282, 79%, 63%) }
+      .example-hsva { color: hsla(20, 25%, 40%, 70%) }
+      .example-cmy { color: #B3804D }
+    </style>
+
+.. role:: red
+.. role:: blue
+.. role:: example-hex
+.. role:: example-hex-with-alpha
+.. role:: example-shorthand-hex
+.. role:: example-shorthand-hex-with-alpha
+.. role:: example-rgb
+.. role:: example-rgba
+.. role:: example-hsl 
+.. role:: example-hsla
+.. role:: example-hsv
+.. role:: example-hsva
+.. role:: example-cmy
+
+
+
+
+.. list-table:: Supported Colour Inputs
     :widths: 10 10 40 40 
 
     * - Name
       - Accepted Value Types
       - Example
       - Notes
+    * - Colour Name (**recommended**)
+      - A valid string representation of a colour
+      - :blue:`blue`
+      - A List of valid colour names can be found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_
     * - Hex
       - 6 Hexidecimal Digits
-      - #A2F3BB
+      - :example-hex:`#A2F3BB`
       - Native Pygame Color
     * - Hex (With Alpha)
       - 8 Hexidecimal Digits
-      - #A2F3BBFF
+      - :example-hex-with-alpha:`#C2558F9F`
       - Native Pygame Color
     * - Shorthand Hex
       - 3 Hexidecimal Digits
-      - #FAB
+      - :example-shorthand-hex:`#FAB`
       - Expands doubly (e.g. would be #FFAABB)
     * - Shorthand Hex (With Alpha)
       - 4 Hexidecimal Digits
-      - #AF2F
+      - :example-shorthand-hex-with-alpha:`#AF2F`
       - Expands doubly (e.g. would be #AAFF22FF)
     * - RGB
       - 3 numbers between 0 and 255
-      - rgb(20, 230, 43)
+      - :example-rgb:`rgb(20, 230, 43)`
       - Red, Green, Blue
     * - RGBA
       - 4 numbers between 0 and 255
-      - rgba(20, 230, 43, 255)
+      - :example-rgba:`rgba(60, 30, 97, 255)`
       - Red, Green, Blue, Alpha
     * - HSL
       - Degree, 2 Percentage Values
-      - hsl(30deg, 40%, .5)
+      - :example-hsl:`hsl(190deg, 40%, .5)`
       - Hue, Saturation, Luminence
     * - HSLA
       - Degree, 3 Percentage Values
-      - hsla(10deg, 40%, .5, 0.7)
+      - :example-hsla:`hsla(10deg, 40%, .5, 0.7)`
       - Hue, Saturation, Luminence, Alpha
     * - HSV
       - Degree, 2 Percentage Values
-      - hsv(60deg, 40%, 12%)
+      - :example-hsv:`hsv(282deg, 63%, 92%)`
       - Hue, Saturation, Value
     * - HSVA
       - Degree, 3 Percentage Values
-      - hsva(20deg, 40%, .5, 70%)
+      - :example-hsva:`hsva(20deg, 40%, .5, 70%)`
       - Hue, Saturation, Value, Alpha
     * - CMY
       - 3 percentage values
-      - cmy(.3, .5, .7)
+      - :example-cmy:`cmy(.3, .5, .7)`
       - Cyan, Magneta, Yellow
 
 .. list-table:: Value Types
@@ -139,14 +178,8 @@ within the colours block you can start to set individual colours by their IDs. I
 
 
 
-.. note:: **Do I really need to memorize colour values just to get a colour? That's such a hassle**
-    
-    | We hear you, anything besides simple primary colors and values are pretty difficult to remember
-    |
-    | For that reason, colour names like "yellow", "purple", "pink",  etc... are supported as well ( Based on the CSS Color values found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_ ) 
-    | as a little plus, these colour names are not case sensitive, so don't worry about that
-    | 
-    | If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ is a great way to choose a color value to use and paste in your theme file
+.. note:: If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ by `QvCool <https://www.qvcool.com/>`_ is a great tool to choose a colour value to use and paste in your theme file
+
 
 .. code-block:: json
     :caption: theme.json with different valid colour expressions
@@ -175,13 +208,12 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
-
-
 .. note:: Some More Notes About Colours
 
-    - In shorthand hex values like #fff and #ffff, each value represents itself twice. for example: #123 == #112233 and #1234 == #11223344
-    - Color Model names are **not** case sensitive, you can write RGB, rGb, or whatever, it will not affect the validity of the color string
-    - Hex values are also **not** case sensitive, #FFF and #fff are exactly the same
+    - In shorthand hex values like **#fff** and **#ffff**, each value represents itself twice. for example: **#123** == **#112233** and **#1234** == **#11223344**
+    - Color Model names are **not** case sensitive, you can write *RGB*, *rGb*, or *Rgb* anyway you like, it will not affect the validity of the colour string
+    - Hex values are also **not** case sensitive, **#FFF** and **#fff** are exactly the same
+    - Colour names are **not** case sensitive, :red:`RED`, :red:`Red`, and :red:`red` are all the same colour
 
     
 
