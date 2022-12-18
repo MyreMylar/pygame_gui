@@ -175,6 +175,12 @@ class TestColourParsing:
     def test_degree_unit_optionality(self, _init_pygame):
         assert parse_degree_string("40") == parse_degree_string("40deg")
 
+    def test_gradient_colour_names(self, _init_pygame):
+        assert is_valid_gradient_string("red,blue,40") is True
+
+    def test_gradient_colour_names_three(self, _init_pygame):
+        assert is_valid_gradient_string("red,green,blue,60deg") is True
+
 
 
 if __name__ == "__main__":
