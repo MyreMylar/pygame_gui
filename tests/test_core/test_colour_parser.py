@@ -148,4 +148,4 @@ class TestColourParsing:
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.console_main()
