@@ -177,6 +177,7 @@ class TestUIHorizontalScrollBar:
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
+    @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
                                                 _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",

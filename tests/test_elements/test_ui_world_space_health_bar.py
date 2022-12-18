@@ -70,6 +70,7 @@ class TestUIWorldSpaceHealthBar:
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
+    @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_world_health_bar_bad_values.json"))
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()

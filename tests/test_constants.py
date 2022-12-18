@@ -2,7 +2,7 @@ import pytest
 
 from pygame_gui import UITextEffectType
 from pygame_gui.core.colour_parser import is_valid_colour_string
-from pygame_gui._constants import __colourNames__
+from pygame_gui._constants import _namedColours
 
 
 class TestConstants:
@@ -25,13 +25,18 @@ class TestConstants:
             text_effect_type + 5
         
     def test_colours(self):
-        invalidColoursFound: tuple[str, str] = {}
-        for colourName, colourValue in __colourNames__.items():
+        """The only real requirement for a colour name is that it is not case sensitive.
+        As convention, the colour name should always be stored as a lower cased string, so that any colour name compared to the string can simply be lowered with .lower() for checking validity
+        """
+        errorMessages: list[str] = []
+        for colourName, colourValue in _namedColours.items():
+            if not colourName == colourName.lower():
+                errorMessages.append(f'Found Invalid Colour Name: {colourName} (must be lowercased)')
             if not is_valid_colour_string(colourValue):
-                invalidColoursFound[colourName] = colourValue
+                errorMessages.append(f'Found Invalid Colour Name Pair: {colourName}, {colourValue}')
 
-        if len(invalidColoursFound) > 0:
-            pytest.fail(f'Found Invalid Colour Name Pairs: { invalidColoursFound  }')
-        assert len(invalidColoursFound) == 0
+        if len(errorMessages) > 0:
+            pytest.fail("\n".join(errorMessages))
+        assert len(errorMessages) == 0
             
 

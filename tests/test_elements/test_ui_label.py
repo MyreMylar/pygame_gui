@@ -110,6 +110,7 @@ class TestUILabel:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Label Rect is too small for text")
+    @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_label_bad_values.json"))

@@ -18,7 +18,7 @@ from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
-from pygame_gui._constants import __colourNames__
+from pygame_gui._constants import _namedColours
 from pygame_gui.core.colour_parser import parse_colour_or_gradient_string, get_commas_outside_enclosing_glyphs
 
 import enum
@@ -980,7 +980,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 if string_data.startswith("#"):
                     warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
                 else:
-                    warnings.warn("Colour: " + string_data + " for id:" + colour_id + " invalid in theme file" )
+                    warnings.warn("Invalid Theme Colour: " + string_data + " for id:" + colour_id + " invalid in theme file" )
             return pygame.Color("#000000")
         return colour
 
