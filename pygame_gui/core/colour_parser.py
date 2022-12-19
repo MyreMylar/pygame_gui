@@ -33,7 +33,7 @@ from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Se
 try:
     from typing import TypedDict
 except ImportError:
-    from typing import Dict as TypedDict
+    from typing_extensions import TypedDict
 import enum
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.utility import premul_col
