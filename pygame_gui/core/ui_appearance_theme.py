@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from typing import Union, List, Dict, Any
 
 import pygame
+import pygame.freetype
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
@@ -22,10 +23,10 @@ from pygame_gui.core.resource_loaders import IResourceLoader
 # First try importlib
 # Then importlib_resources
 try:
-    from importlib.resources import path, read_text
+    from importlib.resources import files, as_file
 except ImportError:
     try:
-        from importlib_resources import path, read_text
+        from importlib_resources import files, as_file
     except ImportError as no_import_lib:
         raise ImportError from no_import_lib
 
@@ -130,8 +131,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         need_to_reload = False
         try:
             if isinstance(self._theme_file_path, PackageResource):
-                with path(self._theme_file_path.package,
-                          self._theme_file_path.resource) as package_file_path:
+                with as_file(files(self._theme_file_path.package) / self._theme_file_path.resource)\
+                        as package_file_path:
                     stamp = os.stat(package_file_path).st_mtime
             else:
                 stamp = os.stat(self._theme_file_path).st_mtime
@@ -644,10 +645,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param file_path: The path to the theme we want to load.
         """
         if isinstance(file_path, PackageResource):
-            used_file_path = io.StringIO(read_text(file_path.package, file_path.resource))
-            self._theme_file_path = file_path
-            with path(file_path.package, file_path.resource) as package_file_path:
-                self._theme_file_last_modified = os.stat(package_file_path).st_mtime
+            with (files(file_path.package) / file_path.resource).open('r', encoding='utf-8', errors='strict') as fp:
+                used_file_path = io.StringIO(fp.read())
+                self._theme_file_path = file_path
+                with as_file(files(file_path.package) / file_path.resource) as package_file_path:
+                    self._theme_file_last_modified = os.stat(package_file_path).st_mtime
 
         elif not isinstance(file_path, io.StringIO):
             self._theme_file_path = create_resource_path(file_path)
@@ -672,8 +674,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 else:
                     load_success = True
 
-                if load_success:
-                    self._parse_theme_data_from_json_dict(theme_dict)
+            if load_success:
+                self._parse_theme_data_from_json_dict(theme_dict)
 
     def _parse_theme_data_from_json_dict(self, theme_dict):
         for element_name in theme_dict.keys():
