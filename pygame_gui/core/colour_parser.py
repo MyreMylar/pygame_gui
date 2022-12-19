@@ -132,7 +132,7 @@ _valueParsers: Dict[NumParserType, ColourValueParserData] = {
 }
 """ A mapping for each NumParserType to its corresponding validator and parser for strings of that type's specification  """
 
-_colourModelSchemas: Dict[str, list[NumParserType]] = {
+_colourModelSchemas: Dict[str, List[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "hsla": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "hsv": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
@@ -144,7 +144,7 @@ _colourModelSchemas: Dict[str, list[NumParserType]] = {
 """Mapping for each supported colour model to the values that they take in"""
 
 
-def validate_colour_model(strdata: str, name: str, types: list[NumParserType]) -> bool:
+def validate_colour_model(strdata: str, name: str, types: List[NumParserType]) -> bool:
     """Use a colour model's name and types (generally denoted by its name in the _colourModelSchemas dictionary) to validate its use
         Developer Notes:
             - This function depends on the validator of each value type being present in the _valueParsers dictionary
@@ -155,7 +155,7 @@ def validate_colour_model(strdata: str, name: str, types: list[NumParserType]) -
     :param name: the name of the colour model
     :type name: str
     :param types: the types of the values in the colour model in order, used to validate each value individually
-    :type types: list[NumParserType]
+    :type types: List[NumParserType]
     :return: A boolean on whether the colour model could find a working validator
     :rtype: bool
     """
@@ -169,7 +169,7 @@ def validate_colour_model(strdata: str, name: str, types: list[NumParserType]) -
     return False
 
 
-def parse_colour_model(strdata: str, name: str, types: list[NumParserType]) -> list[T]:
+def parse_colour_model(strdata: str, name: str, types: List[NumParserType]) -> List[T]:
     """Use a colour model's name and types (generally denoted by its name in the _colourModelSchemas dictionary) to return a tuple of its containing values
         Developer Notes:
             - This function depends on the parser of each value type being present in the _valueParsers dictionary
@@ -181,7 +181,7 @@ def parse_colour_model(strdata: str, name: str, types: list[NumParserType]) -> l
     :param name: the name of the colour model
     :type name: str
     :param types: the types of the values in the colour model in order, used to parse each value individually
-    :type types: list[NumParserType]
+    :type types: List[NumParserType]
     :return: A tuple containing all the parsed values in the colour model
     :rtype: tuple
     :raises ValueError: if the colour model does not meet the standard <name(value, ...)> schema
@@ -543,7 +543,7 @@ def parse_colour_name(strdata: str) -> pygame.Color:
 
 ColourStringValidator = Callable[[str], bool]
 ColourStringParser = Callable[[str], pygame.Color]
-_colourParsers: list[tuple[ColourStringValidator, ColourStringParser]] = [
+_colourParsers: List[Tuple[ColourStringValidator, ColourStringParser]] = [
     (is_valid_colour_name, parse_colour_name),
     (is_valid_hex_string, parse_hex_string),
     (is_valid_rgb_string, parse_rgb_string),
@@ -607,7 +607,7 @@ def valid_enclosing_glyphs(strdata: str) -> bool:
         "}": "{"
     }
 
-    opening_stack: list[str] = []
+    opening_stack: List[str] = []
     for ch in strdata:
         if ch in glyphs.values():
             opening_stack.append(ch)
@@ -620,7 +620,7 @@ def valid_enclosing_glyphs(strdata: str) -> bool:
     return len(opening_stack) == 0
 
 
-def get_commas_outside_enclosing_glyphs(strdata: str) -> list[int]:
+def get_commas_outside_enclosing_glyphs(strdata: str) -> List[int]:
     """In the colour_parser module, This function is used to determine where to split gradient strings in order to get the full list of colours and the final degrees
         Developer Notes:
             - Used to determine which top level commas should be used to separate gradients
@@ -641,7 +641,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> list[int]:
     }
 
     opening_stack = []
-    comma_indices_outside_parentheses: list[int] = []
+    comma_indices_outside_parentheses: List[int] = []
 
     for i in range(len(strdata)):
         ch = strdata[i]
@@ -674,7 +674,7 @@ def may_be_gradient_string(strdata: str) -> bool:
         2, 3]
 
 
-def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tuple[int]]) -> list[str]:
+def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tuple[int]]) -> List[str]:
     """Works similarly to the built-in string split function, where the split data is discarded from the resultant array
         Developer Notes:
             - Used in colour_parser module to split gradient strings into their respective colour and angle components
@@ -684,7 +684,7 @@ def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tu
     :param indices: the indices to split the string at
     :type indices: Iterable[int]
     :return: A list of the split strings after cutting at the specified indices given by the 'indices' parameter
-    :rtype: list[str]
+    :rtype: List[str]
     """
 
     splits = []
