@@ -4,7 +4,7 @@ import os
 import warnings
 
 from contextlib import contextmanager
-from typing import Union, List, Dict, Any, Iterable, Optional, Callable
+from typing import Union, List, Dict, Any, Optional
 
 import pygame
 import pygame.freetype
@@ -19,10 +19,8 @@ from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
-from pygame_gui._constants import _namedColours
 from pygame_gui.core.colour_parser import parse_colour_or_gradient_string, get_commas_outside_enclosing_glyphs
 
-import enum
 
 # First try importlib
 # Then importlib_resources
@@ -33,8 +31,6 @@ except ImportError:
         from importlib_resources import files, as_file
     except ImportError as no_import_lib:
         raise ImportError from no_import_lib
-
-
 
 
 class UIAppearanceTheme(IUIAppearanceThemeInterface):
