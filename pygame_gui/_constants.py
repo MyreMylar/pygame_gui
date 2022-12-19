@@ -83,39 +83,6 @@ TEXT_EFFECT_BOUNCE = UITextEffectType('bounce')
 TEXT_EFFECT_EXPAND_CONTRACT = UITextEffectType('expand_contract')
 TEXT_EFFECT_SHAKE = UITextEffectType('shake')
 
-
-__all__ = ['UI_BUTTON_PRESSED',
-           'UI_BUTTON_START_PRESS',
-           'UI_BUTTON_DOUBLE_CLICKED',
-           'UI_BUTTON_ON_HOVERED',
-           'UI_BUTTON_ON_UNHOVERED',
-           'UI_TEXT_BOX_LINK_CLICKED',
-           'UI_TEXT_ENTRY_CHANGED',
-           'UI_TEXT_ENTRY_FINISHED',
-           'UI_DROP_DOWN_MENU_CHANGED',
-           'UI_HORIZONTAL_SLIDER_MOVED',
-           'UI_SELECTION_LIST_NEW_SELECTION',
-           'UI_SELECTION_LIST_DROPPED_SELECTION',
-           'UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION',
-           'UI_WINDOW_CLOSE',
-           'UI_WINDOW_MOVED_TO_FRONT',
-           'UI_CONFIRMATION_DIALOG_CONFIRMED',
-           'UI_FILE_DIALOG_PATH_PICKED',
-           'UI_COLOUR_PICKER_COLOUR_PICKED',
-           'UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED',
-           'UI_CONSOLE_COMMAND_ENTERED',
-           'UI_TEXT_EFFECT_FINISHED',
-           'TEXT_EFFECT_TYPING_APPEAR',
-           'TEXT_EFFECT_FADE_IN',
-           'TEXT_EFFECT_FADE_OUT',
-           'TEXT_EFFECT_TILT',
-           'TEXT_EFFECT_BOUNCE',
-           'TEXT_EFFECT_EXPAND_CONTRACT',
-           'TEXT_EFFECT_SHAKE',
-           'UITextEffectType',
-           'OldType'
-           ]
-
 _namedColours = {
   "aliceblue": "#f0f8ff",
   "antiquewhite": "#faebd7",
@@ -266,3 +233,36 @@ _namedColours = {
   "yellow": "#ffff00",
   "yellowgreen": "#9acd32"
 }
+
+__all__ = ['UI_BUTTON_PRESSED',
+           'UI_BUTTON_START_PRESS',
+           'UI_BUTTON_DOUBLE_CLICKED',
+           'UI_BUTTON_ON_HOVERED',
+           'UI_BUTTON_ON_UNHOVERED',
+           'UI_TEXT_BOX_LINK_CLICKED',
+           'UI_TEXT_ENTRY_CHANGED',
+           'UI_TEXT_ENTRY_FINISHED',
+           'UI_DROP_DOWN_MENU_CHANGED',
+           'UI_HORIZONTAL_SLIDER_MOVED',
+           'UI_SELECTION_LIST_NEW_SELECTION',
+           'UI_SELECTION_LIST_DROPPED_SELECTION',
+           'UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION',
+           'UI_WINDOW_CLOSE',
+           'UI_WINDOW_MOVED_TO_FRONT',
+           'UI_CONFIRMATION_DIALOG_CONFIRMED',
+           'UI_FILE_DIALOG_PATH_PICKED',
+           'UI_COLOUR_PICKER_COLOUR_PICKED',
+           'UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED',
+           'UI_CONSOLE_COMMAND_ENTERED',
+           'UI_TEXT_EFFECT_FINISHED',
+           'TEXT_EFFECT_TYPING_APPEAR',
+           'TEXT_EFFECT_FADE_IN',
+           'TEXT_EFFECT_FADE_OUT',
+           'TEXT_EFFECT_TILT',
+           'TEXT_EFFECT_BOUNCE',
+           'TEXT_EFFECT_EXPAND_CONTRACT',
+           'TEXT_EFFECT_SHAKE',
+           'UITextEffectType',
+           'OldType',
+           '_namedColours'
+           ]
