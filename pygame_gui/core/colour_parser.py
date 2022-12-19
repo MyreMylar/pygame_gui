@@ -28,7 +28,7 @@ Developer Notes:
 """
 
 import pygame
-from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Set
+from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Set, Dict
 # for Python 3.7 compatibility as TypedDict introduced in 3.8
 try:
     from typing import TypedDict
@@ -123,7 +123,7 @@ class ColourValueParserData(TypedDict):
     parser: ColourValueParser
 
 
-_valueParsers: dict[NumParserType, ColourValueParserData] = {
+_valueParsers: Dict[NumParserType, ColourValueParserData] = {
     NumParserType.PERCENTAGE: {"validator": is_percentage_string, "parser": parse_percentage_string},
     NumParserType.U8: {"validator": is_u8_string, "parser": parse_u8_string},
     NumParserType.DEGREE: {"validator": is_degree_string, "parser": parse_degree_string},
@@ -132,7 +132,7 @@ _valueParsers: dict[NumParserType, ColourValueParserData] = {
 }
 """ A mapping for each NumParserType to its corresponding validator and parser for strings of that type's specification  """
 
-_colourModelSchemas: dict[str, list[NumParserType]] = {
+_colourModelSchemas: Dict[str, list[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "hsla": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "hsv": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
@@ -601,7 +601,7 @@ def valid_enclosing_glyphs(strdata: str) -> bool:
     :rtype: bool
     """
 
-    glyphs: dict[str, str] = {
+    glyphs: Dict[str, str] = {
         ")": "(",
         "]": "[",
         "}": "{"
@@ -634,7 +634,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> list[int]:
     :rtype: list[int]
     """
 
-    glyphs: dict[str, str] = {
+    glyphs: Dict[str, str] = {
         ")": "(",
         "]": "[",
         "}": "{"
