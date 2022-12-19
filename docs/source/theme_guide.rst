@@ -1,3 +1,4 @@
+
 .. _theme-guide:
 
 Theme Guide
@@ -55,6 +56,168 @@ within the colours block you can start to set individual colours by their IDs. I
         }
     }
 
+| To add on, you don't only have to use hex values if you prefer, but you also can use the different supported colour syntax. It's all up to preference
+
+.. raw:: html
+
+    <style>
+      .red {color:red}
+      .blue {color:blue}
+      .example-hex { color: #A2F3BB }
+      .example-hex-with-alpha { color: #C2558F9F }
+      .example-shorthand-hex { color: #FAB }
+      .example-shorthand-hex-with-alpha { color: #AF2F }
+      .example-rgb { color: rgb(20, 230, 43) }
+      .example-rgba { color: rgba(60, 30, 97, 1) }
+      .example-hsl { color: hsl(190deg, 40%, 50%) }
+      .example-hsla { color: hsla(10deg, 40%, 50%, 70%) }
+      .example-hsv { color: hsl(282, 79%, 63%) }
+      .example-hsva { color: hsla(20, 25%, 40%, 70%) }
+      .example-cmy { color: #B3804D }
+    </style>
+
+.. role:: red
+.. role:: blue
+.. role:: example-hex
+.. role:: example-hex-with-alpha
+.. role:: example-shorthand-hex
+.. role:: example-shorthand-hex-with-alpha
+.. role:: example-rgb
+.. role:: example-rgba
+.. role:: example-hsl 
+.. role:: example-hsla
+.. role:: example-hsv
+.. role:: example-hsva
+.. role:: example-cmy
+
+
+
+
+.. list-table:: Supported Colour Inputs
+    :widths: 10 10 40 40 
+
+    * - Name
+      - Accepted Value Types
+      - Example
+      - Notes
+    * - Colour Name (**recommended**)
+      - A valid string representation of a colour
+      - :blue:`blue`
+      - A List of valid colour names can be found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_
+    * - Hex
+      - 6 Hexidecimal Digits
+      - :example-hex:`#A2F3BB`
+      - Native Pygame Color
+    * - Hex (With Alpha)
+      - 8 Hexidecimal Digits
+      - :example-hex-with-alpha:`#C2558F9F`
+      - Native Pygame Color
+    * - Shorthand Hex
+      - 3 Hexidecimal Digits
+      - :example-shorthand-hex:`#FAB`
+      - Expands doubly (e.g. would be #FFAABB)
+    * - Shorthand Hex (With Alpha)
+      - 4 Hexidecimal Digits
+      - :example-shorthand-hex-with-alpha:`#AF2F`
+      - Expands doubly (e.g. would be #AAFF22FF)
+    * - RGB
+      - 3 numbers between 0 and 255
+      - :example-rgb:`rgb(20, 230, 43)`
+      - Red, Green, Blue
+    * - RGBA
+      - 4 numbers between 0 and 255
+      - :example-rgba:`rgba(60, 30, 97, 255)`
+      - Red, Green, Blue, Alpha
+    * - HSL
+      - Degree, 2 Percentage Values
+      - :example-hsl:`hsl(190deg, 40%, .5)`
+      - Hue, Saturation, Luminence
+    * - HSLA
+      - Degree, 3 Percentage Values
+      - :example-hsla:`hsla(10deg, 40%, .5, 0.7)`
+      - Hue, Saturation, Luminence, Alpha
+    * - HSV
+      - Degree, 2 Percentage Values
+      - :example-hsv:`hsv(282deg, 63%, 92%)`
+      - Hue, Saturation, Value
+    * - HSVA
+      - Degree, 3 Percentage Values
+      - :example-hsva:`hsva(20deg, 40%, .5, 70%)`
+      - Hue, Saturation, Value, Alpha
+    * - CMY
+      - 3 percentage values
+      - :example-cmy:`cmy(.3, .5, .7)`
+      - Cyan, Magneta, Yellow
+
+.. list-table:: Value Types
+    :widths: 10 40 20 20 20
+
+    * - Name
+      - Description   
+      - Examples
+      - Invalid Examples
+      - Used In
+    * - Degree
+      - An Integer Value Bounded from 0 to 360
+            * Can optionally have the "deg" unit appended to the end
+      - 270, 30deg, 45deg 
+      - 37.5, 32.8deg, -15deg, -22
+      - HSL, HSLA, HSV, HSVA
+    * - Percentage
+      - Can accept data in two formats:
+            * A float value bounded from 0 to 1
+            * A percentage value with an integer value bounded from 0 to 100
+      - 40%, 0.67, 27%
+      - 0.4%, 2, 200%
+      - HSL, HSLA, HSV, HSVA, CMY
+    * - U8
+      - An integer value bounded from 0 to 255
+      - 12, 55, 154, 243, 255, 0
+      - 12.4, -23, -27.4, 20.0
+      - RGB, RGBA
+
+
+
+.. note:: If you'd like to easily find a custom colour that is not provided, `colorpicker.me <https://www.colorpicker.me>`_ by `QvCool <https://www.qvcool.com/>`_ is a great tool to choose a colour value to use and paste in your theme file
+
+
+.. code-block:: json
+    :caption: theme.json with different valid colour expressions
+    :linenos:
+
+    {
+        "defaults":
+        {
+            "colours":
+            {
+                "normal_bg": "#f2f",
+                "hovered_bg": "#ff7a",
+                "disabled_bg": "rgb(200, 150, 60)",
+                "selected_bg": "rgba(20, 50, 89, 225)",
+                "dark_bg": "hsl(30, 0.6, 0.7)",
+                "normal_text": "hsla(3deg, 0.5, 0.7, 90%)",
+                "hovered_text": "#FFFFFF",
+                "selected_text": "purple",
+                "disabled_text": "RGB(40, 70, 90)",
+                "link_text": "HSV(50deg, 30%, 40%)",
+                "link_hover": "cmy(50%, 30%, 0.7)",
+                "link_selected": "teal",
+                "text_shadow": "skyblue",
+                "normal_border": "gold",
+            }
+        }
+    }
+
+.. note:: Some More Notes About Colours
+
+    - In shorthand hex values like **#fff** and **#ffff**, each value represents itself twice. for example: **#123** == **#112233** and **#1234** == **#11223344**
+    - Color Model names are **not** case sensitive, you can write *RGB*, *rGb*, or *Rgb* anyway you like, it will not affect the validity of the colour string
+    - Hex values are also **not** case sensitive, **#FFF** and **#fff** are exactly the same
+    - Colour names are **not** case sensitive, :red:`RED`, :red:`Red`, and :red:`red` are all the same colour
+
+    
+
+
 Of course, colours are not just colours - they can also be gradients, which have a very similar syntax. Like so:
 
 .. code-block:: json
@@ -66,7 +229,8 @@ Of course, colours are not just colours - they can also be gradients, which have
         {
             "colours":
             {
-               "normal_bg":"#45494e,#65696e,90"
+               "normal_bg":"#45494e,#65696e,90",
+               "hovered_bg":"rgb(30, 40, 60),#f3f,rgb(50, 60, 70),90deg"
             }
         }
    }
