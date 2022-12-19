@@ -656,6 +656,7 @@ class TestUISelectionList:
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid gradient")
     @pytest.mark.filterwarnings("ignore:Unable to load")
+    @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
     def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame,
                                                         _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
