@@ -31,7 +31,8 @@ setup(
       setup_requires=[],
       install_requires=['pygame>=2.0.1',
                         'python-i18n>=0.3.9',
-                        'importlib_resources>1.3; python_version < "3.9"'],
+                        'importlib_resources>1.3; python_version < "3.9"',
+                        'typing-extensions; python_version < "3.8"'],
       include_package_data=True,
       classifiers=[
           'Development Status :: 3 - Alpha',
