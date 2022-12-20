@@ -31,16 +31,23 @@ For running the tests you will need:
  - pytest-benchmark
  
  
- All should be pip installable.
+All should be pip installable.
 
+```python -m pip install sphinx sphinx_rtd_theme pytest pytest-cov pytest-benchmark```
+
+Venv:
++ If developing a [virtual environment](https://docs.python.org/3/library/venv.html) (recommended), use this command while in the environment to download all relevant dependencies
++ ```python -m pip install pygame python-i18n importlib_resources typing_extensions```
++ Or here's a one liner to set up the virtual environment all at once
++ ```python -m pip install pygame python-i18n importlib_resources typing_extensions sphinx sphinx_rtd_theme pytest pytest-cov pytest-benchmark ```
  
  Helpful checklist to go through before submitting a big pull request
  ====================================================================
  
  1. Do the tests run?
  `pytest --cov-report term --cov=pygame_gui tests/`
- 2. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
- 3. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
+ 1. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
+ 2. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
  
  
  Thank you for reading and considering contributing.
