@@ -46,8 +46,8 @@ Venv:
  
  1. Do the tests run?
  `pytest --cov-report term --cov=pygame_gui tests/`
- 1. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
- 2. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
+ 2. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
+ 3. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
  
  
  Thank you for reading and considering contributing.
