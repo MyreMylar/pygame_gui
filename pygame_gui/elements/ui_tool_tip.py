@@ -5,7 +5,7 @@ from typing import Union, Tuple, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
 
 from pygame_gui.elements.ui_text_box import UITextBox
@@ -39,7 +39,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  html_text: str,
                  hover_distance: Tuple[int, int],
                  manager: Optional[IUIManagerInterface] = None,
-                 parent_element: Optional[UIElement] = None,
+                 parent_element: Optional[IUIElementInterface] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  *,

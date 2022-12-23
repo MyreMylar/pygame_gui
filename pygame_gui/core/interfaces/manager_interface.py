@@ -8,6 +8,7 @@ from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
+from pygame_gui.core.object_id import ObjectID
 
 
 class IUIManagerInterface(metaclass=ABCMeta):
@@ -227,6 +228,8 @@ class IUIManagerInterface(metaclass=ABCMeta):
                         text: str,
                         position: Tuple[int, int],
                         hover_distance: Tuple[int, int],
+                        parent_element: IUIElementInterface,
+                        object_id: ObjectID,
                         *,
                         text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
@@ -235,6 +238,8 @@ class IUIManagerInterface(metaclass=ABCMeta):
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
         :param position: The screen position to create the tool tip for.
         :param hover_distance: The distance we should hover away from our target position.
+        :param parent_element: The UIElement that spawned this tool tip.
+        :param object_id: the object_id of the tooltip.
         :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                             useful when you have multiple translations that need variables inserted
                             in the middle.
