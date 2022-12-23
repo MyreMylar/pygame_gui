@@ -34,7 +34,23 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
         A list of all the element IDs in this element's theming/event hierarchy.
 
-        :return: a list of strings, one ofr each element in the hierarchy.
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+
+    @abstractmethod
+    def get_class_ids(self) -> List[str]:
+        """
+        A list of all the class IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+
+    @abstractmethod
+    def get_object_ids(self) -> List[str]:
+        """
+        A list of all the object IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
         """
 
     @abstractmethod
