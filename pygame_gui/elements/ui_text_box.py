@@ -42,9 +42,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     - <a href='id'></a> - to encase 'link' text that can be clicked on to generate events with the
                           id given in href.
     - <body bgcolor='#FFFFFF'></body> - to change the background colour of encased text.
-    - <br> - to start a new line.
+    - <br> or <p></p> - to start a new line.
     - <font face='verdana' color='#000000' size=3.5></font> - To set the font, colour and size of
                                                               encased text.
+    - <hr> a horizontal rule.
+    - <effect id='custom_id'></effect> - to encase text to that will have an effect applied. The custom id
+                                         supplied is used when setting an effect on this text box.
+    - <shadow size=1 offset=1,1 color=#808080></shadow> - puts a shadow behind the text encased. Can also be used to
+                                                          make a glow effect.
+    - <img src="data/images/test_images/london.jpg" float=right> Inserts an image into the text with options on how to
+                                                                 float the text around the image. Float options are
+                                                                 left, right or none.
 
     More may be added in the future if needed or frequently requested.
 
@@ -130,6 +138,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.padding = (5, 5)
         self.background_colour = None
         self.border_colour = None
+        self.line_spacing = 1.25
 
         self.link_normal_colour = None
         self.link_hover_colour = None
@@ -561,7 +570,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                                   self.text_wrap_rect[3])),
                                              pygame.Rect((0, 0), (self.text_wrap_rect[2],
                                                                   self.text_wrap_rect[3])),
-                                             line_spacing=1.25,
+                                             line_spacing=self.line_spacing,
                                              default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
@@ -756,6 +765,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                casting_func=self.tuple_extract):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='line_spacing', default_value=1.25, casting_func=float):
+            has_any_changed = True
+
         # colour parameters
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
                                                                  self.combined_element_ids)
@@ -780,7 +792,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _reparse_and_rebuild(self):
         self.parser = HTMLParser(self.ui_theme, self.combined_element_ids,
-                                 self.link_style, line_spacing=1.25)
+                                 self.link_style, line_spacing=self.line_spacing)
         self.rebuild()
 
     def _check_text_alignment_theming(self) -> bool:
