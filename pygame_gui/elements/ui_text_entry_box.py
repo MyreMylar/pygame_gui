@@ -16,6 +16,22 @@ from pygame_gui.elements.ui_text_box import UITextBox
 
 
 class UITextEntryBox(UITextBox):
+    """
+    Inherits from UITextBox but allows you to enter text with the keyboard, much like UITextEntryLine.
+
+    :param relative_rect: The 'visible area' rectangle, positioned relative to its container.
+    :param initial_text: The text that starts in the text box.
+    :param manager: The UIManager that manages this element. If not provided or set to None,
+                    it will try to use the first UIManager that was created by your application.
+    :param container: The container that this element is within. If not provided or set to None
+                      will be the root window's container.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
+    :param object_id: A custom defined ID for fine-tuning of theming.
+    :param anchors: A dictionary describing what this element's relative_rect is relative to.
+    :param visible: Whether the element is visible by default. Warning - container visibility
+                    may override this.
+    """
+
     def __init__(self,
                  relative_rect: Union[Rect, Tuple[int, int, int, int]],
                  initial_text: str = "",
@@ -25,6 +41,7 @@ class UITextEntryBox(UITextBox):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
+
         super().__init__(initial_text,
                          relative_rect,
                          manager=manager,
@@ -36,6 +53,11 @@ class UITextEntryBox(UITextBox):
                          allow_split_dashes=False,
                          plain_text_display_only=True,
                          should_html_unescape_input_text=True)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='text_entry_box')
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache

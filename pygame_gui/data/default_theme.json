@@ -184,6 +184,24 @@
             "shadow_width": "0"
         }
     },
+    "text_entry_box":
+    {
+        "prototype": "#default_shape_style",
+        "misc":
+        {
+            "padding": "5,5",
+            "text_horiz_alignment_padding": "0",
+            "text_vert_alignment_padding": "0"
+        }
+    },
+    "text_entry_box.vertical_scroll_bar":
+    {
+        "misc":
+        {
+            "border_width": "1",
+            "shadow_width": "0"
+        }
+    },
     "text_entry_line":
     {
         "prototype": "#default_shape_style",
