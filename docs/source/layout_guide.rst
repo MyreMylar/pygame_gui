@@ -130,7 +130,7 @@ And here's what happens to it when we resize the UIWindow to be a bit larger:
 You'll note the gaps between the edges of the window have been maintained.
 
 Invalid anchors
--------------
+-----------------
 
 Some anchor combinations are currently invalid. For example, you can't set:
 
