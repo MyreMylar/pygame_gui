@@ -67,12 +67,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     it will try to use the first UIManager that was created by your application.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
                            match the text within.
-    :param layer_starting_height: Sets the height, above it's container, to start placing the text
+    :param layer_starting_height: Sets the height, above its container, to start placing the text
                                   box at.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
