@@ -16,6 +16,7 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.core.resource_loaders import IResourceLoader, BlockingThreadedResourceLoader
 from pygame_gui.core.utility import PackageResource, get_default_manager, set_default_manager
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
+from pygame_gui.core import ObjectID
 
 from pygame_gui.elements import UITooltip
 
@@ -526,8 +527,12 @@ class UIManager(IUIManagerInterface):
         """
         return self.universal_empty_surface
 
-    def create_tool_tip(self, text: str, position: Tuple[int, int],
+    def create_tool_tip(self,
+                        text: str,
+                        position: Tuple[int, int],
                         hover_distance: Tuple[int, int],
+                        parent_element: IUIElementInterface,
+                        object_id: ObjectID,
                         *,
                         text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
@@ -537,13 +542,16 @@ class UIManager(IUIManagerInterface):
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
         :param position: The screen position to create the tool tip for.
         :param hover_distance: The distance we should hover away from our target position.
+        :param parent_element: The UIElement that spawned this tool tip.
+        :param object_id: the object_id of the tooltip.
         :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                             useful when you have multiple translations that need variables inserted
                             in the middle.
 
         :return: A tool tip placed somewhere on the screen.
         """
-        tool_tip = UITooltip(text, hover_distance, self, text_kwargs=text_kwargs)
+        tool_tip = UITooltip(text, hover_distance, self, text_kwargs=text_kwargs,
+                             parent_element=parent_element, object_id=object_id)
         tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
         return tool_tip
 

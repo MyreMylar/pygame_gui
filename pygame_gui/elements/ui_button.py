@@ -59,6 +59,7 @@ class UIButton(UIElement):
                  generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
                  visible: int = 1,
                  *,
+                 tool_tip_object_id: Optional[ObjectID] = None,
                  text_kwargs: Optional[Dict[str, str]] = None,
                  tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
                  ):
@@ -91,6 +92,7 @@ class UIButton(UIElement):
         if tool_tip_text_kwargs is not None:
             self.tool_tip_text_kwargs = tool_tip_text_kwargs
         self.tool_tip = None
+        self.tool_tip_object_id = tool_tip_object_id
         self.ui_root_container = self.ui_manager.get_root_container()
 
         # Some different states our button can be in, could use a state machine for this
@@ -272,6 +274,8 @@ class UIButton(UIElement):
                                                                       self.rect.centery),
                                                             hover_distance=(0,
                                                                             hover_height),
+                                                            parent_element=self,
+                                                            object_id=self.tool_tip_object_id,
                                                             text_kwargs=self.tool_tip_text_kwargs)
 
         self.hover_time += time_delta

@@ -1,7 +1,5 @@
-from sys import version_info
-
 import warnings
-from collections import namedtuple
+
 from typing import List, Union, Tuple, Dict, Any, Callable, Set, Optional
 from typing import TYPE_CHECKING
 
@@ -13,17 +11,10 @@ from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
 from pygame_gui.core.layered_gui_group import GUISprite
 from pygame_gui.core.utility import get_default_manager
-
+from pygame_gui.core.object_id import ObjectID
 
 if TYPE_CHECKING:
     from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
-
-if version_info.minor >= 7:
-    ObjectID = namedtuple('ObjectID',
-                          field_names=('object_id', 'class_id'),
-                          defaults=(None, None))
-else:
-    ObjectID = namedtuple('ObjectID', field_names=('object_id', 'class_id'))
 
 
 class UIElement(GUISprite, IUIElementInterface):
@@ -285,13 +276,29 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         A list of all the element IDs in this element's theming/event hierarchy.
 
-        :return: a list of strings, one ofr each element in the hierarchy.
+        :return: a list of strings, one for each element in the hierarchy.
         """
         return self.element_ids
 
+    def get_class_ids(self) -> List[str]:
+        """
+        A list of all the class IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+        return self.class_ids
+
+    def get_object_ids(self) -> List[str]:
+        """
+        A list of all the object IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+        return self.object_ids
+
     def _create_valid_ids(self,
                           container: Union[IContainerLikeInterface, None],
-                          parent_element: Union[None, 'UIElement'],
+                          parent_element: Union[None, IUIElementInterface],
                           object_id: Union[ObjectID, str, None],
                           element_id: str):
         """
@@ -308,9 +315,10 @@ class UIElement(GUISprite, IUIElementInterface):
         :param element_id: A string ID representing this element's class.
 
         """
+        id_parent: Union[IContainerLikeInterface, IUIElementInterface, None] = None
         if parent_element is None and container is not None:
             id_parent = container
-        else:
+        elif parent_element is not None:
             id_parent = parent_element
 
         if isinstance(object_id, str):
@@ -326,13 +334,13 @@ class UIElement(GUISprite, IUIElementInterface):
             class_id = None
 
         if id_parent is not None:
-            self.element_ids = id_parent.element_ids.copy()
+            self.element_ids = id_parent.get_element_ids().copy()
             self.element_ids.append(element_id)
 
-            self.class_ids = id_parent.class_ids.copy()
+            self.class_ids = id_parent.get_class_ids().copy()
             self.class_ids.append(class_id)
 
-            self.object_ids = id_parent.object_ids.copy()
+            self.object_ids = id_parent.get_object_ids().copy()
             self.object_ids.append(obj_id)
         else:
             self.element_ids = [element_id]

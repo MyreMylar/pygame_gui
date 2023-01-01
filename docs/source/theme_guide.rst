@@ -482,6 +482,7 @@ Theme Options Per Element
     theme_reference/theme_selection_list
     theme_reference/theme_status_bar
     theme_reference/theme_text_box
+    theme_reference/theme_text_entry_box
     theme_reference/theme_text_entry_line
     theme_reference/theme_tooltip
     theme_reference/theme_vertical_scroll_bar

@@ -235,6 +235,28 @@ class TestUIWindow:
         default_ui_manager.mouse_position = (25, 25)
         window.update(time_delta=0.05)
 
+        window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, draggable=True)
+
+        window.title_bar.held = True
+        default_ui_manager.mouse_position = (100, 10)
+        window.update(time_delta=0.05)
+        default_ui_manager.mouse_position = (150, 10)
+        window.update(time_delta=0.05)
+
+        assert window.get_relative_rect().topleft == (50, 0)
+
+        window = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
+                          manager=default_ui_manager, draggable=False)
+
+        window.title_bar.held = True
+        default_ui_manager.mouse_position = (100, 10)
+        window.update(time_delta=0.05)
+        default_ui_manager.mouse_position = (150, 10)
+        window.update(time_delta=0.05)
+
+        assert window.get_relative_rect().topleft == (0, 0)
+
     def test_check_hover(self, _init_pygame, default_ui_manager: UIManager,
                          _display_surface_return_none: None):
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",

@@ -30,6 +30,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     :param resizable: Whether this window is resizable or not, defaults to False.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
+    :param draggable: Whether this window is draggable or not, defaults to True.
     """
 
     def __init__(self,
@@ -39,11 +40,13 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  element_id: Optional[str] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
-                 visible: int = 1):
+                 visible: int = 1,
+                 draggable: bool = True):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Optional[UIContainer]
         self.resizable = resizable
+        self.draggable = draggable
         self.minimum_dimensions = (100, 100)
         self.edge_hovering = [False, False, False, False]
 
@@ -278,16 +281,17 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     self.starting_grab_difference = (mouse_x - self.rect.x,
                                                      mouse_y - self.rect.y)
 
-                current_grab_difference = (mouse_x - self.rect.x,
-                                           mouse_y - self.rect.y)
+                if self.draggable:
+                    current_grab_difference = (mouse_x - self.rect.x,
+                                               mouse_y - self.rect.y)
 
-                adjustment_required = (current_grab_difference[0] -
-                                       self.starting_grab_difference[0],
-                                       current_grab_difference[1] -
-                                       self.starting_grab_difference[1])
+                    adjustment_required = (current_grab_difference[0] -
+                                           self.starting_grab_difference[0],
+                                           current_grab_difference[1] -
+                                           self.starting_grab_difference[1])
 
-                self.set_relative_position((self.relative_rect.x + adjustment_required[0],
-                                            self.relative_rect.y + adjustment_required[1]))
+                    self.set_relative_position((self.relative_rect.x + adjustment_required[0],
+                                                self.relative_rect.y + adjustment_required[1]))
             else:
                 self.grabbed_window = False
 
