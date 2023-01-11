@@ -200,7 +200,7 @@ class UITextEntryLine(UIElement):
                         raise ValueError('Selected font for UITextEntryLine does not contain '
                                          '●, * or . characters used for hidden text. Please choose'
                                          'a different font for this element')
-                display_text = self.hidden_text_char*len(self.text)
+            display_text = self.hidden_text_char*len(self.text)
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
