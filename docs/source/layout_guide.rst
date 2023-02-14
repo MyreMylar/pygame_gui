@@ -12,17 +12,17 @@ you only want to alter one.
 Horizontal & Vertical positioning
 ---------------------------------
 
-Just as in regular pygame, the x and y axis used by pygame GUI run from 0 in the top left corner down to the pixel
+Just as in regular PyGame, the x and y axis used by Pygame GUI run from 0 in the top left corner down to the pixel
 size of whatever surface/window you are positioning your elements on.
 
 The standard way of positioning elements is through using a 'relative rectangle'; this rectangle's position is always
 relative to the container it is inside of. If you do not supply a container when creating your element, they will be
-assigned the default 'root container' which  is created when you make the GUI's UI Manager and is the same size as the
+assigned the default 'root container' which is created when you make the GUI's UI Manager and is the same size as the
 supplied window_resolution parameter.
 
 If you do supply a container when creating an element, by default it will normally be positioned relative to the top
 left corner of the container. For example, if we were to position a 'hello' UIButton element inside of a UIWindow
-container, and set it's relative_rect parameter like so:
+container, and set its relative_rect parameter like so:
 
 .. code-block:: python
    :linenos:
@@ -38,18 +38,18 @@ You would get a result something like this:
 
 .. figure:: _static/layout_default_anchors.png
 
-The button would maintain it's relative x and y position to the top left corner of the window it's contained inside
+The button would maintain its relative x and y position to the top left corner of the window it's contained inside
 of, no matter where the window is moved to.
 
 Layout Anchors
 --------------
 
 What if you don't want to position your element relative to the top left hand corner of a container? That's where
-layout anchors come in, by changing the anchors for an element you change what the relative layout rectangle is
+layout anchors come in. By changing the anchors for an element you change what the relative layout rectangle is
 relative _to_.
 
-The most straight forward use is to switch both layout axes to track different sides of the container. So instead of
-being relative to the top left we anchor to, say the bottom right. That would look something like this:
+The most straight forward use is to switch both layout axes to track different sides of the container. So, instead of
+being relative to the top left we anchor to, let's say, the bottom right. That would look something like this:
 
 .. code-block:: python
    :linenos:
@@ -69,7 +69,7 @@ is and will produce a layout looking a bit like this:
 
 .. figure:: _static/layout_bottom_right_anchors.png
 
-Another common use case of anchors is centering an element inside a container, in one dimension or both.
+Another common use case of anchors is centering an element inside a container, in one dimension or both:
 
 .. code-block:: python
    :linenos:
@@ -85,7 +85,7 @@ adjusted to instead be an offset from center to center. This just makes it a lit
 positions. Thus a rectangle position of (0, 0) as above will place the centre of the element in the center of the
 container.
 
-If you just want to center in the x dimension, or the y dimension - then the 'centerx' and 'centery' anchors
+If you just want to center in the x dimension, or the y dimension, then the 'centerx' and 'centery' anchors
 are what you need:
 
 .. code-block:: python
@@ -99,10 +99,10 @@ are what you need:
                       'bottom': 'bottom'})
 
 
-Sometimes, you want a layout to change size with it's container so we make maximum use of the available space. In
-those cases we can simply set the appropriate axis anchors of our button to their counterparts on the window. So to
-stretch in the x axis (horizontal) set 'left' to 'left' & 'right' to 'right'. To stretch in the y axis (vertical) set
-'top' to 'top' & 'bottom' to 'bottom'. For example, here is a hello button with a stretch (both x & y axes) anchor
+Sometimes you want a layout to change size with its container so that we make maximum use of the available space. In
+those cases we can simply set the appropriate axis anchors of our button to their counterparts on the window. So, to
+stretch out the x axis (horizontal), set it as 'left' to 'left' and 'right' to 'right'. To stretch out the y axis (vertical),
+set it as 'top' to 'top' and 'bottom' to 'bottom'. For example, here is a "hello button" with a stretch (both x & y axes) anchor
 setup:
 
 .. code-block:: python
@@ -127,7 +127,7 @@ And here's what happens to it when we resize the UIWindow to be a bit larger:
 
 .. figure:: _static/layout_after_stretch_anchors.png
 
-You'll note the gaps between the edges of the window have been maintained.
+You'll notice the gaps between the edges of the window have been maintained.
 
 Invalid anchors
 -----------------
@@ -144,7 +144,7 @@ Some anchor combinations are currently invalid. For example, you can't set:
              anchors={'left': 'right',
                       'right': 'left'})
 
-Nor, the similar inversion for 'top' and 'bottom'. Currently the 'center' anchor can only be set to anchor to 'center',
+Nor the similar inversion for 'top' and 'bottom'. Currently, the 'center' anchor can only be set to anchor to 'center',
 and likewise with 'centerx' and 'centery'. These restrictions were made cleared in Version 0.6.5.
 
 Anchor targets
@@ -155,7 +155,7 @@ container? For that we have anchor targets.
 
 The first thing to appreciate about anchor targets is that because they are inside the container with the element being
 positioned, rather than the element being inside of them, the sides we are anchoring to are reversed. For example,
-anchoring the right hand side of our element to be positioned, to the right of the container is straight forward,
+anchoring the right hand side of our element to be positioned to the right of the container is straight forward,
 but if we add an element as a 'right_target' we will actually anchor to the left hand side of this element, for the
 purposes of positioning.
 
@@ -163,9 +163,9 @@ You might get some strange results if you mix up anchoring direction schemes and
 idea to match the direction scheme of the element you are anchoring to.
 
 Anchor targets are most useful when you have dynamically sized elements where you don't know how large the button next
-to you is going to be but you know you want your right hand side to be ten pixels away from it's left hand side.
+to you is going to be but you know you want your right hand side to be ten pixels away from its left hand side.
 
-Anchor targets are optional, just don't add them if you don't want to use them and positioning will default to the
+Anchor targets are optional, don't add them if you don't want to use them and positioning will default to the
 container edges. They are specified like this:
 
 .. code-block:: python
@@ -182,8 +182,8 @@ container edges. They are specified like this:
 Dynamically sized elements
 --------------------------
 
-Certain elements, such as UIButtons, can have dynamic sizes where their size is determined by the contents (Usually by
-passing in -1). In these cases positioning the top left in the relative rectangle should be done as if the dynamic
+Certain elements, such as UIButtons, can have dynamic sizes where their size is determined by the contents (usually by
+passing in -1). In these cases, positioning the top left in the relative rectangle should be done as if the dynamic
 dimension was 0 length. When the dimension is eventually calculated it will be added into the positioning formula.
 
 UI Layers
@@ -194,14 +194,14 @@ layers will be drawn on top of things in lower layers if they overlap.
 
 Most of the time using Pygame GUI you do not have to interact too much with the layer system. UIs don't tend to
 be designed with their interactive bits overlapping that often, and when they do they tend to be in windows.
-The main exception is for groups of elements, used for things like, HUDs which may overlap UI elements that appear
-'in' game worlds; such as monster health bars. For these occasions there is the UIPanel element which works as a
+The main exception is for groups of elements, used for things like HUDs which may overlap UI elements that appear
+in game worlds (such as monster health bars). For these occasions there is the UIPanel element which works as a
 container, much like a UI Window, except you specify what layer of the UI it will draw on (and thus what it will appear
 on top of).
 
-So how do you know where to position your UI Panels? Well for that purpose and for any other time you might need to
-interrogate the layer system there is a layer debug mode that you can activate by calling a function on the UI manager.
-This should let you figure out how many layers are being used for your 'in game' UI stuff and thus where to position
+So, how do you know where to position your UI Panels? Well, for that purpose, and for any other time you might need to
+utilize the layer system, there is a layer debug mode that you can activate by calling a function on the UI manager.
+This should let you figure out how many layers are being used for your 'in-game' UI stuff and thus where to position
 your Panel. Here's how to turn it on:
 
 .. code-block:: python
