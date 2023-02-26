@@ -3,11 +3,11 @@
 Quick Start Guide
 =================
 
-To start making use of Pygame GUI, you first need to have at least the bare bones of a pygame project
-if you don't know much about pygame then there is some `documentation here <https://www.pygame.org/docs/>`_
+To start making use of Pygame GUI, you first need to have at least the bare bones of a pygame CE project
+if you don't know much about pygame CE then there is some `documentation here <https://pyga.me/docs/>`_
 and many tutorials across the internet.
 
-Assuming you have some idea what you are doing with pygame, I've created a basic, empty pygame project with
+Assuming you have some idea what you are doing with pygame CE, I've created a basic, empty pygame CE project with
 the code below. You can just copy and paste it into an empty python script file.:
 
 .. code-block:: python
@@ -37,7 +37,7 @@ the code below. You can just copy and paste it into an empty python script file.
         pygame.display.update()
 
 
-That should open an empty window upon being run. If it doesn't you may need to install pygame.
+That should open an empty window upon being run. If it doesn't you may need to install pygame CE.
 
 Next, we need to make sure that we've installed the pygame_gui module. If you haven't, then the quickest way is to open
 a terminal or Command Prompt and type:

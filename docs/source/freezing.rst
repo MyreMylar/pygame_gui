@@ -5,7 +5,7 @@ Freezing with PyInstaller & Nuitka
 
 Pygame GUI has some support for turning your application into an executable using either PyInstaller or Nuitka. Be aware
 however that these utilities working successfully is also dependent on the version of python you are using, support in
-any other libraries you are using (including pygame) and your own handling of data files.
+any other libraries you are using (including pygame CE) and your own handling of data files.
 
 As a general principle it is better to be slightly back from the bleeding edge of Python progress if you want to
 successfully freeze your python scripts into an exe. Both nuitka and PyInstaller are community projects and as such
