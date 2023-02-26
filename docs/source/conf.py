@@ -191,6 +191,7 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'pygame': ('https://www.pygame.org/docs/', None)}
+                       'pygame-ce': ('https://pyga.me/docs/', None),
+                       'pygame': ('https://pyga.me/docs/', None)}
 
 autodoc_mock_imports = ["ctypes"]

@@ -1,7 +1,7 @@
 
 
 # Pygame GUI
-A GUI system for pygame 2.
+A GUI system for pygame CE.
 
  - [Documentation](https://pygame-gui.readthedocs.io/)
  - [GitHub](https://github.com/MyreMylar/pygame_gui)
@@ -12,7 +12,7 @@ A GUI system for pygame 2.
 ## Requirements
 
  - Python 3.7+
- - Pygame 2.0.1+
+ - Pygame Community Edition 2.1.3+
  - python-i18n (does localization to different languages)
 
 ## How to install
