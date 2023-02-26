@@ -80,7 +80,7 @@ install:
   - python -m pip install pytest-benchmark
   - python -m pip install codecov
   - python -m pip install python-i18n
-  - python -m pip install -q pygame==$PYGAME_VERSION
+  - python -m pip install -q pygame-ce==$PYGAME_VERSION
   - python setup.py -q install
 
 env:

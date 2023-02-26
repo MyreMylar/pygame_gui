@@ -4,8 +4,8 @@ from setuptools import setup
 setup(
       name='pygame_gui',
       version='0.6.9',
-      description='A GUI module for pygame 2',
-      long_description="Helps create GUIs for games made using pygame 2. "
+      description='A GUI module for pygame Community Edition',
+      long_description="Helps create GUIs for games made using pygame Community Edition. "
                        "Features HTML-style text formatting, localization,"
                        "theme files to control the look and a system to manage"
                        " multiple windows of GUI stuff.",
@@ -29,7 +29,7 @@ setup(
       zip_safe=False,
       python_requires='>=3.7',
       setup_requires=[],
-      install_requires=['pygame>=2.0.1',
+      install_requires=['pygame-ce>=2.1.3',
                         'python-i18n>=0.3.9',
                         'importlib_resources>1.3; python_version < "3.9"',
                         'typing-extensions; python_version < "3.8"'],
