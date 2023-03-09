@@ -13,12 +13,12 @@ from pygame_gui.ui_manager import UIManager
 
 class TestUIPanel:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                 starting_layer_height=5,
                 manager=default_ui_manager)
 
-    def test_creation_with_margins(self, _init_pygame, default_ui_manager):
+    def test_creation_with_margins(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                 starting_layer_height=5,
                 manager=default_ui_manager,
@@ -27,7 +27,7 @@ class TestUIPanel:
                          'top': 5,
                          'bottom': 5})
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=default_ui_manager,
@@ -43,7 +43,7 @@ class TestUIPanel:
         panel.update(0.05)
         assert panel.layer_thickness == 4
 
-    def test_add_button(self, _init_pygame, default_ui_manager):
+    def test_add_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=default_ui_manager,
@@ -66,7 +66,7 @@ class TestUIPanel:
         panel.update(0.05)
         assert panel.layer_thickness == 2
 
-    def test_process_event(self, _init_pygame, default_ui_manager):
+    def test_process_event(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=default_ui_manager,
@@ -89,7 +89,7 @@ class TestUIPanel:
 
         assert consumed_event_left and consumed_event_right and consumed_event_middle
 
-    def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager: IUIManagerInterface):
         panel = UIPanel(relative_rect=pygame.Rect(50, 50, 150, 400),
                         starting_layer_height=5,
                         manager=default_ui_manager,
@@ -117,7 +117,7 @@ class TestUIPanel:
         assert (default_ui_manager.get_sprite_group().sprites() ==
                 [default_ui_manager.get_root_container()])
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300),
                                      manager=default_ui_manager)
         element_1 = UIPanel(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -195,7 +195,7 @@ class TestUIPanel:
         assert element_5.relative_right_margin == 230
         assert element_5.relative_bottom_margin == 230
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
         element = UIPanel(relative_rect=pygame.Rect(100, 100, 50, 50),
@@ -282,7 +282,7 @@ class TestUIPanel:
         assert element_5.relative_right_margin == 240
         assert element_5.relative_bottom_margin == 240
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
 
@@ -513,16 +513,14 @@ class TestUIPanel:
 
         assert button_1.check_pressed() is True
 
-    def test_panel_children_inheriting_hidden_status(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                     _display_surface_return_none):
+    def test_panel_children_inheriting_hidden_status(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel, visible=1)
         assert panel.visible == 0
         assert button.visible == 0
 
-    def test_hidden_panel_children_behaviour_on_show(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                                     _display_surface_return_none):
+    def test_hidden_panel_children_behaviour_on_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0, starting_layer_height=5)
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager, container=panel)
@@ -572,7 +570,7 @@ class TestUIPanel:
         assert panel.visible == 0
         assert button.visible == 1
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

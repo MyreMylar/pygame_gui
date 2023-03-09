@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from typing import Union, List, Dict, Any, Optional
 
 import pygame
-import pygame.freetype
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
@@ -520,14 +519,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         return self.font_dict.default_font.info
 
-    def get_font(self, combined_element_ids: List[str]) -> pygame.freetype.Font:
+    def get_font(self, combined_element_ids: List[str]) -> pygame.font.Font:
         """
         Uses some data about a UIElement to get a font object.
 
         :param combined_element_ids: A list of IDs representing an element's location in a
                                      interleaved hierarchy of elements.
 
-        :return pygame.freetype.Font: A pygame font object.
+        :return pygame.font.Font: A pygame font object.
         """
         # set the default font as the final fall back
         font = self.font_dict.get_default_font()

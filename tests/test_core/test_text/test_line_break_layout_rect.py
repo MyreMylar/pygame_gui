@@ -1,5 +1,4 @@
 import pygame
-import pygame.freetype
 import pytest
 
 from pygame_gui.ui_manager import UIManager
@@ -7,14 +6,14 @@ from pygame_gui.core.text import LineBreakLayoutRect
 
 
 class TestLineBreakLayoutRect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
         line_break_rect = LineBreakLayoutRect(dimensions=(200, 30), font=default_font)
 
         assert line_break_rect.width == 200
         assert line_break_rect.height == 30
 
-    def test_finalise(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finalise(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
         line_break_rect = LineBreakLayoutRect(dimensions=(200, 30), font=default_font)
 

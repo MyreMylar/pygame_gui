@@ -11,19 +11,16 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 
 class TestUIScrollingContainer:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
                              manager=default_ui_manager)
 
-    def test_get_container(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                           _display_surface_return_none):
+    def test_get_container(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
         assert container.get_container() == container.scrollable_container
 
-    def test_add_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                         _display_surface_return_none):
+    def test_add_element(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -33,8 +30,7 @@ class TestUIScrollingContainer:
         container.get_container().add_element(button)
         assert len(container.get_container().elements) == 1
 
-    def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                            _display_surface_return_none):
+    def test_remove_element(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -45,8 +41,7 @@ class TestUIScrollingContainer:
         container.get_container().remove_element(button)
         assert len(container.get_container().elements) == 0
 
-    def test_set_position(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -54,8 +49,7 @@ class TestUIScrollingContainer:
 
         assert container.rect.topleft == (50, 50)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
         container_2 = UIScrollingContainer(pygame.Rect(50, 50, 50, 50),
@@ -66,8 +60,7 @@ class TestUIScrollingContainer:
 
         assert container_2.rect.topleft == (125, 125)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager,
-                            _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -85,8 +78,7 @@ class TestUIScrollingContainer:
 
         assert container.rect.size == (500, 600)
 
-    def test_kill(self, _init_pygame, default_ui_manager,
-                  _display_surface_return_none):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
         container_2 = UIScrollingContainer(pygame.Rect(50, 50, 50, 50),
@@ -102,8 +94,7 @@ class TestUIScrollingContainer:
         assert not container_2.alive()
         assert not container.alive()
 
-    def test_set_scrollable_area_dimensions(self, _init_pygame, default_ui_manager,
-                                            _display_surface_return_none):
+    def test_set_scrollable_area_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -115,8 +106,7 @@ class TestUIScrollingContainer:
         assert container._view_container.rect.size == (200-container.vert_scroll_bar.rect.width,
                                                        200-container.horiz_scroll_bar.rect.height)
 
-    def test_update(self, _init_pygame, default_ui_manager,
-                    _display_surface_return_none):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
                                          manager=default_ui_manager)
 
@@ -275,8 +265,7 @@ class TestUIScrollingContainer:
 
         assert button_1.check_pressed() is True
 
-    def test_show(self, _init_pygame, default_ui_manager,
-                  _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
                                          manager=default_ui_manager, visible=0)
         container.set_scrollable_area_dimensions((500, 600))
@@ -299,8 +288,7 @@ class TestUIScrollingContainer:
         assert container.vert_scroll_bar.visible == 1
         assert container.scrollable_container.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager,
-                  _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 400, 400),
                                          manager=default_ui_manager)
         container.set_scrollable_area_dimensions((500, 600))
@@ -323,7 +311,7 @@ class TestUIScrollingContainer:
         assert container.vert_scroll_bar.visible == 0
         assert container.scrollable_container.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

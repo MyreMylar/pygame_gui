@@ -50,8 +50,7 @@ class TestUITextBox:
         text_box.set_text("<b>Changed text</b>")
         assert text_box.image is not None
 
-    def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
-                             _display_surface_return_none):
+    def test_kwargs_set_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         i18n.add_translation('translation.test_hello', 'Hello %{name}')
         default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
                                           {"name": "fira_code", "size:": 14, "style": "italic"}])
@@ -636,8 +635,7 @@ class TestUITextBox:
                              manager=manager)
         assert text_box.image is not None
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager,
-                            _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -661,8 +659,7 @@ class TestUITextBox:
         # if we successfully clicked on the moved slider then this button should be True
         assert text_box.scroll_bar.bottom_button.held is True
 
-    def test_create_very_short_text_box(self, _init_pygame, default_ui_manager,
-                                        _display_surface_return_none):
+    def test_create_very_short_text_box(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         x = 640
         y = 360
         width = 320
@@ -762,7 +759,7 @@ class TestUITextBox:
 
         assert text_box.scroll_bar.scroll_position != 0.0
 
-    def test_show_without_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_without_scrollbar(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         x = 640
         y = 360
         width = 320
@@ -789,7 +786,7 @@ class TestUITextBox:
 
         assert text_box.scroll_bar is None
 
-    def test_show_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_with_scrollbar(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         x = 640
         y = 360
         width = 100
@@ -824,7 +821,7 @@ class TestUITextBox:
         assert text_box.scroll_bar.top_button.visible == 1
         assert text_box.scroll_bar.bottom_button.visible == 1
 
-    def test_hide_without_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide_without_scrollbar(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         x = 640
         y = 360
         width = 320
@@ -850,7 +847,7 @@ class TestUITextBox:
 
         assert text_box.scroll_bar is None
 
-    def test_hide_with_scrollbar(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide_with_scrollbar(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         x = 640
         y = 360
         width = 100
@@ -884,7 +881,7 @@ class TestUITextBox:
         assert text_box.scroll_bar.top_button.visible == 0
         assert text_box.scroll_bar.bottom_button.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -914,7 +911,7 @@ class TestUITextBox:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
-    def test_on_locale_changed(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_on_locale_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'
@@ -935,8 +932,7 @@ class TestUITextBox:
 
         assert text_box.image is not None
 
-    def test_text_owner_interface(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_text_owner_interface(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
                                        'LLALAALALA ALALA ALAL ALA'
                                        'LAALA ALALA ALALA AAaal aa'

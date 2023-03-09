@@ -1,7 +1,6 @@
 from typing import Optional, Tuple, List, Union
 import math
 import pygame
-import pygame.freetype
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
@@ -408,14 +407,14 @@ class TextBoxLayoutRow(pygame.Rect):
                         letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric in
-                                                  chunk.font.get_metrics(
+                                                  chunk.font.metrics(
                                                       chunk.text[:letter_index]) if char_metric])
                         letter_acc += letter_index
                         found_chunk = True
                     else:
                         cursor_draw_width += sum([char_metric[4]
                                                   for char_metric in
-                                                  chunk.font.get_metrics(chunk.text) if char_metric])
+                                                  chunk.font.metrics(chunk.text) if char_metric])
                         letter_acc += chunk.letter_count
         if (not found_chunk and scrolled_click_pos[0] >= self.right) or (letter_acc == self.letter_count):
             # if we have more than two rows check if we are on right of whole row and if row has space at the end.
@@ -424,7 +423,7 @@ class TextBoxLayoutRow(pygame.Rect):
                 letter_acc -= 1
                 last_chunk = self.get_last_text_chunk()
                 if last_chunk is not None:
-                    char_metric = last_chunk.font.get_metrics(" ")[0]
+                    char_metric = last_chunk.font.metrics(" ")[0]
                     if char_metric:
                         cursor_draw_width -= char_metric[4]
 
@@ -455,14 +454,14 @@ class TextBoxLayoutRow(pygame.Rect):
                     chunk_letter_pos = cursor_pos - letter_acc
                     cursor_draw_width += sum([char_metric[4]
                                               for char_metric
-                                              in chunk.font.get_metrics(chunk.text[:chunk_letter_pos]) if char_metric])
+                                              in chunk.font.metrics(chunk.text[:chunk_letter_pos]) if char_metric])
 
                     break
 
                 letter_acc += chunk.letter_count
                 cursor_draw_width += sum([char_metric[4]
                                           for char_metric in
-                                          chunk.font.get_metrics(chunk.text) if char_metric])
+                                          chunk.font.metrics(chunk.text) if char_metric])
             elif isinstance(chunk, LineBreakLayoutRect):
                 pass
 
@@ -511,10 +510,10 @@ class TextBoxLayoutRow(pygame.Rect):
                 if chunk == chunk_to_insert_after:
                     chunk_insert_index = chunk_index + 1
                     break
-            current_font: pygame.freetype.Font = chunk_to_insert_after.font
-            current_font_size = current_font.size
-            dimensions = (current_font.get_rect(' ').width,
-                          int(round(current_font_size *
+            current_font: pygame.font.Font = chunk_to_insert_after.font
+            current_font_line_size = current_font.get_linesize()
+            dimensions = (current_font.size(' ')[0],
+                          int(round(current_font_line_size *
                                     self.line_spacing)))
             self.items.insert(chunk_insert_index, LineBreakLayoutRect(dimensions, current_font))
             empty_text_chunk = parser.create_styled_text_chunk('')

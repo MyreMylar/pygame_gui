@@ -6,7 +6,6 @@ from pathlib import Path
 from _markupbase import ParserBase
 
 import pygame
-import pygame.freetype
 
 from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 
@@ -249,7 +248,7 @@ class HTMLParser(html.parser.HTMLParser):
             font_size=self.current_style['font_size'],
             bold=self.current_style['bold'],
             italic=self.current_style['italic'])
-        dimensions = (current_font.get_rect(' ').width,
+        dimensions = (current_font.size(' ')[0],
                       int(round(self.current_style['font_size'] *
                                 self.line_spacing)))
         chunk = self.create_styled_text_chunk('')

@@ -26,7 +26,7 @@ class TestColourGradient:
 
         after_application_colour = test_surface.get_at((0, 0))
         # this is now properly fixed in the next version of pygame (2.1.3)
-        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+        if pygame.vernum.minor > 1 or (pygame.vernum.minor == 1 and pygame.vernum.patch >= 3):
             assert after_application_colour == pygame.Color(0, 11, 243, 255)
         else:
             assert after_application_colour == pygame.Color(0, 10, 242, 254)

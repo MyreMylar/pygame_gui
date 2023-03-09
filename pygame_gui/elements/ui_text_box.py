@@ -547,7 +547,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def parse_html_into_style_data(self):
         """
-        Parses HTML styled string text into a format more useful for styling pygame.freetype
+        Parses HTML styled string text into a format more useful for styling pygame.font
         rendered text.
         """
         feed_input = self.html_text

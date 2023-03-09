@@ -11,7 +11,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 class TestUIToolTip:
 
-    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -27,22 +27,21 @@ class TestUIToolTip:
         assert isinstance(text_chunk, TextLineChunkFTFont)
         assert text_chunk.text == "Hello World"
 
-    def test_rebuild(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_rebuild(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
         tool_tip.rebuild()
         assert tool_tip.text_block.image is not None
 
-    def test_kill(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
         tool_tip.kill()
         assert tool_tip.alive() is False and tool_tip.text_block.alive() is False
 
-    def test_find_valid_position(self, _init_pygame, default_ui_manager: UIManager,
-                                 _display_surface_return_none):
+    def test_find_valid_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -52,8 +51,7 @@ class TestUIToolTip:
         assert found_position is True
 
     @pytest.mark.filterwarnings("ignore:initial position for tool tip is off screen")
-    def test_find_invalid_position(self, _init_pygame, default_ui_manager: UIManager,
-                                   _display_surface_return_none):
+    def test_find_invalid_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -62,8 +60,7 @@ class TestUIToolTip:
 
         assert found_position is False
 
-    def test_find_valid_position_off_bottom(self, _init_pygame, default_ui_manager: UIManager,
-                                            _display_surface_return_none):
+    def test_find_valid_position_off_bottom(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -74,8 +71,7 @@ class TestUIToolTip:
 
         assert found_position is True and bool(root_window_rect.contains(tool_tip.rect)) is True
 
-    def test_find_valid_position_off_right(self, _init_pygame, default_ui_manager: UIManager,
-                                           _display_surface_return_none):
+    def test_find_valid_position_off_right(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -86,8 +82,7 @@ class TestUIToolTip:
 
         assert found_position is True and bool(root_window_rect.contains(tool_tip.rect)) is True
 
-    def test_find_valid_position_off_left(self, _init_pygame, default_ui_manager: UIManager,
-                                          _display_surface_return_none):
+    def test_find_valid_position_off_left(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -131,8 +126,7 @@ class TestUIToolTip:
 
         assert tool_tip.text_block.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -141,8 +135,7 @@ class TestUIToolTip:
 
         assert tool_tip.rect.topleft == (150, 30) and tool_tip.text_block.rect.topleft == (150, 30)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -156,8 +149,7 @@ class TestUIToolTip:
 
         assert tool_tip.text_block.rect.topleft == (150, 30)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager,
-                            _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
@@ -167,14 +159,14 @@ class TestUIToolTip:
 
         assert tool_tip.rect.bottomright == (100, 150) and tool_tip.text_block.rect.bottomright == (100, 150)
 
-    def test_show_warning(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_warning(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)
         with pytest.warns(Warning):
             tool_tip.show()
 
-    def test_hide_warning(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide_warning(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         tool_tip = UITooltip(html_text="A tip about tools.",
                              hover_distance=(0, 10),
                              manager=default_ui_manager)

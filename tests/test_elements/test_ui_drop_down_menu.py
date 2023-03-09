@@ -13,14 +13,14 @@ from pygame_gui import PackageResource
 
 class TestUIDropDownMenu:
 
-    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
                               manager=default_ui_manager)
         assert menu.image is not None
 
-    def test_focus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_focus(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -46,8 +46,7 @@ class TestUIDropDownMenu:
 
         assert not menu.is_focused
 
-    def test_addition(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_addition(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -67,8 +66,7 @@ class TestUIDropDownMenu:
         assert menu.options_list[-1] == 'steak'
         assert menu.current_state == menu.menu_states['closed']
 
-    def test_removal(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_removal(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['cheese', 'eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -88,7 +86,7 @@ class TestUIDropDownMenu:
         assert menu.options_list[-1] == 'cheese'
         assert menu.current_state == menu.menu_states['closed']
 
-    def test_kill(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -97,7 +95,7 @@ class TestUIDropDownMenu:
 
         assert menu.alive() is False
 
-    def test_update_closed(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_update_closed(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -105,8 +103,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
         assert menu.image is not None
 
-    def test_update_state_transition(self, _init_pygame, default_ui_manager,
-                                     _display_surface_return_none):
+    def test_update_state_transition(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -117,8 +114,7 @@ class TestUIDropDownMenu:
         default_ui_manager.update(0.01)
         assert menu.image is not None
 
-    def test_update_closed_state_close_button(self, _init_pygame, default_ui_manager,
-                                              _display_surface_return_none):
+    def test_update_closed_state_close_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -129,8 +125,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
         assert menu.image is not None
 
-    def test_update_open_state_finish(self, _init_pygame, default_ui_manager,
-                                      _display_surface_return_none):
+    def test_update_open_state_finish(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -143,8 +138,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
         assert menu.image is not None
 
-    def test_process_event(self, _init_pygame, default_ui_manager,
-                           _display_surface_return_none):
+    def test_process_event(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -281,8 +275,7 @@ class TestUIDropDownMenu:
 
         assert menu.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -318,8 +311,7 @@ class TestUIDropDownMenu:
         assert drop_down_anchor_bottom_right.relative_rect.size == (50, 50)
         assert drop_down_anchor_bottom_right.relative_rect.bottomright == (-30, -30)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -343,7 +335,7 @@ class TestUIDropDownMenu:
         menu.set_relative_position((50.0, 20.0))
         assert menu.rect.topleft == (150, 120)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -410,7 +402,7 @@ class TestUIDropDownMenu:
         # if we successfully clicked on the moved menu then this button should be True
         assert non_default_menu.current_state.close_button.held is True
 
-    def test_on_fresh_drawable_shape_ready(self, _init_pygame, default_ui_manager):
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -418,7 +410,7 @@ class TestUIDropDownMenu:
 
         assert not menu.on_fresh_drawable_shape_ready()
 
-    def test_hover_point(self, _init_pygame, default_ui_manager):
+    def test_hover_point(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -427,8 +419,7 @@ class TestUIDropDownMenu:
         assert not menu.hover_point(0, 0)
         assert menu.hover_point(150, 115)
 
-    def test_cropping_size_of_drop_down(self, _init_pygame, default_ui_manager,
-                                        _display_surface_return_none):
+    def test_cropping_size_of_drop_down(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
                                             'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar',
                                             'eggs', 'flour', 'sugar', 'eggs', 'flour', 'sugar'],
@@ -487,8 +478,7 @@ class TestUIDropDownMenu:
 
         assert menu.current_state.options_selection_list.rect.height == 53  # cropped to container size by default
 
-    def test_select_option_from_drop_down(self, _init_pygame, default_ui_manager,
-                                          _display_surface_return_none):
+    def test_select_option_from_drop_down(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
                                      manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -519,7 +509,7 @@ class TestUIDropDownMenu:
 
         assert menu.selected_option == 'flour'
 
-    def test_disable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_disable(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
                                      manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -556,7 +546,7 @@ class TestUIDropDownMenu:
 
         assert menu.current_state.should_transition is False
 
-    def test_enable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_enable(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
                                      manager=default_ui_manager)
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
@@ -601,7 +591,7 @@ class TestUIDropDownMenu:
         assert menu.current_state == menu.menu_states['expanded']
         assert menu.selected_option == 'eggs'
 
-    def test_show_of_dropdown(self, _init_pygame, default_ui_manager):
+    def test_show_of_dropdown(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(10, 10, 200, 30),
@@ -622,8 +612,7 @@ class TestUIDropDownMenu:
         assert menu.menu_states["closed"].selected_option_button.visible == 1
         assert menu.menu_states["closed"].open_button.visible == 1
 
-    def test_hide_of_closed_dropdown(self, _init_pygame, default_ui_manager,
-                                     _display_surface_return_none):
+    def test_hide_of_closed_dropdown(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(10, 10, 200, 30),
@@ -642,8 +631,7 @@ class TestUIDropDownMenu:
         assert menu.menu_states["closed"].selected_option_button.visible == 0
         assert menu.menu_states["closed"].open_button.visible == 0
 
-    def test_hide_of_expanded_dropdown(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
+    def test_hide_of_expanded_dropdown(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(10, 10, 200, 30),

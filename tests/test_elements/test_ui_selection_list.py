@@ -13,22 +13,19 @@ from pygame_gui.ui_manager import UIManager
 
 class TestUISelectionList:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                         item_list=['green', 'eggs', 'and', 'ham'],
                         manager=default_ui_manager)
 
-    def test_rebuild(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_rebuild(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                item_list=['green', 'eggs', 'and', 'ham'],
                                manager=default_ui_manager)
 
         list.rebuild()
 
-    def test_addition(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_addition(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham'],
                                          manager=default_ui_manager)
@@ -37,8 +34,7 @@ class TestUISelectionList:
 
         assert selection_list.item_list[-1]['text'] == 'bad spam'
 
-    def test_removal(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_removal(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham', ('bad spam', 'bad_spam')],
                                          manager=default_ui_manager)
@@ -47,8 +43,7 @@ class TestUISelectionList:
 
         assert selection_list.item_list[-1]['text'] == 'and'
 
-    def test_get_single_selection(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_get_single_selection(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham'],
                                          manager=default_ui_manager)
@@ -74,8 +69,7 @@ class TestUISelectionList:
                            match='Requesting single selection, from multi-selection list'):
             multi_selection_list.get_single_selection()
 
-    def test_get_multi_selection(self, _init_pygame, default_ui_manager,
-                                 _display_surface_return_none):
+    def test_get_multi_selection(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham'],
                                          manager=default_ui_manager,
@@ -101,7 +95,7 @@ class TestUISelectionList:
                            match='Requesting multi selection, from single-selection list'):
             single_selection_list.get_multi_selection()
 
-    def test_update(self, _init_pygame, default_ui_manager, _display_surface_return_none: None):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: None):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -125,8 +119,7 @@ class TestUISelectionList:
                          if item['button_element'] is not None]
         assert visible_items == ['item 5', 'item 6', 'item 7', 'item 8', 'item 9']
 
-    def test_set_item_list(self, _init_pygame, default_ui_manager,
-                           _display_surface_return_none: None):
+    def test_set_item_list(self, _init_pygame, _display_surface_return_none, default_ui_manager: None):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -162,8 +155,7 @@ class TestUISelectionList:
         with pytest.raises(ValueError):
             selection_list.set_item_list([1, 2, 3])
 
-    def test_process_event(self, _init_pygame, default_ui_manager,
-                           _display_surface_return_none: None):
+    def test_process_event(self, _init_pygame, _display_surface_return_none, default_ui_manager: None):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -255,8 +247,7 @@ class TestUISelectionList:
 
         assert select_event_text == 'item 2' and dropped_event_text == 'item 1'
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300),
                                      manager=default_ui_manager)
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -354,7 +345,7 @@ class TestUISelectionList:
         assert selection_list.relative_right_margin == 230
         assert selection_list.relative_bottom_margin == 230
 
-    def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
 
@@ -453,7 +444,7 @@ class TestUISelectionList:
         assert selection_list.relative_right_margin == 240
         assert selection_list.relative_bottom_margin == 240
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
 
@@ -608,8 +599,7 @@ class TestUISelectionList:
 
         assert selection_list.scroll_bar is None
 
-    def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                  _display_surface_return_none):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -728,7 +718,7 @@ class TestUISelectionList:
 
         assert selection_list.get_single_selection() == 'green'
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -761,7 +751,7 @@ class TestUISelectionList:
         assert selection_list.scroll_bar.top_button.visible == 1
         assert selection_list.scroll_bar.sliding_button.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(0, 0, 50, 80),
                                          item_list=['item 1', 'item 2', 'item 3', 'item 4',
                                                     'item 5', 'item 6', 'item 7', 'item 8',
@@ -794,7 +784,7 @@ class TestUISelectionList:
         assert selection_list.scroll_bar.top_button.visible == 0
         assert selection_list.scroll_bar.sliding_button.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -826,7 +816,7 @@ class TestUISelectionList:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
-    def test_default_selection_exceptions(self):
+    def test_default_selection_exceptions(self, _init_pygame, _display_surface_return_none):
         """
         Test that all exceptions throw appropriately:
         1. ValueError if a list of strings/string tuples is passed to a single-selection list.
@@ -899,7 +889,7 @@ class TestUISelectionList:
 
         assert test_case_3_multiple_throws is True
 
-    def test_default_selection_sets_correctly(self):
+    def test_default_selection_sets_correctly(self, _init_pygame, _display_surface_return_none):
         """
         Test that the default selection parameter ACTUALLY sets the values.
         """
@@ -996,8 +986,7 @@ class TestUISelectionList:
         assert lst[15] in final_vals
         assert lst[17] in final_vals
 
-    def test_set_default_selection(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_default_selection(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham'],
                                          manager=default_ui_manager,
@@ -1016,8 +1005,7 @@ class TestUISelectionList:
 
         assert selection_list.get_multi_selection() == ['green']
 
-    def test_get_single_selection_start_percentage(self, _init_pygame, default_ui_manager,
-                                                   _display_surface_return_none):
+    def test_get_single_selection_start_percentage(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
                                          item_list=['green', 'eggs', 'and', 'ham'],
                                          manager=default_ui_manager,

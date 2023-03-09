@@ -33,7 +33,7 @@ class TestUIAppearanceTheme:
         loader.start()
         loader.update()
         font = theme.get_font(combined_element_ids=['button'])
-        assert isinstance(font, pygame.freetype.Font)
+        assert isinstance(font, pygame.Font)
 
     def test_get_colour_from_gradient(self, _init_pygame):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')

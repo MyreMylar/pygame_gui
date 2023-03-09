@@ -13,7 +13,7 @@ chunk onto it's final destination.
 """
 from typing import Optional, Union, Tuple
 
-import pygame.freetype
+import pygame.font
 
 from pygame.color import Color
 from pygame.surface import Surface
@@ -24,12 +24,12 @@ from pygame_gui.core.colour_gradient import ColourGradient
 
 class TextLineChunkFTFont(TextLayoutRect):
     """
-    A Text line chunk (text on the same horizontal line in the same style) using pygame's freetype
+    A Text line chunk (text on the same horizontal line in the same style) using pygame's font
     module.
     """
 
     def __init__(self, text: str,
-                 font: pygame.freetype.Font,
+                 font: pygame.font.Font,
                  underlined: bool,
                  colour: Union[Color, ColourGradient],
                  using_default_text_colour: bool,
@@ -98,11 +98,11 @@ class TextLineChunkFTFont(TextLayoutRect):
     def __repr__(self):
         return "< '" + self.text + "' " + super().__repr__() + " >"
 
-    def _handle_dimensions(self, font, max_dimensions, text):
+    def _handle_dimensions(self, font: pygame.font.Font, max_dimensions, text):
         if len(text) == 0:
-            text_rect = font.get_rect('A')
+            text_rect = pygame.Rect((0, 0), font.size('A'))
         else:
-            text_rect = font.get_rect(text)
+            text_rect = pygame.Rect((0, 0), font.size(text))
         text_shadow_width = 0
         if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
             # expand our text chunk if we have a text shadow
@@ -124,16 +124,17 @@ class TextLineChunkFTFont(TextLayoutRect):
         # that doesn't drop below the base line (no y's, g's, p's etc)
         # but also don't want it to flicker on and off. Base-line
         # centering is the default for chunks on a single style row.
-        padding_state = self.font.pad
-
-        self.font.pad = False
-        no_pad_origin = self.font.get_rect('A').y
-
-        self.font.pad = True
-        pad_origin = self.font.get_rect('A').y
-
-        self.font.pad = padding_state
-        return pad_origin - no_pad_origin
+        # padding_state = self.font.pad
+        #
+        # self.font.pad = False
+        # no_pad_origin = self.font.get_rect('A').y
+        #
+        # self.font.pad = True
+        # pad_origin = self.font.get_rect('A').y
+        #
+        # self.font.pad = padding_state
+        # return pad_origin - no_pad_origin
+        return 0
 
     def style_match(self, other_text_chunk: 'TextLineChunkFTFont'):
         """
@@ -183,8 +184,8 @@ class TextLineChunkFTFont(TextLayoutRect):
             chunk_draw_height += (text_shadow_width * 2)
 
         self.font.underline = self.underlined  # set underlined state
-        if self.underlined:
-            self.font.underline_adjustment = 0.5
+        # if self.underlined:
+        #     self.font.underline_adjustment = 0.5
         if isinstance(self.colour, ColourGradient):
             surface = self._draw_text_fg_gradient(bg_col, chunk_draw_height, chunk_draw_width,
                                                   chunk_x_origin, final_str_text, row_bg_height,
@@ -236,13 +237,21 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     def _draw_text_no_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
                                final_str_text, row_bg_height, row_chunk_origin):
+
+        text_surface = self.font.render(final_str_text, True, self.colour)
+        try:
+            text_surface = text_surface.convert_alpha()
+        except pygame.error as error:
+            raise error
+        else:
+            text_surface = text_surface.premul_alpha()
         # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                      flags=pygame.SRCALPHA, depth=32)
-        temp_text_surface = text_surface.copy()
-        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                            final_str_text, fgcolor=self.colour)
-        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        # text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+        #                               flags=pygame.SRCALPHA, depth=32)
+        # temp_text_surface = text_surface.copy()
+        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+        #                     final_str_text, fgcolor=self.colour)
+        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
         surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
         surface.fill(bg_col)
         # center the text in the line
@@ -263,13 +272,20 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _draw_text_bg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
                                final_str_text, row_bg_height, row_chunk_origin):
         # draw the text first
+        text_surface = self.font.render(final_str_text, True, self.colour)
+        try:
+            text_surface = text_surface.convert_alpha()
+        except pygame.error as error:
+            raise error
+        else:
+            text_surface = text_surface.premul_alpha()
         # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                      flags=pygame.SRCALPHA, depth=32)
-        temp_text_surface = text_surface.copy()
-        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                            final_str_text, fgcolor=self.colour)
-        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        # text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+        #                               flags=pygame.SRCALPHA, depth=32)
+        # temp_text_surface = text_surface.copy()
+        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+        #                     final_str_text, fgcolor=self.colour)
+        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
         # then make the background
         surface = Surface((chunk_draw_width, row_bg_height),
                           flags=pygame.SRCALPHA, depth=32)
@@ -297,12 +313,19 @@ class TextLineChunkFTFont(TextLayoutRect):
         # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
         # on the normal text colour.
         # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
-                                      flags=pygame.SRCALPHA, depth=32)
-        temp_text_surface = text_surface.copy()
-        self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-                            final_str_text, fgcolor=Color('#FFFFFFFF'))
-        text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        text_surface = self.font.render(final_str_text, True, Color('#FFFFFFFF'))
+        try:
+            text_surface = text_surface.convert_alpha()
+        except pygame.error as error:
+            raise error
+        else:
+            text_surface = text_surface.premul_alpha()
+        # text_surface = pygame.Surface((chunk_draw_width, chunk_draw_height),
+        #                               flags=pygame.SRCALPHA, depth=32)
+        # temp_text_surface = text_surface.copy()
+        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
+        #                     final_str_text, fgcolor=Color('#FFFFFFFF'))
+        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
         self.colour.apply_gradient_to_surface(text_surface)
         # then make the background
         surface = Surface((chunk_draw_width, row_bg_height), flags=pygame.SRCALPHA, depth=32)
@@ -334,14 +357,21 @@ class TextLineChunkFTFont(TextLayoutRect):
             # we have a shadow
             # This is a hacky way to convert text to
             # pre-multiplied alpha with a SDL2 alpha blit
-            shadow_surface = text_surface.copy()
-            temp_shadow_surface = shadow_surface.copy()
+            # shadow_surface = text_surface.copy()
+            # temp_shadow_surface = shadow_surface.copy()
 
-            self.font.render_to(temp_shadow_surface, origin,
-                                text_str,
-                                fgcolor=shadow_colour)
-            shadow_surface.blit(temp_shadow_surface, (0, 0),
-                                special_flags=pygame.BLEND_ALPHA_SDL2)
+            shadow_surface = self.font.render(text_str, True, shadow_colour)
+            try:
+                shadow_surface = shadow_surface.convert_alpha()
+            except pygame.error as error:
+                raise error
+            else:
+                shadow_surface = shadow_surface.premul_alpha()
+            # self.font.render_to(temp_shadow_surface, origin,
+            #                     text_str,
+            #                     fgcolor=shadow_colour)
+            # shadow_surface.blit(temp_shadow_surface, (0, 0),
+            #                     special_flags=pygame.BLEND_ALPHA_SDL2)
 
             for y_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = pygame.Rect((text_rect.x + shadow_offset[0],
@@ -460,7 +490,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                 found_optimum = True
                 optimum_split_point = valid_points[-1]
             else:
-                width, _ = self.font.get_rect(self.text[:optimum_split_point]).size
+                width, _ = self.font.size(self.text[:optimum_split_point])
                 if width < requested_x and current_split_point_index <= max_split_point_index:
                     # we are below the required width so we move right
                     valid_points.append(optimum_split_point)
@@ -556,11 +586,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.letter_count = len(self.text)
 
         if len(self.text) == 0:
-            text_rect = self.font.get_rect('A')
+            text_height = self.font.size('A')[1]
         else:
-            text_rect = self.font.get_rect(self.text)
+            text_height = self.font.size(self.text)[1]
         text_width = self._text_render_width(self.text, self.font)
-        text_height = text_rect.height
+
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
                 text_width = min(self.max_dimensions[0], text_width)
@@ -581,11 +611,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
         if len(self.text) == 0:
-            text_rect = self.font.get_rect('A')
+            text_height = self.font.size('A')[1]
         else:
-            text_rect = self.font.get_rect(self.text)
+            text_height = self.font.size(self.text)[1]
         text_width = self._text_render_width(self.text, self.font)
-        text_height = text_rect.height
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
                 text_width = min(self.max_dimensions[0], text_width)
@@ -606,11 +635,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
 
         if len(self.text) == 0:
-            text_rect = self.font.get_rect('A')
+            text_height = self.font.size('A')[1]
         else:
-            text_rect = self.font.get_rect(self.text)
+            text_height = self.font.size(self.text)[1]
         text_width = self._text_render_width(self.text, self.font)
-        text_height = text_rect.height
         if self.max_dimensions is not None:
             if self.max_dimensions[0] != -1:
                 text_width = min(self.max_dimensions[0], text_width)
@@ -630,9 +658,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         percentage = chunk_space_x/self.width
         estimated_index = int(round(len(self.text) * percentage))
         best_index = estimated_index
-        text_rect = self.font.get_rect(self.text[:best_index])
-        width_to_index = text_rect.x + text_rect.width
-        lowest_diff = abs(width_to_index - chunk_space_x)
+        text_width = self.font.size(self.text[:best_index])[0]
+        lowest_diff = abs(text_width - chunk_space_x)
 
         check_dir = -1
         changed_dir = 0
@@ -641,9 +668,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         # index and then checks either side for better indexes
         while changed_dir < 2:
             new_index = best_index + (step * check_dir)
-            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index +
-                                                               (step * check_dir), 0)])
-            new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
+            curr_text_width = self.font.size(self.text[:max(estimated_index + (step * check_dir), 0)])[0]
+            new_diff = abs(curr_text_width - chunk_space_x)
             if new_diff < lowest_diff:
                 lowest_diff = new_diff
                 best_index = new_index
@@ -683,9 +709,9 @@ class TextLineChunkFTFont(TextLayoutRect):
                     self.set_alpha(self.alpha)
 
     @staticmethod
-    def _text_render_width(text: str, font):
+    def _text_render_width(text: str, font: pygame.font.Font):
         return sum([char_metric[4] if char_metric is not None else 0
-                    for char_metric in font.get_metrics(text)])
+                    for char_metric in font.metrics(text)])
 
     def set_alpha(self, alpha: int):
         """

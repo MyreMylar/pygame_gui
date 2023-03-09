@@ -13,8 +13,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 class TestUIMessageWindow:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         default_ui_manager.preload_fonts([{'name': 'fira_code',
                                            'point_size': 14,
                                            'style': 'bold'}])
@@ -37,8 +36,7 @@ class TestUIMessageWindow:
         assert isinstance(text_chunk, TextLineChunkFTFont)
         assert text_chunk.text == "Hello World"
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager,
-                              _display_surface_return_none):
+    def test_create_too_small(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         default_ui_manager.preload_fonts([{'name': 'fira_code',
                                            'point_size': 14,
                                            'style': 'bold'}])
@@ -50,8 +48,7 @@ class TestUIMessageWindow:
                                          "message box functionality.",
                             manager=default_ui_manager)
 
-    def test_press_close_window_button(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
+    def test_press_close_window_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -79,8 +76,7 @@ class TestUIMessageWindow:
 
         assert is_alive_pre_process_event is True and is_dead_post_process_event is True
 
-    def test_update_dismiss_button(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_update_dismiss_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -102,8 +98,7 @@ class TestUIMessageWindow:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_update_menu_bar_grab(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_update_menu_bar_grab(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -115,8 +110,7 @@ class TestUIMessageWindow:
 
         assert message_window.grabbed_window is True
 
-    def test_rebuild(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_rebuild(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -127,8 +121,7 @@ class TestUIMessageWindow:
 
         assert message_window.image is not None
 
-    def test_rebuild_rounded_rectangle(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
+    def test_rebuild_rounded_rectangle(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -168,7 +161,7 @@ class TestUIMessageWindow:
 
         assert message_window.image is not None
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -190,7 +183,7 @@ class TestUIMessageWindow:
         assert message_window.dismiss_button.visible == 1
         assert message_window.text_block.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         message_window = UIMessageWindow(rect=pygame.Rect(100, 100, 250, 300),
                                          window_title="Test Message",
                                          html_message="This is a bold test of the "
@@ -211,7 +204,7 @@ class TestUIMessageWindow:
         assert message_window.dismiss_button.visible == 0
         assert message_window.text_block.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (600, 600)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

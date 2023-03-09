@@ -7,11 +7,10 @@ from pygame_gui.core.utility import apply_colour_to_surface
 
 
 class TestDrawableShapeState:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         DrawableShapeState('normal')
 
-    def test_get_surface(self, _init_pygame, default_ui_manager: UIManager,
-                         _display_surface_return_none):
+    def test_get_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         normal_state = DrawableShapeState('normal')
         selected_state = DrawableShapeState('selected')
         states = {'normal': normal_state,
@@ -25,7 +24,7 @@ class TestDrawableShapeState:
 
         assert isinstance(normal_state.get_surface(), pygame.Surface)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         normal_state = DrawableShapeState('normal')
         selected_state = DrawableShapeState('selected')
         states = {'normal': normal_state,
@@ -45,7 +44,7 @@ class TestDrawableShapeState:
 
 
 class TestDrawableShape:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                       theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
@@ -56,7 +55,7 @@ class TestDrawableShape:
             DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                           theming_parameters={}, states=['flipper'], manager=default_ui_manager)
 
-    def test_stub_methods(self, _init_pygame, default_ui_manager: UIManager):
+    def test_stub_methods(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
@@ -66,7 +65,7 @@ class TestDrawableShape:
         shape.collide_point((25, 25))
         shape.clean_up_temp_shapes()
 
-    def test_set_active_state(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_active_state(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal', 'hovered'],
                               manager=default_ui_manager)
@@ -75,7 +74,7 @@ class TestDrawableShape:
 
         assert shape.active_state.state_id == 'hovered'
 
-    def test_set_active_state_with_transitions(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_active_state_with_transitions(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'transitions': {('normal', 'hovered'): 0.5,
                                                                   ('hovered', 'normal'): 0.5}},
@@ -90,7 +89,7 @@ class TestDrawableShape:
 
         assert shape.active_state.transition is not None
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal', 'hovered'], manager=default_ui_manager)
 
@@ -110,13 +109,13 @@ class TestDrawableShape:
         shape.update(0.5)
         assert not shape.should_trigger_full_rebuild
 
-    def test_full_rebuild_on_size_change(self, _init_pygame, default_ui_manager: UIManager):
+    def test_full_rebuild_on_size_change(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal', 'hovered'], manager=default_ui_manager)
         shape.full_rebuild_on_size_change()
         assert shape.full_rebuild_countdown == shape.time_until_full_rebuild_after_changing_size
 
-    def test_redraw_all_states(self, _init_pygame, default_ui_manager: UIManager):
+    def test_redraw_all_states(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal', 'hovered'], manager=default_ui_manager)
 
@@ -124,7 +123,7 @@ class TestDrawableShape:
 
         assert len(shape.states_to_redraw_queue) == 1
 
-    def test_get_active_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_active_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
@@ -133,7 +132,7 @@ class TestDrawableShape:
         shape.active_state = None
         assert shape.get_active_state_surface().get_height() == 0
 
-    def test_get_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
@@ -145,19 +144,19 @@ class TestDrawableShape:
         shape.states['hovered'].surface = None
         assert shape.get_surface('hovered') == shape.states['normal'].surface
 
-    def test_get_fresh_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_fresh_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
         assert shape.get_fresh_surface().get_width() == 0
 
-    def test_has_fresh_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_fresh_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={}, states=['normal'], manager=default_ui_manager)
 
         assert not shape.has_fresh_surface()
 
-    def test_apply_colour_to_surface(self, _init_pygame, default_ui_manager: UIManager, default_display_surface):
+    def test_apply_colour_to_surface(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager, default_display_surface):
 
         DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                       theming_parameters={}, states=['normal'], manager=default_ui_manager)
@@ -171,7 +170,7 @@ class TestDrawableShape:
 
         # multiply blend always appears to be 1 pixel down in every channel
         # this is now fixed in the next version of pygame (2.1.3)
-        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+        if pygame.vernum.minor > 1 or (pygame.vernum.minor == 1 and pygame.vernum.patch >= 3):
             assert after_application_colour == pygame.Color(50, 100, 50, 255)
         else:
             assert after_application_colour == pygame.Color(50-1, 100-1, 50-1, 255-1)
@@ -186,7 +185,7 @@ class TestDrawableShape:
 
         # multiply blend always appears to be 1 pixel down in every channel
         # this is now fixed in the next version of pygame (2.1.3)
-        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
+        if pygame.vernum.minor > 1 or (pygame.vernum.minor == 1 and pygame.vernum.patch >= 3):
             assert after_application_colour == pygame.Color(150, 100, 150, 255)
         else:
             assert after_application_colour == pygame.Color(150 - 1, 100 - 1, 150 - 1, 255 - 1)
@@ -194,7 +193,7 @@ class TestDrawableShape:
         after_application_colour = test_surface_2.get_at((30, 0))
         assert after_application_colour == pygame.Color(255, 255, 255, 255)
 
-    def test_rebuild_images_and_text(self, _init_pygame, default_ui_manager: UIManager):
+    def test_rebuild_images_and_text(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'doop doop',
                                                   'font': default_ui_manager.get_theme().get_font([]),

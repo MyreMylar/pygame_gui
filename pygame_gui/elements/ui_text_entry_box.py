@@ -447,7 +447,7 @@ class UITextEntryBox(UITextBox):
             # here we really want to get the font metrics for the current active style where the edit cursor is
             # instead we will make do for now
             font = self.ui_theme.get_font(self.combined_element_ids)
-            char_metrics = font.get_metrics(character)
+            char_metrics = font.metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
                 valid_character = True
                 if valid_character:

@@ -1,7 +1,6 @@
 from collections import deque
 
 import pygame
-import pygame.freetype
 import pytest
 
 from pygame_gui.core.text import HTMLParser, TextBoxLayoutRow, TextBoxLayout, TextFloatPosition
@@ -10,7 +9,7 @@ from pygame_gui.ui_manager import UIManager
 
 
 class TestTextBoxLayoutRow:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
         default_font_data = {"font": default_font,
@@ -31,7 +30,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.width == 0
         assert layout_row.height == 0
 
-    def test_at_start(self, _init_pygame, default_ui_manager: UIManager):
+    def test_at_start(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
         default_font_data = {"font": default_font,
@@ -54,7 +53,7 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(simple_rect)
         assert not layout_row.at_start()
 
-    def test_add_item(self, _init_pygame, default_ui_manager: UIManager):
+    def test_add_item(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -81,7 +80,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.text_chunk_height == simple_rect.height
         assert layout_row.height == int(simple_rect.height * line_spacing)
 
-    def test_rewind_row(self, _init_pygame, default_ui_manager: UIManager):
+    def test_rewind_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -114,7 +113,7 @@ class TestTextBoxLayoutRow:
         assert rewound_data.pop().width == simple_rect_2.width
         assert rewound_data.pop().width == simple_rect.width
 
-    def test_horiz_center_row(self, _init_pygame, default_ui_manager: UIManager):
+    def test_horiz_center_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -156,7 +155,7 @@ class TestTextBoxLayoutRow:
 
         layout_row.horiz_center_row(text_box_layout.floating_rects)
 
-    def test_align_left_row(self, _init_pygame, default_ui_manager: UIManager):
+    def test_align_left_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -192,7 +191,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.items[2].right == 105
         assert layout_row.right == 105
 
-    def test_align_right_row(self, _init_pygame, default_ui_manager: UIManager):
+    def test_align_right_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -237,7 +236,7 @@ class TestTextBoxLayoutRow:
         layout_row.align_right_row(floating_rects=text_box_layout.floating_rects,
                                    start_x=text_box_layout.layout_rect.width - 5)
 
-    def test_vert_align_items_to_row(self, _init_pygame, default_ui_manager: UIManager):
+    def test_vert_align_items_to_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -256,9 +255,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
-        font_3 = pygame.freetype.Font(None, 10)
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        font_2 = pygame.Font("tests/data/Roboto-Regular.ttf", 20)
+        font_3 = pygame.Font("tests/data/Roboto-Regular.ttf", 10)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -293,7 +292,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.items[1].y == 7
         assert layout_row.items[2].y == 15
 
-    def test_merge_adjacent_compatible_chunks(self, _init_pygame, default_ui_manager: UIManager):
+    def test_merge_adjacent_compatible_chunks(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -312,8 +311,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        font_2 = pygame.Font("tests/data/Roboto-Regular.ttf", 20)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -342,7 +341,7 @@ class TestTextBoxLayoutRow:
 
         assert len(layout_row.items) == 2
 
-    def test_finalise(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finalise(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -361,8 +360,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        font_2 = pygame.Font("tests/data/Roboto-Regular.ttf", 20)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -391,7 +390,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_surface.get_at((3, 3)) == pygame.Color(255, 0, 0, 255)
 
-    def test_set_default_text_colour(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_default_text_colour(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -410,9 +409,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        # font_1.origin = True
+        # font_1.pad = True
         text_chunk_1 = TextLineChunkFTFont(text='D',
                                            font=font_1,
                                            underlined=False,
@@ -430,7 +429,7 @@ class TestTextBoxLayoutRow:
 
         assert layout_surface.get_at((18, 18)) == pygame.Color('#00FF00')
 
-    def test_toggle_cursor(self, _init_pygame, default_ui_manager: UIManager):
+    def test_toggle_cursor(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -449,9 +448,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        # font_1.origin = True
+        # font_1.pad = True
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,
@@ -477,7 +476,7 @@ class TestTextBoxLayoutRow:
         #     for y in range(0, 30):
         #         print(x, y, ':', layout_surface.get_at((x, y)))
 
-    def test_clear(self, _init_pygame, default_ui_manager: UIManager):
+    def test_clear(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -496,9 +495,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        # font_1.origin = True
+        # font_1.pad = True
         text_chunk_1 = TextLineChunkFTFont(text='D',
                                            font=font_1,
                                            underlined=False,
@@ -515,7 +514,7 @@ class TestTextBoxLayoutRow:
         layout_row.clear()
         assert layout_surface.get_at((18, 18)) == pygame.Color('#00000000')
 
-    def test_set_cursor_from_click_pos(self, default_ui_manager: UIManager):
+    def test_set_cursor_from_click_pos(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -534,9 +533,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        # font_1.origin = True
+        # font_1.pad = True
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,
@@ -574,7 +573,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.left == 0
         assert layout_row.cursor_index == 0
 
-    def test_set_cursor_position(self, default_ui_manager: UIManager):
+    def test_set_cursor_position(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
         line_spacing = 1.25
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
@@ -593,9 +592,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
+        # font_1.origin = True
+        # font_1.pad = True
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,
@@ -625,7 +624,7 @@ class TestTextBoxLayoutRow:
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
-    def test_insert_text(self, _init_pygame, default_ui_manager: UIManager):
+    def test_insert_text(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -662,7 +661,7 @@ class TestTextBoxLayoutRow:
 
         layout_row.insert_text('test', 0, parser=parser)
 
-        # font_1 = pygame.freetype.Font(None, 30)
+        # font_1 = pygame.Font("tests/data/Roboto-Regular.ttf", 30)
         # font_1.origin = True
         # font_1.pad = True
         # text_chunk_1 = TextLineChunkFTFont(text='test',

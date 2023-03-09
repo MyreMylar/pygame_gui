@@ -9,7 +9,7 @@ from pygame_gui.core.utility import set_default_manager
 
 
 class TestUIElement:
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                   manager=default_ui_manager,
                   container=None,
@@ -31,7 +31,7 @@ class TestUIElement:
                       starting_height=0,
                       layer_thickness=1)
 
-    def test_create_valid_id(self, _init_pygame, default_ui_manager):
+    def test_create_valid_id(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -44,7 +44,7 @@ class TestUIElement:
         assert len(element.object_ids) == 1
         assert element.object_ids == ["none"]
 
-    def test_create_invalid_id(self, _init_pygame, default_ui_manager):
+    def test_create_invalid_id(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -53,7 +53,7 @@ class TestUIElement:
         with pytest.raises(ValueError, match="Object ID cannot contain fullstops or spaces"):
             element._create_valid_ids(None, None, ". .", 'none')
 
-    def test_update_containing_rect_position(self, _init_pygame, default_ui_manager):
+    def test_update_containing_rect_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
         element_1 = UIElement(relative_rect=pygame.Rect(10, 10, 50, 50),
                               manager=default_ui_manager,
@@ -128,7 +128,7 @@ class TestUIElement:
         element_5.update_containing_rect_position()
         assert element_5.rect.topleft == (60, 60)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
         element_1 = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                               manager=default_ui_manager,
@@ -210,7 +210,7 @@ class TestUIElement:
         assert element_5.relative_right_margin == 230
         assert element_5.relative_bottom_margin == 230
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
         element = UIElement(relative_rect=pygame.Rect(100, 100, 50, 50),
                             manager=default_ui_manager,
@@ -302,7 +302,7 @@ class TestUIElement:
         assert element_5.relative_right_margin == 240
         assert element_5.relative_bottom_margin == 240
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
 
@@ -418,7 +418,7 @@ class TestUIElement:
         assert element_5.relative_right_margin == 200
         assert element_5.relative_bottom_margin == 200
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -437,7 +437,7 @@ class TestUIElement:
 
         assert element.image is not None
 
-    def test_change_layer(self, _init_pygame, default_ui_manager):
+    def test_change_layer(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -448,7 +448,7 @@ class TestUIElement:
         element.change_layer(4)
         assert element.get_top_layer() == 5
 
-    def test_kill(self, _init_pygame, default_ui_manager):
+    def test_kill(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300), manager=default_ui_manager)
 
         element = UIElement(relative_rect=pygame.Rect(30, 30, 50, 50),
@@ -472,7 +472,7 @@ class TestUIElement:
         assert default_ui_manager.ui_group.sprites() == [default_ui_manager.get_root_container(),
                                                          test_container]
 
-    def test_check_hover(self, _init_pygame, default_ui_manager):
+    def test_check_hover(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -486,7 +486,7 @@ class TestUIElement:
 
         assert element.check_hover(0.5, False) is False
 
-    def test_on_fresh_drawable_shape_ready(self, _init_pygame, default_ui_manager):
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -505,7 +505,7 @@ class TestUIElement:
 
         assert element.image is not None
 
-    def test_stub_methods(self, _init_pygame, default_ui_manager):
+    def test_stub_methods(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -522,7 +522,7 @@ class TestUIElement:
         element.unfocus()
         element.rebuild_from_changed_theme_data()
 
-    def test_hover_point(self, _init_pygame, default_ui_manager):
+    def test_hover_point(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -532,8 +532,7 @@ class TestUIElement:
         assert element.hover_point(25, 25) is True
         assert element.hover_point(100, 100) is False
 
-    def test_set_visual_debug_mode(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                                   _display_surface_return_none):
+    def test_set_visual_debug_mode(self, _init_pygame, _display_surface_return_none, default_ui_manager):
 
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 8, 'style': 'regular'}])
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -557,7 +556,7 @@ class TestUIElement:
         element.set_visual_debug_mode(False)
         assert element.pre_debug_image is None
 
-    def test_set_image_clip(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_set_image_clip(self, _init_pygame, _display_surface_return_none, default_ui_manager: IUIManagerInterface):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -588,7 +587,7 @@ class TestUIElement:
         assert after_clip_in_clip_colour == pygame.Color(200, 80, 80, 255)
         assert after_clip_out_clip_colour == pygame.Color(200, 80, 80, 255)
 
-    def test_set_image(self, _init_pygame, default_ui_manager: IUIManagerInterface):
+    def test_set_image(self, _init_pygame, _display_surface_return_none, default_ui_manager: IUIManagerInterface):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -614,7 +613,7 @@ class TestUIElement:
         element._set_image(None)
         assert element.image is None
 
-    def test_show(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -626,7 +625,7 @@ class TestUIElement:
         element.show()
         assert element.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager: IUIManagerInterface, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -645,7 +644,7 @@ class TestUIElement:
         assert element.hovered is False
         assert element.hover_time == 0.0
 
-    def test_get_relative_rect(self, _init_pygame, default_ui_manager):
+    def test_get_relative_rect(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -654,7 +653,7 @@ class TestUIElement:
 
         assert element.get_relative_rect() == pygame.Rect(0, 0, 50, 50)
 
-    def test_get_element_ids(self, _init_pygame, default_ui_manager):
+    def test_get_element_ids(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,
@@ -663,7 +662,7 @@ class TestUIElement:
 
         assert element.get_element_ids() is None
 
-    def test_invalid_container(self, _init_pygame, default_ui_manager):
+    def test_invalid_container(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         bad_container = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                                   manager=default_ui_manager,
                                   container=None,
@@ -677,7 +676,7 @@ class TestUIElement:
                                 starting_height=0,
                                 layer_thickness=1)
 
-    def test_anchor_targets(self, _init_pygame, default_ui_manager):
+    def test_anchor_targets(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element_1 = UIElement(relative_rect=pygame.Rect(100, 50, 40, 40),
                               manager=default_ui_manager,
                               container=None,
@@ -811,7 +810,7 @@ class TestUIElement:
                   layer_thickness=1,
                   anchors={'right': 'left'})
 
-    def test_enable_disable(self, _init_pygame, default_ui_manager):
+    def test_enable_disable(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,

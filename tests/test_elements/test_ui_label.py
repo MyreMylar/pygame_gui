@@ -13,8 +13,7 @@ from pygame_gui.core.ui_container import UIContainer
 
 class TestUILabel:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
@@ -28,8 +27,7 @@ class TestUILabel:
         assert label_with_kwargs.image is not None
         assert label_with_kwargs.drawable_shape.theming['text'] == "Hello World"
 
-    def test_set_text(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_set_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
@@ -43,8 +41,7 @@ class TestUILabel:
         label.set_text("new text")
         assert label.image is not None and label.rect.width == 64
 
-    def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
-                             _display_surface_return_none):
+    def test_kwargs_set_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         i18n.add_translation('translation.test_hello', 'Hello %{name}')
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
@@ -57,16 +54,14 @@ class TestUILabel:
         assert label.image is not None
         assert label.drawable_shape.theming['text'] == "Clear args"
 
-    def test_rebuild(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_rebuild(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
         label.rebuild()
         assert label.image is not None
 
-    def test_rebuild_anchors(self, _init_pygame, default_ui_manager,
-                             _display_surface_return_none):
+    def test_rebuild_anchors(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, -1, 30),
                         text="Test Label",
                         manager=default_ui_manager,
@@ -83,7 +78,7 @@ class TestUILabel:
         label.rebuild()
         assert label.image is not None
 
-    def test_rebuild_from_theme_data_non_default_1(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default_1(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_label_non_default_1.json"))
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -91,7 +86,7 @@ class TestUILabel:
                         manager=manager)
         assert label.image is not None
 
-    def test_rebuild_from_theme_data_non_default_2(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default_2(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_label_non_default_2.json"))
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -99,7 +94,7 @@ class TestUILabel:
                         manager=manager)
         assert label.image is not None
 
-    def test_rebuild_from_theme_data_non_default_3(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default_3(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_label_non_default_3.json"))
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -111,7 +106,7 @@ class TestUILabel:
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Label Rect is too small for text")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes",
                                                      "ui_label_bad_values.json"))
         label = UILabel(relative_rect=pygame.Rect(100, 100, 10, 30),
@@ -119,8 +114,7 @@ class TestUILabel:
                         manager=manager)
         assert label.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -132,8 +126,7 @@ class TestUILabel:
 
         assert label.relative_rect.topleft == (50, -70)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -145,8 +138,7 @@ class TestUILabel:
 
         assert label.rect.topleft == (150, 150)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager,
-                            _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -179,7 +171,7 @@ class TestUILabel:
 
         assert label.is_enabled is True
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager,
@@ -189,7 +181,7 @@ class TestUILabel:
         label.show()
         assert label.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
@@ -198,7 +190,7 @@ class TestUILabel:
         label.hide()
         assert label.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -224,7 +216,7 @@ class TestUILabel:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
-    def test_change_locale(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_change_locale(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(pygame.Rect((10, 100), (150, 30)),
                         'pygame-gui.English',
                         default_ui_manager)
@@ -246,8 +238,7 @@ class TestUILabel:
 
         assert label.drawable_shape.theming['text'] == "英語"
 
-    def test_text_owner_interface(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_text_owner_interface(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager)
@@ -259,8 +250,7 @@ class TestUILabel:
 
         assert label.image is not None
 
-    def test_get_object_id(self, _init_pygame, default_ui_manager,
-                           _display_surface_return_none):
+    def test_get_object_id(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         label = UILabel(relative_rect=pygame.Rect(100, 100, 150, 30),
                         text="Test Label",
                         manager=default_ui_manager,

@@ -16,12 +16,12 @@ from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 
 class TestUITextEntryLine:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
         assert text_entry.image is not None
 
-    def test_placeholder_text(self, _init_pygame, default_ui_manager):
+    def test_placeholder_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
 
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager,
@@ -53,14 +53,14 @@ class TestUITextEntryLine:
         assert text_entry.image is not None
         assert text_entry.drawable_shape.theming['text'] == "Enter age..."
 
-    def test_initial_text(self, _init_pygame, default_ui_manager):
+    def test_initial_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager,
                                      initial_text="Bob")
         assert text_entry.image is not None
         assert text_entry.drawable_shape.theming['text'] == "Bob"
 
-    def test_clear(self, _init_pygame, default_ui_manager):
+    def test_clear(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager,
                                      initial_text="Bob")
@@ -72,7 +72,7 @@ class TestUITextEntryLine:
         assert text_entry.image is not None
         assert text_entry.drawable_shape.theming['text'] == ""
 
-    def test_set_text_length_limit(self, _init_pygame, default_ui_manager):
+    def test_set_text_length_limit(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -82,7 +82,7 @@ class TestUITextEntryLine:
                                              " is too long on text entry element"):
             text_entry.set_text("GOLD PYJAMAS GOLD PYJAMAS")
 
-    def test_set_text_success(self, _init_pygame, default_ui_manager):
+    def test_set_text_success(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -91,7 +91,7 @@ class TestUITextEntryLine:
 
         assert text_entry.get_text() == "GOLD"
 
-    def test_set_text_forbidden_characters(self, _init_pygame, default_ui_manager,):
+    def test_set_text_forbidden_characters(self, _init_pygame, _display_surface_return_none, default_ui_manager,):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -101,7 +101,7 @@ class TestUITextEntryLine:
                                 " characters on text entry element"):
             text_entry.set_text("1,2,3,4,5")
 
-    def test_hidden_text(self, _init_pygame, default_ui_manager):
+    def test_hidden_text(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -169,8 +169,7 @@ class TestUITextEntryLine:
         with pytest.raises(ValueError, match='Selected font for UITextEntryLine'):
             text_entry.set_text_hidden(True)
 
-    def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_rebuild_select_area_1(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -180,8 +179,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_set_text_rebuild_select_area_2(self, _init_pygame,
-                                            _display_surface_return_none):
+    def test_set_text_rebuild_select_area_2(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -195,7 +193,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_set_text_rebuild_select_area_3(self, _init_pygame):
+    def test_set_text_rebuild_select_area_3(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default_2.json"))
@@ -212,7 +210,7 @@ class TestUITextEntryLine:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_set_text_rebuild_select_area_3(self, _init_pygame):
+    def test_set_text_rebuild_select_area_3(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
@@ -226,7 +224,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    # def test_redraw_cursor(self, _init_pygame, default_ui_manager):
+    # def test_redraw_cursor(self, _init_pygame, _display_surface_return_none, default_ui_manager):
     #     text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
     #                                  manager=default_ui_manager)
     #
@@ -238,7 +236,7 @@ class TestUITextEntryLine:
     #
     #     assert text_entry.image is not None
 
-    def test_focus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_focus(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -246,7 +244,7 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-    def test_unfocus(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_unfocus(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -819,7 +817,7 @@ class TestUITextEntryLine:
 
         assert processed_key_event
 
-    def test_set_allowed_characters_predefined(self, _init_pygame, default_ui_manager):
+    def test_set_allowed_characters_predefined(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -846,7 +844,7 @@ class TestUITextEntryLine:
         text_entry.set_allowed_characters('letters')
         text_entry.set_allowed_characters('alpha_numeric')
 
-    def test_set_allowed_characters_anything(self, _init_pygame, default_ui_manager):
+    def test_set_allowed_characters_anything(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -856,7 +854,7 @@ class TestUITextEntryLine:
             text_entry.set_text("HORSE")
             assert text_entry.get_text() == ""
 
-    def test_set_allowed_characters_invalid_id(self, _init_pygame, default_ui_manager):
+    def test_set_allowed_characters_invalid_id(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -864,7 +862,7 @@ class TestUITextEntryLine:
                                              "type string, but no match"):
             text_entry.set_allowed_characters('dan')
 
-    def test_set_forbidden_characters_predefined(self, _init_pygame, default_ui_manager):
+    def test_set_forbidden_characters_predefined(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -878,7 +876,7 @@ class TestUITextEntryLine:
         text_entry.set_forbidden_characters('forbidden_file_path')
         text_entry.set_forbidden_characters('numbers')
 
-    def test_set_forbidden_characters_anything(self, _init_pygame, default_ui_manager):
+    def test_set_forbidden_characters_anything(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -888,7 +886,7 @@ class TestUITextEntryLine:
             text_entry.set_text("DAN")
             assert text_entry.get_text() == ""
 
-    def test_set_forbidden_characters_invalid_id(self, _init_pygame, default_ui_manager):
+    def test_set_forbidden_characters_invalid_id(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -899,7 +897,7 @@ class TestUITextEntryLine:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_redraw_selected_text(self, _init_pygame):
+    def test_redraw_selected_text(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
@@ -911,7 +909,7 @@ class TestUITextEntryLine:
         text_entry.start_text_offset = 500
         text_entry.redraw()
 
-    def test_redraw_selected_text_different_them(self, _init_pygame):
+    def test_redraw_selected_text_different_them(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default_2.json"))
@@ -922,7 +920,7 @@ class TestUITextEntryLine:
         text_entry.select_range = [3, 9]
         text_entry.redraw()
 
-    def test_update(self,  _init_pygame):
+    def test_update(self,  _init_pygame, _display_surface_return_none):
         pygame.display.init()
 
         class MouselessManager(UIManager):
@@ -1010,7 +1008,7 @@ class TestUITextEntryLine:
         text_entry.blink_cursor_time_acc = 10.0
         text_entry.update(0.01)
 
-    def test_rebuild_from_theme_data_non_default(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -1023,7 +1021,7 @@ class TestUITextEntryLine:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
@@ -1032,7 +1030,7 @@ class TestUITextEntryLine:
                                      manager=manager)
         assert text_entry.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
@@ -1044,8 +1042,7 @@ class TestUITextEntryLine:
         assert (text_entry.relative_rect.topleft == (50, -70) and
                 text_entry.drawable_shape.containing_rect.topleft == (150, 30))
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(50, 50, 300, 250),
                                      manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
@@ -1056,7 +1053,7 @@ class TestUITextEntryLine:
 
         assert text_entry.rect.topleft == (100, 80)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(0, 0, 150, 30),
@@ -1117,7 +1114,7 @@ class TestUITextEntryLine:
 
         assert processed_key_event is True and text_entry.get_text() == 'dan'
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager, visible=0)
 
@@ -1125,7 +1122,7 @@ class TestUITextEntryLine:
         text_entry.show()
         assert text_entry.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
 
@@ -1133,7 +1130,7 @@ class TestUITextEntryLine:
         text_entry.hide()
         assert text_entry.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -1160,7 +1157,7 @@ class TestUITextEntryLine:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
-    def test_change_locale(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_change_locale(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
                                      manager=default_ui_manager)
         text_entry.set_text("Some basic text")

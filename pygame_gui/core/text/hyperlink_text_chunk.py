@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-import pygame.freetype
+import pygame.font
 
 from pygame.color import Color
 
@@ -16,7 +16,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
     def __init__(self,
                  href: str,
                  text: str,
-                 font: pygame.freetype.Font,
+                 font: pygame.font.Font,
                  underlined: bool,
                  colour: Color,
                  bg_colour: Color,

@@ -11,7 +11,7 @@ from pygame_gui.core.utility import restore_premul_col
 
 
 class TestUIColourChannelEditor:
-    def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                               manager=default_ui_manager,
                               name='H:',
@@ -19,8 +19,7 @@ class TestUIColourChannelEditor:
                               initial_value=0,
                               value_range=(0, 360))
 
-    def test_text_entry_finished(self, _init_pygame, default_ui_manager,
-                                 _display_surface_return_none):
+    def test_text_entry_finished(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -65,8 +64,7 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.slider.current_value == 0
 
-    def test_slider_moved_finished(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_slider_moved_finished(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -80,8 +78,7 @@ class TestUIColourChannelEditor:
                                                              {'ui_element': channel_editor.slider}))
         assert channel_editor.entry.get_text() == '100'
 
-    def test_set_value(self, _init_pygame, default_ui_manager,
-                       _display_surface_return_none):
+    def test_set_value(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
                                                manager=default_ui_manager,
                                                name='H:',
@@ -98,8 +95,7 @@ class TestUIColourChannelEditor:
         assert channel_editor.slider.get_current_value() == 200
         assert channel_editor.current_value == 200
 
-    def test_set_position(self, _init_pygame, default_ui_manager,
-                          _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
@@ -114,8 +110,7 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.relative_rect.topleft == (50, -70)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
@@ -130,8 +125,7 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.rect.topleft == (150, 150)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager,
-                            _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
@@ -146,7 +140,7 @@ class TestUIColourChannelEditor:
 
         assert channel_editor.rect.size == (200, 29)
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
@@ -176,7 +170,7 @@ class TestUIColourChannelEditor:
         assert channel_editor.entry.visible == 1
         assert channel_editor.slider.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
                                      manager=default_ui_manager)
         channel_editor = UIColourChannelEditor(relative_rect=pygame.Rect(0, 0, 150, 29),
@@ -206,7 +200,7 @@ class TestUIColourChannelEditor:
         assert channel_editor.entry.visible == 0
         assert channel_editor.slider.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
@@ -246,19 +240,16 @@ class TestUIColourChannelEditor:
 
 class TestUIColourPickerDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                              manager=default_ui_manager)
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager,
-                              _display_surface_return_none):
+    def test_create_too_small(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         with pytest.warns(UserWarning, match="Initial size"):
             UIColourPickerDialog(rect=pygame.Rect(100, 100, 50, 50),
                                  manager=default_ui_manager)
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager,
-                                 _display_surface_return_none):
+    def test_press_cancel_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager)
 
@@ -275,7 +266,7 @@ class TestUIColourPickerDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_press_ok_button(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_press_ok_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -321,7 +312,7 @@ class TestUIColourPickerDialog:
 
         assert colour_picker.current_colour == pygame.Color(120, 127, 63, 255)
 
-    def test_mess_with_colour_channel_event(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_mess_with_colour_channel_event(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -380,7 +371,7 @@ class TestUIColourPickerDialog:
 
         assert confirm_event_fired
 
-    def test_update_saturation_value_square(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_update_saturation_value_square(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager)
 
@@ -399,7 +390,7 @@ class TestUIColourPickerDialog:
                                                              ))
         assert colour_picker.current_colour == pygame.Color(63, 127, 95, 255)
 
-    def test_update_current_colour_image(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_update_current_colour_image(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -429,7 +420,7 @@ class TestUIColourPickerDialog:
         assert 151 >= pixel_colour.b >= 149
         assert pixel_colour.a == 255
 
-    def test_changed_rgb_update_hsv(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_changed_rgb_update_hsv(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -456,7 +447,7 @@ class TestUIColourPickerDialog:
         assert colour_picker.sat_channel.current_value == 57
         assert colour_picker.value_channel.current_value == 74
 
-    def test_changed_hsv_update_rgb(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_changed_hsv_update_rgb(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255))
@@ -484,7 +475,7 @@ class TestUIColourPickerDialog:
         assert colour_picker.green_channel.current_value == 81
         assert colour_picker.blue_channel.current_value == 188
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255),
@@ -522,7 +513,7 @@ class TestUIColourPickerDialog:
         assert colour_picker.green_channel.visible == 1
         assert colour_picker.blue_channel.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
                                              initial_colour=pygame.Color(200, 220, 50, 255),
@@ -560,7 +551,7 @@ class TestUIColourPickerDialog:
         assert colour_picker.green_channel.visible == 0
         assert colour_picker.blue_channel.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (600, 600)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

@@ -129,7 +129,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.rect.height = -1 if self.dynamic_height else self.rect.height
         self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
 
-        text_size = self.font.get_rect(translate(self.text, **self.text_kwargs)).size
+        text_size = self.font.size(translate(self.text, **self.text_kwargs))
         if ((self.rect.height != -1 and text_size[1] > self.relative_rect.height) or
                 (self.rect.width != -1 and text_size[0] > self.relative_rect.width)):
             width_overlap = self.relative_rect.width - text_size[0]

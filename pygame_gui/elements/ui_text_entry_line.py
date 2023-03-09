@@ -5,7 +5,6 @@ from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
 
-import pygame.freetype
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
@@ -97,7 +96,7 @@ class UITextEntryLine(UIElement):
             self.placeholder_text = placeholder_text
 
         # theme font
-        self.font: Optional[pygame.freetype.Font] = None
+        self.font: Optional[pygame.font.Font] = None
 
         self.shadow_width = None
         self.border_width = None
@@ -192,11 +191,11 @@ class UITextEntryLine(UIElement):
         display_text = self.text
         if self.is_text_hidden:
             # test if self.hidden_text_char is supported by font here
-            if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            if self.font.metrics(self.hidden_text_char)[0] is None:
                 self.hidden_text_char = '*'
-                if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                if self.font.metrics(self.hidden_text_char)[0] is None:
                     self.hidden_text_char = '.'
-                    if self.font.get_metrics(self.hidden_text_char)[0] is None:
+                    if self.font.metrics(self.hidden_text_char)[0] is None:
                         raise ValueError('Selected font for UITextEntryLine does not contain '
                                          '●, * or . characters used for hidden text. Please choose'
                                          'a different font for this element')
@@ -445,7 +444,7 @@ class UITextEntryLine(UIElement):
             within_length_limit = False
         if within_length_limit and hasattr(event, 'unicode') and self.font is not None:
             character = event.unicode
-            char_metrics = self.font.get_metrics(character)
+            char_metrics = self.font.metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
                 valid_character = True
                 if (self.allowed_characters is not None and
@@ -522,8 +521,8 @@ class UITextEntryLine(UIElement):
                     self.drawable_shape.apply_active_text_changes()
             elif self.edit_position > 0 and self.font is not None:
                 if self.start_text_offset > 0:
-                    self.start_text_offset -= self.font.get_rect(
-                        self.text[self.edit_position - 1]).width
+                    self.start_text_offset -= self.font.size(
+                        self.text[self.edit_position - 1])[0]
                 self.text = self.text[:self.edit_position - 1] + self.text[self.edit_position:]
                 self.edit_position -= 1
                 self.cursor_has_moved_recently = True

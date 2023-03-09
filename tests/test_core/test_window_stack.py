@@ -6,12 +6,10 @@ from pygame_gui.elements.ui_window import UIWindow
 
 
 class TestWindowStack:
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         UIWindowStack((800, 600), default_ui_manager.get_root_container())
 
-    def test_add_window(self, _init_pygame, default_ui_manager,
-                        _display_surface_return_none):
+    def test_add_window(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
@@ -19,8 +17,7 @@ class TestWindowStack:
 
         assert len(stack.stack) == 1
 
-    def test_clear(self, _init_pygame, default_ui_manager,
-                   _display_surface_return_none):
+    def test_clear(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
@@ -32,8 +29,7 @@ class TestWindowStack:
 
         assert len(stack.stack) == 0
 
-    def test_remove_window(self, _init_pygame, default_ui_manager,
-                           _display_surface_return_none):
+    def test_remove_window(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
@@ -50,8 +46,7 @@ class TestWindowStack:
 
         assert len(stack.stack) == 0
 
-    def test_move_window_to_front(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_move_window_to_front(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
@@ -68,8 +63,7 @@ class TestWindowStack:
 
         assert stack.stack[0] == window
 
-    def test_is_window_at_top(self, _init_pygame, default_ui_manager,
-                              _display_surface_return_none):
+    def test_is_window_at_top(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         stack = UIWindowStack((800, 600), default_ui_manager.get_root_container())
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')

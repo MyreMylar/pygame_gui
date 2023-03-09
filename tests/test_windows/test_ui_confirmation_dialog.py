@@ -14,8 +14,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 class TestUIConfirmationDialog:
 
-    def test_creation(self, _init_pygame, default_ui_manager,
-                      _display_surface_return_none):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
         UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                              action_long_desc="Confirm a <b>bold</b> test of the confirmation "
@@ -37,8 +36,7 @@ class TestUIConfirmationDialog:
         assert isinstance(text_chunk, TextLineChunkFTFont)
         assert text_chunk.text == "Hello World"
 
-    def test_create_too_small(self, _init_pygame, default_ui_manager,
-                              _display_surface_return_none):
+    def test_create_too_small(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
 
         with pytest.warns(UserWarning, match="Initial size"):
@@ -49,8 +47,7 @@ class TestUIConfirmationDialog:
                                  window_title="Confirm",
                                  action_short_name="Confirm")
 
-    def test_press_close_window_button(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
+    def test_press_close_window_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the confirmation "
                                                                "dialog.",
@@ -81,8 +78,7 @@ class TestUIConfirmationDialog:
 
         assert is_alive_pre_process_event is True and is_dead_post_process_event is True
 
-    def test_press_cancel_button(self, _init_pygame, default_ui_manager,
-                                 _display_surface_return_none):
+    def test_press_cancel_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the confirmation "
                                                                "dialog.",
@@ -103,8 +99,7 @@ class TestUIConfirmationDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
-    def test_press_confirm_button(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_press_confirm_button(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the "
                                                                "confirmation dialog.",
@@ -135,8 +130,7 @@ class TestUIConfirmationDialog:
         assert is_dead_post_events
         assert confirm_event_fired
 
-    def test_update_menu_bar_grab(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
+    def test_update_menu_bar_grab(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a "
                                                                "test of the confirmation dialog.",
@@ -151,8 +145,7 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.grabbed_window is True
 
-    def test_rebuild(self, _init_pygame, default_ui_manager,
-                     _display_surface_return_none):
+    def test_rebuild(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the "
                                                                "confirmation dialog.",
@@ -164,8 +157,7 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.image is not None
 
-    def test_rebuild_rounded_rectangle(self, _init_pygame, default_ui_manager,
-                                       _display_surface_return_none):
+    def test_rebuild_rounded_rectangle(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the confirmation "
                                                                "dialog.",
@@ -207,7 +199,7 @@ class TestUIConfirmationDialog:
 
         assert confirm_dialog.image is not None
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the "
                                                                "confirmation dialog.",
@@ -228,7 +220,7 @@ class TestUIConfirmationDialog:
         assert confirm_dialog.confirm_button.visible == 1
         assert confirm_dialog.cancel_button.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         confirm_dialog = UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                                               action_long_desc="Confirm a test of the "
                                                                "confirmation dialog.",

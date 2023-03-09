@@ -36,28 +36,28 @@ class TestUIManager:
         """
         UIManager((800, 600))
 
-    def test_get_theme(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_get_theme(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
         assert (type(theme) == UIAppearanceTheme)
 
-    def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_get_sprite_group(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
         assert (type(sprite_group) == LayeredGUIGroup)
 
-    def test_get_window_stack(self, _init_pygame, default_ui_manager):
+    def test_get_window_stack(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Can we get the window stack? Serves as a test of the window stack being successfully created.
         """
         window_stack = default_ui_manager.get_window_stack()
         assert (type(window_stack) == UIWindowStack)
 
-    def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_get_shadow(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Try to get a shadow of a requested size.
         Tests that the returned object is a surface of the correct size.
@@ -69,14 +69,14 @@ class TestUIManager:
 
         assert ((type(shadow_surface) == pygame.Surface) and (shadow_surface_size == requested_size))
 
-    def test_set_window_resolution(self, _init_pygame, default_ui_manager):
+    def test_set_window_resolution(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Tests that this does actually set the window resolution.
         """
         default_ui_manager.set_window_resolution((640, 480))
         assert default_ui_manager.window_resolution == (640, 480)
 
-    def test_clear_and_reset(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_clear_and_reset(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Check clear and reset is restoring manager to initial state with no extra, lingering, elements.
         """
@@ -91,7 +91,7 @@ class TestUIManager:
 
         assert should_be_one_sprite == 1 and should_be_two_sprites == 2 and should_be_one_sprite_again == 1
 
-    def test_process_events(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_process_events(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Fake a click button event on a button to check they are going through the ui event manager properly/
         """
@@ -103,8 +103,7 @@ class TestUIManager:
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (125, 115)}))
         assert test_button.held
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager,
-                    _display_surface_return_none):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         """
         Test update does store button shapes in the long term cache
         """
@@ -240,7 +239,7 @@ class TestUIManager:
             pass
         pygame.display.quit()
 
-    def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_add_font_paths_and_preload_fonts(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Combined test of setting font paths and pre-loading.
 
@@ -258,7 +257,7 @@ class TestUIManager:
                   relative_rect=pygame.Rect(100, 100, 200, 100),
                   manager=default_ui_manager)
 
-    def test_print_unused_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none, capsys):
+    def test_print_unused_fonts(self, _init_pygame, _display_surface_return_none, default_ui_manager, capsys):
         """
         Test unused font printing, by creating a font we don't use and seeing if the print out reports it.
 
@@ -273,8 +272,7 @@ class TestUIManager:
 
         assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
 
-    def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager,
-                                             _display_surface_return_none):
+    def test_focus_and_unfocus_focus_element(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Test if we correctly select the focused element and unselect it with these functions.
         """

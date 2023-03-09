@@ -9,13 +9,13 @@ from pygame_gui.windows.ui_console_window import UIConsoleWindow
 
 
 class TestUIConsoleWindow:
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         pygame.display.set_mode((800, 600))
         UIConsoleWindow(
             rect=pygame.rect.Rect((0, 0), (700, 500)),
             manager=default_ui_manager)
 
-    def test_command_entry_finished(self, _init_pygame, default_ui_manager):
+    def test_command_entry_finished(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         pygame.display.set_mode((800, 600))
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (300, 200)),
                                          manager=default_ui_manager)
@@ -134,8 +134,7 @@ class TestUIConsoleWindow:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-    def test_log_prefix(self, _init_pygame, default_ui_manager,
-                        _display_surface_return_none):
+    def test_log_prefix(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
                                          manager=default_ui_manager)
 
@@ -209,8 +208,7 @@ class TestUIConsoleWindow:
 
         assert console_window.log.appended_text == logged_lines
 
-    def test_add_output_line_to_log(self, _init_pygame, default_ui_manager,
-                                    _display_surface_return_none):
+    def test_add_output_line_to_log(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
                                          manager=default_ui_manager)
 
@@ -233,8 +231,7 @@ class TestUIConsoleWindow:
                                                     '<b>third &lt;i&gt;line&lt;/i&gt; to add,'
                                                     ' escape html</b><br>')
 
-    def test_scroll_log_with_arrow_keys(self, _init_pygame, default_ui_manager,
-                                        _display_surface_return_none):
+    def test_scroll_log_with_arrow_keys(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
                                          manager=default_ui_manager)
 
@@ -352,8 +349,7 @@ class TestUIConsoleWindow:
 
         assert console_window.command_entry.get_text() == 'A second command'
 
-    def test_clear_log(self, _init_pygame, default_ui_manager,
-                       _display_surface_return_none):
+    def test_clear_log(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         console_window = UIConsoleWindow(rect=pygame.rect.Rect((0, 0), (700, 500)),
                                          manager=default_ui_manager)
 
@@ -370,4 +366,3 @@ class TestUIConsoleWindow:
 
 if __name__ == '__main__':
     pytest.console_main()
-

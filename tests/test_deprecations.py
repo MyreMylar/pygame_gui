@@ -10,7 +10,7 @@ class TestDeprecations:
     """
     Testing for functionality that gets deprecated
     """
-    def test_set_image_deprecation(self, _init_pygame, default_ui_manager):
+    def test_set_image_deprecation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Remove this test in version 0.8.0
         """
@@ -22,7 +22,7 @@ class TestDeprecations:
                                                     "most elements from version 0.8.0"):
             button.set_image(pygame.Surface((64, 64)))
 
-    def test_event_user_type_deprecation(self, _init_pygame, default_ui_manager):
+    def test_event_user_type_deprecation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         """
         Remove this test in version 0.8.0
         """
@@ -47,3 +47,7 @@ class TestDeprecations:
             for event in pygame.event.get():
                 if event.type == pygame.USEREVENT and event.user_type == UI_BUTTON_DOUBLE_CLICKED:
                     pass
+
+
+if __name__ == '__main__':
+    pytest.console_main()

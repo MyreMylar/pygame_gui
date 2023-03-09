@@ -19,7 +19,7 @@ class TestUIImage:
                            manager=default_ui_manager)
         assert ui_image.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
         ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
                            image_surface=loaded_image,
@@ -29,7 +29,7 @@ class TestUIImage:
 
         assert ui_image.relative_rect.topleft == (200, 200)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
         ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
                            image_surface=loaded_image,
@@ -39,7 +39,7 @@ class TestUIImage:
 
         assert ui_image.relative_rect.topleft == (200, 200)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
         ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
                            image_surface=loaded_image,
@@ -80,7 +80,7 @@ class TestUIImage:
 
         assert ui_image.image.get_size() == (128, 128) and ui_image.rect.size == (128, 128)
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
         ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
                            image_surface=loaded_image,
@@ -91,7 +91,7 @@ class TestUIImage:
         ui_image.show()
         assert ui_image.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         loaded_image = pygame.image.load(os.path.join('tests', 'data', 'images', 'splat.png'))
         ui_image = UIImage(relative_rect=pygame.Rect(100, 100, 150, 30),
                            image_surface=loaded_image,
@@ -101,7 +101,7 @@ class TestUIImage:
         ui_image.hide()
         assert ui_image.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))

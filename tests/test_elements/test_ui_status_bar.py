@@ -21,14 +21,14 @@ class HealthySprite(pygame.sprite.Sprite):
 
 class TestUIStatusBar:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
                                  manager=default_ui_manager)
         assert health_bar.image is not None
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -60,7 +60,7 @@ class TestUIStatusBar:
                                  manager=manager)
         assert health_bar.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -75,7 +75,7 @@ class TestUIStatusBar:
 
         assert other_bar.position == (100, 100)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -85,7 +85,7 @@ class TestUIStatusBar:
 
         assert health_bar.rect.topleft == (150, 30)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -97,7 +97,7 @@ class TestUIStatusBar:
         assert health_bar.rect.size == (250, 60)
         assert health_bar.relative_rect.size == (250, 60)
 
-    def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -108,7 +108,7 @@ class TestUIStatusBar:
         health_bar.show()
         assert health_bar.visible == 1
 
-    def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_hide(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -118,7 +118,7 @@ class TestUIStatusBar:
         health_bar.hide()
         assert health_bar.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
