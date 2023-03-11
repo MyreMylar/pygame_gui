@@ -24,34 +24,34 @@ class HealthySpriteNoCurrentHealth(pygame.sprite.Sprite):
 
 class TestUIWorldSpaceHealthBar:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            sprite_to_monitor=healthy_sprite,
                                            manager=default_ui_manager)
         assert health_bar.image is not None
 
-    def test_creation_no_sprite(self, _init_pygame, default_ui_manager):
+    def test_creation_no_sprite(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         with pytest.raises(AssertionError):
             UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                   sprite_to_monitor=None,
                                   manager=default_ui_manager)
 
-    def test_creation_sprite_no_capacity(self, _init_pygame, default_ui_manager):
+    def test_creation_sprite_no_capacity(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySpriteNoCapacity()
         with pytest.raises(AttributeError, match="Sprite does not have health_capacity attribute"):
             UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                   sprite_to_monitor=healthy_sprite,
                                   manager=default_ui_manager)
 
-    def test_creation_sprite_no_current_health(self, _init_pygame, default_ui_manager):
+    def test_creation_sprite_no_current_health(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySpriteNoCurrentHealth()
         with pytest.raises(AttributeError, match="Sprite does not have current_health attribute"):
             UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                   sprite_to_monitor=healthy_sprite,
                                   manager=default_ui_manager)
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            sprite_to_monitor=healthy_sprite,
@@ -60,7 +60,7 @@ class TestUIWorldSpaceHealthBar:
         health_bar.update(0.01)
         assert health_bar.image is not None
 
-    def test_rebuild_from_theme_data_non_default(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_world_health_bar_non_default.json"))
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -71,7 +71,7 @@ class TestUIWorldSpaceHealthBar:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_world_health_bar_bad_values.json"))
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -79,7 +79,7 @@ class TestUIWorldSpaceHealthBar:
                                            manager=manager)
         assert health_bar.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            sprite_to_monitor=healthy_sprite,
@@ -89,7 +89,7 @@ class TestUIWorldSpaceHealthBar:
 
         assert health_bar.rect.topleft == (150, 30)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            sprite_to_monitor=healthy_sprite,
@@ -99,7 +99,7 @@ class TestUIWorldSpaceHealthBar:
 
         assert health_bar.rect.topleft == (150, 30)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = UIWorldSpaceHealthBar.ExampleHealthSprite()
         health_bar = UIWorldSpaceHealthBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                            sprite_to_monitor=healthy_sprite,

@@ -7,7 +7,7 @@ from pygame_gui.core.text import HyperlinkTextChunk
 
 
 class TestHyperlinkTextChunk:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
@@ -27,7 +27,7 @@ class TestHyperlinkTextChunk:
                            hover_underline=style['link_hover_underline'],
                            text_shadow_data=style['shadow_data'])
 
-    def test_on_hovered(self, _init_pygame, default_ui_manager: UIManager):
+    def test_on_hovered(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
         the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
@@ -61,7 +61,7 @@ class TestHyperlinkTextChunk:
         assert hyper_chunk.is_hovered
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF00FF')
 
-    def test_on_unhovered(self, _init_pygame, default_ui_manager: UIManager):
+    def test_on_unhovered(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
         the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
@@ -98,7 +98,7 @@ class TestHyperlinkTextChunk:
         assert not hyper_chunk.is_hovered
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
 
-    def test_set_active(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_active(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
         the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
@@ -132,7 +132,7 @@ class TestHyperlinkTextChunk:
         assert hyper_chunk.is_active
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FFFF00')
 
-    def test_set_inactive(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_inactive(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
         the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),

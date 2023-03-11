@@ -1319,7 +1319,7 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_redraw_selected_text(self, _init_pygame):
+    def test_redraw_selected_text(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
@@ -1330,7 +1330,7 @@ class TestUITextEntryBox:
         text_entry.select_range = [3, 8]
         text_entry.start_text_offset = 500
 
-    def test_redraw_selected_text_different_theme(self, _init_pygame):
+    def test_redraw_selected_text_different_theme(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default_2.json"))
@@ -1340,7 +1340,7 @@ class TestUITextEntryBox:
         text_entry.set_text("Yellow su")
         text_entry.select_range = [3, 9]
 
-    def test_update(self,  _init_pygame):
+    def test_update(self,  _init_pygame, _display_surface_return_none):
         pygame.display.init()
 
         class MouselessManager(UIManager):
@@ -1402,7 +1402,7 @@ class TestUITextEntryBox:
 
         text_entry.update(0.01)
 
-    def test_update_after_long_wait(self,  _init_pygame):
+    def test_update_after_long_wait(self,  _init_pygame, _display_surface_return_none):
         pygame.display.init()
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
@@ -1431,7 +1431,7 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
