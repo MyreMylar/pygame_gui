@@ -1,9 +1,9 @@
 from collections import deque
 
-import pygame
-import pygame.freetype
 import pytest
+import pygame
 
+from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 from pygame_gui.core.text import HTMLParser, TextBoxLayoutRow, TextBoxLayout, TextFloatPosition
 from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont
 from pygame_gui.ui_manager import UIManager
@@ -256,9 +256,9 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
-        font_3 = pygame.freetype.Font(None, 10)
+        font_1 = GUIFontFreetype(None, 30)
+        font_2 = GUIFontFreetype(None, 20)
+        font_3 = GUIFontFreetype(None, 10)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -284,14 +284,14 @@ class TestTextBoxLayoutRow:
         # not sure this is right, need to do some more visual testing of vertical
         # alignment of text rects with different height text on a single row.
         assert layout_row.items[0].y == 0
-        assert layout_row.items[1].y == 7
-        assert layout_row.items[2].y == 15
+        assert layout_row.items[1].y == 8
+        assert layout_row.items[2].y == 16
 
         layout_row.vert_align_items_to_row()
 
         assert layout_row.items[0].y == 0
-        assert layout_row.items[1].y == 7
-        assert layout_row.items[2].y == 15
+        assert layout_row.items[1].y == 8
+        assert layout_row.items[2].y == 16
 
     def test_merge_adjacent_compatible_chunks(self, _init_pygame, default_ui_manager: UIManager):
         input_data = deque([])
@@ -312,8 +312,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
+        font_1 = GUIFontFreetype(None, 30)
+        font_2 = GUIFontFreetype(None, 20)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -361,8 +361,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_2 = pygame.freetype.Font(None, 20)
+        font_1 = GUIFontFreetype(None, 30)
+        font_2 = GUIFontFreetype(None, 20)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -410,9 +410,7 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = GUIFontFreetype(None, 30)
         text_chunk_1 = TextLineChunkFTFont(text='D',
                                            font=font_1,
                                            underlined=False,
@@ -449,9 +447,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = GUIFontFreetype(None, 30)
+
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,
@@ -496,9 +493,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = GUIFontFreetype(None, 30)
+
         text_chunk_1 = TextLineChunkFTFont(text='D',
                                            font=font_1,
                                            underlined=False,
@@ -534,9 +530,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = GUIFontFreetype(None, 30)
+
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,
@@ -593,9 +588,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = pygame.freetype.Font(None, 30)
-        font_1.origin = True
-        font_1.pad = True
+        font_1 = GUIFontFreetype(None, 30)
+
         text_chunk_1 = TextLineChunkFTFont(text='test',
                                            font=font_1,
                                            underlined=False,

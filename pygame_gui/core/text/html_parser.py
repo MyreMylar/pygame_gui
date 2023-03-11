@@ -6,7 +6,6 @@ from pathlib import Path
 from _markupbase import ParserBase
 
 import pygame
-import pygame.freetype
 
 from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 

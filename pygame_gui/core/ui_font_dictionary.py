@@ -5,6 +5,7 @@ from typing import Dict, Union, Tuple, List, Optional
 
 
 import pygame
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.resource_loaders import IResourceLoader
@@ -168,7 +169,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                              resource=self.default_font.bold_italic_file_name), False)]
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
+                  bold: bool = False, italic: bool = False) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -183,7 +184,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
 
-        :return pygame.freetype.Font: Returns either the font we asked for, or the default font.
+        :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
         """
         return self.find_font_resource(font_size, font_name, bold, italic).loaded_font
@@ -237,7 +238,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             return self.loaded_fonts[self.default_font.idx]
 
-    def get_default_font(self) -> pygame.freetype.Font:
+    def get_default_font(self) -> IGUIFontInterface:
         """
         Grab the default font.
 
@@ -413,7 +414,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         :param html_size: Size in HTML style.
 
-        :return int: A 'point' font size we can use with pygame.freetype
+        :return int: A 'point' font size.
 
         """
         if html_size in UIFontDictionary._html_font_sizes:

@@ -1,5 +1,5 @@
 import pygame
-import pygame.freetype
+from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 import pytest
 
 from pygame_gui.ui_manager import UIManager
@@ -8,7 +8,7 @@ from pygame_gui.core.text import HyperlinkTextChunk
 
 class TestHyperlinkTextChunk:
     def test_creation(self, _init_pygame, default_ui_manager: UIManager):
-        the_font = pygame.freetype.Font(None, 20)
+        the_font = GUIFontFreetype(None, 20)
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -28,7 +28,8 @@ class TestHyperlinkTextChunk:
                            text_shadow_data=style['shadow_data'])
 
     def test_on_hovered(self, _init_pygame, default_ui_manager: UIManager):
-        the_font = pygame.freetype.Font(None, 20)
+        the_font = GUIFontFreetype(None, 20)
+        the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -61,7 +62,8 @@ class TestHyperlinkTextChunk:
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF00FF')
 
     def test_on_unhovered(self, _init_pygame, default_ui_manager: UIManager):
-        the_font = pygame.freetype.Font(None, 20)
+        the_font = GUIFontFreetype(None, 20)
+        the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -97,7 +99,8 @@ class TestHyperlinkTextChunk:
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
 
     def test_set_active(self, _init_pygame, default_ui_manager: UIManager):
-        the_font = pygame.freetype.Font(None, 20)
+        the_font = GUIFontFreetype(None, 20)
+        the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -130,7 +133,8 @@ class TestHyperlinkTextChunk:
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FFFF00')
 
     def test_set_inactive(self, _init_pygame, default_ui_manager: UIManager):
-        the_font = pygame.freetype.Font(None, 20)
+        the_font = GUIFontFreetype(None, 20)
+        the_font.remove_font_pad_and_origin()
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
