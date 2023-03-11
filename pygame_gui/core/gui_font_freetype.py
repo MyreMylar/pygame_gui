@@ -6,8 +6,8 @@ from typing import Union, IO, Optional, Dict, Tuple
 from os import PathLike
 from pygame import Color, Surface, Rect
 
-AnyPath = Union[str, bytes, PathLike[str], PathLike[bytes]]
-FileArg = Union[AnyPath, IO[bytes], IO[str]]
+AnyPath = Union[str, bytes, PathLike]
+FileArg = Union[AnyPath, IO]
 
 
 class GUIFontFreetype(IGUIFontInterface):
