@@ -192,13 +192,16 @@ def clipboard_copy(data: str):
     :return: A platform specific copy function.
 
     """
-    current_platform = platform.system().upper()
-    if current_platform == 'WINDOWS':
-        __windows_copy(data)
-    elif current_platform == 'LINUX':
-        __linux_copy(data)
+    if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
+        pygame.scrap.put_text(data)
     else:
-        __mac_copy(data)
+        current_platform = platform.system().upper()
+        if current_platform == 'WINDOWS':
+            __windows_copy(data)
+        elif current_platform == 'LINUX':
+            __linux_copy(data)
+        else:
+            __mac_copy(data)
 
 
 def clipboard_paste():
@@ -208,13 +211,16 @@ def clipboard_paste():
     :return: A platform specific paste function.
 
     """
-    current_platform = platform.system().upper()
-    if current_platform == 'WINDOWS':
-        return __windows_paste()
-    elif current_platform == 'LINUX':
-        return __linux_paste()
+    if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
+        return pygame.scrap.get_text()
     else:
-        return __mac_paste()
+        current_platform = platform.system().upper()
+        if current_platform == 'WINDOWS':
+            return __windows_paste()
+        elif current_platform == 'LINUX':
+            return __linux_paste()
+        else:
+            return __mac_paste()
 
 
 def create_resource_path(relative_path: Union[str, Path]):
