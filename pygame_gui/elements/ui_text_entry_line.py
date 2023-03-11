@@ -5,7 +5,7 @@ from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
 
-import pygame.freetype
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
@@ -97,7 +97,7 @@ class UITextEntryLine(UIElement):
             self.placeholder_text = placeholder_text
 
         # theme font
-        self.font: Optional[pygame.freetype.Font] = None
+        self.font: Optional[IGUIFontInterface] = None
 
         self.shadow_width = None
         self.border_width = None

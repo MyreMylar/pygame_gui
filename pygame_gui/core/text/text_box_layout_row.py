@@ -1,7 +1,7 @@
 from typing import Optional, Tuple, List, Union
 import math
 import pygame
-import pygame.freetype
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
@@ -432,13 +432,10 @@ class TextBoxLayoutRow(pygame.Rect):
         return cursor_index, cursor_draw_width
 
     def get_last_text_chunk(self):
-        last_item = None
         for item in reversed(self.items):
             if isinstance(item, TextLineChunkFTFont):
-                last_item = item
-                break
-
-        return last_item
+                return item
+        return None
 
     def set_cursor_position(self, cursor_pos):
         """
@@ -511,8 +508,8 @@ class TextBoxLayoutRow(pygame.Rect):
                 if chunk == chunk_to_insert_after:
                     chunk_insert_index = chunk_index + 1
                     break
-            current_font: pygame.freetype.Font = chunk_to_insert_after.font
-            current_font_size = current_font.size
+            current_font: IGUIFontInterface = chunk_to_insert_after.font
+            current_font_size = current_font.get_point_size()
             dimensions = (current_font.get_rect(' ').width,
                           int(round(current_font_size *
                                     self.line_spacing)))
@@ -526,12 +523,6 @@ class TextBoxLayoutRow(pygame.Rect):
                 if len(item.text) > 0 and item.text[-1] == " ":
                     return True
         return False
-
-    def get_last_text_chunk(self):
-        for item in reversed(self.items):
-            if isinstance(item, TextLineChunkFTFont):
-                return item
-        return None
 
     def get_last_text_or_line_break_chunk(self):
         for item in reversed(self.items):

@@ -20,9 +20,9 @@ from queue import Queue
 import i18n
 
 import pygame
-import pygame.freetype
 
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IGUIFontInterface
+from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 
 
 __default_manager = None  # type: Optional[IUIManagerInterface]
@@ -274,23 +274,14 @@ def premul_alpha_surface(surface: pygame.surface.Surface) -> pygame.surface.Surf
     return surface
 
 
-def render_white_text_alpha_black_bg(font: pygame.freetype.Font,
+def render_white_text_alpha_black_bg(font: IGUIFontInterface,
                                      text: str) -> pygame.surface.Surface:
     """
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
     """
-    text_surface, text_rect = font.render(text,
-                                          pygame.Color('#FFFFFFFF'),
-                                          pygame.Color('#00000001'))
-    text_rect.height -= 1
-    text_rect.topleft = (0, 0)
-    final_surface = pygame.surface.Surface(text_rect.size,
-                                           flags=pygame.SRCALPHA, depth=32)
-    final_surface.fill(pygame.Color('#00000001'))
-    final_surface.blit(text_surface, text_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
-
-    return final_surface
+    text_surface = font.render_premul(text, pygame.Color("white"))
+    return text_surface
 
 
 def basic_blit(destination: pygame.surface.Surface,
@@ -383,7 +374,7 @@ class FontResource:
         self.style = style
         self.location = location[0]
         self.force_style = location[1]
-        self.loaded_font = None  # type: Union[pygame.freetype.Font, None]
+        self.loaded_font = None  # type: Union[GUIFontFreetype, None]
 
     def load(self):
         """
@@ -395,27 +386,17 @@ class FontResource:
         error = None
         if isinstance(self.location, PackageResource):
             try:
-                self.loaded_font = pygame.freetype.Font(
+                self.loaded_font = GUIFontFreetype(
                     io.BytesIO((resources.files(self.location.package) /
                                 self.location.resource).read_bytes()),
-                    self.size, resolution=72)
-                self.loaded_font.pad = True
-                self.loaded_font.origin = True
-                if self.force_style:
-                    self.loaded_font.strong = self.style['bold']
-                    self.loaded_font.oblique = self.style['italic']
+                    self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
 
         elif isinstance(self.location, str):
             try:
-                self.loaded_font = pygame.freetype.Font(self.location, self.size, resolution=72)
-                self.loaded_font.pad = True
-                self.loaded_font.origin = True
-                if self.force_style:
-                    self.loaded_font.strong = self.style['bold']
-                    self.loaded_font.oblique = self.style['italic']
+                self.loaded_font = GUIFontFreetype(self.location, self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -423,12 +404,7 @@ class FontResource:
         elif isinstance(self.location, bytes):
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
-                self.loaded_font = pygame.freetype.Font(file_obj, self.size, resolution=72)
-                self.loaded_font.pad = True
-                self.loaded_font.origin = True
-                if self.force_style:
-                    self.loaded_font.strong = self.style['bold']
-                    self.loaded_font.oblique = self.style['italic']
+                self.loaded_font = GUIFontFreetype(file_obj, self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -616,9 +592,3 @@ def translate(text_to_translate: str, **keywords) -> str:
              is passed back.
     """
     return i18n.t(text_to_translate, **keywords)
-
-
-
-
-
-
