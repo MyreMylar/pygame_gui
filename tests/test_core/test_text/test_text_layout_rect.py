@@ -5,7 +5,7 @@ from pygame_gui.ui_manager import UIManager
 
 
 class TestTextLayoutRect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
                                           float_pos=TextFloatPosition.NONE,
@@ -13,7 +13,7 @@ class TestTextLayoutRect:
 
         assert text_layout_rect.size == (100, 50)
 
-    def test_can_split(self, _init_pygame, default_ui_manager: UIManager):
+    def test_can_split(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
                                           float_pos=TextFloatPosition.NONE,
@@ -28,7 +28,7 @@ class TestTextLayoutRect:
 
         assert not text_layout_rect_no_split.can_split()
 
-    def test_should_span(self, _init_pygame, default_ui_manager: UIManager):
+    def test_should_span(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_layout_rect = TextLayoutRect(dimensions=(100, 50),
                                           can_split=True,
                                           float_pos=TextFloatPosition.NONE,
@@ -43,7 +43,7 @@ class TestTextLayoutRect:
 
         assert not text_layout_rect_no_span.should_span()
 
-    def test_float_pos(self, _init_pygame, default_ui_manager: UIManager):
+    def test_float_pos(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         rect_float_none = TextLayoutRect(dimensions=(100, 50),
                                          can_split=True,
                                          float_pos=TextFloatPosition.NONE,
@@ -65,7 +65,7 @@ class TestTextLayoutRect:
 
         assert rect_float_right.float_pos() == TextFloatPosition.RIGHT
 
-    def test_split(self, _init_pygame, default_ui_manager: UIManager):
+    def test_split(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         layout_rect = TextLayoutRect(dimensions=(100, 50),
                                      can_split=True,
                                      float_pos=TextFloatPosition.NONE,
@@ -83,7 +83,7 @@ class TestTextLayoutRect:
         assert new_rect.width == 50
         assert layout_rect.height == new_rect.height
 
-    def test_vertical_overlap(self, _init_pygame, default_ui_manager: UIManager):
+    def test_vertical_overlap(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         layout_rect_1 = TextLayoutRect(dimensions=(100, 50),
                                        can_split=True,
                                        float_pos=TextFloatPosition.NONE,

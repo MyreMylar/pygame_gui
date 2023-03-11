@@ -50,7 +50,7 @@ class TestUIManager:
         sprite_group = default_ui_manager.get_sprite_group()
         assert (type(sprite_group) == LayeredGUIGroup)
 
-    def test_get_window_stack(self, _init_pygame, default_ui_manager):
+    def test_get_window_stack(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the window stack? Serves as a test of the window stack being successfully created.
         """
@@ -69,7 +69,7 @@ class TestUIManager:
 
         assert ((type(shadow_surface) == pygame.Surface) and (shadow_surface_size == requested_size))
 
-    def test_set_window_resolution(self, _init_pygame, default_ui_manager):
+    def test_set_window_resolution(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Tests that this does actually set the window resolution.
         """

@@ -16,19 +16,19 @@ from pygame_gui import UITextEffectType, UI_TEXT_EFFECT_FINISHED
 
 
 class TestTextEffect:
-    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_final_alpha(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_effect = TextEffect()
 
         assert text_effect.get_final_alpha() == 255
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_effect = TextEffect()
 
         assert not text_effect.has_text_changed()
 
 
 class TestTypingAppearEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('Hello world', pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
         typing_effect = TypingAppearEffect(text_owner=text_box)
@@ -41,7 +41,7 @@ class TestTypingAppearEffect:
 
         assert label.active_text_effect.text_owner == label
 
-    def test_switching(self, _init_pygame, default_ui_manager: UIManager):
+    def test_switching(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -52,7 +52,7 @@ class TestTypingAppearEffect:
 
         assert type(text_box.active_text_effect) is TypingAppearEffect
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -110,7 +110,7 @@ class TestTypingAppearEffect:
 
         assert label.active_text_effect is None
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -134,7 +134,7 @@ class TestTypingAppearEffect:
 
         assert label_typing_effect.has_text_changed()
 
-    def test_set_active_effect_and_params(self, _init_pygame,
+    def test_set_active_effect_and_params(self, _init_pygame, _display_surface_return_none,
                                           default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
@@ -169,7 +169,7 @@ class TestTypingAppearEffect:
         with pytest.warns(UserWarning, match='Unsupported effect name'):
             label.set_active_effect("bunce")
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -189,7 +189,7 @@ class TestTypingAppearEffect:
 
 
 class TestFadeInEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('Hello world', pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
         fade_in_effect = FadeInEffect(text_owner=text_box)
@@ -202,7 +202,7 @@ class TestFadeInEffect:
 
         assert label_fade_in_effect.text_owner == label
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -227,7 +227,7 @@ class TestFadeInEffect:
 
         assert label_fade_in_effect.alpha_value == (0.12 / label_fade_in_effect.time_per_alpha_change)
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -252,7 +252,7 @@ class TestFadeInEffect:
 
         assert label_fade_in_effect.has_text_changed()
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -269,7 +269,7 @@ class TestFadeInEffect:
         label.set_active_effect(TEXT_EFFECT_FADE_IN,
                                 params={'time_per_alpha_change': 19.0})
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -287,7 +287,7 @@ class TestFadeInEffect:
             if event.type == UI_TEXT_EFFECT_FINISHED:
                 assert event.effect == TEXT_EFFECT_FADE_IN
 
-    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_final_alpha(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('Hello world',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -299,7 +299,7 @@ class TestFadeInEffect:
 
 
 class TestFadeOutEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('Hello world', pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
         fade_out_effect = FadeOutEffect(text_owner=text_box)
@@ -312,7 +312,7 @@ class TestFadeOutEffect:
 
         assert label_fade_out_effect.text_owner == label
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -337,7 +337,7 @@ class TestFadeOutEffect:
 
         assert label_fade_out_effect.alpha_value == 255 - (0.12 / label_fade_out_effect.time_per_alpha_change)
 
-    def test_has_text_block_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_block_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('hello <font color=#FF0000>this is a</font> test',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -351,7 +351,7 @@ class TestFadeOutEffect:
 
         assert fade_out_effect.has_text_changed()
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -368,7 +368,7 @@ class TestFadeOutEffect:
         label.set_active_effect(TEXT_EFFECT_FADE_OUT,
                                 params={'time_per_alpha_change': 19.0})
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -386,7 +386,7 @@ class TestFadeOutEffect:
             if event.type == UI_TEXT_EFFECT_FINISHED:
                 assert event.effect == TEXT_EFFECT_FADE_OUT
 
-    def test_get_final_alpha(self, _init_pygame, default_ui_manager: UIManager):
+    def test_get_final_alpha(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('Hello world',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -398,7 +398,7 @@ class TestFadeOutEffect:
 
 
 class TestBounceEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -410,7 +410,7 @@ class TestBounceEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], BounceEffect)
 
-    def test_switching_from_full_to_tagged(self, _init_pygame, default_ui_manager: UIManager):
+    def test_switching_from_full_to_tagged(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
 
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
@@ -426,7 +426,7 @@ class TestBounceEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], BounceEffect)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -459,7 +459,7 @@ class TestBounceEffect:
 
         assert effect.time_acc == 0.0
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -474,7 +474,7 @@ class TestBounceEffect:
 
         assert effect.has_text_changed()
 
-    def test_apply_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_apply_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -491,7 +491,7 @@ class TestBounceEffect:
 
         assert chunk.effects_offset_pos != (0, 0)
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -504,7 +504,7 @@ class TestBounceEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], BounceEffect)
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other <effect id=test2>text</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -534,7 +534,7 @@ class TestBounceEffect:
 
 
 class TestTiltEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -543,7 +543,7 @@ class TestTiltEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], TiltEffect)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -576,7 +576,7 @@ class TestTiltEffect:
 
         assert effect.time_acc == 0.0
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -591,7 +591,7 @@ class TestTiltEffect:
 
         assert effect.has_text_changed()
 
-    def test_apply_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_apply_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -608,7 +608,7 @@ class TestTiltEffect:
 
         assert chunk.effects_rotation != 0
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -621,7 +621,7 @@ class TestTiltEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], TiltEffect)
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -642,7 +642,7 @@ class TestTiltEffect:
 
 
 class TestExpandContractEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -651,7 +651,7 @@ class TestExpandContractEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ExpandContractEffect)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -683,7 +683,7 @@ class TestExpandContractEffect:
 
         assert effect.time_acc == 0.0
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -698,7 +698,7 @@ class TestExpandContractEffect:
 
         assert effect.has_text_changed()
 
-    def test_apply_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_apply_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -715,7 +715,7 @@ class TestExpandContractEffect:
 
         assert chunk.effects_scale != 1.0
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -728,7 +728,7 @@ class TestExpandContractEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ExpandContractEffect)
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other text',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -749,7 +749,7 @@ class TestExpandContractEffect:
 
 
 class TestShakeEffect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -761,7 +761,7 @@ class TestShakeEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
 
-    def test_switching_from_full_to_tagged(self, _init_pygame, default_ui_manager: UIManager):
+    def test_switching_from_full_to_tagged(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
 
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
@@ -777,7 +777,7 @@ class TestShakeEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -810,7 +810,7 @@ class TestShakeEffect:
 
         assert effect.time_acc == 0.0
 
-    def test_has_text_changed(self, _init_pygame, default_ui_manager: UIManager):
+    def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -832,7 +832,7 @@ class TestShakeEffect:
         effect.update(time_delta=0.06)
         effect.update(time_delta=0.06)
 
-    def test_apply_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_apply_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -849,7 +849,7 @@ class TestShakeEffect:
 
         assert chunk.effects_offset_pos == effect.shake
 
-    def test_params(self, _init_pygame, default_ui_manager: UIManager):
+    def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -863,7 +863,7 @@ class TestShakeEffect:
 
         assert isinstance(text_box.active_text_chunk_effects[0]['effect'], ShakeEffect)
 
-    def test_finish_effect(self, _init_pygame, default_ui_manager: UIManager):
+    def test_finish_effect(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect> other <effect id=test2>text</effect>',
                              pygame.Rect((10, 10), (200, 100)),
                              default_ui_manager)
@@ -894,7 +894,7 @@ class TestShakeEffect:
 
 class TestTextEffectType:
 
-    def test_basic_tests(self, _init_pygame):
+    def test_basic_tests(self, _init_pygame, _display_surface_return_none):
         test_effect_type = UITextEffectType('test_effect')
 
         assert 'this is test_effect' == 'this is ' + test_effect_type

@@ -826,7 +826,7 @@ class TestUISelectionList:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
-    def test_default_selection_exceptions(self):
+    def test_default_selection_exceptions(self, _init_pygame, _display_surface_return_none):
         """
         Test that all exceptions throw appropriately:
         1. ValueError if a list of strings/string tuples is passed to a single-selection list.
@@ -899,7 +899,7 @@ class TestUISelectionList:
 
         assert test_case_3_multiple_throws is True
 
-    def test_default_selection_sets_correctly(self):
+    def test_default_selection_sets_correctly(self, _init_pygame, _display_surface_return_none):
         """
         Test that the default selection parameter ACTUALLY sets the values.
         """

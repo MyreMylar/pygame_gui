@@ -21,14 +21,14 @@ class HealthySprite(pygame.sprite.Sprite):
 
 class TestUIStatusBar:
 
-    def test_creation(self, _init_pygame, default_ui_manager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
                                  manager=default_ui_manager)
         assert health_bar.image is not None
 
-    def test_update(self, _init_pygame, default_ui_manager):
+    def test_update(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -41,7 +41,7 @@ class TestUIStatusBar:
 
         assert health_bar.percent_full == 0.5
 
-    def test_rebuild_from_theme_data_non_default(self, _init_pygame):
+    def test_rebuild_from_theme_data_non_default(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_status_bar_non_default.json"))
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -52,7 +52,7 @@ class TestUIStatusBar:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame):
+    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_status_bar_bad_values.json"))
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
@@ -60,7 +60,7 @@ class TestUIStatusBar:
                                  manager=manager)
         assert health_bar.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -75,7 +75,7 @@ class TestUIStatusBar:
 
         assert other_bar.position == (100, 100)
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager):
+    def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,
@@ -85,7 +85,7 @@ class TestUIStatusBar:
 
         assert health_bar.rect.topleft == (150, 30)
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         healthy_sprite = HealthySprite()
         health_bar = UIStatusBar(relative_rect=pygame.Rect(100, 100, 150, 30),
                                  sprite=healthy_sprite,

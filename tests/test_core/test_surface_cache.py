@@ -105,7 +105,7 @@ class TestSurfaceCache:
         # remove item not in cache
         cache.remove_user_and_request_clean_up_of_cached_item('Blep')
 
-    def test_build_cache_id(self, _init_pygame):
+    def test_build_cache_id(self, _init_pygame, _display_surface_return_none):
 
         cache_id = SurfaceCache.build_cache_id(shape='rectangle',
                                                size=(64, 64),
@@ -117,7 +117,7 @@ class TestSurfaceCache:
 
         assert cache_id == 'rectangle_64_64_1_1_5_255_0_0_255_100_200_100_180'
 
-    def test_expand_lt_cache(self, _init_pygame):
+    def test_expand_lt_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
         assert not cache.low_on_space
         cache.cache_surfaces = [1, 2, 3, 4, 5]
