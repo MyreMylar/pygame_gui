@@ -699,11 +699,13 @@ def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tu
 
 
 def is_valid_gradient_string(strdata: str) -> bool:
-    """Validate a gradient string
-        A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid colour strings and the last value representing a degree angle for the direction of the gradient
-        Examples:
-            - "red,blue,40deg"
-            - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
+    """
+    Validate a gradient string
+    A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid
+    colour strings and the last value representing a degree angle for the direction of the gradient.
+    Examples:
+    - "red,blue,40deg"
+    - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
 
     :param strdata: the gradient string to validate
     :type strdata: str
@@ -721,11 +723,13 @@ def is_valid_gradient_string(strdata: str) -> bool:
 
 
 def parse_gradient_string(strdata: str) -> Optional[ColourGradient]:
-    """Parse a gradient string
-        A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid colour strings and the last value representing a degree angle for the direction of the gradient
-        Examples:
-            - "red,blue,40deg"
-            - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
+    """
+    Parse a gradient string
+    A gradient string should consist of a 3 or 4 length comma separated list, with the first values being any valid
+    colour strings and the last value representing a degree angle for the direction of the gradient
+    Examples:
+    - "red,blue,40deg"
+    - "#f23,rgb(30, 70, 230),hsv(50, 70%, 90%),50"
 
     :param strdata: the gradient string to validate
     :type strdata: str

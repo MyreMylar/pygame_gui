@@ -14,6 +14,8 @@
 #
 import os
 import sys
+import sphinxcontrib.htmlhelp
+import sphinxcontrib.applehelp
 import sphinx_rtd_theme
 
 
@@ -112,8 +114,6 @@ smartquotes = False
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'pygame-ce': ('https://pyga.me/docs/', None),
-                       'pygame': ('https://pyga.me/docs/', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 autodoc_mock_imports = ["ctypes"]
