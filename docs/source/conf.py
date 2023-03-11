@@ -14,8 +14,6 @@
 #
 import os
 import sys
-import sphinxcontrib.htmlhelp
-import sphinxcontrib.applehelp
 import sphinx_rtd_theme
 
 
