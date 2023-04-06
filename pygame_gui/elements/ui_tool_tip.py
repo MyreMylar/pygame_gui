@@ -66,7 +66,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         self.text_block = UITextBox(html_text,
                                     pygame.Rect(0, 0, self.rect_width, -1),
                                     manager=self.ui_manager,
-                                    layer_starting_height=self._layer,
+                                    starting_height=self._layer,
                                     parent_element=self,
                                     text_kwargs=text_kwargs)
 

@@ -23,7 +23,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout
                           guide for details.
-    :param starting_layer_height: How many layers above its container to place this panel on.
+    :param starting_height: How many layers above its container to place this panel on.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
                     between elements. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
@@ -42,7 +42,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 starting_layer_height: int = 1,
+                 starting_height: int = 1,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
                  element_id: str = 'panel',
@@ -57,7 +57,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         super().__init__(relative_rect,
                          manager,
                          container,
-                         starting_height=starting_layer_height,
+                         starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
                          visible=visible)
@@ -93,7 +93,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                                   self.container_margins['bottom']))
 
         self.panel_container = UIContainer(container_rect, manager,
-                                           starting_height=starting_layer_height,
+                                           starting_height=starting_height,
                                            container=container,
                                            parent_element=self,
                                            object_id=ObjectID(object_id='#panel_container',

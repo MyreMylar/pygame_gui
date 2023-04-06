@@ -675,7 +675,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=True,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message")
 
         assert text_box.rect.height != 10
@@ -692,7 +692,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=True,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message")
 
         assert text_box.rect.height != 0
@@ -775,7 +775,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=False,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message",
                              visible=0)
 
@@ -802,7 +802,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=False,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message",
                              visible=0)
 
@@ -837,7 +837,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=False,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message")
 
         assert text_box.visible == 1
@@ -863,7 +863,7 @@ class TestUITextBox:
                              relative_rect=rect,
                              manager=default_ui_manager,
                              wrap_to_height=False,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message")
 
         assert text_box.visible == 1
@@ -895,7 +895,7 @@ class TestUITextBox:
                              relative_rect=pygame.Rect(100, 100, 400, 400),
                              manager=manager,
                              wrap_to_height=False,
-                             layer_starting_height=100,
+                             starting_height=100,
                              object_id="screen_message",
                              visible=0)
         manager.update(0.01)
