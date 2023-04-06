@@ -916,6 +916,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
             self._image_clip = rect
             if self.image is not None:
+                if self.image.get_size() != self._pre_clipped_image.get_size():
+                    self.image = pygame.Surface(self._pre_clipped_image.get_size(), flags=pygame.SRCALPHA, depth=32)
                 self.image.fill(pygame.Color('#00000000'))
                 basic_blit(self.image, self._pre_clipped_image, self._image_clip, self._image_clip)
 
