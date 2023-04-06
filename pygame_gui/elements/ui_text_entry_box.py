@@ -239,8 +239,6 @@ class UITextEntryBox(UITextBox):
                 consumed_event = True
             elif self._process_action_key_event(event):
                 consumed_event = True
-            # elif self._process_text_entry_key(event):
-            #     consumed_event = True
 
         if self.is_enabled and self.is_focused and event.type == TEXTINPUT:
             processed_any_char = False
