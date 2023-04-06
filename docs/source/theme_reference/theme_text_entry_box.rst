@@ -1,7 +1,7 @@
-.. _theme-text-box:
+.. _theme-text-entry-box:
 
 UITextEntryBox Theming Parameters
-===============================
+=================================
 
 .. raw:: html
 

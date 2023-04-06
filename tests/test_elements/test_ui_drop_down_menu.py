@@ -410,7 +410,7 @@ class TestUIDropDownMenu:
         # if we successfully clicked on the moved menu then this button should be True
         assert non_default_menu.current_state.close_button.held is True
 
-    def test_on_fresh_drawable_shape_ready(self, _init_pygame, default_ui_manager):
+    def test_on_fresh_drawable_shape_ready(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -418,7 +418,7 @@ class TestUIDropDownMenu:
 
         assert not menu.on_fresh_drawable_shape_ready()
 
-    def test_hover_point(self, _init_pygame, default_ui_manager):
+    def test_hover_point(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(100, 100, 200, 30),
@@ -601,7 +601,7 @@ class TestUIDropDownMenu:
         assert menu.current_state == menu.menu_states['expanded']
         assert menu.selected_option == 'eggs'
 
-    def test_show_of_dropdown(self, _init_pygame, default_ui_manager):
+    def test_show_of_dropdown(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
                               starting_option='eggs',
                               relative_rect=pygame.Rect(10, 10, 200, 30),

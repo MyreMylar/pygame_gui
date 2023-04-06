@@ -25,11 +25,11 @@ class TestColourGradient:
         gradient.apply_gradient_to_surface(test_surface)
 
         after_application_colour = test_surface.get_at((0, 0))
-        # this is now properly fixed in the next version of pygame (2.1.3)
-        if pygame.vernum.minor >= 1 and pygame.vernum.patch >= 3:
-            assert after_application_colour == pygame.Color(0, 11, 243, 255)
+        if pygame.vernum.major >= 2 and pygame.vernum.minor >= 2:
+            # The scaling algorithm changed slightly in 2.2, this affects the gradient color
+            assert after_application_colour == pygame.Color(0, 5, 249, 255)
         else:
-            assert after_application_colour == pygame.Color(0, 10, 242, 254)
+            assert after_application_colour == pygame.Color(0, 11, 243, 255)
 
 
 if __name__ == '__main__':

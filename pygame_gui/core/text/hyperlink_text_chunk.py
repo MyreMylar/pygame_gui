@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
-import pygame.freetype
-
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame.color import Color
 
 
@@ -16,7 +15,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
     def __init__(self,
                  href: str,
                  text: str,
-                 font: pygame.freetype.Font,
+                 font: IGUIFontInterface,
                  underlined: bool,
                  colour: Color,
                  bg_colour: Color,

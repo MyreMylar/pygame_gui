@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-import pygame.freetype
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 
 class IUIFontDictionaryInterface(metaclass=ABCMeta):
@@ -13,7 +13,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> pygame.freetype.Font:
+                  bold: bool = False, italic: bool = False) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -28,12 +28,12 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
 
-        :return pygame.freetype.Font: Returns either the font we asked for, or the default font.
+        :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
         """
 
     @abstractmethod
-    def get_default_font(self) -> pygame.freetype.Font:
+    def get_default_font(self) -> IGUIFontInterface:
         """
         Grab the default font.
 
@@ -105,7 +105,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
         :param html_size: Size in HTML style.
 
-        :return int: A 'point' font size we can use with pygame.freetype.font
+        :return int: A 'point' font size.
 
         """
 

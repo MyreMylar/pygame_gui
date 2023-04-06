@@ -7,11 +7,11 @@ from pygame_gui.core.text import HorizRuleLayoutRect
 
 
 class TestHorizRuleLayoutRect:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         HorizRuleLayoutRect(height=20,
                             colour_or_gradient=pygame.Color('#FFFFFF'))
 
-    def test_finalise(self):
+    def test_finalise(self, _init_pygame, _display_surface_return_none):
         horiz_rule = HorizRuleLayoutRect(height=20,
                                          rule_dimensions=(-1, 1),
                                          colour_or_gradient=pygame.Color('#FFFFFF'))

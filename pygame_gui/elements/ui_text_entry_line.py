@@ -5,7 +5,7 @@ from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
 
-import pygame.freetype
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
@@ -97,7 +97,7 @@ class UITextEntryLine(UIElement):
             self.placeholder_text = placeholder_text
 
         # theme font
-        self.font: Optional[pygame.freetype.Font] = None
+        self.font: Optional[IGUIFontInterface] = None
 
         self.shadow_width = None
         self.border_width = None
@@ -200,7 +200,7 @@ class UITextEntryLine(UIElement):
                         raise ValueError('Selected font for UITextEntryLine does not contain '
                                          '●, * or . characters used for hidden text. Please choose'
                                          'a different font for this element')
-                display_text = self.hidden_text_char*len(self.text)
+            display_text = self.hidden_text_char*len(self.text)
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
@@ -406,8 +406,13 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
             elif self._process_action_key_event(event):
                 consumed_event = True
-            elif self._process_text_entry_key(event):
-                consumed_event = True
+
+        if self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT:
+            processed_any_char = False
+            for char in event.text:
+                if self._process_entered_character(char):
+                    processed_any_char = True
+            consumed_event = processed_any_char
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
@@ -429,6 +434,12 @@ class UITextEntryLine(UIElement):
         return consumed_event
 
     def _process_text_entry_key(self, event: pygame.event.Event) -> bool:
+        consumed_event = False
+        if hasattr(event, 'unicode'):
+            consumed_event = self._process_entered_character(event.unicode)
+        return consumed_event
+
+    def _process_entered_character(self, character: str) -> bool:
         """
         Process key input that can be added to the text entry text.
 
@@ -436,15 +447,14 @@ class UITextEntryLine(UIElement):
 
         :return: True if consumed.
         """
-        consumed_event = False
+        processed_character = False
         within_length_limit = True
         if (self.length_limit is not None
                 and (len(self.text) -
                      abs(self.select_range[0] -
                          self.select_range[1])) >= self.length_limit):
             within_length_limit = False
-        if within_length_limit and hasattr(event, 'unicode') and self.font is not None:
-            character = event.unicode
+        if within_length_limit and self.font is not None:
             char_metrics = self.font.get_metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
                 valid_character = True
@@ -476,8 +486,8 @@ class UITextEntryLine(UIElement):
 
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
-                    consumed_event = True
-        return consumed_event
+                    processed_character = True
+        return processed_character
 
     def _process_action_key_event(self, event: pygame.event.Event) -> bool:
         """
@@ -886,15 +896,18 @@ class UITextEntryLine(UIElement):
 
         """
         is_valid = True
-        if self.forbidden_characters is not None:
-            for character in text_to_validate:
-                if character in self.forbidden_characters:
-                    is_valid = False
+        if text_to_validate is not None:
+            if self.forbidden_characters is not None:
+                for character in text_to_validate:
+                    if character in self.forbidden_characters:
+                        is_valid = False
 
-        if is_valid and self.allowed_characters is not None:
-            for character in text_to_validate:
-                if character not in self.allowed_characters:
-                    is_valid = False
+            if is_valid and self.allowed_characters is not None:
+                for character in text_to_validate:
+                    if character not in self.allowed_characters:
+                        is_valid = False
+        else:
+            is_valid = False
 
         return is_valid
 

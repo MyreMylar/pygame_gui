@@ -1,7 +1,7 @@
 Contributing to Pygame GUI
 --------------------------
 
-Basic guidlines for contributing
+Basic guidelines for contributing
 ================================
 
 1. **Pygame GUI uses PEP8 as a style guide**, mainly because it is enforced by PyCharm. Contributions should be in the same general style.
@@ -38,7 +38,7 @@ All should be pip installable.
 Venv:
 + If developing a [virtual environment](https://docs.python.org/3/library/venv.html) (recommended), use this command while in the environment to download all relevant dependencies
 + ```python -m pip install pygame python-i18n importlib_resources typing_extensions```
-+ Or here's a one liner to set up the virtual environment all at once
++ Or here's a one-liner to set up the virtual environment all at once
 + ```python -m pip install pygame python-i18n importlib_resources typing_extensions sphinx sphinx_rtd_theme pytest pytest-cov pytest-benchmark ```
  
  Helpful checklist to go through before submitting a big pull request

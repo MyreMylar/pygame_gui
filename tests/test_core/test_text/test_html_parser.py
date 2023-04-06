@@ -8,7 +8,7 @@ from pygame_gui.core.text import HTMLParser, LineBreakLayoutRect, ImageLayoutRec
 
 
 class TestHTMLParser:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
 
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
@@ -25,7 +25,7 @@ class TestHTMLParser:
 
         assert len(parser.layout_rect_queue) == 0
 
-    def test_handle_start_tag(self, _init_pygame, default_ui_manager: UIManager):
+    def test_handle_start_tag(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -104,7 +104,7 @@ class TestHTMLParser:
         assert parser.layout_rect_queue[-1].padding.right == 0
         assert parser.layout_rect_queue[-1].padding.left == 0
 
-    def test_handle_end_tag(self, _init_pygame, default_ui_manager: UIManager):
+    def test_handle_end_tag(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -132,7 +132,7 @@ class TestHTMLParser:
         assert len(parser.style_stack) == 1
         assert parser.current_style['bold'] is False
 
-    def test_handle_data(self, _init_pygame, default_ui_manager: UIManager):
+    def test_handle_data(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -164,7 +164,7 @@ class TestHTMLParser:
         assert parser.layout_rect_queue[1].text == 'underlined text'
         assert parser.layout_rect_queue[1].underlined is True
 
-    def test_push_style(self, _init_pygame, default_ui_manager: UIManager):
+    def test_push_style(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -186,7 +186,7 @@ class TestHTMLParser:
         assert parser.style_stack[1][0] == 'b'
         assert parser.current_style['bold'] is True
 
-    def test_pop_style(self, _init_pygame, default_ui_manager: UIManager):
+    def test_pop_style(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
@@ -215,7 +215,7 @@ class TestHTMLParser:
 
         parser.pop_style('bad_tag')
 
-    def test_error(self, _init_pygame, default_ui_manager: UIManager):
+    def test_error(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
