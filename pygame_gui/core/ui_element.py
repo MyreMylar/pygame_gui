@@ -720,26 +720,32 @@ class UIElement(GUISprite, IUIElementInterface):
         :return bool: A boolean that is true if we have hovered a UI element, either just now or
                       before this method.
         """
-        if self.alive() and self.can_hover():
+        should_block_hover = False
+        if self.alive():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
-            if (self.is_enabled and
-                    self.hover_point(mouse_x, mouse_y) and
+            if (self.hover_point(mouse_x, mouse_y) and
                     not hovered_higher_element):
-                if not self.hovered:
-                    self.hovered = True
-                    self.on_hovered()
+                should_block_hover = True
 
-                self.while_hovering(time_delta, mouse_pos)
+                if self.can_hover():
+                    if not self.hovered:
+                        self.hovered = True
+                        self.on_hovered()
 
+                    self.while_hovering(time_delta, mouse_pos)
+                else:
+                    if self.hovered:
+                        self.hovered = False
+                        self.on_unhovered()
             else:
                 if self.hovered:
                     self.hovered = False
                     self.on_unhovered()
         elif self.hovered:
             self.hovered = False
-        return self.hovered
+        return should_block_hover
 
     def on_fresh_drawable_shape_ready(self):
         """
