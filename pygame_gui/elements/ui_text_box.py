@@ -587,7 +587,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.rect.width <= 0 or self.rect.height <= 0:
             return
-        if (self.scroll_bar is None and
+        if (self.scroll_bar is None and (self.text_wrap_rect[3] != -1) and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
         else:
