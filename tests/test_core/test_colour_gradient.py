@@ -25,7 +25,11 @@ class TestColourGradient:
         gradient.apply_gradient_to_surface(test_surface)
 
         after_application_colour = test_surface.get_at((0, 0))
-        assert after_application_colour == pygame.Color(0, 11, 243, 255)
+        if pygame.vernum.major >= 2 and pygame.vernum.minor >= 2:
+            # The scaling algorithm changed slightly in 2.2, this affects the gradient color
+            assert after_application_colour == pygame.Color(0, 5, 249, 255)
+        else:
+            assert after_application_colour == pygame.Color(0, 11, 243, 255)
 
 
 if __name__ == '__main__':

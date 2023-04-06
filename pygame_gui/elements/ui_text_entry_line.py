@@ -898,15 +898,18 @@ class UITextEntryLine(UIElement):
 
         """
         is_valid = True
-        if self.forbidden_characters is not None:
-            for character in text_to_validate:
-                if character in self.forbidden_characters:
-                    is_valid = False
+        if text_to_validate is not None:
+            if self.forbidden_characters is not None:
+                for character in text_to_validate:
+                    if character in self.forbidden_characters:
+                        is_valid = False
 
-        if is_valid and self.allowed_characters is not None:
-            for character in text_to_validate:
-                if character not in self.allowed_characters:
-                    is_valid = False
+            if is_valid and self.allowed_characters is not None:
+                for character in text_to_validate:
+                    if character not in self.allowed_characters:
+                        is_valid = False
+        else:
+            is_valid = False
 
         return is_valid
 
