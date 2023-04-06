@@ -9,7 +9,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11']
-        pygame-ce-version: ['2.1.4']
+        pygame-ce-version: ['2.1.4', '2.2.1']
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
@@ -49,7 +49,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [ '3.11' ]
-        pygame-ce-version: [ '2.1.4' ]
+        pygame-ce-version: [ '2.1.4', '2.2.1' ]
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python ${{ matrix.python-version }}
@@ -86,7 +86,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [ '3.11' ]
-        pygame-ce-version: [ '2.1.4' ]
+        pygame-ce-version: [ '2.1.4', '2.2.1' ]
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python ${{ matrix.python-version }}
