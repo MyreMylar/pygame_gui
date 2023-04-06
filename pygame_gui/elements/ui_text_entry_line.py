@@ -406,8 +406,13 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
             elif self._process_action_key_event(event):
                 consumed_event = True
-            elif self._process_text_entry_key(event):
-                consumed_event = True
+
+        if self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT:
+            processed_any_char = False
+            for char in event.text:
+                if self._process_entered_character(char):
+                    processed_any_char = True
+            consumed_event = processed_any_char
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
@@ -429,6 +434,12 @@ class UITextEntryLine(UIElement):
         return consumed_event
 
     def _process_text_entry_key(self, event: pygame.event.Event) -> bool:
+        consumed_event = False
+        if hasattr(event, 'unicode'):
+            consumed_event = self._process_entered_character(event.unicode)
+        return consumed_event
+
+    def _process_entered_character(self, character: str) -> bool:
         """
         Process key input that can be added to the text entry text.
 
@@ -436,15 +447,14 @@ class UITextEntryLine(UIElement):
 
         :return: True if consumed.
         """
-        consumed_event = False
+        processed_character = False
         within_length_limit = True
         if (self.length_limit is not None
                 and (len(self.text) -
                      abs(self.select_range[0] -
                          self.select_range[1])) >= self.length_limit):
             within_length_limit = False
-        if within_length_limit and hasattr(event, 'unicode') and self.font is not None:
-            character = event.unicode
+        if within_length_limit and self.font is not None:
             char_metrics = self.font.get_metrics(character)
             if len(char_metrics) > 0 and char_metrics[0] is not None:
                 valid_character = True
@@ -476,8 +486,8 @@ class UITextEntryLine(UIElement):
 
                         self.edit_position += 1
                     self.cursor_has_moved_recently = True
-                    consumed_event = True
-        return consumed_event
+                    processed_character = True
+        return processed_character
 
     def _process_action_key_event(self, event: pygame.event.Event) -> bool:
         """

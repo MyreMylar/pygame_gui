@@ -714,17 +714,12 @@ class TestUITextEntryBox:
         assert text_entry.is_enabled is True
         text_entry.focus()
         # process a mouse button down event
-        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
-                                                                          {'key': pygame.K_d,
-                                                                           'mod': 0,
-                                                                           'unicode': 'd'}))
+        processed_text_input_event = text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'd'}))
 
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_a, 'mod': 0,
-                                                                     'unicode': 'a'}))
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_n, 'mod': 0,
-                                                                     'unicode': 'n'}))
+        text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'a'}))
+        text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'n'}))
 
-        assert processed_key_event is True and text_entry.get_text() == 'dan'
+        assert processed_text_input_event is True and text_entry.get_text() == 'dan'
 
     def test_on_locale_changed(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         text_box = UITextEntryBox(initial_text='la la LA LA LAL LAL ALALA'
@@ -862,17 +857,12 @@ class TestUITextEntryBox:
 
         text_entry.focus()
 
-        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
-                                                                          {'key': pygame.K_d,
-                                                                           'mod': 0,
-                                                                           'unicode': 'd'}))
+        processed_text_input_event = text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'd'}))
 
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_a, 'mod': 0,
-                                                                     'unicode': 'a'}))
-        text_entry.process_event(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_n, 'mod': 0,
-                                                                     'unicode': 'n'}))
+        text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'a'}))
+        text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'n'}))
 
-        assert processed_key_event and text_entry.get_text() == 'dan'
+        assert processed_text_input_event and text_entry.get_text() == 'dan'
 
     def test_process_event_text_entered_with_select_range(self, _init_pygame: None,
                                                           default_ui_manager: UIManager,
@@ -884,13 +874,10 @@ class TestUITextEntryBox:
         text_entry.focus()
         text_entry.select_range = [1, 9]
 
-        # process a mouse button down event
-        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
-                                                                          {'key': pygame.K_o,
-                                                                           'mod': 0,
-                                                                           'unicode': 'o'}))
+        # process a text input event
+        processed_text_input_event = text_entry.process_event(pygame.event.Event(pygame.TEXTINPUT, {'text': 'o'}))
 
-        assert (processed_key_event is True and
+        assert (processed_text_input_event is True and
                 text_entry.get_text() == 'Ho hours of fun writing tests')
 
     def test_process_event_text_ctrl_c(self, _init_pygame: None,
