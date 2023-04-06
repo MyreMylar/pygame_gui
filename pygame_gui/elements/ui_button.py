@@ -301,6 +301,21 @@ class UIButton(UIElement):
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(UI_BUTTON_ON_UNHOVERED, event_data))
 
+    def _get_appropriate_state_name(self):
+        """
+        Returns a string representing the appropriate state for the widgets DrawableShapes.
+        Currently only returns either 'normal' or 'disabled' based on is_enabled.
+        """
+
+        if self.is_enabled:
+            if self.is_selected:
+                return "selected"
+            elif self.hovered:
+                return "hovered"
+            else:
+                return "normal"
+        return "disabled"
+
     def update(self, time_delta: float):
         """
         Sets the pressed state for an update cycle if we've pressed this button recently.
