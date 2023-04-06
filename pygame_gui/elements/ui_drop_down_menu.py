@@ -934,22 +934,6 @@ class UIDropDownMenu(UIContainer):
         """
         self._set_image(self.drawable_shape.get_fresh_surface())
 
-    def hover_point(self, hover_x: float, hover_y: float) -> bool:
-        """
-        Test if a given point counts as 'hovering' this UI element. Normally that is a
-        straightforward matter of seeing if a point is inside the rectangle. Occasionally it
-        will also check if we are in a wider zone around a UI element once it is already active,
-        this makes it easier to move scroll bars and the like.
-
-        :param hover_x: The x (horizontal) position of the point.
-        :param hover_y: The y (vertical) position of the point.
-
-        :return: Returns True if we are hovering this element.
-
-        """
-        return (bool(self.rect.collidepoint(hover_x, hover_y)) and
-                bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
-
     def disable(self):
         """
         Disables the button so that it is no longer interactive.
