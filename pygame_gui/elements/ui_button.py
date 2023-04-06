@@ -366,6 +366,8 @@ class UIButton(UIElement):
                         self.double_click_timer = 0.0
                         self.last_click_button = event.button
                         self.held = True
+                        self.hovered = False
+                        self.on_unhovered()
                         self._set_active()
                         self.hover_time = 0.0
                         if self.tool_tip is not None:
