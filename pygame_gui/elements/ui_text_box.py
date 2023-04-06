@@ -67,7 +67,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     it will try to use the first UIManager that was created by your application.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
                            match the text within.
-    :param layer_starting_height: Sets the height, above its container, to start placing the text
+    :param starting_height: Sets the height, above its container, to start placing the text
                                   box at.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
@@ -86,7 +86,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface] = None,
                  wrap_to_height: bool = False,
-                 layer_starting_height: int = 1,
+                 starting_height: int = 1,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
@@ -100,7 +100,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  should_html_unescape_input_text: bool = False):
 
         super().__init__(relative_rect, manager, container,
-                         starting_height=layer_starting_height,
+                         starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors,
                          visible=visible
