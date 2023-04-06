@@ -225,8 +225,7 @@ class UIButton(UIElement):
         if self.held:
             return self.in_hold_range((hover_x, hover_y))
         else:
-            return (self.drawable_shape.collide_point((hover_x, hover_y)) and
-                    bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
+            return super().hover_point(hover_x, hover_y)
 
     def can_hover(self) -> bool:
         """
