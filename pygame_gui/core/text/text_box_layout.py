@@ -50,10 +50,17 @@ class TextBoxLayout:
 
         self.expand_width = False
         if self.layout_rect.width == -1:
+            self.dynamic_width = True
             self.layout_rect.width = 0
             self.expand_width = True
             for rect in self.input_data_rect_queue:
                 self.layout_rect.width += rect.width
+        else:
+            self.dynamic_width = False
+        if self.layout_rect.height == -1:
+            self.dynamic_height = True
+        else:
+            self.dynamic_height = False
 
         self.layout_rect_queue = None
         self.finalised_surface = None
@@ -142,6 +149,10 @@ class TextBoxLayout:
                 current_row = self._handle_regular_rect(current_row, text_layout_rect, input_queue)
         # make sure we add the last row to the layout
         self._add_row_to_layout(current_row, last_row=True)
+        if self.dynamic_width:
+            self.view_rect.width = self.layout_rect.width
+        if self.dynamic_height:
+            self.view_rect.height = self.layout_rect.height
 
     def _add_row_to_layout(self, current_row: TextBoxLayoutRow, last_row=False):
         # handle an empty row being added to layout
