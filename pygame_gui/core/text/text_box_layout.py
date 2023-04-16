@@ -50,14 +50,16 @@ class TextBoxLayout:
 
         self.expand_width = False
         if self.layout_rect.width == -1:
-            self.dynamic_width = True
             self.layout_rect.width = 0
             self.expand_width = True
             for rect in self.input_data_rect_queue:
                 self.layout_rect.width += rect.width
+
+        if self.view_rect.width == -1:
+            self.dynamic_width = True
         else:
             self.dynamic_width = False
-        if self.layout_rect.height == -1:
+        if self.view_rect.height == -1:
             self.dynamic_height = True
         else:
             self.dynamic_height = False
