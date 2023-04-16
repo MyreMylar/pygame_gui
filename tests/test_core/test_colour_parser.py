@@ -158,7 +158,7 @@ class TestColourParsing:
         assert is_u8_string("4.3") is False
 
     def test_degree_on_bounds(self, _init_pygame):
-        assert is_degree_string("0") is True and is_degree_string("360") is True and is_degree_string("-1") is False and is_degree_string("361") is False
+        assert is_degree_string("0") is True and is_degree_string("360") is True and is_degree_string("-361") is False and is_degree_string("361") is False
 
     def test_degree_unit(self, _init_pygame):
         assert is_degree_string("40deg") is True
