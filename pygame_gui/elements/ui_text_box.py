@@ -98,7 +98,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  allow_split_dashes: bool = True,
                  plain_text_display_only: bool = False,
                  should_html_unescape_input_text: bool = False):
-
+        relative_rect.height = -1 if wrap_to_height else relative_rect.height
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=2,
@@ -125,7 +125,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
-        self.wrap_to_height = wrap_to_height
         self.link_hover_chunks = []  # container for any link chunks we have
 
         self.active_text_effect = None  # type: Optional[TextEffect]
@@ -213,9 +212,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                   (self.border_width * 2) -
                                                   (self.shadow_width * 2) -
                                                   (2 * self.rounded_corner_offset))))
-        if self.wrap_to_height or self.rect[3] == -1:
+        if self.dynamic_height:
             self.text_wrap_rect.height = -1
-        if self.rect[2] == -1:
+        if self.dynamic_width:
             self.text_wrap_rect.width = -1
 
         drawable_area_size = (self.text_wrap_rect[2], self.text_wrap_rect[3])
@@ -223,7 +222,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # This gives us the height of the text at the 'width' of the text_wrap_area
         self.parse_html_into_style_data()
         if self.text_box_layout is not None:
-            if self.wrap_to_height or self.rect[3] == -1 or self.rect[2] == -1:
+            if self.dynamic_height or self.dynamic_width:
                 final_text_area_size = self.text_box_layout.layout_rect.size
                 new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
@@ -573,7 +572,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
-        if self.text_wrap_rect[3] == -1:
+        if not self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
         self._align_all_text_rows()
@@ -587,7 +586,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.rect.width <= 0 or self.rect.height <= 0:
             return
-        if (self.scroll_bar is None and (self.text_wrap_rect[3] != -1) and
+        if (self.scroll_bar is None and not self.dynamic_height and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
         else:

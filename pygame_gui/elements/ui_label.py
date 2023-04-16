@@ -60,8 +60,6 @@ class UILabel(UIElement, IUITextOwnerInterface):
                                object_id=object_id,
                                element_id='label')
 
-        self.dynamic_width = False
-        self.dynamic_height = False
         self.dynamic_dimensions_orig_top_left = relative_rect.topleft
 
         self.text = text
@@ -97,7 +95,6 @@ class UILabel(UIElement, IUITextOwnerInterface):
         :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                             useful when you have multiple translations that need variables inserted
                             in the middle.
-
         """
         any_changed = False
         if text != self.text:
@@ -112,7 +109,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             any_changed = True
 
         if any_changed:
-            if self.dynamic_width:
+            if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
             else:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
@@ -123,15 +120,9 @@ class UILabel(UIElement, IUITextOwnerInterface):
         the displayed text is or remake it with different theming (if the theming has changed).
         """
 
-        self.rect.width = -1 if self.dynamic_width else self.rect.width
-        self.relative_rect.width = -1 if self.dynamic_width else self.relative_rect.width
-
-        self.rect.height = -1 if self.dynamic_height else self.rect.height
-        self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
-
         text_size = self.font.get_rect(translate(self.text, **self.text_kwargs)).size
-        if ((self.rect.height != -1 and text_size[1] > self.relative_rect.height) or
-                (self.rect.width != -1 and text_size[0] > self.relative_rect.width)):
+        if (not (self.dynamic_height or self.dynamic_width) and
+                ((text_size[1] > self.relative_rect.height) or (text_size[0] > self.relative_rect.width))):
             width_overlap = self.relative_rect.width - text_size[0]
             height_overlap = self.relative_rect.height - text_size[1]
             warn_text = ('Label Rect is too small for text: '
@@ -161,17 +152,22 @@ class UILabel(UIElement, IUITextOwnerInterface):
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
                               'text_vert_alignment_padding': self.text_vert_alignment_padding}
 
-        self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+        drawable_shape_rect = self.rect.copy()
+        if self.dynamic_width:
+            drawable_shape_rect.width = -1
+        if self.dynamic_height:
+            drawable_shape_rect.height = -1
+        self.drawable_shape = RectDrawableShape(drawable_shape_rect, theming_parameters,
                                                 ['normal', 'disabled'], self.ui_manager)
         self.on_fresh_drawable_shape_ready()
 
-        if self.relative_rect.width == -1 or self.relative_rect.height == -1:
-            self.dynamic_width = self.relative_rect.width == -1
-            self.dynamic_height = self.relative_rect.height == -1
+        self._on_contents_changed()
 
+    def _calc_dynamic_size(self):
+        if self.dynamic_width or self.dynamic_height:
             self.set_dimensions(self.image.get_size())
 
-            # if we have anchored the left side of our button to the right of it's container then
+            # if we have anchored the left side of our button to the right of its container then
             # changing the width is going to mess up the horiz position as well.
             new_left = self.relative_rect.left
             new_top = self.relative_rect.top
@@ -290,7 +286,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             self.font = font
             self.rebuild()
         else:
-            if self.dynamic_width:
+            if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
             else:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))

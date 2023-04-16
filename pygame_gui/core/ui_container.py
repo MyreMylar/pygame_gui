@@ -198,12 +198,16 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False
+                       ):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.
 
         :param dimensions: the new dimensions.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
