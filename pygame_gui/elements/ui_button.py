@@ -776,16 +776,16 @@ class UIButton(UIElement):
         if self.dynamic_width or self.dynamic_height:
             self.set_dimensions(self.image.get_size())
 
-            # if we have anchored the left side of our button to the right of it's container then
+            # if we have anchored the left side of our button to the right of its container then
             # changing the width is going to mess up the horiz position as well.
             new_left = self.relative_rect.left
             new_top = self.relative_rect.top
-            if self.anchors['left'] == 'right' and self.dynamic_width:
+            if 'left' in self.anchors and self.anchors['left'] == 'right' and self.dynamic_width:
                 left_offset = self.dynamic_dimensions_orig_top_left[0]
                 new_left = left_offset - self.relative_rect.width
             # if we have anchored the top side of our button to the bottom of it's container then
             # changing the height is going to mess up the vert position as well.
-            if self.anchors['top'] == 'bottom' and self.dynamic_height:
+            if 'top' in self.anchors and self.anchors['top'] == 'bottom' and self.dynamic_height:
                 top_offset = self.dynamic_dimensions_orig_top_left[1]
                 new_top = top_offset - self.relative_rect.height
 
