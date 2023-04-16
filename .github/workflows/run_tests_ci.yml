@@ -11,7 +11,7 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         pygame-ce-version: ['2.1.4', '2.2.1']
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -25,7 +25,6 @@ jobs:
         python -m pip install pytest
         python -m pip install pytest-benchmark
         python -m pip install pytest-cov
-        python -m pip install codecov
         python -m pip install -q pygame-ce==${{ matrix.pygame-ce-version }}
         python -m pip install . -U
         sudo apt-get install xvfb
@@ -38,7 +37,7 @@ jobs:
       run: |
         xvfb-run pytest --cov-report=xml --cov=pygame_gui tests/
     - name: Upload to Code Cov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }} #required
 
@@ -51,7 +50,7 @@ jobs:
         python-version: [ '3.11' ]
         pygame-ce-version: [ '2.1.4', '2.2.1' ]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -65,7 +64,6 @@ jobs:
           python -m pip install pytest
           python -m pip install pytest-benchmark
           python -m pip install pytest-cov
-          python -m pip install codecov
           python -m pip install -q pygame-ce==${{ matrix.pygame-ce-version }}
           python -m pip install . -U
       - name: Test with pytest
@@ -75,7 +73,7 @@ jobs:
         run: |
           pytest --cov-report=xml --cov=pygame_gui tests/
       - name: Upload to Code Cov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }} #required
 
@@ -88,7 +86,7 @@ jobs:
         python-version: [ '3.11' ]
         pygame-ce-version: [ '2.1.4', '2.2.1' ]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -102,7 +100,6 @@ jobs:
           python -m pip install pytest
           python -m pip install pytest-benchmark
           python -m pip install pytest-cov
-          python -m pip install codecov
           python -m pip install -q pygame-ce==${{ matrix.pygame-ce-version }}
           python -m pip install . -U
       - name: Test with pytest
@@ -112,6 +109,6 @@ jobs:
         run: |
           pytest --cov-report=xml --cov=pygame_gui tests/
       - name: Upload to Code Cov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }} #required
