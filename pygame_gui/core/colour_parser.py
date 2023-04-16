@@ -78,7 +78,7 @@ def is_degree_string(strdata: str) -> bool:
                 return 0 <= degrees <= 360
         elif is_int_str(strdata):
             degrees = int(strdata)
-            return 0 <= degrees <= 360
+            return -360 <= degrees <= 360
     return False
 
 
