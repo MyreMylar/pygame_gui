@@ -44,17 +44,26 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._layer = 0
         self.ui_manager = manager
+        self.ui_container = None
         if self.ui_manager is None:
             self.ui_manager = get_default_manager()
         if self.ui_manager is None:
             raise ValueError("Need to create at least one UIManager to create UIElements")
 
         super().__init__(self.ui_manager.get_sprite_group())
+
+        self.minimum_dimensions = (-1, -1)
+        relative_rect.size = self._get_clamped_to_minimum_dimensions(relative_rect.size)
+
         if isinstance(relative_rect, pygame.Rect):
             self.relative_rect = relative_rect.copy()
         else:
             self.relative_rect = pygame.Rect(relative_rect)
         self.rect = self.relative_rect.copy()
+
+        self.dynamic_width = True if self.relative_rect.width == -1 else False
+        self.dynamic_height = True if self.relative_rect.height == -1 else False
+
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
 
@@ -139,7 +148,6 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
-        self.ui_container = None
         self._setup_container(container)
 
         self.dirty = 1
@@ -151,6 +159,26 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
+
+    def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
+        if self.ui_container is not None and clamp_to_container:
+            dimensions = (min(self.ui_container.rect.width,
+                              max(self.minimum_dimensions[0],
+                                  int(dimensions[0]))),
+                          min(self.ui_container.rect.height,
+                              max(self.minimum_dimensions[1],
+                                  int(dimensions[1]))))
+        else:
+            dimensions = (max(self.minimum_dimensions[0], int(dimensions[0])),
+                          max(self.minimum_dimensions[1], int(dimensions[1])))
+        return dimensions
+
+    def _on_contents_changed(self):
+        if self.dynamic_width or self.dynamic_height:
+            self._calc_dynamic_size()
+
+    def _calc_dynamic_size(self):
+        pass
 
     @staticmethod
     def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
@@ -462,6 +490,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.rect.top = new_top
         new_height = new_bottom - new_top
         new_width = new_right - new_left
+        new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
             self.set_dimensions((new_width, new_height))
 
@@ -649,9 +678,30 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
         self.ui_container.on_anchor_target_changed(self)
 
+    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                                       Tuple[int, int],
+                                                       Tuple[float, float]]):
+        """
+        If this window is resizable, then the dimensions we set here will be the minimum that
+        users can change the window to. They are also used as the minimum size when
+        'set_dimensions' is called.
+
+        :param dimensions: The new minimum dimension for the window.
+
+        """
+        self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
+                                   min(self.ui_container.rect.height, int(dimensions[1])))
+
+        if ((self.rect.width < self.minimum_dimensions[0]) or
+                (self.rect.height < self.minimum_dimensions[1])):
+            new_width = max(self.minimum_dimensions[0], self.rect.width)
+            new_height = max(self.minimum_dimensions[1], self.rect.height)
+            self.set_dimensions((new_width, new_height))
+
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -659,8 +709,11 @@ class UIElement(GUISprite, IUIElementInterface):
         may make a mess of them.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
+        dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
         self.relative_rect.width = int(dimensions[0])
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size

@@ -47,13 +47,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self._window_root_container = None  # type: Optional[UIContainer]
         self.resizable = resizable
         self.draggable = draggable
-        self.minimum_dimensions = (100, 100)
+
         self.edge_hovering = [False, False, False, False]
 
         super().__init__(rect, manager, container=None,
                          starting_height=1,
                          layer_thickness=1,
                          visible=visible)
+
+        self.minimum_dimensions = (100, 100)
 
         if element_id is None:
             element_id = 'window'
@@ -103,26 +105,6 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         self.is_blocking = state
 
-    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                                       Tuple[int, int],
-                                                       Tuple[float, float]]):
-        """
-        If this window is resizable, then the dimensions we set here will be the minimum that
-        users can change the window to. They are also used as the minimum size when
-        'set_dimensions' is called.
-
-        :param dimensions: The new minimum dimension for the window.
-
-        """
-        self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
-                                   min(self.ui_container.rect.height, int(dimensions[1])))
-
-        if ((self.rect.width < self.minimum_dimensions[0]) or
-                (self.rect.height < self.minimum_dimensions[1])):
-            new_width = max(self.minimum_dimensions[0], self.rect.width)
-            new_height = max(self.minimum_dimensions[1], self.rect.height)
-            self.set_dimensions((new_width, new_height))
-
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]]):
@@ -133,17 +115,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param dimensions: The new dimensions to set.
 
         """
-        # clamp to minimum dimensions and container size
-        dimensions = (min(self.ui_container.rect.width,
-                          max(self.minimum_dimensions[0],
-                              int(dimensions[0]))),
-                      min(self.ui_container.rect.height,
-                          max(self.minimum_dimensions[1],
-                              int(dimensions[1]))))
-
         # Don't use a basic gate on this set dimensions method because the container may be a
         # different size to the window
-        super().set_dimensions(dimensions)
+        super().set_dimensions(dimensions, clamp_to_container=True)
 
         if self._window_root_container is not None:
             new_container_dimensions = (self.relative_rect.width - (2 * self.shadow_width),

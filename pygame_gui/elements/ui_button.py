@@ -83,8 +83,6 @@ class UIButton(UIElement):
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
 
-        self.dynamic_width = False
-        self.dynamic_height = False
         self.dynamic_dimensions_orig_top_left = rel_rect.topleft
         # support for an optional 'tool tip' element attached to this button
         self.tool_tip_text = tool_tip_text
@@ -502,7 +500,7 @@ class UIButton(UIElement):
             any_changed = True
 
         if any_changed:
-            if self.dynamic_width:
+            if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
             else:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
@@ -708,11 +706,6 @@ class UIButton(UIElement):
         A complete rebuild of the drawable shape used by this button.
 
         """
-        self.rect.width = -1 if self.dynamic_width else self.rect.width
-        self.relative_rect.width = -1 if self.dynamic_width else self.relative_rect.width
-
-        self.rect.height = -1 if self.dynamic_height else self.rect.height
-        self.relative_rect.height = -1 if self.dynamic_height else self.relative_rect.height
 
         theming_parameters = {'normal_bg': self.colours['normal_bg'],
                               'normal_text': self.colours['normal_text'],
@@ -756,25 +749,31 @@ class UIButton(UIElement):
                               'shape_corner_radius': self.shape_corner_radius,
                               'transitions': self.state_transitions}
 
+        drawable_shape_rect = self.rect.copy()
+        if self.dynamic_width:
+            drawable_shape_rect.width = -1
+        if self.dynamic_height:
+            drawable_shape_rect.height = -1
+
         if self.shape == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+            self.drawable_shape = RectDrawableShape(drawable_shape_rect, theming_parameters,
                                                     ['normal', 'hovered', 'disabled',
                                                      'selected', 'active'], self.ui_manager)
         elif self.shape == 'ellipse':
-            self.drawable_shape = EllipseDrawableShape(self.rect, theming_parameters,
+            self.drawable_shape = EllipseDrawableShape(drawable_shape_rect, theming_parameters,
                                                        ['normal', 'hovered', 'disabled',
                                                         'selected', 'active'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+            self.drawable_shape = RoundedRectangleShape(drawable_shape_rect, theming_parameters,
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
 
-        if self.relative_rect.width == -1 or self.relative_rect.height == -1:
-            self.dynamic_width = self.relative_rect.width == -1
-            self.dynamic_height = self.relative_rect.height == -1
+        self._on_contents_changed()
 
+    def _calc_dynamic_size(self):
+        if self.dynamic_width or self.dynamic_height:
             self.set_dimensions(self.image.get_size())
 
             # if we have anchored the left side of our button to the right of it's container then
@@ -806,7 +805,7 @@ class UIButton(UIElement):
             self.font = font
             self.rebuild()
         else:
-            if self.dynamic_width:
+            if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
             else:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
