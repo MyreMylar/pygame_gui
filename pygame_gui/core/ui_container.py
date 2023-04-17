@@ -93,6 +93,11 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         element.change_layer(self._layer + element.get_starting_height())
         self.elements.append(element)
         self.calc_add_element_changes_thickness(element)
+        if not self.is_enabled:
+            element.disable()
+        if not self.visible:
+            if hasattr(element, 'hide'):
+                element.hide()
 
     def remove_element(self, element: IUIElementInterface):
         """

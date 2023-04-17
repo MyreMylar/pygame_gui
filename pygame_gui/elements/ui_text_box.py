@@ -98,6 +98,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  allow_split_dashes: bool = True,
                  plain_text_display_only: bool = False,
                  should_html_unescape_input_text: bool = False):
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.scroll_bar = None
         relative_rect.height = -1 if wrap_to_height else relative_rect.height
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
@@ -129,7 +132,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self.active_text_effect = None  # type: Optional[TextEffect]
         self.active_text_chunk_effects = []
-        self.scroll_bar = None
+
         self.scroll_bar_width = 20
 
         self.border_width = None
@@ -497,11 +500,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of a text box.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         self.relative_rect.width = int(dimensions[0])

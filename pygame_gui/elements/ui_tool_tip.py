@@ -192,11 +192,14 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
 
-        :param dimensions: The new dimensions to set
+        :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         self.rect_width = dimensions[0]

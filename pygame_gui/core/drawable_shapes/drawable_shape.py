@@ -344,14 +344,14 @@ class DrawableShape:
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-    def redraw_all_states(self):
+    def redraw_all_states(self, force_full_redraw: bool = False):
         """
         Starts the redrawing process for all states of this shape that auto pre-generate.
         Redrawing is done one state at a time so will take a few loops of the game to
         complete if this shape has many states.
         """
         self.states_to_redraw_queue = deque([state_id for state_id, state in self.states.items()
-                                             if state.should_auto_pregen])
+                                             if (state.should_auto_pregen or force_full_redraw)])
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 
@@ -595,7 +595,10 @@ class DrawableShape:
         """
         self.theming['text'] = text
         self.build_text_layout()
-        self.redraw_all_states()
+        if 'disabled' in self.states and self.active_state == self.states['disabled']:
+            self.redraw_all_states(force_full_redraw=True)
+        else:
+            self.redraw_all_states()
 
     def set_text_alpha(self, alpha: int):
         """

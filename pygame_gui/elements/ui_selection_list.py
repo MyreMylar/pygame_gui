@@ -65,7 +65,9 @@ class UISelectionList(UIElement):
                     List[str], List[Tuple[str, str]]  # Multi-selection lists
                     ]] = None,
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.list_and_scroll_bar_container = None
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -488,12 +490,15 @@ class UISelectionList(UIElement):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the size of this panel and then resizes and shifts the contents of the panel container
         to fit the new size.
 
+
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: clamp these dimensions to the size of the element's container.
 
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
@@ -680,11 +685,13 @@ class UISelectionList(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.list_and_scroll_bar_container.disable()
+            if self.list_and_scroll_bar_container is not None:
+                self.list_and_scroll_bar_container.disable()
 
             # clear selections
-            for item in self.item_list:
-                item['selected'] = False
+            if self.item_list is not None:
+                for item in self.item_list:
+                    item['selected'] = False
 
     def enable(self):
         """
@@ -692,7 +699,8 @@ class UISelectionList(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.list_and_scroll_bar_container.enable()
+            if self.list_and_scroll_bar_container is not None:
+                self.list_and_scroll_bar_container.enable()
 
     def show(self):
         """
@@ -713,5 +721,5 @@ class UISelectionList(UIElement):
         there is no need to call their hide() methods separately.
         """
         super().hide()
-
-        self.list_and_scroll_bar_container.hide()
+        if self.list_and_scroll_bar_container is not None:
+            self.list_and_scroll_bar_container.hide()

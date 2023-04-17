@@ -148,6 +148,8 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
+        self.tool_tip = None
+
         self._setup_container(container)
 
         self.dirty = 1
