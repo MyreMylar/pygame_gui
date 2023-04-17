@@ -107,12 +107,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the size of this window and then re-sizes and shifts the contents of the windows
         container to fit the new size.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
@@ -696,7 +699,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self._window_root_container.disable()
+            if self._window_root_container is not None:
+                self._window_root_container.disable()
 
     def enable(self):
         """
@@ -704,7 +708,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self._window_root_container.enable()
+            if self._window_root_container is not None:
+                self._window_root_container.enable()
 
     def show(self):
         """
@@ -712,8 +717,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         propagate and show all the children.
         """
         super().show()
-
-        self._window_root_container.show()
+        if self._window_root_container is not None:
+            self._window_root_container.show()
 
     def hide(self):
         """
@@ -721,8 +726,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         propagate and hide all the children.
         """
         super().hide()
-
-        self._window_root_container.hide()
+        if self._window_root_container is not None:
+            self._window_root_container.hide()
 
     def get_relative_mouse_pos(self):
         """

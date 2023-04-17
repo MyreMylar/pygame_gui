@@ -270,7 +270,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.drawable_shape.set_active_state('disabled')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
@@ -278,7 +279,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.drawable_shape.set_active_state('normal')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('normal')
 
     def on_locale_changed(self):
         font = self.ui_theme.get_font(self.combined_element_ids)

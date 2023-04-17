@@ -89,7 +89,6 @@ class UIButton(UIElement):
         self.tool_tip_text_kwargs = {}
         if tool_tip_text_kwargs is not None:
             self.tool_tip_text_kwargs = tool_tip_text_kwargs
-        self.tool_tip = None
         self.tool_tip_object_id = tool_tip_object_id
         self.ui_root_container = self.ui_manager.get_root_container()
 
@@ -282,7 +281,8 @@ class UIButton(UIElement):
         Called when we leave the hover state. Resets the colours and images to normal and kills any
         tooltip that was created while we were hovering the button.
         """
-        self.drawable_shape.set_active_state(self._get_appropriate_state_name())
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state(self._get_appropriate_state_name())
         if self.tool_tip is not None:
             self.tool_tip.kill()
             self.tool_tip = None
@@ -430,7 +430,8 @@ class UIButton(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.drawable_shape.set_active_state('disabled')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
 
             # clear other button state
             self.held = False
@@ -444,7 +445,8 @@ class UIButton(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.drawable_shape.set_active_state('normal')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('normal')
 
     def _set_active(self):
         """
@@ -767,6 +769,10 @@ class UIButton(UIElement):
             self.drawable_shape = RoundedRectangleShape(drawable_shape_rect, theming_parameters,
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)
+
+        if not self.is_enabled:
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
 
         self.on_fresh_drawable_shape_ready()
 

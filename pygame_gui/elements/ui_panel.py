@@ -156,12 +156,15 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the size of this panel and then re-sizes and shifts the contents of the panel container
         to fit the new size.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
@@ -280,7 +283,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.panel_container.disable()
+            if self.panel_container is not None:
+                self.panel_container.disable()
 
     def enable(self):
         """
@@ -288,7 +292,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.panel_container.enable()
+            if self.panel_container is not None:
+                self.panel_container.enable()
 
     def show(self):
         """
