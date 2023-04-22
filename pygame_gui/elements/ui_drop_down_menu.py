@@ -666,7 +666,10 @@ class UIDropDownMenu(UIContainer):
                  *,
                  expand_on_option_click: bool = True
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.menu_states = None
+        self.current_state = None
         super().__init__(relative_rect, manager, container=container,
                          starting_height=0,
                          anchors=anchors,
@@ -971,8 +974,8 @@ class UIDropDownMenu(UIContainer):
         showing it's buttons.
         """
         super().show()
-
-        self.menu_states['closed'].show()
+        if self.current_state is not None and self.menu_states is not None:
+            self.menu_states['closed'].show()
 
     def hide(self):
         """
@@ -981,7 +984,7 @@ class UIDropDownMenu(UIContainer):
         call the hide() method of the 'closed' state which hides all it's children widgets.
         """
         super().hide()
-
-        if self.current_state == self.menu_states['expanded']:
-            self.menu_states['expanded'].hide()
-        self.menu_states['closed'].hide()
+        if self.current_state is not None and self.menu_states is not None:
+            if self.current_state == self.menu_states['expanded']:
+                self.menu_states['expanded'].hide()
+            self.menu_states['closed'].hide()

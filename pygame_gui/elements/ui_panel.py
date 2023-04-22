@@ -53,7 +53,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.panel_container = None
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -300,12 +302,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
         In addition to the base UIElement.show() - call show() of owned container - panel_container.
         """
         super().show()
-
-        self.panel_container.show()
+        if self.panel_container is not None:
+            self.panel_container.show()
 
     def hide(self):
         """
         In addition to the base UIElement.hide() - call hide() of owned container - panel_container.
         """
-        self.panel_container.hide()
+        if self.panel_container is not None:
+            self.panel_container.hide()
         super().hide()
