@@ -578,8 +578,8 @@ class UIHorizontalScrollBar(UIElement):
         will propagate and show all the buttons.
         """
         super().show()
-
-        self.button_container.show()
+        if self.button_container is not None:
+            self.button_container.show()
 
     def hide(self):
         """

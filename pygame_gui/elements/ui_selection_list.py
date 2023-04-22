@@ -710,8 +710,8 @@ class UISelectionList(UIElement):
         there is no need to call their show() methods separately.
         """
         super().show()
-
-        self.list_and_scroll_bar_container.show()
+        if self.list_and_scroll_bar_container is not None:
+            self.list_and_scroll_bar_container.show()
 
     def hide(self):
         """

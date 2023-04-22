@@ -41,7 +41,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self._root_container = None
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -439,7 +441,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         separately.
         """
         super().show()
-        self._root_container.show()
+        if self._root_container is not None:
+            self._root_container.show()
 
     def hide(self):
         """
@@ -448,5 +451,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         it's visibility will propagate to them - there is no need to call their hide() methods
         separately.
         """
-        self._root_container.hide()
+        if self._root_container is not None:
+            self._root_container.hide()
         super().hide()

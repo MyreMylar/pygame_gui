@@ -44,7 +44,8 @@ class UIHorizontalSlider(UIElement):
                  visible: int = 1,
                  click_increment: Union[float, int] = 1
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
         self.sliding_button = None
         self.button_container = None
         super().__init__(relative_rect, manager, container,
@@ -560,8 +561,8 @@ class UIHorizontalSlider(UIElement):
         the button_container which will propagate and show the left and right buttons.
         """
         super().show()
-
-        self.sliding_button.show()
+        if self.sliding_button is not None:
+            self.sliding_button.show()
         if self.button_container is not None:
             self.button_container.show()
 
