@@ -243,6 +243,11 @@ class UIStatusBar(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
                                                              self.combined_element_ids)
         if border_colour != self.border_colour:

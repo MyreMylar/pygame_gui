@@ -534,6 +534,7 @@ class UIManager(IUIManagerInterface):
                         parent_element: IUIElementInterface,
                         object_id: ObjectID,
                         *,
+                        wrap_width: Optional[int] = None,
                         text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it
@@ -544,6 +545,7 @@ class UIManager(IUIManagerInterface):
         :param hover_distance: The distance we should hover away from our target position.
         :param parent_element: The UIElement that spawned this tool tip.
         :param object_id: the object_id of the tooltip.
+        :param wrap_width: an optional width for the tool tip, will overwrite any value from the theme file.
         :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                             useful when you have multiple translations that need variables inserted
                             in the middle.
@@ -551,7 +553,7 @@ class UIManager(IUIManagerInterface):
         :return: A tool tip placed somewhere on the screen.
         """
         tool_tip = UITooltip(text, hover_distance, self, text_kwargs=text_kwargs,
-                             parent_element=parent_element, object_id=object_id)
+                             parent_element=parent_element, object_id=object_id, wrap_width=wrap_width)
         tool_tip.find_valid_position(pygame.math.Vector2(position[0], position[1]))
         return tool_tip
 

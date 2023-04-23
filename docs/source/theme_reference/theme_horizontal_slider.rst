@@ -39,6 +39,7 @@ Misc
  - "**shadow_width**" - the width in pixels of the shadow behind the slider. Defaults to 1.
  - "**enable_arrow_buttons**" - Enables or disables the arrow buttons for the slider. "1" is enabled, "0" is disabled. Defaults to "1".
  - "**sliding_button_width**" - Sets the width of the sliding button. Defaults to "20".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Sub-elements
 --------------

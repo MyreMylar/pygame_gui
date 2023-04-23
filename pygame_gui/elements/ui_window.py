@@ -576,6 +576,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                                'rounded_rectangle']):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 15,
                                                        'shape_corner_radius': 2}):

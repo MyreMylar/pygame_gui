@@ -74,6 +74,7 @@ Misc
  - "**border_width**" - the width of the border around the element in pixels. Defaults to "1".
  - "**shadow_width**" - the width of the shadow around the element in pixels. Defaults to "1".
  - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Example
 -------
