@@ -116,9 +116,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                         'zh': self._chinese_font}
 
         try:
-            self.default_font = self.default_font_dictionary[locale]
+            self.default_font: DefaultFontData = self.default_font_dictionary[locale]
         except KeyError:
-            self.default_font = self._latin_font
+            self.default_font: DefaultFontData = self._latin_font
 
         self.debug_font_size = 8
 
