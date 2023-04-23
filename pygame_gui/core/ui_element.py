@@ -148,6 +148,11 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
+        self.tool_tip_text = None
+        self.tool_tip_text_kwargs = None
+        self.tool_tip_object_id = None
+        self.tool_tip_delay = 1.0
+        self.tool_tip_wrap_width = None
         self.tool_tip = None
 
         self._setup_container(container)
@@ -758,6 +763,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         Overriding regular sprite kill() method to remove the element from it's container.
         """
+        if self.tool_tip is not None:
+            self.tool_tip.kill()
         self.ui_container.remove_element(self)
         self.remove_element_from_focus_set(self)
         super().kill()
@@ -811,23 +818,42 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def on_hovered(self):
         """
-        A stub to override. Called when this UI element first enters the 'hovered' state.
+        Called when this UI element first enters the 'hovered' state.
         """
+        self.hover_time = 0.0
 
     def on_unhovered(self):
         """
-        A stub to override. Called when this UI element leaves the 'hovered' state.
+        Called when this UI element leaves the 'hovered' state.
         """
+        if self.tool_tip is not None:
+            self.tool_tip.kill()
+            self.tool_tip = None
 
-    def while_hovering(self, time_delta: float, mouse_pos: pygame.math.Vector2):
+    def while_hovering(self, time_delta: float,
+                       mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        A stub method to override. Called when this UI element is currently hovered.
+        Called while we are in the hover state. It will create a tool tip if we've been in the
+        hover state for a while, the text exists to create one and we haven't created one already.
 
-        :param time_delta: A float, the time in seconds between the last call to this function
-                           and now (roughly).
-        :param mouse_pos: The current position of the mouse as 2D Vector.
+        :param time_delta: Time in seconds between calls to update.
+        :param mouse_pos: The current position of the mouse.
 
         """
+        if (self.tool_tip is None and self.tool_tip_text is not None and
+                self.hover_time > self.tool_tip_delay):
+            hover_height = int(self.rect.height / 2)
+            self.tool_tip = self.ui_manager.create_tool_tip(text=self.tool_tip_text,
+                                                            position=(mouse_pos[0],
+                                                                      self.rect.centery),
+                                                            hover_distance=(0,
+                                                                            hover_height),
+                                                            parent_element=self,
+                                                            object_id=self.tool_tip_object_id,
+                                                            wrap_width=self.tool_tip_wrap_width,
+                                                            text_kwargs=self.tool_tip_text_kwargs)
+
+        self.hover_time += time_delta
 
     def can_hover(self) -> bool:
         """
@@ -1186,3 +1212,18 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         self.ui_theme.update_single_element_theming(self.most_specific_combined_id, new_theming_data)
         self.rebuild_from_changed_theme_data()
+
+    def set_tooltip(self, text: Optional[str] = None, object_id: Optional[ObjectID] = None,
+                    text_kwargs: Optional[Dict[str, str]] = None, delay: Optional[float] = None,
+                    wrap_width: Optional[int] = None):
+        self.tool_tip_text = text
+        self.tool_tip_text_kwargs = {}
+        if text_kwargs is not None:
+            self.tool_tip_text_kwargs = text_kwargs
+        self.tool_tip_object_id = object_id
+
+        if delay is not None:
+            self.tool_tip_delay = delay
+
+        self.tool_tip_wrap_width = wrap_width
+

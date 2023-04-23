@@ -453,6 +453,11 @@ class UIHorizontalSlider(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 

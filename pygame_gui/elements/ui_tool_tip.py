@@ -43,6 +43,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  *,
+                 wrap_width: Optional[int] = None,
                  text_kwargs: Dict[str, str] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
@@ -61,6 +62,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         self.rect_width = None  # type: Optional[int]
         self.hover_distance_from_target = hover_distance
 
+        self.overwrite_theme_wrap_width = wrap_width
         self.rebuild_from_changed_theme_data()
 
         self.text_block = UITextBox(html_text,
@@ -160,6 +162,9 @@ class UITooltip(UIElement, IUITooltipInterface):
                                                default_value=170,
                                                casting_func=int):
             has_any_changed = True
+
+        if self.overwrite_theme_wrap_width is not None:
+            self.rect_width = self.overwrite_theme_wrap_width
 
         if has_any_changed:
             self.rebuild()

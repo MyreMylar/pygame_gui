@@ -85,11 +85,7 @@ class UIButton(UIElement):
 
         self.dynamic_dimensions_orig_top_left = rel_rect.topleft
         # support for an optional 'tool tip' element attached to this button
-        self.tool_tip_text = tool_tip_text
-        self.tool_tip_text_kwargs = {}
-        if tool_tip_text_kwargs is not None:
-            self.tool_tip_text_kwargs = tool_tip_text_kwargs
-        self.tool_tip_object_id = tool_tip_object_id
+        self.set_tooltip(tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs)
         self.ui_root_container = self.ui_manager.get_root_container()
 
         # Some different states our button can be in, could use a state machine for this
@@ -99,9 +95,6 @@ class UIButton(UIElement):
         self.is_selected = False
         # Used to check button pressed without going through pygame.Event system
         self.pressed_event = False
-
-        # time the hovering
-        self.hover_time = 0.0
 
         # timer for double clicks
         self.last_click_button = None
@@ -127,8 +120,6 @@ class UIButton(UIElement):
         self.hovered_image = None
         self.selected_image = None
         self.disabled_image = None
-
-        self.tool_tip_delay = 1.0
 
         self.text_horiz_alignment = 'center'
         self.text_vert_alignment = 'center'
@@ -202,8 +193,6 @@ class UIButton(UIElement):
         Overrides the standard sprite kill method to also kill any tooltips belonging to
         this button.
         """
-        if self.tool_tip is not None:
-            self.tool_tip.kill()
         super().kill()
 
     def hover_point(self, hover_x: int, hover_y: int) -> bool:
@@ -239,8 +228,8 @@ class UIButton(UIElement):
         Called when we enter the hover state, it sets the colours and image of the button
         to the appropriate values and redraws it.
         """
+        super().on_hovered()
         self.drawable_shape.set_active_state('hovered')
-        self.hover_time = 0.0
 
         # old event to remove in 0.8.0
         event_data = {'user_type': OldType(UI_BUTTON_ON_HOVERED),
@@ -252,40 +241,14 @@ class UIButton(UIElement):
                       'ui_object_id': self.most_specific_combined_id}
         pygame.event.post(pygame.event.Event(UI_BUTTON_ON_HOVERED, event_data))
 
-    def while_hovering(self, time_delta: float,
-                       mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        """
-        Called while we are in the hover state. It will create a tool tip if we've been in the
-        hover state for a while, the text exists to create one and we haven't created one already.
-
-        :param time_delta: Time in seconds between calls to update.
-        :param mouse_pos: The current position of the mouse.
-
-        """
-        if (self.tool_tip is None and self.tool_tip_text is not None and
-                self.hover_time > self.tool_tip_delay):
-            hover_height = int(self.rect.height / 2)
-            self.tool_tip = self.ui_manager.create_tool_tip(text=self.tool_tip_text,
-                                                            position=(mouse_pos[0],
-                                                                      self.rect.centery),
-                                                            hover_distance=(0,
-                                                                            hover_height),
-                                                            parent_element=self,
-                                                            object_id=self.tool_tip_object_id,
-                                                            text_kwargs=self.tool_tip_text_kwargs)
-
-        self.hover_time += time_delta
-
     def on_unhovered(self):
         """
         Called when we leave the hover state. Resets the colours and images to normal and kills any
         tooltip that was created while we were hovering the button.
         """
+        super().on_unhovered()
         if self.drawable_shape is not None:
             self.drawable_shape.set_active_state(self._get_appropriate_state_name())
-        if self.tool_tip is not None:
-            self.tool_tip.kill()
-            self.tool_tip = None
 
         # old event to remove in 0.8.0
         event_data = {'user_type': OldType(UI_BUTTON_ON_UNHOVERED),
@@ -381,10 +344,7 @@ class UIButton(UIElement):
                         self.hovered = False
                         self.on_unhovered()
                         self._set_active()
-                        self.hover_time = 0.0
-                        if self.tool_tip is not None:
-                            self.tool_tip.kill()
-                            self.tool_tip = None
+
                 consumed_event = True
         if event.type == pygame.MOUSEBUTTONUP and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)

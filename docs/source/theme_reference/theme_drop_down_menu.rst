@@ -40,6 +40,7 @@ Misc
  - "**border_width**" - the width in pixels of the border around the drop down menu. Defaults to "1".
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to "1".
  - "**open_button_width**" - the width of the open/close button on the right hand side of the drop down. Defaults to "20" (pixels). Set it to "0" to remove the open/close button.
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Sub-elements
 --------------

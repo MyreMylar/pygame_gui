@@ -772,6 +772,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if self._check_misc_theme_data_changed(attribute_name='line_spacing', default_value=1.25, casting_func=float):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         # colour parameters
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
                                                                  self.combined_element_ids)

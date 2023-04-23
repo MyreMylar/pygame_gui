@@ -19,7 +19,6 @@ Misc
 
  - "**rect_width**" - The width of the rectangle around the tool tip in pixels, including any shadows or borders. The height is determined dynamically.
 
-
 Sub-elements
 --------------
 

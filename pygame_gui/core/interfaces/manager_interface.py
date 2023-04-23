@@ -231,6 +231,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
                         parent_element: IUIElementInterface,
                         object_id: ObjectID,
                         *,
+                        wrap_width: Optional[int] = None,
                         text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it.
@@ -240,6 +241,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         :param hover_distance: The distance we should hover away from our target position.
         :param parent_element: The UIElement that spawned this tool tip.
         :param object_id: the object_id of the tooltip.
+        :param wrap_width: an optional width for the tool tip, will overwrite any value from the theme file.
         :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                             useful when you have multiple translations that need variables inserted
                             in the middle.

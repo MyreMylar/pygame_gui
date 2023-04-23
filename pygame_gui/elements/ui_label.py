@@ -227,6 +227,11 @@ class UILabel(UIElement, IUITextOwnerInterface):
                                                casting_func=self.tuple_extract):
             any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            any_changed = True
+
         if self._check_text_alignment_theming():
             any_changed = True
 
