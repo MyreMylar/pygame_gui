@@ -413,7 +413,10 @@ of our UI theme.
 Prototype theme blocks must be defined higher in the theme file than where they are used, otherwise they won't exist to
 be imported.
 
-Here's a quick example:
+If you are using multiple locale specifiers in font blocks, you will need to specify these in every font block in your
+prototype hierarchy so that the theme loading can determine which locale's font to apply the theming to.
+
+Here's a quick example of using a simple prototype:
 
 .. code-block:: json
    :caption: theme.json

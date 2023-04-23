@@ -897,26 +897,36 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.ui_element_fonts_info[element_name][locale] = {}
 
         font_info_dict = self.ui_element_fonts_info[element_name][locale]
-        font_info_dict['name'] = file_dict['name']
-        try:
-            font_info_dict['size'] = int(file_dict['size'])
-        except ValueError:
-            default_size = self.font_dict.default_font.size
-            font_info_dict['size'] = default_size
+        if 'name' in file_dict:
+            font_info_dict['name'] = file_dict['name']
+        if 'name' not in font_info_dict:
+            font_info_dict['name'] = self.font_dict.default_font.name
+
+        if 'size' in file_dict:
+            try:
+                font_info_dict['size'] = int(file_dict['size'])
+            except ValueError:
+                default_size = self.font_dict.default_font.size
+                font_info_dict['size'] = default_size
+        if 'size' not in font_info_dict:
+            font_info_dict['size'] = self.font_dict.default_font.size
+
         if 'bold' in file_dict:
             try:
                 font_info_dict['bold'] = bool(int(file_dict['bold']))
             except ValueError:
                 font_info_dict['bold'] = False
-        else:
+        if 'bold' not in font_info_dict:
             font_info_dict['bold'] = False
+
         if 'italic' in file_dict:
             try:
                 font_info_dict['italic'] = bool(int(file_dict['italic']))
             except ValueError:
                 font_info_dict['italic'] = False
-        else:
+        if 'italic' not in font_info_dict:
             font_info_dict['italic'] = False
+
         if 'regular_path' in file_dict:
             font_info_dict['regular_path'] = file_dict['regular_path']
         if 'bold_path' in file_dict:

@@ -52,7 +52,7 @@ Font
 block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
- - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide.
+ - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide. You will need to keep repeating the locale specifier if using prototypes to make a hierarchy.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the button.
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
