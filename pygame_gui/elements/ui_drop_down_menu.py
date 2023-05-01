@@ -143,8 +143,11 @@ class UIExpandedDropDownState:
         list_class_ids.append(None)
         list_element_ids = self.drop_down_menu_ui.element_ids[:]
         list_element_ids.append('selection_list')
+        list_base_element_ids = self.drop_down_menu_ui.element_base_ids[:]
+        list_base_element_ids.append(None)
 
-        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_element_ids,
+        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_base_element_ids,
+                                                                       list_element_ids,
                                                                        list_class_ids,
                                                                        list_object_ids)
 

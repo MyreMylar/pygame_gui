@@ -620,7 +620,8 @@ class TestTextBoxLayoutRow:
         assert layout_row.cursor_draw_width == 44
 
     def test_insert_text(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),

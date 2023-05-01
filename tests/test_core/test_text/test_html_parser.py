@@ -10,7 +10,8 @@ from pygame_gui.core.text import HTMLParser, LineBreakLayoutRect, ImageLayoutRec
 class TestHTMLParser:
     def test_creation(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
 
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -26,7 +27,8 @@ class TestHTMLParser:
         assert len(parser.layout_rect_queue) == 0
 
     def test_handle_start_tag(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -105,7 +107,8 @@ class TestHTMLParser:
         assert parser.layout_rect_queue[-1].padding.left == 0
 
     def test_handle_end_tag(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -133,7 +136,8 @@ class TestHTMLParser:
         assert parser.current_style['bold'] is False
 
     def test_handle_data(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -165,7 +169,8 @@ class TestHTMLParser:
         assert parser.layout_rect_queue[1].underlined is True
 
     def test_push_style(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -187,7 +192,8 @@ class TestHTMLParser:
         assert parser.current_style['bold'] is True
 
     def test_pop_style(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),
@@ -216,7 +222,8 @@ class TestHTMLParser:
         parser.pop_style('bad_tag')
 
     def test_error(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
-        combined_ids = default_ui_manager.get_theme().build_all_combined_ids(['text_box'],
+        combined_ids = default_ui_manager.get_theme().build_all_combined_ids([None],
+                                                                             ['text_box'],
                                                                              ['@test_text'],
                                                                              ['#test_text_1'])
         link_style = {'link_text': pygame.Color('#80A0F0'),

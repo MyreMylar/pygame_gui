@@ -3,7 +3,8 @@
 UIConfirmationDialog Theming Parameters
 =======================================
 
-:class:`UIConfirmationDialog <pygame_gui.windows.UIConfirmationDialog>` is a UIWindow with the object id of '#confirmation_dialog'.
+:class:`UIConfirmationDialog <pygame_gui.windows.UIConfirmationDialog>` is a UIWindow with the element id of
+'confirmation_dialog' and a default object id of '#confirmation_dialog'.
 
 .. figure:: ../_static/confirmation_dialog_static_image.png
 
@@ -23,11 +24,11 @@ As well as the sub-elements of the UIWindow (title bar and close button) which y
 
 UIButtons:
 
- - '#confirmation_dialog.#confirm_button'
- - '#confirmation_dialog.#cancel_button'
+ - 'confirmation_dialog.#confirm_button'
+ - 'confirmation_dialog.#cancel_button'
 
 UITextBox:
 
- - '#confirmation_dialog.text_box'
+ - 'confirmation_dialog.text_box'
 
 You can find out more about theming buttons here: :ref:`theme-button` and text boxes here: :ref:`theme-text-box`.
