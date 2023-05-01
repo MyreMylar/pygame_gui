@@ -320,6 +320,7 @@ class UIColourPickerDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
+                         element_id='colour_picker_dialog',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

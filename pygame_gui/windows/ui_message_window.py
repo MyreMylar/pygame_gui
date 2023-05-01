@@ -32,6 +32,7 @@ class UIMessageWindow(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
+                         element_id='message_window',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

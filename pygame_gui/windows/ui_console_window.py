@@ -37,6 +37,7 @@ class UIConsoleWindow(UIWindow):
                  preload_bold_log_font: bool = True):
         super().__init__(rect, manager,
                          window_display_title=window_title,
+                         element_id='console_window',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)
