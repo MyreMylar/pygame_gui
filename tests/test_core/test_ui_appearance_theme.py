@@ -170,7 +170,8 @@ class TestUIAppearanceTheme:
         assert border_width == '1'
         assert shadow_width == '3'
 
-        combined_ids = theme.build_all_combined_ids(element_ids=['button'], class_ids=[None],
+        combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
+                                                    element_ids=['button'], class_ids=[None],
                                                     object_ids=['#test_object_2'])
 
         assert combined_ids == ['#test_object_2', 'button']
