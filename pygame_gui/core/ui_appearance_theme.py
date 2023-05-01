@@ -373,6 +373,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                                     shape_corner_radius)
 
     def _get_next_id_node(self, current_node: Union[Dict[str, Union[str, Dict]], None],
+                          element_base_ids: List[Union[str, None]],
                           element_ids: List[str],
                           class_ids: List[Union[str, None]],
                           object_ids: List[Union[str, None]],
@@ -405,19 +406,27 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     and index < len(object_ids)
                     and object_ids[index] is not None):
                 next_node = {'id': object_ids[index], 'parent': current_node}
-                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                self._get_next_id_node(next_node, element_base_ids, element_ids, class_ids, object_ids,
                                        index + 1, tree_size, combined_ids)
             # then any class IDs...
             if (class_ids is not None
                     and index < len(class_ids)
                     and class_ids[index] is not None):
                 next_node = {'id': class_ids[index], 'parent': current_node}
-                self._get_next_id_node(next_node, element_ids, class_ids, object_ids,
+                self._get_next_id_node(next_node, element_base_ids, element_ids, class_ids, object_ids,
                                        index + 1, tree_size, combined_ids)
             # Finally add the required element IDs.
             next_node_2 = {'id': element_ids[index], 'parent': current_node}
-            self._get_next_id_node(next_node_2, element_ids, class_ids, object_ids, index + 1,
+            self._get_next_id_node(next_node_2, element_base_ids, element_ids, class_ids, object_ids, index + 1,
                                    tree_size, combined_ids)
+
+            # then any element base IDs...
+            if (element_base_ids is not None
+                    and index < len(element_base_ids)
+                    and element_base_ids[index] is not None):
+                next_node = {'id': element_base_ids[index], 'parent': current_node}
+                self._get_next_id_node(next_node, element_base_ids, element_ids, class_ids, object_ids,
+                                       index + 1, tree_size, combined_ids)
         else:
             # unwind
             gathered_ids = []
@@ -432,25 +441,28 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 combined_id += gathered_ids[gathered_index]
             combined_ids.append(combined_id)
 
-    def build_all_combined_ids(self, element_ids: Union[None, List[str]],
+    def build_all_combined_ids(self, element_base_ids: Union[None, List[Union[str, None]]],
+                               element_ids: Union[None, List[str]],
                                class_ids: Union[None, List[Union[str, None]]],
                                object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
         """
         Construct a list of combined element ids from the element's various accumulated ids.
 
+        :param element_base_ids: when an element is also another element (e.g. a file dialog is also a window)
         :param element_ids: All the ids of elements this element is contained within.
         :param class_ids: All the ids of 'classes' that this element is contained within.
         :param object_ids: All the ids of objects this element is contained within.
 
         :return: A list of IDs that reference this element in order of decreasing specificity.
         """
-        combined_id = str(element_ids).join(str(class_ids)).join(str(object_ids))
+        combined_id = str(element_base_ids).join(str(element_ids).join(str(class_ids)).join(str(object_ids)))
         if combined_id in self.unique_theming_ids:
             return self.unique_theming_ids[combined_id]
 
         combined_ids = []
-        if object_ids is not None and element_ids is not None and class_ids is not None:
-            if len(object_ids) != len(element_ids) or len(class_ids) != len(element_ids):
+        if object_ids is not None and element_ids is not None and class_ids is not None and element_base_ids is not None:
+            if (len(object_ids) != len(element_ids) or len(class_ids) != len(element_ids) or
+                    len(element_base_ids) != len(element_ids)):
                 raise ValueError("Object & class ID hierarchy is not equal "
                                  "in length to Element ID hierarchy"
                                  "Element IDs: " +
@@ -460,7 +472,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                  "\nObject IDs: " +
                                  str(object_ids) + "\n")
             if len(element_ids) != 0:
-                self._get_next_id_node(None, element_ids, class_ids, object_ids,
+                self._get_next_id_node(None, element_base_ids, element_ids, class_ids, object_ids,
                                        0, len(element_ids), combined_ids)
 
             current_ids = combined_ids[:]
