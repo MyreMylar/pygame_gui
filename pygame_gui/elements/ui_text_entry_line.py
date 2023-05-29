@@ -579,7 +579,91 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_LEFT:
+        # modded versions of LEFT and RIGHT must go first otherwise the simple
+        # cases will absorb the events
+        if event.key == pygame.K_HOME or (event.key == pygame.K_LEFT
+            and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)
+            ):
+            # include case when shift held down to select everything to start
+            # of current line.
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if event.mod & pygame.KMOD_SHIFT:
+                    if self.edit_position == self.select_range[1]:
+                        # undo selection to right, create to left
+                        self.select_range = [0, self.select_range[0]]
+                    else:
+                        # extend left
+                        self.select_range = [0, self.select_range[1]]
+                else:
+                    self.select_range = [0, 0]
+            else:
+                if event.mod & pygame.KMOD_SHIFT:
+                    self.select_range = [0, self.edit_position]
+                else:
+                    self.select_range = [0, 0]
+            self.edit_position = 0
+            self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_END or (event.key == pygame.K_RIGHT
+            and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)
+            ):
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if event.mod & pygame.KMOD_SHIFT:
+                    if self.edit_position == self.select_range[0]:
+                        # undo selection to left, create to right
+                        self.select_range = [self.select_range[1], len(self.text)]
+                    else:
+                        # extend right
+                        self.select_range = [self.select_range[0], len(self.text)]
+                else:
+                    self.select_range = [0, 0]
+            else:
+                if event.mod & pygame.KMOD_SHIFT:
+                    self.select_range = [self.edit_position, len(self.text)]
+                else:
+                    self.select_range = [0, 0]
+            self.edit_position = len(self.text)
+            self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_LEFT and event.mod & pygame.KMOD_SHIFT:
+            # keyboard-based selection
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                # existing selection, so edit_position should correspond to one
+                # end of it
+                if self.edit_position == self.select_range[0]:
+                    # try to extend to the left
+                    self.select_range = [max(0, self.edit_position - 1),
+                                         self.select_range[1]]
+                elif self.edit_position == self.select_range[1]:
+                    # reduce to the left
+                    self.select_range = [self.select_range[0], max(0,
+                                                    self.edit_position - 1)]
+            else:
+                self.select_range = [max(0, self.edit_position - 1),
+                                     self.edit_position]
+            if self.edit_position > 0:
+                self.edit_position -= 1
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_RIGHT and event.mod & pygame.KMOD_SHIFT:
+            # keyboard-based selection
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if self.edit_position == self.select_range[1]:
+                    # try to extend to the right
+                    self.select_range = [self.select_range[0],
+                                         min(len(self.text), self.edit_position + 1)]
+                elif self.edit_position == self.select_range[0]:
+                    # reduce to the right
+                    self.select_range = [min(len(self.text), self.edit_position + 1),
+                                         self.select_range[1]]
+            else:
+                self.select_range = [self.edit_position, min(len(self.text),
+                                                    self.edit_position + 1)]
+            if self.edit_position < len(self.text):
+                self.edit_position += 1
+                self.cursor_has_moved_recently = True
+            consumed_event = True
+        elif event.key == pygame.K_LEFT:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.edit_position = min(self.select_range[0], self.select_range[1])
                 self.select_range = [0, 0]
