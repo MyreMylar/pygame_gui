@@ -549,8 +549,9 @@ class UITextEntryBox(UITextBox):
                     self.html_text = (self.html_text[:self.edit_position] +
                                       new_text +
                                       self.html_text[self.edit_position:])
+                    original_edit_pos = self.edit_position
                     self.set_text(self.html_text)
-                    self.edit_position += len(new_text)
+                    self.edit_position = original_edit_pos + len(new_text)
                     self.text_box_layout.set_cursor_position(self.edit_position)
                     self.redraw_from_text_block()
                     self.cursor_has_moved_recently = True
