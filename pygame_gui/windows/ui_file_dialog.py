@@ -48,7 +48,6 @@ class UIFileDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='file_dialog',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

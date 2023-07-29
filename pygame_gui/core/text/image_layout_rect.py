@@ -1,6 +1,5 @@
 from typing import Optional
 
-import pygame
 from pygame.surface import Surface
 from pygame.rect import Rect
 from pygame.image import load
@@ -14,7 +13,7 @@ class ImageLayoutRect(TextLayoutRect):
     """
     def __init__(self, image_path, float_position, padding: Padding):
         self.image_path = image_path
-        self.image_surf = load(image_path).convert_alpha().premul_alpha()
+        self.image_surf = load(image_path)
         self.padding = padding
         self.size_with_padding = (self.image_surf.get_width() + padding.left + padding.right,
                                   self.image_surf.get_height() + padding.top + padding.bottom)
@@ -33,4 +32,4 @@ class ImageLayoutRect(TextLayoutRect):
         blit_rect.height -= (self.padding.top + self.padding.bottom)
         blit_rect.left += self.padding.left
         blit_rect.top += self.padding.top
-        target_surface.blit(self.image_surf, blit_rect, target_area, special_flags=pygame.BLEND_PREMULTIPLIED)
+        target_surface.blit(self.image_surf, blit_rect, target_area)

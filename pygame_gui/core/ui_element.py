@@ -70,7 +70,6 @@ class UIElement(GUISprite, IUIElementInterface):
         self.object_ids = None
         self.class_ids = None
         self.element_ids = None
-        self.element_base_ids = None
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
 
@@ -308,14 +307,6 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         return self.rect
 
-    def get_element_base_ids(self) -> List[str]:
-        """
-        A list of all the element base IDs in this element's theming/event hierarchy.
-
-        :return: a list of strings, one for each element in the hierarchy.
-        """
-        return self.element_base_ids
-
     def get_element_ids(self) -> List[str]:
         """
         A list of all the element IDs in this element's theming/event hierarchy.
@@ -344,8 +335,7 @@ class UIElement(GUISprite, IUIElementInterface):
                           container: Union[IContainerLikeInterface, None],
                           parent_element: Union[None, IUIElementInterface],
                           object_id: Union[ObjectID, str, None],
-                          element_id: str,
-                          element_base_id: Optional[str] = None):
+                          element_id: str):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
         won't work such as those containing full stops. These ID lists are used by the theming
@@ -379,23 +369,20 @@ class UIElement(GUISprite, IUIElementInterface):
             class_id = None
 
         if id_parent is not None:
-            self.element_base_ids = id_parent.get_element_base_ids().copy()
             self.element_ids = id_parent.get_element_ids().copy()
-            self.class_ids = id_parent.get_class_ids().copy()
-            self.object_ids = id_parent.get_object_ids().copy()
-
-            self.element_base_ids.append(element_base_id)
             self.element_ids.append(element_id)
+
+            self.class_ids = id_parent.get_class_ids().copy()
             self.class_ids.append(class_id)
+
+            self.object_ids = id_parent.get_object_ids().copy()
             self.object_ids.append(obj_id)
         else:
-            self.element_base_ids = [element_base_id]
             self.element_ids = [element_id]
             self.class_ids = [class_id]
             self.object_ids = [obj_id]
 
         self.combined_element_ids = self.ui_manager.get_theme().build_all_combined_ids(
-            self.element_base_ids,
             self.element_ids,
             self.class_ids,
             self.object_ids)

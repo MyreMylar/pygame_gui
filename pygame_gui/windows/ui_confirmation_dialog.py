@@ -47,7 +47,6 @@ class UIConfirmationDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='confirmation_dialog',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

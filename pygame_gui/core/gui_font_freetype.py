@@ -12,8 +12,7 @@ FileArg = Union[AnyPath, IO]
 
 class GUIFontFreetype(IGUIFontInterface):
 
-    def __init__(self, file: Optional[FileArg], size: Union[int, float],
-                 force_style: bool = False, style: Optional[Dict[str, bool]] = None):
+    def __init__(self, file: Optional[FileArg], size: Union[int, float], force_style: bool = False, style: Optional[Dict[str, bool]] = None):
         self.__internal_font: Font = Font(file, size, resolution=72)
         self.__internal_font.pad = True
         self.__internal_font.origin = True

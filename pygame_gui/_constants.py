@@ -73,6 +73,10 @@ UI_COLOUR_PICKER_COLOUR_PICKED = custom_type()
 UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED = custom_type()
 UI_CONSOLE_COMMAND_ENTERED = custom_type()
 UI_TEXT_EFFECT_FINISHED = custom_type()
+UI_CHECKBOX_ON_HOVERED = custom_type()
+UI_CHECKBOX_ON_UNHOVERED = custom_type()
+UI_CHECKBOX_TOGGLED = custom_type()
+UI_CHECKBOX_START_CHECK = custom_type()
 
 # Text effects
 TEXT_EFFECT_TYPING_APPEAR = UITextEffectType('typing_appear')
@@ -255,6 +259,10 @@ __all__ = ['UI_BUTTON_PRESSED',
            'UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED',
            'UI_CONSOLE_COMMAND_ENTERED',
            'UI_TEXT_EFFECT_FINISHED',
+           'UI_CHECKBOX_ON_HOVERED',
+           'UI_CHECKBOX_ON_UNHOVERED',
+           'UI_CHECKBOX_TOGGLED',
+           'UI_CHECKBOX_START_CHECK',
            'TEXT_EFFECT_TYPING_APPEAR',
            'TEXT_EFFECT_FADE_IN',
            'TEXT_EFFECT_FADE_OUT',

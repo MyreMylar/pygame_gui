@@ -287,7 +287,7 @@
             "hover_height": "1"
         }
     },
-    "confirmation_dialog.text_box":
+    "#confirmation_dialog.text_box":
     {
         "misc":
         {
@@ -309,7 +309,7 @@
             "text_horiz_alignment_padding": "0"
         }
     },
-    "file_dialog.#file_display_list.vertical_scroll_bar":
+    "#file_dialog.#file_display_list.vertical_scroll_bar":
     {
         "misc":
         {
@@ -319,7 +319,7 @@
             "enable_arrow_buttons": "0"
         }
     },
-    "file_dialog.#file_display_list.vertical_scroll_bar.button":
+    "#file_dialog.#file_display_list.vertical_scroll_bar.button":
     {
         "misc":
         {
@@ -328,7 +328,7 @@
             "shadow_width": "1"
         }
     },
-    "file_dialog.#file_display_list.#file_list_item":
+    "#file_dialog.#file_display_list.#file_list_item":
     {
         "colours":
         {
@@ -343,7 +343,7 @@
             "text_horiz_alignment_padding": "5"
         }
     },
-    "file_dialog.#file_display_list.#directory_list_item":
+    "#file_dialog.#file_display_list.#directory_list_item":
     {
         "prototype": "#no_frills_button",
         "misc":
@@ -352,11 +352,11 @@
             "text_horiz_alignment_padding": "5"
         }
     },
-    "file_dialog.#home_icon_button":
+    "#file_dialog.#home_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons"
     },
-    "file_dialog.#delete_icon_button":
+    "#file_dialog.#delete_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons",
         "misc":
@@ -364,11 +364,11 @@
             "text_vert_alignment_padding": "0"
         }
     },
-    "file_dialog.#parent_icon_button":
+    "#file_dialog.#parent_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons"
     },
-    "file_dialog.#refresh_icon_button":
+    "#file_dialog.#refresh_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons",
         "misc":
@@ -376,7 +376,7 @@
             "text_vert_alignment_padding": "0"
         }
     },
-    "message_window.text_box":
+    "#message_window.text_box":
     {
         "misc":
         {
@@ -386,7 +386,7 @@
         }
     },
 
-    "colour_picker_dialog.colour_channel_editor.text_entry_line":
+    "#colour_picker_dialog.colour_channel_editor.text_entry_line":
     {
         "prototype": "#default_shape_style",
         "misc":
@@ -394,7 +394,7 @@
             "padding": "2,2"
         }
     },
-    "colour_picker_dialog.colour_channel_editor.label":
+    "#colour_picker_dialog.colour_channel_editor.label":
     {
         "prototype": "#default_shape_style",
         "misc":
@@ -404,7 +404,7 @@
             "text_horiz_alignment_padding": "0"
         }
     },
-    "colour_picker_dialog.colour_channel_editor.horizontal_slider":
+    "#colour_picker_dialog.colour_channel_editor.horizontal_slider":
     {
         "prototype": "#default_shape_style",
 
@@ -414,7 +414,7 @@
             "sliding_button_width": "8"
         }
     },
-    "colour_picker_dialog.colour_channel_editor.horizontal_slider.#sliding_button":
+    "#colour_picker_dialog.colour_channel_editor.horizontal_slider.#sliding_button":
     {
         "prototype": "#no_frills_button",
         "misc":

@@ -1,5 +1,6 @@
 from pygame_gui.elements.ui_image import UIImage
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_checkbox import UICheckbox
 from pygame_gui.elements.ui_horizontal_slider import UIHorizontalSlider
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.elements.ui_horizontal_scroll_bar import UIHorizontalScrollBar
@@ -21,6 +22,7 @@ from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
 
 __all__ = ['UIImage',
            'UIButton',
+           'UICheckbox',
            'UIHorizontalSlider',
            'UIVerticalScrollBar',
            'UIHorizontalScrollBar',
