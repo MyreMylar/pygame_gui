@@ -291,26 +291,33 @@ class UICheckbox(UIElement):
         """
         consumed_event = False
 
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button in self.generate_click_events_from:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
-            if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]) and self.is_enabled and self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
-                self.held = False
-                self._set_inactive()
-                consumed_event = True
-                self.pressed_event = True
+            if event.button in self.generate_click_events_from:
+                if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]) and self.is_enabled and self.drawable_shape.collide_point(scaled_mouse_pos) and self.held:
+                    self.held = False
+                    consumed_event = True
+                    self.pressed_event = True
 
-                # old event
-                event_data = {'user_type': OldType(UI_CHECKBOX_TOGGLED),
-                              'ui_element': self,
-                              'ui_object_id': self.most_specific_combined_id}
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+                    # Toggle the checkbox state
+                    self.checked = not self.checked  # Toggle the checked state
 
-                # new event
-                event_data = {'ui_element': self,
-                              'ui_object_id': self.most_specific_combined_id,
-                              'mouse_button': event.button}
-                pygame.event.post(pygame.event.Event(UI_CHECKBOX_TOGGLED, event_data))
+                    if self.checked:  # if the checkbox was checked
+                        self._set_active()  # change appearance to checked
+                    else:  # if the checkbox was unchecked
+                        self._set_inactive()  # change appearance to unchecked
+
+                    # old event
+                    event_data = {'user_type': OldType(UI_CHECKBOX_TOGGLED),
+                                'ui_element': self,
+                                'ui_object_id': self.most_specific_combined_id}
+                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                    # new event
+                    event_data = {'ui_element': self,
+                                'ui_object_id': self.most_specific_combined_id,
+                                'mouse_button': event.button}
+                    pygame.event.post(pygame.event.Event(UI_CHECKBOX_TOGGLED, event_data))
 
             if self.is_enabled and self.held:
                 self.held = False
@@ -323,13 +330,12 @@ class UICheckbox(UIElement):
     def check_toggled(self) -> bool:
         """
         A direct way to check if this checkbox has been toggled in the last update cycle.
+
         :return: True if the checkbox has been toggled.
         """
         was_toggled = self.checked != self.previous_checked
         self.previous_checked = self.checked
-        print(f"Checkbox status: {self.checked}")  # print the status of the checkbox
         return was_toggled
-
 
     def disable(self):
         """
@@ -630,7 +636,7 @@ class UICheckbox(UIElement):
                               'disabled_border': self.colours['disabled_border'],
                               'disabled_image': self.disabled_image,
                               'selected_bg': self.colours['selected_bg'],
-                              'selected_text': self.colours['selected_text'],
+                              'selected_text': "X",
                               'selected_text_shadow': self.colours['selected_text_shadow'],
                               'selected_border': self.colours['selected_border'],
                               'selected_image': self.selected_image,
@@ -665,19 +671,24 @@ class UICheckbox(UIElement):
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(drawable_shape_rect, theming_parameters,
                                                     ['normal', 'hovered', 'disabled',
-                                                     'selected', 'active'], self.ui_manager)
+                                                    'selected', 'active'], self.ui_manager)
         elif self.shape == 'ellipse':
             self.drawable_shape = EllipseDrawableShape(drawable_shape_rect, theming_parameters,
-                                                       ['normal', 'hovered', 'disabled',
+                                                    ['normal', 'hovered', 'disabled',
                                                         'selected', 'active'], self.ui_manager)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(drawable_shape_rect, theming_parameters,
                                                         ['normal', 'hovered', 'disabled',
-                                                         'selected', 'active'], self.ui_manager)
+                                                        'selected', 'active'], self.ui_manager)
 
         if not self.is_enabled:
             if self.drawable_shape is not None:
                 self.drawable_shape.set_active_state('disabled')
+
+        if self.checked:  # if the checkbox is checked
+            self._set_active()  # set appearance to checked
+        else:  # if the checkbox is unchecked
+            self._set_inactive()  # set appearance to unchecked
 
         self.on_fresh_drawable_shape_ready()
 
