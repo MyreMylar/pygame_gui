@@ -67,8 +67,7 @@ class GUIFontFreetype(IGUIFontInterface):
             text_surface = text_surface.premul_alpha()
         return text_surface
 
-    def render_premul_to(self, text: str, text_colour: Color,
-                         surf_size: Tuple[int, int], surf_position: Tuple[int, int]) -> Surface:
+    def render_premul_to(self, text: str, text_colour: Color, surf_size: Tuple[int, int], surf_position: Tuple[int, int]) -> Surface:
         text_surface = pygame.Surface(surf_size, depth=32, flags=pygame.SRCALPHA)
         self.__internal_font.render_to(text_surface, surf_position, text, fgcolor=text_colour)
         if text_surface.get_width() > 0 and text_surface.get_height() > 0:
