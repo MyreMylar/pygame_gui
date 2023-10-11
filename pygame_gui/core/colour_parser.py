@@ -28,12 +28,8 @@ Developer Notes:
 """
 
 import pygame
-from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Set, Dict
-# for Python 3.7 compatibility as TypedDict introduced in 3.8
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Set, Dict, TypedDict
+
 import enum
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.utility import premul_col
