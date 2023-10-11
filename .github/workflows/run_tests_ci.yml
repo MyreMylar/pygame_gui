@@ -8,8 +8,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        pygame-ce-version: ['2.1.4', '2.2.1']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        pygame-ce-version: ['2.2.1', '2.3.2']
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -47,8 +47,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [ '3.11' ]
-        pygame-ce-version: [ '2.1.4', '2.2.1' ]
+        python-version: [ '3.12' ]
+        pygame-ce-version: [ '2.2.1', '2.3.2' ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -83,8 +83,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [ '3.11' ]
-        pygame-ce-version: [ '2.1.4', '2.2.1' ]
+        python-version: [ '3.12' ]
+        pygame-ce-version: [ '2.2.1', '2.3.2' ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
