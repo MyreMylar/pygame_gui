@@ -11,9 +11,9 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         pygame-ce-version: ['2.2.1', '2.3.2']
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.1.0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4.7.1
       with:
         python-version: ${{ matrix.python-version }}
         pygame-ce-version: ${{ matrix.pygame-ce-version }}
@@ -50,9 +50,9 @@ jobs:
         python-version: [ '3.12' ]
         pygame-ce-version: [ '2.2.1', '2.3.2' ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4.7.1
         with:
           python-version: ${{ matrix.python-version }}
           pygame-ce-version: ${{ matrix.pygame-ce-version }}
@@ -86,9 +86,9 @@ jobs:
         python-version: [ '3.12' ]
         pygame-ce-version: [ '2.2.1', '2.3.2' ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4.7.1
         with:
           python-version: ${{ matrix.python-version }}
           pygame-ce-version: ${{ matrix.pygame-ce-version }}
