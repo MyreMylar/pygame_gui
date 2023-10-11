@@ -43,6 +43,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  *,
+                 wrap_width: Optional[int] = None,
                  text_kwargs: Dict[str, str] = None):
 
         super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
@@ -61,12 +62,13 @@ class UITooltip(UIElement, IUITooltipInterface):
         self.rect_width = None  # type: Optional[int]
         self.hover_distance_from_target = hover_distance
 
+        self.overwrite_theme_wrap_width = wrap_width
         self.rebuild_from_changed_theme_data()
 
         self.text_block = UITextBox(html_text,
                                     pygame.Rect(0, 0, self.rect_width, -1),
                                     manager=self.ui_manager,
-                                    layer_starting_height=self._layer,
+                                    starting_height=self._layer,
                                     parent_element=self,
                                     text_kwargs=text_kwargs)
 
@@ -161,6 +163,9 @@ class UITooltip(UIElement, IUITooltipInterface):
                                                casting_func=int):
             has_any_changed = True
 
+        if self.overwrite_theme_wrap_width is not None:
+            self.rect_width = self.overwrite_theme_wrap_width
+
         if has_any_changed:
             self.rebuild()
 
@@ -192,11 +197,14 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
 
-        :param dimensions: The new dimensions to set
+        :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         self.rect_width = dimensions[0]

@@ -28,6 +28,7 @@ Misc
  - "**border_width**" - The width of the border around the element in pixels. Defaults to "1".
  - "**shadow_width**" - The width of the shadow around the element in pixels. Defaults to "2".
  - "**list_item_height**" - The pixel height of a the items in the list. Defaults to "20".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Sub-elements
 --------------

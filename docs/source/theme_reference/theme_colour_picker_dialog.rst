@@ -3,7 +3,8 @@
 UIColourPickerDialog Theming Parameters
 =======================================
 
-:class:`UIColourPickerDialog <pygame_gui.windows.UIColourPickerDialog>` is a UIWindow with the object id of '#colour_picker_dialog'.
+:class:`UIColourPickerDialog <pygame_gui.windows.UIColourPickerDialog>` is a UIWindow with the element id of
+'colour_picker_dialog' and the default object id of '#colour_picker_dialog'.
 
 .. figure:: ../_static/colour_picker_static_image.png
 

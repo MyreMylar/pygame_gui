@@ -28,6 +28,7 @@ Misc
  - "**follow_sprite_offset**" - The x,y offset values the bar relative to the sprite. Defaults to "0,0".
  - "**border_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
  - "**shadow_width**" - The width of the border around the health bar. Defaults to "1". Can be "0" to remove the border.
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Example
 -------

@@ -27,6 +27,7 @@ Font
 :class:`UILabel <pygame_gui.elements.UILabel>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
+ - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide. You will need to keep repeating the locale specifier if using prototypes to make a hierarchy.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the label.
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
@@ -67,6 +68,7 @@ Misc
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the label text. Default is "center".
  - "**text_horiz_alignment_padding**" - If horizontal alignment is set to 'left' or 'right' this value will control the buffer between the edge of the label rectangle and where we start placing the text. Default is "0".
  - "**text_vert_alignment_padding**" - If vertical alignment is set to 'top' or 'bottom' this value will control the buffer between the edge of the label rectangle and where we start placing the text. Default is "0".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Example
 -------

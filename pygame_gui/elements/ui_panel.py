@@ -23,7 +23,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     :param relative_rect: The positioning and sizing rectangle for the panel. See the layout
                           guide for details.
-    :param starting_layer_height: How many layers above its container to place this panel on.
+    :param starting_height: How many layers above its container to place this panel on.
     :param manager: The GUI manager that handles drawing and updating the UI and interactions
                     between elements. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
@@ -42,7 +42,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
     """
     def __init__(self,
                  relative_rect: pygame.Rect,
-                 starting_layer_height: int = 1,
+                 starting_height: int = 1,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
                  element_id: str = 'panel',
@@ -53,11 +53,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.panel_container = None
         super().__init__(relative_rect,
                          manager,
                          container,
-                         starting_height=starting_layer_height,
+                         starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
                          visible=visible)
@@ -85,15 +87,15 @@ class UIPanel(UIElement, IContainerLikeInterface):
         else:
             self.container_margins = margins
 
-        container_rect = pygame.Rect(self.relative_rect.left + self.container_margins['left'],
-                                     self.relative_rect.top + self.container_margins['top'],
+        container_rect = pygame.Rect(self.relative_rect.left,
+                                     self.relative_rect.top,
                                      self.relative_rect.width - (self.container_margins['left'] +
                                                                  self.container_margins['right']),
                                      self.relative_rect.height - (self.container_margins['top'] +
                                                                   self.container_margins['bottom']))
 
         self.panel_container = UIContainer(container_rect, manager,
-                                           starting_height=starting_layer_height,
+                                           starting_height=starting_height,
                                            container=container,
                                            parent_element=self,
                                            object_id=ObjectID(object_id='#panel_container',
@@ -156,12 +158,15 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the size of this panel and then re-sizes and shifts the contents of the panel container
         to fit the new size.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
@@ -173,10 +178,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                     self.relative_rect.height - (self.container_margins['top'] +
                                                                  self.container_margins['bottom']))
         if new_container_dimensions != self.get_container().get_size():
-            container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
-                                 self.relative_rect.y + self.container_margins['top'])
             self.get_container().set_dimensions(new_container_dimensions)
-            self.get_container().set_relative_position(container_rel_pos)
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
@@ -188,9 +190,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         super().set_relative_position(position)
-        container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
-                             self.relative_rect.y + self.container_margins['top'])
-        self.get_container().set_relative_position(container_rel_pos)
+        self.get_container().set_relative_position(self.relative_rect.topleft)
 
     def set_position(self, position: Union[pygame.math.Vector2,
                                            Tuple[int, int],
@@ -202,9 +202,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         super().set_position(position)
-        container_rel_pos = (self.relative_rect.x + self.container_margins['left'],
-                             self.relative_rect.y + self.container_margins['top'])
-        self.get_container().set_relative_position(container_rel_pos)
+        self.get_container().set_relative_position(self.relative_rect.topleft)
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -245,6 +243,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
                                                                'rounded_rectangle']):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
                                                        'shape_corner_radius': 2}):
@@ -280,7 +283,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.panel_container.disable()
+            if self.panel_container is not None:
+                self.panel_container.disable()
 
     def enable(self):
         """
@@ -288,19 +292,21 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.panel_container.enable()
+            if self.panel_container is not None:
+                self.panel_container.enable()
 
     def show(self):
         """
         In addition to the base UIElement.show() - call show() of owned container - panel_container.
         """
         super().show()
-
-        self.panel_container.show()
+        if self.panel_container is not None:
+            self.panel_container.show()
 
     def hide(self):
         """
         In addition to the base UIElement.hide() - call hide() of owned container - panel_container.
         """
-        self.panel_container.hide()
+        if self.panel_container is not None:
+            self.panel_container.hide()
         super().hide()

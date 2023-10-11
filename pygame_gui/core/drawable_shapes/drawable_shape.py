@@ -148,6 +148,8 @@ class DrawableShape:
 
         self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
+        self.dynamic_width = True if self.containing_rect.width == -1 else False
+        self.dynamic_height = True if self.containing_rect.height == -1 else False
         self.text_view_rect: Optional[pygame.Rect] = None
 
         self.shadow_width = 0
@@ -207,7 +209,7 @@ class DrawableShape:
         self.only_text_changed = False
 
     def _evaluate_contents_for_containing_rect(self):
-        if self.containing_rect.width == -1:
+        if self.dynamic_width:
             # check to see if we have text and a font, this won't work with HTML
             # text - throw a warning?
             # What we really need to to is process the html text layout by this
@@ -230,7 +232,7 @@ class DrawableShape:
                 self.text_view_rect.width = text_width
                 self.text_box_layout.view_rect.width = self.text_view_rect.width
                 self.containing_rect.width = final_width
-        if self.containing_rect.height == -1:
+        if self.dynamic_height:
             if self.text_box_layout is not None:
                 text_height = self.text_box_layout.layout_rect.height
 
@@ -342,14 +344,14 @@ class DrawableShape:
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-    def redraw_all_states(self):
+    def redraw_all_states(self, force_full_redraw: bool = False):
         """
         Starts the redrawing process for all states of this shape that auto pre-generate.
         Redrawing is done one state at a time so will take a few loops of the game to
         complete if this shape has many states.
         """
         self.states_to_redraw_queue = deque([state_id for state_id, state in self.states.items()
-                                             if state.should_auto_pregen])
+                                             if (state.should_auto_pregen or force_full_redraw)])
         initial_state = self.states_to_redraw_queue.popleft()
         self.redraw_state(initial_state)
 
@@ -490,10 +492,17 @@ class DrawableShape:
             self.text_view_rect = self.containing_rect.copy()
             self.text_view_rect.x = 0
             self.text_view_rect.y = 0
-            if self.text_view_rect.width != -1:
-                self.text_view_rect.width -= ((total_text_buffer * 2) + (2 * horiz_padding))
-            if self.text_view_rect.height != -1:
-                self.text_view_rect.height -= ((total_text_buffer * 2) + (2 * vert_padding))
+            if self.dynamic_width:
+                self.text_view_rect.width = -1
+            else:
+                self.text_view_rect.width = max(0, self.text_view_rect.width -
+                                                ((total_text_buffer * 2) + (2 * horiz_padding)))
+
+            if self.dynamic_height:
+                self.text_view_rect.height = -1
+            else:
+                self.text_view_rect.height = max(0, self.text_view_rect.height -
+                                                 ((total_text_buffer * 2) + (2 * vert_padding)))
 
             text_actual_area_rect = self.text_view_rect.copy()
             text_actual_area_rect.x = total_text_buffer + horiz_padding
@@ -586,7 +595,10 @@ class DrawableShape:
         """
         self.theming['text'] = text
         self.build_text_layout()
-        self.redraw_all_states()
+        if 'disabled' in self.states and self.active_state == self.states['disabled']:
+            self.redraw_all_states(force_full_redraw=True)
+        else:
+            self.redraw_all_states()
 
     def set_text_alpha(self, alpha: int):
         """

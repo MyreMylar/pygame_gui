@@ -44,7 +44,10 @@ class UIHorizontalSlider(UIElement):
                  visible: int = 1,
                  click_increment: Union[float, int] = 1
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.sliding_button = None
+        self.button_container = None
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
@@ -460,6 +463,11 @@ class UIHorizontalSlider(UIElement):
                                                casting_func=int):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 
@@ -533,11 +541,14 @@ class UIHorizontalSlider(UIElement):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
@@ -567,12 +578,14 @@ class UIHorizontalSlider(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.sliding_button.disable()
+            if self.sliding_button is not None:
+                self.sliding_button.disable()
             if self.left_button:
                 self.left_button.disable()
             if self.right_button:
                 self.right_button.disable()
-            self.drawable_shape.set_active_state('disabled')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
@@ -580,12 +593,14 @@ class UIHorizontalSlider(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.sliding_button.enable()
+            if self.sliding_button is not None:
+                self.sliding_button.enable()
             if self.left_button:
                 self.left_button.enable()
             if self.right_button:
                 self.right_button.enable()
-            self.drawable_shape.set_active_state('normal')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('normal')
 
     def show(self):
         """
@@ -593,8 +608,8 @@ class UIHorizontalSlider(UIElement):
         the button_container which will propagate and show the left and right buttons.
         """
         super().show()
-
-        self.sliding_button.show()
+        if self.sliding_button is not None:
+            self.sliding_button.show()
         if self.button_container is not None:
             self.button_container.show()
 
@@ -605,6 +620,7 @@ class UIHorizontalSlider(UIElement):
         """
         super().hide()
 
-        self.sliding_button.hide()
+        if self.sliding_button is not None:
+            self.sliding_button.hide()
         if self.button_container is not None:
             self.button_container.hide()

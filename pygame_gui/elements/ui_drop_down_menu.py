@@ -143,8 +143,11 @@ class UIExpandedDropDownState:
         list_class_ids.append(None)
         list_element_ids = self.drop_down_menu_ui.element_ids[:]
         list_element_ids.append('selection_list')
+        list_base_element_ids = self.drop_down_menu_ui.element_base_ids[:]
+        list_base_element_ids.append(None)
 
-        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_element_ids,
+        final_ids = self.ui_manager.get_theme().build_all_combined_ids(list_base_element_ids,
+                                                                       list_element_ids,
                                                                        list_class_ids,
                                                                        list_object_ids)
 
@@ -418,19 +421,23 @@ class UIClosedDropDownState:
         """
         Disables the closed state so that it is no longer interactive.
         """
-        self.selected_option_button.disable()
+        if self.selected_option_button is not None:
+            self.selected_option_button.disable()
         if self.open_button is not None:
             self.open_button.disable()
-        self.drop_down_menu_ui.drawable_shape.set_active_state('disabled')
+        if self.drop_down_menu_ui.drawable_shape is not None:
+            self.drop_down_menu_ui.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
         Re-enables the closed state so we can once again interact with it.
         """
-        self.selected_option_button.enable()
+        if self.selected_option_button is not None:
+            self.selected_option_button.enable()
         if self.open_button is not None:
             self.open_button.enable()
-        self.drop_down_menu_ui.drawable_shape.set_active_state('normal')
+        if self.drop_down_menu_ui.drawable_shape is not None:
+            self.drop_down_menu_ui.drawable_shape.set_active_state('normal')
 
     def rebuild(self):
         """
@@ -662,7 +669,10 @@ class UIDropDownMenu(UIContainer):
                  *,
                  expand_on_option_click: bool = True
                  ):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.menu_states = None
+        self.current_state = None
         super().__init__(relative_rect, manager, container=container,
                          starting_height=0,
                          anchors=anchors,
@@ -839,6 +849,11 @@ class UIDropDownMenu(UIContainer):
                                                casting_func=int):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
                                                        'shape_corner_radius': 2}):
@@ -916,12 +931,15 @@ class UIDropDownMenu(UIContainer):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Sets the dimensions of this drop down, updating all subordinate button
         elements at the same time.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
@@ -934,22 +952,6 @@ class UIDropDownMenu(UIContainer):
         """
         self._set_image(self.drawable_shape.get_fresh_surface())
 
-    def hover_point(self, hover_x: float, hover_y: float) -> bool:
-        """
-        Test if a given point counts as 'hovering' this UI element. Normally that is a
-        straightforward matter of seeing if a point is inside the rectangle. Occasionally it
-        will also check if we are in a wider zone around a UI element once it is already active,
-        this makes it easier to move scroll bars and the like.
-
-        :param hover_x: The x (horizontal) position of the point.
-        :param hover_y: The y (vertical) position of the point.
-
-        :return: Returns True if we are hovering this element.
-
-        """
-        return (bool(self.rect.collidepoint(hover_x, hover_y)) and
-                bool(self.ui_container.rect.collidepoint(hover_x, hover_y)))
-
     def disable(self):
         """
         Disables the button so that it is no longer interactive.
@@ -957,12 +959,13 @@ class UIDropDownMenu(UIContainer):
         if self.is_enabled:
             self.is_enabled = False
             # switch back to the closed state if we are in the expanded state
-            if self.current_state is self.menu_states['expanded']:
-                self.current_state.finish()
-                self.current_state = self.menu_states['closed']
-                self.current_state.selected_option = self.selected_option
-                self.current_state.start()
-            self.current_state.disable()
+            if self.current_state is not None:
+                if self.current_state is self.menu_states['expanded']:
+                    self.current_state.finish()
+                    self.current_state = self.menu_states['closed']
+                    self.current_state.selected_option = self.selected_option
+                    self.current_state.start()
+                self.current_state.disable()
 
     def enable(self):
         """
@@ -970,7 +973,8 @@ class UIDropDownMenu(UIContainer):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.current_state.enable()
+            if self.current_state is not None:
+                self.current_state.enable()
 
     def show(self):
         """
@@ -978,8 +982,8 @@ class UIDropDownMenu(UIContainer):
         showing it's buttons.
         """
         super().show()
-
-        self.menu_states['closed'].show()
+        if self.current_state is not None and self.menu_states is not None:
+            self.menu_states['closed'].show()
 
     def hide(self):
         """
@@ -988,7 +992,7 @@ class UIDropDownMenu(UIContainer):
         call the hide() method of the 'closed' state which hides all it's children widgets.
         """
         super().hide()
-
-        if self.current_state == self.menu_states['expanded']:
-            self.menu_states['expanded'].hide()
-        self.menu_states['closed'].hide()
+        if self.current_state is not None and self.menu_states is not None:
+            if self.current_state == self.menu_states['expanded']:
+                self.menu_states['expanded'].hide()
+            self.menu_states['closed'].hide()

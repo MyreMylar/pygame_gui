@@ -111,7 +111,8 @@ class TestUIAppearanceTheme:
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
         with pytest.raises(ValueError, match="Object & class ID hierarchy is not "
                                              "equal in length to Element ID hierarchy"):
-            theme.build_all_combined_ids(element_ids=['button'],
+            theme.build_all_combined_ids(element_base_ids=[None],
+                                         element_ids=['button'],
                                          class_ids=[None],
                                          object_ids=['whut', 'the', 'heck'])
 
@@ -140,7 +141,8 @@ class TestUIAppearanceTheme:
         theme.load_theme(PackageResource('tests.data.themes',
                                          'appearance_theme_class_id_test.json'))
 
-        combined_ids = theme.build_all_combined_ids(element_ids=['button'],
+        combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
+                                                    element_ids=['button'],
                                                     class_ids=['@test_class'],
                                                     object_ids=['#test_object_2'])
 
@@ -153,7 +155,8 @@ class TestUIAppearanceTheme:
         assert shadow_width == '0'
         assert border_width == '3'
 
-        combined_ids = theme.build_all_combined_ids(element_ids=['button'],
+        combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
+                                                    element_ids=['button'],
                                                     class_ids=['@test_class'],
                                                     object_ids=['#test_object_1'])
 
@@ -167,7 +170,8 @@ class TestUIAppearanceTheme:
         assert border_width == '1'
         assert shadow_width == '3'
 
-        combined_ids = theme.build_all_combined_ids(element_ids=['button'], class_ids=[None],
+        combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
+                                                    element_ids=['button'], class_ids=[None],
                                                     object_ids=['#test_object_2'])
 
         assert combined_ids == ['#test_object_2', 'button']

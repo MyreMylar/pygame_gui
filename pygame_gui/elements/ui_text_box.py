@@ -67,7 +67,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     it will try to use the first UIManager that was created by your application.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
                            match the text within.
-    :param layer_starting_height: Sets the height, above its container, to start placing the text
+    :param starting_height: Sets the height, above its container, to start placing the text
                                   box at.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
@@ -86,7 +86,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface] = None,
                  wrap_to_height: bool = False,
-                 layer_starting_height: int = 1,
+                 starting_height: int = 1,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
@@ -98,9 +98,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  allow_split_dashes: bool = True,
                  plain_text_display_only: bool = False,
                  should_html_unescape_input_text: bool = False):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.scroll_bar = None
+        relative_rect.height = -1 if wrap_to_height else relative_rect.height
         super().__init__(relative_rect, manager, container,
-                         starting_height=layer_starting_height,
+                         starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors,
                          visible=visible
@@ -125,12 +128,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
-        self.wrap_to_height = wrap_to_height
         self.link_hover_chunks = []  # container for any link chunks we have
 
         self.active_text_effect = None  # type: Optional[TextEffect]
         self.active_text_chunk_effects = []
-        self.scroll_bar = None
+
         self.scroll_bar_width = 20
 
         self.border_width = None
@@ -213,9 +215,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                   (self.border_width * 2) -
                                                   (self.shadow_width * 2) -
                                                   (2 * self.rounded_corner_offset))))
-        if self.wrap_to_height or self.rect[3] == -1:
+        if self.dynamic_height:
             self.text_wrap_rect.height = -1
-        if self.rect[2] == -1:
+        if self.dynamic_width:
             self.text_wrap_rect.width = -1
 
         drawable_area_size = (self.text_wrap_rect[2], self.text_wrap_rect[3])
@@ -223,7 +225,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # This gives us the height of the text at the 'width' of the text_wrap_area
         self.parse_html_into_style_data()
         if self.text_box_layout is not None:
-            if self.wrap_to_height or self.rect[3] == -1 or self.rect[2] == -1:
+            if self.dynamic_height or self.dynamic_width:
                 final_text_area_size = self.text_box_layout.layout_rect.size
                 new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
@@ -498,11 +500,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of a text box.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         self.relative_rect.width = int(dimensions[0])
@@ -573,7 +578,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes)
         self.parser.empty_layout_queue()
-        if self.text_wrap_rect[3] == -1:
+        if not self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
         self._align_all_text_rows()
@@ -587,7 +592,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         if self.rect.width <= 0 or self.rect.height <= 0:
             return
-        if (self.scroll_bar is None and
+        if (self.scroll_bar is None and not self.dynamic_height and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
         else:
@@ -765,6 +770,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='line_spacing', default_value=1.25, casting_func=float):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
             has_any_changed = True
 
         # colour parameters

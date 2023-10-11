@@ -52,14 +52,23 @@ class UIImage(UIElement):
         self.original_image = None
 
         self.set_image(image_surface, image_is_alpha_premultiplied)
+        self.rebuild_from_changed_theme_data()
+
+    def rebuild_from_changed_theme_data(self):
+        self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                            default_value=1.0,
+                                            casting_func=float)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the dimensions of this image, scaling the image surface to match.
 
         :param dimensions: The new dimensions of the image.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)

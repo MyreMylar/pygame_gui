@@ -55,12 +55,14 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def build_all_combined_ids(self, element_ids: Union[None, List[str]],
+    def build_all_combined_ids(self, element_base_ids: Union[None, List[Union[str, None]]],
+                               element_ids: Union[None, List[str]],
                                class_ids: Union[None, List[Union[str, None]]],
                                object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
         """
         Construct a list of combined element ids from the element's various accumulated ids.
 
+        :param element_base_ids: when an element is also another element (e.g. a file dialog is also a window)
         :param element_ids: All the ids of elements this element is contained within.
         :param class_ids: All the ids of 'classes' that this element is contained within.
         :param object_ids: All the ids of objects this element is contained within.

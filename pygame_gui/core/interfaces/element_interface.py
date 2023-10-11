@@ -30,6 +30,14 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_element_base_ids(self) -> List[str]:
+        """
+        A list of all the element base IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+
+    @abstractmethod
     def get_element_ids(self) -> List[str]:
         """
         A list of all the element IDs in this element's theming/event hierarchy.
@@ -85,7 +93,8 @@ class IUIElementInterface(metaclass=ABCMeta):
     @abstractmethod
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -93,6 +102,8 @@ class IUIElementInterface(metaclass=ABCMeta):
         may make a mess of them.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
 

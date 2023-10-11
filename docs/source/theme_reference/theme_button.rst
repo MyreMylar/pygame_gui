@@ -52,7 +52,7 @@ Font
 block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
- - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide.
+ - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide. You will need to keep repeating the locale specifier if using prototypes to make a hierarchy.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the button.
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
@@ -125,7 +125,7 @@ Misc
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
  - "**border_width**" - the width in pixels of the border around the button. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to 2.
- - "**tool_tip_delay**" - time in seconds before a the buttons tool sip (if it has one) will appear. Default is "1.0".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
  - "**text_horiz_alignment**" - Set to "left", "right" or "center". Controls the horizontal placement of the button text, if this button has any text. Default is "center".
  - "**text_vert_alignment**" - Set to "top", "bottom or "center". Controls the vertical placement of the button text, if this button has any text. Default is "center".
  - "**text_horiz_alignment_padding**" - If horizontal alignment is set to 'left' or 'right' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".

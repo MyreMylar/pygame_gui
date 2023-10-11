@@ -52,6 +52,9 @@ class UIColourChannelEditor(UIElement):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors:  Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor when hiding on creation
+        self.element_container = None
 
         super().__init__(relative_rect,
                          manager,
@@ -289,8 +292,8 @@ class UIColourChannelEditor(UIElement):
         - which will propagate to the sub-elements - label, entry and slider.
         """
         super().hide()
-
-        self.element_container.hide()
+        if self.element_container is not None:
+            self.element_container.hide()
 
 
 class UIColourPickerDialog(UIWindow):
@@ -317,6 +320,7 @@ class UIColourPickerDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
+                         element_id='colour_picker_dialog',
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

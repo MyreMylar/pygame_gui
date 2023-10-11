@@ -92,7 +92,10 @@ class RectDrawableShape(DrawableShape):
                                             self.border_width + self.shadow_width),
                                            (self.click_area_shape.width - (2 * self.border_width),
                                             self.click_area_shape.height - (2 * self.border_width)))
-        self.redraw_all_states()
+        if 'disabled' in self.states and self.active_state == self.states['disabled']:
+            self.redraw_all_states(force_full_redraw=True)
+        else:
+            self.redraw_all_states()
 
     def collide_point(self, point: Union[pygame.math.Vector2,
                                          Tuple[int, int],

@@ -35,6 +35,7 @@ Font
 :class:`UITextEntryLine <pygame_gui.elements.UITextEntryLine>` accepts a font specified in the theme via a 'font' block. A 'font' block has these parameters:
 
  - "**name**" - Necessary to make a valid block. This is the name that this font goes by in the UI, if this is a new font then subsequent font instances with different styles or sizes should use the same name.
+ - "**locale**" - Optional parameter to set this font as belonging to a particular locale only. See the :ref:`localization` guide. You will need to keep repeating the locale specifier if using prototypes to make a hierarchy.
  - "**size**" - Necessary to make a valid block. This is the point size of the font to use on the text entry line.
  - "**bold**" - Optional parameter. Set it to "1" to make this font bold.
  - "**italic**" - Optional parameter. Set it to "1" to make this font italic.
@@ -73,6 +74,7 @@ Misc
  - "**border_width**" - the width of the border around the element in pixels. Defaults to "1".
  - "**shadow_width**" - the width of the shadow around the element in pixels. Defaults to "1".
  - "**padding**" - the horizontal and vertical 'padding' between the border and where we render the text. Defaults to "4,2".
+ - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
 
 Example
 -------

@@ -93,6 +93,11 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         element.change_layer(self._layer + element.get_starting_height())
         self.elements.append(element)
         self.calc_add_element_changes_thickness(element)
+        if not self.is_enabled:
+            element.disable()
+        if not self.visible:
+            if hasattr(element, 'hide'):
+                element.hide()
 
     def remove_element(self, element: IUIElementInterface):
         """
@@ -198,12 +203,16 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False
+                       ):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.
 
         :param dimensions: the new dimensions.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)

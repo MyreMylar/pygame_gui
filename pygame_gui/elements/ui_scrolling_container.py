@@ -41,7 +41,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
-
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self._root_container = None
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -160,7 +162,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -168,6 +171,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         may make a mess of them.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
@@ -416,7 +421,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self._root_container.disable()
+            if self._root_container is not None:
+                self._root_container.disable()
 
     def enable(self):
         """
@@ -424,7 +430,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self._root_container.enable()
+            if self._root_container is not None:
+                self._root_container.enable()
 
     def show(self):
         """
@@ -434,7 +441,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         separately.
         """
         super().show()
-        self._root_container.show()
+        if self._root_container is not None:
+            self._root_container.show()
 
     def hide(self):
         """
@@ -443,5 +451,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         it's visibility will propagate to them - there is no need to call their hide() methods
         separately.
         """
-        self._root_container.hide()
+        if self._root_container is not None:
+            self._root_container.hide()
         super().hide()

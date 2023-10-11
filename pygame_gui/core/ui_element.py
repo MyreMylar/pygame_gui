@@ -44,23 +44,33 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._layer = 0
         self.ui_manager = manager
+        self.ui_container = None
         if self.ui_manager is None:
             self.ui_manager = get_default_manager()
         if self.ui_manager is None:
             raise ValueError("Need to create at least one UIManager to create UIElements")
 
         super().__init__(self.ui_manager.get_sprite_group())
+
+        self.minimum_dimensions = (-1, -1)
+        relative_rect.size = self._get_clamped_to_minimum_dimensions(relative_rect.size)
+
         if isinstance(relative_rect, pygame.Rect):
             self.relative_rect = relative_rect.copy()
         else:
             self.relative_rect = pygame.Rect(relative_rect)
         self.rect = self.relative_rect.copy()
+
+        self.dynamic_width = True if self.relative_rect.width == -1 else False
+        self.dynamic_height = True if self.relative_rect.height == -1 else False
+
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
 
         self.object_ids = None
         self.class_ids = None
         self.element_ids = None
+        self.element_base_ids = None
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
 
@@ -139,7 +149,13 @@ class UIElement(GUISprite, IUIElementInterface):
         self.border_width = None  # type: Union[None, int]
         self.shape_corner_radius = None  # type: Union[None, int]
 
-        self.ui_container = None
+        self.tool_tip_text = None
+        self.tool_tip_text_kwargs = None
+        self.tool_tip_object_id = None
+        self.tool_tip_delay = 1.0
+        self.tool_tip_wrap_width = None
+        self.tool_tip = None
+
         self._setup_container(container)
 
         self.dirty = 1
@@ -151,6 +167,26 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
+
+    def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
+        if self.ui_container is not None and clamp_to_container:
+            dimensions = (min(self.ui_container.rect.width,
+                              max(self.minimum_dimensions[0],
+                                  int(dimensions[0]))),
+                          min(self.ui_container.rect.height,
+                              max(self.minimum_dimensions[1],
+                                  int(dimensions[1]))))
+        else:
+            dimensions = (max(self.minimum_dimensions[0], int(dimensions[0])),
+                          max(self.minimum_dimensions[1], int(dimensions[1])))
+        return dimensions
+
+    def _on_contents_changed(self):
+        if self.dynamic_width or self.dynamic_height:
+            self._calc_dynamic_size()
+
+    def _calc_dynamic_size(self):
+        pass
 
     @staticmethod
     def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
@@ -272,6 +308,14 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         return self.rect
 
+    def get_element_base_ids(self) -> List[str]:
+        """
+        A list of all the element base IDs in this element's theming/event hierarchy.
+
+        :return: a list of strings, one for each element in the hierarchy.
+        """
+        return self.element_base_ids
+
     def get_element_ids(self) -> List[str]:
         """
         A list of all the element IDs in this element's theming/event hierarchy.
@@ -300,7 +344,8 @@ class UIElement(GUISprite, IUIElementInterface):
                           container: Union[IContainerLikeInterface, None],
                           parent_element: Union[None, IUIElementInterface],
                           object_id: Union[ObjectID, str, None],
-                          element_id: str):
+                          element_id: str,
+                          element_base_id: Optional[str] = None):
         """
         Creates valid id lists for an element. It will assert if users supply object IDs that
         won't work such as those containing full stops. These ID lists are used by the theming
@@ -334,20 +379,23 @@ class UIElement(GUISprite, IUIElementInterface):
             class_id = None
 
         if id_parent is not None:
+            self.element_base_ids = id_parent.get_element_base_ids().copy()
             self.element_ids = id_parent.get_element_ids().copy()
-            self.element_ids.append(element_id)
-
             self.class_ids = id_parent.get_class_ids().copy()
-            self.class_ids.append(class_id)
-
             self.object_ids = id_parent.get_object_ids().copy()
+
+            self.element_base_ids.append(element_base_id)
+            self.element_ids.append(element_id)
+            self.class_ids.append(class_id)
             self.object_ids.append(obj_id)
         else:
+            self.element_base_ids = [element_base_id]
             self.element_ids = [element_id]
             self.class_ids = [class_id]
             self.object_ids = [obj_id]
 
         self.combined_element_ids = self.ui_manager.get_theme().build_all_combined_ids(
+            self.element_base_ids,
             self.element_ids,
             self.class_ids,
             self.object_ids)
@@ -462,6 +510,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.rect.top = new_top
         new_height = new_bottom - new_top
         new_width = new_right - new_left
+        new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
             self.set_dimensions((new_width, new_height))
 
@@ -649,9 +698,30 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
         self.ui_container.on_anchor_target_changed(self)
 
+    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                                       Tuple[int, int],
+                                                       Tuple[float, float]]):
+        """
+        If this window is resizable, then the dimensions we set here will be the minimum that
+        users can change the window to. They are also used as the minimum size when
+        'set_dimensions' is called.
+
+        :param dimensions: The new minimum dimension for the window.
+
+        """
+        self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
+                                   min(self.ui_container.rect.height, int(dimensions[1])))
+
+        if ((self.rect.width < self.minimum_dimensions[0]) or
+                (self.rect.height < self.minimum_dimensions[1])):
+            new_width = max(self.minimum_dimensions[0], self.rect.width)
+            new_height = max(self.minimum_dimensions[1], self.rect.height)
+            self.set_dimensions((new_width, new_height))
+
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -659,8 +729,11 @@ class UIElement(GUISprite, IUIElementInterface):
         may make a mess of them.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
+        dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
         self.relative_rect.width = int(dimensions[0])
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
@@ -703,6 +776,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         Overriding regular sprite kill() method to remove the element from it's container.
         """
+        if self.tool_tip is not None:
+            self.tool_tip.kill()
         self.ui_container.remove_element(self)
         self.remove_element_from_focus_set(self)
         super().kill()
@@ -720,26 +795,32 @@ class UIElement(GUISprite, IUIElementInterface):
         :return bool: A boolean that is true if we have hovered a UI element, either just now or
                       before this method.
         """
-        if self.alive() and self.can_hover():
+        should_block_hover = False
+        if self.alive():
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             mouse_pos = pygame.math.Vector2(mouse_x, mouse_y)
 
-            if (self.is_enabled and
-                    self.hover_point(mouse_x, mouse_y) and
+            if (self.hover_point(mouse_x, mouse_y) and
                     not hovered_higher_element):
-                if not self.hovered:
-                    self.hovered = True
-                    self.on_hovered()
+                should_block_hover = True
 
-                self.while_hovering(time_delta, mouse_pos)
+                if self.can_hover():
+                    if not self.hovered:
+                        self.hovered = True
+                        self.on_hovered()
 
+                    self.while_hovering(time_delta, mouse_pos)
+                else:
+                    if self.hovered:
+                        self.hovered = False
+                        self.on_unhovered()
             else:
                 if self.hovered:
                     self.hovered = False
                     self.on_unhovered()
         elif self.hovered:
             self.hovered = False
-        return self.hovered
+        return should_block_hover
 
     def on_fresh_drawable_shape_ready(self):
         """
@@ -750,23 +831,42 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def on_hovered(self):
         """
-        A stub to override. Called when this UI element first enters the 'hovered' state.
+        Called when this UI element first enters the 'hovered' state.
         """
+        self.hover_time = 0.0
 
     def on_unhovered(self):
         """
-        A stub to override. Called when this UI element leaves the 'hovered' state.
+        Called when this UI element leaves the 'hovered' state.
         """
+        if self.tool_tip is not None:
+            self.tool_tip.kill()
+            self.tool_tip = None
 
-    def while_hovering(self, time_delta: float, mouse_pos: pygame.math.Vector2):
+    def while_hovering(self, time_delta: float,
+                       mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
-        A stub method to override. Called when this UI element is currently hovered.
+        Called while we are in the hover state. It will create a tool tip if we've been in the
+        hover state for a while, the text exists to create one and we haven't created one already.
 
-        :param time_delta: A float, the time in seconds between the last call to this function
-                           and now (roughly).
-        :param mouse_pos: The current position of the mouse as 2D Vector.
+        :param time_delta: Time in seconds between calls to update.
+        :param mouse_pos: The current position of the mouse.
 
         """
+        if (self.tool_tip is None and self.tool_tip_text is not None and
+                self.hover_time > self.tool_tip_delay):
+            hover_height = int(self.rect.height / 2)
+            self.tool_tip = self.ui_manager.create_tool_tip(text=self.tool_tip_text,
+                                                            position=(mouse_pos[0],
+                                                                      self.rect.centery),
+                                                            hover_distance=(0,
+                                                                            hover_height),
+                                                            parent_element=self,
+                                                            object_id=self.tool_tip_object_id,
+                                                            wrap_width=self.tool_tip_wrap_width,
+                                                            text_kwargs=self.tool_tip_text_kwargs)
+
+        self.hover_time += time_delta
 
     def can_hover(self) -> bool:
         """
@@ -1125,3 +1225,18 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         self.ui_theme.update_single_element_theming(self.most_specific_combined_id, new_theming_data)
         self.rebuild_from_changed_theme_data()
+
+    def set_tooltip(self, text: Optional[str] = None, object_id: Optional[ObjectID] = None,
+                    text_kwargs: Optional[Dict[str, str]] = None, delay: Optional[float] = None,
+                    wrap_width: Optional[int] = None):
+        self.tool_tip_text = text
+        self.tool_tip_text_kwargs = {}
+        if text_kwargs is not None:
+            self.tool_tip_text_kwargs = text_kwargs
+        self.tool_tip_object_id = object_id
+
+        if delay is not None:
+            self.tool_tip_delay = delay
+
+        self.tool_tip_wrap_width = wrap_width
+

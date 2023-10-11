@@ -3,7 +3,8 @@
 UIMessageWindow Theming Parameters
 =======================================
 
-:class:`UIMessageWindow <pygame_gui.windows.UIMessageWindow>` is a UIWindow with the object id of '#message_window'.
+:class:`UIMessageWindow <pygame_gui.windows.UIMessageWindow>` is a UIWindow with the element id of 'message_window' and
+a default object id of '#message_window'.
 
 .. figure:: ../_static/message_window_static_image.png
 
@@ -23,10 +24,10 @@ As well as the sub-elements of the UIWindow (title bar and close button) which y
 
 UIButtons:
 
- - '#message_window.#dismiss_button'
+ - 'message_window.#dismiss_button'
 
 UITextBox:
 
- - '#message_window.text_box'
+ - 'message_window.text_box'
 
 You can find out more about theming buttons here: :ref:`theme-button` and text boxes here: :ref:`theme-text-box`.

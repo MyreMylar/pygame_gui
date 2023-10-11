@@ -39,6 +39,10 @@ class UIHorizontalScrollBar(UIElement):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
 
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.button_container = None
+
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
@@ -468,6 +472,11 @@ class UIHorizontalScrollBar(UIElement):
                                                casting_func=parse_to_bool):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 
@@ -509,11 +518,14 @@ class UIHorizontalScrollBar(UIElement):
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
@@ -547,9 +559,11 @@ class UIHorizontalScrollBar(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.button_container.disable()
+            if self.button_container is not None:
+                self.button_container.disable()
 
-            self.drawable_shape.set_active_state('disabled')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
@@ -557,9 +571,11 @@ class UIHorizontalScrollBar(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.button_container.enable()
+            if self.button_container is not None:
+                self.button_container.enable()
 
-            self.drawable_shape.set_active_state('normal')
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state('normal')
 
     def show(self):
         """
@@ -567,8 +583,8 @@ class UIHorizontalScrollBar(UIElement):
         will propagate and show all the buttons.
         """
         super().show()
-
-        self.button_container.show()
+        if self.button_container is not None:
+            self.button_container.show()
 
     def hide(self):
         """
@@ -576,5 +592,5 @@ class UIHorizontalScrollBar(UIElement):
         will propagate and hide all the buttons.
         """
         super().hide()
-
-        self.button_container.hide()
+        if self.button_container is not None:
+            self.button_container.hide()

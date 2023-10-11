@@ -47,7 +47,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self._window_root_container = None  # type: Optional[UIContainer]
         self.resizable = resizable
         self.draggable = draggable
-        self.minimum_dimensions = (100, 100)
+
         self.edge_hovering = [False, False, False, False]
 
         super().__init__(rect, manager, container=None,
@@ -55,13 +55,19 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                          layer_thickness=1,
                          visible=visible)
 
+        self.minimum_dimensions = (100, 100)
+
+        base_id = None
         if element_id is None:
             element_id = 'window'
+        else:
+            base_id = 'window'
 
         self._create_valid_ids(container=None,
                                parent_element=None,
                                object_id=object_id,
-                               element_id=element_id)
+                               element_id=element_id,
+                               element_base_id=base_id)
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True
@@ -103,47 +109,22 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         self.is_blocking = state
 
-    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                                       Tuple[int, int],
-                                                       Tuple[float, float]]):
-        """
-        If this window is resizable, then the dimensions we set here will be the minimum that
-        users can change the window to. They are also used as the minimum size when
-        'set_dimensions' is called.
-
-        :param dimensions: The new minimum dimension for the window.
-
-        """
-        self.minimum_dimensions = (min(self.ui_container.rect.width, int(dimensions[0])),
-                                   min(self.ui_container.rect.height, int(dimensions[1])))
-
-        if ((self.rect.width < self.minimum_dimensions[0]) or
-                (self.rect.height < self.minimum_dimensions[1])):
-            new_width = max(self.minimum_dimensions[0], self.rect.width)
-            new_height = max(self.minimum_dimensions[1], self.rect.height)
-            self.set_dimensions((new_width, new_height))
-
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the size of this window and then re-sizes and shifts the contents of the windows
         container to fit the new size.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
-        # clamp to minimum dimensions and container size
-        dimensions = (min(self.ui_container.rect.width,
-                          max(self.minimum_dimensions[0],
-                              int(dimensions[0]))),
-                      min(self.ui_container.rect.height,
-                          max(self.minimum_dimensions[1],
-                              int(dimensions[1]))))
-
         # Don't use a basic gate on this set dimensions method because the container may be a
         # different size to the window
-        super().set_dimensions(dimensions)
+        super().set_dimensions(dimensions, clamp_to_container=True)
 
         if self._window_root_container is not None:
             new_container_dimensions = (self.relative_rect.width - (2 * self.shadow_width),
@@ -599,6 +580,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                                                                'rounded_rectangle']):
             has_any_changed = True
 
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
+            has_any_changed = True
+
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 15,
                                                        'shape_corner_radius': 2}):
@@ -722,7 +708,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self._window_root_container.disable()
+            if self._window_root_container is not None:
+                self._window_root_container.disable()
 
     def enable(self):
         """
@@ -730,7 +717,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self._window_root_container.enable()
+            if self._window_root_container is not None:
+                self._window_root_container.enable()
 
     def show(self):
         """
@@ -738,8 +726,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         propagate and show all the children.
         """
         super().show()
-
-        self._window_root_container.show()
+        if self._window_root_container is not None:
+            self._window_root_container.show()
 
     def hide(self):
         """
@@ -747,8 +735,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         propagate and hide all the children.
         """
         super().hide()
-
-        self._window_root_container.hide()
+        if self._window_root_container is not None:
+            self._window_root_container.hide()
 
     def get_relative_mouse_pos(self):
         """
