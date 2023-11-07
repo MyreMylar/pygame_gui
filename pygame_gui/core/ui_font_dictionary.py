@@ -104,6 +104,13 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              'NotoSansSC-Bold.otf',
                                              'NotoSansSC-Regular.otf',
                                              'NotoSansSC-Bold.otf')
+        self._korean_font = DefaultFontData(14,
+                                             'noto_sans_kr',
+                                             'regular',
+                                             'NotoSansKR-Regular.ttf',
+                                             'NotoSansKR-Bold.ttf',
+                                             'NotoSansKR-Regular.ttf',
+                                             'NotoSansKR-Bold.ttf')
         self.default_font_dictionary = {'en': self._latin_font,
                                         'fr': self._latin_font,
                                         'de': self._latin_font,
@@ -113,7 +120,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                         'id': self._latin_font,
                                         'pt': self._latin_font,
                                         'ja': self._japanese_font,
-                                        'zh': self._chinese_font}
+                                        'zh': self._chinese_font,
+                                        'ko': self._korean_font}
 
         try:
             self.default_font: DefaultFontData = self.default_font_dictionary[locale]
