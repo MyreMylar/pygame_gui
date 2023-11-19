@@ -146,7 +146,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
 
         super().set_position(position)
-        self._root_container.set_dimensions(position)
+        self._root_container.set_position(position)
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],

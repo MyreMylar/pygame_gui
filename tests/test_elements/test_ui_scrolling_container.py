@@ -53,6 +53,7 @@ class TestUIScrollingContainer:
         container.set_position((50, 50))
 
         assert container.rect.topleft == (50, 50)
+        assert container._root_container.rect.size == (200, 200)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
