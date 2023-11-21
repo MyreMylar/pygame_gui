@@ -13,7 +13,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> IGUIFontInterface:
+                  bold: bool = False, italic: bool = False,
+                  antialiased: bool = True) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -27,6 +28,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param font_name: The name of the font to find.
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
+        :param antialiased: Whether the font is antialiased or not.
 
         :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
@@ -42,7 +44,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
+    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool, antialiased: bool = True) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
 
@@ -50,6 +52,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param font_name: The name of the font.
         :param bold: Whether the font is bold styled or not.
         :param italic: Whether the font is italic styled or not.
+        :param antialiased: Whether the font is antialiased or not.
 
         :return str: The finished font id.
 
@@ -58,7 +61,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
     @abstractmethod
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False,
-                     force_immediate_load: bool = False):
+                     force_immediate_load: bool = False,
+                     antialiased: bool = True):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
@@ -70,6 +74,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param italic: Whether the font is italic styled or not.
         :param force_immediate_load: bypasses any asynchronous threaded loading setup to immediately
                                      load the font on the main thread.
+        :param antialiased: Whether the font is antialiased or not.
 
         """
 

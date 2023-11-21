@@ -23,9 +23,13 @@ class GUIFontFreetype(IGUIFontInterface):
 
         self.point_size = size
 
-        if force_style and style is not None:
-            self.__internal_font.strong = style['bold']
-            self.__internal_font.oblique = style['italic']
+        if style is not None:
+            self.__internal_font.antialiased = style['antialiased']
+
+            if force_style:
+                self.__internal_font.strong = style['bold']
+                self.__internal_font.oblique = style['italic']
+
 
     @property
     def underline(self) -> bool:

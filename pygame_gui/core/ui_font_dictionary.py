@@ -26,7 +26,7 @@ class DefaultFontData:
         self.size = size
         self.name = name
         self.style = style
-        self.idx = (self.name + '_' + self.style + '_' + str(self.size))
+        self.idx = (self.name + '_' + self.style + '_' + 'aa_' + str(self.size))
 
         self.regular_file_name = regular_file_name
         self.bold_file_name = bold_file_name
@@ -155,7 +155,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         default_font_res = FontResource(
             font_id=self.default_font.idx,
             size=self.default_font.size,
-            style={'bold': False, 'italic': False},
+            style={'bold': False, 'italic': False, 'antialiased': True},
             location=(
                 PackageResource(package='pygame_gui.data',
                                 resource=self.default_font.regular_file_name),
@@ -177,7 +177,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                              resource=self.default_font.bold_italic_file_name), False)]
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False) -> IGUIFontInterface:
+                  bold: bool = False, italic: bool = False, antialiased: bool = True) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -191,14 +191,15 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param font_name: The name of the font to find.
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
+        :param antialiased: Whether the font is antialiased or not.
 
         :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
         """
-        return self.find_font_resource(font_size, font_name, bold, italic).loaded_font
+        return self.find_font_resource(font_size, font_name, bold, italic, antialiased).loaded_font
 
     def find_font_resource(self, font_size: int, font_name: str,
-                           bold: bool = False, italic: bool = False) -> FontResource:
+                           bold: bool = False, italic: bool = False, antialiased: bool = True) -> FontResource:
         """
         Find a loaded font resource from the font dictionary. Will load a font if it does not
         already exist and we have paths to the needed files, however it will issue a warning
@@ -212,11 +213,12 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param font_name: The name of the font to find.
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
+        :param antialiased: Whether the font is antialiased or not.
 
         :return FontResource: Returns either the font resource we asked for, or the default font.
 
         """
-        font_id = self.create_font_id(font_size, font_name, bold, italic)
+        font_id = self.create_font_id(font_size, font_name, bold, italic, antialiased)
 
         if font_id not in self.used_font_ids:
             self.used_font_ids.append(font_id)  # record font usage for optimisation purposes
@@ -233,15 +235,21 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             elif italic:
                 style_string = "italic"
 
+            font_aliasing = "0"
+            if antialiased:
+                font_aliasing = "1"
+
             warning_string = ('Finding font with id: ' +
                               font_id +
                               " that is not already loaded.\n"
                               "Preload this font with {'name': "
                               "'" + font_name + "',"
                               " 'point_size': " + str(font_size) + ","
-                              " 'style': '" + style_string + "'}")
+                              " 'style': '" + style_string + "'," +
+                              " 'antialiased': '" + font_aliasing +
+                              "'}")
             warnings.warn(warning_string, UserWarning)
-            self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True)
+            self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True, antialiased=antialiased)
             return self.loaded_fonts[font_id]
         else:
             return self.loaded_fonts[self.default_font.idx]
@@ -255,7 +263,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         """
         return self.find_font(self.default_font.size, self.default_font.name)
 
-    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool) -> str:
+    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool, antialiased: bool = True) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
 
@@ -263,6 +271,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param font_name: The name of the font.
         :param bold: Whether the font is bold styled or not.
         :param italic: Whether the font is italic styled or not.
+        :param antialiased: Whether the font is antialiased or not.
 
         :return str: The finished font id.
 
@@ -278,11 +287,16 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             font_style_string = "italic"
         else:
             font_style_string = "regular"
-        return font_name + "_" + font_style_string + "_" + str(font_size)
+
+        font_aliasing = "non_aa"
+        if antialiased:
+            font_aliasing = "aa"
+
+        return font_name + "_" + font_style_string + "_" + font_aliasing + "_" + str(font_size)
 
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False,
-                     force_immediate_load: bool = False):
+                     force_immediate_load: bool = False, antialiased: bool = True):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
@@ -294,9 +308,10 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param italic: Whether the font is italic styled or not.
         :param force_immediate_load: resource loading setup to immediately
                                      load the font on the main thread.
+        :param antialiased: Whether the font is antialiased or not.
 
         """
-        font_id = self.create_font_id(font_size, font_name, bold, italic)
+        font_id = self.create_font_id(font_size, font_name, bold, italic, antialiased)
         if font_id in self.loaded_fonts:    # font already loaded
             warnings.warn('Trying to pre-load font id: ' +
                           font_id +
@@ -312,7 +327,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_id,
                                              font_size,
                                              font_style={'bold': True,
-                                                         'italic': True},
+                                                         'italic': True,
+                                                         'antialiased': antialiased},
                                              force_immediate_load=force_immediate_load)
 
             elif bold:
@@ -320,21 +336,24 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_id,
                                              font_size,
                                              font_style={'bold': True,
-                                                         'italic': False},
+                                                         'italic': False,
+                                                         'antialiased': antialiased},
                                              force_immediate_load=force_immediate_load)
             elif italic:
                 self._load_single_font_style(italic_path,
                                              font_id,
                                              font_size,
                                              font_style={'bold': False,
-                                                         'italic': True},
+                                                         'italic': True,
+                                                         'antialiased': antialiased},
                                              force_immediate_load=force_immediate_load)
             else:
                 self._load_single_font_style(regular_path,
                                              font_id,
                                              font_size,
                                              font_style={'bold': False,
-                                                         'italic': False},
+                                                         'italic': False,
+                                                         'antialiased': antialiased},
                                              force_immediate_load=force_immediate_load)
         else:
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
@@ -351,7 +370,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param font_loc: Path to the font file.
         :param font_id: id for the font in the loaded fonts dictionary.
         :param font_size: pygame font size.
-        :param font_style: style dictionary (italic, bold, both or neither)
+        :param font_style: style dictionary (italic, bold, antialiased, all, some or none)
 
         """
         resource = FontResource(font_id=font_id,

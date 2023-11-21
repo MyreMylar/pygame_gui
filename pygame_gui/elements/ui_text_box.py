@@ -564,7 +564,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             font_name=self.parser.default_style['font_name'],
             font_size=self.parser.default_style['font_size'],
             bold=self.parser.default_style['bold'],
-            italic=self.parser.default_style['italic'])
+            italic=self.parser.default_style['italic'],
+            antialiased=self.parser.default_style['antialiased'],)
         default_font_data = {"font": default_font,
                              "font_colour": self.parser.default_style['font_colour'],
                              "bg_colour": self.parser.default_style['bg_colour']

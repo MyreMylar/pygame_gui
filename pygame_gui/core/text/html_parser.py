@@ -85,6 +85,7 @@ class HTMLParser(html.parser.HTMLParser):
         self.default_style['link_href'] = ''
         self.default_style['shadow_data'] = None
         self.default_style['effect_id'] = None
+        self.default_style['antialiased'] = True
 
         # this is the style used before any html is loaded
         self.push_style('default_style', self.default_style)
@@ -247,7 +248,8 @@ class HTMLParser(html.parser.HTMLParser):
             font_name=self.current_style['font_name'],
             font_size=self.current_style['font_size'],
             bold=self.current_style['bold'],
-            italic=self.current_style['italic'])
+            italic=self.current_style['italic'],
+            antialiased=self.current_style['antialiased'])
         dimensions = (current_font.get_rect(' ').width,
                       int(round(self.current_style['font_size'] *
                                 self.line_spacing)))
@@ -406,7 +408,8 @@ class HTMLParser(html.parser.HTMLParser):
             font_name=self.current_style['font_name'],
             font_size=self.current_style['font_size'],
             bold=self.current_style['bold'],
-            italic=self.current_style['italic'])
+            italic=self.current_style['italic'],
+            antialiased=self.current_style['antialiased'])
 
         if self.current_style['link']:
             should_underline = (self.current_style['underline'] or
