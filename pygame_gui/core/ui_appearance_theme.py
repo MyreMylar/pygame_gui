@@ -210,13 +210,16 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 font_id = self.font_dict.create_font_id(font_info['size'],
                                                         font_info['name'],
                                                         font_info['bold'],
-                                                        font_info['italic'])
+                                                        font_info['italic'],
+                                                        font_info['antialiased'])
 
                 if font_id not in self.font_dict.loaded_fonts:
                     self.font_dict.preload_font(font_info['size'],
                                                 font_info['name'],
                                                 font_info['bold'],
-                                                font_info['italic'])
+                                                font_info['italic'],
+                                                False,
+                                                font_info['antialiased'])
 
                 if element_key not in self.ele_font_res:
                     self.ele_font_res[element_key] = {}
@@ -224,7 +227,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     font_info['size'],
                     font_info['name'],
                     font_info['bold'],
-                    font_info['italic'])
+                    font_info['italic'],
+                    font_info['antialiased'])
 
     def _load_images(self):
         """
@@ -926,6 +930,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 font_info_dict['italic'] = False
         if 'italic' not in font_info_dict:
             font_info_dict['italic'] = False
+
+        if 'antialiased' in file_dict:
+            try:
+                font_info_dict['antialiased'] = bool(int(file_dict['antialiased']))
+            except ValueError:
+                font_info_dict['antialiased'] = True
+        if 'antialiased' not in font_info_dict:
+            font_info_dict['antialiased'] = True
 
         if 'regular_path' in file_dict:
             font_info_dict['regular_path'] = file_dict['regular_path']

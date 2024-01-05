@@ -271,7 +271,7 @@ class TestUIManager:
         default_ui_manager.print_unused_fonts()
         captured = capsys.readouterr()
 
-        assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
+        assert captured.out == 'Unused font ids:\nroboto_regular_aa_14(HTML size: 4)\n'
 
     def test_focus_and_unfocus_focus_element(self, _init_pygame, default_ui_manager,
                                              _display_surface_return_none):

@@ -37,7 +37,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                  max_dimensions: Optional[Tuple[int, int]] = None,
                  effect_id: Optional[str] = None):
         self.text_shadow_data = text_shadow_data
-        text_height, text_rect, text_width = self._handle_dimensions(font, max_dimensions, text)
+        self.max_dimensions = max_dimensions
+        text_height, text_rect, text_width = self._handle_dimensions(font, text)
         super().__init__((text_width, text_height), can_split=True)
 
         self.text = text
@@ -56,7 +57,6 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.using_default_text_shadow_colour = self.text_shadow_data[4]
             self.shadow_colour = self.text_shadow_data[3]
 
-        self.max_dimensions = max_dimensions
         self.y_origin = text_rect.y
         self.font_y_padding = self._calc_font_padding()
 
@@ -97,7 +97,16 @@ class TextLineChunkFTFont(TextLayoutRect):
     def __repr__(self):
         return "< '" + self.text + "' " + super().__repr__() + " >"
 
-    def _handle_dimensions(self, font, max_dimensions, text):
+    def _clamp_dimensions_to_maximums(self, text_width, text_height):
+        if self.max_dimensions is not None:
+            if not (self.max_dimensions[0] == -1 or self.max_dimensions[1] == -1):
+                # we don't have dynamic maximum dimensions so use maximum dimensions for both
+                text_width = min(self.max_dimensions[0], text_width)
+                text_height = min(self.max_dimensions[1], text_height)
+
+        return text_width, text_height
+
+    def _handle_dimensions(self, font, text):
         if len(text) == 0:
             text_rect = font.get_rect('A')
         else:
@@ -108,11 +117,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_shadow_width = self.text_shadow_data[0]
         text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
         text_height = text_rect.height
-        if max_dimensions is not None:
-            if not (max_dimensions[0] == -1 or max_dimensions[1] == -1):
-                # we don't have dynamic maximum dimensions so use maximum dimensions for both
-                text_width = min(max_dimensions[0], text_width)
-                text_height = min(max_dimensions[1], text_height)
+        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
         return text_height, text_rect, text_width
 
     def _calc_font_padding(self):
@@ -566,11 +571,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect(self.text)
         text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
-        if self.max_dimensions is not None:
-            if not (self.max_dimensions[0] == -1 or self.max_dimensions[1] == -1):
-                # we don't have dynamic maximum dimensions so use maximum dimensions for both
-                text_width = min(self.max_dimensions[0], text_width)
-                text_height = min(self.max_dimensions[1], text_height)
+        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
 
         self.size = (text_width, text_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
@@ -591,11 +592,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect(self.text)
         text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
-        if self.max_dimensions is not None:
-            if not (self.max_dimensions[0] == -1 or self.max_dimensions[1] == -1):
-                # we don't have dynamic maximum dimensions so use maximum dimensions for both
-                text_width = min(self.max_dimensions[0], text_width)
-                text_height = min(self.max_dimensions[1], text_height)
+        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
 
         self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
@@ -616,11 +613,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect = self.font.get_rect(self.text)
         text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
-        if self.max_dimensions is not None:
-            if self.max_dimensions[0] != -1:
-                text_width = min(self.max_dimensions[0], text_width)
-            if self.max_dimensions[1] != -1:
-                text_height = min(self.max_dimensions[1], text_height)
+        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
 
         self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 

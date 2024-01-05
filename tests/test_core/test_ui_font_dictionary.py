@@ -64,16 +64,16 @@ class TestUIFontDictionary:
     def test_create_font_id(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=False, italic=False)
-        assert font_id_1 == 'bob_regular_10'
+        assert font_id_1 == 'bob_regular_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=True, italic=False)
-        assert font_id_1 == 'bob_bold_10'
+        assert font_id_1 == 'bob_bold_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=False, italic=True)
-        assert font_id_1 == 'bob_italic_10'
+        assert font_id_1 == 'bob_italic_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=True, italic=True)
-        assert font_id_1 == 'bob_bold_italic_10'
+        assert font_id_1 == 'bob_bold_italic_aa_10'
 
         with pytest.warns(UserWarning, match="Font size less than or equal to 0"):
             font_dictionary.create_font_id(font_size=-50, font_name='bob', bold=True, italic=True)
@@ -135,7 +135,7 @@ class TestUIFontDictionary:
         font_dictionary.print_unused_loaded_fonts()
         captured = capsys.readouterr()
 
-        assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
+        assert captured.out == 'Unused font ids:\nroboto_regular_aa_14(HTML size: 4)\n'
 
     def test_convert_html_size_to_point_size_invalid(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
@@ -156,7 +156,7 @@ class TestUIFontDictionary:
         loader.start()
         loader.update()
 
-        assert font_dictionary.check_font_preloaded('roboto_regular_14')
+        assert font_dictionary.check_font_preloaded('roboto_regular_aa_14')
 
 
 if __name__ == '__main__':
