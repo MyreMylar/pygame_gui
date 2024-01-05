@@ -381,7 +381,7 @@ class UIManager(IUIManagerInterface):
         'fira_code' font) you must first add the paths to the files for those fonts, then load the
         specific fonts with a list of font descriptions in a dictionary form like so:
 
-            ``{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}``
+            ``{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic', 'antialiased': 1}``
 
         You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style
         sizes with 'html_size'. Style options are:
@@ -401,6 +401,7 @@ class UIManager(IUIManagerInterface):
             bold = False
             italic = False
             size = 14
+            antialiased = True
             if 'name' in font:
                 name = font['name']
             if 'style' in font:
@@ -408,13 +409,15 @@ class UIManager(IUIManagerInterface):
                     bold = True
                 if 'italic' in font['style']:
                     italic = True
+            if 'antialiased' in font:
+                antialiased = bool(int(font['antialiased']))
             if 'html_size' in font:
                 font_dict = self.ui_theme.get_font_dictionary()
                 size = font_dict.convert_html_to_point_size(font['html_size'])
             elif 'point_size' in font:
                 size = font['point_size']
 
-            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic)
+            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic, False, antialiased)
 
     def print_unused_fonts(self):
         """
