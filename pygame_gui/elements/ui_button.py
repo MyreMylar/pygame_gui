@@ -315,7 +315,7 @@ class UIButton(UIElement):
                 if self.is_enabled:
                     if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        self.on_double_clicked()
+                        self.on_double_clicked(event.button)
                     else:
                         self.on_start_press(event.button)
                         self.double_click_timer = 0.0
@@ -370,7 +370,7 @@ class UIButton(UIElement):
                         'mouse_button': button}
         pygame.event.post(pygame.event.Event(UI_BUTTON_PRESSED, event_data))
 
-    def on_double_clicked(self):
+    def on_double_clicked(self, button: int):
         # old event to remove in 0.8.0
         event_data = {'user_type': OldType(UI_BUTTON_DOUBLE_CLICKED),
                         'ui_element': self,
@@ -380,7 +380,7 @@ class UIButton(UIElement):
         # new event
         event_data = {'ui_element': self,
                         'ui_object_id': self.most_specific_combined_id,
-                        'mouse_button': event.button}
+                        'mouse_button': button}
         pygame.event.post(pygame.event.Event(UI_BUTTON_DOUBLE_CLICKED, event_data))
         
 

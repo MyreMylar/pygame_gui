@@ -29,7 +29,7 @@ setup(
       zip_safe=False,
       python_requires='>=3.8',
       setup_requires=[],
-      install_requires=['pygame-ce>=2.3.2',
+      install_requires=['pygame-ce>=2.4.0',
                         'python-i18n>=0.3.9',
                         'importlib_resources>1.3; python_version < "3.9"'],
       include_package_data=True,
