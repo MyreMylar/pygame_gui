@@ -209,7 +209,7 @@ class UIAutoResizingContainer(UIContainer):
 
     def _update_extreme_elements(self) -> None:
         """
-        Updates which elements is currently responsible for preventing the container to collapse from a certain side
+        Updates which elements are currently responsible for preventing the container from collapsing on each side
         :return: None
         """
         self.left_element = next(
