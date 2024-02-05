@@ -24,7 +24,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                                      container for a UI window.
     :param container: The UIContainer that this UIElement is contained within.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the container and its children are visible by default.
                     Warning - it's parent container visibility may override this.
@@ -333,10 +333,10 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
             self.visible = 0
 
-    def on_anchor_target_changed(self, target: UIElement):
+    def on_contained_elements_changed(self, target: UIElement) -> None:
         """
-        Update the contents of this container that one of their layout anchors may have moved, or
-        been resized.
+        Update the positioning of the contained elements of this container. To be called when one of the contained
+        elements may have moved, or been resized.
 
         :param target: the UI element that has been benn moved or resized.
         """

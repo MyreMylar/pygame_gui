@@ -65,9 +65,13 @@ class UIAutoResizingContainer(UIContainer):
         self.min_edges_rect = min_edges_rect
 
         if self.min_edges_rect is None:
-            self.min_edges_rect = self.get_abs_rect()
+            self.min_edges_rect = self.get_relative_rect()
 
         self.max_edges_rect = max_edges_rect
+
+        self.abs_min_edges_rect = None
+        self.abs_max_edges_rect = None
+        self.recalculate_abs_edges_rect()
 
         self.resize_left = resize_left
         self.resize_right = resize_right
@@ -91,54 +95,113 @@ class UIAutoResizingContainer(UIContainer):
         self.right_anchor_elements: List[IUIElementInterface] = []
         self.top_anchor_elements: List[IUIElementInterface] = []
         self.bottom_anchor_elements: List[IUIElementInterface] = []
+        
+        self.should_update_dimensions = False
+    
+    def add_element(self, element: IUIElementInterface):
+        super().add_element(element)
 
-    def get_left_most_point(self) -> int:
+        self._update_anchors_from_element(element)
+        self._update_sorting()
+        self._update_extreme_elements()
+        # self._update_dimensions()
+
+        self.should_update_dimensions = True
+
+    def remove_element(self, element: IUIElementInterface):
+        super().remove_element(element)
+
+        if element in self.left_anchor_elements:
+            self.left_anchor_elements.remove(element)
+        if element in self.right_anchor_elements:
+            self.right_anchor_elements.remove(element)
+        if element in self.top_anchor_elements:
+            self.top_anchor_elements.remove(element)
+        if element in self.bottom_anchor_elements:
+            self.bottom_anchor_elements.remove(element)
+
+        self.left_to_right_elements.remove(element)
+        self.right_to_left_elements.remove(element)
+        self.top_to_bottom_elements.remove(element)
+        self.bottom_to_top_elements.remove(element)
+
+        if element in (self.left_element, self.right_element, self.top_element, self.bottom_element):
+            self._update_extreme_elements()
+
+        self.should_update_dimensions = True
+
+    def _get_left_most_point(self) -> int:
         """
         Gets the minimum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        left = self.min_edges_rect.left
+        left = self.abs_min_edges_rect.left
         if self.left_element:
             left = min(left, self.left_element.get_abs_rect().left)
-        if self.max_edges_rect is not None:
-            left = max(left, self.max_edges_rect.left)
+        if self.abs_max_edges_rect is not None:
+            left = max(left, self.abs_max_edges_rect.left)
         return left
 
-    def get_right_most_point(self) -> int:
+    def _get_right_most_point(self) -> int:
         """
         Gets the maximum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        right = self.min_edges_rect.right
+        right = self.abs_min_edges_rect.right
         if self.right_element:
             right = max(right, self.right_element.get_abs_rect().right)
-        if self.max_edges_rect is not None:
-            right = min(right, self.max_edges_rect.right)
+        if self.abs_max_edges_rect is not None:
+            right = min(right, self.abs_max_edges_rect.right)
         return right
 
-    def get_top_most_point(self) -> int:
+    def _get_top_most_point(self) -> int:
         """
         Gets the minimum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        top = self.min_edges_rect.top
+        top = self.abs_min_edges_rect.top
         if self.top_element:
             top = min(top, self.top_element.get_abs_rect().top)
-        if self.max_edges_rect is not None:
-            top = max(top, self.max_edges_rect.top)
+        if self.abs_max_edges_rect is not None:
+            top = max(top, self.abs_max_edges_rect.top)
         return top
 
-    def get_bottom_most_point(self) -> int:
+    def _get_bottom_most_point(self) -> int:
         """
         Gets the maximum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        bottom = self.min_edges_rect.bottom
+        bottom = self.abs_min_edges_rect.bottom
         if self.bottom_element:
             bottom = max(bottom, self.bottom_element.get_abs_rect().bottom)
-        if self.max_edges_rect is not None:
-            bottom = min(bottom, self.max_edges_rect.bottom)
+        if self.abs_max_edges_rect is not None:
+            bottom = min(bottom, self.abs_max_edges_rect.bottom)
         return bottom
+
+    def recalculate_abs_edges_rect(self) -> None:
+        """
+        Used to recalculate the absolute rects from the min and max edges rect which control the minimum and maximum
+        sizes of the container. Usually called when the container of this container has moved, or the minimum or
+        maximum rects have changed.
+
+        :return: None
+        """
+        self.abs_min_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.min_edges_rect,
+                                                                        container=self.ui_container,
+                                                                        anchors=self.anchors)
+
+        if self.max_edges_rect:
+            self.abs_max_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.min_edges_rect,
+                                                                            container=self.ui_container,
+                                                                            anchors=self.anchors)
+
+    def update_containing_rect_position(self):
+        """
+        Overriden to also recalculate the absolute rects which control the minimum and maximum sizes of the container
+        :return:
+        """
+        super().update_containing_rect_position()
+        self.recalculate_abs_edges_rect()
 
     def update_min_edges_rect(self, new_rect: pygame.Rect) -> None:
         """
@@ -155,6 +218,7 @@ class UIAutoResizingContainer(UIContainer):
             raise ValueError("Argument passed is not a pygame.Rect object")
         if new_rect != self.min_edges_rect:
             self.min_edges_rect = new_rect
+            self.recalculate_abs_edges_rect()
 
     def update_max_edges_rect(self, new_rect: pygame.Rect) -> None:
         """
@@ -171,6 +235,28 @@ class UIAutoResizingContainer(UIContainer):
             raise ValueError("Argument passed is not a pygame.Rect object")
         if new_rect != self.max_edges_rect:
             self.max_edges_rect = new_rect
+            self.recalculate_abs_edges_rect()
+    
+    def _update_anchors_from_element(self, element: IUIElementInterface) -> bool:
+
+        has_any_changed = False
+
+        anchors = element.anchors.values()  # Only the values are important
+        for attr in ["left", "right", "top", "bottom"]:
+
+            anchor_elements = getattr(self, f"{attr}_anchor_elements")
+            element_contained = element in anchor_elements
+
+            if attr in anchors:
+                if not element_contained:
+                    anchor_elements.append(element)
+                    has_any_changed = True
+
+            elif element_contained:
+                anchor_elements.remove(element)
+                has_any_changed = True
+
+        return has_any_changed
 
     def _update_anchor_elements(self) -> None:
         """
@@ -226,19 +312,30 @@ class UIAutoResizingContainer(UIContainer):
         Updates the the sizes of the container
         :return: None
         """
-        left_ext = self.get_abs_rect().left - self.get_left_most_point() if self.resize_left else 0
-        right_ext = self.get_right_most_point() - self.get_abs_rect().right if self.resize_right else 0
-        top_ext = self.get_abs_rect().top - self.get_top_most_point() if self.resize_top else 0
-        bottom_ext = self.get_bottom_most_point() - self.get_abs_rect().bottom if self.resize_bottom else 0
+        rect = self.get_abs_rect()
+
+        left_ext = rect.left - self._get_left_most_point() if self.resize_left else 0
+        right_ext = self._get_right_most_point() - rect.right if self.resize_right else 0
+        top_ext = rect.top - self._get_top_most_point() if self.resize_top else 0
+        bottom_ext = self._get_bottom_most_point() - rect.bottom if self.resize_bottom else 0
 
         if left_ext or top_ext:
-            self.set_position(pygame.Vector2(self.get_abs_rect().topleft) - pygame.Vector2(left_ext, top_ext))
+            self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
 
-        width = left_ext + self.get_abs_rect().width + right_ext
-        height = top_ext + self.get_abs_rect().height + bottom_ext
+        width = left_ext + rect.width + right_ext
+        height = top_ext + rect.height + bottom_ext
 
         if left_ext or right_ext or top_ext or bottom_ext:
             self.set_dimensions((width, height))
+    
+    def on_contained_elements_changed(self, target: UIElement) -> None:
+        super().on_contained_elements_changed(target)
+
+        self._update_anchors_from_element(target)
+        self._update_sorting()
+        self._update_extreme_elements()
+        
+        self.should_update_dimensions = True
 
     def update(self, time_delta: float) -> None:
         """
@@ -251,8 +348,10 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         super().update(time_delta)
-        # Perhaps this could be attached to a timer to not have to call every single frame
-        self._update_anchor_elements()
-        self._update_sorting()
-        self._update_extreme_elements()
-        self._update_dimensions()
+        if self.should_update_dimensions:
+            # Try uncommenting these lines
+            # self._update_anchor_elements()
+            # self._update_sorting()
+            # self._update_extreme_elements()
+            self._update_dimensions()
+            self.should_update_dimensions = False
