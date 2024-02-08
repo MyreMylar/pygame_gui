@@ -74,30 +74,32 @@ class UIElement(GUISprite, IUIElementInterface):
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
 
-        self.anchors = {}
+        self.anchors = {'left': 0, 'right': 0, 'top': 0, 'bottom': 0}
         if anchors is not None:
-            if 'center' in anchors and anchors['center'] == 'center':
-                self.anchors.update({'center': 'center'})
-            else:
-                if self._validate_horizontal_anchors(anchors):
-                    if 'left' in anchors:
-                        self.anchors['left'] = anchors['left']
-                    if 'right' in anchors:
-                        self.anchors['right'] = anchors['right']
-                    if 'centerx' in anchors:
-                        self.anchors['centerx'] = anchors['centerx']
-                else:
-                    self.anchors.update({'left': 'left'})
+            mapping = {'left': 0, 'right': 1, 'top': 0, 'bottom': 1, 'center': 0.5}
+            for key in ('left', 'right', 'top', 'bottom', 'center', 'centerx', 'centery'):
+                if key in anchors and anchors[key] in mapping:
+                    anchors[key] = mapping[anchors[key]]
 
-                if self._validate_vertical_anchors(anchors):
-                    if 'top' in anchors:
-                        self.anchors['top'] = anchors['top']
-                    if 'bottom' in anchors:
-                        self.anchors['bottom'] = anchors['bottom']
-                    if 'centery' in anchors:
-                        self.anchors['centery'] = anchors['centery']
-                else:
-                    self.anchors.update({'top': 'top'})
+            if 'center' in anchors:
+                self.anchors.update({'left':anchors['center'], 'right':anchors['center'], 'top':anchors['center'], 'bottom':anchors['center']})
+                self.anchors.update({'pivotx':0.5, 'pivoty':0.5})
+            else:
+                if 'left' in anchors:
+                    self.anchors['left'] = anchors['left']
+                if 'right' in anchors:
+                    self.anchors['right'] = anchors['right']
+                if 'centerx' in anchors:
+                    self.anchors.update({'left':anchors['center'], 'right':anchors['center']})
+                    self.anchors.update({'pivotx':0.5})
+
+                if 'top' in anchors:
+                    self.anchors['top'] = anchors['top']
+                if 'bottom' in anchors:
+                    self.anchors['bottom'] = anchors['bottom']
+                if 'centery' in anchors:
+                    self.anchors.update({'top':anchors['centery'], 'bottom':anchors['centery']})
+                    self.anchors.update({'pivoty':0.5})
 
             if 'left_target' in anchors:
                 self.anchors['left_target'] = anchors['left_target']
@@ -108,13 +110,27 @@ class UIElement(GUISprite, IUIElementInterface):
             if 'bottom_target' in anchors:
                 self.anchors['bottom_target'] = anchors['bottom_target']
             if 'centerx_target' in anchors:
-                self.anchors['centerx_target'] = anchors['centerx_target']
+                self.anchors['left_target'] = anchors['centerx_target']
+                self.anchors['right_target'] = anchors['centerx_target']
             if 'centery_target' in anchors:
-                self.anchors['centery_target'] = anchors['centery_target']
-        else:
-            self.anchors = {'left': 'left',
-                            'top': 'top'}
-
+                self.anchors['top_target'] = anchors['centery_target']
+                self.anchors['bottom_target'] = anchors['centery_target']
+                
+            if 'pivotx' in anchors:
+                self.anchors['pivotx'] = anchors['pivotx']
+            if 'pivoty' in anchors:
+                self.anchors['pivoty'] = anchors['pivoty']
+                
+        if 'pivotx' not in self.anchors:
+            self.anchors['pivotx'] = (self.anchors['left'] + self.anchors['right']) / 2
+        if 'pivoty' not in self.anchors:
+            self.anchors['pivoty'] = (self.anchors['top'] + self.anchors['bottom']) / 2
+           
+        # Adding this offset would be better.
+        # After adding, when the right and bottom edges are anchored, there is no need to subtract the width or height of the rectangle.
+        # At present, it is not added for forward compatibility.
+        # self.relative_rect.move_ip(-self.relative_rect.width * self.anchors['pivotx'], -self.relative_rect.height * self.anchors['pivoty'])
+                
         self.drawable_shape = None  # type: Union['DrawableShape', None]
         self.image = None
 
@@ -161,7 +177,6 @@ class UIElement(GUISprite, IUIElementInterface):
         self.dirty = 1
         self.visible = 0
         self._setup_visibility(visible)
-
         self._update_absolute_rect_position_from_anchors()
 
         self._update_container_clip()
@@ -187,66 +202,6 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _calc_dynamic_size(self):
         pass
-
-    @staticmethod
-    def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
-        # first make a dictionary of just the horizontal anchors
-        horizontal_anchors = {}
-
-        if 'left' in anchors:
-            horizontal_anchors.update({'left': anchors['left']})
-        if 'right' in anchors:
-            horizontal_anchors.update({'right': anchors['right']})
-        if 'centerx' in anchors:
-            horizontal_anchors.update({'centerx': anchors['centerx']})
-
-        valid_anchor_set = [{'left': 'left', 'right': 'left'},
-                            {'left': 'right', 'right': 'right'},
-                            {'left': 'left', 'right': 'right'},
-                            {'left': 'left'},
-                            {'right': 'right'},
-                            {'left': 'right'},
-                            {'right': 'left'},
-                            {'centerx': 'centerx'}
-                            ]
-
-        if horizontal_anchors in valid_anchor_set:
-            return True
-        elif len(horizontal_anchors) == 0:
-            return False  # no horizontal anchors so just use defaults
-        else:
-            warnings.warn("Supplied horizontal anchors are invalid, defaulting to left", category=UserWarning)
-            return False
-
-    @staticmethod
-    def _validate_vertical_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
-        # first make a dictionary of just the vertical anchors
-        vertical_anchors = {}
-
-        if 'top' in anchors:
-            vertical_anchors.update({'top': anchors['top']})
-        if 'bottom' in anchors:
-            vertical_anchors.update({'bottom': anchors['bottom']})
-        if 'centery' in anchors:
-            vertical_anchors.update({'centery': anchors['centery']})
-
-        valid_anchor_set = [{'top': 'top', 'bottom': 'top'},
-                            {'top': 'bottom', 'bottom': 'bottom'},
-                            {'top': 'top', 'bottom': 'bottom'},
-                            {'top': 'top'},
-                            {'bottom': 'bottom'},
-                            {'top': 'bottom'},
-                            {'bottom': 'top'},
-                            {'centery': 'centery'}
-                            ]
-
-        if vertical_anchors in valid_anchor_set:
-            return True
-        elif len(vertical_anchors) == 0:
-            return False  # no vertical anchors so just use defaults
-        else:
-            warnings.warn("Supplied vertical anchors are invalid, defaulting to top", category=UserWarning)
-            return False
 
     def _setup_visibility(self, visible):
         if visible:
@@ -412,11 +367,6 @@ class UIElement(GUISprite, IUIElementInterface):
                 if 'bottom_target' in self.anchors
                 else self.ui_container.get_abs_rect().bottom)
 
-    def _calc_centery_offset(self) -> int:
-        return (self.anchors['centery_target'].get_abs_rect().centery
-                if 'centery_target' in self.anchors
-                else self.ui_container.get_abs_rect().centery)
-
     def _calc_left_offset(self) -> int:
         return (self.anchors['left_target'].get_abs_rect().right
                 if 'left_target' in self.anchors
@@ -426,91 +376,96 @@ class UIElement(GUISprite, IUIElementInterface):
         return (self.anchors['right_target'].get_abs_rect().left
                 if 'right_target' in self.anchors
                 else self.ui_container.get_abs_rect().right)
+    
+    def _update_relative_rect_when_resize(self, dx=None, dy=None):
+        """
+        Called when our element's size has changed.
+        """
 
-    def _calc_centerx_offset(self) -> int:
-        return (self.anchors['centerx_target'].get_abs_rect().centerx
-                if 'centerx_target' in self.anchors
-                else self.ui_container.get_abs_rect().centerx)
+        left_offset = self._calc_left_offset()
+        right_offset = self._calc_right_offset()
+        top_offset = self._calc_top_offset()
+        bottom_offset = self._calc_bottom_offset()
+        
+        new_left_offset = left_offset * (1 - self.anchors['left']) + right_offset * self.anchors['left']
+        new_right_offset = left_offset * (1 - self.anchors['right']) + right_offset * self.anchors['right']
+        
+        new_top_offset = top_offset * (1 - self.anchors['top']) + bottom_offset * self.anchors['top']
+        new_bottom_offset = top_offset * (1 - self.anchors['bottom']) + bottom_offset * self.anchors['bottom']
+        
+        if dx is None:
+            if self.relative_right_margin is None:
+                dx = 0
+            else:
+                dx = self.relative_rect.left + self.relative_rect.width + self.relative_right_margin - (new_right_offset - new_left_offset)
+                
+        if dy is None:
+            if self.relative_bottom_margin is None:
+                dy = 0
+            else:
+                dy = self.relative_rect.top + self.relative_rect.height + self.relative_bottom_margin - (new_bottom_offset - new_top_offset)
+        
+        new_left = self.relative_rect.left - dx * self.anchors['pivotx']
+        new_right = new_left + self.relative_rect.width
+        
+        new_top = self.relative_rect.top - dy * self.anchors['pivoty']
+        new_bottom = new_top + self.relative_rect.height
+            
+        if self.relative_right_margin is None:
+            self.relative_right_margin = new_right_offset - self.rect.right
+            
+        if self.relative_bottom_margin is None:
+            self.relative_bottom_margin = new_top_offset - self.rect.bottom
+
+        # set bottom and right first in case these are only anchors available
+        self.relative_rect.bottom = new_bottom
+        self.relative_rect.right = new_right
+
+        # set top and left last to give these priority, in most cases where all anchors are set
+        # we want relative_rect parameters to be correct for whatever the top & left sides are
+        # anchored to. The data for the bottom and right in cases where left is anchored
+        # differently to right and/or top is anchored differently to bottom should be captured by
+        # the bottom and right margins.
+        self.relative_rect.left = new_left
+        self.relative_rect.top = new_top
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
         Called when our element's relative position has changed.
         """
-        new_top = 0
-        new_bottom = 0
-        top_offset = self._calc_top_offset()
-        bottom_offset = self._calc_bottom_offset()
-
-        center_x_and_y = False
-
-        if 'center' in self.anchors:
-            if self.anchors['center'] == 'center':
-                center_x_and_y = True
-
-        if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
-            centery_offset = self._calc_centery_offset()
-            new_top = self.relative_rect.top - self.relative_rect.height//2 + centery_offset
-            new_bottom = self.relative_rect.bottom - self.relative_rect.height//2 + centery_offset
-
-        if 'top' in self.anchors:
-            if self.anchors['top'] == 'top':
-                new_top = self.relative_rect.top + top_offset
-                new_bottom = self.relative_rect.bottom + top_offset
-            elif self.anchors['top'] == 'bottom':
-                new_top = self.relative_rect.top + bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = (bottom_offset -
-                                                   (new_top + self.relative_rect.height))
-                new_bottom = bottom_offset - self.relative_bottom_margin
-
-        if 'bottom' in self.anchors:
-            if self.anchors['bottom'] == 'top':
-                new_top = self.relative_rect.top + top_offset
-                new_bottom = self.relative_rect.bottom + top_offset
-            elif self.anchors['bottom'] == 'bottom':
-                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
-                    new_top = self.relative_rect.top + bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = (bottom_offset -
-                                                   (new_top + self.relative_rect.height))
-                new_bottom = bottom_offset - self.relative_bottom_margin
-
         new_left = 0
         new_right = 0
+        new_top = 0
+        new_bottom = 0
         left_offset = self._calc_left_offset()
         right_offset = self._calc_right_offset()
+        top_offset = self._calc_top_offset()
+        bottom_offset = self._calc_bottom_offset()
+        
+        new_left_offset = left_offset * (1 - self.anchors['left']) + right_offset * self.anchors['left']
+        new_left = int(self.relative_rect.left + new_left_offset) 
+        
 
-        if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
-            centerx_offset = self._calc_centerx_offset()
-            new_left = self.relative_rect.left - self.relative_rect.width//2 + centerx_offset
-            new_right = self.relative_rect.right - self.relative_rect.width//2 + centerx_offset
-
-        if 'left' in self.anchors:
-            if self.anchors['left'] == 'left':
-                new_left = self.relative_rect.left + left_offset
-                new_right = self.relative_rect.right + left_offset
-            elif self.anchors['left'] == 'right':
-                new_left = self.relative_rect.left + right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
-                new_right = right_offset - self.relative_right_margin
-
-        if 'right' in self.anchors:
-            if self.anchors['right'] == 'left':
-                new_left = self.relative_rect.left + left_offset
-                new_right = self.relative_rect.right + left_offset
-            elif self.anchors['right'] == 'right':
-                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
-                    new_left = self.relative_rect.left + right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
-                new_right = right_offset - self.relative_right_margin
-
+        new_right_offset = left_offset * (1 - self.anchors['right']) + right_offset * self.anchors['right']
+        if self.relative_right_margin is None or recalculate_margins:
+            self.relative_right_margin = new_right_offset - (new_left + self.relative_rect.width)
+        new_right = new_right_offset - self.relative_right_margin
+        
+        new_top_offset = top_offset * (1 - self.anchors['top']) + bottom_offset * self.anchors['top']
+        new_top = int(self.relative_rect.top + new_top_offset) 
+        
+        new_bottom_offset = top_offset * (1 - self.anchors['bottom']) + bottom_offset * self.anchors['bottom']
+        if self.relative_bottom_margin is None or recalculate_margins:
+            self.relative_bottom_margin = new_bottom_offset - (new_top + self.relative_rect.height)
+        new_bottom = new_bottom_offset - self.relative_bottom_margin
+        
         self.rect.left = new_left
         self.rect.top = new_top
-        new_height = new_bottom - new_top
         new_width = new_right - new_left
+        new_height = new_bottom - new_top
+        
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
+
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
             self.set_dimensions((new_width, new_height))
 
@@ -527,72 +482,32 @@ class UIElement(GUISprite, IUIElementInterface):
         self.relative_bottom_margin = None
         self.relative_right_margin = None
 
-        new_top = 0
-        new_bottom = 0
-        top_offset = self._calc_top_offset()
-        bottom_offset = self._calc_bottom_offset()
-
-        center_x_and_y = False
-        if 'center' in self.anchors:
-            if self.anchors['center'] == 'center':
-                center_x_and_y = True
-
-        if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
-            centery_offset = self._calc_centery_offset()
-            new_top = self.rect.top + self.relative_rect.height//2 - centery_offset
-            new_bottom = self.rect.bottom + self.relative_rect.height//2 - centery_offset
-
-        if 'top' in self.anchors:
-            if self.anchors['top'] == 'top':
-                new_top = self.rect.top - top_offset
-                new_bottom = self.rect.bottom - top_offset
-            elif self.anchors['top'] == 'bottom':
-                new_top = self.rect.top - bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = bottom_offset - self.rect.bottom
-                new_bottom = self.rect.bottom - bottom_offset
-
-        if 'bottom' in self.anchors:
-            if self.anchors['bottom'] == 'top':
-                new_top = self.rect.top - top_offset
-                new_bottom = self.rect.bottom - top_offset
-            elif self.anchors['bottom'] == 'bottom':
-                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
-                    new_top = self.rect.top - bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = bottom_offset - self.rect.bottom
-                new_bottom = self.rect.bottom - bottom_offset
-
         new_left = 0
         new_right = 0
+        new_top = 0
+        new_bottom = 0
         left_offset = self._calc_left_offset()
         right_offset = self._calc_right_offset()
+        top_offset = self._calc_top_offset()
+        bottom_offset = self._calc_bottom_offset()
+        
+        new_left_offset = left_offset * (1 - self.anchors['left']) + right_offset * self.anchors['left']
+        new_left = int(self.rect.left - new_left_offset) 
+        
+        new_right_offset = left_offset * (1 - self.anchors['right']) + right_offset * self.anchors['right']
+        new_right = int(self.rect.right - new_right_offset) 
 
-        if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
-            centerx_offset = self._calc_centerx_offset()
-            new_left = self.rect.left + self.relative_rect.width//2 - centerx_offset
-            new_right = self.rect.right + self.relative_rect.width//2 - centerx_offset
-
-        if 'left' in self.anchors:
-            if self.anchors['left'] == 'left':
-                new_left = self.rect.left - left_offset
-                new_right = self.rect.right - left_offset
-            elif self.anchors['left'] == 'right':
-                new_left = self.rect.left - right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = right_offset - self.rect.right
-                new_right = self.rect.right - right_offset
-
-        if 'right' in self.anchors:
-            if self.anchors['right'] == 'left':
-                new_left = self.rect.left - left_offset
-                new_right = self.rect.right - left_offset
-            elif self.anchors['right'] == 'right':
-                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
-                    new_left = self.rect.left - right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = right_offset - self.rect.right
-                new_right = self.rect.right - right_offset
+        new_top_offset = top_offset * (1 - self.anchors['top']) + bottom_offset * self.anchors['top']
+        new_top = int(self.rect.top - new_top_offset) 
+        
+        new_bottom_offset = top_offset * (1 - self.anchors['bottom']) + bottom_offset * self.anchors['bottom']
+        new_bottom = int(self.rect.bottom - new_bottom_offset) 
+            
+        if self.relative_right_margin is None or recalculate_margins:
+            self.relative_right_margin = new_right_offset - self.rect.right
+            
+        if self.relative_bottom_margin is None or recalculate_margins:
+            self.relative_bottom_margin = new_bottom_offset - self.rect.bottom
 
         # set bottom and right first in case these are only anchors available
         self.relative_rect.bottom = new_bottom
@@ -732,13 +647,17 @@ class UIElement(GUISprite, IUIElementInterface):
         :param clamp_to_container: Whether we should clamp the dimensions to the
                                    dimensions of the container or not.
 
-        """
+        """  
         dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
-        self.relative_rect.width = int(dimensions[0])
-        self.relative_rect.height = int(dimensions[1])
+        dimension_x, dimension_y = int(dimensions[0]), int(dimensions[1])
+        if self.relative_rect.width == dimension_x and self.relative_rect.height == dimension_y:
+            return
+        self.relative_rect.width = dimension_x
+        self.relative_rect.height = dimension_y
+        self._update_relative_rect_when_resize()
         self.rect.size = self.relative_rect.size
 
-        if dimensions[0] >= 0 and dimensions[1] >= 0:
+        if dimension_x >= 0 and dimension_y >= 0:
             self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
             if self.drawable_shape is not None:
