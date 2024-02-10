@@ -98,6 +98,8 @@ class UIAutoResizingContainer(UIContainer):
 
         self.should_update_sorting = False
         self.should_update_dimensions = False
+
+        self.has_recently_updated_dimensions = False
     
     def add_element(self, element: IUIElementInterface) -> None:
         """
@@ -346,8 +348,8 @@ class UIAutoResizingContainer(UIContainer):
         if left_ext or top_ext:
             self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
 
-        width = left_ext + rect.width + right_ext #+ 10
-        height = top_ext + rect.height + bottom_ext #+ 10
+        width = left_ext + rect.width + right_ext
+        height = top_ext + rect.height + bottom_ext
 
         if left_ext or right_ext or top_ext or bottom_ext:
             self.set_dimensions((width, height))
@@ -378,6 +380,10 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         super().update(time_delta)
+
+        if self.has_recently_updated_dimensions:
+            self.has_recently_updated_dimensions = False
+
         if self.should_update_sorting:
             self._update_sorting()
             self._update_extreme_elements()
@@ -386,3 +392,4 @@ class UIAutoResizingContainer(UIContainer):
         if self.should_update_dimensions:
             self._update_dimensions()
             self.should_update_dimensions = False
+            self.has_recently_updated_dimensions = True
