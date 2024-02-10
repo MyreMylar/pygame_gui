@@ -286,7 +286,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     def _sort_out_element_container_scroll_bars(self):
         """
         This creates, re-sizes or removes the scrollbars after resizing, but not after the scroll
-        bar has been moved. Instead it tries to keep the scrollbars in the same approximate position
+        bar has been moved. Instead, it tries to keep the scrollbars in the same approximate position
         they were in before resizing
         """
         self._check_scroll_bars_and_adjust()

@@ -18,6 +18,7 @@ from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
 from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
+from pygame_gui.elements.ui_auto_scrolling_container import UIAutoScrollingContainer
 
 
 __all__ = ['UIImage',
@@ -40,4 +41,5 @@ __all__ = ['UIImage',
            'UIWindow',
            'UIScrollingContainer',
            'UITextEntryBox',
-           'UIAutoResizingContainer']
+           'UIAutoResizingContainer',
+           'UIAutoScrollingContainer']
