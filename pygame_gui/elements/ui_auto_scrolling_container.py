@@ -40,6 +40,8 @@ class UIAutoScrollingContainer(UIScrollingContainer):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
         super().__init__(relative_rect, manager,
+                         allow_scroll_x=allow_scroll_x,
+                         allow_scroll_y=allow_scroll_y,
                          starting_height=starting_height,
                          container=container,
                          parent_element=parent_element,
@@ -52,26 +54,16 @@ class UIAutoScrollingContainer(UIScrollingContainer):
                                object_id=object_id,
                                element_id="auto_scrolling_container")
 
-        self.allow_scroll_x = allow_scroll_x
-        self.allow_scroll_y = allow_scroll_y
-
-        anchors = {"left": "left",
-                   "right": "left",
-                   "top": "top",
-                   "bottom": "top"}
-
         resize_left: bool = True
         resize_right: bool = True
         resize_top: bool = True
         resize_bottom: bool = True
 
         if not self.allow_scroll_x:
-            anchors["right"] = "right"
             resize_left = False
             resize_right = False
 
         if not self.allow_scroll_y:
-            anchors["bottom"] = "bottom"
             resize_top = False
             resize_bottom = False
 
@@ -89,9 +81,10 @@ class UIAutoScrollingContainer(UIScrollingContainer):
                                                             object_id=ObjectID(
                                                                 object_id="#scrollable_container",
                                                                 class_id=None),
-                                                            anchors=anchors)
-
-        self.scrollable_container_dimensions = scrollable_rect.size
+                                                            anchors={"left": "left",
+                                                                     "right": "left",
+                                                                     "top": "top",
+                                                                     "bottom": "top"})
 
     def update(self, time_delta: float):
         """
@@ -103,9 +96,6 @@ class UIAutoScrollingContainer(UIScrollingContainer):
         """
         super().update(time_delta)
 
-        new_dimensions = self.scrollable_container.rect.size
-
-        if self.scrollable_container_dimensions != new_dimensions:
-            self.scrollable_container_dimensions = new_dimensions
+        if self.scrollable_container.has_recently_updated_dimensions:
             self._calculate_scrolling_dimensions()
             self._sort_out_element_container_scroll_bars()

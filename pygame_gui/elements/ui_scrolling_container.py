@@ -34,6 +34,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
+                 allow_scroll_x: bool = True,
+                 allow_scroll_y: bool = True,
                  *,
                  starting_height: int = 1,
                  container: Optional[IContainerLikeInterface] = None,
@@ -64,6 +66,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self.need_to_sort_out_scrollbars = False
         self.vert_scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
         self.horiz_scroll_bar = None  # type: Union[UIHorizontalScrollBar, None]
+
+        self.allow_scroll_x = allow_scroll_x
+        self.allow_scroll_y = allow_scroll_y
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
@@ -362,11 +367,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         need_horiz_scroll_bar = False
         need_vert_scroll_bar = False
         if (self.scrolling_height > self._view_container.rect.height or
-                self.scrollable_container.relative_rect.top != 0):
+                self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
             need_vert_scroll_bar = True
             self.scroll_bar_width = 20
         if (self.scrolling_width > self._view_container.rect.width or
-                self.scrollable_container.relative_rect.left != 0):
+                self.scrollable_container.relative_rect.left != 0) and self.allow_scroll_x:
             need_horiz_scroll_bar = True
             self.scroll_bar_height = 20
         if need_vert_scroll_bar or need_horiz_scroll_bar:
