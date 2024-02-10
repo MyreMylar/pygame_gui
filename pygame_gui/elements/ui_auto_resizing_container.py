@@ -20,7 +20,7 @@ class UIAutoResizingContainer(UIContainer):
     :param resize_bottom: Should the bottom side be resized?
     :param manager: The UI manager for this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
-    :param starting_height: The starting layer height of this container above it's container.
+    :param starting_height: The starting layer height of this container above its container.
                             Defaults to 1.
     :param container: The container this container is within. Defaults to None (which is the root
                       container for the UI)
@@ -95,20 +95,32 @@ class UIAutoResizingContainer(UIContainer):
         self.right_anchor_elements: List[IUIElementInterface] = []
         self.top_anchor_elements: List[IUIElementInterface] = []
         self.bottom_anchor_elements: List[IUIElementInterface] = []
-        
+
+        self.should_update_sorting = False
         self.should_update_dimensions = False
     
-    def add_element(self, element: IUIElementInterface):
+    def add_element(self, element: IUIElementInterface) -> None:
+        """
+        Add a UIElement to the container. The UIElement's relative_rect parameter will be relative to
+        this container. Overridden to also update dimensions.
+
+        :param element: A UIElement to add to this container.
+        :return: None
+        """
         super().add_element(element)
 
         self._update_anchors_from_element(element)
-        self._update_sorting()
-        self._update_extreme_elements()
-        # self._update_dimensions()
 
+        self.should_update_sorting = True  # Currently, the rect is just a copy of relative rect so cannot do sorting
         self.should_update_dimensions = True
 
-    def remove_element(self, element: IUIElementInterface):
+    def remove_element(self, element: IUIElementInterface) -> None:
+        """
+        Remove a UIElement from this container.
+
+        :param element: A UIElement to remove from this container.
+        :return: None
+        """
         super().remove_element(element)
 
         if element in self.left_anchor_elements:
@@ -195,10 +207,11 @@ class UIAutoResizingContainer(UIContainer):
                                                                             container=self.ui_container,
                                                                             anchors=self.anchors)
 
-    def update_containing_rect_position(self):
+    def update_containing_rect_position(self) -> None:
         """
         Overriden to also recalculate the absolute rects which control the minimum and maximum sizes of the container
-        :return:
+
+        :return: None
         """
         super().update_containing_rect_position()
         self.recalculate_abs_edges_rect()
@@ -238,6 +251,13 @@ class UIAutoResizingContainer(UIContainer):
             self.recalculate_abs_edges_rect()
     
     def _update_anchors_from_element(self, element: IUIElementInterface) -> bool:
+        """
+        Updates the element's anchors which affect which side it's allowed to resize based on its anchors.
+        This is needed to avoid endlessly expanding the container to accommodate elements which will always be out of
+        bounds.
+
+        :return: None
+        """
 
         has_any_changed = False
 
@@ -263,6 +283,7 @@ class UIAutoResizingContainer(UIContainer):
         Updates the elements which affect which side they are allowed to resize based on their anchors.
         This is needed to avoid endlessly expanding the container to accommodate elements which will always be out of
         bounds.
+
         :return: None
         """
         self.left_anchor_elements = []
@@ -283,6 +304,7 @@ class UIAutoResizingContainer(UIContainer):
     def _update_sorting(self) -> None:
         """
         Updates the sorting of the elements from left to right, top to bottom etc.
+
         :return: None
         """
         elements = self.elements
@@ -296,6 +318,7 @@ class UIAutoResizingContainer(UIContainer):
     def _update_extreme_elements(self) -> None:
         """
         Updates which elements are currently responsible for preventing the container from collapsing on each side
+
         :return: None
         """
         self.left_element = next(
@@ -309,7 +332,8 @@ class UIAutoResizingContainer(UIContainer):
 
     def _update_dimensions(self) -> None:
         """
-        Updates the the sizes of the container
+        Updates the sizes of the container
+
         :return: None
         """
         rect = self.get_abs_rect()
@@ -322,13 +346,19 @@ class UIAutoResizingContainer(UIContainer):
         if left_ext or top_ext:
             self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
 
-        width = left_ext + rect.width + right_ext
-        height = top_ext + rect.height + bottom_ext
+        width = left_ext + rect.width + right_ext #+ 10
+        height = top_ext + rect.height + bottom_ext #+ 10
 
         if left_ext or right_ext or top_ext or bottom_ext:
             self.set_dimensions((width, height))
     
     def on_contained_elements_changed(self, target: UIElement) -> None:
+        """
+        Update the positioning of the contained elements of this container. To be called when one of the contained
+        elements may have moved, or been resized.
+
+        :param target: the UI element that has been benn moved or resized.
+        """
         super().on_contained_elements_changed(target)
 
         self._update_anchors_from_element(target)
@@ -348,10 +378,11 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         super().update(time_delta)
+        if self.should_update_sorting:
+            self._update_sorting()
+            self._update_extreme_elements()
+            self.should_update_sorting = False
+
         if self.should_update_dimensions:
-            # Try uncommenting these lines
-            # self._update_anchor_elements()
-            # self._update_sorting()
-            # self._update_extreme_elements()
             self._update_dimensions()
             self.should_update_dimensions = False

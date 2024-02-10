@@ -304,9 +304,20 @@ class UIElement(GUISprite, IUIElementInterface):
         return self.object_ids
 
     def get_anchors(self) -> Dict[str, Union[str, IUIElementInterface]]:
+        """
+        A dictionary containing all the anchors defining what the relative rect is relative to
+
+        :return: A dictionary containing all the anchors defining what the relative rect is relative to
+        """
         return self.anchors
 
     def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+        """
+        Wraps the setting of the anchors with some validation
+
+        :param anchors: A dictionary of anchors defining what the relative rect is relative to
+        :return: None
+        """
         anchors_copy = anchors.copy() if anchors is not None else None
 
         if anchors is not None:
@@ -1114,18 +1125,14 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         if self.get_image_clipping_rect() is not None and new_image is not None:
             self._pre_clipped_image = new_image
-            if (self.get_image_clipping_rect().width == 0 and
-                    self.get_image_clipping_rect().height == 0):
-                self.image = self.ui_manager.get_universal_empty_surface()
-            else:
-                self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
-                                                    flags=pygame.SRCALPHA,
-                                                    depth=32)
-                self.image.fill(pygame.Color('#00000000'))
-                basic_blit(self.image,
-                           self._pre_clipped_image,
-                           self.get_image_clipping_rect(),
-                           self.get_image_clipping_rect())
+            self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
+                                                flags=pygame.SRCALPHA,
+                                                depth=32)
+            self.image.fill(pygame.Color('#00000000'))
+            basic_blit(self.image,
+                       self._pre_clipped_image,
+                       self.get_image_clipping_rect(),
+                       self.get_image_clipping_rect())
         else:
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None
