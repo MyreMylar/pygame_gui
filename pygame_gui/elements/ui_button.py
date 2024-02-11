@@ -382,7 +382,7 @@ class UIButton(UIElement):
 
         :param event: The event occurs.
 
-        :param function: event data
+        :param data: event data
 
         """
         if event in self.handler:
