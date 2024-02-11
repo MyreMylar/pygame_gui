@@ -31,7 +31,7 @@ class UIButton(UIElement):
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
-    :param command: Functions to be called when an event occurs..
+    :param command: Functions to be called when an event occurs.
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
                           appear on hover.
     :param starting_height: The height in layers above it's container that this element will be
