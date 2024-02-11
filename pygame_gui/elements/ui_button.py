@@ -1,4 +1,5 @@
-from typing import Union, Tuple, Dict, Iterable, Optional
+from typing import Union, Tuple, Dict, Iterable, Callable, Optional, Any
+import warnings
 
 import pygame
 
@@ -30,6 +31,7 @@ class UIButton(UIElement):
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
+    :param command: Functions to be called when an event occurs..
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
                           appear on hover.
     :param starting_height: The height in layers above it's container that this element will be
@@ -50,6 +52,7 @@ class UIButton(UIElement):
                  text: str,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
+                 command: Union[Callable, Dict[int, Callable]] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
@@ -131,6 +134,17 @@ class UIButton(UIElement):
         self.text_shadow_offset = (0, 0)
 
         self.state_transitions = {}
+        
+        self.handler = {}
+        if command is not None:
+            if callable(command):
+                self.handler = {UI_BUTTON_PRESSED: command}
+            else:
+                for key, value in command.items():
+                    self.bind(key, value)
+                        
+        if UI_BUTTON_DOUBLE_CLICKED in self.handler:
+            self.allow_double_clicks = True
 
         self.rebuild_from_changed_theme_data()
 
@@ -315,9 +329,9 @@ class UIButton(UIElement):
                 if self.is_enabled:
                     if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        self.on_double_clicked(event.button)
+                        self.on_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':event.button})
                     else:
-                        self.on_start_press(event.button)
+                        self.on_event(UI_BUTTON_START_PRESS, {'mouse_button':event.button})
                         self.double_click_timer = 0.0
                         self.last_click_button = event.button
                         self.held = True
@@ -335,7 +349,7 @@ class UIButton(UIElement):
                 self._set_inactive()
                 consumed_event = True
                 self.pressed_event = True
-                self.on_pressed(event.button)
+                self.on_event(UI_BUTTON_PRESSED, {'mouse_button':event.button})
 
             if self.is_enabled and self.held:
                 self.held = False
@@ -343,45 +357,48 @@ class UIButton(UIElement):
                 consumed_event = True
 
         return consumed_event
+    
+    def bind(self, event:int, function:Callable = None):
+        """
+        Bind a function to an event.
 
-    def on_start_press(self, button: int):
-        # old event to remove in 0.8.0
-        event_data = {'user_type': OldType(UI_BUTTON_START_PRESS),
-                        'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id}
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        :param event: The event to bind.
 
-        # new event
-        event_data = {'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id,
-                        'mouse_button': button}
-        pygame.event.post(pygame.event.Event(UI_BUTTON_START_PRESS, event_data))
+        :param function: The function to bind. None to unbind.
 
-    def on_pressed(self, button: int):
-        # old event
-        event_data = {'user_type': OldType(UI_BUTTON_PRESSED),
-                        'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id}
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        """
+        if function is None:
+            self.handler.pop(event)
+            return
 
-        # new event
-        event_data = {'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id,
-                        'mouse_button': button}
-        pygame.event.post(pygame.event.Event(UI_BUTTON_PRESSED, event_data))
+        if callable(function):
+            self.handler[event] = function
+        else:
+            warnings.warn(f"{function} are not callable", category=UserWarning)
+    
+    def on_event(self, event:int, data: Dict[str, Any]):
+        """
+        Called when an event occurs. Handle events.
 
-    def on_double_clicked(self, button: int):
-        # old event to remove in 0.8.0
-        event_data = {'user_type': OldType(UI_BUTTON_DOUBLE_CLICKED),
-                        'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id}
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        :param event: The event occurs.
 
-        # new event
-        event_data = {'ui_element': self,
-                        'ui_object_id': self.most_specific_combined_id,
-                        'mouse_button': button}
-        pygame.event.post(pygame.event.Event(UI_BUTTON_DOUBLE_CLICKED, event_data))
+        :param function: event data
+
+        """
+        if event in self.handler:
+            self.handler[event](data)
+        else:
+            # old event to remove in 0.8.0
+            event_data = {'user_type': OldType(event),
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+            # new event
+            event_data = data
+            event_data.update({'ui_element': self,
+                               'ui_object_id': self.most_specific_combined_id})
+            pygame.event.post(pygame.event.Event(event, event_data))
         
 
     def check_pressed(self) -> bool:
