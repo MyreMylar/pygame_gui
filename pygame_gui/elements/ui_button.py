@@ -31,7 +31,6 @@ class UIButton(UIElement):
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
-    :param command: Functions to be called when an event occurs.
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
                           appear on hover.
     :param starting_height: The height in layers above it's container that this element will be
@@ -43,6 +42,7 @@ class UIButton(UIElement):
                                 unique event.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
+    :param command: Functions to be called when an event occurs.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                         useful when you have multiple translations that need variables inserted
                         in the middle.
@@ -52,7 +52,6 @@ class UIButton(UIElement):
                  text: str,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
-                 command: Union[Callable, Dict[int, Callable]] = None,
                  tool_tip_text: Union[str, None] = None,
                  starting_height: int = 1,
                  parent_element: UIElement = None,
@@ -62,6 +61,7 @@ class UIButton(UIElement):
                  generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
                  visible: int = 1,
                  *,
+                 command: Union[Callable, Dict[int, Callable]] = None,
                  tool_tip_object_id: Optional[ObjectID] = None,
                  text_kwargs: Optional[Dict[str, str]] = None,
                  tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
