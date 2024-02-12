@@ -1,5 +1,4 @@
 from typing import Union, Tuple, Dict, Iterable, Callable, Optional, Any
-import warnings
 
 import pygame
 
@@ -368,13 +367,13 @@ class UIButton(UIElement):
 
         """
         if function is None:
-            self.handler.pop(event)
+            self.handler.pop(event, None)
             return
 
         if callable(function):
             self.handler[event] = function
         else:
-            warnings.warn(f"{function} are not callable", category=UserWarning)
+            raise TypeError("Function to bind must be callable")
     
     def on_event(self, event:int, data: Dict[str, Any]):
         """
