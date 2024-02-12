@@ -465,9 +465,9 @@ class TestUIButton:
                           manager=default_ui_manager,
                           command=test_function)
         
-        assert not button_clicked
         assert button.handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
         
+        assert not button_clicked
         # process a mouse button down event
         button.process_event(
             pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
@@ -537,7 +537,7 @@ class TestUIButton:
                           manager=default_ui_manager,
                           command=command_dict)
         
-        assert button.handler[pygame_gui.UI_BUTTON_START_PRESS] == test_function
+        assert button.handler[pygame_gui.UI_BUTTON_START_PRESS] == test_function # not 
         assert button.handler[pygame_gui.UI_BUTTON_PRESSED] == test_function2
         assert pygame_gui.UI_BUTTON_DOUBLE_CLICKED not in button.handler
         
@@ -557,6 +557,26 @@ class TestUIButton:
                     event.ui_element == button):
                 confirm_double_click_event_fired = True
         assert confirm_double_click_event_fired
+        
+    def test_on_button_event_0_params(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        button_start_press = False
+        
+        def test_function():
+            nonlocal button_start_press
+            button_start_press = True
+            
+        command_dict ={pygame_gui.UI_BUTTON_START_PRESS:test_function}
+            
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          command=command_dict)
+        
+        assert not button_start_press
+        button.on_button_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
+        assert button_start_press
         
 
     def test_set_active(self, _init_pygame: None, default_ui_manager: UIManager,
