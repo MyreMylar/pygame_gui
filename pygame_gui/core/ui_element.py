@@ -471,7 +471,7 @@ class UIElement(GUISprite, IUIElementInterface):
     def _calc_abs_rect_pos_from_rel_rect(relative_rect: pygame.Rect, container: Optional[IContainerLikeInterface],
                                          anchors: Dict[str, Union[str, IUIElementInterface]],
                                          relative_right_margin: Optional[int] = None,
-                                         relative_bottom_margin: Optional[int] = None) -> pygame.Rect:
+                                         relative_bottom_margin: Optional[int] = None) -> Tuple[pygame.Rect, int, int]:
         """
         Use this function to get the absolute rect position, given the relative rect, container and the anchors.
         All values are assumed to be valid.
@@ -481,7 +481,8 @@ class UIElement(GUISprite, IUIElementInterface):
         :param anchors: Defines what the Rect is relative to
         :param relative_right_margin: The margin from the right. If not given or None, then it will be calculated
         :param relative_bottom_margin: The margin from the bottom. If not given or None, then it will be calculated
-        :return: A Rect representing the absolute position of the rect from the screen
+        :return: A tuple containing a Rect representing the absolute position of the rect from the screen, and the
+        relative right and bottom margins
         """
         new_top = 0
         new_bottom = 0
@@ -559,7 +560,7 @@ class UIElement(GUISprite, IUIElementInterface):
         new_width = new_right - new_left
 
         rect = pygame.Rect(new_left, new_top, new_width, new_height)
-        return rect
+        return rect, relative_right_margin, relative_bottom_margin
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -568,8 +569,8 @@ class UIElement(GUISprite, IUIElementInterface):
         relative_right_margin = None if recalculate_margins else self.relative_right_margin
         relative_bottom_margin = None if recalculate_margins else self.relative_bottom_margin
 
-        rect = self._calc_abs_rect_pos_from_rel_rect(self.relative_rect, self.ui_container, self.anchors,
-                                                     relative_right_margin, relative_bottom_margin)
+        rect, self.relative_right_margin, self.relative_bottom_margin = self._calc_abs_rect_pos_from_rel_rect(
+            self.relative_rect, self.ui_container, self.anchors, relative_right_margin, relative_bottom_margin)
 
         new_left, new_top = rect.topleft
         new_width, new_height = rect.size

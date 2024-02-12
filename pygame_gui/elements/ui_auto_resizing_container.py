@@ -112,6 +112,7 @@ class UIAutoResizingContainer(UIContainer):
         super().add_element(element)
 
         self._update_anchors_from_element(element)
+        self._update_sorting()  # This is to account for when the element is created and immediately removed
 
         self.should_update_sorting = True  # Currently, the rect is just a copy of relative rect so cannot do sorting
         self.should_update_dimensions = True
@@ -202,12 +203,12 @@ class UIAutoResizingContainer(UIContainer):
         """
         self.abs_min_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.min_edges_rect,
                                                                         container=self.ui_container,
-                                                                        anchors=self.anchors)
+                                                                        anchors=self.anchors)[0]
 
         if self.max_edges_rect:
             self.abs_max_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.min_edges_rect,
                                                                             container=self.ui_container,
-                                                                            anchors=self.anchors)
+                                                                            anchors=self.anchors)[0]
 
     def update_containing_rect_position(self) -> None:
         """
