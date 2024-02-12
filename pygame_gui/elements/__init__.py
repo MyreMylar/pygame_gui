@@ -19,6 +19,7 @@ from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
 from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
 from pygame_gui.elements.ui_auto_scrolling_container import UIAutoScrollingContainer
+from pygame_gui.elements.ui_2d_slider import UI2DSlider
 
 
 __all__ = ['UIImage',
@@ -42,4 +43,5 @@ __all__ = ['UIImage',
            'UIScrollingContainer',
            'UITextEntryBox',
            'UIAutoResizingContainer',
-           'UIAutoScrollingContainer']
+           'UIAutoScrollingContainer',
+           'UI2DSlider']

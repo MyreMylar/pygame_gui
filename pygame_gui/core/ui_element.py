@@ -727,9 +727,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._update_container_clip()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]]):
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the relative rect position of an element.
 
@@ -747,9 +745,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
         self.ui_container.on_contained_elements_changed(self)
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]]):
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -765,9 +761,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
         self.ui_container.on_contained_elements_changed(self)
 
-    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]]):
+    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         If this window is resizable, then the dimensions we set here will be the minimum that
         users can change the window to. They are also used as the minimum size when
@@ -785,9 +779,7 @@ class UIElement(GUISprite, IUIElementInterface):
             new_height = max(self.minimum_dimensions[1], self.rect.height)
             self.set_dimensions((new_width, new_height))
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]],
+    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]],
                        clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
