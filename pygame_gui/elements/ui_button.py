@@ -375,7 +375,7 @@ class UIButton(UIElement):
         else:
             raise TypeError("Function to bind must be callable")
     
-    def on_event(self, event:int, data: Dict[str, Any]):
+    def on_event(self, event:int, data:Dict[str, Any]=None):
         """
         Called when an event occurs. Handle events.
 
@@ -384,6 +384,9 @@ class UIButton(UIElement):
         :param data: event data
 
         """
+        if data is None:
+            data = {}
+            
         if event in self.handler:
             self.handler[event](data)
         else:
