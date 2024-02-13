@@ -411,7 +411,6 @@ class UIButton(UIElement):
             event_data.update({'ui_element': self,
                                'ui_object_id': self.most_specific_combined_id})
             pygame.event.post(pygame.event.Event(event, event_data))
-        
 
     def check_pressed(self) -> bool:
         """
