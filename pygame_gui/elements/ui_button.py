@@ -42,7 +42,7 @@ class UIButton(UIElement):
                                 unique event.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
-    :param command: Functions to be called when a button event occurs.
+    :param command: Functions to be called when an element event occurs.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                         useful when you have multiple translations that need variables inserted
                         in the middle.
@@ -329,9 +329,9 @@ class UIButton(UIElement):
                 if self.is_enabled:
                     if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        self.on_button_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':event.button})
+                        self.on_element_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':event.button})
                     else:
-                        self.on_button_event(UI_BUTTON_START_PRESS, {'mouse_button':event.button})
+                        self.on_element_event(UI_BUTTON_START_PRESS, {'mouse_button':event.button})
                         self.double_click_timer = 0.0
                         self.last_click_button = event.button
                         self.held = True
@@ -349,7 +349,7 @@ class UIButton(UIElement):
                 self._set_inactive()
                 consumed_event = True
                 self.pressed_event = True
-                self.on_button_event(UI_BUTTON_PRESSED, {'mouse_button':event.button})
+                self.on_element_event(UI_BUTTON_PRESSED, {'mouse_button':event.button})
 
             if self.is_enabled and self.held:
                 self.held = False
@@ -360,7 +360,7 @@ class UIButton(UIElement):
     
     def bind(self, event:int, function:Callable = None):
         """
-        Bind a function to an event.
+        Bind a function to an element event.
 
         :param event: The event to bind.
 
@@ -378,15 +378,15 @@ class UIButton(UIElement):
             elif num_params == 0:
                 self._handler[event] = lambda _:function()
             else:
-                raise ValueError("Button command function signatures can have 0 or 1 parameter. "
+                raise ValueError("Command function signatures can have 0 or 1 parameter. "
                                  "If one parameter is set it will contain data for the id of the mouse button used "
                                  "to trigger this click event.")
         else:
-            raise TypeError("Button command function must be callable")
+            raise TypeError("Command function must be callable")
     
-    def on_button_event(self, event:int, data:Dict[str, Any]=None):
+    def on_element_event(self, event:int, data:Dict[str, Any]=None):
         """
-        Called when a button event occurs. Handles these events either by posting the event back
+        Called when an element event occurs. Handles these events either by posting the event back
         to the event queue, or by running a function supplied by the user.
 
         :param event: The event occurs.
