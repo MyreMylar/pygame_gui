@@ -465,7 +465,7 @@ class TestUIButton:
                           manager=default_ui_manager,
                           command=test_function)
         
-        assert button.handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
         
         assert not button_clicked
         # process a mouse button down event
@@ -498,13 +498,13 @@ class TestUIButton:
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=default_ui_manager)
         
-        assert pygame_gui.UI_BUTTON_PRESSED not in button.handler
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
         
         button.bind(pygame_gui.UI_BUTTON_PRESSED, test_function)
-        assert button.handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
         
         button.bind(pygame_gui.UI_BUTTON_PRESSED, None)
-        assert pygame_gui.UI_BUTTON_PRESSED not in button.handler
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
         
         with pytest.raises(TypeError, match="Button command function must be callable"):
             button.bind(pygame_gui.UI_BUTTON_PRESSED, "non-callable")
@@ -537,9 +537,9 @@ class TestUIButton:
                           manager=default_ui_manager,
                           command=command_dict)
         
-        assert button.handler[pygame_gui.UI_BUTTON_START_PRESS] == test_function # not 
-        assert button.handler[pygame_gui.UI_BUTTON_PRESSED] == test_function2
-        assert pygame_gui.UI_BUTTON_DOUBLE_CLICKED not in button.handler
+        assert button._handler[pygame_gui.UI_BUTTON_START_PRESS] == test_function # not 
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function2
+        assert pygame_gui.UI_BUTTON_DOUBLE_CLICKED not in button._handler
         
         assert not button_start_press
         button.on_button_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})

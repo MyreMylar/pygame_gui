@@ -135,7 +135,7 @@ class UIButton(UIElement):
 
         self.state_transitions = {}
         
-        self.handler = {}
+        self._handler = {}
         if command is not None:
             if callable(command):
                 self.bind(UI_BUTTON_PRESSED, command)
@@ -143,7 +143,7 @@ class UIButton(UIElement):
                 for key, value in command.items():
                     self.bind(key, value)
                         
-        if UI_BUTTON_DOUBLE_CLICKED in self.handler:
+        if UI_BUTTON_DOUBLE_CLICKED in self._handler:
             self.allow_double_clicks = True
 
         self.rebuild_from_changed_theme_data()
@@ -368,15 +368,15 @@ class UIButton(UIElement):
 
         """
         if function is None:
-            self.handler.pop(event, None)
+            self._handler.pop(event, None)
             return
 
         if callable(function):
             num_params = len(signature(function).parameters)
             if num_params == 1:
-                self.handler[event] = function
+                self._handler[event] = function
             elif num_params == 0:
-                self.handler[event] = lambda _:function()
+                self._handler[event] = lambda _:function()
             else:
                 raise ValueError("Button command function signatures can have 0 or 1 parameter. "
                                  "If one parameter is set it will contain data for the id of the mouse button used "
@@ -397,8 +397,8 @@ class UIButton(UIElement):
         if data is None:
             data = {}
             
-        if event in self.handler:
-            self.handler[event](data)
+        if event in self._handler:
+            self._handler[event](data)
         else:
             # old event to remove in 0.8.0
             event_data = {'user_type': OldType(event),
