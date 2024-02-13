@@ -519,7 +519,7 @@ class TestUIButton:
         with pytest.raises(ValueError):
             button.bind(pygame_gui.UI_BUTTON_PRESSED, function_with_3_params)
         
-    def test_on_element_event(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_on_self_event(self, _init_pygame: None, default_ui_manager: UIManager,
                         _display_surface_return_none):
         button_start_press = False
         
@@ -546,14 +546,14 @@ class TestUIButton:
         assert pygame_gui.UI_BUTTON_DOUBLE_CLICKED not in button._handler
         
         assert not button_start_press
-        button.on_element_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
+        button.on_self_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
         assert button_start_press
         
         assert pressed_button == 0
-        button.on_element_event(pygame_gui.UI_BUTTON_PRESSED, {'mouse_button':3})
+        button.on_self_event(pygame_gui.UI_BUTTON_PRESSED, {'mouse_button':3})
         assert pressed_button == 3
         
-        button.on_element_event(pygame_gui.UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':1})
+        button.on_self_event(pygame_gui.UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':1})
         
         confirm_double_click_event_fired = False
         for event in pygame.event.get():
@@ -562,7 +562,7 @@ class TestUIButton:
                 confirm_double_click_event_fired = True
         assert confirm_double_click_event_fired
         
-    def test_on_element_event_no_params(self, _init_pygame: None, default_ui_manager: UIManager,
+    def test_on_self_event_no_params(self, _init_pygame: None, default_ui_manager: UIManager,
                         _display_surface_return_none):
         button_start_press = False
         
@@ -579,7 +579,7 @@ class TestUIButton:
                           command=command_dict)
         
         assert not button_start_press
-        button.on_element_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
+        button.on_self_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
         assert button_start_press
         
 
