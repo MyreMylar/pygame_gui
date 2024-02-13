@@ -503,6 +503,10 @@ class TestUIButton:
         button.bind(pygame_gui.UI_BUTTON_PRESSED, test_function)
         assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
         
+        # test unbind
+        button.bind(pygame_gui.UI_BUTTON_PRESSED, None)
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
+        
         button.bind(pygame_gui.UI_BUTTON_PRESSED, None)
         assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
         
