@@ -26,22 +26,6 @@ class IGUIFontInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_text_width(self, text: str) -> int:
-        """
-        Returns the width of text drawn by this font in pixels
-        :param text:
-        :return: The pixel width of the text.
-        """
-
-    @abstractmethod
-    def get_text_height(self, text: str) -> int:
-        """
-        Returns the height of text drawn by this font in pixels
-        :param text:
-        :return: The pixel height of the text.
-        """
-
-    @abstractmethod
     def get_rect(self, text: str) -> Rect:
         """
         Not sure if we want this.
@@ -103,9 +87,3 @@ class IGUIFontInterface(metaclass=ABCMeta):
         :return:
         """
 
-    @abstractmethod
-    def remove_font_pad_and_origin(self):
-        """
-
-        :return:
-        """
