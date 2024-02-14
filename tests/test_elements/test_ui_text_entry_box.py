@@ -802,7 +802,8 @@ class TestUITextEntryBox:
 
         assert text_entry.image is not None
 
-    def test_set_text_rebuild_select_area_3(self, _init_pygame):
+    def test_set_text_rebuild_select_area_3(self, _init_pygame,
+                                            _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default_2.json"))
@@ -819,7 +820,8 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_set_text_rebuild_select_area_3(self, _init_pygame):
+    def test_set_text_rebuild_select_area_4(self, _init_pygame,
+                                            _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))
