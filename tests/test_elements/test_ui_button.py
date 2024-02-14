@@ -450,6 +450,138 @@ class TestUIButton:
         button.update(0.01)
 
         assert button.check_pressed() is True and button.is_enabled is True
+        
+    def test_command(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        button_clicked = False
+        
+        def test_function(data):
+            nonlocal button_clicked
+            button_clicked = True
+            
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          command=test_function)
+        
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
+        
+        assert not button_clicked
+        # process a mouse button down event
+        button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1, 'pos': (50, 25)}))
+
+        # process a mouse button up event
+        button.process_event(
+            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1, 'pos': (50, 25)}))
+
+        button.update(0.01)
+        assert button_clicked 
+        
+    def test_command_bad_value(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        with pytest.raises(TypeError, match="Command function must be callable"):
+            button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                              text="Test Button",
+                              tool_tip_text="This is a test of the button's tool tip functionality.",
+                              manager=default_ui_manager,
+                              command={pygame_gui.UI_BUTTON_PRESSED:5})
+        
+    def test_bind(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        def test_function(data):
+            pass
+
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager)
+        
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
+        
+        button.bind(pygame_gui.UI_BUTTON_PRESSED, test_function)
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function
+        
+        # test unbind
+        button.bind(pygame_gui.UI_BUTTON_PRESSED, None)
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
+        
+        button.bind(pygame_gui.UI_BUTTON_PRESSED, None)
+        assert pygame_gui.UI_BUTTON_PRESSED not in button._handler
+        
+        with pytest.raises(TypeError, match="Command function must be callable"):
+            button.bind(pygame_gui.UI_BUTTON_PRESSED, "non-callable")
+        
+        def function_with_3_params(x, y, z):
+            pass
+
+        with pytest.raises(ValueError):
+            button.bind(pygame_gui.UI_BUTTON_PRESSED, function_with_3_params)
+        
+    def test_on_self_event(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        button_start_press = False
+        
+        def test_function(data):
+            nonlocal button_start_press
+            button_start_press = True
+           
+        pressed_button = 0
+        def test_function2(data):
+            nonlocal pressed_button
+            pressed_button = data["mouse_button"]
+            
+        command_dict ={pygame_gui.UI_BUTTON_START_PRESS:test_function,
+                       pygame_gui.UI_BUTTON_PRESSED:test_function2}
+            
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          command=command_dict)
+        
+        assert button._handler[pygame_gui.UI_BUTTON_START_PRESS] == test_function # not 
+        assert button._handler[pygame_gui.UI_BUTTON_PRESSED] == test_function2
+        assert pygame_gui.UI_BUTTON_DOUBLE_CLICKED not in button._handler
+        
+        assert not button_start_press
+        button.on_self_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
+        assert button_start_press
+        
+        assert pressed_button == 0
+        button.on_self_event(pygame_gui.UI_BUTTON_PRESSED, {'mouse_button':3})
+        assert pressed_button == 3
+        
+        button.on_self_event(pygame_gui.UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':1})
+        
+        confirm_double_click_event_fired = False
+        for event in pygame.event.get():
+            if (event.type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED and
+                    event.ui_element == button):
+                confirm_double_click_event_fired = True
+        assert confirm_double_click_event_fired
+        
+    def test_on_self_event_no_params(self, _init_pygame: None, default_ui_manager: UIManager,
+                        _display_surface_return_none):
+        button_start_press = False
+        
+        def test_function():
+            nonlocal button_start_press
+            button_start_press = True
+            
+        command_dict ={pygame_gui.UI_BUTTON_START_PRESS:test_function}
+            
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          tool_tip_text="This is a test of the button's tool tip functionality.",
+                          manager=default_ui_manager,
+                          command=command_dict)
+        
+        assert not button_start_press
+        button.on_self_event(pygame_gui.UI_BUTTON_START_PRESS, {'mouse_button':1})
+        assert button_start_press
+        
 
     def test_set_active(self, _init_pygame: None, default_ui_manager: UIManager,
                         _display_surface_return_none):
