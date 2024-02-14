@@ -42,7 +42,7 @@ class UIButton(UIElement):
                                 unique event.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
-    :param command: Functions to be called when an event triggered by this element.
+    :param command: Functions to be called when an event is triggered by this element.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated string
                         useful when you have multiple translations that need variables inserted
                         in the middle.
@@ -386,7 +386,7 @@ class UIButton(UIElement):
     
     def on_self_event(self, event:int, data:Dict[str, Any]=None):
         """
-        Called when a event triggered by this element. Handles these events either by posting the event back
+        Called when an event is triggered by this element. Handles these events either by posting the event back
         to the event queue, or by running a function supplied by the user.
 
         :param event: The event triggered.
