@@ -187,6 +187,16 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _calc_dynamic_size(self):
         pass
+    
+    def _set_dynamic_width(self, is_dynamic: bool = True):
+        self.dynamic_width = is_dynamic
+        if self.drawable_shape is not None:
+            self.drawable_shape.dynamic_width = is_dynamic
+    
+    def _set_dynamic_height(self, is_dynamic: bool = True):
+        self.dynamic_height = is_dynamic
+        if self.drawable_shape is not None:
+            self.drawable_shape.dynamic_height = is_dynamic
 
     @staticmethod
     def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
@@ -733,21 +743,40 @@ class UIElement(GUISprite, IUIElementInterface):
                                    dimensions of the container or not.
 
         """
+        dynamic_width_original = self.dynamic_width
+        dynamic_height_original = self.dynamic_height
+        
+        is_dynamic = False
+        if dimensions[0] < 0:
+            self._set_dynamic_width()
+            is_dynamic = True
+        if dimensions[1] < 0:
+            self._set_dynamic_height()
+            is_dynamic = True
+            
+        if is_dynamic:
+            self._set_image(self.drawable_shape.get_fresh_surface())
+            self.rebuild()
+            
+            self._set_dynamic_width(dynamic_width_original)
+            self._set_dynamic_height(dynamic_height_original)
+        
         dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
-        self.relative_rect.width = int(dimensions[0])
-        self.relative_rect.height = int(dimensions[1])
+        if dimensions[0] >= 0:
+            self.relative_rect.width = int(dimensions[0])
+        if dimensions[1] >= 0:
+            self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
-        if dimensions[0] >= 0 and dimensions[1] >= 0:
-            self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
+        self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
-            if self.drawable_shape is not None:
-                if self.drawable_shape.set_dimensions(self.relative_rect.size):
-                    # needed to stop resizing 'lag'
-                    self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            if self.drawable_shape.set_dimensions(self.relative_rect.size):
+                # needed to stop resizing 'lag'
+                self._set_image(self.drawable_shape.get_fresh_surface())
 
-            self._update_container_clip()
-            self.ui_container.on_anchor_target_changed(self)
+        self._update_container_clip()
+        self.ui_container.on_anchor_target_changed(self)
 
     def update(self, time_delta: float):
         """
