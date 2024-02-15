@@ -755,7 +755,6 @@ class UIElement(GUISprite, IUIElementInterface):
             is_dynamic = True
             
         if is_dynamic:
-            self._set_image(self.drawable_shape.get_fresh_surface())
             self.rebuild()
             
             self._set_dynamic_width(dynamic_width_original)
