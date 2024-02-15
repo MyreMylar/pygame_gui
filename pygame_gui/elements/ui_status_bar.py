@@ -39,6 +39,8 @@ class UIStatusBar(UIElement):
 
     """
 
+    element_id = 'status_bar'
+
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
@@ -55,10 +57,12 @@ class UIStatusBar(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['status_bar'])
+                         visible=visible)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id=self.element_id)
 
         self.sprite = sprite
         self.follow_sprite = follow_sprite

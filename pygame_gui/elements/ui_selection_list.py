@@ -74,10 +74,12 @@ class UISelectionList(UIElement):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['selection_list'])
+                         visible=visible)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='selection_list')
 
         self._parent_element = parent_element
         self.list_and_scroll_bar_container = None

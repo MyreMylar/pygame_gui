@@ -74,10 +74,12 @@ class UIButton(UIElement):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['button'])
+                         visible=visible)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='button')
 
         self.text = text
         self.text_kwargs = {}

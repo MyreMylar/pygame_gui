@@ -106,10 +106,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                          starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['text_box'])
+                         visible=visible
+                         )
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='text_box')
         self.should_html_unescape_input_text = should_html_unescape_input_text
         if self.should_html_unescape_input_text:
             self.html_text = html.unescape(html_text)

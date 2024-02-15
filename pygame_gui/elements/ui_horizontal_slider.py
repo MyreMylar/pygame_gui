@@ -52,10 +52,12 @@ class UIHorizontalSlider(UIElement):
                          layer_thickness=2,
                          starting_height=1,
                          anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['horizontal_slider'])
+                         visible=visible)
+
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id='horizontal_slider')
 
         self.default_button_width = 20
         self.arrow_button_width = self.default_button_width
