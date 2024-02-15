@@ -49,25 +49,20 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.draggable = draggable
 
         self.edge_hovering = [False, False, False, False]
-
+        
+        if element_id is None:
+            element_ids = ['window']
+        else:
+            element_ids = [element_id, 'window']
+        
         super().__init__(rect, manager, container=None,
                          starting_height=1,
                          layer_thickness=1,
-                         visible=visible)
+                         visible=visible,
+                         object_id=object_id,
+                         element_id=element_ids)
 
         self.minimum_dimensions = (100, 100)
-
-        base_id = None
-        if element_id is None:
-            element_id = 'window'
-        else:
-            base_id = 'window'
-
-        self._create_valid_ids(container=None,
-                               parent_element=None,
-                               object_id=object_id,
-                               element_id=element_id,
-                               element_base_id=base_id)
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True

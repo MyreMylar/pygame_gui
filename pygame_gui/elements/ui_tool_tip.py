@@ -51,12 +51,10 @@ class UITooltip(UIElement, IUITooltipInterface):
                          container=None,
                          starting_height=manager.get_sprite_group().get_top_layer()+1,
                          layer_thickness=1,
-                         anchors=anchors)
-
-        self._create_valid_ids(container=None,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='tool_tip')
+                         anchors=anchors,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['tool_tip'])
 
         self.text_block = None
         self.rect_width = None  # type: Optional[int]
