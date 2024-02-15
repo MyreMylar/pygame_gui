@@ -37,7 +37,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
                  window_display_title: str = "",
-                 element_id: Optional[List[str]] = None,
+                 element_id: Union[List[str], str, None] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
                  visible: int = 1,
@@ -52,7 +52,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         
         if element_id is None:
             element_ids = ['window']
-        else:
+        elif isinstance(element_id, str):
+            element_ids = ['window', element_id]
+        elif isinstance(element_id, list):
             element_ids = ['window'] + element_id
         
         super().__init__(rect, manager, container=None,
