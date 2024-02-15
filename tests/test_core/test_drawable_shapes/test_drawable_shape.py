@@ -185,7 +185,7 @@ class TestDrawableShape:
         after_application_colour = test_surface_2.get_at((30, 0))
         assert after_application_colour == pygame.Color(255, 255, 255, 255)
 
-    def test_rebuild_images_and_text(self, _init_pygame, default_ui_manager: UIManager):
+    def test_rebuild_images_and_text(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         shape = DrawableShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'doop doop',
                                                   'font': default_ui_manager.get_theme().get_font([]),

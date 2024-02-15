@@ -676,12 +676,9 @@ class UIDropDownMenu(UIContainer):
         super().__init__(relative_rect, manager, container=container,
                          starting_height=0,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='drop_down_menu')
+                         visible=visible,
+                         object_id=object_id,
+                         element_id=['drop_down_menu'])
 
         self.__layer_thickness_including_expansion = 4
         self.options_list = options_list

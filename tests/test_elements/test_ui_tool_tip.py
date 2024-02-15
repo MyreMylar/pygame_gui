@@ -152,7 +152,8 @@ class TestUIToolTip:
         assert tool_tip.rect.topleft == (150, 30)
 
         assert tool_tip.text_block.ui_container.rect.topleft == (0, 0)
-        assert tool_tip.text_block.relative_rect.bottom == 71
+        # size of the box will differ depending on font renderer used as they generate slightly different surface heights.
+        assert tool_tip.text_block.relative_rect.bottom == pytest.approx(70, 2)
 
         assert tool_tip.text_block.rect.topleft == (150, 30)
 

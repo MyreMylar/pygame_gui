@@ -29,7 +29,7 @@ class TestHyperlinkTextChunk:
 
     def test_on_hovered(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
-        the_font.remove_font_pad_and_origin()
+
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -52,18 +52,18 @@ class TestHyperlinkTextChunk:
         rendered_chunk_surf.fill((0, 0, 0))
         hyper_chunk.finalise(target_surface=rendered_chunk_surf,
                              target_area=pygame.Rect(0, 0, 200, 30),
-                             row_chunk_origin=0,
+                             row_chunk_origin=19,
                              row_chunk_height=20,
                              row_bg_height=20)
 
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.on_hovered()
         assert hyper_chunk.is_hovered
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF00FF')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF00FF')
 
     def test_on_unhovered(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
-        the_font.remove_font_pad_and_origin()
+
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -86,21 +86,21 @@ class TestHyperlinkTextChunk:
         rendered_chunk_surf.fill((0, 0, 0))
         hyper_chunk.finalise(target_surface=rendered_chunk_surf,
                              target_area=pygame.Rect(0, 0, 200, 30),
-                             row_chunk_origin=0,
+                             row_chunk_origin=19,
                              row_chunk_height=20,
                              row_bg_height=20)
 
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.on_hovered()
         assert hyper_chunk.is_hovered
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF00FF')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF00FF')
         hyper_chunk.on_unhovered()
         assert not hyper_chunk.is_hovered
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
 
     def test_set_active(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
-        the_font.remove_font_pad_and_origin()
+
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -123,18 +123,18 @@ class TestHyperlinkTextChunk:
         rendered_chunk_surf.fill((0, 0, 0))
         hyper_chunk.finalise(target_surface=rendered_chunk_surf,
                              target_area=pygame.Rect(0, 0, 200, 30),
-                             row_chunk_origin=0,
+                             row_chunk_origin=19,
                              row_chunk_height=20,
                              row_bg_height=20)
 
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.set_active()
         assert hyper_chunk.is_active
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FFFF00')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FFFF00')
 
     def test_set_inactive(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         the_font = GUIFontFreetype(None, 20)
-        the_font.remove_font_pad_and_origin()
+
         style = {'link_text':       pygame.Color('#FF0000'),
                  'bg_colour':       pygame.Color('#808080'),
                  'link_hover':      pygame.Color('#FF00FF'),
@@ -157,17 +157,17 @@ class TestHyperlinkTextChunk:
         rendered_chunk_surf.fill((0, 0, 0))
         hyper_chunk.finalise(target_surface=rendered_chunk_surf,
                              target_area=pygame.Rect(0, 0, 200, 30),
-                             row_chunk_origin=0,
+                             row_chunk_origin=19,
                              row_chunk_height=20,
                              row_bg_height=20)
 
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.set_active()
         assert hyper_chunk.is_active
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FFFF00')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FFFF00')
         hyper_chunk.set_inactive()
         assert not hyper_chunk.is_active
-        assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color('#FF0000')
+        assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
 
 
 if __name__ == '__main__':

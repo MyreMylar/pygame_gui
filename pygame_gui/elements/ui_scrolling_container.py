@@ -52,12 +52,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                          starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='scrolling_container')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['scrolling_container'])
 
         # self.parent_element = parent_element
         self.scroll_bar_width = 0

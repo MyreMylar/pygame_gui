@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, List
 
 import pygame
 
@@ -37,7 +37,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
                  window_display_title: str = "",
-                 element_id: Optional[str] = None,
+                 element_id: Union[List[str], str, None] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
                  visible: int = 1,
@@ -49,25 +49,22 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.draggable = draggable
 
         self.edge_hovering = [False, False, False, False]
-
+        
+        if element_id is None:
+            element_ids = ['window']
+        elif isinstance(element_id, str):
+            element_ids = ['window', element_id]
+        elif isinstance(element_id, list):
+            element_ids = ['window'] + element_id
+        
         super().__init__(rect, manager, container=None,
                          starting_height=1,
                          layer_thickness=1,
-                         visible=visible)
+                         visible=visible,
+                         object_id=object_id,
+                         element_id=element_ids)
 
         self.minimum_dimensions = (100, 100)
-
-        base_id = None
-        if element_id is None:
-            element_id = 'window'
-        else:
-            base_id = 'window'
-
-        self._create_valid_ids(container=None,
-                               parent_element=None,
-                               object_id=object_id,
-                               element_id=element_id,
-                               element_base_id=base_id)
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
         self.bring_to_front_on_focused = True

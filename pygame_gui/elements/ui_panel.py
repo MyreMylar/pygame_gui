@@ -62,12 +62,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id=element_id)
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=[element_id])
 
         self.background_colour = None
         self.border_colour = None

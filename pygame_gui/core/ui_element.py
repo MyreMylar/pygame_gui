@@ -32,6 +32,10 @@ class UIElement(GUISprite, IUIElementInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
+    :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
+                    colours from parents.
+    :param object_id: An optional set of IDs to help distinguish this element from other elements.
+    :param element_id: A list of string ID representing this element's class.
     """
 
     def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
@@ -41,7 +45,10 @@ class UIElement(GUISprite, IUIElementInterface):
                  starting_height: int,
                  layer_thickness: int,
                  anchors: Dict[str, Union[str, IUIElementInterface]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 parent_element: Union[None, IUIElementInterface] = None,
+                 object_id: Union[ObjectID, str, None] = None,
+                 element_id: List[str] = None):
 
         self._layer = 0
         self.ui_manager = manager
@@ -130,6 +137,22 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
+        
+        element_ids = element_id
+        element_id = None
+        base_id = None
+        if element_ids is not None:
+            if len(element_ids) >= 1:
+                element_id = element_ids[0]
+            
+            if len(element_ids) >= 2:
+                base_id = element_ids[1]
+        
+            self._create_valid_ids(container=container,
+                                    parent_element=parent_element,
+                                    object_id=object_id,
+                                    element_id=element_id,
+                                    element_base_id=base_id)
 
     def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
         if self.ui_container is not None and clamp_to_container:
@@ -384,10 +407,10 @@ class UIElement(GUISprite, IUIElementInterface):
 
         """
         id_parent: Union[IContainerLikeInterface, IUIElementInterface, None] = None
-        if parent_element is None and container is not None:
-            id_parent = container
-        elif parent_element is not None:
+        if parent_element is not None:
             id_parent = parent_element
+        elif container is not None:
+            id_parent = container
 
         if isinstance(object_id, str):
             if object_id is not None and ('.' in object_id or ' ' in object_id):
