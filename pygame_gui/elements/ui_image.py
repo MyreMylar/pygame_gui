@@ -40,14 +40,11 @@ class UIImage(UIElement):
         super().__init__(relative_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
-
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='image')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['image'])
 
         self.original_image = None
 

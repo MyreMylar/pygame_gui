@@ -49,12 +49,10 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='container')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['container'])
 
         self.sprite_group = self.ui_manager.get_sprite_group()
         self._set_image(self.ui_manager.get_universal_empty_surface())
