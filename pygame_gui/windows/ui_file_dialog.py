@@ -1,4 +1,5 @@
 import warnings
+import locale
 
 from typing import Union, List, Optional, Set
 from pathlib import Path
@@ -38,7 +39,7 @@ class UIFileDialog(UIWindow):
                  rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface],
                  window_title: str = 'pygame-gui.file_dialog_title_bar',
-                 allowed_suffixes: Set[str] = {""},
+                 allowed_suffixes: Optional[Set[str]] = None,
                  initial_file_path: Optional[str] = None,
                  object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
@@ -48,10 +49,12 @@ class UIFileDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='file_dialog',
+                         element_id=['file_dialog'],
                          object_id=object_id,
                          resizable=True,
                          visible=visible)
+
+        locale.setlocale(locale.LC_ALL, "")
 
         minimum_dimensions = (260, 300)
         if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
@@ -65,7 +68,8 @@ class UIFileDialog(UIWindow):
 
         self.delete_confirmation_dialog = None  # type: Union[UIConfirmationDialog, None]
         self.current_file_path = None  # type: Union[Path, None]
-        self.allowed_suffixes = allowed_suffixes
+        if allowed_suffixes is None:
+            self.allowed_suffixes = {""}
         if initial_file_path is not None:
             pathed_initial_file_path = Path(initial_file_path)
             if pathed_initial_file_path.exists() and not pathed_initial_file_path.is_file():
@@ -216,14 +220,14 @@ class UIFileDialog(UIWindow):
         directory path has changed.
         """
         try:
-            directories_on_path = [f.name for f in Path(self.current_directory_path).iterdir()
-                                   if not f.is_file()]
-            directories_on_path = sorted(directories_on_path, key=str.casefold)
+            directories_on_path: list[str] = [f.name for f in Path(self.current_directory_path).iterdir()
+                                              if not f.is_file()]
+            directories_on_path.sort(key=locale.strxfrm)
             directories_on_path_tuples = [(f, '#directory_list_item') for f in directories_on_path]
 
             files_on_path = [f.name for f in Path(self.current_directory_path).iterdir()
                              if f.is_file() and any([f.name.endswith(x) for x in self.allowed_suffixes])]
-            files_on_path = sorted(files_on_path, key=str.casefold)
+            files_on_path.sort(key=locale.strxfrm)
             files_on_path_tuples = [(f, '#file_list_item') for f in files_on_path]
 
             self.current_file_list = directories_on_path_tuples + files_on_path_tuples

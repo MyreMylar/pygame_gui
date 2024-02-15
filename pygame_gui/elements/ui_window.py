@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, List
 
 import pygame
 
@@ -37,7 +37,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
                  window_display_title: str = "",
-                 element_id: Optional[str] = None,
+                 element_id: Optional[List[str]] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
                  visible: int = 1,
@@ -53,7 +53,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if element_id is None:
             element_ids = ['window']
         else:
-            element_ids = [element_id, 'window']
+            element_ids = ['window'] + element_id
         
         super().__init__(rect, manager, container=None,
                          starting_height=1,
