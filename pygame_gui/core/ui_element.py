@@ -32,6 +32,10 @@ class UIElement(GUISprite, IUIElementInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
+    :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
+                    colours from parents.
+    :param object_id: An optional set of IDs to help distinguish this element from other elements.
+    :param element_id: A list of string ID representing this element's class.
     """
     def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface],
