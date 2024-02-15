@@ -12,7 +12,7 @@ from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED
 
 class UIConsoleWindow(UIWindow):
     """
-    Create a basic console window. By default it doesn't do anything except log
+    Create a basic console window. By default, it doesn't do anything except log
     commands entered into the console in the text box log. There is an event
     and a few methods however that allow you to hook this console window up
     to do whatever you would like with the entered text commands.
@@ -37,7 +37,7 @@ class UIConsoleWindow(UIWindow):
                  preload_bold_log_font: bool = True):
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='console_window',
+                         element_id=['console_window'],
                          object_id=object_id,
                          resizable=True,
                          visible=visible)
@@ -76,7 +76,7 @@ class UIConsoleWindow(UIWindow):
 
         if preload_bold_log_font:
             # Would be better to load this font during UIManager setup, but this is probably
-            # second best place. We can't know if someone will use the console window in advance
+            # second-best place. We can't know if someone will use the console window in advance
             # but if they do and use the default bold output setup for it, it would be a good idea
             # to load the bold font at th the same time th other UI stuff is loaded.
 
@@ -103,7 +103,7 @@ class UIConsoleWindow(UIWindow):
 
     def restore_default_prefix(self) -> None:
         """
-        Restore the console log prefix to it's default value (which is: '> ')
+        Restore the console log prefix to its default value (which is: '> ')
         """
         self.log_prefix = self.default_log_prefix
 
@@ -113,7 +113,7 @@ class UIConsoleWindow(UIWindow):
         to the log. This is because the log uses an HTML Text box and most of the time we don't
         want to assume that every entered > or < is part of an HTML tag.
 
-        By default HTML is escaped for commands added to the log.
+        By default, HTML is escaped for commands added to the log.
 
         :param should_escape: A bool to switch escaping HTML on commands on or off.
         """

@@ -22,15 +22,15 @@ class UIConfirmationDialog(UIWindow):
     :param manager: The UIManager that manages this UIElement. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param window_title: The title of the  window.
-    :param action_short_name: Short, one or two word description of action for button.
+    :param action_short_name: Short, one or two-word description of action for button.
     :param blocking: Whether this window should block all other mouse interactions with the GUI
                      until it is closed.
-    :param object_id: A custom defined ID for fine tuning of theming. Defaults to
+    :param object_id: A custom defined ID for fine-tuning of theming. Defaults to
                       '#confirmation_dialog'.
     :param visible: Whether the element is visible by default.
-    :param long_desc_text_kwargs: a dictionary of variable arguments to pass to the translated string
-                                  useful when you have multiple translations that need variables inserted
-                                  in the middle.
+    :param action_long_desc_text_kwargs: a dictionary of variable arguments to pass to the translated string
+                                         useful when you have multiple translations that need variables inserted
+                                         in the middle.
     """
 
     def __init__(self, rect: pygame.Rect,
@@ -47,7 +47,7 @@ class UIConfirmationDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='confirmation_dialog',
+                         element_id=['confirmation_dialog'],
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

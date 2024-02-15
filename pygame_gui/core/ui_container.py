@@ -38,6 +38,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                  container: Union[IContainerLikeInterface, None] = None,
                  parent_element: Union[UIElement, None] = None,
                  object_id: Union[ObjectID, str, None] = None,
+                 element_id: Union[List[str], None] = None,
                  anchors: Union[Dict[str, str], None] = None,
                  visible: int = 1):
 
@@ -45,16 +46,17 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         self.is_window_root_container = is_window_root_container
         self.elements = []  # type: List[IUIElementInterface]
 
+        if element_id is None:
+            element_id = ['container']
+
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='container')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=element_id)
 
         self.sprite_group = self.ui_manager.get_sprite_group()
         self._set_image(self.ui_manager.get_universal_empty_surface())

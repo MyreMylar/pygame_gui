@@ -46,12 +46,10 @@ class UIVerticalScrollBar(UIElement):
                          layer_thickness=2,
                          starting_height=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='vertical_scroll_bar')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['vertical_scroll_bar'])
 
         self.button_height = 20
         self.arrow_button_height = self.button_height

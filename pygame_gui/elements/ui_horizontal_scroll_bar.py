@@ -46,14 +46,11 @@ class UIHorizontalScrollBar(UIElement):
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=1,
-
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='horizontal_scroll_bar')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['horizontal_scroll_bar'])
 
         self.button_width = 20
         self.arrow_button_width = self.button_width
