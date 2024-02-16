@@ -104,9 +104,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             return True
         return False
 
-    def update_theming(self, new_theming_data: str, rebuild_all: bool = True):
+    def update_theming(self, new_theming_data: Union[str, dict], rebuild_all: bool = True):
         # parse new_theming data
-        theme_dict = json.loads(new_theming_data)
+        if isinstance(new_theming_data, dict):
+            theme_dict = new_theming_data
+        else:
+            theme_dict = json.loads(new_theming_data)
+            
         self._parse_theme_data_from_json_dict(theme_dict)
         if rebuild_all:
             self.need_to_rebuild_data_manually_changed = True
@@ -654,8 +658,25 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 yield file, None
             finally:
                 file.close()
+                
+    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]):
+        """
+        Loads a theme file, and currently, all associated data like fonts and images required
+        by the theme.
 
-    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]):
+        :param file_path: The path to the theme we want to load.
+        """
+        if isinstance(file_path, dict):
+            theme_dict = file_path
+        else:
+            theme_dict = self._load_theme_by_path(file_path)
+            if theme_dict is None:
+                return
+            
+        self._parse_theme_data_from_json_dict(theme_dict)
+            
+
+    def _load_theme_by_path(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]) -> dict:  
         """
         Loads a theme file, and currently, all associated data like fonts and images required
         by the theme.
@@ -693,7 +714,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     load_success = True
 
             if load_success:
-                self._parse_theme_data_from_json_dict(theme_dict)
+                return theme_dict
 
     def _parse_theme_data_from_json_dict(self, theme_dict):
         for element_name in theme_dict.keys():

@@ -232,6 +232,10 @@ class UIManager(IUIManagerInterface):
 
                             break
         return consumed_event
+    
+    def rebuild_all_from_changed_theme_data(self):
+        for sprite in self.ui_group.sprites():
+            sprite.rebuild_from_changed_theme_data()
 
     def update(self, time_delta: float):
         """
@@ -253,12 +257,10 @@ class UIManager(IUIManagerInterface):
             if self.theme_update_acc > self.theme_update_check_interval:
                 self.theme_update_acc = 0.0
                 if self.ui_theme.check_need_to_reload():
-                    for sprite in self.ui_group.sprites():
-                        sprite.rebuild_from_changed_theme_data()
+                    self.rebuild_all_from_changed_theme_data()
 
         if self.ui_theme.check_need_to_rebuild_data_manually_changed():
-            for sprite in self.ui_group.sprites():
-                sprite.rebuild_from_changed_theme_data()
+            self.rebuild_all_from_changed_theme_data()
 
         self.ui_theme.update_caching(time_delta)
 
