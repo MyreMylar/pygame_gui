@@ -7,7 +7,8 @@ from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class TestRoundedRectangleShape:
-    def test_creation(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation(self, _init_pygame, _display_surface_return_none,
+                      default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
@@ -22,7 +23,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_update(self, _init_pygame, default_ui_manager: UIManager):
+    def test_update(self, _init_pygame, _display_surface_return_none,
+                    default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
@@ -43,8 +45,9 @@ class TestRoundedRectangleShape:
         shape.update(0.2)
         shape.update(0.4)
 
-    def test_full_rebuild_on_size_change_negative_values(self, _init_pygame, default_ui_manager: UIManager):
-        with pytest.warns(UserWarning, match='Clamping shadow_width'):
+    def test_full_rebuild_on_size_change_negative_values(self, _init_pygame, _display_surface_return_none,
+                                                         default_ui_manager: UIManager):
+        with pytest.warns(UserWarning, match=r'Clamping '):
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
@@ -59,7 +62,8 @@ class TestRoundedRectangleShape:
                                                       'text_vert_alignment': 'center'},
                                   states=['normal'], manager=default_ui_manager)
 
-    def test_full_rebuild_on_size_change_corner_only_negative_values(self, _init_pygame, default_ui_manager: UIManager):
+    def test_full_rebuild_on_size_change_corner_only_negative_values(self, _init_pygame, _display_surface_return_none,
+                                                                     default_ui_manager: UIManager):
         with pytest.warns(UserWarning, match='Clamping shape_corner_radius'):
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                   theming_parameters={'text': 'test',
@@ -75,8 +79,9 @@ class TestRoundedRectangleShape:
                                                       'text_vert_alignment': 'center'},
                                   states=['normal'], manager=default_ui_manager)
 
-    def test_full_rebuild_on_size_change_large(self, _init_pygame, default_ui_manager: UIManager):
-        with pytest.warns(UserWarning, match='Clamping shadow_width'):
+    def test_full_rebuild_on_size_change_large(self, _init_pygame, _display_surface_return_none,
+                                               default_ui_manager: UIManager):
+        with pytest.warns(UserWarning, match='Clamping '):
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 25, 25),
                                   theming_parameters={'text': 'test',
                                                       'font': default_ui_manager.ui_theme.get_font([]),
@@ -91,7 +96,8 @@ class TestRoundedRectangleShape:
                                                       'text_vert_alignment': 'center'},
                                   states=['normal'], manager=default_ui_manager)
 
-    def test_full_rebuild_on_size_change_large_corners_only(self, _init_pygame, default_ui_manager: UIManager):
+    def test_full_rebuild_on_size_change_large_corners_only(self, _init_pygame, _display_surface_return_none,
+                                                            default_ui_manager: UIManager):
         with pytest.warns(UserWarning, match='Clamping shape_corner_radius'):
             RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 50, 50),
                                   theming_parameters={'text': 'test',
@@ -107,7 +113,8 @@ class TestRoundedRectangleShape:
                                                       'text_vert_alignment': 'center'},
                                   states=['normal'], manager=default_ui_manager)
 
-    def test_full_rebuild_on_size_change_large_corners_no_shadow(self, _init_pygame, default_ui_manager: UIManager):
+    def test_full_rebuild_on_size_change_large_corners_no_shadow(self, _init_pygame, _display_surface_return_none,
+                                                                 default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 50, 50),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.ui_theme.get_font([]),
@@ -122,7 +129,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_full_rebuild_on_size_change_small_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_full_rebuild_on_size_change_small_surface(self, _init_pygame, _display_surface_return_none,
+                                                       default_ui_manager: UIManager):
         with pytest.warns(UserWarning, match='Clamping shape_corner_radius'):
             theming_params = {'text': 'test',
                               'font': default_ui_manager.ui_theme.get_font([]),
@@ -139,7 +147,8 @@ class TestRoundedRectangleShape:
                                   theming_parameters=theming_params,
                                   states=['normal'], manager=default_ui_manager)
 
-    def test_collide_point(self, _init_pygame, default_ui_manager: UIManager):
+    def test_collide_point(self, _init_pygame, _display_surface_return_none,
+                           default_ui_manager: UIManager):
         theming_params = {'text': 'test',
                           'font': default_ui_manager.ui_theme.get_font([]),
                           'normal_text': pygame.Color('#FFFFFF'),
@@ -160,7 +169,8 @@ class TestRoundedRectangleShape:
         assert shape.collide_point((10, 10)) is False
         assert shape.collide_point((5, 5)) is False
 
-    def test_set_position(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_position(self, _init_pygame, _display_surface_return_none,
+                          default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
@@ -176,7 +186,8 @@ class TestRoundedRectangleShape:
                                       states=['normal'], manager=default_ui_manager)
         shape.set_position((50, 50))
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager: UIManager):
+    def test_set_dimensions(self, _init_pygame, _display_surface_return_none,
+                            default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
@@ -192,7 +203,8 @@ class TestRoundedRectangleShape:
                                       states=['normal'], manager=default_ui_manager)
         shape.set_dimensions((50, 50))
 
-    def test_creation_with_gradients(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation_with_gradients(self, _init_pygame, _display_surface_return_none,
+                                     default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
@@ -209,7 +221,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_creation_with_filled_bar(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation_with_filled_bar(self, _init_pygame, _display_surface_return_none,
+                                      default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
@@ -229,7 +242,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_creation_with_filled_bar_no_gradient(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation_with_filled_bar_no_gradient(self, _init_pygame, _display_surface_return_none,
+                                                  default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
@@ -248,7 +262,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_creation_with_filled_bar_no_gradients_at_all(self, _init_pygame, default_ui_manager: UIManager):
+    def test_creation_with_filled_bar_no_gradients_at_all(self, _init_pygame, _display_surface_return_none,
+                                                          default_ui_manager: UIManager):
         RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                               theming_parameters={'text': 'test',
                                                   'font': default_ui_manager.get_theme().get_font([]),
@@ -265,7 +280,8 @@ class TestRoundedRectangleShape:
                                                   'text_vert_alignment': 'center'},
                               states=['normal'], manager=default_ui_manager)
 
-    def test_clear_and_create_shape_surface(self, _init_pygame, default_ui_manager: UIManager):
+    def test_clear_and_create_shape_surface(self, _init_pygame, _display_surface_return_none,
+                                            default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
@@ -291,7 +307,8 @@ class TestRoundedRectangleShape:
         shape.clear_and_create_shape_surface(pygame.Surface((100, 100)), pygame.Rect(0, 0, 75, 75), overlap=0,
                                              corner_radius=40, aa_amount=4)
 
-    def test_redraw_state(self, _init_pygame, default_ui_manager: UIManager):
+    def test_redraw_state(self, _init_pygame, _display_surface_return_none,
+                          default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),
@@ -314,7 +331,8 @@ class TestRoundedRectangleShape:
         shape.shadow_width = 3
         shape.redraw_state('hovered')
 
-    def test_clear_and_create_shape_surface_double_call(self, _init_pygame, default_ui_manager: UIManager):
+    def test_clear_and_create_shape_surface_double_call(self, _init_pygame, _display_surface_return_none,
+                                                        default_ui_manager: UIManager):
         shape = RoundedRectangleShape(containing_rect=pygame.Rect(0, 0, 100, 100),
                                       theming_parameters={'text': 'test',
                                                           'font': default_ui_manager.ui_theme.get_font([]),

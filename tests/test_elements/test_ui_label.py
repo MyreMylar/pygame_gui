@@ -230,14 +230,14 @@ class TestUILabel:
                         default_ui_manager)
         default_ui_manager.set_locale('fr')
 
-        assert label.drawable_shape.theming['text'] == "Anglaise"
+        assert label.drawable_shape.theming['text'] == "Anglais"
 
         label = UILabel(pygame.Rect((10, 100), (-1, 30)),
                         'pygame-gui.English',
                         default_ui_manager)
         default_ui_manager.set_locale('fr')
 
-        assert label.drawable_shape.theming['text'] == "Anglaise"
+        assert label.drawable_shape.theming['text'] == "Anglais"
 
         label = UILabel(pygame.Rect((10, 100), (-1, -1)),
                         'pygame-gui.English',

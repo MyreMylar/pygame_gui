@@ -23,6 +23,7 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIManagerInterface, IGUIFontInterface
 from pygame_gui.core.gui_font_freetype import GUIFontFreetype
+from pygame_gui.core.gui_font_pygame import GUIFontPygame
 
 
 __default_manager = None  # type: Optional[IUIManagerInterface]
@@ -380,7 +381,9 @@ class FontResource:
         self.style = style
         self.location = location[0]
         self.force_style = location[1]
-        self.loaded_font = None  # type: Union[GUIFontFreetype, None]
+        self.loaded_font = None  # type: Union[IGUIFontInterface, None]
+
+        self.font_type_to_use = "pygame"
 
     def load(self):
         """
@@ -392,17 +395,26 @@ class FontResource:
         error = None
         if isinstance(self.location, PackageResource):
             try:
-                self.loaded_font = GUIFontFreetype(
-                    io.BytesIO((resources.files(self.location.package) /
-                                self.location.resource).read_bytes()),
-                    self.size, self.force_style, self.style)
+                if self.font_type_to_use == "freetype":
+                    self.loaded_font = GUIFontFreetype(
+                        io.BytesIO((resources.files(self.location.package) /
+                                    self.location.resource).read_bytes()),
+                        self.size, self.force_style, self.style)
+                elif self.font_type_to_use == "pygame":
+                    self.loaded_font = GUIFontPygame(
+                        io.BytesIO((resources.files(self.location.package) /
+                                    self.location.resource).read_bytes()),
+                        self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
 
         elif isinstance(self.location, str):
             try:
-                self.loaded_font = GUIFontFreetype(self.location, self.size, self.force_style, self.style)
+                if self.font_type_to_use == "freetype":
+                    self.loaded_font = GUIFontFreetype(self.location, self.size, self.force_style, self.style)
+                elif self.font_type_to_use == "pygame":
+                    self.loaded_font = GUIFontPygame(self.location, self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))
@@ -410,7 +422,10 @@ class FontResource:
         elif isinstance(self.location, bytes):
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
-                self.loaded_font = GUIFontFreetype(file_obj, self.size, self.force_style, self.style)
+                if self.font_type_to_use == "freetype":
+                    self.loaded_font = GUIFontFreetype(file_obj, self.size, self.force_style, self.style)
+                elif self.font_type_to_use == "pygame":
+                    self.loaded_font = GUIFontPygame(file_obj, self.size, self.force_style, self.style)
             except (pygame.error, FileNotFoundError, OSError):
                 error = FileNotFoundError('Unable to load resource with path: ' +
                                           str(self.location))

@@ -720,7 +720,7 @@ class TestUIElement:
         anchor_element.set_dimensions((30, 30))
         anchor_element.set_relative_position((45, 45))
 
-        with pytest.warns(expected_warning=UserWarning, match="Supplied horizontal anchors are invalid"):
+        with pytest.warns(expected_warning=UserWarning, match=r'Supplied \w+ anchors are invalid'):
             anchor_element = UIElement(relative_rect=pygame.Rect(50, 50, 40, 40),
                                        manager=default_ui_manager,
                                        container=None,

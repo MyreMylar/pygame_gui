@@ -38,7 +38,6 @@ class UIStatusBar(UIElement):
                     may override this.
 
     """
-
     element_id = 'status_bar'
 
     def __init__(self,
@@ -57,12 +56,10 @@ class UIStatusBar(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id=self.element_id)
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=[self.element_id])
 
         self.sprite = sprite
         self.follow_sprite = follow_sprite
