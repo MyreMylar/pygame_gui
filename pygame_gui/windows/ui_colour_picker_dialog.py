@@ -645,6 +645,11 @@ class UIColourPickerDialog(UIWindow):
         self.sat_value_square._set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
 
     def update_colour_2d_slider(self):
+        """
+        This is used to update the 2D slider from the sliders
+
+        :return: None
+        """
         s, v = self.sat_channel.current_value, self.value_channel.current_value
         self.colour_2d_slider.set_current_value(v, s)
 
