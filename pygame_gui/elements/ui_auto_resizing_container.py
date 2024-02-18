@@ -65,7 +65,7 @@ class UIAutoResizingContainer(UIContainer):
         self.min_edges_rect = min_edges_rect
 
         if self.min_edges_rect is None:
-            self.min_edges_rect = self.get_relative_rect()
+            self.min_edges_rect = self.get_relative_rect().copy()
 
         self.max_edges_rect = max_edges_rect
 
@@ -90,17 +90,11 @@ class UIAutoResizingContainer(UIContainer):
         self.top_to_bottom_elements: List[IUIElementInterface] = []
         self.bottom_to_top_elements: List[IUIElementInterface] = []
 
-        # An element which is anchored to the left shouldn't expand the container to the left
-        self.left_anchor_elements: List[IUIElementInterface] = []
-        self.right_anchor_elements: List[IUIElementInterface] = []
-        self.top_anchor_elements: List[IUIElementInterface] = []
-        self.bottom_anchor_elements: List[IUIElementInterface] = []
-
         self.should_update_sorting = False
         self.should_update_dimensions = False
 
         self.has_recently_updated_dimensions = False
-    
+
     def add_element(self, element: IUIElementInterface) -> None:
         """
         Add a UIElement to the container. The UIElement's relative_rect parameter will be relative to
@@ -110,9 +104,6 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         super().add_element(element)
-
-        self._update_anchors_from_element(element)
-        self._update_sorting()  # This is to account for when the element is created and immediately removed
 
         self.should_update_sorting = True  # Currently, the rect is just a copy of relative rect so cannot do sorting
         self.should_update_dimensions = True
@@ -126,19 +117,17 @@ class UIAutoResizingContainer(UIContainer):
         """
         super().remove_element(element)
 
-        if element in self.left_anchor_elements:
-            self.left_anchor_elements.remove(element)
-        if element in self.right_anchor_elements:
-            self.right_anchor_elements.remove(element)
-        if element in self.top_anchor_elements:
-            self.top_anchor_elements.remove(element)
-        if element in self.bottom_anchor_elements:
-            self.bottom_anchor_elements.remove(element)
+        if element in self.left_to_right_elements:
+            self.left_to_right_elements.remove(element)
 
-        self.left_to_right_elements.remove(element)
-        self.right_to_left_elements.remove(element)
-        self.top_to_bottom_elements.remove(element)
-        self.bottom_to_top_elements.remove(element)
+        if element in self.right_to_left_elements:
+            self.right_to_left_elements.remove(element)
+
+        if element in self.top_to_bottom_elements:
+            self.top_to_bottom_elements.remove(element)
+
+        if element in self.bottom_to_top_elements:
+            self.bottom_to_top_elements.remove(element)
 
         if element in (self.left_element, self.right_element, self.top_element, self.bottom_element):
             self._update_extreme_elements()
@@ -252,57 +241,6 @@ class UIAutoResizingContainer(UIContainer):
         if new_rect != self.max_edges_rect:
             self.max_edges_rect = new_rect
             self.recalculate_abs_edges_rect()
-    
-    def _update_anchors_from_element(self, element: IUIElementInterface) -> bool:
-        """
-        Updates the element's anchors which affect which side it's allowed to resize based on its anchors.
-        This is needed to avoid endlessly expanding the container to accommodate elements which will always be out of
-        bounds.
-
-        :return: None
-        """
-
-        has_any_changed = False
-
-        anchors = element.anchors.values()  # Only the values are important
-        for attr in ["left", "right", "top", "bottom"]:
-
-            anchor_elements = getattr(self, f"{attr}_anchor_elements")
-            element_contained = element in anchor_elements
-
-            if attr in anchors:
-                if not element_contained:
-                    anchor_elements.append(element)
-                    has_any_changed = True
-
-            elif element_contained:
-                anchor_elements.remove(element)
-                has_any_changed = True
-
-        return has_any_changed
-
-    def _update_anchor_elements(self) -> None:
-        """
-        Updates the elements which affect which side they are allowed to resize based on their anchors.
-        This is needed to avoid endlessly expanding the container to accommodate elements which will always be out of
-        bounds.
-
-        :return: None
-        """
-        self.left_anchor_elements = []
-        self.right_anchor_elements = []
-        self.top_anchor_elements = []
-        self.bottom_anchor_elements = []
-        for element in self.elements:
-            anchors = element.anchors.values()
-            if "left" in anchors:
-                self.left_anchor_elements.append(element)
-            if "right" in anchors:
-                self.right_anchor_elements.append(element)
-            if "top" in anchors:
-                self.top_anchor_elements.append(element)
-            if "bottom" in anchors:
-                self.bottom_anchor_elements.append(element)
 
     def _update_sorting(self) -> None:
         """
@@ -324,14 +262,19 @@ class UIAutoResizingContainer(UIContainer):
 
         :return: None
         """
-        self.left_element = next(
-            (element for element in self.left_to_right_elements if element not in self.left_anchor_elements), None)
-        self.right_element = next(
-            (element for element in self.right_to_left_elements if element not in self.right_anchor_elements), None)
-        self.top_element = next(
-            (element for element in self.top_to_bottom_elements if element not in self.top_anchor_elements), None)
-        self.bottom_element = next(
-            (element for element in self.bottom_to_top_elements if element not in self.bottom_anchor_elements), None)
+        # self.left_element = next(
+        #     (element for element in self.left_to_right_elements if element not in self.left_anchor_elements), None)
+        # self.right_element = next(
+        #     (element for element in self.right_to_left_elements if element not in self.right_anchor_elements), None)
+        # self.top_element = next(
+        #     (element for element in self.top_to_bottom_elements if element not in self.top_anchor_elements), None)
+        # self.bottom_element = next(
+        #     (element for element in self.bottom_to_top_elements if element not in self.bottom_anchor_elements), None)
+
+        self.left_element = self.left_to_right_elements[0] if self.left_to_right_elements else None
+        self.right_element = self.right_to_left_elements[0] if self.right_to_left_elements else None
+        self.top_element = self.top_to_bottom_elements[0] if self.top_to_bottom_elements else None
+        self.bottom_element = self.bottom_to_top_elements[0] if self.bottom_to_top_elements else None
 
     def _update_dimensions(self) -> None:
         """
@@ -345,29 +288,33 @@ class UIAutoResizingContainer(UIContainer):
         right_ext = self._get_right_most_point() - rect.right if self.resize_right else 0
         top_ext = rect.top - self._get_top_most_point() if self.resize_top else 0
         bottom_ext = self._get_bottom_most_point() - rect.bottom if self.resize_bottom else 0
+        #
+        # if left_ext or top_ext:
+        #     self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
 
-        if left_ext or top_ext:
-            self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
+        if left_ext:
+            self.expand_left(left_ext)
+        if top_ext:
+            self.expand_top(top_ext)
 
-        width = left_ext + rect.width + right_ext
-        height = top_ext + rect.height + bottom_ext
-
-        if left_ext or right_ext or top_ext or bottom_ext:
+        if right_ext or bottom_ext:
+            width = rect.width + right_ext
+            height = rect.height + bottom_ext
             self.set_dimensions((width, height))
-    
+
     def on_contained_elements_changed(self, target: UIElement) -> None:
         """
         Update the positioning of the contained elements of this container. To be called when one of the contained
-        elements may have moved, or been resized.
+        elements may have moved, been resized or changed its anchors.
 
-        :param target: the UI element that has been benn moved or resized.
+        :param target: the UI element that has been benn moved resized or changed its anchors.
+        :return: None
         """
         super().on_contained_elements_changed(target)
 
-        self._update_anchors_from_element(target)
         self._update_sorting()
         self._update_extreme_elements()
-        
+
         self.should_update_dimensions = True
 
     def update(self, time_delta: float) -> None:
@@ -385,7 +332,7 @@ class UIAutoResizingContainer(UIContainer):
         if self.has_recently_updated_dimensions:
             self.has_recently_updated_dimensions = False
 
-        if self.should_update_sorting:
+        if self.should_update_sorting:  # Only used when adding elements as their rects aren't accurate during creation
             self._update_sorting()
             self._update_extreme_elements()
             self.should_update_sorting = False

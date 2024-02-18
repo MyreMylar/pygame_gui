@@ -220,6 +220,55 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         super().set_dimensions(dimensions)
         self.update_containing_rect_position()
 
+    def expand_left(self, width: int) -> None:
+        """
+        Increases the width of the container, but instead of expanding the right edge, it expands the left edge.
+        This is achieved by setting the new dimensions and updating the anchors of all the elements anchored
+        to the left of the container.
+
+        :param width: The height to increase by. Pass in negative values to decrease the size
+        :return: None
+        """
+
+        # Increase width
+        dim = self.rect.width + width, self.rect.height
+        self.set_dimensions(dim)
+
+        # Reposition so that the right edge is back to where it was
+        pos = self.relative_rect.left - width, self.relative_rect.top
+        self.set_relative_position(pos)
+
+        # Moving the elements anchored to the top to make it seem like the container just increased its top edge
+        for element in self.elements:
+            if "left" in element.anchors.values() and "left_target" not in element.anchors:
+                pos = pygame.Vector2(element.get_relative_rect().topleft) + pygame.Vector2(width, 0)
+                element.set_relative_position(pos)
+
+    def expand_top(self, height: int) -> None:
+        """
+        Increases the height of the container, but instead of expanding the bottom edge, it expands the top edge.
+        This is achieved by setting the new dimensions and updating the anchors of all the elements anchored
+        to the top of the container.
+
+        :param height: The height to increase by. Pass in negative values to decrease the size
+        :return: None
+        """
+
+        # Increase height
+        dim = self.rect.width, self.rect.height + height
+        self.set_dimensions(dim)
+
+        # Reposition so that the bottom edge is back to where it was
+        pos = self.relative_rect.left, self.relative_rect.top - height
+        self.set_relative_position(pos)
+
+        # Moving the elements anchored to the top to make it seem like the container just increased its top edge
+        for element in self.elements:
+            if "top" in element.anchors.values() and "top_target" not in element.anchors and "bottom_target" not in element.anchors:
+                print(element.most_specific_combined_id)
+                pos = pygame.Vector2(element.get_relative_rect().topleft) + pygame.Vector2(0, height)
+                element.set_relative_position(pos)
+
     def get_top_layer(self) -> int:
         """
         Assuming we have correctly calculated the 'thickness' of this container, this method will
@@ -338,10 +387,11 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     def on_contained_elements_changed(self, target: UIElement) -> None:
         """
         Update the positioning of the contained elements of this container. To be called when one of the contained
-        elements may have moved, or been resized.
+        elements may have moved, been resized or changed its anchors.
 
-        :param target: the UI element that has been benn moved or resized.
+        :param target: the UI element that has been benn moved resized or changed its anchors.
         """
         for element in self.elements:
             if target in element.get_anchor_targets():
                 element.update_containing_rect_position()
+                self.on_contained_elements_changed(element)
