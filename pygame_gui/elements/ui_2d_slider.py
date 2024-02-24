@@ -113,8 +113,6 @@ class UI2DSlider(UIElement):
 
         self.button_container = None
 
-        self.rebuild_from_changed_theme_data()
-
         sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
         sliding_y_pos = int(self.background_rect.height / 2 - self.sliding_button_width / 2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos, sliding_y_pos),
@@ -136,6 +134,8 @@ class UI2DSlider(UIElement):
         self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
 
         self.set_current_value(start_value_x, start_value_y)
+
+        self.rebuild_from_changed_theme_data()
 
     def rebuild(self):
         """
