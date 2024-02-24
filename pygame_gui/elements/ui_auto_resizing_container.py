@@ -262,14 +262,6 @@ class UIAutoResizingContainer(UIContainer):
 
         :return: None
         """
-        # self.left_element = next(
-        #     (element for element in self.left_to_right_elements if element not in self.left_anchor_elements), None)
-        # self.right_element = next(
-        #     (element for element in self.right_to_left_elements if element not in self.right_anchor_elements), None)
-        # self.top_element = next(
-        #     (element for element in self.top_to_bottom_elements if element not in self.top_anchor_elements), None)
-        # self.bottom_element = next(
-        #     (element for element in self.bottom_to_top_elements if element not in self.bottom_anchor_elements), None)
 
         self.left_element = self.left_to_right_elements[0] if self.left_to_right_elements else None
         self.right_element = self.right_to_left_elements[0] if self.right_to_left_elements else None
@@ -288,9 +280,6 @@ class UIAutoResizingContainer(UIContainer):
         right_ext = self._get_right_most_point() - rect.right if self.resize_right else 0
         top_ext = rect.top - self._get_top_most_point() if self.resize_top else 0
         bottom_ext = self._get_bottom_most_point() - rect.bottom if self.resize_bottom else 0
-        #
-        # if left_ext or top_ext:
-        #     self.set_position(pygame.Vector2(rect.topleft) - pygame.Vector2(left_ext, top_ext))
 
         if left_ext:
             self.expand_left(left_ext)
