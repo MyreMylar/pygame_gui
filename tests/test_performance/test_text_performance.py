@@ -24,9 +24,9 @@ def test_new_style_text_box_performance(benchmark, _init_pygame,
                                         default_ui_manager: UIManager,
                                         _display_surface_return_none):
 
-    default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                      {"name": "fira_code", "size:": 14, "style": "italic"},
-                                      {'name': 'fira_code',
+    default_ui_manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                                      {"name": "noto_sans", "size:": 14, "style": "italic"},
+                                      {'name': 'noto_sans',
                                        'point_size': 14,
                                        'style': 'bold_italic'}])
 

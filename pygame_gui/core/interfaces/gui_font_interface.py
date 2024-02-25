@@ -87,3 +87,9 @@ class IGUIFontInterface(metaclass=ABCMeta):
         :return:
         """
 
+    def get_direction(self) -> int:
+        """
+
+        :return:
+        """
+

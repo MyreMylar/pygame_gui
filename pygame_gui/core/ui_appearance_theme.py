@@ -219,7 +219,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                 font_info['bold'],
                                                 font_info['italic'],
                                                 False,
-                                                font_info['antialiased'])
+                                                font_info['antialiased'],
+                                                font_info['script'],
+                                                font_info['direction'])
 
                 if element_key not in self.ele_font_res:
                     self.ele_font_res[element_key] = {}
@@ -228,7 +230,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     font_info['name'],
                     font_info['bold'],
                     font_info['italic'],
-                    font_info['antialiased'])
+                    font_info['antialiased'],
+                    font_info['script'],
+                    font_info['direction'])
 
     def _load_images(self):
         """
@@ -950,6 +954,19 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 font_info_dict['antialiased'] = True
         if 'antialiased' not in font_info_dict:
             font_info_dict['antialiased'] = True
+
+        if 'script' in file_dict:
+            font_info_dict['script'] = file_dict['script']
+        if 'script' not in font_info_dict:
+            font_info_dict['script'] = self.font_dict.default_font.script
+
+        if 'direction' in file_dict:
+            if file_dict['direction'].lower() == 'ltr':
+                font_info_dict['direction'] = pygame.DIRECTION_LTR
+            elif file_dict['direction'].lower() == 'rtl':
+                font_info_dict['direction'] = pygame.DIRECTION_RTL
+        else:
+            font_info_dict['direction'] = pygame.DIRECTION_LTR
 
         if 'regular_path' in file_dict:
             font_info_dict['regular_path'] = file_dict['regular_path']

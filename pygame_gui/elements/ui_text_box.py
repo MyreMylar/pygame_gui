@@ -141,6 +141,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.background_colour = None
         self.border_colour = None
         self.line_spacing = 1.25
+        self.text_cursor_colour = pygame.Color("white")
 
         self.link_normal_colour = None
         self.link_hover_colour = None
@@ -297,7 +298,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius}
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'text_cursor_colour': self.text_cursor_colour}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -357,6 +359,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
             else:
                 self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
+        elif self.text_horiz_alignment == 'default':
+            locale = self.ui_manager.get_locale()
+            if locale in ['ar', 'he']:
+                self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
+            else:
+                self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
 
         # Vertical alignment
         if self.text_vert_alignment != 'default':
@@ -565,7 +573,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             font_size=self.parser.default_style['font_size'],
             bold=self.parser.default_style['bold'],
             italic=self.parser.default_style['italic'],
-            antialiased=self.parser.default_style['antialiased'],)
+            antialiased=self.parser.default_style['antialiased'],
+            script=self.parser.default_style['script'],
+            direction=self.parser.default_style['direction'])
         default_font_data = {"font": default_font,
                              "font_colour": self.parser.default_style['font_colour'],
                              "bg_colour": self.parser.default_style['bg_colour']
@@ -577,7 +587,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                                   self.text_wrap_rect[3])),
                                              line_spacing=self.line_spacing,
                                              default_font_data=default_font_data,
-                                             allow_split_dashes=self.allow_split_dashes)
+                                             allow_split_dashes=self.allow_split_dashes,
+                                             text_direction=self.parser.default_style['direction'])
+        self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.parser.empty_layout_queue()
         if not self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
@@ -802,7 +814,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _reparse_and_rebuild(self):
         self.parser = HTMLParser(self.ui_theme, self.combined_element_ids,
-                                 self.link_style, line_spacing=self.line_spacing)
+                                 self.link_style, line_spacing=self.line_spacing,
+                                 text_direction=self.font_dict.get_default_font().get_direction())
         self.rebuild()
 
     def _check_text_alignment_theming(self) -> bool:
@@ -815,7 +828,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
-                                               default_value='left',
+                                               default_value='default',
                                                casting_func=str):
             has_any_changed = True
 

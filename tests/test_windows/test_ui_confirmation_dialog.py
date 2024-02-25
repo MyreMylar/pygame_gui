@@ -16,7 +16,7 @@ class TestUIConfirmationDialog:
 
     def test_creation(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'point_size': 14, 'style': 'bold'}])
         UIConfirmationDialog(rect=pygame.Rect(100, 100, 400, 300),
                              action_long_desc="Confirm a <b>bold</b> test of the confirmation "
                                               "dialog.",
@@ -39,7 +39,7 @@ class TestUIConfirmationDialog:
 
     def test_create_too_small(self, _init_pygame, default_ui_manager,
                               _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 14, 'style': 'bold'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'point_size': 14, 'style': 'bold'}])
 
         with pytest.warns(UserWarning, match="Initial size"):
             UIConfirmationDialog(rect=pygame.Rect(100, 100, 50, 50),
