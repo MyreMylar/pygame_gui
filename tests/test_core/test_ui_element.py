@@ -535,7 +535,7 @@ class TestUIElement:
     def test_set_visual_debug_mode(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
 
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 8, 'style': 'regular'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'point_size': 8, 'style': 'regular'}])
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,

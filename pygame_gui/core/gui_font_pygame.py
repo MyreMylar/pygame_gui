@@ -24,16 +24,26 @@ class GUIFontPygame(IGUIFontInterface):
 
         self.point_size = size
         self.antialiased = True
+        self.direction = pygame.DIRECTION_LTR
 
         if style is not None:
             self.antialiased = style['antialiased']
+            self.italic = style['italic']
+            self.bold = style['bold']
+
+            if 'script' in style:
+                self.__internal_font.set_script(style['script'])
+
+            if 'direction' in style:
+                self.__internal_font.set_direction(style['direction'])
+                self.direction = style['direction']
 
             if force_style:
                 self.__internal_font.bold = style['bold']
                 self.__internal_font.italic = style['italic']
 
     def size(self, text: str):
-        return self.__internal_font.size(text)
+        return self.get_rect(text).size
 
     @property
     def underline(self) -> bool:
@@ -57,8 +67,12 @@ class GUIFontPygame(IGUIFontInterface):
 
     def get_rect(self, text: str) -> Rect:
         # only way to get accurate font layout data with kerning is to render it ourselves it seems
-        text_surface = self.__internal_font.render(text, self.antialiased, pygame.Color("white"))
-        return pygame.Rect((0, self.__internal_font.get_ascent()), text_surface.get_size())
+        if len(text) > 0:
+            text_surface = self.__internal_font.render(text, self.antialiased, pygame.Color("white"))
+            ascent = self.__internal_font.get_ascent()
+            return pygame.Rect((0, ascent), text_surface.get_size())
+        else:
+            return pygame.Rect(0, 0, 0, 0)
 
     def get_metrics(self, text: str):
         # this may need to be broken down further in the wrapper
@@ -92,7 +106,14 @@ class GUIFontPygame(IGUIFontInterface):
         # but also don't want it to flicker on and off. Base-line
         # centering is the default for chunks on a single style row.
 
-        descender = self.__internal_font.get_descent()
-        return -descender + 1
+        descender = -self.__internal_font.get_descent()
+        return descender + 1
+
+    def get_direction(self) -> int:
+        """
+
+        :return:
+        """
+        return self.direction
 
 

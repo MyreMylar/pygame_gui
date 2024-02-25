@@ -33,11 +33,13 @@ class TextBoxLayout:
                  view_rect: pygame.Rect,
                  line_spacing: float,
                  default_font_data: Dict[str, Any],
-                 allow_split_dashes: bool = True):
+                 allow_split_dashes: bool = True,
+                 text_direction: int = pygame.DIRECTION_LTR):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
+        self.text_direction = text_direction
 
         # this is the font used when we don't have anything else
         self.default_font_data = default_font_data
@@ -185,7 +187,10 @@ class TextBoxLayout:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
         # See if this rectangle will fit on the current line
-        if not self.expand_width and text_layout_rect.right > rhs_limit:
+        # also check whether this layout rect is a final unsplittable rectangle that is wider than the layout.
+        if not self.expand_width and text_layout_rect.right > rhs_limit and not (
+                len(input_queue) == 0 and not text_layout_rect.can_split() and current_row.x == 0
+        ):
             # move to next line and try to split if we can
             current_row = self._split_rect_and_move_to_next_line(current_row,
                                                                  rhs_limit,

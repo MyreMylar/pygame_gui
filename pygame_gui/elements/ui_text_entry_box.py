@@ -740,3 +740,18 @@ class UITextEntryBox(UITextBox):
     @staticmethod
     def convert_all_line_endings_to_unix(input_str: str):
         return input_str.replace('\r\n', '\n').replace('\r', '\n')
+
+    def rebuild_from_changed_theme_data(self):
+        # TODO: refactor this a bit so we don't rebuild twice if base classes and this class has changed data.
+        super().rebuild_from_changed_theme_data()
+
+        has_any_changed = False
+
+        text_cursor_colour = self.ui_theme.get_colour_or_gradient('text_cursor',
+                                                                  self.combined_element_ids)
+        if text_cursor_colour != self.text_cursor_colour:
+            self.text_cursor_colour = text_cursor_colour
+            has_any_changed = True
+
+        if has_any_changed:
+            self._reparse_and_rebuild()

@@ -96,6 +96,7 @@ class UITextEntryLine(UIElement):
 
         # theme font
         self.font: Optional[IGUIFontInterface] = None
+        self.hidden_font: Optional[IGUIFontInterface] = self.ui_theme.get_font_dictionary().get_default_symbol_font()
 
         self.shadow_width = None
         self.border_width = None
@@ -188,17 +189,27 @@ class UITextEntryLine(UIElement):
         """
 
         display_text = self.text
+        display_font = self.font
         if self.is_text_hidden:
+            display_font = self.hidden_font
             # test if self.hidden_text_char is supported by font here
-            if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                self.hidden_text_char = '*'
-                if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                    self.hidden_text_char = '.'
-                    if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                        raise ValueError('Selected font for UITextEntryLine does not contain '
-                                         '●, * or . characters used for hidden text. Please choose'
-                                         'a different font for this element')
+            # currently we can't do this
+            # if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #     self.hidden_text_char = '*'
+            #     if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #         self.hidden_text_char = '.'
+            #         if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #             raise ValueError('Selected font for UITextEntryLine does not contain '
+            #                              '●, * or . characters used for hidden text. Please choose'
+            #                              'a different font for this element')
             display_text = self.hidden_text_char*len(self.text)
+
+        text_direction = self.font.get_direction()
+        text_horiz_alignment = 'left'
+        if text_direction == pygame.DIRECTION_LTR:
+            text_horiz_alignment = 'left'
+        elif text_direction == pygame.DIRECTION_RTL:
+            text_horiz_alignment = 'right'
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
@@ -213,10 +224,10 @@ class UITextEntryLine(UIElement):
                               'text_cursor_colour': self.text_cursor_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'font': self.font,
+                              'font': display_font,
                               'text': display_text if len(display_text) > 0 else translate(self.placeholder_text),
                               'text_width': -1,
-                              'text_horiz_alignment': 'left',
+                              'text_horiz_alignment': text_horiz_alignment,
                               'text_vert_alignment': 'centre',
                               'text_horiz_alignment_padding': self.padding[0],
                               'text_vert_alignment_padding': self.padding[1],

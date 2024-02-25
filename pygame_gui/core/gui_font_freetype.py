@@ -84,3 +84,10 @@ class GUIFontFreetype(IGUIFontInterface):
         # centering is the default for chunks on a single style row.
 
         return -self.__internal_font.get_sized_descender(self.point_size)
+
+    def get_direction(self) -> int:
+        """
+
+        :return:
+        """
+        return pygame.DIRECTION_LTR

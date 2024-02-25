@@ -17,8 +17,8 @@ class TestUITextEntryBox:
     def test_creation(self, _init_pygame: None,
                       default_ui_manager: UIManager,
                       _display_surface_return_none):
-        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        default_ui_manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                                          {"name": "noto_sans", "size:": 14, "style": "italic"}])
         text_box = UITextEntryBox(
             initial_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                          "<i>styles</i>.",
@@ -29,8 +29,8 @@ class TestUITextEntryBox:
     def test_set_text(self, _init_pygame: None,
                       default_ui_manager: UIManager,
                       _display_surface_return_none):
-        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        default_ui_manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                                          {"name": "noto_sans", "size:": 14, "style": "italic"}])
         text_box = UITextEntryBox(
             initial_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                          "<i>styles</i>.",
@@ -44,8 +44,8 @@ class TestUITextEntryBox:
     def test_clear(self, _init_pygame: None,
                    default_ui_manager: UIManager,
                    _display_surface_return_none):
-        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        default_ui_manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                                          {"name": "noto_sans", "size:": 14, "style": "italic"}])
         text_box = UITextEntryBox(
             initial_text="<font color=#FF0000>Some text</font> in a <b>bold box</b> using colours and "
                          "<i>styles</i>.",
@@ -59,29 +59,29 @@ class TestUITextEntryBox:
     def test_creation_grow_to_fit_width(self, _init_pygame: None,
                                         default_ui_manager: UIManager,
                                         _display_surface_return_none):
-        default_ui_manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                                          {"name": "fira_code", "size:": 14, "style": "italic"}])
+        default_ui_manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                                          {"name": "noto_sans", "size:": 14, "style": "italic"}])
         text_box = UITextEntryBox(
             initial_text="Some text in a  box not using colours and styles. Hey hey hey, what is this?"
                          "More text padding this out a little. Well OK.",
             relative_rect=pygame.Rect(100, 100, -1, 50),
             manager=default_ui_manager)
-        assert text_box.image is not None and text_box.rect.width == 984
+        assert text_box.image is not None and text_box.rect.width == 804
 
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None,
                                                  default_ui_manager: UIManager,
                                                  _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'italic'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold_italic'},
-                                          {'name': 'fira_code', 'html_size': 4, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 4, 'style': 'italic'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'html_size': 4.5, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 4.5, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'italic'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'bold_italic'},
+                                          {'name': 'noto_sans', 'html_size': 4, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 4, 'style': 'italic'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextEntryBox(initial_text=''
                                                '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
                                                '<br><br><br>'
@@ -161,17 +161,17 @@ class TestUITextEntryBox:
 
     def test_kill(self, _init_pygame: None, default_ui_manager: UIManager,
                   _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 4.5, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 4.5, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'italic'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'regular'},
-                                          {'name': 'fira_code', 'html_size': 6, 'style': 'bold_italic'},
-                                          {'name': 'fira_code', 'html_size': 4, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 4, 'style': 'italic'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold'},
-                                          {'name': 'fira_code', 'html_size': 2, 'style': 'bold_italic'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'html_size': 4.5, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 4.5, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'italic'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'regular'},
+                                          {'name': 'noto_sans', 'html_size': 6, 'style': 'bold_italic'},
+                                          {'name': 'noto_sans', 'html_size': 4, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 4, 'style': 'italic'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'bold'},
+                                          {'name': 'noto_sans', 'html_size': 2, 'style': 'bold_italic'}])
         text_box = UITextEntryBox(initial_text=''
                                                '<font color=regular_text><font color=#E784A2 size=4.5><br><b><u>Lorem</u>'
                                                '<br><br><br>'
@@ -486,11 +486,11 @@ class TestUITextEntryBox:
                                                _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_non_default.json"))
-        manager.preload_fonts([{"name": "fira_code", "point_size": 10, "style": "regular"},
-                               {'name': 'fira_code', 'point_size': 10, 'style': 'bold'},
-                               {"name": "fira_code", "point_size": 10, "style": "italic"},
-                               {"name": "fira_code", "point_size": 10, "style": "bold_italic"}])
-        htm_text_block_2 = UITextEntryBox(initial_text='<font face=fira_code size=2 color=#000000>'
+        manager.preload_fonts([{"name": "noto_sans", "point_size": 10, "style": "regular"},
+                               {'name': 'noto_sans', 'point_size': 10, 'style': 'bold'},
+                               {"name": "noto_sans", "point_size": 10, "style": "italic"},
+                               {"name": "noto_sans", "point_size": 10, "style": "bold_italic"}])
+        htm_text_block_2 = UITextEntryBox(initial_text='<font face=noto_sans size=2 color=#000000>'
                                           '<b>Hey, What the heck!</b>'
                                           '<br><br>'
                                           'This is some <a href="test">text</a> in a different box,'
@@ -564,9 +564,9 @@ class TestUITextEntryBox:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_non_default.json"))
 
-        manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                               {"name": "fira_code", "size:": 14, "style": "italic"}])
-        text_box = UITextEntryBox(initial_text="<font color=#FF0000 face=fira_code>Some "
+        manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                               {"name": "noto_sans", "size:": 14, "style": "italic"}])
+        text_box = UITextEntryBox(initial_text="<font color=#FF0000 face=noto_sans>Some "
                                                "<font color=regular_text>text</font> "
                                                "in a <b>bold box</b> <a>using</a> "
                                                "colours and <i>styles</i>.</font>",
@@ -584,10 +584,10 @@ class TestUITextEntryBox:
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes", "ui_text_box_bad_values.json"))
 
-        manager.preload_fonts([{"name": "fira_code", "size:": 14, "style": "bold"},
-                               {"name": "fira_code", "size:": 14, "style": "italic"}])
+        manager.preload_fonts([{"name": "noto_sans", "size:": 14, "style": "bold"},
+                               {"name": "noto_sans", "size:": 14, "style": "italic"}])
         text_box = UITextEntryBox(
-            initial_text="<font color=#FF0000 face=fira_code>Some text in a <b>bold box</b> using "
+            initial_text="<font color=#FF0000 face=noto_sans>Some text in a <b>bold box</b> using "
                          "colours and <i>styles</i>.</font>",
             relative_rect=pygame.Rect(100, 100, 200, 300),
             manager=manager)
@@ -1052,7 +1052,7 @@ class TestUITextEntryBox:
 
         assert processed_down_event
         assert processed_up_event
-        assert text_entry.select_range == [3, 9]
+        assert text_entry.select_range == [3, 10]
 
     def test_process_event_mouse_button_double_click(self, _init_pygame: None,
                                                      default_ui_manager: UIManager,

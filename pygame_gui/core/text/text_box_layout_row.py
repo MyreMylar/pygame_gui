@@ -197,7 +197,10 @@ class TextBoxLayoutRow(pygame.Rect):
                 aligned_right_start_x = floater.left
         self.right = aligned_right_start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
-        for item in reversed(self.items):
+        direction_list = self.items
+        if self.layout.text_direction == pygame.DIRECTION_LTR:
+            direction_list = reversed(self.items)
+        for item in direction_list:
             item.right = current_start_x
             current_start_x -= item.width
 
