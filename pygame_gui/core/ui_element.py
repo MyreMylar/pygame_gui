@@ -277,6 +277,21 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if self.ui_container is not None and not self.ui_container.visible:
             self.visible = 0
+            
+    def set_container(self, container: Union[None, IContainerLikeInterface]):
+        """
+        Switch the element to new container.
+        Remove the element from the old container and add it to the new container.
+
+        :param container: The new container to add.
+
+        """
+        if isinstance(self.ui_container, IContainerLikeInterface):
+            self.ui_container.remove_element(self)
+            
+        self._setup_container(container)
+        self._update_absolute_rect_position_from_anchors()
+        self.rebuild_from_changed_theme_data()
 
     def _setup_container(self, container):
         if container is None:
