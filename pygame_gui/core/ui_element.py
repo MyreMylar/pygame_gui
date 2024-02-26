@@ -738,12 +738,11 @@ class UIElement(GUISprite, IUIElementInterface):
         NOTE: Using this on elements inside containers with non-default anchoring arrangements
         may make a mess of them.
 
-        :param dimensions: The new dimensions to set.If it is a negative value, the element will become
+        :param dimensions: The new dimensions to set. If it is a negative value, the element will become
                             dynamically sized, otherwise it will become statically sized.
         :param clamp_to_container: Whether we should clamp the dimensions to the
                                    dimensions of the container or not.
         """
-        
         is_dynamic = False
         if dimensions[0] < 0:
             self._set_dynamic_width()
