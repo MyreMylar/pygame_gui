@@ -522,7 +522,7 @@ class UIElement(GUISprite, IUIElementInterface):
         new_width = new_right - new_left
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
-            self.set_dimensions((new_width, new_height))
+            self._set_dimensions((new_width, new_height))
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -726,56 +726,69 @@ class UIElement(GUISprite, IUIElementInterface):
                 (self.rect.height < self.minimum_dimensions[1])):
             new_width = max(self.minimum_dimensions[0], self.rect.width)
             new_height = max(self.minimum_dimensions[1], self.rect.height)
-            self.set_dimensions((new_width, new_height))
+            self._set_dimensions((new_width, new_height))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]],
                        clamp_to_container: bool = False):
         """
-        Method to directly set the dimensions of an element.
+        Method to directly set the dimensions of an element. And set whether the elements are dynamic.
 
         NOTE: Using this on elements inside containers with non-default anchoring arrangements
         may make a mess of them.
 
-        :param dimensions: The new dimensions to set.
+        :param dimensions: The new dimensions to set.If it is a negative value, the element will become
+                            dynamically sized, otherwise it will become statically sized.
         :param clamp_to_container: Whether we should clamp the dimensions to the
                                    dimensions of the container or not.
-
         """
-        dynamic_width_original = self.dynamic_width
-        dynamic_height_original = self.dynamic_height
         
         is_dynamic = False
         if dimensions[0] < 0:
             self._set_dynamic_width()
             is_dynamic = True
+        else:
+            self._set_dynamic_width(False)
+            
         if dimensions[1] < 0:
             self._set_dynamic_height()
             is_dynamic = True
+        else:
+            self._set_dynamic_height(False)
             
         if is_dynamic:
             self.rebuild()
-            
-            self._set_dynamic_width(dynamic_width_original)
-            self._set_dynamic_height(dynamic_height_original)
-        
+        else:
+            self._set_dimensions(dimensions, clamp_to_container)
+
+    def _set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
+        """
+        Method to directly set the dimensions of an element.
+        Dimensions must be positive values.
+
+        :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
+        """
         dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
-        if dimensions[0] >= 0:
-            self.relative_rect.width = int(dimensions[0])
-        if dimensions[1] >= 0:
-            self.relative_rect.height = int(dimensions[1])
+        self.relative_rect.width = int(dimensions[0])
+        self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
-        self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
+        if dimensions[0] >= 0 and dimensions[1] >= 0:
+            self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
-        if self.drawable_shape is not None:
-            if self.drawable_shape.set_dimensions(self.relative_rect.size):
-                # needed to stop resizing 'lag'
-                self._set_image(self.drawable_shape.get_fresh_surface())
+            if self.drawable_shape is not None:
+                if self.drawable_shape.set_dimensions(self.relative_rect.size):
+                    # needed to stop resizing 'lag'
+                    self._set_image(self.drawable_shape.get_fresh_surface())
 
-        self._update_container_clip()
-        self.ui_container.on_anchor_target_changed(self)
+            self._update_container_clip()
+            self.ui_container.on_anchor_target_changed(self)
 
     def update(self, time_delta: float):
         """

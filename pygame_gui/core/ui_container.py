@@ -204,8 +204,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]],
-                       clamp_to_container: bool = False
-                       ):
+                       clamp_to_container: bool = False):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.
