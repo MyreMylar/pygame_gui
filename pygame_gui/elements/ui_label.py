@@ -163,7 +163,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
 
     def _calc_dynamic_size(self):
         if self.dynamic_width or self.dynamic_height:
-            self.set_dimensions(self.image.get_size())
+            self._set_dimensions(self.image.get_size())
 
             # if we have anchored the left side of our button to the right of its container then
             # changing the width is going to mess up the horiz position as well.

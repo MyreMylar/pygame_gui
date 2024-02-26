@@ -210,6 +210,16 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _calc_dynamic_size(self):
         pass
+    
+    def _set_dynamic_width(self, is_dynamic: bool = True):
+        self.dynamic_width = is_dynamic
+        if self.drawable_shape is not None:
+            self.drawable_shape.dynamic_width = is_dynamic
+    
+    def _set_dynamic_height(self, is_dynamic: bool = True):
+        self.dynamic_height = is_dynamic
+        if self.drawable_shape is not None:
+            self.drawable_shape.dynamic_height = is_dynamic
 
     @staticmethod
     def _validate_horizontal_anchors(anchors: Dict[str, Union[str, 'UIElement']]):
@@ -550,7 +560,7 @@ class UIElement(GUISprite, IUIElementInterface):
         new_width = new_right - new_left
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
-            self.set_dimensions((new_width, new_height))
+            self._set_dimensions((new_width, new_height))
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -754,22 +764,52 @@ class UIElement(GUISprite, IUIElementInterface):
                 (self.rect.height < self.minimum_dimensions[1])):
             new_width = max(self.minimum_dimensions[0], self.rect.width)
             new_height = max(self.minimum_dimensions[1], self.rect.height)
-            self.set_dimensions((new_width, new_height))
+            self._set_dimensions((new_width, new_height))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
                                                Tuple[float, float]],
                        clamp_to_container: bool = False):
         """
-        Method to directly set the dimensions of an element.
+        Method to directly set the dimensions of an element. And set whether the elements are dynamic.
 
         NOTE: Using this on elements inside containers with non-default anchoring arrangements
         may make a mess of them.
 
+        :param dimensions: The new dimensions to set. If it is a negative value, the element will become
+                            dynamically sized, otherwise it will become statically sized.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
+        """
+        is_dynamic = False
+        if dimensions[0] < 0:
+            self._set_dynamic_width()
+            is_dynamic = True
+        else:
+            self._set_dynamic_width(False)
+            
+        if dimensions[1] < 0:
+            self._set_dynamic_height()
+            is_dynamic = True
+        else:
+            self._set_dynamic_height(False)
+            
+        if is_dynamic:
+            self.rebuild()
+        else:
+            self._set_dimensions(dimensions, clamp_to_container)
+
+    def _set_dimensions(self, dimensions: Union[pygame.math.Vector2,
+                                               Tuple[int, int],
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
+        """
+        Method to directly set the dimensions of an element.
+        Dimensions must be positive values.
+
         :param dimensions: The new dimensions to set.
         :param clamp_to_container: Whether we should clamp the dimensions to the
                                    dimensions of the container or not.
-
         """
         dimensions = self._get_clamped_to_minimum_dimensions(dimensions, clamp_to_container)
         self.relative_rect.width = int(dimensions[0])
