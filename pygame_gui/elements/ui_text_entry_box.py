@@ -4,7 +4,7 @@ from typing import Union, Tuple, Dict, Optional
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 
 from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN, TEXTINPUT
-from pygame import KMOD_SHIFT, KMOD_META, KMOD_CTRL, K_a, K_x, K_c, K_v
+from pygame import KMOD_SHIFT, KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c, K_v
 from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE, K_RETURN
 from pygame import key
 from pygame.event import Event, post
@@ -335,9 +335,9 @@ class UITextEntryBox(UITextBox):
         consumed_event = False
         # modded versions of LEFT and RIGHT must go first otherwise the simple
         # cases will absorb the events
-        if event.key == K_HOME or (event.key == K_LEFT
-            and (event.mod & KMOD_CTRL or event.mod & KMOD_META)
-            ):
+        if (event.key == K_HOME or
+                (event.key == K_LEFT and
+                 (event.mod & KMOD_CTRL or event.mod & KMOD_META))):
             try:
                 next_pos = self.edit_position - self.html_text[:self.edit_position][::-1].index("\n")
             except ValueError:
@@ -362,9 +362,9 @@ class UITextEntryBox(UITextBox):
             self.edit_position = next_pos
             self.cursor_has_moved_recently = True
             consumed_event = True
-        elif event.key == K_END or (event.key == K_RIGHT
-            and (event.mod & KMOD_CTRL or event.mod & KMOD_META)
-            ):
+        elif (event.key == K_END or
+              (event.key == K_RIGHT and
+               (event.mod & KMOD_CTRL or event.mod & KMOD_META))):
             try:
                 next_pos = self.edit_position + self.html_text[self.edit_position:].index("\n")
             except ValueError:
@@ -623,13 +623,15 @@ class UITextEntryBox(UITextBox):
         """
         consumed_event = False
         if (event.key == K_a and
-                (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters)
             self.select_range = [0, len(self.html_text)]
             self.edit_position = len(self.html_text)
             self.cursor_has_moved_recently = True
             consumed_event = True
         elif (event.key == K_x and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -643,7 +645,8 @@ class UITextEntryBox(UITextBox):
                 self.cursor_has_moved_recently = True
                 consumed_event = True
         elif (event.key == K_c and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META)):
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -663,7 +666,8 @@ class UITextEntryBox(UITextBox):
 
         """
         consumed_event = False
-        if event.key == K_v and (event.mod & KMOD_CTRL or event.mod & KMOD_META):
+        if (event.key == K_v and (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters:
             paste = clipboard_paste()
             if paste is not None:
                 new_text = self.convert_all_line_endings_to_unix(clipboard_paste())

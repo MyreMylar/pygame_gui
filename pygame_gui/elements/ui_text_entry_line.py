@@ -135,6 +135,7 @@ class UITextEntryLine(UIElement):
         self.edit_position = 0
         self._select_range = [0, 0]
         self.selection_in_progress = False
+        self.keyboard_shortcut_in_progress = False
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
@@ -413,10 +414,12 @@ class UITextEntryLine(UIElement):
         if self.is_enabled and self.is_focused and event.type == pygame.KEYDOWN:
             if self._process_keyboard_shortcut_event(event):
                 consumed_event = True
+                self.keyboard_shortcut_in_progress = True
             elif self._process_action_key_event(event):
                 consumed_event = True
 
-        if self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT:
+        if (not self.keyboard_shortcut_in_progress and
+                self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT):
             processed_any_char = False
             for char in event.text:
                 if self._process_entered_character(char):
@@ -424,6 +427,7 @@ class UITextEntryLine(UIElement):
             consumed_event = processed_any_char
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
+            self.keyboard_shortcut_in_progress = False
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 self.text_entered = False  # reset text input entry
 
@@ -715,14 +719,16 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if (event.key == pygame.K_a and
-                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)):
+                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters):
             self.select_range = [0, len(self.text)]
             self.edit_position = len(self.text)
             self.cursor_has_moved_recently = True
             consumed_event = True
         elif (event.key == pygame.K_x and
               (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden):
+              not self.is_text_hidden and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -740,7 +746,8 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
         elif (event.key == pygame.K_c and
               (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden):
+              not self.is_text_hidden and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -760,7 +767,9 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_v and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META):
+        if (event.key == pygame.K_v and
+                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
             new_text = clipboard_paste()
             if self.validate_text_string(new_text):
                 if abs(self.select_range[0] - self.select_range[1]) > 0:
