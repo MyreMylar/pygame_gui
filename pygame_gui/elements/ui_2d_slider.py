@@ -19,7 +19,7 @@ class UI2DSlider(UIElement):
     :param value_range_x: The full range of x values.
     :param start_value_y: The y value to start the slider at.
     :param value_range_y: The full range of y values.
-    :param invert_y_value: Should the y increase from bottom to top instead of the other way round?
+    :param invert_y: Should the y increase from bottom to top instead of the other way round?
     :param manager: The UIManager that manages this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root
@@ -37,7 +37,7 @@ class UI2DSlider(UIElement):
                  value_range_x: Tuple[Union[float, int], Union[float, int]],
                  start_value_y: Union[float, int],
                  value_range_y: Tuple[Union[float, int], Union[float, int]],
-                 invert_y_value: bool = True,
+                 invert_y: bool = True,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  starting_height: int = 1,
@@ -66,7 +66,7 @@ class UI2DSlider(UIElement):
         self.top_limit_position = 0.0
         self.starting_grab_difference = 0
 
-        self.invert_y_value = invert_y_value
+        self.invert_y = invert_y
 
         if all([isinstance(n, int) for n in [start_value_x, *value_range_x, start_value_y, *value_range_y]]):
             self.use_integers_for_value = True
@@ -113,6 +113,8 @@ class UI2DSlider(UIElement):
 
         self.button_container = None
 
+        self.rebuild_from_changed_theme_data()
+
         sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
         sliding_y_pos = int(self.background_rect.height / 2 - self.sliding_button_width / 2)
         self.sliding_button = UIButton(pygame.Rect((sliding_x_pos, sliding_y_pos),
@@ -134,8 +136,6 @@ class UI2DSlider(UIElement):
         self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
 
         self.set_current_value(start_value_x, start_value_y)
-
-        self.rebuild_from_changed_theme_data()
 
     def rebuild(self):
         """
@@ -183,9 +183,9 @@ class UI2DSlider(UIElement):
         self.scroll_position = pygame.Vector2(self.scrollable_width / 2, self.scrollable_height / 2)
 
         if self.sliding_button is not None:
-            sliding_x_pos = int((self.background_rect.width / 2) - (self.sliding_button_width / 2))
-            sliding_y_pos = int((self.background_rect.height / 2) - (self.sliding_button_width / 2))
-            self.sliding_button.set_relative_position((sliding_x_pos, sliding_y_pos))
+            # sliding_x_pos = int((self.background_rect.width / 2) - (self.sliding_button_width / 2))
+            # sliding_y_pos = int((self.background_rect.height / 2) - (self.sliding_button_width / 2))
+            # self.sliding_button.set_relative_position((sliding_x_pos, sliding_y_pos))
             self.sliding_button.set_dimensions((self.sliding_button_width,
                                                 self.sliding_button_width))
             self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
@@ -242,7 +242,11 @@ class UI2DSlider(UIElement):
             self.current_x_value = self.value_range_x[0] + (self.current_x_percentage *
                                                             (self.value_range_x[1] - self.value_range_x[0]))
 
-            self.current_y_percentage = self.scroll_position.y / self.scrollable_height
+            if self.invert_y:
+                # Scroll position is inverted, so invert it again to get actual percentage
+                self.current_y_percentage = (self.scrollable_height - self.scroll_position.y) / self.scrollable_height
+            else:
+                self.current_y_percentage = self.scroll_position.y / self.scrollable_height
             self.current_y_value = self.value_range_y[0] + (self.current_y_percentage *
                                                             (self.value_range_y[1] - self.value_range_y[0]))
             if self.use_integers_for_value:
@@ -277,7 +281,7 @@ class UI2DSlider(UIElement):
         """
         self.has_moved_recently = False
         self.has_been_moved_by_user_recently = False
-        return self.current_x_value, self.value_range_y[1] - self.current_y_value
+        return self.current_x_value, self.current_y_value
 
     def set_current_value(self, value_x: Union[float, int], value_y: Union[float, int], warn: bool = True) -> None:
         """
@@ -288,6 +292,7 @@ class UI2DSlider(UIElement):
         :param value_y: The y value to set.
         :param warn: set to false in order to suppress the default warning,
                      instead the value will be clamped.
+        :param: invert_y: Should the y value be inverted? If not passed then will use self.invert_value for this info.
         :return: None
         """
         if self.use_integers_for_value:
@@ -309,9 +314,6 @@ class UI2DSlider(UIElement):
         min_y_value = min(self.value_range_y[0], self.value_range_y[1])
         max_y_value = max(self.value_range_y[0], self.value_range_y[1])
 
-        if self.invert_y_value:
-            value_y = max_y_value - value_y
-
         if value_y < min_y_value or value_y > max_y_value:
             if warn:
                 warnings.warn("y value not in range", UserWarning)
@@ -329,8 +331,15 @@ class UI2DSlider(UIElement):
                                          self.value_range_x[0]) / value_x_range_size
             self.current_y_percentage = (float(self.current_y_value) -
                                          self.value_range_y[0]) / value_y_range_size
+
+            # Invert the position at which the slider should be
+            if self.invert_y:
+                height = self.scrollable_height * (1 - self.current_y_percentage)
+            else:
+                height = self.scrollable_height * self.current_y_percentage
+
             self.scroll_position = (self.scrollable_width * self.current_x_percentage,
-                                    self.scrollable_height * self.current_y_percentage)
+                                    height)
 
             self.sliding_button.set_relative_position(self.scroll_position)
             self.has_moved_recently = True
