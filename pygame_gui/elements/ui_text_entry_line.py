@@ -135,7 +135,6 @@ class UITextEntryLine(UIElement):
         self.edit_position = 0
         self._select_range = [0, 0]
         self.selection_in_progress = False
-        self.keyboard_shortcut_in_progress = False
 
         self.cursor_on = False
         self.cursor_has_moved_recently = False
@@ -414,20 +413,23 @@ class UITextEntryLine(UIElement):
         if self.is_enabled and self.is_focused and event.type == pygame.KEYDOWN:
             if self._process_keyboard_shortcut_event(event):
                 consumed_event = True
-                self.keyboard_shortcut_in_progress = True
             elif self._process_action_key_event(event):
                 consumed_event = True
 
-        if (not self.keyboard_shortcut_in_progress and
-                self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT):
-            processed_any_char = False
-            for char in event.text:
-                if self._process_entered_character(char):
-                    processed_any_char = True
-            consumed_event = processed_any_char
+        if self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT:
+            # sometimes we don't get a keydown event for a paste shortcut on mac (?)
+            key_mods = pygame.key.get_mods()
+            if event.text == "v" and ((key_mods & pygame.KMOD_CTRL) or (key_mods & pygame.KMOD_META)):
+                self._do_paste()
+                consumed_event = True
+            else:
+                processed_any_char = False
+                for char in event.text:
+                    if self._process_entered_character(char):
+                        processed_any_char = True
+                consumed_event = processed_any_char
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
-            self.keyboard_shortcut_in_progress = False
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 self.text_entered = False  # reset text input entry
 
@@ -770,54 +772,57 @@ class UITextEntryLine(UIElement):
         if (event.key == pygame.K_v and
                 (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
                 not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
-            new_text = clipboard_paste()
-            if self.validate_text_string(new_text):
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    final_text = self.text[:low_end] + new_text + self.text[high_end:]
-                    within_length_limit = True
-                    if self.length_limit is not None and len(final_text) > self.length_limit:
-                        within_length_limit = False
-                    if within_length_limit:
-                        self.text = final_text
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.delete_selected_text()
-                            self.drawable_shape.apply_active_text_changes()
-                        display_new_text = new_text
-                        if self.is_text_hidden:
-                            display_new_text = self.hidden_text_char * len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.insert_text(display_new_text, low_end)
-                        self.edit_position = low_end + len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.set_cursor_position(
-                                self.edit_position)
-                            self.drawable_shape.apply_active_text_changes()
-                        self.select_range = [0, 0]
-                        self.cursor_has_moved_recently = True
-                elif len(new_text) > 0:
-                    final_text = (self.text[:self.edit_position] +
-                                  new_text +
-                                  self.text[self.edit_position:])
-                    within_length_limit = True
-                    if self.length_limit is not None and len(final_text) > self.length_limit:
-                        within_length_limit = False
-                    if within_length_limit:
-                        self.text = final_text
-                        display_new_text = new_text
-                        if self.is_text_hidden:
-                            display_new_text = self.hidden_text_char * len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.insert_text(display_new_text, self.edit_position)
-                        self.edit_position += len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.set_cursor_position(
-                                self.edit_position)
-                            self.drawable_shape.apply_active_text_changes()
-                        self.cursor_has_moved_recently = True
-                consumed_event = True
+            self._do_paste()
+            consumed_event = True
         return consumed_event
+
+    def _do_paste(self):
+        new_text = clipboard_paste()
+        if self.validate_text_string(new_text):
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                final_text = self.text[:low_end] + new_text + self.text[high_end:]
+                within_length_limit = True
+                if self.length_limit is not None and len(final_text) > self.length_limit:
+                    within_length_limit = False
+                if within_length_limit:
+                    self.text = final_text
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.delete_selected_text()
+                        self.drawable_shape.apply_active_text_changes()
+                    display_new_text = new_text
+                    if self.is_text_hidden:
+                        display_new_text = self.hidden_text_char * len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.insert_text(display_new_text, low_end)
+                    self.edit_position = low_end + len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.set_cursor_position(
+                            self.edit_position)
+                        self.drawable_shape.apply_active_text_changes()
+                    self.select_range = [0, 0]
+                    self.cursor_has_moved_recently = True
+            elif len(new_text) > 0:
+                final_text = (self.text[:self.edit_position] +
+                              new_text +
+                              self.text[self.edit_position:])
+                within_length_limit = True
+                if self.length_limit is not None and len(final_text) > self.length_limit:
+                    within_length_limit = False
+                if within_length_limit:
+                    self.text = final_text
+                    display_new_text = new_text
+                    if self.is_text_hidden:
+                        display_new_text = self.hidden_text_char * len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.insert_text(display_new_text, self.edit_position)
+                    self.edit_position += len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.set_cursor_position(
+                            self.edit_position)
+                        self.drawable_shape.apply_active_text_changes()
+                    self.cursor_has_moved_recently = True
 
     def _process_mouse_button_event(self, event: pygame.event.Event) -> bool:
         """

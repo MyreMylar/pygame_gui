@@ -241,11 +241,16 @@ class UITextEntryBox(UITextBox):
                 consumed_event = True
 
         if self.is_enabled and self.is_focused and event.type == TEXTINPUT:
-            processed_any_char = False
-            for char in event.text:
-                if self._process_entered_character(char):
-                    processed_any_char = True
-            consumed_event = processed_any_char
+            key_mods = key.get_mods()
+            if event.text == "v" and ((key_mods & KMOD_CTRL) or (key_mods & KMOD_META)):
+                self._do_paste()
+                consumed_event = True
+            else:
+                processed_any_char = False
+                for char in event.text:
+                    if self._process_entered_character(char):
+                        processed_any_char = True
+                consumed_event = processed_any_char
 
         if self.html_text != initial_text_state:
             # new event
@@ -454,14 +459,14 @@ class UITextEntryBox(UITextBox):
                 if self.edit_position == self.select_range[1]:
                     # try to extend to the right
                     self.select_range = [self.select_range[0],
-                                                 min(len(self.html_text), new_pos)]
+                                         min(len(self.html_text), new_pos)]
                 elif self.edit_position == self.select_range[0]:
                     # reduce to the right
                     self.select_range = [min(len(self.html_text), new_pos),
-                                                 self.select_range[1]]
+                                         self.select_range[1]]
             else:
                 self.select_range = [self.edit_position, min(len(self.html_text),
-                                                                     new_pos)]
+                                                             new_pos)]
             if self.edit_position < len(self.html_text):
                 self.edit_position = new_pos
                 self.cursor_has_moved_recently = True
@@ -631,7 +636,7 @@ class UITextEntryBox(UITextBox):
             consumed_event = True
         elif (event.key == K_x and
               (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):
+              not (event.mod & KMOD_ALT)):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -646,7 +651,7 @@ class UITextEntryBox(UITextBox):
                 consumed_event = True
         elif (event.key == K_c and
               (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):
+              not (event.mod & KMOD_ALT)):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -668,32 +673,35 @@ class UITextEntryBox(UITextBox):
         consumed_event = False
         if (event.key == K_v and (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
                 not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters:
-            paste = clipboard_paste()
-            if paste is not None:
-                new_text = self.convert_all_line_endings_to_unix(clipboard_paste())
-
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    self.html_text = self.html_text[:low_end] + new_text + self.html_text[high_end:]
-                    self.set_text(self.html_text)
-                    self.edit_position = low_end + len(new_text)
-                    self.text_box_layout.set_cursor_position(self.edit_position)
-                    self.redraw_from_text_block()
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-                elif len(new_text) > 0:
-                    self.html_text = (self.html_text[:self.edit_position] +
-                                      new_text +
-                                      self.html_text[self.edit_position:])
-                    original_edit_pos = self.edit_position
-                    self.set_text(self.html_text)
-                    self.edit_position = original_edit_pos + len(new_text)
-                    self.text_box_layout.set_cursor_position(self.edit_position)
-                    self.redraw_from_text_block()
-                    self.cursor_has_moved_recently = True
+            self._do_paste()
             consumed_event = True
         return consumed_event
+
+    def _do_paste(self):
+        paste = clipboard_paste()
+        if paste is not None:
+            new_text = self.convert_all_line_endings_to_unix(clipboard_paste())
+
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                self.html_text = self.html_text[:low_end] + new_text + self.html_text[high_end:]
+                self.set_text(self.html_text)
+                self.edit_position = low_end + len(new_text)
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.redraw_from_text_block()
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif len(new_text) > 0:
+                self.html_text = (self.html_text[:self.edit_position] +
+                                  new_text +
+                                  self.html_text[self.edit_position:])
+                original_edit_pos = self.edit_position
+                self.set_text(self.html_text)
+                self.edit_position = original_edit_pos + len(new_text)
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.redraw_from_text_block()
+                self.cursor_has_moved_recently = True
 
     def _calculate_double_click_word_selection(self):
         """
