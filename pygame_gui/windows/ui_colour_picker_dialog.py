@@ -410,6 +410,26 @@ class UIColourPickerDialog(UIWindow):
 
         self.update_colour_2d_slider()
 
+    def get_colour(self) -> pygame.Color:
+        """
+        Get the current colour
+        :return:
+        """
+        return self.current_colour
+
+    def set_colour(self, colour: pygame.Color) -> None:
+        """
+        Set the current colour and update all the necessary elements
+        :param colour: The colour to set
+        :return: None
+        """
+        self.current_colour = colour
+        self.changed_hsv_update_rgb()
+        self.changed_rgb_update_hsv()
+        self.update_current_colour_image()
+        self.update_saturation_value_square()
+        self.update_colour_2d_slider()
+
     def _setup_channels(self, default_sizes):
         # Set up the channels, possibly we can make this into a
         # slimmer method called with just the bits that change like names, position and value range.
