@@ -137,22 +137,22 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
-        
+
         element_ids = element_id
         element_id = None
         base_id = None
         if element_ids is not None:
             if len(element_ids) >= 1:
                 element_id = element_ids[0]
-            
+
             if len(element_ids) >= 2:
                 base_id = element_ids[1]
-        
+
             self._create_valid_ids(container=container,
-                                    parent_element=parent_element,
-                                    object_id=object_id,
-                                    element_id=element_id,
-                                    element_base_id=base_id)
+                                   parent_element=parent_element,
+                                   object_id=object_id,
+                                   element_id=element_id,
+                                   element_base_id=base_id)
 
     def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
         if self.ui_container is not None and clamp_to_container:
