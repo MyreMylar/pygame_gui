@@ -47,6 +47,10 @@ class UI2DSlider(UIElement):
                  visible: int = 1
                  ):
 
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor
+        self.sliding_button = None
+        self.button_container = None
         super().__init__(relative_rect, manager, container,
                          layer_thickness=2,
                          starting_height=starting_height,
@@ -183,9 +187,6 @@ class UI2DSlider(UIElement):
         self.scroll_position = pygame.Vector2(self.scrollable_width / 2, self.scrollable_height / 2)
 
         if self.sliding_button is not None:
-            # sliding_x_pos = int((self.background_rect.width / 2) - (self.sliding_button_width / 2))
-            # sliding_y_pos = int((self.background_rect.height / 2) - (self.sliding_button_width / 2))
-            # self.sliding_button.set_relative_position((sliding_x_pos, sliding_y_pos))
             self.sliding_button.set_dimensions((self.sliding_button_width,
                                                 self.sliding_button_width))
             self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
@@ -398,9 +399,7 @@ class UI2DSlider(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]]) -> None:
+    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> None:
         """
         Sets the absolute screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -416,9 +415,7 @@ class UI2DSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-    Tuple[int, int],
-    Tuple[float, float]]) -> None:
+    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> None:
         """
         Sets the relative screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -487,7 +484,8 @@ class UI2DSlider(UIElement):
         """
         super().show()
 
-        self.sliding_button.show()
+        if self.sliding_button is not None:
+            self.sliding_button.show()
         if self.button_container is not None:
             self.button_container.show()
 
@@ -498,6 +496,7 @@ class UI2DSlider(UIElement):
         """
         super().hide()
 
-        self.sliding_button.hide()
+        if self.sliding_button is not None:
+            self.sliding_button.hide()
         if self.button_container is not None:
             self.button_container.hide()

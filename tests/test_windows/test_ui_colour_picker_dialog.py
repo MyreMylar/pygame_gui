@@ -386,9 +386,9 @@ class TestUIColourPickerDialog:
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
-                                                              'pos': colour_picker.sat_value_square.rect.center}
+                                                              'pos': colour_picker.sat_value_square.rect.bottomright}
                                                              ))
-        assert colour_picker.current_colour == pygame.Color(127, 63, 63, 255)
+        assert colour_picker.current_colour == pygame.Color(255, 255, 255, 255)
 
         colour_picker.hue_channel.current_value = 150
         colour_picker.update_saturation_value_square()
