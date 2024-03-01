@@ -201,7 +201,7 @@ class UIAutoResizingContainer(UIContainer):
 
     def update_containing_rect_position(self) -> None:
         """
-        Overriden to also recalculate the absolute rects which control the minimum and maximum sizes of the container
+        Overridden to also recalculate the absolute rects which control the minimum and maximum sizes of the container
 
         :return: None
         """
