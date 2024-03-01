@@ -59,13 +59,20 @@ class UIAutoScrollingContainer(UIScrollingContainer):
         resize_top: bool = True
         resize_bottom: bool = True
 
+        anchors = {"left": "left",
+                   "right": "left",
+                   "top": "top",
+                   "bottom": "top"}
+
         if not self.allow_scroll_x:
             resize_left = False
             resize_right = False
+            anchors["right"] = "right"
 
         if not self.allow_scroll_y:
             resize_top = False
             resize_bottom = False
+            anchors["bottom"] = "bottom"
 
         self.scrollable_container.kill()
         scrollable_rect = pygame.Rect(0, 0, relative_rect.width, relative_rect.height)
@@ -81,10 +88,7 @@ class UIAutoScrollingContainer(UIScrollingContainer):
                                                             object_id=ObjectID(
                                                                 object_id="#scrollable_container",
                                                                 class_id=None),
-                                                            anchors={"left": "left",
-                                                                     "right": "left",
-                                                                     "top": "top",
-                                                                     "bottom": "top"})
+                                                            anchors=anchors)
 
     def update(self, time_delta: float):
         """
