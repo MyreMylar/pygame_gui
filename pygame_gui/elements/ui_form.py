@@ -12,6 +12,16 @@ from ast import literal_eval
 from typing import *
 
 
+class InputField(NamedTuple):
+    """
+    This NamedTuple is used within parsed questionnaires to store elements which take input, which were created from
+    default types supported by UIForm, like short_text, long_text etc.
+    """
+    question_type: str
+    label: UILabel
+    element: Union[UITextEntryLine, UITextEntryBox, UIDropDownMenu]
+
+
 class UISection(UIAutoResizingContainer):
     """
     A Section is a part of the UIForm which can contain questions or more sections. This behaviour is used to create
@@ -21,7 +31,7 @@ class UISection(UIAutoResizingContainer):
     automatically by the section. Therefore, any height passed in will have no effect on the section.
     :param form: The UIForm element this section belongs to
     :param name: The name of the section.
-    :param sub_questionnaire: The section in the main questionnaire to handle.
+    :param questionnaire: The section in the main questionnaire to handle.
     :param manager: The UI manager for this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param starting_height: The starting layer height of this container above its container.
@@ -40,7 +50,7 @@ class UISection(UIAutoResizingContainer):
                  relative_rect: pygame.Rect,
                  form: "UIForm",
                  name: str,
-                 sub_questionnaire: Mapping[str, Union[str, Mapping]],
+                 questionnaire: Mapping[str, Union[str, Mapping]],
                  manager: Optional[IUIManagerInterface] = None,
                  *,
                  starting_height: int = 1,
@@ -50,9 +60,9 @@ class UISection(UIAutoResizingContainer):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
         super().__init__(relative_rect,
-                         # resize_left=False,
-                         # resize_right=False,
-                         # resize_top=False,
+                         resize_left=False,
+                         resize_right=False,
+                         resize_top=False,
                          manager=manager,
                          starting_height=starting_height,
                          container=container,
@@ -61,8 +71,32 @@ class UISection(UIAutoResizingContainer):
                          anchors=anchors,
                          visible=visible)
 
+        self._create_valid_ids(container=container,
+                               parent_element=parent_element,
+                               object_id=object_id,
+                               element_id="section")
+
         self.form = form
         self.name = name
+
+        self.background_colour = None
+        self.border_colour = None
+        self.background_image = None
+        self.border_width = 1
+        self.shadow_width = 2
+        self.padding = (5, 5)
+
+        self.label_height = 30
+        self.section_label_height = 30
+        self.field_height = 40
+        self.large_field_height = 80
+        self.gap = 10
+        self.label_gap = 0
+        self.section_gap = 15
+        self.section_indent = 5
+
+        self.shape = "rectangle"
+        self.shape_corner_radius = 0
 
         anchors = {"left": "left", "right": "right", "top": "top"}
 
@@ -72,7 +106,7 @@ class UISection(UIAutoResizingContainer):
                                            manager=manager,
                                            container=self,
                                            parent_element=parent_element,
-                                           object_id=ObjectID("#expand_section", None),
+                                           object_id=ObjectID("#expand_section_button", None),
                                            anchors=anchors.copy())
 
         self.should_transition = False  # Should the section container switch from shown/hidden to the other state?
@@ -82,7 +116,7 @@ class UISection(UIAutoResizingContainer):
         # Container for the rest of the section
         self.section_container = UIAutoResizingContainer(pygame.Rect(0, 0, self.relative_rect.width, 0),
                                                          # resize_left=False,
-                                                         # resize_right=False,
+                                                         resize_right=False,
                                                          # resize_top=False,
                                                          # resize_bottom=True,
                                                          manager=manager,
@@ -91,9 +125,11 @@ class UISection(UIAutoResizingContainer):
                                                          object_id=ObjectID("#inner_section_container", None),
                                                          anchors=anchors.copy()
                                                          )
-        self.sub_questionnaire = sub_questionnaire
-        self.parsed_sub_questionnaire = {}
+        self.questionnaire = questionnaire
+        self.parsed_questionnaire = {}
         self.parse_section()
+
+        self.rebuild_from_changed_theme_data()
 
     def parse_section(self) -> None:
         """
@@ -103,22 +139,17 @@ class UISection(UIAutoResizingContainer):
         :return: None
         """
 
-        rel_rect = pygame.Rect(self.form.section_indent,
-                               self.form.padding[1],
-                               self.relative_rect.width - self.form.section_indent,
-                               self.form.field_height)
-
         # Main Expand Button
 
-        rect = rel_rect.copy()
-        self.main_expand_button.set_dimensions((rect.width, self.form.label_height))
-        self.main_expand_button.set_relative_position((rect.left, 0))
+        size = (self.relative_rect.width - 2 * self.padding[0], self.section_label_height)
+        self.main_expand_button.set_dimensions(size)
+        self.main_expand_button.set_relative_position((self.padding[0], 0))
 
         anchors = {"left": "left", "right": "right", "top": "top"}
 
-        self.parsed_sub_questionnaire = self.form.get_parsed_questionnaire(self.form, self.sub_questionnaire, rel_rect,
-                                                                           self.ui_manager, self.section_container,
-                                                                           self, anchors)
+        self.parsed_questionnaire = self.form.get_parsed_questionnaire(self, self.questionnaire,
+                                                                       self.ui_manager, self.section_container,
+                                                                       self, anchors)
 
     def update(self, time_delta: float) -> None:
         """
@@ -146,6 +177,128 @@ class UISection(UIAutoResizingContainer):
             self.should_transition = False
 
         super().update(time_delta)
+
+    def rebuild_from_changed_theme_data(self) -> None:
+        """
+        Called by the UIManager to check the theming data and rebuild whatever needs rebuilding
+        for this element when the theme data has changed.
+
+        :return: None
+        """
+        super().rebuild_from_changed_theme_data()
+        has_any_changed = False
+
+        background_colour = self.ui_theme.get_colour_or_gradient("dark_bg",
+                                                                 self.combined_element_ids)
+        if background_colour != self.background_colour:
+            self.background_colour = background_colour
+            has_any_changed = True
+
+        border_colour = self.ui_theme.get_colour_or_gradient("normal_border",
+                                                             self.combined_element_ids)
+        if border_colour != self.border_colour:
+            self.border_colour = border_colour
+            has_any_changed = True
+
+        # misc
+        if self._check_misc_theme_data_changed(attribute_name="shape",
+                                               default_value="rectangle",
+                                               casting_func=str,
+                                               allowed_values=["rectangle",
+                                                               "rounded_rectangle"]):
+            has_any_changed = True
+
+        if self._check_shape_theming_changed(defaults={"border_width": 1,
+                                                       "shadow_width": 2,
+                                                       "shape_corner_radius": 2}):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="padding",
+                                               default_value=(5, 5),
+                                               casting_func=self.tuple_extract):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="label_height",
+                                               default_value=30,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="section_label_height",
+                                               default_value=30,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="field_height",
+                                               default_value=40,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="large_field_height",
+                                               default_value=80,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="gap",
+                                               default_value=10,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="label_gap",
+                                               default_value=0,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="section_gap",
+                                               default_value=15,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="section_indent",
+                                               default_value=5,
+                                               casting_func=int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name="submit_button_horiz_alignment",
+                                               default_value="right",
+                                               casting_func=str,
+                                               allowed_values=["left",
+                                                               "center",
+                                                               "right"]):
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+
+    def rebuild(self) -> None:
+        """
+        A complete rebuild of the drawable shape used by this element.
+
+        :return: None
+        """
+
+        super().rebuild()
+
+        self.form.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
+
+        size = (self.relative_rect.width - 2 * self.padding[0], self.section_label_height)
+        self.main_expand_button.set_dimensions(size)
+        self.main_expand_button.set_relative_position((self.padding[0], 0))
+
+        theming_parameters = {"normal_bg": self.background_colour,
+                              "normal_border": self.border_colour,
+                              "normal_image": self.background_image,
+                              "border_width": self.border_width,
+                              "shadow_width": self.shadow_width,
+                              "shape_corner_radius": self.shape_corner_radius}
+
+        if self.shape == "rectangle":
+            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
+                                                    ["normal"], self.ui_manager)
+        elif self.shape == "rounded_rectangle":
+            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
+                                                        ["normal"], self.ui_manager)
+
+        self.on_fresh_drawable_shape_ready()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -275,7 +428,7 @@ class UIForm(UIAutoScrollingContainer):
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.padding = (5, 5)
+        self.padding = (5, 5)  # TODO: Implement vertical padding from the bottom
 
         self.label_height = 30
         self.field_height = 40
@@ -296,11 +449,14 @@ class UIForm(UIAutoScrollingContainer):
         self.submit_button = UIButton(pygame.Rect(0, 0, -1, self.field_height),
                                       text="Submit",
                                       manager=manager,
-                                      container=self.scrollable_container,
+                                      container=self,
                                       parent_element=parent_element,
-                                      object_id=ObjectID("#submit", None))
+                                      object_id=ObjectID("#submit_button", None))
 
         self.parse_form()
+
+        self.rebuild_from_changed_theme_data()
+        self.vert_scroll_bar.rebuild()
 
     def _get_current_values(self, dic: Mapping[str, Union[IUIElementInterface, Mapping]]) -> Dict:
         """
@@ -316,7 +472,7 @@ class UIForm(UIAutoScrollingContainer):
                 value = value[1]  # This is because it includes both the label and the actual element we want.
 
             if isinstance(value, UISection):
-                value_dic[key] = self._get_current_values(value.parsed_sub_questionnaire)
+                value_dic[key] = self._get_current_values(value.parsed_questionnaire)
 
             elif isinstance(value, IUIElementInterface):
 
@@ -356,27 +512,38 @@ class UIForm(UIAutoScrollingContainer):
         return self._get_current_values(self.parsed_questionnaire)
 
     @staticmethod
-    def get_parsed_questionnaire(form: "UIForm", questionnaire: Mapping[str, Union[str, Mapping]],
-                                 relative_rect: pygame.Rect, manager: IUIManagerInterface,
+    def get_parsed_questionnaire(element: Union["UIForm", UISection], questionnaire: Mapping[str, Union[str, Mapping]],
+                                 manager: IUIManagerInterface,
                                  container: IContainerLikeInterface, parent_element: UIElement,
                                  anchors: Dict[str, Union[str, UIElement]]) -> \
-            Dict[str, Union[UISection, List[IUIElementInterface], IUIElementInterface]]:
+            Dict[str, Union[UISection, InputField, IUIElementInterface]]:
         """
         This function is used by UIForm.parse_questionnaire to recursively create the ui elements to gather input based
         on the questionnaire passed. This prevents duplication of code as UISection elements created also call this
         function
 
-        :param form: The form the questionnaire belongs to
+        :param element: The element the questionnaire belongs to. Used for theming
         :param questionnaire: The dict representing the questionnaire to parse
-        :param relative_rect: The rect representing the area available for elements
         :param manager: The UIManager which will handle the elements
         :param container: The container which should contain the elements
         :param parent_element: The parent element
         :param anchors: The starting anchors of the elements
         :return: The parsed questionnaire
         """
-        rel_rect = relative_rect.copy()
         parsed_questionnaire = {}
+
+        form = element if isinstance(element, UIForm) else element.form
+        label_height = element.label_height
+        field_height = element.field_height
+        large_field_height = element.large_field_height
+        gap = element.gap
+        label_gap = element.label_gap
+        section_gap = element.section_gap
+        section_indent = element.section_indent
+
+        rel_rect = pygame.Rect(*element.padding,
+                               element.relative_rect.width - 2 * element.padding[0],
+                               field_height)
 
         for key, value in questionnaire.items():
 
@@ -389,12 +556,12 @@ class UIForm(UIAutoScrollingContainer):
             if isinstance(value, Mapping):
                 # Create Section
 
-                parsed_questionnaire[key] = UISection(form=form,
-                                                      name=key,
-                                                      sub_questionnaire=value,
-                                                      object_id=ObjectID(f"#{key.lower()}", "@form_section"),
+                param_dict["relative_rect"].width -= section_indent
+                param_dict["relative_rect"].x += section_indent
+                parsed_questionnaire[key] = UISection(form=form, name=key, questionnaire=value,
+                                                      object_id=ObjectID(f"#{key.lower()}", None),
                                                       **param_dict)
-                rel_rect.y = form.section_gap
+                rel_rect.y = section_gap
 
             elif isinstance(value, str):
                 # Parse supported types to appropriate UIElements. Could use a separate function for this in the future
@@ -411,15 +578,23 @@ class UIForm(UIAutoScrollingContainer):
 
                 # Two elements are created, a label and the actual UIElement needed for input
 
-                param_dict["relative_rect"].width = -1  # Dynamic widths were not working for some reason
-                param_dict["relative_rect"].height = form.label_height
+                param_dict["relative_rect"].width = -1
+                param_dict["relative_rect"].height = label_height
+
+                # This is to prevent labels from resizing and becoming too small to hold their text
+                right = param_dict["anchors"].pop("right", None)
+                right_target = param_dict["anchors"].pop("right_target", None)
 
                 label = UILabel(text=key, object_id=ObjectID(f"#{key.lower()}", "@form_label"), **param_dict)
 
                 param_dict["anchors"]["top_target"] = label
+                if right:
+                    param_dict["anchors"]["right"] = right
+                if right_target:
+                    param_dict["anchors"]["right_target"] = right_target
                 param_dict["relative_rect"] = rel_rect.copy()
-                param_dict["relative_rect"].y = form.label_gap
-                param_dict["relative_rect"].height = form.field_height
+                param_dict["relative_rect"].y = label_gap
+                param_dict["relative_rect"].height = field_height
                 param_dict["object_id"] = ObjectID(f"#{key.lower()}", "@form_field")
 
                 element = None
@@ -432,7 +607,7 @@ class UIForm(UIAutoScrollingContainer):
                     element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
 
                 elif type_name == "long_text":
-                    param_dict["relative_rect"].height = form.large_field_height
+                    param_dict["relative_rect"].height = large_field_height
                     element = UITextEntryBox(initial_text=args.get("default", ""), **param_dict)
 
                 elif type_name == "integer":
@@ -447,20 +622,24 @@ class UIForm(UIAutoScrollingContainer):
                     element = UIDropDownMenu(options_list=["True", "False"],
                                              starting_option=args.get("default", "True"),
                                              **param_dict)
-                rel_rect.y = form.gap
-                parsed_questionnaire[key] = [label, element]
+                rel_rect.y = gap
+                parsed_questionnaire[key] = InputField(type_name, label, element)
                 anchors["top_target"] = element
                 continue
 
             elif isinstance(value, IUIElementInterface):
 
-                # TODO: Test adding IUIElementInterface as a questionnaire element
-                value.anchors = anchors.copy()
+                value.ui_container.remove_element(value)
+                container = param_dict["container"].get_container()
+                container.add_element(value)
+                value.ui_container = container
+
+                value.set_anchors(anchors)
                 rect = rel_rect.copy()
                 value.set_dimensions((rect.width, rect.height))
                 value.set_relative_position(rect.topleft)
 
-                rel_rect.y = form.gap
+                rel_rect.y = gap
                 parsed_questionnaire[key] = value
 
             anchors["top_target"] = parsed_questionnaire[key]
@@ -476,20 +655,16 @@ class UIForm(UIAutoScrollingContainer):
         """
 
         self.validate_questionnaire(self.questionnaire, raise_error=True)
-        rel_rect = pygame.Rect(self.padding[0],
-                               self.padding[1],
-                               self.scrollable_container.relative_rect.width - 2 * self.padding[0],
-                               self.field_height)
 
-        anchors = {"left": "left", "right": "right", "top": "top"}
+        anchors = {"left": "left", "right": "right", "top": "top", "right_target": self.vert_scroll_bar}
 
-        self.parsed_questionnaire = self.get_parsed_questionnaire(self, self.questionnaire, rel_rect, self.ui_manager,
+        self.parsed_questionnaire = self.get_parsed_questionnaire(self, self.questionnaire, self.ui_manager,
                                                                   self.scrollable_container, self, anchors)
 
         # Submit Button
 
         self.submit_button.anchors["top_target"] = anchors["top_target"]
-        self.submit_button.relative_rect.y = rel_rect.y
+        self.submit_button.relative_rect.y = self.gap
         self.rebuild_submit_button()
 
     def rebuild_from_changed_theme_data(self) -> None:
@@ -533,7 +708,7 @@ class UIForm(UIAutoScrollingContainer):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name="label_height",
-                                               default_value=20,
+                                               default_value=30,
                                                casting_func=int):
             has_any_changed = True
 
@@ -578,6 +753,99 @@ class UIForm(UIAutoScrollingContainer):
         if has_any_changed:
             self.rebuild()
 
+    @staticmethod
+    def rebuild_parsed_questionnaire(element: Union["UIForm", UISection],
+                                     questionnaire: Mapping[str, Union[str, Mapping]]) -> None:
+
+        """
+        Called by UIForm.rebuild() to rebuild the elements of the form when theming elements like gaps between elements,
+        indentation of the sections, etc. change.
+
+        :param element: The element whose questionnaire to rebuild.
+        :param questionnaire: The dict representing the parsed_questionnaire to rebuild
+        :return: None
+        """
+
+        label_height = element.label_height
+        field_height = element.field_height
+        large_field_height = element.large_field_height
+        gap = element.gap
+        label_gap = element.label_gap
+        section_gap = element.section_gap
+        section_indent = element.section_indent
+
+        relative_rect = pygame.Rect(*element.padding,
+                                    element.relative_rect.width - 2 * element.padding[0],
+                                    field_height)
+
+        for key, value in questionnaire.items():
+
+            rel_rect = relative_rect.copy()
+
+            if isinstance(value, UISection):
+                # Update Section
+
+                rel_rect.width -= section_indent
+                rel_rect.x += section_indent
+
+                value.set_dimensions((rel_rect.width, rel_rect.height))
+                value.set_relative_position(rel_rect.topleft)
+
+                value.rebuild()
+                relative_rect.y = section_gap
+
+            elif isinstance(value, InputField):
+                # Updated appropriate UIElements for supported types.
+                # Could use a separate function for this in the future
+
+                # Supported types (Pasted here for quick reference):
+                # character (UITextEntryLine with 1 letter input)
+                # short_text (normal UITextEntryLine input)
+                # long_text (UITextEntryBox)
+                # integer (UITextEntryLine with only numeric inputs allowed)
+                # decimal (UITextEntryLine with numeric inputs and decimal point allowed)
+                # boolean (UIDropDownMenu with True and False as the options. Default option is True)
+
+                # Two elements are updated, a label and the actual UIElement needed for input
+
+                label = value.label
+                rel_rect.width = label.relative_rect.width
+                rel_rect.height = label_height
+
+                label.set_dimensions((rel_rect.width, rel_rect.height))
+                label.set_relative_position(rel_rect.topleft)
+
+                rel_rect = relative_rect.copy()
+                rel_rect.y = label_gap
+                rel_rect.height = field_height
+
+                type_name = value.question_type
+                element = value.element
+
+                if type_name == "character":
+                    element.set_text_length_limit(1)
+
+                elif type_name == "long_text":
+                    rel_rect.height = large_field_height
+
+                elif type_name == "integer":
+                    element.set_allowed_characters("numbers")
+
+                elif type_name == "decimal":
+                    element.set_allowed_characters([".", *list("0123456789")])
+
+                element.set_dimensions((rel_rect.width, rel_rect.height))
+                element.set_relative_position(rel_rect.topleft)
+
+                relative_rect.y = gap
+
+            elif isinstance(value, IUIElementInterface):
+
+                value.set_dimensions((rel_rect.width, rel_rect.height))
+                value.set_relative_position(rel_rect.topleft)
+
+                relative_rect.y = gap
+
     def rebuild_submit_button(self) -> None:
         """
         Called by UIForm.rebuild() to rebuild the submit button based on its horizontal alignment
@@ -596,10 +864,11 @@ class UIForm(UIAutoScrollingContainer):
             anchors["centerx"] = "centerx"
         elif self.submit_button_horiz_alignment == "right":
             anchors["right"] = "right"
-            pos.x = -self.submit_button.relative_rect.width - x_padding - 20  # Scrollbar width
-            print(self.scroll_bar_width)
+            anchors["right_target"] = self.vert_scroll_bar
+            pos.x = -self.submit_button.rect.width - x_padding
 
-        self.submit_button.anchors = anchors
+        self.submit_button.anchors = anchors  # Set anchors messes stuff up for some reason
+        self.submit_button.set_dimensions((self.submit_button.relative_rect.width, self.field_height))
         self.submit_button.set_relative_position(pos)
 
     def rebuild(self) -> None:
@@ -610,6 +879,18 @@ class UIForm(UIAutoScrollingContainer):
         """
 
         super().rebuild()
+
+        root_rect = pygame.Rect(self.relative_rect.x + self.shadow_width + self.border_width,
+                                self.relative_rect.y + self.shadow_width + self.border_width,
+                                self.relative_rect.width - (2 * self.shadow_width) - (2 * self.border_width),
+                                self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width))
+
+        if self._root_container.relative_rect != root_rect:
+            self._root_container.set_relative_position(root_rect.topleft)
+            self._root_container.set_dimensions(root_rect.size)
+
+        self.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
+        self.rebuild_submit_button()
 
         theming_parameters = {"normal_bg": self.background_colour,
                               "normal_border": self.border_colour,
@@ -626,17 +907,6 @@ class UIForm(UIAutoScrollingContainer):
                                                         ["normal"], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
-
-        root_rect = pygame.Rect(self.relative_rect.x + self.shadow_width + self.border_width,
-                                self.relative_rect.y + self.shadow_width + self.border_width,
-                                self.relative_rect.width - (2 * self.shadow_width) - (2 * self.border_width),
-                                self.relative_rect.height - (2 * self.shadow_width) - (2 * self.border_width))
-
-        if self._root_container.relative_rect != root_rect:
-            self._root_container.set_relative_position(root_rect.topleft)
-            self._root_container.set_dimensions(root_rect.size)
-
-        self.rebuild_submit_button()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -813,58 +1083,8 @@ class UIForm(UIAutoScrollingContainer):
     def validate_questionnaire(questionnaire: Mapping[str, Union[str, Mapping]],
                                raise_error: bool = False) -> Optional[bool]:
         """
-        Use this to validate if a questionnaire can be passed to the __init__ function.
-        The questionnaire should be in the following format:
-
-        questionnaire = {
-            "section1": {"question1":"short_text", "question2":"boolean(default=False)", ...}, \n
-            ..., \n
-            "question3": UIDropDownMenu(...), \n
-            ...
-        }
-
-        Where each key and value represent either:
-
-        * A section's name and all questions within, or
-        * A question's name and its corresponding type (see supported values below)
-
-        Each section will create a sub-form for the questions within.
-
-         Supported types (with the elements created automatically to gather input):
-
-        * character (UITextEntryLine with 1 letter input)
-        * short_text (normal UITextEntryLine input)
-        * long_text (UITextEntryBox)
-        * integer (UITextEntryLine with only numeric inputs allowed)
-        * decimal (UITextEntryLine with numeric inputs and decimal point allowed)
-        * boolean (UIDropDownMenu with True and False as the options. Default option is True)
-        * boolean(default=False) (UIDropDownMenu with True and False as the options and the default option as *default*)
-        The value of default must be either True or False. The types must be passed as a string only.
-        Type values are **not** case-sensitive.
-
-         Passing arguments for supported types:
-
-        Each type can have arguments which follow syntax similar to normal functions as shown above with the boolean
-        type. Currently, the only supported parameter is default. All string values should be passed in quotes, like:
-        short_text(default="Hello World")
-
-         You may provide an element instead of a pre-existing type. This element will be used for input.
-
-        Supported elements:
-
-        * UITextEntryLine
-        * UITextEntryBox
-        * UISelectionList
-        * UIDropDownMenu
-
-        Other elements (they must be instances of IUIElementInterface or its subclasses) may be passed in,
-        if they implement either:
-
-        * A get_current_input() function which takes no arguments and returns the currently input values; or
-        * A current_input attribute or property which holds the currently input values
-
-        If they do not implement any of the above, then this class will not handle its input, and you'll have to check
-        for the input of the element once the form has been submitted
+        Use this to validate if a questionnaire can be passed to the __init__ function. The format of the questionnaire
+        is given in the main documentation of the class.
 
         :param questionnaire: A dictionary containing the details of the questionnaire in the appropriate format
         :param raise_error: Should an error be raised with appropriate message? Default is False
@@ -884,10 +1104,12 @@ class UIForm(UIAutoScrollingContainer):
                 else:
                     return False
 
+            # Sub-questionnaire
             if isinstance(value, Mapping):
                 if not UIForm.validate_questionnaire(value, raise_error):
                     return False
 
+            # Value is one of the supported types, check for validity
             elif isinstance(value, str):
                 if raise_error:
                     UIForm.type_checker(value)
@@ -900,12 +1122,14 @@ class UIForm(UIAutoScrollingContainer):
             elif isinstance(value, IUIElementInterface):
                 continue
 
+            # Value not present
             elif not value:
                 if raise_error:
                     raise ValueError(f"Question type cannot be {value}")
                 else:
                     return False
 
+            # Type of Value is not supported
             else:
                 if raise_error:
                     raise ValueError(f"Questions of type {type(value)} are not supported")

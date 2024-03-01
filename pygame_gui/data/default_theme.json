@@ -270,6 +270,50 @@
             "shadow_width": "1"
         }
     },
+    "section":
+    {
+        "prototype": "#default_shape_style",
+        "misc":
+        {
+            "padding": "5,5",
+            "label_height": "20",
+            "section_label_height": "30",
+            "field_height": "40",
+            "large_field_height": "80",
+            "gap": "10",
+            "label_gap": "0",
+            "section_gap": "15",
+            "section_indent": "5"
+        }
+    },
+    "section.#expand_section_button":
+    {
+        "prototype": "#no_frills_button"
+    },
+    "form":
+    {
+        "prototype": "#default_shape_style",
+        "misc":
+        {
+            "padding": "5,5",
+            "label_height": "20",
+            "field_height": "40",
+            "large_field_height": "80",
+            "gap": "10",
+            "label_gap": "0",
+            "section_gap": "15",
+            "section_indent": "5",
+            "submit_button_horiz_alignment": "right"
+        }
+    },
+    "form.#submit_button":
+    {
+        "prototype": "#no_frills_button",
+        "misc":
+        {
+            "text_horiz_alignment_padding": "5"
+        }
+    },
     "window":
     {
         "misc":
