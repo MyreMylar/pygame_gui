@@ -233,7 +233,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         super().update(time_delta)
 
-        # Both scroll bars are the sole cause for each other's existence, terminate them
+        # Both scroll bars are the sole cause for each other's existence, terminate them both
         self._calculate_scrolling_dimensions()
         if (self.scrolling_width == self._view_container.rect.width + self.scroll_bar_width
                 and self.scrolling_height == self._view_container.rect.height + self.scroll_bar_height):
@@ -256,7 +256,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                 start_height = (int(button_bottom_percent * self.scrolling_height) -
                                 self._view_container.rect.height)
 
-            print(self.scrolling_height, self._view_container.rect.height)
             if vis_percent < 1.0:
                 self.vert_scroll_bar.set_visible_percentage(vis_percent)
             else:
