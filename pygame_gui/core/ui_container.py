@@ -240,7 +240,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
         # Moving the elements anchored to the top to make it seem like the container just increased its top edge
         for element in self.elements:
-            if "left" in element.anchors.values() and "left_target" not in element.anchors:
+            anchors = element.get_anchors()
+            if "left" in anchors.values() and "left_target" not in anchors:
                 pos = pygame.Vector2(element.get_relative_rect().topleft) + pygame.Vector2(width, 0)
                 element.set_relative_position(pos)
 
@@ -264,7 +265,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
         # Moving the elements anchored to the top to make it seem like the container just increased its top edge
         for element in self.elements:
-            if "top" in element.anchors.values() and "top_target" not in element.anchors and "bottom_target" not in element.anchors:
+            anchors = element.get_anchors()
+            if "top" in anchors.values() and "top_target" not in anchors:
                 pos = pygame.Vector2(element.get_relative_rect().topleft) + pygame.Vector2(0, height)
                 element.set_relative_position(pos)
 
