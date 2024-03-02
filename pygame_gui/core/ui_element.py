@@ -343,7 +343,6 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         old_anchors = self.anchors.copy()
         self.anchors = {}
-        anchors_copy = anchors.copy() if anchors is not None else None
 
         if anchors is not None:
             if 'center' in anchors and anchors['center'] == 'center':
@@ -455,42 +454,42 @@ class UIElement(GUISprite, IUIElementInterface):
                          anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['top_target'].get_abs_rect().bottom
                 if 'top_target' in anchors
-                else container.get_abs_rect().top)
+                else container.get_container().get_rect().top)
 
     @staticmethod
     def _calc_bottom_offset(container: Optional[IContainerLikeInterface],
                             anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['bottom_target'].get_abs_rect().top
                 if 'bottom_target' in anchors
-                else container.get_abs_rect().bottom)
+                else container.get_container().get_rect().bottom)
 
     @staticmethod
     def _calc_centery_offset(container: Optional[IContainerLikeInterface],
                              anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['centery_target'].get_abs_rect().centery
                 if 'centery_target' in anchors
-                else container.get_abs_rect().centery)
+                else container.get_container().get_rect().centery)
 
     @staticmethod
     def _calc_left_offset(container: Optional[IContainerLikeInterface],
                           anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['left_target'].get_abs_rect().right
                 if 'left_target' in anchors
-                else container.get_abs_rect().left)
+                else container.get_container().get_rect().left)
 
     @staticmethod
     def _calc_right_offset(container: Optional[IContainerLikeInterface],
                            anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['right_target'].get_abs_rect().left
                 if 'right_target' in anchors
-                else container.get_abs_rect().right)
+                else container.get_container().get_rect().right)
 
     @staticmethod
     def _calc_centerx_offset(container: Optional[IContainerLikeInterface],
                              anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['centerx_target'].get_abs_rect().centerx
                 if 'centerx_target' in anchors
-                else container.get_abs_rect().centerx)
+                else container.get_container().get_rect().centerx)
 
     @staticmethod
     def _calc_abs_rect_pos_from_rel_rect(relative_rect: pygame.Rect, container: Optional[IContainerLikeInterface],
