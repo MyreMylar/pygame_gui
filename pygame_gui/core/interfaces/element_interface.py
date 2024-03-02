@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, List, Set, Any
+from typing import Tuple, Union, List, Set, Any, Dict
 
 import pygame
 
@@ -59,6 +59,23 @@ class IUIElementInterface(metaclass=ABCMeta):
         A list of all the object IDs in this element's theming/event hierarchy.
 
         :return: a list of strings, one for each element in the hierarchy.
+        """
+
+    @abstractmethod
+    def get_anchors(self) -> Dict[str, Union[str, "IUIElementInterface"]]:
+        """
+        A dictionary containing all the anchors defining what the relative rect is relative to
+
+        :return: A dictionary containing all the anchors defining what the relative rect is relative to
+        """
+
+    @abstractmethod
+    def set_anchors(self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]) -> None:
+        """
+        Wraps the setting of the anchors with some validation
+
+        :param anchors: A dictionary of anchors defining what the relative rect is relative to
+        :return: None
         """
 
     @abstractmethod
