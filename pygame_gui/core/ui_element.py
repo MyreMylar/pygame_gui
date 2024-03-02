@@ -341,6 +341,8 @@ class UIElement(GUISprite, IUIElementInterface):
         :param anchors: A dictionary of anchors defining what the relative rect is relative to
         :return: None
         """
+        old_anchors = self.anchors.copy()
+        self.anchors = {}
         anchors_copy = anchors.copy() if anchors is not None else None
 
         if anchors is not None:
@@ -383,7 +385,7 @@ class UIElement(GUISprite, IUIElementInterface):
             self.anchors = {'left': 'left',
                             'top': 'top'}
 
-        if anchors_copy != self.anchors and self.ui_container is not None:
+        if self.anchors != old_anchors and self.ui_container is not None:
             self.ui_container.on_contained_elements_changed(self)
 
     def _create_valid_ids(self,
