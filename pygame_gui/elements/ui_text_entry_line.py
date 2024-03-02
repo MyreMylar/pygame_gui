@@ -983,11 +983,13 @@ class UITextEntryLine(UIElement):
                 for character in text_to_validate:
                     if character in self.forbidden_characters:
                         is_valid = False
+                        break
 
             if is_valid and self.allowed_characters is not None:
                 for character in text_to_validate:
                     if character not in self.allowed_characters:
                         is_valid = False
+                        break
         else:
             is_valid = False
 
