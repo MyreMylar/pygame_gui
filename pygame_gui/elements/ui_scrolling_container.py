@@ -67,6 +67,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
+        # The order to define the following is important. Both scroll_bars are part of the root container, so root
+        # container is defined first. Then the scroll bars, and only then the view container as it is anchored to the
+        # scroll bars so that it resizes automatically as the scroll bars are added and "removed".
+
         # this contains the scroll bars and the 'view' container
         self._root_container = UIContainer(relative_rect=relative_rect,
                                            manager=manager,
@@ -325,24 +329,27 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         bar has been moved. Instead, it tries to keep the scrollbars in the same approximate position
         they were in before resizing
         """
-        self._check_scroll_bars_and_adjust()
-        need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars_and_adjust()
+        need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars()
 
         if need_vert_scroll_bar:
-            vis_percent = self._view_container.rect.height / self.scrolling_height
+            vis_percent = (self._view_container.rect.height - self.scroll_bar_height) / self.scrolling_height
             start_percent = ((self._view_container.rect.top -
                               self.scrollable_container.rect.top)
                              / self.scrolling_height)
             self.vert_scroll_bar.start_percentage = start_percent
             self.vert_scroll_bar.set_visible_percentage(vis_percent)
             self.vert_scroll_bar.set_relative_position((-self.scroll_bar_width, 0))
+
+            # This is important as horiz scroll bar's dimensions are evaluated after
+            height = self._view_container.rect.height
+            height -= self.scroll_bar_height if need_horiz_scroll_bar else 0
             self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
-                                                 self._view_container.rect.height))
+                                                 height))
         else:
             self._remove_vert_scrollbar()
 
         if need_horiz_scroll_bar:
-            vis_percent = self._view_container.rect.width / self.scrolling_width
+            vis_percent = (self._view_container.rect.width - self.scroll_bar_width) / self.scrolling_width
             start_percent = ((self._view_container.rect.left -
                               self.scrollable_container.rect.left)
                              / self.scrolling_width)
@@ -354,12 +361,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         else:
             self._remove_horiz_scrollbar()
 
-    def _check_scroll_bars_and_adjust(self):
+    def _check_scroll_bars(self):
         """
-        Check if we need a horizontal or vertical scrollbar and adjust the containers if we do.
-
-        Adjusting the containers for a scrollbar, may mean we now need a scrollbar in the other
-        dimension, so we need to call this twice.
+        Check if we need a horizontal or vertical scrollbar.
         """
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
@@ -369,10 +373,18 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                 self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
             need_vert_scroll_bar = True
             self.scroll_bar_width = 20
-        if (self.scrolling_width > self._view_container.rect.width or
+        if (self.scrolling_width > self._view_container.rect.width - self.scroll_bar_width or
                 self.scrollable_container.relative_rect.left != 0) and self.allow_scroll_x:
             need_horiz_scroll_bar = True
             self.scroll_bar_height = 20
+
+            # Needs a second check for the case where we didn't need the vertical scroll bar until after creating a
+            # horizontal scroll bar
+            if (self.scrolling_height > self._view_container.rect.height - self.scroll_bar_height or
+                    self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
+                need_vert_scroll_bar = True
+                self.scroll_bar_width = 20
+
         self._calculate_scrolling_dimensions()
         return need_horiz_scroll_bar, need_vert_scroll_bar
 
