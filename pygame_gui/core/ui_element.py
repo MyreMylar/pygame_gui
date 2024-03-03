@@ -556,8 +556,16 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self.rect.left = new_left
         self.rect.top = new_top
-        new_height = new_bottom - new_top
-        new_width = new_right - new_left
+        if self.dynamic_height:
+            new_height = new_bottom - new_top
+        else:
+            new_height = max(0, new_bottom - new_top)
+
+        if self.dynamic_width:
+            new_width = new_right - new_left
+        else:
+            new_width = max(0, new_right - new_left)
+
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
             self.set_dimensions((new_width, new_height))
