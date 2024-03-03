@@ -231,6 +231,13 @@
             "rect_width": "170"
         }
     },
+    "file_dialog.button.tool_tip":
+    {
+        "misc":
+        {
+            "rect_width": "-1"
+        }
+    },
     "vertical_scroll_bar":
     {
         "prototype": "#default_shape_style"

@@ -470,6 +470,23 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self._setup_offset_position_from_edit_cursor()
 
+    def set_cursor_to_end(self, is_last_row):
+        end_pos = self.letter_count
+        # we need to ignore the trailing space on line-wrapped rows,
+        # or we will spill over to the row below
+        if not is_last_row and len(self.items) > 0:
+            last_chunk = self.items[-1]
+            if (isinstance(last_chunk, TextLineChunkFTFont) and
+                    (len(last_chunk.text) > 0 and last_chunk.text[-1] == " ")):
+                end_pos -= 1
+            if isinstance(last_chunk, LineBreakLayoutRect):
+                end_pos -= 1
+        end_pos = max(0, end_pos)
+        self.set_cursor_position(end_pos)
+
+    def set_cursor_to_start(self):
+        self.set_cursor_position(0)
+
     def get_cursor_index(self) -> int:
         """
         Get the current character index of the cursor
