@@ -17,6 +17,7 @@ from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
+from pygame_gui.elements.ui_tab_container import UITabContainer
 
 
 __all__ = ['UIImage',
@@ -38,4 +39,5 @@ __all__ = ['UIImage',
            'UITextEntryLine',
            'UIWindow',
            'UIScrollingContainer',
-           'UITextEntryBox']
+           'UITextEntryBox',
+           'UITabContainer']
