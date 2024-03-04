@@ -1170,6 +1170,42 @@ class TestUITextEntryBox:
                                                                            'mod': 0}))
 
         assert processed_key_event
+        assert text_entry.edit_position == 3
+
+        text_entry.edit_position = 1
+        text_entry.focus()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [1, 2]
+        assert text_entry.edit_position == 2
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [1, 3]
+        assert text_entry.edit_position == 3
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [1, 2]
+        assert text_entry.edit_position == 2
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT,
+                                                                           'mod': 0}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 0]
+        assert text_entry.edit_position == 2
 
         text_entry.edit_position = 0
         text_entry.focus()
@@ -1179,6 +1215,17 @@ class TestUITextEntryBox:
                                                                            'mod': pygame.KMOD_CTRL}))
 
         assert processed_key_event
+        assert text_entry.edit_position == 3
+
+        text_entry.edit_position = 0
+        text_entry.focus()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT,
+                                                                           'mod': pygame.KMOD_CTRL | pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 3]
         assert text_entry.edit_position == 3
 
     def test_process_event_text_left(self, _init_pygame: None, default_ui_manager: UIManager,
@@ -1199,10 +1246,111 @@ class TestUITextEntryBox:
 
         processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
                                                                           {'key': pygame.K_LEFT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [1, 2]
+        assert text_entry.edit_position == 1
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 2]
+        assert text_entry.edit_position == 0
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_RIGHT,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [1, 2]
+        assert text_entry.edit_position == 1
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT,
+                                                                           'mod': 0}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 0]
+        assert text_entry.edit_position == 1
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT,
                                                                            'mod': pygame.KMOD_CTRL}))
 
         assert processed_key_event
         assert text_entry.edit_position == 0
+
+        text_entry.edit_position = 3
+        text_entry.focus()
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_LEFT,
+                                                                           'mod': pygame.KMOD_CTRL | pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [0, 3]
+        assert text_entry.edit_position == 0
+
+    def test_process_event_text_down(self, _init_pygame: None, default_ui_manager: UIManager,
+                                     _display_surface_return_none: None):
+        text_entry = UITextEntryBox(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    manager=default_ui_manager)
+
+        text_entry.set_text('daniel\nmulti-line\ntext')
+        text_entry.edit_position = 3
+        text_entry.focus()
+        text_entry.update(0.1)
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_DOWN,
+                                                                           'mod': 0}))
+
+        assert processed_key_event
+        assert text_entry.edit_position == 10
+
+        text_entry.edit_position = 3
+        text_entry.focus()
+        text_entry.update(0.1)
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_DOWN,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [3, 10]
+        assert text_entry.edit_position == 10
+
+    def test_process_event_text_up(self, _init_pygame: None, default_ui_manager: UIManager,
+                                   _display_surface_return_none: None):
+        text_entry = UITextEntryBox(relative_rect=pygame.Rect(100, 100, 200, 30),
+                                    manager=default_ui_manager)
+
+        text_entry.set_text('daniel\nmulti-line\ntext')
+        text_entry.edit_position = 10
+        text_entry.focus()
+        text_entry.update(0.1)
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_UP,
+                                                                           'mod': 0}))
+
+        assert processed_key_event
+        assert text_entry.edit_position == 3
+
+        text_entry.edit_position = 10
+        text_entry.focus()
+        text_entry.update(0.1)
+
+        processed_key_event = text_entry.process_event(pygame.event.Event(pygame.KEYDOWN,
+                                                                          {'key': pygame.K_UP,
+                                                                           'mod': pygame.KMOD_SHIFT}))
+
+        assert processed_key_event
+        assert text_entry.select_range == [3, 10]
+        assert text_entry.edit_position == 3
 
     def test_process_event_home(self, _init_pygame: None, default_ui_manager: UIManager,
                                 _display_surface_return_none: None):
