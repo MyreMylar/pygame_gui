@@ -499,7 +499,7 @@ class UITextEntryBox(UITextBox):
             text_to_search = self.html_text[max(0, self.edit_position-1)::-1]
             match_result = re.search(r'\b\w+\b', text_to_search)
             if match_result is not None:
-                next_pos = self.edit_position - match_result.regs[-1][1]
+                next_pos = max(self.edit_position - match_result.regs[-1][1], 0)
             else:
                 next_pos = self.edit_position
         except ValueError:
@@ -515,6 +515,7 @@ class UITextEntryBox(UITextBox):
                     # extend left
                     self.select_range = [next_pos, self.select_range[1]]
             else:
+                next_pos = self.select_range[0]
                 self.select_range = [0, 0]
         else:
             if should_select:
@@ -528,7 +529,7 @@ class UITextEntryBox(UITextBox):
         try:
             match_result = re.search(r'\b\w+\b', self.html_text[self.edit_position:])
             if match_result is not None:
-                next_pos = self.edit_position + match_result.regs[0][1]
+                next_pos = min(self.edit_position + match_result.regs[0][1], len(self.html_text))
             else:
                 next_pos = self.edit_position
         except ValueError:
