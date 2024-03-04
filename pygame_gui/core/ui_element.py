@@ -556,11 +556,19 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self.rect.left = new_left
         self.rect.top = new_top
-        new_height = new_bottom - new_top
-        new_width = new_right - new_left
+        if self.dynamic_height:
+            new_height = new_bottom - new_top
+        else:
+            new_height = max(0, new_bottom - new_top)
+
+        if self.dynamic_width:
+            new_width = new_right - new_left
+        else:
+            new_width = max(0, new_right - new_left)
+
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
-            self._set_dimensions((new_width, new_height))
+            self.set_dimensions((new_width, new_height))
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -764,7 +772,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 (self.rect.height < self.minimum_dimensions[1])):
             new_width = max(self.minimum_dimensions[0], self.rect.width)
             new_height = max(self.minimum_dimensions[1], self.rect.height)
-            self._set_dimensions((new_width, new_height))
+            self.set_dimensions((new_width, new_height))
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -800,9 +808,9 @@ class UIElement(GUISprite, IUIElementInterface):
             self._set_dimensions(dimensions, clamp_to_container)
 
     def _set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+                                                Tuple[int, int],
+                                                Tuple[float, float]],
+                        clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
         Dimensions must be positive values.

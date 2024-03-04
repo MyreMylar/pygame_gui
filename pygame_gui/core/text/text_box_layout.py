@@ -96,7 +96,7 @@ class TextBoxLayout:
             self._add_row_to_layout(current_row, True)
 
         self.edit_buffer = 2
-        self.cursor_text_row = None
+        self.cursor_text_row: Optional[TextBoxLayoutRow] = None
         self.last_horiz_cursor_row_pos = 0
 
         self.selection_colour = pygame.Color(128, 128, 200, 255)
@@ -584,6 +584,29 @@ class TextBoxLayout:
             row.bottom = new_y
             row.vert_align_items_to_row()
             new_y -= row.height
+
+    def set_cursor_to_end_of_current_row(self):
+        """
+        Set the edit cursor position in the text layout to the end of the current row and returns the overall
+        position in the text
+
+        :return: the overall position of the cursor in the text layout, after setting it to the end of the current row
+        """
+        if self.cursor_text_row is not None:
+            is_last_row = self.cursor_text_row == self.layout_rows[-1]
+            self.cursor_text_row.set_cursor_to_end(is_last_row)
+        return self.get_cursor_index()
+
+    def set_cursor_to_start_of_current_row(self):
+        """
+        Set the edit cursor position in the text layout to the end of the current row and returns the overall
+        position in the text
+
+        :return: the overall position of the cursor in the text layout, after setting it to the end of the current row
+        """
+        if self.cursor_text_row is not None:
+            self.cursor_text_row.set_cursor_to_start()
+        return self.get_cursor_index()
 
     def set_cursor_position(self, cursor_pos):
         """

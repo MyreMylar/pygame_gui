@@ -132,6 +132,9 @@ class UITextEntryBox(UITextBox):
         super().focus()
         key.set_repeat(500, 25)
 
+        self.text_box_layout.set_cursor_position(self.edit_position)
+        self.cursor_has_moved_recently = True
+
     def update(self, time_delta: float):
         """
         Called every update loop of our UI Manager. Largely handles text drag selection and
@@ -338,64 +341,75 @@ class UITextEntryBox(UITextBox):
 
         """
         consumed_event = False
-        # modded versions of LEFT and RIGHT must go first otherwise the simple
-        # cases will absorb the events
-        if (event.key == K_HOME or
-                (event.key == K_LEFT and
-                 (event.mod & KMOD_CTRL or event.mod & KMOD_META))):
-            try:
-                next_pos = self.edit_position - self.html_text[:self.edit_position][::-1].index("\n")
-            except ValueError:
-                next_pos = 0
-            # include case when shift held down to select everything to start
-            # of current line.
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                if event.mod & KMOD_SHIFT:
-                    if self.edit_position == self.select_range[1]:
-                        # undo selection to right, create to left
-                        self.select_range = [next_pos, self.select_range[0]]
-                    else:
-                        # extend left
-                        self.select_range = [next_pos, self.select_range[1]]
-                else:
-                    self.select_range = [0, 0]
+        # 4 left/right cases:
+        # 1. jump left or right one character (LEFT or RIGHT on their own)
+        # 2. jump to end/start of word (CTRL + LEFT or RIGHT)
+        # 3. jump to end/start of line (HOME or END)
+        # 4. jump to end/start of document (CTRL + HOME or END)
+        # plus 1 up or down a line/text row case (UP & DOWN arrows, CTRL makes no difference here in notepad,
+        # but in IDE it scrolls if possible)
+        # All cases can have selection attached with shift held
+
+        if event.key == K_LEFT:
+            if event.mod & KMOD_CTRL or event.mod & KMOD_META:
+                self._jump_edit_pos_to_start_of_word(should_select=(event.mod & KMOD_SHIFT))
             else:
-                if event.mod & KMOD_SHIFT:
-                    self.select_range = [next_pos, self.edit_position]
-                else:
-                    self.select_range = [0, 0]
-            self.edit_position = next_pos
-            self.cursor_has_moved_recently = True
+                self._jump_edit_pos_one_character_left(should_select=(event.mod & KMOD_SHIFT))
             consumed_event = True
-        elif (event.key == K_END or
-              (event.key == K_RIGHT and
-               (event.mod & KMOD_CTRL or event.mod & KMOD_META))):
-            try:
-                next_pos = self.edit_position + self.html_text[self.edit_position:].index("\n")
-            except ValueError:
-                next_pos = len(self.html_text)
-            # include case when shift held down to select everything to end
-            # of current line.
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                if event.mod & KMOD_SHIFT:
-                    if self.edit_position == self.select_range[0]:
-                        # undo selection to left, create to right
-                        self.select_range = [self.select_range[1], next_pos]
-                    else:
-                        # extend right
-                        self.select_range = [self.select_range[0], next_pos]
-                else:
-                    self.select_range = [0, 0]
+        elif event.key == K_RIGHT:
+            if event.mod & KMOD_CTRL or event.mod & KMOD_META:
+                self._jump_edit_pos_to_end_of_word(should_select=(event.mod & KMOD_SHIFT))
             else:
-                if event.mod & KMOD_SHIFT:
-                    self.select_range = [self.edit_position, next_pos]
-                else:
-                    self.select_range = [0, 0]
-            self.edit_position = next_pos
-            self.cursor_has_moved_recently = True
+                self._jump_edit_pos_one_character_right(should_select=(event.mod & KMOD_SHIFT))
             consumed_event = True
-        elif event.key == K_LEFT and event.mod & KMOD_SHIFT:
-            # keyboard-based selection
+        elif event.key == K_UP:
+            self._jump_edit_pos_one_row_up(should_select=(event.mod & KMOD_SHIFT))
+            consumed_event = True
+        elif event.key == K_DOWN:
+            self._jump_edit_pos_one_row_down(should_select=(event.mod & KMOD_SHIFT))
+            consumed_event = True
+        elif event.key == K_HOME:
+            if event.mod & KMOD_CTRL or event.mod & KMOD_META:
+                self._jump_edit_pos_to_start_of_all_text(should_select=(event.mod & KMOD_SHIFT))
+            else:
+                self._jump_edit_pos_to_start_of_line(should_select=(event.mod & KMOD_SHIFT))
+            consumed_event = True
+        elif event.key == K_END:
+            if event.mod & KMOD_CTRL or event.mod & KMOD_META:
+                self._jump_edit_pos_to_end_of_all_text(should_select=(event.mod & KMOD_SHIFT))
+            else:
+                self._jump_edit_pos_to_end_of_line(should_select=(event.mod & KMOD_SHIFT))
+            consumed_event = True
+        return consumed_event
+
+    def _jump_edit_pos_one_character_right(self, should_select=False):
+        if should_select:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if self.edit_position == self.select_range[1]:
+                    # try to extend to the right
+                    self.select_range = [self.select_range[0],
+                                         min(len(self.html_text), self.edit_position + 1)]
+                elif self.edit_position == self.select_range[0]:
+                    # reduce to the right
+                    self.select_range = [min(len(self.html_text), self.edit_position + 1),
+                                         self.select_range[1]]
+            else:
+                self.select_range = [self.edit_position, min(len(self.html_text),
+                                                             self.edit_position + 1)]
+            if self.edit_position < len(self.html_text):
+                self.edit_position += 1
+                self.cursor_has_moved_recently = True
+        else:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = max(self.select_range[0], self.select_range[1])
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position < len(self.html_text):
+                self.edit_position += 1
+                self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_one_character_left(self, should_select=False):
+        if should_select:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 # existing selection, so edit_position should correspond to one
                 # end of it
@@ -413,27 +427,45 @@ class UITextEntryBox(UITextBox):
             if self.edit_position > 0:
                 self.edit_position -= 1
                 self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_RIGHT and event.mod & KMOD_SHIFT:
-            # keyboard-based selection
+        else:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = min(self.select_range[0], self.select_range[1])
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            elif self.edit_position > 0:
+                self.edit_position -= 1
+                self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_one_row_down(self, should_select=False):
+        if should_select:
+            new_pos = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 if self.edit_position == self.select_range[1]:
                     # try to extend to the right
                     self.select_range = [self.select_range[0],
-                                         min(len(self.html_text), self.edit_position + 1)]
+                                         min(len(self.html_text), new_pos)]
                 elif self.edit_position == self.select_range[0]:
                     # reduce to the right
-                    self.select_range = [min(len(self.html_text), self.edit_position + 1),
+                    self.select_range = [min(len(self.html_text), new_pos),
                                          self.select_range[1]]
             else:
                 self.select_range = [self.edit_position, min(len(self.html_text),
-                                                             self.edit_position + 1)]
+                                                             new_pos)]
             if self.edit_position < len(self.html_text):
-                self.edit_position += 1
+                self.edit_position = new_pos
                 self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_UP and event.mod & KMOD_SHIFT:
-            # keyboard-based selection
+        else:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            else:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
+                self.cursor_has_moved_recently = True
+            self.vertical_cursor_movement = True
+
+    def _jump_edit_pos_one_row_up(self, should_select=False):
+        if should_select:
             new_pos = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 # existing selection, so edit_position should correspond to one
@@ -452,76 +484,156 @@ class UITextEntryBox(UITextBox):
             if self.edit_position > 0:
                 self.edit_position = new_pos
                 self.cursor_has_moved_recently = True
-        elif event.key == K_DOWN and event.mod & KMOD_SHIFT:
-            # keyboard-based selection
-            new_pos = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
+        else:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
+            else:
+                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
+                self.cursor_has_moved_recently = True
+            self.vertical_cursor_movement = True
+
+    def _jump_edit_pos_to_start_of_word(self, should_select=False):
+        try:
+            text_to_search = self.html_text[max(0, self.edit_position-1)::-1]
+            match_result = re.search(r'\b\w+\b', text_to_search)
+            if match_result is not None:
+                next_pos = max(self.edit_position - match_result.regs[-1][1], 0)
+            else:
+                next_pos = self.edit_position
+        except ValueError:
+            next_pos = 0
+        # include case when shift held down to select everything to start
+        # of current line.
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            if should_select:
                 if self.edit_position == self.select_range[1]:
-                    # try to extend to the right
-                    self.select_range = [self.select_range[0],
-                                         min(len(self.html_text), new_pos)]
-                elif self.edit_position == self.select_range[0]:
-                    # reduce to the right
-                    self.select_range = [min(len(self.html_text), new_pos),
-                                         self.select_range[1]]
+                    # undo selection to right, create to left
+                    self.select_range = [next_pos, self.select_range[0]]
+                else:
+                    # extend left
+                    self.select_range = [next_pos, self.select_range[1]]
             else:
-                self.select_range = [self.edit_position, min(len(self.html_text),
-                                                             new_pos)]
-            if self.edit_position < len(self.html_text):
-                self.edit_position = new_pos
-                self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_LEFT:
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = min(self.select_range[0], self.select_range[1])
+                next_pos = self.select_range[0]
                 self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
-            elif self.edit_position > 0:
-                self.edit_position -= 1
-                self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_RIGHT:
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = max(self.select_range[0], self.select_range[1])
-                self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
-            elif self.edit_position < len(self.html_text):
-                self.edit_position += 1
-                self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_UP:
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
-                self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
+        else:
+            if should_select:
+                self.select_range = [next_pos, self.edit_position]
             else:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_up_one_row(self.last_horiz_cursor_index)
-                self.cursor_has_moved_recently = True
-            self.vertical_cursor_movement = True
-            consumed_event = True
-        elif event.key == K_DOWN:
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
                 self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
+        self.edit_position = next_pos
+        self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_to_end_of_word(self, should_select=False):
+        try:
+            match_result = re.search(r'\b\w+\b', self.html_text[self.edit_position:])
+            if match_result is not None:
+                next_pos = min(self.edit_position + match_result.regs[0][1], len(self.html_text))
             else:
-                self.edit_position = self.text_box_layout.get_cursor_pos_move_down_one_row(self.last_horiz_cursor_index)
-                self.cursor_has_moved_recently = True
-            self.vertical_cursor_movement = True
-            consumed_event = True
-        elif event.key == K_HOME:
+                next_pos = self.edit_position
+        except ValueError:
+            next_pos = len(self.html_text)
+        # include case when shift held down to select everything to end
+        # of current line.
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            if should_select:
+                if self.edit_position == self.select_range[0]:
+                    # undo selection to left, create to right
+                    self.select_range = [self.select_range[1], next_pos]
+                else:
+                    # extend right
+                    self.select_range = [self.select_range[0], next_pos]
+            else:
+                self.select_range = [0, 0]
+        else:
+            if should_select:
+                self.select_range = [self.edit_position, next_pos]
+            else:
+                self.select_range = [0, 0]
+        self.edit_position = next_pos
+        self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_to_start_of_line(self, should_select=False):
+        try:
+            next_pos = self.text_box_layout.set_cursor_to_start_of_current_row()
+        except ValueError:
+            next_pos = 0
+        # include case when shift held down to select everything to start
+        # of current line.
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            if should_select:
+                if self.edit_position == self.select_range[1]:
+                    # undo selection to right, create to left
+                    self.select_range = [next_pos, self.select_range[0]]
+                else:
+                    # extend left
+                    self.select_range = [next_pos, self.select_range[1]]
+            else:
+                self.select_range = [0, 0]
+        else:
+            if should_select:
+                self.select_range = [next_pos, self.edit_position]
+            else:
+                self.select_range = [0, 0]
+        self.edit_position = next_pos
+        self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_to_end_of_line(self, should_select=False):
+        try:
+            next_pos = self.text_box_layout.set_cursor_to_end_of_current_row()
+        except ValueError:
+            next_pos = len(self.html_text)
+        # include case when shift held down to select everything to end
+        # of current line.
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            if should_select:
+                if self.edit_position == self.select_range[0]:
+                    # undo selection to left, create to right
+                    self.select_range = [self.select_range[1], next_pos]
+                else:
+                    # extend right
+                    self.select_range = [self.select_range[0], next_pos]
+            else:
+                self.select_range = [0, 0]
+        else:
+            if should_select:
+                self.select_range = [self.edit_position, next_pos]
+            else:
+                self.select_range = [0, 0]
+        self.edit_position = next_pos
+        self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_to_start_of_all_text(self, should_select=False):
+        if should_select:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if self.edit_position == self.select_range[0]:
+                    self.select_range = [0, self.select_range[1]]
+                else:
+                    self.select_range = [0, self.select_range[0]]
+            else:
+                self.select_range = [0, self.edit_position]
+        else:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.select_range = [0, 0]
-            self.edit_position = 0
-            self.cursor_has_moved_recently = True
-            consumed_event = True
-        elif event.key == K_END:
+        self.edit_position = 0
+        self.cursor_has_moved_recently = True
+
+    def _jump_edit_pos_to_end_of_all_text(self, should_select=False):
+        end_of_all_pos = len(self.html_text)
+        if should_select:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                if self.edit_position == self.select_range[0]:
+                    self.select_range = [self.select_range[1], end_of_all_pos]
+                else:
+                    self.select_range = [self.select_range[0], end_of_all_pos]
+            else:
+                self.select_range = [self.edit_position, end_of_all_pos]
+        else:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.select_range = [0, 0]
-            self.edit_position = len(self.html_text)
-            self.cursor_has_moved_recently = True
-            consumed_event = True
-        return consumed_event
+        self.edit_position = end_of_all_pos
+        self.cursor_has_moved_recently = True
 
     def _process_mouse_button_event(self, event: Event) -> bool:
         """

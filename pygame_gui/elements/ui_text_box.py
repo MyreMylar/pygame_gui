@@ -588,7 +588,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              text_direction=self.parser.default_style['direction'])
         self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.parser.empty_layout_queue()
-        if not self.dynamic_height:
+        if self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
         self._align_all_text_rows()
