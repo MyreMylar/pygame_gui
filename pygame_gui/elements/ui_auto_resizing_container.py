@@ -63,6 +63,7 @@ class UIAutoResizingContainer(UIContainer):
                                element_id='auto_resizing_container')
 
         self.min_edges_rect = min_edges_rect
+        # TODO: Add validation for min and max edges rect
 
         if self.min_edges_rect is None:
             self.min_edges_rect = self.get_relative_rect().copy()

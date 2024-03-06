@@ -388,12 +388,15 @@ class UIForm(UIAutoScrollingContainer):
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
-    SUPPORTED_TYPES = {"character": (("default", "."),),
-                       "short_text": (("default", ".*"),),
-                       "long_text": (("default", ".*"),),
-                       "integer": (("default", "[0-9]*"),),
-                       "decimal": (("default", "[0-9.]*"),),
-                       "boolean": (("default", "True|False"),)
+    # TODO: Implement a show password button
+    # TODO: Implement colour inputs
+    SUPPORTED_TYPES = {"character": {"default": "'.'", "required": "True|False"},
+                       "short_text": {"default": "'.*'", "required": "True|False"},
+                       "long_text": {"default": "'.*'", "required": "True|False"},
+                       "password": {"default": "'.*'", "required": "True|False"},
+                       "integer": {"default": r"\d*", "required": "True|False"},
+                       "decimal": {"default": r"[/d.]*", "required": "True|False"},
+                       "boolean": {"default": "True|False", "required": "True|False"}
                        }
 
     def __init__(self,
@@ -609,6 +612,10 @@ class UIForm(UIAutoScrollingContainer):
                 elif type_name == "long_text":
                     param_dict["relative_rect"].height = large_field_height
                     element = UITextEntryBox(initial_text=args.get("default", ""), **param_dict)
+
+                elif type_name == "password":
+                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element.set_text_hidden(True)
 
                 elif type_name == "integer":
                     element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
@@ -828,6 +835,9 @@ class UIForm(UIAutoScrollingContainer):
                 elif type_name == "long_text":
                     rel_rect.height = large_field_height
 
+                elif type_name == "password":
+                    element.set_text_hidden(True)
+
                 elif type_name == "integer":
                     element.set_allowed_characters("numbers")
 
@@ -867,7 +877,7 @@ class UIForm(UIAutoScrollingContainer):
             anchors["right_target"] = self.vert_scroll_bar
             pos.x = -self.submit_button.rect.width - x_padding
 
-        self.submit_button.anchors = anchors  # Set anchors messes stuff up for some reason
+        self.submit_button.set_anchors(anchors)
         self.submit_button.set_dimensions((self.submit_button.relative_rect.width, self.field_height))
         self.submit_button.set_relative_position(pos)
 
@@ -947,6 +957,7 @@ class UIForm(UIAutoScrollingContainer):
         * character (UITextEntryLine with 1 letter input)
         * short_text (normal UITextEntryLine input)
         * long_text (UITextEntryBox)
+        * password (UITextEntryLine input with characters hidden)
         * integer (UITextEntryLine with only numeric inputs allowed)
         * decimal (UITextEntryLine with numeric inputs and decimal point allowed)
         * boolean (UIDropDownMenu with True and False as the options. Default option is True)
@@ -956,13 +967,7 @@ class UIForm(UIAutoScrollingContainer):
         """
 
         # Type with their args and supported values for args
-        supported_types = {"character": {"default": "'.'", "required": "True|False"},
-                           "short_text": {"default": "'.*'", "required": "True|False"},
-                           "long_text": {"default": "'.*'", "required": "True|False"},
-                           "integer": {"default": r"\d*", "required": "True|False"},
-                           "decimal": {"default": r"[/d.]*", "required": "True|False"},
-                           "boolean": {"default": "True|False", "required": "True|False"}
-                           }
+        supported_types = UIForm.SUPPORTED_TYPES
 
         type_check = re.compile(f"(?P<type_name>{'|'.join(supported_types)})(?:\\((?P<type_args>.*)\\))?",
                                 re.IGNORECASE)
