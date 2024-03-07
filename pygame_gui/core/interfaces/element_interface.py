@@ -3,8 +3,10 @@ from typing import Tuple, Union, List, Set, Any
 
 import pygame
 
+from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
-class IUIElementInterface(metaclass=ABCMeta):
+
+class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     """
     Interface for the ui element class. This is so we can refer to ui elements in other classes
     before the UIElement has itself been defined.

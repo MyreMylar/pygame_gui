@@ -10,6 +10,7 @@ from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 from pygame_gui.core.interfaces.manager_interface import IUIManagerInterface
 from pygame_gui.core.interfaces.text_owner_interface import IUITextOwnerInterface
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
 
 __all__ = ['IColourGradientInterface',
@@ -23,4 +24,5 @@ __all__ = ['IColourGradientInterface',
            'IUITooltipInterface',
            'IUIManagerInterface',
            'IUITextOwnerInterface',
-           'IGUIFontInterface']
+           'IGUIFontInterface',
+           'IGUISpriteInterface']

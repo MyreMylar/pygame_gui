@@ -315,7 +315,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         If the container was visible before - ignore.
         """
         if not self.visible:
-            self.visible = 1
+            self.visible = True
 
             for element in self.elements:
                 if hasattr(element, 'show'):
@@ -332,9 +332,9 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                 if hasattr(element, 'hide'):
                     element.hide()
 
-            self.visible = 0
+            self.visible = False
 
-    def on_anchor_target_changed(self, target: UIElement):
+    def on_anchor_target_changed(self, target: IUIElementInterface):
         """
         Update the contents of this container that one of their layout anchors may have moved, or
         been resized.

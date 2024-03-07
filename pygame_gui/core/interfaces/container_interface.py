@@ -6,7 +6,7 @@ import pygame
 from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 
 
-class IUIContainerInterface(metaclass=ABCMeta):
+class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
     """
     Interface for the actual container class. Not to be confused with the IContainerLikeInterface
     which is an interface for all the things we can treat like containers when creating elements.
@@ -96,11 +96,13 @@ class IUIContainerInterface(metaclass=ABCMeta):
     @abstractmethod
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
-                                               Tuple[float, float]]):
+                                               Tuple[float, float]],
+                       clamp_to_container: bool = False):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.
 
+        :param clamp_to_container:
         :param dimensions: the new dimensions.
 
         """
@@ -164,14 +166,22 @@ class IUIContainerInterface(metaclass=ABCMeta):
         """
         Obtain the current image clipping rect.
 
-        :return: The current clipping rect. May be None.
+        :return: The current clipping rect. It may be None.
 
+        """
+
+    def on_anchor_target_changed(self, target: IUIElementInterface):
+        """
+        Update the contents of this container that one of their layout anchors may have moved, or
+        been resized.
+
+        :param target: the UI element that has been benn moved or resized.
         """
 
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
-        A meta class that defines the interface for containers used by elements.
+        A metaclass that defines the interface for containers used by elements.
 
         This interface lets us treat classes like UIWindows and UIPanels like containers for
         elements even though they actually pass this functionality off to the proper UIContainer

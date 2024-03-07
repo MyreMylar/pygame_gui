@@ -607,7 +607,7 @@ class UIClosedDropDownState:
         """
         Show selected_option_button and open_button.
         """
-        self.visible = 1
+        self.visible = True
 
         if self.open_button is not None:
             self.open_button.show()
@@ -618,7 +618,7 @@ class UIClosedDropDownState:
         """
         Hide selected_option_button and open_button.
         """
-        self.visible = 0
+        self.visible = False
 
         if self.open_button is not None:
             self.open_button.hide()
