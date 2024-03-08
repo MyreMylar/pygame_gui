@@ -371,10 +371,3 @@ class IUIElementInterface(metaclass=ABCMeta):
         Called for each element when the locale is changed on their UIManager
 
         """
-
-    @abstractmethod
-    def get_anchor_targets(self) -> list:
-        """
-        Get any anchor targets this element has so we can update them when their targets change
-        :return: the list of anchor targets.
-        """

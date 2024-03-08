@@ -342,5 +342,5 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         :param target: the UI element that has been benn moved or resized.
         """
         for element in self.elements:
-            if target in element.get_anchor_targets():
+            if target in element.transform.get_anchor_targets():
                 element.update_containing_rect_position()
