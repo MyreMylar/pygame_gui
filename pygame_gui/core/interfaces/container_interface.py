@@ -170,12 +170,20 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
 
         """
 
-    def on_anchor_target_changed(self, target: IUIElementInterface):
+    def on_contained_elements_changed(self, target: IUIElementInterface) -> None:
         """
         Update the contents of this container that one of their layout anchors may have moved, or
         been resized.
 
         :param target: the UI element that has been benn moved or resized.
+        """
+
+    def calc_add_element_changes_thickness(self, element: IUIElementInterface):
+        """
+        This function checks if a single added element will increase the containers thickness
+        and if so updates containers recursively.
+
+        :param element: the element to check.
         """
 
 

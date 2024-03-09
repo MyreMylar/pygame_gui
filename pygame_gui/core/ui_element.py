@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from pygame_gui.core.interfaces import IUIElementInterface
+from pygame_gui.core.interfaces import IUIElementInterface, Coordinate
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
@@ -14,6 +14,7 @@ from pygame_gui.core.utility import get_default_manager
 from pygame_gui.core.object_id import ObjectID
 
 if TYPE_CHECKING:
+    # noinspection PyUnresolvedReferences
     from pygame_gui.core.drawable_shapes.drawable_shape import DrawableShape
 
 
@@ -26,7 +27,7 @@ class UIElement(GUISprite, IUIElementInterface):
                           element's container.
     :param manager: The UIManager that manages this UIElement.
     :param container: A container that this element is contained in.
-    :param starting_height: Used to record how many layers above it's container this element
+    :param starting_height: Used to record how many layers above its container this element
                             should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
@@ -37,6 +38,7 @@ class UIElement(GUISprite, IUIElementInterface):
     :param object_id: An optional set of IDs to help distinguish this element from other elements.
     :param element_id: A list of string ID representing this element's class.
     """
+
     def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: Optional[IUIManagerInterface],
                  container: Optional[IContainerLikeInterface],
@@ -51,7 +53,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._layer = 0
         self.ui_manager = manager
-        self.ui_container:  Optional[IContainerLikeInterface] = None
+        self.ui_container: Optional[IContainerLikeInterface] = None
         if self.ui_manager is None:
             self.ui_manager = get_default_manager()
         if self.ui_manager is None:
@@ -173,17 +175,17 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
-        
+
         element_ids = element_id
         element_id = None
         base_id = None
         if element_ids is not None:
             if len(element_ids) >= 1:
                 element_id = element_ids[0]
-            
+
             if len(element_ids) >= 2:
                 base_id = element_ids[1]
-        
+
             self._create_valid_ids(container=container,
                                    parent_element=parent_element,
                                    object_id=object_id,
@@ -209,12 +211,12 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def _calc_dynamic_size(self):
         pass
-    
+
     def _set_dynamic_width(self, is_dynamic: bool = True):
         self.dynamic_width = is_dynamic
         if self.drawable_shape is not None:
             self.drawable_shape.dynamic_width = is_dynamic
-    
+
     def _set_dynamic_height(self, is_dynamic: bool = True):
         self.dynamic_height = is_dynamic
         if self.drawable_shape is not None:
@@ -297,7 +299,7 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         if isinstance(self.ui_container, IContainerLikeInterface):
             self.ui_container.get_container().remove_element(self)
-            
+
         self._setup_container(container)
         self._update_absolute_rect_position_from_anchors()
         self.rebuild_from_changed_theme_data()
@@ -496,8 +498,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
             centery_offset = self._calc_centery_offset()
-            new_top = self.relative_rect.top - self.relative_rect.height//2 + centery_offset
-            new_bottom = self.relative_rect.bottom - self.relative_rect.height//2 + centery_offset
+            new_top = self.relative_rect.top - self.relative_rect.height // 2 + centery_offset
+            new_bottom = self.relative_rect.bottom - self.relative_rect.height // 2 + centery_offset
 
         if 'top' in self.anchors:
             if self.anchors['top'] == 'top':
@@ -529,8 +531,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
             centerx_offset = self._calc_centerx_offset()
-            new_left = self.relative_rect.left - self.relative_rect.width//2 + centerx_offset
-            new_right = self.relative_rect.right - self.relative_rect.width//2 + centerx_offset
+            new_left = self.relative_rect.left - self.relative_rect.width // 2 + centerx_offset
+            new_right = self.relative_rect.right - self.relative_rect.width // 2 + centerx_offset
 
         if 'left' in self.anchors:
             if self.anchors['left'] == 'left':
@@ -594,8 +596,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
             centery_offset = self._calc_centery_offset()
-            new_top = self.rect.top + self.relative_rect.height//2 - centery_offset
-            new_bottom = self.rect.bottom + self.relative_rect.height//2 - centery_offset
+            new_top = self.rect.top + self.relative_rect.height // 2 - centery_offset
+            new_bottom = self.rect.bottom + self.relative_rect.height // 2 - centery_offset
 
         if 'top' in self.anchors:
             if self.anchors['top'] == 'top':
@@ -625,8 +627,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
             centerx_offset = self._calc_centerx_offset()
-            new_left = self.rect.left + self.relative_rect.width//2 - centerx_offset
-            new_right = self.rect.right + self.relative_rect.width//2 - centerx_offset
+            new_left = self.rect.left + self.relative_rect.width // 2 - centerx_offset
+            new_right = self.rect.right + self.relative_rect.width // 2 - centerx_offset
 
         if 'left' in self.anchors:
             if self.anchors['left'] == 'left':
@@ -705,7 +707,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def update_containing_rect_position(self):
         """
-        Updates the position of this element based on the position of it's container. Usually
+        Updates the position of this element based on the position of its container. Usually
         called when the container has moved.
         """
         self._update_absolute_rect_position_from_anchors()
@@ -715,9 +717,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._update_container_clip()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -733,11 +733,9 @@ class UIElement(GUISprite, IUIElementInterface):
             self.drawable_shape.set_position(self.rect.topleft)
 
         self._update_container_clip()
-        self.ui_container.get_container().on_anchor_target_changed(self)
+        self.ui_container.get_container().on_contained_elements_changed(self)
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -751,11 +749,9 @@ class UIElement(GUISprite, IUIElementInterface):
         if self.drawable_shape is not None:
             self.drawable_shape.set_position(self.rect.topleft)
         self._update_container_clip()
-        self.ui_container.get_container().on_anchor_target_changed(self)
+        self.ui_container.get_container().on_contained_elements_changed(self)
 
-    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                                       Tuple[int, int],
-                                                       Tuple[float, float]]):
+    def set_minimum_dimensions(self, dimensions: Coordinate):
         """
         If this window is resizable, then the dimensions we set here will be the minimum that
         users can change the window to. They are also used as the minimum size when
@@ -773,10 +769,7 @@ class UIElement(GUISprite, IUIElementInterface):
             new_height = max(self.minimum_dimensions[1], self.rect.height)
             self.set_dimensions((new_width, new_height))
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element. And set whether the elements are dynamic.
 
@@ -794,22 +787,19 @@ class UIElement(GUISprite, IUIElementInterface):
             is_dynamic = True
         else:
             self._set_dynamic_width(False)
-            
+
         if dimensions[1] < 0:
             self._set_dynamic_height()
             is_dynamic = True
         else:
             self._set_dynamic_height(False)
-            
+
         if is_dynamic:
             self.rebuild()
         else:
             self._set_dimensions(dimensions, clamp_to_container)
 
-    def _set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                                Tuple[int, int],
-                                                Tuple[float, float]],
-                        clamp_to_container: bool = False):
+    def _set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
         Dimensions must be positive values.
@@ -832,7 +822,7 @@ class UIElement(GUISprite, IUIElementInterface):
                     self._set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
-            self.ui_container.get_container().on_anchor_target_changed(self)
+            self.ui_container.get_container().on_contained_elements_changed(self)
 
     def update(self, time_delta: float):
         """
@@ -859,7 +849,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def kill(self):
         """
-        Overriding regular sprite kill() method to remove the element from it's container.
+        Overriding regular sprite kill() method to remove the element from its container.
         """
         if self.tool_tip is not None:
             self.tool_tip.kill()
@@ -932,7 +922,7 @@ class UIElement(GUISprite, IUIElementInterface):
                        mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         """
         Called while we are in the hover state. It will create a tool tip if we've been in the
-        hover state for a while, the text exists to create one and we haven't created one already.
+        hover state for a while, the text exists to create one, and we haven't created one already.
 
         :param time_delta: Time in seconds between calls to update.
         :param mouse_pos: The current position of the mouse.
@@ -1116,7 +1106,7 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         Obtain the current image clipping rect.
 
-        :return: The current clipping rect. May be None.
+        :return: The current clipping rect. Maybe None.
 
         """
         return self._image_clip
@@ -1324,4 +1314,3 @@ class UIElement(GUISprite, IUIElementInterface):
             self.tool_tip_delay = delay
 
         self.tool_tip_wrap_width = wrap_width
-

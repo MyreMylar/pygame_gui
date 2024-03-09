@@ -5,6 +5,8 @@ import pygame
 
 from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
+Coordinate = Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]
+
 
 class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     """
@@ -71,9 +73,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -82,9 +82,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -93,10 +91,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
