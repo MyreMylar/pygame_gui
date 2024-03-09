@@ -132,7 +132,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_theme
 
-    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
+    def get_sprite_group(self) -> LayeredGUIGroup:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.

@@ -10,21 +10,21 @@ from pygame_gui.core.ui_element import UIElement
 
 class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     """
-    A UI Container holds any number of other UI elements inside of a rectangle. When we move the
+    A UI Container holds any number of other UI elements inside a rectangle. When we move the
     UIContainer all the UI elements contained within it can be moved as well.
 
     This class helps us make UI Windows, but likely will have wider uses as well as the GUI
     system develops.
 
     :param relative_rect: A pygame.Rect whose position is relative to whatever UIContainer it is
-                          inside of, if any.
+                          inside, if any.
     :param manager: The UIManager that manages this UIElement.
-    :param starting_height: The starting layer height for this element above it's container.
+    :param starting_height: The starting layer height for this element above its container.
     :param is_window_root_container: True/False flag for whether this container is the root
                                      container for a UI window.
     :param container: The UIContainer that this UIElement is contained within.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the container and its children are visible by default.
                     Warning - it's parent container visibility may override this.
@@ -132,7 +132,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         if new_thickness != self.layer_thickness:
             self.layer_thickness = new_thickness
             if self.ui_container is not None and self.ui_container != self:
-                self.ui_container.recalculate_container_layer_thickness()
+                self.ui_container.get_container().recalculate_container_layer_thickness()
 
     def calc_add_element_changes_thickness(self, element: IUIElementInterface):
         """
@@ -148,7 +148,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
             self.max_element_top_layer = element.get_top_layer()
             self.layer_thickness = self.max_element_top_layer - self._layer
             if self.ui_container is not None and self.ui_container != self:
-                self.ui_container.calc_add_element_changes_thickness(self)
+                self.ui_container.get_container().calc_add_element_changes_thickness(self)
 
     def change_layer(self, new_layer: int):
         """
@@ -292,7 +292,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def disable(self):
         """
-        Disables all elements in the container so they are no longer interactive.
+        Disables all elements in the container, so they are no longer interactive.
         """
         if self.is_enabled:
             self.is_enabled = False
@@ -301,7 +301,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def enable(self):
         """
-        Enables all elements in the container so they are interactive again.
+        Enables all elements in the container, so they are interactive again.
         """
         if not self.is_enabled:
             self.is_enabled = True
@@ -315,7 +315,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         If the container was visible before - ignore.
         """
         if not self.visible:
-            self.visible = 1
+            self.visible = True
 
             for element in self.elements:
                 if hasattr(element, 'show'):
@@ -332,15 +332,16 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                 if hasattr(element, 'hide'):
                     element.hide()
 
-            self.visible = 0
+            self.visible = False
 
-    def on_anchor_target_changed(self, target: UIElement):
+    def on_contained_elements_changed(self, target: IUIElementInterface) -> None:
         """
-        Update the contents of this container that one of their layout anchors may have moved, or
-        been resized.
+        Update the positioning of the contained elements of this container. To be called when one of the contained
+        elements may have moved, been resized or changed its anchors.
 
-        :param target: the UI element that has been benn moved or resized.
+        :param target: the UI element that has been benn moved resized or changed its anchors.
         """
         for element in self.elements:
             if target in element.get_anchor_targets():
                 element.update_containing_rect_position()
+                self.on_contained_elements_changed(element)
