@@ -250,7 +250,7 @@ class TestUIManager:
         default_ui_manager.add_font_paths(font_name='roboto',
                                           regular_path=os.path.join('tests', 'data', 'Roboto-Regular.ttf'))
         default_ui_manager.preload_fonts([{'name': 'roboto', 'point_size': 14, 'style': 'regular'}])
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'html_size': 3, 'style': 'italic'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'html_size': 3, 'style': 'italic'}])
         # default_ui_manager.resource_loader.start()
         # default_ui_manager.resource_loader.update()
 

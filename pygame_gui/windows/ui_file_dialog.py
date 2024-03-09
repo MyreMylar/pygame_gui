@@ -70,6 +70,8 @@ class UIFileDialog(UIWindow):
         self.current_file_path = None  # type: Union[Path, None]
         if allowed_suffixes is None:
             self.allowed_suffixes = {""}
+        else:
+            self.allowed_suffixes = allowed_suffixes
         if initial_file_path is not None:
             pathed_initial_file_path = Path(initial_file_path)
             if pathed_initial_file_path.exists() and not pathed_initial_file_path.is_file():

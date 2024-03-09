@@ -5,13 +5,13 @@ from pygame import Surface, Color, Rect
 
 class IGUIFontInterface(metaclass=ABCMeta):
     """
-    A font interface so we can easily switch between pygame.freetype.Font and pygame.Font.
+    A font interface, so we can easily switch between pygame.freetype.Font and pygame.Font.
     """
 
     @abstractmethod
     def render_premul(self, text: str, text_color: Color) -> Surface:
         """
-        Draws text to a surface ready for premultiplied alpha-blending
+        Draws text to a surface ready for pre-multiplied alpha-blending
         """
 
     def render_premul_to(self, text: str, text_colour: Color, surf_size: Tuple[int, int], surf_position: Tuple[int, int]):
@@ -87,3 +87,8 @@ class IGUIFontInterface(metaclass=ABCMeta):
         :return:
         """
 
+    def get_direction(self) -> int:
+        """
+
+        :return:
+        """

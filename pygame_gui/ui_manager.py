@@ -132,7 +132,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_theme
 
-    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
+    def get_sprite_group(self) -> LayeredGUIGroup:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -378,10 +378,10 @@ class UIManager(IUIManagerInterface):
         responsiveness when creating UI elements that use a lot of different fonts.
 
         To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default
-        'fira_code' font) you must first add the paths to the files for those fonts, then load the
+        'noto_sans' font) you must first add the paths to the files for those fonts, then load the
         specific fonts with a list of font descriptions in a dictionary form like so:
 
-            ``{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic', 'antialiased': 1}``
+            ``{'name': 'noto_sans', 'point_size': 12, 'style': 'bold_italic', 'antialiased': 1}``
 
         You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style
         sizes with 'html_size'. Style options are:
@@ -397,11 +397,13 @@ class UIManager(IUIManagerInterface):
 
         """
         for font in font_list:
-            name = 'fira_code'
+            name = 'noto_sans'
             bold = False
             italic = False
             size = 14
             antialiased = True
+            script = 'Latn'
+            direction = pygame.DIRECTION_LTR
             if 'name' in font:
                 name = font['name']
             if 'style' in font:
@@ -411,13 +413,21 @@ class UIManager(IUIManagerInterface):
                     italic = True
             if 'antialiased' in font:
                 antialiased = bool(int(font['antialiased']))
+            if 'script' in font:
+                script = font['script']
+            if 'direction' in font:
+                if 'ltr' == font['direction'].lower():
+                    direction = pygame.DIRECTION_LTR
+                if 'rtl' in font['direction'].lower():
+                    direction = pygame.DIRECTION_RTL
             if 'html_size' in font:
                 font_dict = self.ui_theme.get_font_dictionary()
                 size = font_dict.convert_html_to_point_size(font['html_size'])
             elif 'point_size' in font:
                 size = font['point_size']
 
-            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic, False, antialiased)
+            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic, False,
+                                                             antialiased, script=script, direction=direction)
 
     def print_unused_fonts(self):
         """

@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
-
+from pygame import DIRECTION_LTR
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 
 class IUIFontDictionaryInterface(metaclass=ABCMeta):
     """
-    A meta class that defines the interface that a font dictionary uses.
+    A metaclass that defines the interface that a font dictionary uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
@@ -14,14 +14,16 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
     @abstractmethod
     def find_font(self, font_size: int, font_name: str,
                   bold: bool = False, italic: bool = False,
-                  antialiased: bool = True) -> IGUIFontInterface:
+                  antialiased: bool = True,
+                  script: str = 'Latn',
+                  direction: int = DIRECTION_LTR) -> IGUIFontInterface:
         """
-        Find a loaded font from the font dictionary. Will load a font if it does not already exist
+        Find a loaded font from the font dictionary. Will load a font if it does not already exist,
         and we have paths to the needed files, however it will issue a warning after doing so
         because dynamic file loading is normally a bad idea as you will get frame rate hitches
         while the running program waits for the font to load.
 
-        Instead it's best to preload all your needed files at another time in your program when
+        Instead, it's best to preload all your needed files at another time in your program when
         you have more control over the user experience.
 
         :param font_size: The size of the font to find.
@@ -29,6 +31,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
         :param antialiased: Whether the font is antialiased or not.
+        :param script: The ISO 15924 script code used for text shaping as a string.
+        :param direction: the direction of text e.g. left to right or right to left. An integer.
 
         :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
@@ -44,7 +48,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool, antialiased: bool = True) -> str:
+    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool,
+                       antialiased: bool = True) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
 
@@ -62,11 +67,13 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False,
                      force_immediate_load: bool = False,
-                     antialiased: bool = True):
+                     antialiased: bool = True,
+                     script: str = 'Latn',
+                     direction: int = DIRECTION_LTR):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
-        pre-load all your font data at a controlled time, which is where this method comes in.
+        preload all your font data at a controlled time, which is where this method comes in.
 
         :param font_size: The size of the font to load.
         :param font_name: The name of the font to load.
@@ -75,6 +82,8 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         :param force_immediate_load: bypasses any asynchronous threaded loading setup to immediately
                                      load the font on the main thread.
         :param antialiased: Whether the font is antialiased or not.
+        :param script: The ISO 15924 script code used for text shaping as a string.
+        :param direction: the direction of text e.g. left to right or right to left. An integer.
 
         """
 
@@ -106,7 +115,7 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
     @abstractmethod
     def convert_html_to_point_size(self, html_size: float) -> int:
         """
-        Takes in a HTML style font size and converts it into a point font size.
+        Takes in an HTML style font size and converts it into a point font size.
 
         :param html_size: Size in HTML style.
 
@@ -137,5 +146,5 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
         This may change the default font.
 
-        :param new_locale: The new locale to set, a two letter country code ISO 639-1
+        :param new_locale: The new locale to set, a two-letter country code ISO 639-1
         """

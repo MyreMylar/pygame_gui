@@ -127,6 +127,18 @@ class TestUIElement:
         assert element_5.rect.topleft == (110, 110)
         element_5.update_containing_rect_position()
         assert element_5.rect.topleft == (60, 60)
+        
+    def test_set_container(self, _init_pygame, _display_surface_return_none, default_ui_manager):
+        test_container1 = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
+        test_container2 = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
+        element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=test_container1,
+                            starting_height=0,
+                            layer_thickness=1)
+        assert element.ui_container == test_container1
+        element.set_container(test_container2)
+        assert element.ui_container == test_container2
 
     def test_set_relative_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 300), manager=default_ui_manager)
@@ -535,7 +547,7 @@ class TestUIElement:
     def test_set_visual_debug_mode(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
 
-        default_ui_manager.preload_fonts([{'name': 'fira_code', 'point_size': 8, 'style': 'regular'}])
+        default_ui_manager.preload_fonts([{'name': 'noto_sans', 'point_size': 8, 'style': 'regular'}])
         element = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),
                             manager=default_ui_manager,
                             container=None,

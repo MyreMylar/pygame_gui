@@ -94,6 +94,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.effects_offset_pos = (0, 0)
         self.transform_effect_rect = Rect(self.topleft, self.size)
 
+    def can_split(self):
+        if len(self.text) > 0:
+            return super().can_split()
+        else:
+            return False
+
     def __repr__(self):
         return "< '" + self.text + "' " + super().__repr__() + " >"
 
@@ -109,13 +115,15 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _handle_dimensions(self, font, text):
         if len(text) == 0:
             text_rect = font.get_rect('A')
+            text_rect.width = 0
+            text_width = 0
         else:
             text_rect = font.get_rect(text)
-        text_shadow_width = 0
-        if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
-            # expand our text chunk if we have a text shadow
-            text_shadow_width = self.text_shadow_data[0]
-        text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
+            text_shadow_width = 0
+            if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
+                # expand our text chunk if we have a text shadow
+                text_shadow_width = self.text_shadow_data[0]
+            text_width = text_rect.width + (2 * text_shadow_width)
         text_height = text_rect.height
         text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
         return text_height, text_rect, text_width
@@ -682,8 +690,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     @staticmethod
     def _text_render_width(text: str, font):
-        return sum([char_metric[4] if char_metric is not None else 0
-                    for char_metric in font.get_metrics(text)])
+        return font.get_rect(text).width
 
     def set_alpha(self, alpha: int):
         """

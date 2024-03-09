@@ -197,7 +197,10 @@ class TextBoxLayoutRow(pygame.Rect):
                 aligned_right_start_x = floater.left
         self.right = aligned_right_start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
-        for item in reversed(self.items):
+        direction_list = self.items
+        if self.layout.text_direction == pygame.DIRECTION_LTR:
+            direction_list = reversed(self.items)
+        for item in direction_list:
             item.right = current_start_x
             current_start_x -= item.width
 
@@ -466,6 +469,23 @@ class TextBoxLayoutRow(pygame.Rect):
         self.cursor_draw_width = cursor_draw_width
 
         self._setup_offset_position_from_edit_cursor()
+
+    def set_cursor_to_end(self, is_last_row):
+        end_pos = self.letter_count
+        # we need to ignore the trailing space on line-wrapped rows,
+        # or we will spill over to the row below
+        if not is_last_row and len(self.items) > 0:
+            last_chunk = self.items[-1]
+            if (isinstance(last_chunk, TextLineChunkFTFont) and
+                    (len(last_chunk.text) > 0 and last_chunk.text[-1] == " ")):
+                end_pos -= 1
+            if isinstance(last_chunk, LineBreakLayoutRect):
+                end_pos -= 1
+        end_pos = max(0, end_pos)
+        self.set_cursor_position(end_pos)
+
+    def set_cursor_to_start(self):
+        self.set_cursor_position(0)
 
     def get_cursor_index(self) -> int:
         """
