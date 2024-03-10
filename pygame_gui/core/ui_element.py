@@ -410,7 +410,7 @@ class UIElement(GUISprite, IUIElementInterface):
                             'top': 'top'}
 
         if self.anchors != old_anchors and self.ui_container is not None:
-            self.ui_container.on_contained_elements_changed(self)
+            self.ui_container.get_container().on_contained_elements_changed(self)
 
     def _create_valid_ids(self,
                           container: Union[IContainerLikeInterface, None],

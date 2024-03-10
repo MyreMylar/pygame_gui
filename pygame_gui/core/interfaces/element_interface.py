@@ -85,7 +85,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     @abstractmethod
     def update_containing_rect_position(self):
         """
-        Updates the position of this element based on the position of it's container. Usually
+        Updates the position of this element based on the position of its container. Usually
         called when the container has moved.
         """
 
@@ -142,7 +142,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     @abstractmethod
     def kill(self):
         """
-        Overriding regular sprite kill() method to remove the element from it's container.
+        Overriding regular sprite kill() method to remove the element from its container.
         """
 
     @abstractmethod
@@ -275,7 +275,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
         Obtain the current image clipping rect.
 
-        :return: The current clipping rect. May be None.
+        :return: The current clipping rect. Maybe None.
 
         """
 
@@ -337,7 +337,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     @abstractmethod
     def join_focus_sets(self, element):
         """
-        Join this element's focus set with another's.
+        Join this element's focus set with another element's focus set.
 
         :param element: The other element whose focus set we are joining with.
         """
@@ -389,6 +389,6 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     @abstractmethod
     def get_anchor_targets(self) -> list:
         """
-        Get any anchor targets this element has so we can update them when their targets change
+        Get any anchor targets this element has, so we can update them when their targets change
         :return: the list of anchor targets.
         """
