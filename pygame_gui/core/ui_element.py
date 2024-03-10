@@ -479,42 +479,42 @@ class UIElement(GUISprite, IUIElementInterface):
                          anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['top_target'].get_abs_rect().bottom
                 if 'top_target' in anchors
-                else container.get_container().get_rect().top)
+                else container.get_container().get_abs_rect().top)
 
     @staticmethod
     def _calc_bottom_offset(container: Optional[IContainerLikeInterface],
                             anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['bottom_target'].get_abs_rect().top
                 if 'bottom_target' in anchors
-                else container.get_container().get_rect().bottom)
+                else container.get_container().get_abs_rect().bottom)
 
     @staticmethod
     def _calc_centery_offset(container: Optional[IContainerLikeInterface],
                              anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['centery_target'].get_abs_rect().centery
                 if 'centery_target' in anchors
-                else container.get_container().get_rect().centery)
+                else container.get_container().get_abs_rect().centery)
 
     @staticmethod
     def _calc_left_offset(container: Optional[IContainerLikeInterface],
                           anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['left_target'].get_abs_rect().right
                 if 'left_target' in anchors
-                else container.get_container().get_rect().left)
+                else container.get_container().get_abs_rect().left)
 
     @staticmethod
     def _calc_right_offset(container: Optional[IContainerLikeInterface],
                            anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['right_target'].get_abs_rect().left
                 if 'right_target' in anchors
-                else container.get_container().get_rect().right)
+                else container.get_container().get_abs_rect().right)
 
     @staticmethod
     def _calc_centerx_offset(container: Optional[IContainerLikeInterface],
                              anchors: Dict[str, Union[str, IUIElementInterface]]) -> int:
         return (anchors['centerx_target'].get_abs_rect().centerx
                 if 'centerx_target' in anchors
-                else container.get_container().get_rect().centerx)
+                else container.get_container().get_abs_rect().centerx)
 
     @staticmethod
     def _calc_abs_rect_pos_from_rel_rect(relative_rect: pygame.Rect, container: Optional[IContainerLikeInterface],
@@ -535,9 +535,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         new_top = 0
         new_bottom = 0
-        top_offset = UIElement._calc_top_offset(container, anchors)
-        bottom_offset = UIElement._calc_bottom_offset(container, anchors)
-
+        top_offset = self._calc_top_offset(container, anchors)
+        bottom_offset = self._calc_bottom_offset(container, anchors)
         center_x_and_y = False
 
         if 'center' in anchors:
@@ -545,7 +544,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 center_x_and_y = True
 
         if ('centery' in anchors and anchors['centery'] == 'centery') or center_x_and_y:
-            centery_offset = UIElement._calc_centery_offset(container, anchors)
+            centery_offset = self._calc_centery_offset(container, anchors)
             new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
             new_bottom = relative_rect.bottom - relative_rect.height // 2 + centery_offset
 
@@ -574,11 +573,11 @@ class UIElement(GUISprite, IUIElementInterface):
 
         new_left = 0
         new_right = 0
-        left_offset = UIElement._calc_left_offset(container, anchors)
-        right_offset = UIElement._calc_right_offset(container, anchors)
+        left_offset = self._calc_left_offset(container, anchors)
+        right_offset = self._calc_right_offset(container, anchors)
 
         if ('centerx' in anchors and anchors['centerx'] == 'centerx') or center_x_and_y:
-            centerx_offset = UIElement._calc_centerx_offset(container, anchors)
+            centerx_offset = self._calc_centerx_offset(container, anchors)
             new_left = relative_rect.left - relative_rect.width // 2 + centerx_offset
             new_right = relative_rect.right - relative_rect.width // 2 + centerx_offset
 
