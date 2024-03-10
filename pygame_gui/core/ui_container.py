@@ -250,7 +250,6 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         This is achieved by setting the new dimensions and updating the anchors of all the elements anchored
         to the top of the container.
 
-        :param height: The height to increase by. Pass in negative values to decrease the size
         :param height_increase: The height to increase by. Pass in negative values to decrease the size
         :return: None
         """
@@ -384,7 +383,6 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     element.hide()
 
             self.visible = False
-
 
     def on_contained_elements_changed(self, target: IUIElementInterface) -> None:
         """
