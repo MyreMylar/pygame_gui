@@ -40,7 +40,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 allow_scroll_x: bool = True,
+                 allow_scroll_y: bool = True,
+                 ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self._root_container = None
@@ -55,11 +58,14 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                          object_id=object_id,
                          element_id=['scrolling_container'])
 
-        # self.parent_element = parent_element
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
 
         self.need_to_sort_out_scrollbars = False
+
+        self.allow_scroll_x = allow_scroll_x
+        self.allow_scroll_y = allow_scroll_y
+
         self.vert_scroll_bar: Optional[UIVerticalScrollBar] = None
         self.horiz_scroll_bar: Optional[UIHorizontalScrollBar] = None
 
@@ -271,7 +277,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         bar has been moved. Instead, it tries to keep the scrollbars in the same approximate position
         they were in before resizing
         """
+
+        # First call to see if scrolling container size on its own necessitates scroll bars
         self._check_scroll_bars_and_adjust()
+        # second call to see if the view space contraction produced by any scroll bars created
+        # in the first call, require an additional scroll bar
         need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars_and_adjust()
 
         if need_vert_scroll_bar:
@@ -344,11 +354,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         need_horiz_scroll_bar = False
         need_vert_scroll_bar = False
         if (self.scrolling_height > self._view_container.rect.height or
-                self.scrollable_container.relative_rect.top != 0):
+                self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
             need_vert_scroll_bar = True
             self.scroll_bar_width = 20
         if (self.scrolling_width > self._view_container.rect.width or
-                self.scrollable_container.relative_rect.left != 0):
+                self.scrollable_container.relative_rect.left != 0) and self.allow_scroll_x:
             need_horiz_scroll_bar = True
             self.scroll_bar_height = 20
         if need_vert_scroll_bar or need_horiz_scroll_bar:
@@ -356,6 +366,16 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             new_height = (self._root_container.rect.height - self.scroll_bar_height)
             new_dimensions = (new_width, new_height)
             self._view_container.set_dimensions(new_dimensions)
+
+            if not self.allow_scroll_x:
+                # horizontal scrolling is banned, lets shrink the scrollable width
+                # to account for any scroll bar as well
+                self.scrollable_container.set_dimensions((new_width,
+                                                          self.scrollable_container.rect.height))
+            if not self.allow_scroll_y:
+                self.scrollable_container.set_dimensions((self.scrollable_container.rect.width,
+                                                          new_height))
+
         self._calculate_scrolling_dimensions()
         return need_horiz_scroll_bar, need_vert_scroll_bar
 
