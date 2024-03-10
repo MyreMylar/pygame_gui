@@ -84,47 +84,9 @@ class UIElement(GUISprite, IUIElementInterface):
         self.most_specific_combined_id = 'no_id'
 
         self.anchors = {}
-        if anchors is not None:
-            if 'center' in anchors and anchors['center'] == 'center':
-                self.anchors.update({'center': 'center'})
-            else:
-                if self._validate_horizontal_anchors(anchors):
-                    if 'left' in anchors:
-                        self.anchors['left'] = anchors['left']
-                    if 'right' in anchors:
-                        self.anchors['right'] = anchors['right']
-                    if 'centerx' in anchors:
-                        self.anchors['centerx'] = anchors['centerx']
-                else:
-                    self.anchors.update({'left': 'left'})
+        self.set_anchors(anchors)
 
-                if self._validate_vertical_anchors(anchors):
-                    if 'top' in anchors:
-                        self.anchors['top'] = anchors['top']
-                    if 'bottom' in anchors:
-                        self.anchors['bottom'] = anchors['bottom']
-                    if 'centery' in anchors:
-                        self.anchors['centery'] = anchors['centery']
-                else:
-                    self.anchors.update({'top': 'top'})
-
-            if 'left_target' in anchors:
-                self.anchors['left_target'] = anchors['left_target']
-            if 'right_target' in anchors:
-                self.anchors['right_target'] = anchors['right_target']
-            if 'top_target' in anchors:
-                self.anchors['top_target'] = anchors['top_target']
-            if 'bottom_target' in anchors:
-                self.anchors['bottom_target'] = anchors['bottom_target']
-            if 'centerx_target' in anchors:
-                self.anchors['centerx_target'] = anchors['centerx_target']
-            if 'centery_target' in anchors:
-                self.anchors['centery_target'] = anchors['centery_target']
-        else:
-            self.anchors = {'left': 'left',
-                            'top': 'top'}
-
-        self.drawable_shape = None  # type: Union['DrawableShape', None]
+        self.drawable_shape: Optional[DrawableShape] = None
         self.image = None
 
         if visible:
@@ -388,6 +350,67 @@ class UIElement(GUISprite, IUIElementInterface):
         :return: a list of strings, one for each element in the hierarchy.
         """
         return self.object_ids
+
+    def get_anchors(self) -> Dict[str, Union[str, IUIElementInterface]]:
+        """
+        A dictionary containing all the anchors defining what the relative rect is relative to
+
+        :return: A dictionary containing all the anchors defining what the relative rect is relative to
+        """
+        return self.anchors
+
+    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+        """
+        Wraps the setting of the anchors with some validation
+
+        :param anchors: A dictionary of anchors defining what the relative rect is relative to
+        :return: None
+        """
+        old_anchors = self.anchors.copy()
+        self.anchors = {}
+
+        if anchors is not None:
+            if 'center' in anchors and anchors['center'] == 'center':
+                self.anchors.update({'center': 'center'})
+            else:
+                if self._validate_horizontal_anchors(anchors):
+                    if 'left' in anchors:
+                        self.anchors['left'] = anchors['left']
+                    if 'right' in anchors:
+                        self.anchors['right'] = anchors['right']
+                    if 'centerx' in anchors:
+                        self.anchors['centerx'] = anchors['centerx']
+                else:
+                    self.anchors.update({'left': 'left'})
+
+                if self._validate_vertical_anchors(anchors):
+                    if 'top' in anchors:
+                        self.anchors['top'] = anchors['top']
+                    if 'bottom' in anchors:
+                        self.anchors['bottom'] = anchors['bottom']
+                    if 'centery' in anchors:
+                        self.anchors['centery'] = anchors['centery']
+                else:
+                    self.anchors.update({'top': 'top'})
+
+            if 'left_target' in anchors:
+                self.anchors['left_target'] = anchors['left_target']
+            if 'right_target' in anchors:
+                self.anchors['right_target'] = anchors['right_target']
+            if 'top_target' in anchors:
+                self.anchors['top_target'] = anchors['top_target']
+            if 'bottom_target' in anchors:
+                self.anchors['bottom_target'] = anchors['bottom_target']
+            if 'centerx_target' in anchors:
+                self.anchors['centerx_target'] = anchors['centerx_target']
+            if 'centery_target' in anchors:
+                self.anchors['centery_target'] = anchors['centery_target']
+        else:
+            self.anchors = {'left': 'left',
+                            'top': 'top'}
+
+        if self.anchors != old_anchors and self.ui_container is not None:
+            self.ui_container.get_container().on_contained_elements_changed(self)
 
     def _create_valid_ids(self,
                           container: Union[IContainerLikeInterface, None],
@@ -1163,7 +1186,7 @@ class UIElement(GUISprite, IUIElementInterface):
     def get_starting_height(self) -> int:
         """
         Get the starting layer height of this element. (i.e. the layer we start placing it on
-        *above* it's container, it may use more layers above this layer)
+        *above* its container, it may use more layers above this layer)
 
         :return: an integer representing the starting layer height.
 
