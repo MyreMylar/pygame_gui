@@ -520,7 +520,9 @@ class UIElement(GUISprite, IUIElementInterface):
     def _calc_abs_rect_pos_from_rel_rect(relative_rect: pygame.Rect, container: Optional[IContainerLikeInterface],
                                          anchors: Dict[str, Union[str, IUIElementInterface]],
                                          relative_right_margin: Optional[int] = None,
-                                         relative_bottom_margin: Optional[int] = None) -> Tuple[pygame.Rect, int, int]:
+                                         relative_bottom_margin: Optional[int] = None,
+                                         dynamic_width: bool = False,
+                                         dynamic_height: bool = False) -> Tuple[pygame.Rect, int, int]:
         """
         Use this function to get the absolute rect position, given the relative rect, container and the anchors.
         All values are assumed to be valid.
@@ -530,13 +532,17 @@ class UIElement(GUISprite, IUIElementInterface):
         :param anchors: Defines what the Rect is relative to
         :param relative_right_margin: The margin from the right. If not given or None, then it will be calculated
         :param relative_bottom_margin: The margin from the bottom. If not given or None, then it will be calculated
+        :param dynamic_width: If the width of the rect is dynamic or not.
+                              If not width will be clamped to minimum of 0.
+        :param dynamic_height: If the height of the rect is dynamic or not.
+                               If not height will be clamped to minimum of 0.
         :return: A tuple containing a Rect representing the absolute position of the rect from the screen, and the
         relative right and bottom margins
         """
         new_top = 0
         new_bottom = 0
-        top_offset = self._calc_top_offset(container, anchors)
-        bottom_offset = self._calc_bottom_offset(container, anchors)
+        top_offset = UIElement._calc_top_offset(container, anchors)
+        bottom_offset = UIElement._calc_bottom_offset(container, anchors)
         center_x_and_y = False
 
         if 'center' in anchors:
@@ -544,7 +550,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 center_x_and_y = True
 
         if ('centery' in anchors and anchors['centery'] == 'centery') or center_x_and_y:
-            centery_offset = self._calc_centery_offset(container, anchors)
+            centery_offset = UIElement._calc_centery_offset(container, anchors)
             new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
             new_bottom = relative_rect.bottom - relative_rect.height // 2 + centery_offset
 
@@ -573,11 +579,11 @@ class UIElement(GUISprite, IUIElementInterface):
 
         new_left = 0
         new_right = 0
-        left_offset = self._calc_left_offset(container, anchors)
-        right_offset = self._calc_right_offset(container, anchors)
+        left_offset = UIElement._calc_left_offset(container, anchors)
+        right_offset = UIElement._calc_right_offset(container, anchors)
 
         if ('centerx' in anchors and anchors['centerx'] == 'centerx') or center_x_and_y:
-            centerx_offset = self._calc_centerx_offset(container, anchors)
+            centerx_offset = UIElement._calc_centerx_offset(container, anchors)
             new_left = relative_rect.left - relative_rect.width // 2 + centerx_offset
             new_right = relative_rect.right - relative_rect.width // 2 + centerx_offset
 
@@ -604,8 +610,15 @@ class UIElement(GUISprite, IUIElementInterface):
                     relative_right_margin = (right_offset - (new_left + relative_rect.width))
                 new_right = right_offset - relative_right_margin
 
-        new_height = new_bottom - new_top
-        new_width = new_right - new_left
+        if dynamic_height:
+            new_height = new_bottom - new_top
+        else:
+            new_height = max(0, new_bottom - new_top)
+
+        if dynamic_width:
+            new_width = new_right - new_left
+        else:
+            new_width = max(0, new_right - new_left)
 
         rect = pygame.Rect(new_left, new_top, new_width, new_height)
         return rect, relative_right_margin, relative_bottom_margin
@@ -618,23 +631,19 @@ class UIElement(GUISprite, IUIElementInterface):
         relative_bottom_margin = None if recalculate_margins else self.relative_bottom_margin
 
         rect, self.relative_right_margin, self.relative_bottom_margin = self._calc_abs_rect_pos_from_rel_rect(
-            self.relative_rect, self.ui_container, self.anchors, relative_right_margin, relative_bottom_margin)
+            self.relative_rect,
+            self.ui_container,
+            self.anchors,
+            relative_right_margin,
+            relative_bottom_margin,
+            self.dynamic_width,
+            self.dynamic_height)
 
         new_left, new_top = rect.topleft
         new_width, new_height = rect.size
 
         self.rect.left = new_left
         self.rect.top = new_top
-
-        if self.dynamic_height:
-            new_height = new_bottom - new_top
-        else:
-            new_height = max(0, new_bottom - new_top)
-
-        if self.dynamic_width:
-            new_width = new_right - new_left
-        else:
-            new_width = max(0, new_right - new_left)
 
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
