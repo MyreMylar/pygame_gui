@@ -1,10 +1,10 @@
-from typing import Union, Tuple, Dict, Optional
+from typing import Union, Dict, Tuple, Optional
 
 import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, Coordinate
 from pygame_gui.core import UIElement, UIContainer
 
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
@@ -64,6 +64,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         self.allow_scroll_x = allow_scroll_x
         self.allow_scroll_y = allow_scroll_y
+        self.vert_scroll_bar: Optional[UIVerticalScrollBar] = None
+        self.horiz_scroll_bar: Optional[UIHorizontalScrollBar] = None
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
@@ -174,7 +176,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self._root_container.kill()
         super().kill()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -185,7 +187,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         super().set_position(position)
         self._root_container.set_position(position)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -195,8 +197,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         super().set_relative_position(position)
         self._root_container.set_relative_position(position)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -214,8 +215,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self._calculate_scrolling_dimensions()
         self._sort_out_element_container_scroll_bars()
 
-    def set_scrollable_area_dimensions(self,
-                                       dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_scrollable_area_dimensions(self, dimensions: Coordinate):
         """
         Set the size of the scrollable area container. It starts the same size as the view
         container, but often you want to expand it, or why have a scrollable container?
@@ -265,10 +265,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             else:
                 self._remove_vert_scrollbar()
 
-            # Think this code is unreachable due to clamping
-            # if self.scrolling_bottom < self._view_container.rect.bottom:
-            #     start_height = min(start_height, self._view_container.rect.height)
-
             new_pos = (self.scrollable_container.relative_rect.x,
                        -start_height)
             self.scrollable_container.set_relative_position(new_pos)
@@ -293,9 +289,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             else:
                 self._remove_horiz_scrollbar()
 
-            # Think this code is unreachable due to clamping
-            # if self.scrolling_right < self._view_container.rect.right:
-            #     start_width = min(start_width, self._view_container.rect.width)
             new_pos = (-start_width,
                        self.scrollable_container.relative_rect.y)
             self.scrollable_container.set_relative_position(new_pos)
@@ -361,9 +354,12 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         else:
             self._remove_horiz_scrollbar()
 
-    def _check_scroll_bars(self):
+    def _check_scroll_bars_and_adjust(self) -> Tuple[bool, bool]:
         """
-        Check if we need a horizontal or vertical scrollbar.
+        Check if we need a horizontal or vertical scrollbar and adjust the containers if we do.
+
+        Adjusting the containers for a scrollbar, may mean we now need a scrollbar in the other
+        dimension, so we need to call this twice.
         """
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
