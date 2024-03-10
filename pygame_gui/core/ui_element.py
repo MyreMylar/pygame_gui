@@ -516,91 +516,134 @@ class UIElement(GUISprite, IUIElementInterface):
                 if 'centerx_target' in anchors
                 else container.get_container().get_abs_rect().centerx)
 
-    def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
+    @staticmethod
+    def _calc_abs_rect_pos_from_rel_rect(relative_rect: pygame.Rect, container: Optional[IContainerLikeInterface],
+                                         anchors: Dict[str, Union[str, IUIElementInterface]],
+                                         relative_right_margin: Optional[int] = None,
+                                         relative_bottom_margin: Optional[int] = None,
+                                         dynamic_width: bool = False,
+                                         dynamic_height: bool = False) -> Tuple[pygame.Rect, int, int]:
         """
-        Called when our element's relative position has changed.
+        Use this function to get the absolute rect position, given the relative rect, container and the anchors.
+        All values are assumed to be valid.
+
+        :param relative_rect: A Rect relative to the container/anchors
+        :param container: Defines the container of the rect
+        :param anchors: Defines what the Rect is relative to
+        :param relative_right_margin: The margin from the right. If not given or None, then it will be calculated
+        :param relative_bottom_margin: The margin from the bottom. If not given or None, then it will be calculated
+        :param dynamic_width: If the width of the rect is dynamic or not.
+                              If not width will be clamped to minimum of 0.
+        :param dynamic_height: If the height of the rect is dynamic or not.
+                               If not height will be clamped to minimum of 0.
+        :return: A tuple containing a Rect representing the absolute position of the rect from the screen, and the
+        relative right and bottom margins
         """
         new_top = 0
         new_bottom = 0
-        top_offset = self._calc_top_offset(self.ui_container, self.anchors)
-        bottom_offset = self._calc_bottom_offset(self.ui_container, self.anchors)
-
+        top_offset = UIElement._calc_top_offset(container, anchors)
+        bottom_offset = UIElement._calc_bottom_offset(container, anchors)
         center_x_and_y = False
 
-        if 'center' in self.anchors:
-            if self.anchors['center'] == 'center':
+        if 'center' in anchors:
+            if anchors['center'] == 'center':
                 center_x_and_y = True
 
-        if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
-            centery_offset = self._calc_centery_offset(self.ui_container, self.anchors)
-            new_top = self.relative_rect.top - self.relative_rect.height // 2 + centery_offset
-            new_bottom = self.relative_rect.bottom - self.relative_rect.height // 2 + centery_offset
+        if ('centery' in anchors and anchors['centery'] == 'centery') or center_x_and_y:
+            centery_offset = UIElement._calc_centery_offset(container, anchors)
+            new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
+            new_bottom = relative_rect.bottom - relative_rect.height // 2 + centery_offset
 
-        if 'top' in self.anchors:
-            if self.anchors['top'] == 'top':
-                new_top = self.relative_rect.top + top_offset
-                new_bottom = self.relative_rect.bottom + top_offset
-            elif self.anchors['top'] == 'bottom':
-                new_top = self.relative_rect.top + bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = (bottom_offset -
-                                                   (new_top + self.relative_rect.height))
-                new_bottom = bottom_offset - self.relative_bottom_margin
+        if 'top' in anchors:
+            if anchors['top'] == 'top':
+                new_top = relative_rect.top + top_offset
+                new_bottom = relative_rect.bottom + top_offset
+            elif anchors['top'] == 'bottom':
+                new_top = relative_rect.top + bottom_offset
 
-        if 'bottom' in self.anchors:
-            if self.anchors['bottom'] == 'top':
-                new_top = self.relative_rect.top + top_offset
-                new_bottom = self.relative_rect.bottom + top_offset
-            elif self.anchors['bottom'] == 'bottom':
-                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
-                    new_top = self.relative_rect.top + bottom_offset
-                if self.relative_bottom_margin is None or recalculate_margins:
-                    self.relative_bottom_margin = (bottom_offset -
-                                                   (new_top + self.relative_rect.height))
-                new_bottom = bottom_offset - self.relative_bottom_margin
+                if relative_bottom_margin is None:
+                    relative_bottom_margin = (bottom_offset - (new_top + relative_rect.height))
+                new_bottom = bottom_offset - relative_bottom_margin
+
+        if 'bottom' in anchors:
+            if anchors['bottom'] == 'top':
+                new_top = relative_rect.top + top_offset
+                new_bottom = relative_rect.bottom + top_offset
+            elif anchors['bottom'] == 'bottom':
+                if not ('top' in anchors and anchors['top'] == 'top'):
+                    new_top = relative_rect.top + bottom_offset
+
+                if relative_bottom_margin is None:
+                    relative_bottom_margin = (bottom_offset - (new_top + relative_rect.height))
+                new_bottom = bottom_offset - relative_bottom_margin
 
         new_left = 0
         new_right = 0
-        left_offset = self._calc_left_offset(self.ui_container, self.anchors)
-        right_offset = self._calc_right_offset(self.ui_container, self.anchors)
+        left_offset = UIElement._calc_left_offset(container, anchors)
+        right_offset = UIElement._calc_right_offset(container, anchors)
 
-        if ('centerx' in self.anchors and self.anchors['centerx'] == 'centerx') or center_x_and_y:
-            centerx_offset = self._calc_centerx_offset(self.ui_container, self.anchors)
-            new_left = self.relative_rect.left - self.relative_rect.width // 2 + centerx_offset
-            new_right = self.relative_rect.right - self.relative_rect.width // 2 + centerx_offset
+        if ('centerx' in anchors and anchors['centerx'] == 'centerx') or center_x_and_y:
+            centerx_offset = UIElement._calc_centerx_offset(container, anchors)
+            new_left = relative_rect.left - relative_rect.width // 2 + centerx_offset
+            new_right = relative_rect.right - relative_rect.width // 2 + centerx_offset
 
-        if 'left' in self.anchors:
-            if self.anchors['left'] == 'left':
-                new_left = self.relative_rect.left + left_offset
-                new_right = self.relative_rect.right + left_offset
-            elif self.anchors['left'] == 'right':
-                new_left = self.relative_rect.left + right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
-                new_right = right_offset - self.relative_right_margin
+        if 'left' in anchors:
+            if anchors['left'] == 'left':
+                new_left = relative_rect.left + left_offset
+                new_right = relative_rect.right + left_offset
+            elif anchors['left'] == 'right':
+                new_left = relative_rect.left + right_offset
 
-        if 'right' in self.anchors:
-            if self.anchors['right'] == 'left':
-                new_left = self.relative_rect.left + left_offset
-                new_right = self.relative_rect.right + left_offset
-            elif self.anchors['right'] == 'right':
-                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
-                    new_left = self.relative_rect.left + right_offset
-                if self.relative_right_margin is None or recalculate_margins:
-                    self.relative_right_margin = (right_offset - (new_left + self.relative_rect.width))
-                new_right = right_offset - self.relative_right_margin
+                if relative_right_margin is None:
+                    relative_right_margin = (right_offset - (new_left + relative_rect.width))
+                new_right = right_offset - relative_right_margin
 
-        self.rect.left = new_left
-        self.rect.top = new_top
-        if self.dynamic_height:
+        if 'right' in anchors:
+            if anchors['right'] == 'left':
+                new_left = relative_rect.left + left_offset
+                new_right = relative_rect.right + left_offset
+            elif anchors['right'] == 'right':
+                if not ('left' in anchors and anchors['left'] == 'left'):
+                    new_left = relative_rect.left + right_offset
+
+                if relative_right_margin is None:
+                    relative_right_margin = (right_offset - (new_left + relative_rect.width))
+                new_right = right_offset - relative_right_margin
+
+        if dynamic_height:
             new_height = new_bottom - new_top
         else:
             new_height = max(0, new_bottom - new_top)
 
-        if self.dynamic_width:
+        if dynamic_width:
             new_width = new_right - new_left
         else:
             new_width = max(0, new_right - new_left)
+
+        rect = pygame.Rect(new_left, new_top, new_width, new_height)
+        return rect, relative_right_margin, relative_bottom_margin
+
+    def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
+        """
+        Called when our element's relative position has changed.
+        """
+        relative_right_margin = None if recalculate_margins else self.relative_right_margin
+        relative_bottom_margin = None if recalculate_margins else self.relative_bottom_margin
+
+        rect, self.relative_right_margin, self.relative_bottom_margin = self._calc_abs_rect_pos_from_rel_rect(
+            self.relative_rect,
+            self.ui_container,
+            self.anchors,
+            relative_right_margin,
+            relative_bottom_margin,
+            self.dynamic_width,
+            self.dynamic_height)
+
+        new_left, new_top = rect.topleft
+        new_width, new_height = rect.size
+
+        self.rect.left = new_left
+        self.rect.top = new_top
 
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
