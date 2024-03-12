@@ -34,9 +34,9 @@ class UI2DSlider(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  start_value_x: Union[float, int],
-                 value_range_x: Tuple[Union[float, int], Union[float, int]],
+                 value_range_x: Union[Tuple[float, float], Tuple[int, int]],
                  start_value_y: Union[float, int],
-                 value_range_y: Tuple[Union[float, int], Union[float, int]],
+                 value_range_y: Union[Tuple[float, float], Tuple[int, int]],
                  invert_y: bool = True,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -264,7 +264,7 @@ class UI2DSlider(UIElement):
                           "ui_object_id": self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
 
-    def get_current_value(self) -> Tuple[Union[float, int], Union[float, int]]:
+    def get_current_value(self) -> Tuple[Union[float, float], Union[int, int]]:
         """
         Gets the current value the slider is set to.
 
