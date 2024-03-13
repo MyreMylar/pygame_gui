@@ -37,7 +37,7 @@ class UI2DSlider(UIElement):
                  value_range_x: Union[Tuple[float, float], Tuple[int, int]],
                  start_value_y: Union[float, int],
                  value_range_y: Union[Tuple[float, float], Tuple[int, int]],
-                 invert_y: bool = True,
+                 invert_y: bool = False,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  starting_height: int = 1,
