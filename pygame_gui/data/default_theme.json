@@ -131,6 +131,27 @@
             "shadow_width": "1"
         }
     },
+    "2d_slider":
+    {
+        "prototype": "#default_shape_style",
+        "misc":
+        {
+            "sliding_button_width": "20"
+        }
+    },
+    "2d_slider.button":
+    {
+        "prototype": "#no_frills_button"
+    },
+    "2d_slider.#sliding_button":
+    {
+        "misc":
+        {
+            "shape": "ellipse",
+            "border_width": "1",
+            "shadow_width": "1"
+        }
+    },
     "label":
     {
         "misc":
