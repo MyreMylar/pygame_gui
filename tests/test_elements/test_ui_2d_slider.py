@@ -91,6 +91,26 @@ class TestUI2DSlider:
 
         assert slider.grabbed_slider is False
 
+        non_y_invert_slider = UI2DSlider(relative_rect=pygame.Rect(0, 0, 200, 30),
+                                         start_value_x=50,
+                                         value_range_x=(0, 100),
+                                         start_value_y=50,
+                                         value_range_y=(0, 100),
+                                         invert_y=False,
+                                         manager=default_ui_manager)
+
+        # scroll down a bit then up again to exercise update
+        default_ui_manager.mouse_position = (100, 15)
+        non_y_invert_slider.sliding_button.held = True
+        non_y_invert_slider.update(0.3)
+
+        assert non_y_invert_slider.grabbed_slider is True
+
+        non_y_invert_slider.sliding_button.held = False
+        non_y_invert_slider.update(0.3)
+
+        assert non_y_invert_slider.grabbed_slider is False
+
     def test_get_current_value(self, _init_pygame, default_ui_manager,
                                _display_surface_return_none):
         slider = UI2DSlider(relative_rect=pygame.Rect(100, 100, 100, 100),
@@ -114,6 +134,17 @@ class TestUI2DSlider:
         slider.set_current_value(75, 75)
         assert slider.get_current_value() == (75, 75)
 
+        slider = UI2DSlider(relative_rect=pygame.Rect(100, 100, 100, 100),
+                            start_value_x=50,
+                            value_range_x=(0, 100),
+                            start_value_y=50,
+                            value_range_y=(0, 100),
+                            invert_y=False,
+                            manager=default_ui_manager)
+
+        slider.set_current_value(75, 75)
+        assert slider.get_current_value() == (75, 75)
+
     def test_set_current_value_out_of_range(self, _init_pygame, default_ui_manager,
                                             _display_surface_return_none):
         slider = UI2DSlider(relative_rect=pygame.Rect(100, 100, 100, 100),
@@ -130,11 +161,18 @@ class TestUI2DSlider:
 
         assert slider.get_current_value() == (100, 50)
 
+        with pytest.warns(UserWarning, match='y value not in range'):
+            slider.set_current_value(50, 250)
+
+        slider.set_current_value(50, 250, warn=False)
+
+        assert slider.get_current_value() == (50, 100)
+
     def test_rebuild_from_theme_data_non_default(self, _init_pygame,
                                                  _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
-                                                     "ui_horizontal_slider_non_default.json"))
+                                                     "ui_2d_slider_non_default.json"))
 
         slider = UI2DSlider(relative_rect=pygame.Rect(100, 100, 100, 100),
                             start_value_x=50,
@@ -152,7 +190,7 @@ class TestUI2DSlider:
         manager = UIManager((800, 600), os.path.join("tests",
                                                      "data",
                                                      "themes",
-                                                     "ui_horizontal_slider_bad_values.json"))
+                                                     "ui_2d_slider_bad_values.json"))
 
         slider = UI2DSlider(relative_rect=pygame.Rect(100, 100, 100, 100),
                             start_value_x=51,
