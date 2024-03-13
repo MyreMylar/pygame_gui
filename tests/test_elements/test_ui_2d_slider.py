@@ -96,7 +96,7 @@ class TestUI2DSlider:
                                          value_range_x=(0, 100),
                                          start_value_y=50,
                                          value_range_y=(0, 100),
-                                         invert_y=False,
+                                         invert_y=True,
                                          manager=default_ui_manager)
 
         # scroll down a bit then up again to exercise update
@@ -139,7 +139,7 @@ class TestUI2DSlider:
                             value_range_x=(0, 100),
                             start_value_y=50,
                             value_range_y=(0, 100),
-                            invert_y=False,
+                            invert_y=True,
                             manager=default_ui_manager)
 
         slider.set_current_value(75, 75)
