@@ -1,7 +1,7 @@
 import pygame
-from pygame_gui._constants import OldType, UI_2D_SLIDER_MOVED
+from pygame_gui._constants import UI_2D_SLIDER_MOVED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, Coordinate
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.elements import UIButton
 
@@ -34,10 +34,10 @@ class UI2DSlider(UIElement):
     def __init__(self,
                  relative_rect: pygame.Rect,
                  start_value_x: Union[float, int],
-                 value_range_x: Tuple[Union[float, int], Union[float, int]],
+                 value_range_x: Union[Tuple[float, float], Tuple[int, int]],
                  start_value_y: Union[float, int],
-                 value_range_y: Tuple[Union[float, int], Union[float, int]],
-                 invert_y: bool = True,
+                 value_range_y: Union[Tuple[float, float], Tuple[int, int]],
+                 invert_y: bool = False,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  starting_height: int = 1,
@@ -55,12 +55,10 @@ class UI2DSlider(UIElement):
                          layer_thickness=2,
                          starting_height=starting_height,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id="2d_slider")
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=["2d_slider"])
 
         self.default_button_width = 20
         self.sliding_button_width = self.default_button_width
@@ -105,7 +103,7 @@ class UI2DSlider(UIElement):
         self.shape = "rectangle"
         self.shape_corner_radius = None
 
-        self.background_rect = None  # type: Optional[pygame.Rect]
+        self.background_rect: Optional[pygame.Rect] = None
 
         self.scrollable_width = None
         self.scrollable_height = None
@@ -260,20 +258,13 @@ class UI2DSlider(UIElement):
             if not self.has_been_moved_by_user_recently:
                 self.has_been_moved_by_user_recently = True
 
-            # old event - to be removed in 0.8.0
-            event_data = {"user_type": OldType(UI_2D_SLIDER_MOVED),
-                          "value": self.current_x_value,
-                          "ui_element": self,
-                          "ui_object_id": self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
-
             # new event
             event_data = {"value": self.current_x_value,
                           "ui_element": self,
                           "ui_object_id": self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
 
-    def get_current_value(self) -> Tuple[Union[float, int], Union[float, int]]:
+    def get_current_value(self) -> Tuple[Union[float, float], Union[int, int]]:
         """
         Gets the current value the slider is set to.
 
@@ -399,7 +390,7 @@ class UI2DSlider(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> None:
+    def set_position(self, position: Coordinate) -> None:
         """
         Sets the absolute screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -415,7 +406,7 @@ class UI2DSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]) -> None:
+    def set_relative_position(self, position: Coordinate) -> None:
         """
         Sets the relative screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -431,7 +422,7 @@ class UI2DSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]],
+    def set_dimensions(self, dimensions: Coordinate,
                        clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
