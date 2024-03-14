@@ -275,6 +275,32 @@ class TestUIColourPickerDialog:
 
         assert is_alive_pre_events is True and is_dead_post_events is True
 
+    def test_set_colour(self, _init_pygame, default_ui_manager,
+                        _display_surface_return_none):
+        colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
+                                             manager=default_ui_manager)
+
+        assert colour_picker.get_colour() == pygame.Color(0, 0, 0, 255)
+
+        colour_picker.set_colour(pygame.Color(32, 128, 90, 255))
+
+        assert colour_picker.get_colour() == pygame.Color(32, 128, 90, 255)
+
+    def test_2d_slider_moved(self, _init_pygame, default_ui_manager,
+                             _display_surface_return_none):
+        colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
+                                             manager=default_ui_manager)
+
+        assert colour_picker.get_colour() == pygame.Color(0, 0, 0, 255)
+
+        colour_picker.colour_2d_slider.set_current_value(50, 50)
+        colour_picker.process_event(pygame.event.Event(pygame_gui.UI_2D_SLIDER_MOVED,
+                                                       {'ui_element': colour_picker.colour_2d_slider,
+                                                        'value': (50,
+                                                                  50)}))
+
+        assert colour_picker.get_colour() == pygame.Color(127, 63, 63, 255)
+
     def test_press_ok_button(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),
                                              manager=default_ui_manager,
@@ -386,18 +412,25 @@ class TestUIColourPickerDialog:
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
-                                                              'pos': colour_picker.sat_value_square.rect.bottomright}
+                                                              'pos': colour_picker.sat_value_square.rect.center}
                                                              ))
-        assert colour_picker.current_colour == pygame.Color(255, 255, 255, 255)
+        assert colour_picker.get_colour() == pygame.Color(127, 63, 63, 255)
 
         colour_picker.hue_channel.current_value = 150
+        colour_picker.current_colour.hsva = (colour_picker.hue_channel.current_value,
+                                             colour_picker.sat_channel.current_value,
+                                             colour_picker.value_channel.current_value,
+                                             100)
+        colour_picker.changed_hsv_update_rgb()
+        colour_picker.update_current_colour_image()
         colour_picker.update_saturation_value_square()
+        colour_picker.update_colour_2d_slider()
 
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                              {'button': pygame.BUTTON_LEFT,
                                                               'pos': colour_picker.sat_value_square.rect.center}
                                                              ))
-        assert colour_picker.current_colour == pygame.Color(63, 127, 95, 255)
+        assert colour_picker.get_colour() == pygame.Color(62, 124, 93, 255)
 
     def test_update_current_colour_image(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         colour_picker = UIColourPickerDialog(rect=pygame.Rect(100, 100, 400, 400),

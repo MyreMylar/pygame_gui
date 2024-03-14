@@ -7,7 +7,7 @@ from pygame_gui._constants import UI_BUTTON_PRESSED, UI_HORIZONTAL_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED, UI_2D_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, Coordinate
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage
@@ -40,7 +40,6 @@ class UIColourChannelEditor(UIElement):
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
-
     def __init__(self,
                  relative_rect: pygame.Rect,
                  name: str,
@@ -238,7 +237,7 @@ class UIColourChannelEditor(UIElement):
             self.entry.set_text(str(self.current_value))
             self.slider.set_current_value(self.current_value)
 
-    def set_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this channel, updating all subordinate elements at the
         same time.
@@ -249,7 +248,7 @@ class UIColourChannelEditor(UIElement):
         super().set_position(position)
         self.element_container.set_relative_position(self.relative_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this channel, updating all subordinate elements at the
         same time.
@@ -260,8 +259,7 @@ class UIColourChannelEditor(UIElement):
         super().set_relative_position(position)
         self.element_container.set_relative_position(self.relative_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -306,7 +304,6 @@ class UIColourPickerDialog(UIWindow):
                       '#colour_picker_dialog'
     :param visible: Whether the element is visible by default.
     """
-
     def __init__(self, rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
@@ -400,11 +397,10 @@ class UIColourPickerDialog(UIWindow):
 
         self._setup_channels(default_sizes)
 
-        # Saturation controls y axis, Value controls x axis
-
         self.colour_2d_slider = UI2DSlider(self.sat_value_square.relative_rect,
                                            start_value_x=50, value_range_x=(0, 100),
                                            start_value_y=50, value_range_y=(0, 100),
+                                           invert_y=True,
                                            manager=self.ui_manager,
                                            container=self)
 
