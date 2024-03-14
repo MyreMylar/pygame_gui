@@ -480,5 +480,46 @@
             "border_width": "1",
             "shadow_width": "1"
         }
+    },
+    "colour_picker_dialog.2d_slider":
+    {
+        "prototype": "#default_shape_style",
+        "colours":
+        {
+            "normal_bg": "#0000",
+            "hovered_bg": "#0000",
+            "disabled_bg": "#0000",
+            "selected_bg": "#0000",
+            "active_bg": "#0000",
+            "dark_bg": "#0000",
+            "disabled_dark_bg": "#0000"
+        },
+        "misc":
+        {
+            "shape": "ellipse",
+            "border_width": "1",
+            "shadow_width": "0",
+            "sliding_button_width": "15"
+        }
+    },
+    "colour_picker_dialog.2d_slider.#sliding_button":
+    {
+        "prototype": "#no_frills_button",
+        "colours":
+        {
+            "normal_bg": "#0000",
+            "hovered_bg": "#0000",
+            "disabled_bg": "#0000",
+            "selected_bg": "#0000",
+            "active_bg": "#0000",
+            "dark_bg": "#0000",
+            "disabled_dark_bg": "#0000"
+        },
+        "misc":
+        {
+            "shape": "ellipse",
+            "border_width": "1",
+            "shadow_width": "0"
+        }
     }
 }

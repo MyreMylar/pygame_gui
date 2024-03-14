@@ -259,7 +259,7 @@ class UI2DSlider(UIElement):
                 self.has_been_moved_by_user_recently = True
 
             # new event
-            event_data = {"value": self.current_x_value,
+            event_data = {"value": (self.current_x_value, self.current_y_value),
                           "ui_element": self,
                           "ui_object_id": self.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
