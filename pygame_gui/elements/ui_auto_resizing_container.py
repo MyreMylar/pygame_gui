@@ -55,12 +55,9 @@ class UIAutoResizingContainer(UIContainer):
                          parent_element=parent_element,
                          object_id=object_id,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='auto_resizing_container')
+                         visible=visible,
+                         element_id=['scrolling_container']
+                         )
 
         self.min_edges_rect = min_edges_rect
         # TODO: Add validation for min and max edges rect

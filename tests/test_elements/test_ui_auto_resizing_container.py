@@ -24,7 +24,37 @@ class TestUIContainer:
                           manager=default_ui_manager)
         default_ui_manager.get_root_container().remove_element(button)
         container.add_element(button)
+
+        container.update(0.4)
         assert len(container.elements) == 1
+
+        button_right = UIButton(relative_rect=pygame.Rect(300, 50, 50, 50), text="",
+                                manager=default_ui_manager)
+        default_ui_manager.get_root_container().remove_element(button_right)
+        container.add_element(button_right)
+        container.update(0.4)
+        assert len(container.elements) == 2
+
+        button_left = UIButton(relative_rect=pygame.Rect(-100, 50, 50, 50), text="",
+                               manager=default_ui_manager)
+        default_ui_manager.get_root_container().remove_element(button_left)
+        container.add_element(button_left)
+        container.update(0.4)
+        assert len(container.elements) == 3
+
+        button_top = UIButton(relative_rect=pygame.Rect(100, -50, 50, 50), text="",
+                              manager=default_ui_manager)
+        default_ui_manager.get_root_container().remove_element(button_top)
+        container.add_element(button_top)
+        container.update(0.4)
+        assert len(container.elements) == 4
+
+        button_bottom = UIButton(relative_rect=pygame.Rect(100, 400, 50, 50), text="",
+                                 manager=default_ui_manager)
+        default_ui_manager.get_root_container().remove_element(button_bottom)
+        container.add_element(button_bottom)
+        container.update(0.4)
+        assert len(container.elements) == 5
 
     def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                             _display_surface_return_none):
@@ -35,6 +65,26 @@ class TestUIContainer:
                           container=container)
 
         container.remove_element(button)
+
+        button_right = UIButton(relative_rect=pygame.Rect(300, 50, 50, 50), text="",
+                                manager=default_ui_manager,
+                                container=container)
+        container.remove_element(button_right)
+        button_left = UIButton(relative_rect=pygame.Rect(-100, 50, 50, 50), text="",
+                               manager=default_ui_manager,
+                               container=container)
+        container.remove_element(button_left)
+        button_top = UIButton(relative_rect=pygame.Rect(100, -50, 50, 50), text="",
+                              manager=default_ui_manager,
+                              container=container)
+        container.remove_element(button_top)
+        button_bottom = UIButton(relative_rect=pygame.Rect(100, 400, 50, 50), text="",
+                                 manager=default_ui_manager,
+                                 container=container)
+        container.remove_element(button_bottom)
+
+        container.update(0.4)
+
         assert len(container.elements) == 0
 
     def test_recalculate_container_layer_thickness(self, _init_pygame,
@@ -143,7 +193,7 @@ class TestUIContainer:
         default_ui_manager.mouse_position = (150, 150)
         assert container.check_hover(0.5, False) is True  # already hovering
         container.kill()
-        assert container.check_hover(0.5, False) is False  # dead so can't hover any more
+        assert container.check_hover(0.5, False) is False  # dead so can't hover anymore
 
     def test_resizing_with_anchors(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):

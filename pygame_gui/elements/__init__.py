@@ -16,10 +16,10 @@ from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
 from pygame_gui.elements.ui_status_bar import UIStatusBar
 from pygame_gui.elements.ui_world_space_health_bar import UIWorldSpaceHealthBar
 from pygame_gui.elements.ui_window import UIWindow
-from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
-from pygame_gui.elements.ui_auto_scrolling_container import UIAutoScrollingContainer
 from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
+from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
+from pygame_gui.elements.ui_auto_scrolling_container import UIAutoScrollingContainer
 from pygame_gui.elements.ui_form import UIForm, InputField
 
 
@@ -42,9 +42,9 @@ __all__ = ['UIImage',
            'UIProgressBar',
            'UITextEntryLine',
            'UIWindow',
-           'UIAutoResizingContainer',
            'UIScrollingContainer',
-           'UIAutoScrollingContainer',
            'UITextEntryBox',
-           'UIForm',
-           'InputField']
+           'UIAutoResizingContainer',
+           'UIAutoScrollingContainer',
+           'InputField',
+           'UIForm']
