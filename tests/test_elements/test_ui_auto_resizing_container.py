@@ -24,7 +24,6 @@ class TestUIContainer:
                           manager=default_ui_manager)
         default_ui_manager.get_root_container().remove_element(button)
         container.add_element(button)
-
         container.update(0.4)
         assert len(container.elements) == 1
 
@@ -84,7 +83,6 @@ class TestUIContainer:
         container.remove_element(button_bottom)
 
         container.update(0.4)
-
         assert len(container.elements) == 0
 
     def test_recalculate_container_layer_thickness(self, _init_pygame,
