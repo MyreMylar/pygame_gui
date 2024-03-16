@@ -1180,6 +1180,12 @@ class UIElement(GUISprite, IUIElementInterface):
         else:
             self._image_clip = None
 
+    def _get_pre_clipped_image_size(self) -> Coordinate:
+        if self._pre_clipped_image is not None:
+            return self._pre_clipped_image.get_size()
+        else:
+            return 0, 0
+
     def get_image_clipping_rect(self) -> Union[pygame.Rect, None]:
         """
         Obtain the current image clipping rect.
@@ -1212,14 +1218,18 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         if self.get_image_clipping_rect() is not None and new_image is not None:
             self._pre_clipped_image = new_image
-            self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
-                                                flags=pygame.SRCALPHA,
-                                                depth=32)
-            self.image.fill(pygame.Color('#00000000'))
-            basic_blit(self.image,
-                       self._pre_clipped_image,
-                       self.get_image_clipping_rect(),
-                       self.get_image_clipping_rect())
+            if (self.get_image_clipping_rect().width == 0 and
+                    self.get_image_clipping_rect().height == 0):
+                self.image = self.ui_manager.get_universal_empty_surface()
+            else:
+                self.image = pygame.surface.Surface(self._pre_clipped_image.get_size(),
+                                                    flags=pygame.SRCALPHA,
+                                                    depth=32)
+                self.image.fill(pygame.Color('#00000000'))
+                basic_blit(self.image,
+                           self._pre_clipped_image,
+                           self.get_image_clipping_rect(),
+                           self.get_image_clipping_rect())
         else:
             self.image = new_image.copy() if new_image is not None else None
             self._pre_clipped_image = None
