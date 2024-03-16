@@ -155,7 +155,7 @@ class EllipseDrawableShape(DrawableShape):
 
         """
         if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
-            self.states[state_str] = self.ui_manager.get_universal_empty_surface()
+            self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
 
             border_colour_state_str = state_str + '_border'

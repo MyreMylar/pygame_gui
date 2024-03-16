@@ -1180,6 +1180,12 @@ class UIElement(GUISprite, IUIElementInterface):
         else:
             self._image_clip = None
 
+    def _get_pre_clipped_image_size(self) -> Coordinate:
+        if self._pre_clipped_image is not None:
+            return self._pre_clipped_image.get_size()
+        else:
+            return 0, 0
+
     def get_image_clipping_rect(self) -> Union[pygame.Rect, None]:
         """
         Obtain the current image clipping rect.
