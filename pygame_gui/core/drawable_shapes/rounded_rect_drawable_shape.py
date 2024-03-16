@@ -256,35 +256,39 @@ class RoundedRectangleShape(DrawableShape):
         self.click_area_shape.width = int(dimensions[0]) - (2 * self.shadow_width)
         self.click_area_shape.height = int(dimensions[1]) - (2 * self.shadow_width)
 
-        if self.shadow_width > 0:
-            quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
-                                                    self.shadow_width,
-                                                    'rectangle',
-                                                    corner_radius=self.shadow_width + 2)
+        if dimensions[0] <= 0 or dimensions[1] <= 0:
+            self.states['normal'].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            quick_surf = pygame.surface.Surface(self.containing_rect.size,
-                                                flags=pygame.SRCALPHA,
-                                                depth=32)
-            quick_surf.fill(pygame.Color('#00000000'))
-        if isinstance(self.theming['normal_bg'], ColourGradient):
-            grad_surf = pygame.surface.Surface(self.click_area_shape.size,
-                                               flags=pygame.SRCALPHA,
-                                               depth=32)
-            grad_surf.fill(pygame.Color('#FFFFFFFF'))
-            self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
+            if self.shadow_width > 0:
+                quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
+                                                        self.shadow_width,
+                                                        'rectangle',
+                                                        corner_radius=self.shadow_width + 2)
+            else:
+                quick_surf = pygame.surface.Surface(self.containing_rect.size,
+                                                    flags=pygame.SRCALPHA,
+                                                    depth=32)
+                quick_surf.fill(pygame.Color('#00000000'))
+            if isinstance(self.theming['normal_bg'], ColourGradient):
+                grad_surf = pygame.surface.Surface(self.click_area_shape.size,
+                                                   flags=pygame.SRCALPHA,
+                                                   depth=32)
+                grad_surf.fill(pygame.Color('#FFFFFFFF'))
+                self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
 
-            basic_blit(quick_surf, grad_surf,
-                       pygame.Rect((self.shadow_width,
-                                    self.shadow_width),
-                                   self.click_area_shape.size))
-        else:
-            quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
-                                                                    self.shadow_width),
-                                                                   self.click_area_shape.size))
+                basic_blit(quick_surf, grad_surf,
+                           pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
+                                       self.click_area_shape.size))
+            else:
+                quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
+                                                                        self.shadow_width),
+                                                                       self.click_area_shape.size))
 
-        self.states['normal'].surface = quick_surf
-        self.finalise_images_and_text('normal_image', 'normal',
-                                      'normal_text', 'normal_text_shadow', True)
+            self.states['normal'].surface = quick_surf
+            self.finalise_images_and_text('normal_image', 'normal',
+                                          'normal_text',
+                                          'normal_text_shadow', True)
         self.states['normal'].has_fresh_surface = True
 
         self.has_been_resized = True
