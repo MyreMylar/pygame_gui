@@ -395,3 +395,9 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
             if target in element.get_anchor_targets():
                 element.update_containing_rect_position()
                 self.on_contained_elements_changed(element)
+                
+    def __iter__(self):
+        """
+        Iterates over the elements within the container.
+        """
+        return iter(self.elements)

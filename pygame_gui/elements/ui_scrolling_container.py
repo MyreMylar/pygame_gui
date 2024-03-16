@@ -456,3 +456,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if self._root_container is not None:
             self._root_container.hide()
         super().hide()
+        
+    def __iter__(self):
+        """
+        Iterates over the elements within the container.
+        """
+        return iter(self.get_container())

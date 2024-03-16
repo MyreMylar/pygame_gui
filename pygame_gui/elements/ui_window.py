@@ -753,3 +753,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                              abs_mouse_pos[1] - window_contents_top_left[1])
 
         return rel_mouse_pos
+    
+    def __iter__(self):
+        """
+        Iterates over the elements within the container.
+        """
+        return iter(self.get_container())

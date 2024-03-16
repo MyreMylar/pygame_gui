@@ -217,3 +217,10 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         process events. Should also hide all the children elements.
         If the container was hidden before - ignore.
         """
+        
+    @abstractmethod
+    def __iter__(self):
+        """
+        Iterates over the elements within the container-like interface. 
+        This method allows iterating over the children elements within the container.
+        """
