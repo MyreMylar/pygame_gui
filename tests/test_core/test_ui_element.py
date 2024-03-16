@@ -620,8 +620,7 @@ class TestUIElement:
 
         element._set_image_clip(pygame.Rect(0, 0, 0, 0))
         element._set_image(coloured_surface_1)
-        assert element.image.get_size() == (50, 50)
-        assert element.image.get_at((10, 10)) == pygame.Color(0, 0, 0, 0)
+        assert element.image == default_ui_manager.get_universal_empty_surface()
 
         element._set_image_clip(None)
         element._set_image(None)
