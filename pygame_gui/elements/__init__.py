@@ -47,4 +47,5 @@ __all__ = ['UIImage',
            'UIAutoResizingContainer',
            'UIAutoScrollingContainer',
            'InputField',
-           'UIForm']
+           'UIForm'
+           ]

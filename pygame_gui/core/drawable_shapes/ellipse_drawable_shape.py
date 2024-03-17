@@ -154,107 +154,111 @@ class EllipseDrawableShape(DrawableShape):
         :param state_str: The ID string of the state to rebuild.
 
         """
-        border_colour_state_str = state_str + '_border'
-        bg_colour_state_str = state_str + '_bg'
-        text_colour_state_str = state_str + '_text'
-        text_shadow_colour_state_str = state_str + '_text_shadow'
-        image_state_str = state_str + '_image'
-
-        found_shape = None
-        shape_id = None
-        if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
-            shape_id = self.shape_cache.build_cache_id('ellipse',
-                                                       self.containing_rect.size,
-                                                       self.shadow_width,
-                                                       self.border_width,
-                                                       self.theming[border_colour_state_str],
-                                                       self.theming[bg_colour_state_str])
-
-            found_shape = self.shape_cache.find_surface_in_cache(shape_id)
-        if found_shape is not None:
-            self.states[state_str].surface = found_shape.copy()
+        if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
+            self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            self.states[state_str].surface = self.base_surface.copy()
 
-            # Try one AA call method
-            aa_amount = 4
-            self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
-                                            self.shadow_width * aa_amount),
-                                           (self.click_area_shape.width * aa_amount,
-                                            self.click_area_shape.height * aa_amount))
+            border_colour_state_str = state_str + '_border'
+            bg_colour_state_str = state_str + '_bg'
+            text_colour_state_str = state_str + '_text'
+            text_shadow_colour_state_str = state_str + '_text_shadow'
+            image_state_str = state_str + '_image'
 
-            self.background_rect = pygame.Rect(((self.border_width +
-                                                 self.shadow_width) * aa_amount,
-                                                (self.border_width +
-                                                 self.shadow_width) * aa_amount),
-                                               (self.border_rect.width -
-                                                (2 * self.border_width * aa_amount),
-                                                self.border_rect.height -
-                                                (2 * self.border_width * aa_amount)))
+            found_shape = None
+            shape_id = None
+            if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
+                shape_id = self.shape_cache.build_cache_id('ellipse',
+                                                           self.containing_rect.size,
+                                                           self.shadow_width,
+                                                           self.border_width,
+                                                           self.theming[border_colour_state_str],
+                                                           self.theming[bg_colour_state_str])
 
-            bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
-                                                  self.containing_rect.height * aa_amount),
-                                                 flags=pygame.SRCALPHA,
-                                                 depth=32)
-            bab_surface.fill(pygame.Color('#00000000'))
-            if self.border_width > 0:
-                if isinstance(self.theming[border_colour_state_str], ColourGradient):
+                found_shape = self.shape_cache.find_surface_in_cache(shape_id)
+            if found_shape is not None:
+                self.states[state_str].surface = found_shape.copy()
+            else:
+                self.states[state_str].surface = self.base_surface.copy()
+
+                # Try one AA call method
+                aa_amount = 4
+                self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
+                                                self.shadow_width * aa_amount),
+                                               (self.click_area_shape.width * aa_amount,
+                                                self.click_area_shape.height * aa_amount))
+
+                self.background_rect = pygame.Rect(((self.border_width +
+                                                     self.shadow_width) * aa_amount,
+                                                    (self.border_width +
+                                                     self.shadow_width) * aa_amount),
+                                                   (self.border_rect.width -
+                                                    (2 * self.border_width * aa_amount),
+                                                    self.border_rect.height -
+                                                    (2 * self.border_width * aa_amount)))
+
+                bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
+                                                      self.containing_rect.height * aa_amount),
+                                                     flags=pygame.SRCALPHA,
+                                                     depth=32)
+                bab_surface.fill(pygame.Color('#00000000'))
+                if self.border_width > 0:
+                    if isinstance(self.theming[border_colour_state_str], ColourGradient):
+                        shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                            self.border_rect,
+                                                                            0, aa_amount=aa_amount,
+                                                                            clear=False)
+                        self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
+                    else:
+                        shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                            self.border_rect,
+                                                                            0, aa_amount=aa_amount,
+                                                                            clear=False)
+                        apply_colour_to_surface(self.theming[border_colour_state_str],
+                                                shape_surface)
+                    basic_blit(bab_surface, shape_surface, self.border_rect)
+                if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.border_rect,
-                                                                        0, aa_amount=aa_amount,
-                                                                        clear=False)
-                    self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
+                                                                        self.background_rect, 1,
+                                                                        aa_amount=aa_amount)
+                    self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.border_rect,
-                                                                        0, aa_amount=aa_amount,
-                                                                        clear=False)
-                    apply_colour_to_surface(self.theming[border_colour_state_str],
-                                            shape_surface)
-                basic_blit(bab_surface, shape_surface, self.border_rect)
-            if isinstance(self.theming[bg_colour_state_str], ColourGradient):
-                shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                    self.background_rect, 1,
-                                                                    aa_amount=aa_amount)
-                self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
-            else:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                    self.background_rect, 1,
-                                                                    aa_amount=aa_amount)
-                apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
+                                                                        self.background_rect, 1,
+                                                                        aa_amount=aa_amount)
+                    apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 
-            basic_blit(bab_surface, shape_surface, self.background_rect)
-            # apply AA to background
-            bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
+                basic_blit(bab_surface, shape_surface, self.background_rect)
+                # apply AA to background
+                bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
-            # cut a hole in shadow, then blit background into it
-            sub_surface = pygame.surface.Surface(
-                ((self.containing_rect.width - (2 * self.shadow_width)) * aa_amount,
-                 (self.containing_rect.height - (2 * self.shadow_width)) * aa_amount),
-                flags=pygame.SRCALPHA, depth=32)
-            sub_surface.fill(pygame.Color('#00000000'))
-            pygame.draw.ellipse(sub_surface, pygame.Color("#FFFFFFFF"), sub_surface.get_rect())
-            small_sub = pygame.transform.smoothscale(sub_surface,
-                                                     (self.containing_rect.width -
-                                                      (2 * self.shadow_width),
-                                                      self.containing_rect.height -
-                                                      (2 * self.shadow_width)))
-            self.states[state_str].surface.blit(small_sub, pygame.Rect((self.shadow_width,
-                                                                        self.shadow_width),
-                                                                       sub_surface.get_size()),
-                                                special_flags=pygame.BLEND_RGBA_SUB)
-            basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
+                # cut a hole in shadow, then blit background into it
+                sub_surface = pygame.surface.Surface(
+                    ((self.containing_rect.width - (2 * self.shadow_width)) * aa_amount,
+                     (self.containing_rect.height - (2 * self.shadow_width)) * aa_amount),
+                    flags=pygame.SRCALPHA, depth=32)
+                sub_surface.fill(pygame.Color('#00000000'))
+                pygame.draw.ellipse(sub_surface, pygame.Color("#FFFFFFFF"), sub_surface.get_rect())
+                small_sub = pygame.transform.smoothscale(sub_surface,
+                                                         (self.containing_rect.width -
+                                                          (2 * self.shadow_width),
+                                                          self.containing_rect.height -
+                                                          (2 * self.shadow_width)))
+                self.states[state_str].surface.blit(small_sub, pygame.Rect((self.shadow_width,
+                                                                            self.shadow_width),
+                                                                           sub_surface.get_size()),
+                                                    special_flags=pygame.BLEND_RGBA_SUB)
+                basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
-            if (shape_id is not None and
-                    self.states[state_str].surface.get_width() <= 1024 and
-                    self.states[state_str].surface.get_height() <= 1024):
-                self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
-                                                      shape_id)
+                if (shape_id is not None and
+                        self.states[state_str].surface.get_width() <= 1024 and
+                        self.states[state_str].surface.get_height() <= 1024):
+                    self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
+                                                          shape_id)
 
-        self.finalise_images_and_text(image_state_str, state_str,
-                                      text_colour_state_str,
-                                      text_shadow_colour_state_str,
-                                      add_text)
+            self.finalise_images_and_text(image_state_str, state_str,
+                                          text_colour_state_str,
+                                          text_shadow_colour_state_str,
+                                          add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

@@ -1,4 +1,4 @@
-from typing import Union, Dict, Tuple, Optional
+from typing import Union, Dict, Tuple, Optional, List
 
 import pygame
 
@@ -39,6 +39,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
+                 element_id: Union[List[str], None] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  allow_scroll_x: bool = True,
@@ -47,6 +48,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self._root_container = None
+        if element_id is None:
+            element_id = ['scrolling_container']
         super().__init__(relative_rect,
                          manager,
                          container,
@@ -56,7 +59,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                          visible=visible,
                          parent_element=parent_element,
                          object_id=object_id,
-                         element_id=['scrolling_container'])
+                         element_id=element_id)
 
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
@@ -302,6 +305,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                     'top': 'top',
                                                                     'bottom': 'bottom'})
                 self.join_focus_sets(self.vert_scroll_bar)
+                start_percent = ((self._view_container.rect.top -
+                                  self.scrollable_container.rect.top)
+                                 / self.scrolling_height)
+                self.vert_scroll_bar.set_scroll_from_start_percentage(start_percent)
             else:
                 start_percent = ((self._view_container.rect.top -
                                   self.scrollable_container.rect.top)
@@ -331,6 +338,12 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                        'top': 'bottom',
                                                                        'bottom': 'bottom'})
                 self.join_focus_sets(self.horiz_scroll_bar)
+
+                start_percent = ((self._view_container.rect.left -
+                                  self.scrollable_container.rect.left)
+                                 / self.scrolling_width)
+                self.horiz_scroll_bar.set_scroll_from_start_percentage(start_percent)
+
             else:
                 start_percent = ((self._view_container.rect.left -
                                   self.scrollable_container.rect.left)
