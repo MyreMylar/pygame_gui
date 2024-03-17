@@ -33,6 +33,13 @@ class TestUIAutoScrollingContainer:
         container.get_container().add_element(button)
         assert len(container.get_container().elements) == 1
 
+        button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 250), text="",
+                          manager=default_ui_manager)
+        default_ui_manager.get_root_container().remove_element(button)
+        container.get_container().add_element(button)
+        container.update(0.4)
+        assert len(container.get_container().elements) == 2
+
     def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                             _display_surface_return_none):
         container = UIAutoScrollingContainer(pygame.Rect(100, 100, 200, 200),
