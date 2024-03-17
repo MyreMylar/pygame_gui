@@ -37,6 +37,7 @@ class TestUIAutoScrollingContainer:
                           manager=default_ui_manager)
         default_ui_manager.get_root_container().remove_element(button)
         container.get_container().add_element(button)
+        container.scrollable_container.update(0.4)
         container.update(0.4)
         assert len(container.get_container().elements) == 2
 

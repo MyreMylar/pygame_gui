@@ -305,6 +305,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                     'top': 'top',
                                                                     'bottom': 'bottom'})
                 self.join_focus_sets(self.vert_scroll_bar)
+                start_percent = ((self._view_container.rect.top -
+                                  self.scrollable_container.rect.top)
+                                 / self.scrolling_height)
+                self.vert_scroll_bar.set_scroll_from_start_percentage(start_percent)
             else:
                 start_percent = ((self._view_container.rect.top -
                                   self.scrollable_container.rect.top)
@@ -334,6 +338,12 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                        'top': 'bottom',
                                                                        'bottom': 'bottom'})
                 self.join_focus_sets(self.horiz_scroll_bar)
+
+                start_percent = ((self._view_container.rect.left -
+                                  self.scrollable_container.rect.left)
+                                 / self.scrolling_width)
+                self.horiz_scroll_bar.set_scroll_from_start_percentage(start_percent)
+
             else:
                 start_percent = ((self._view_container.rect.left -
                                   self.scrollable_container.rect.left)
