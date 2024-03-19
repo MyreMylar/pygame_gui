@@ -62,12 +62,12 @@ class UIElement(GUISprite, IUIElementInterface):
         super().__init__(self.ui_manager.get_sprite_group())
 
         self.minimum_dimensions = (-1, -1)
-        relative_rect.size = self._get_clamped_to_minimum_dimensions(relative_rect.size)
 
         if isinstance(relative_rect, pygame.Rect):
             self.relative_rect = relative_rect.copy()
         else:
             self.relative_rect = pygame.Rect(relative_rect)
+        self.relative_rect.size = self._get_clamped_to_minimum_dimensions(self.relative_rect.size)
         self.rect = self.relative_rect.copy()
 
         self.dynamic_width = True if self.relative_rect.width == -1 else False
