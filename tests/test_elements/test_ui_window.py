@@ -671,9 +671,9 @@ class TestUIWindow:
                        _display_surface_return_none):
         window = UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
-                            manager=default_ui_manager, container=container)
+                            manager=default_ui_manager, container=window)
         button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
-                            manager=default_ui_manager, container=container)
+                            manager=default_ui_manager, container=window)
 
         count = 0
         for button in window:
