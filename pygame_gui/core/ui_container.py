@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple, Dict
+from typing import List, Union, Tuple, Dict, Iterator
 
 import pygame
 
@@ -396,7 +396,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                 element.update_containing_rect_position()
                 self.on_contained_elements_changed(element)
                 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container.
         """
