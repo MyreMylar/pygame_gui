@@ -389,6 +389,20 @@ class TestUIScrollingContainer:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        container = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=container)
+
+        count = 0
+        for button in container:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
+
 
 if __name__ == '__main__':
     pytest.console_main()
