@@ -56,7 +56,7 @@ class UIAutoResizingContainer(UIContainer):
                          object_id=object_id,
                          anchors=anchors,
                          visible=visible,
-                         element_id=['scrolling_container']
+                         element_id=['auto_resizing_container']
                          )
 
         self.min_edges_rect = min_edges_rect
