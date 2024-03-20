@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Optional, List
+from typing import Union, Tuple, Optional, List, Iterator
 
 import pygame
 
@@ -7,7 +7,7 @@ from pygame_gui._constants import OldType
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
-from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface, IUIElementInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -753,3 +753,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                              abs_mouse_pos[1] - window_contents_top_left[1])
 
         return rel_mouse_pos
+    
+    def __iter__(self) -> Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container.
+        """
+        return iter(self.get_container())
