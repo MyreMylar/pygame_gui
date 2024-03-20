@@ -391,7 +391,7 @@ class TestUIScrollingContainer:
 
     def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                        _display_surface_return_none):
-        container = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
         button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
                             manager=default_ui_manager, container=container)
         button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
