@@ -1,3 +1,4 @@
+import typing
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union
 
@@ -186,6 +187,13 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         :param element: the element to check.
         """
 
+    @abstractmethod
+    def __iter__(self) -> typing.Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container-like interface.
+        This method allows iterating over the children elements within the container.
+        """
+
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
@@ -219,7 +227,7 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         """
         
     @abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> typing.Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container-like interface. 
         This method allows iterating over the children elements within the container.
