@@ -21,7 +21,7 @@ class TestUIAppearanceTheme:
     def test_load_non_default_theme_from_dictionary(self, _init_pygame, _display_surface_return_none):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
         theme_dict = {"text_box": {"colours": {"dark_bg": "#25f92e"}}}
-        theme.load_theme()
+        theme.load_theme(theme_dict)
         colour = theme.get_colour(colour_id='dark_bg', combined_element_ids=['text_box'])
         assert colour == pygame.Color('#25f92e')
 
