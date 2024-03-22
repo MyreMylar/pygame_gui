@@ -10,6 +10,7 @@ import pygame
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+from pygame_gui.core.utility import PackageResource
 
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
