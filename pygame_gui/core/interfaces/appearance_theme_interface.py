@@ -147,12 +147,12 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def load_theme(self, file_path: Union[str, PathLike, io.StringIO]):
+    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]):
         """
-        Loads a theme file, and currently, all associated data like fonts and images required
+        Loads a theme, and currently, all associated data like fonts and images required
         by the theme.
 
-        :param file_path: The path to the theme we want to load.
+        :param file_path: The location of the theme, or the theme data we want to load.
 
         """
 
