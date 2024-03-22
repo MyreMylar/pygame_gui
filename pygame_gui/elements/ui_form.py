@@ -931,12 +931,6 @@ class UIForm(UIAutoScrollingContainer):
             if event.ui_element == self.submit_button:
                 form_values = self.get_current_values()
 
-                # old event - to be removed in 0.8.0
-                event_data = {"user_type": OldType(UI_FORM_SUBMITTED),
-                              "form_values": form_values,
-                              "ui_element": self,
-                              "ui_object_id": self.most_specific_combined_id}
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
                 # new event
                 event_data = {"form_values": form_values,
