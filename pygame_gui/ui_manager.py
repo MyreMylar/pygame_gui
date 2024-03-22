@@ -35,7 +35,7 @@ class UIManager(IUIManagerInterface):
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: Optional[Union[str, PackageResource]] = None,
+                 theme_path: Optional[Union[str, os.PathLike, io.StringIO, PackageResource, dict]] = None,
                  enable_live_theme_updates: bool = True,
                  resource_loader: Optional[IResourceLoader] = None,
                  starting_language: str = 'en',
