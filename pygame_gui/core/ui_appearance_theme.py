@@ -665,10 +665,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 
     def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]):
         """
-        Loads a theme file, and currently, all associated data like fonts and images required
+        Loads a theme, and currently, all associated data like fonts and images required
         by the theme.
 
-        :param file_path: The path to the theme we want to load.
+        :param file_path: The location of the theme, or the theme data we want to load.
         """
         if isinstance(file_path, dict):
             theme_dict = file_path
@@ -686,6 +686,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         by the theme.
 
         :param file_path: The path to the theme we want to load.
+        :return dict: The theme dictionary.
         """
         if isinstance(file_path, PackageResource):
             with (files(file_path.package) / file_path.resource).open('r', encoding='utf-8', errors='strict') as fp:

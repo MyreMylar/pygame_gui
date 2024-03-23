@@ -30,7 +30,7 @@ class UIManager(IUIManagerInterface):
     frame.
 
     :param window_resolution: window resolution.
-    :param theme_path: relative file path to theme.
+    :param theme_path: relative file path to theme or theme dictionary.
     :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file
     """
 
@@ -67,9 +67,7 @@ class UIManager(IUIManagerInterface):
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme(self.resource_loader, self._locale)
-        if theme_path is not None:
-            self.ui_theme.load_theme(theme_path)
+        self.ui_theme = self.create_new_theme(theme_path)
 
         self.universal_empty_surface = pygame.surface.Surface((0, 0),
                                                               flags=pygame.SRCALPHA,
@@ -107,6 +105,12 @@ class UIManager(IUIManagerInterface):
             self.resource_loader.start()
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
+        
+    def create_new_theme(self, theme_path=None) -> UIAppearanceTheme:
+        theme = UIAppearanceTheme(self.resource_loader, self._locale)
+        if theme_path is not None:
+            theme.load_theme(theme_path)
+        return theme
 
     def get_double_click_time(self) -> float:
         """
@@ -234,8 +238,22 @@ class UIManager(IUIManagerInterface):
                             break
         return consumed_event
     
-    def rebuild_all_from_changed_theme_data(self):
+    def set_ui_theme(self, theme:IUIAppearanceThemeInterface, update_all_sprites:bool=False):
+        """
+        Set ui theme.
+        :param theme: The theme to set.
+        """
         for sprite in self.ui_group.sprites():
+            if not update_all_sprites and sprite.ui_theme is not self.ui_theme:
+                continue
+            sprite.ui_theme = theme
+        self.ui_theme = theme
+        self.rebuild_all_from_changed_theme_data(self.ui_theme)
+    
+    def rebuild_all_from_changed_theme_data(self, theme:IUIAppearanceThemeInterface=None):
+        for sprite in self.ui_group.sprites():
+            if theme is not None and sprite.ui_theme is not theme:
+                continue
             sprite.rebuild_from_changed_theme_data()
 
     def update(self, time_delta: float):
@@ -258,10 +276,10 @@ class UIManager(IUIManagerInterface):
             if self.theme_update_acc > self.theme_update_check_interval:
                 self.theme_update_acc = 0.0
                 if self.ui_theme.check_need_to_reload():
-                    self.rebuild_all_from_changed_theme_data()
+                    self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
         if self.ui_theme.check_need_to_rebuild_data_manually_changed():
-            self.rebuild_all_from_changed_theme_data()
+            self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
         self.ui_theme.update_caching(time_delta)
 
