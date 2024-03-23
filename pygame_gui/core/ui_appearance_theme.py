@@ -109,7 +109,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if isinstance(json_data, dict):
             return json_data
         else:
-            return json.loads(json)
+            return json.loads(json_data)
 
     def update_theming(self, new_theming_data: Union[str, dict], rebuild_all: bool = True):
         # parse new_theming data
