@@ -471,8 +471,10 @@ class UIForm(UIAutoScrollingContainer):
         """
         value_dic = {}
         for key, value in dic.items():
-            if isinstance(value, Sequence):
-                value = value[1]  # This is because it includes both the label and the actual element we want.
+            type_name = ""  # Used for re-casting str to boolean in Dropdowns created from the boolean type
+            if isinstance(value, InputField):
+                type_name = value.question_type
+                value = value.element  # This is because it includes both the label and the actual element we want.
 
             if isinstance(value, UISection):
                 value_dic[key] = self._get_current_values(value.parsed_questionnaire)
@@ -492,7 +494,10 @@ class UIForm(UIAutoScrollingContainer):
                         value_dic[key] = value.get_multi_selection()
 
                 elif isinstance(value, UIDropDownMenu):
-                    value_dic[key] = value.selected_option
+                    selected_option = value.selected_option
+                    if type_name == "boolean":
+                        selected_option = literal_eval(selected_option)
+                    value_dic[key] = selected_option
 
                 elif hasattr(value, "get_current_input") and isinstance(value.get_current_input, Callable):
                     value_dic[key] = value.get_current_input()
@@ -627,7 +632,7 @@ class UIForm(UIAutoScrollingContainer):
 
                 elif type_name == "boolean":
                     element = UIDropDownMenu(options_list=["True", "False"],
-                                             starting_option=args.get("default", "True"),
+                                             starting_option=str(args.get("default", "True")),
                                              **param_dict)
                 rel_rect.y = gap
                 parsed_questionnaire[key] = InputField(type_name, label, element)
