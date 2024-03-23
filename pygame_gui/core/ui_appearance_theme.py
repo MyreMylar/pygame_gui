@@ -103,20 +103,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.need_to_rebuild_data_manually_changed = False
             return True
         return False
+    
+    @staticmethod
+    def _json_to_dict(json_data):
+        if isinstance(json_data, dict):
+            return json_data
+        else:
+            return json.loads(json)
 
     def update_theming(self, new_theming_data: Union[str, dict], rebuild_all: bool = True):
         # parse new_theming data
-        if isinstance(new_theming_data, dict):
-            theme_dict = new_theming_data
-        else:
-            theme_dict = json.loads(new_theming_data)
-            
+        theme_dict = self._json_to_dict(new_theming_data)
         self._parse_theme_data_from_json_dict(theme_dict)
         if rebuild_all:
             self.need_to_rebuild_data_manually_changed = True
 
-    def update_single_element_theming(self, element_name: str, new_theming_data: str):
-        element_theming_dict = json.loads(new_theming_data)
+    def update_single_element_theming(self, element_name: str, new_theming_data: Union[str, dict]):
+        element_theming_dict = self._json_to_dict(new_theming_data)
 
         self._parse_single_element_data(element_name, element_theming_dict)
         self._load_fonts()
