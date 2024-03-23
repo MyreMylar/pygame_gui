@@ -370,6 +370,13 @@ class TestUIManager:
             finished, _ = incremental_loader.update()
         assert finished
 
+    def test_set_ui_theme(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        theme_dict = {"text_box": {"colours": {"dark_bg": "#25f92e"}}}
+        theme = manager.create_new_theme(theme_dict)
+        manager.set_ui_theme(theme)
+        assert manager.ui_theme == theme
+
     def test_get_hovering_any_element(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
 

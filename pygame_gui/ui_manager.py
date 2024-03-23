@@ -106,7 +106,7 @@ class UIManager(IUIManagerInterface):
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
         
-    def create_new_theme(self, theme_path:bool=None) -> UIAppearanceTheme:
+    def create_new_theme(self, theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]=None) -> UIAppearanceTheme:
         """
         Create a new theme using self information.
         :param theme_path: relative file path to theme or theme dictionary.
