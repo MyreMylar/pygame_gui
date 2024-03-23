@@ -256,35 +256,39 @@ class RoundedRectangleShape(DrawableShape):
         self.click_area_shape.width = int(dimensions[0]) - (2 * self.shadow_width)
         self.click_area_shape.height = int(dimensions[1]) - (2 * self.shadow_width)
 
-        if self.shadow_width > 0:
-            quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
-                                                    self.shadow_width,
-                                                    'rectangle',
-                                                    corner_radius=self.shadow_width + 2)
+        if dimensions[0] <= 0 or dimensions[1] <= 0:
+            self.states['normal'].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            quick_surf = pygame.surface.Surface(self.containing_rect.size,
-                                                flags=pygame.SRCALPHA,
-                                                depth=32)
-            quick_surf.fill(pygame.Color('#00000000'))
-        if isinstance(self.theming['normal_bg'], ColourGradient):
-            grad_surf = pygame.surface.Surface(self.click_area_shape.size,
-                                               flags=pygame.SRCALPHA,
-                                               depth=32)
-            grad_surf.fill(pygame.Color('#FFFFFFFF'))
-            self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
+            if self.shadow_width > 0:
+                quick_surf = self.ui_manager.get_shadow(self.containing_rect.size,
+                                                        self.shadow_width,
+                                                        'rectangle',
+                                                        corner_radius=self.shadow_width + 2)
+            else:
+                quick_surf = pygame.surface.Surface(self.containing_rect.size,
+                                                    flags=pygame.SRCALPHA,
+                                                    depth=32)
+                quick_surf.fill(pygame.Color('#00000000'))
+            if isinstance(self.theming['normal_bg'], ColourGradient):
+                grad_surf = pygame.surface.Surface(self.click_area_shape.size,
+                                                   flags=pygame.SRCALPHA,
+                                                   depth=32)
+                grad_surf.fill(pygame.Color('#FFFFFFFF'))
+                self.theming['normal_bg'].apply_gradient_to_surface(grad_surf)
 
-            basic_blit(quick_surf, grad_surf,
-                       pygame.Rect((self.shadow_width,
-                                    self.shadow_width),
-                                   self.click_area_shape.size))
-        else:
-            quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
-                                                                    self.shadow_width),
-                                                                   self.click_area_shape.size))
+                basic_blit(quick_surf, grad_surf,
+                           pygame.Rect((self.shadow_width,
+                                        self.shadow_width),
+                                       self.click_area_shape.size))
+            else:
+                quick_surf.fill(self.theming['normal_bg'], pygame.Rect((self.shadow_width,
+                                                                        self.shadow_width),
+                                                                       self.click_area_shape.size))
 
-        self.states['normal'].surface = quick_surf
-        self.finalise_images_and_text('normal_image', 'normal',
-                                      'normal_text', 'normal_text_shadow', True)
+            self.states['normal'].surface = quick_surf
+            self.finalise_images_and_text('normal_image', 'normal',
+                                          'normal_text',
+                                          'normal_text_shadow', True)
         self.states['normal'].has_fresh_surface = True
 
         self.has_been_resized = True
@@ -301,104 +305,107 @@ class RoundedRectangleShape(DrawableShape):
         :param state_str: The ID string of the state to rebuild.
 
         """
-        text_colour_state_str = state_str + '_text'
-        text_shadow_colour_state_str = state_str + '_text_shadow'
-        bg_col = self.theming[state_str + '_bg']
-        border_col = self.theming[state_str + '_border']
-
-        found_shape = None
-        shape_id = None
-        if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
-            shape_id = self.shape_cache.build_cache_id('rounded_rectangle',
-                                                       self.containing_rect.size,
-                                                       self.shadow_width,
-                                                       self.border_width,
-                                                       border_col,
-                                                       bg_col,
-                                                       self.corner_radius)
-
-            found_shape = self.shape_cache.find_surface_in_cache(shape_id)
-        if found_shape is not None:
-            self.states[state_str].surface = found_shape.copy()
+        if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
+            self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            # border_corner_radius = self.corner_radius
-            if self.base_surface is not None:
-                self.states[state_str].surface = self.base_surface.copy()
+            text_colour_state_str = state_str + '_text'
+            text_shadow_colour_state_str = state_str + '_text_shadow'
+            bg_col = self.theming[state_str + '_bg']
+            border_col = self.theming[state_str + '_border']
 
-            # Try one AA call method
-            aa_amount = 4
-            self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
-                                            self.shadow_width * aa_amount),
-                                           (self.click_area_shape.width * aa_amount,
-                                            self.click_area_shape.height * aa_amount))
+            found_shape = None
+            shape_id = None
+            if 'filled_bar' not in self.theming and 'filled_bar_width_percentage' not in self.theming:
+                shape_id = self.shape_cache.build_cache_id('rounded_rectangle',
+                                                           self.containing_rect.size,
+                                                           self.shadow_width,
+                                                           self.border_width,
+                                                           border_col,
+                                                           bg_col,
+                                                           self.corner_radius)
 
-            self.background_rect = pygame.Rect(((self.border_width +
-                                                 self.shadow_width) * aa_amount,
-                                                (self.border_width +
-                                                 self.shadow_width) * aa_amount),
-                                               (self.border_rect.width -
-                                                (2 * self.border_width * aa_amount),
-                                                self.border_rect.height -
-                                                (2 * self.border_width * aa_amount)))
-
-            dimension_scale = min(self.background_rect.width / max(self.border_rect.width, 1),
-                                  self.background_rect.height / max(self.border_rect.height, 1))
-            bg_corner_radius = int(self.corner_radius * dimension_scale)
-
-            bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
-                                                  self.containing_rect.height * aa_amount),
-                                                 flags=pygame.SRCALPHA, depth=32)
-            bab_surface.fill(pygame.Color('#00000000'))
-            if self.border_width > 0:
-                shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                    self.border_rect,
-                                                                    0,
-                                                                    self.corner_radius,
-                                                                    aa_amount=aa_amount,
-                                                                    clear=False)
-                if isinstance(border_col, ColourGradient):
-                    border_col.apply_gradient_to_surface(shape_surface)
-                else:
-                    apply_colour_to_surface(border_col, shape_surface)
-
-                basic_blit(bab_surface, shape_surface, self.border_rect)
-
-            shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                self.background_rect,
-                                                                0,
-                                                                bg_corner_radius,
-                                                                aa_amount=aa_amount)
-
-            if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
-                self._redraw_filled_bar(bg_col, shape_surface)
+                found_shape = self.shape_cache.find_surface_in_cache(shape_id)
+            if found_shape is not None:
+                self.states[state_str].surface = found_shape.copy()
             else:
-                if isinstance(bg_col, ColourGradient):
-                    bg_col.apply_gradient_to_surface(shape_surface)
+                # border_corner_radius = self.corner_radius
+                if self.base_surface is not None:
+                    self.states[state_str].surface = self.base_surface.copy()
+
+                # Try one AA call method
+                aa_amount = 4
+                self.border_rect = pygame.Rect((self.shadow_width * aa_amount,
+                                                self.shadow_width * aa_amount),
+                                               (self.click_area_shape.width * aa_amount,
+                                                self.click_area_shape.height * aa_amount))
+
+                self.background_rect = pygame.Rect(((self.border_width +
+                                                     self.shadow_width) * aa_amount,
+                                                    (self.border_width +
+                                                     self.shadow_width) * aa_amount),
+                                                   (self.border_rect.width -
+                                                    (2 * self.border_width * aa_amount),
+                                                    self.border_rect.height -
+                                                    (2 * self.border_width * aa_amount)))
+
+                dimension_scale = min(self.background_rect.width / max(self.border_rect.width, 1),
+                                      self.background_rect.height / max(self.border_rect.height, 1))
+                bg_corner_radius = int(self.corner_radius * dimension_scale)
+
+                bab_surface = pygame.surface.Surface((self.containing_rect.width * aa_amount,
+                                                      self.containing_rect.height * aa_amount),
+                                                     flags=pygame.SRCALPHA, depth=32)
+                bab_surface.fill(pygame.Color('#00000000'))
+                if self.border_width > 0:
+                    shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                        self.border_rect,
+                                                                        0,
+                                                                        self.corner_radius,
+                                                                        aa_amount=aa_amount,
+                                                                        clear=False)
+                    if isinstance(border_col, ColourGradient):
+                        border_col.apply_gradient_to_surface(shape_surface)
+                    else:
+                        apply_colour_to_surface(border_col, shape_surface)
+
+                    basic_blit(bab_surface, shape_surface, self.border_rect)
+
+                shape_surface = self.clear_and_create_shape_surface(bab_surface,
+                                                                    self.background_rect,
+                                                                    0,
+                                                                    bg_corner_radius,
+                                                                    aa_amount=aa_amount)
+
+                if 'filled_bar' in self.theming and 'filled_bar_width_percentage' in self.theming:
+                    self._redraw_filled_bar(bg_col, shape_surface)
                 else:
-                    apply_colour_to_surface(bg_col, shape_surface)
+                    if isinstance(bg_col, ColourGradient):
+                        bg_col.apply_gradient_to_surface(shape_surface)
+                    else:
+                        apply_colour_to_surface(bg_col, shape_surface)
 
-            basic_blit(bab_surface, shape_surface, self.background_rect)
+                basic_blit(bab_surface, shape_surface, self.background_rect)
 
-            # apply AA to background
-            bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
+                # apply AA to background
+                bab_surface = pygame.transform.smoothscale(bab_surface, self.containing_rect.size)
 
-            basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
+                basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
-            if self.states[state_str].cached_background_id is not None:
-                cached_id = self.states[state_str].cached_background_id
-                self.shape_cache.remove_user_from_cache_item(cached_id)
-            if (not self.has_been_resized
-                    and ((self.containing_rect.width * self.containing_rect.height) < 40000)
-                    and (shape_id is not None
-                         and self.states[state_str].surface.get_width() <= 1024
-                         and self.states[state_str].surface.get_height() <= 1024)):
-                self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
-                                                      shape_id)
-                self.states[state_str].cached_background_id = shape_id
+                if self.states[state_str].cached_background_id is not None:
+                    cached_id = self.states[state_str].cached_background_id
+                    self.shape_cache.remove_user_from_cache_item(cached_id)
+                if (not self.has_been_resized
+                        and ((self.containing_rect.width * self.containing_rect.height) < 40000)
+                        and (shape_id is not None
+                             and self.states[state_str].surface.get_width() <= 1024
+                             and self.states[state_str].surface.get_height() <= 1024)):
+                    self.shape_cache.add_surface_to_cache(self.states[state_str].surface.copy(),
+                                                          shape_id)
+                    self.states[state_str].cached_background_id = shape_id
 
-        self.finalise_images_and_text(state_str + '_image', state_str,
-                                      text_colour_state_str,
-                                      text_shadow_colour_state_str, add_text)
+            self.finalise_images_and_text(state_str + '_image', state_str,
+                                          text_colour_state_str,
+                                          text_shadow_colour_state_str, add_text)
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True

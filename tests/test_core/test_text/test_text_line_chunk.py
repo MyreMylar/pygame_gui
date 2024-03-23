@@ -183,7 +183,7 @@ class TestTextLineChunkFTFont:
         new_chunk = chunk.split(requested_x=70, line_width=200, row_start_x=0)
 
         assert chunk.width == 62
-        assert new_chunk.width == 53
+        assert new_chunk.width == 55
         assert original_chunk_width == (chunk.width + new_chunk.width)
         assert chunk.height == new_chunk.height
 
@@ -208,7 +208,7 @@ class TestTextLineChunkFTFont:
         new_chunk = chunk.split_index(index=5)
 
         assert chunk.width == 62
-        assert new_chunk.width == 53
+        assert new_chunk.width == 55
         assert original_chunk_width == (chunk.width + new_chunk.width)
         assert chunk.height == new_chunk.height
 

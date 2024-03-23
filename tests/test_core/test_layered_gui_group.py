@@ -8,7 +8,7 @@ class MyProperSprite(GUISprite):
     def __init__(self, *groups):
         super().__init__(*groups)
         self.blendmode = 0
-        self.visible = 1
+        self.visible = True
 
     def update(self, time_delta: float):
         pass
@@ -37,7 +37,7 @@ class MyDodgySprite1:
 
 class MyDodgySprite2:
     def __init__(self, *groups):
-        self.visible = 1
+        self.visible = True
 
         self.__g = {}
         if groups:
@@ -59,7 +59,7 @@ class MyDodgySprite2:
 class MyDodgySprite3(pygame.sprite.Sprite):
     def __init__(self, *groups):
         self.blendmode = 0
-        self.visible = 1
+        self.visible = True
         super().__init__(*groups)
 
 

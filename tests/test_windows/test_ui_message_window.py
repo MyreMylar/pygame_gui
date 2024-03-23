@@ -15,7 +15,7 @@ class TestUIMessageWindow:
 
     def test_creation(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code',
+        default_ui_manager.preload_fonts([{'name': 'noto_sans',
                                            'point_size': 14,
                                            'style': 'bold'}])
 
@@ -39,7 +39,7 @@ class TestUIMessageWindow:
 
     def test_create_too_small(self, _init_pygame, default_ui_manager,
                               _display_surface_return_none):
-        default_ui_manager.preload_fonts([{'name': 'fira_code',
+        default_ui_manager.preload_fonts([{'name': 'noto_sans',
                                            'point_size': 14,
                                            'style': 'bold'}])
 

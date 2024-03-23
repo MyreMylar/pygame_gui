@@ -34,7 +34,7 @@ class UITextEntryLine(UIElement):
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
@@ -46,7 +46,7 @@ class UITextEntryLine(UIElement):
 
     _number_character_set = {'en': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
 
-    # excluding these characters won't ensure that user entered text is a valid filename but they
+    # excluding these characters won't ensure that user entered text is a valid filename, but they
     # can help reduce the problems that input will leave you with.
     _forbidden_file_path_characters = {'en': ['<', '>', ':', '"', '/',
                                               '\\', '|', '?', '*', '\0', '.']}
@@ -60,8 +60,8 @@ class UITextEntryLine(UIElement):
         'ja': [],  # no upper case in japanese
         'zh': []}  # no upper case in chinese
 
-    _alphabet_characters_all = {'en': _alphabet_characters_lower['en'] +
-                                _alphabet_characters_upper['en']}
+    _alphabet_characters_all = {'en': (_alphabet_characters_lower['en'] +
+                                       _alphabet_characters_upper['en'])}
 
     _alpha_numeric_characters = {'en': (_alphabet_characters_all['en'] +
                                         _number_character_set['en'])}
@@ -96,6 +96,7 @@ class UITextEntryLine(UIElement):
 
         # theme font
         self.font: Optional[IGUIFontInterface] = None
+        self.hidden_font: Optional[IGUIFontInterface] = self.ui_theme.get_font_dictionary().get_default_symbol_font()
 
         self.shadow_width = None
         self.border_width = None
@@ -188,17 +189,27 @@ class UITextEntryLine(UIElement):
         """
 
         display_text = self.text
+        display_font = self.font
         if self.is_text_hidden:
+            display_font = self.hidden_font
             # test if self.hidden_text_char is supported by font here
-            if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                self.hidden_text_char = '*'
-                if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                    self.hidden_text_char = '.'
-                    if self.font.get_metrics(self.hidden_text_char)[0] is None:
-                        raise ValueError('Selected font for UITextEntryLine does not contain '
-                                         '●, * or . characters used for hidden text. Please choose'
-                                         'a different font for this element')
-            display_text = self.hidden_text_char*len(self.text)
+            # currently we can't do this (not supported by pygame.font yet)
+            # if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #     self.hidden_text_char = '*'
+            #     if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #         self.hidden_text_char = '.'
+            #         if self.font.get_metrics(self.hidden_text_char)[0] is None:
+            #             raise ValueError('Selected font for UITextEntryLine does not contain '
+            #                              '●, * or . characters used for hidden text. Please choose'
+            #                              'a different font for this element')
+            display_text = self.hidden_text_char * len(self.text)
+
+        text_direction = self.font.get_direction()
+        text_horiz_alignment = 'left'
+        if text_direction == pygame.DIRECTION_LTR:
+            text_horiz_alignment = 'left'
+        elif text_direction == pygame.DIRECTION_RTL:
+            text_horiz_alignment = 'right'
 
         theming_parameters = {'normal_bg': self.background_colour,
                               'normal_text': self.text_colour,
@@ -213,10 +224,10 @@ class UITextEntryLine(UIElement):
                               'text_cursor_colour': self.text_cursor_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'font': self.font,
+                              'font': display_font,
                               'text': display_text if len(display_text) > 0 else translate(self.placeholder_text),
                               'text_width': -1,
-                              'text_horiz_alignment': 'left',
+                              'text_horiz_alignment': text_horiz_alignment,
                               'text_vert_alignment': 'centre',
                               'text_horiz_alignment_padding': self.padding[0],
                               'text_vert_alignment_padding': self.padding[1],
@@ -236,7 +247,7 @@ class UITextEntryLine(UIElement):
 
     def set_text_length_limit(self, limit: int):
         """
-        Allows a character limit to be set on the text entry element. By default there is no
+        Allows a character limit to be set on the text entry element. By default, there is no
         limit on the number of characters that can be entered.
 
         :param limit: The character limit as an integer.
@@ -256,7 +267,7 @@ class UITextEntryLine(UIElement):
     def set_text(self, text: str):
         """
         Allows the text displayed in the text entry element to be set via code. Useful for
-        setting an initial or existing value that is able to be edited.
+        setting an initial or existing value that can be edited.
 
         The string to set must be valid for the text entry element for this to work.
 
@@ -383,7 +394,7 @@ class UITextEntryLine(UIElement):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        Allows the text entry box to react to input events, which is it's primary function.
+        Allows the text entry box to react to input events, which is its primary function.
         The entry element reacts to various types of mouse clicks (double click selecting words,
         drag select), keyboard combos (CTRL+C, CTRL+V, CTRL+X, CTRL+A), individual editing keys
         (Backspace, Delete, Left & Right arrows) and other keys for inputting letters, symbols
@@ -406,11 +417,17 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
 
         if self.is_enabled and self.is_focused and event.type == pygame.TEXTINPUT:
-            processed_any_char = False
-            for char in event.text:
-                if self._process_entered_character(char):
-                    processed_any_char = True
-            consumed_event = processed_any_char
+            # sometimes we don't get a keydown event for a paste shortcut on Mac (?)
+            key_mods = pygame.key.get_mods()
+            if event.text == "v" and ((key_mods & pygame.KMOD_CTRL) or (key_mods & pygame.KMOD_META)):
+                self._do_paste()
+                consumed_event = True
+            else:
+                processed_any_char = False
+                for char in event.text:
+                    if self._process_entered_character(char):
+                        processed_any_char = True
+                consumed_event = processed_any_char
 
         if self.is_enabled and self.is_focused and event.type == pygame.KEYUP:
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
@@ -441,7 +458,7 @@ class UITextEntryLine(UIElement):
         """
         Process key input that can be added to the text entry text.
 
-        :param event: The event to process.
+        :param character: The character to process.
 
         :return: True if consumed.
         """
@@ -579,9 +596,9 @@ class UITextEntryLine(UIElement):
         consumed_event = False
         # modded versions of LEFT and RIGHT must go first otherwise the simple
         # cases will absorb the events
-        if event.key == pygame.K_HOME or (event.key == pygame.K_LEFT
-            and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)
-            ):
+        if (event.key == pygame.K_HOME or
+                (event.key == pygame.K_LEFT and
+                 (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META))):
             # include case when shift held down to select everything to start
             # of current line.
             if abs(self.select_range[0] - self.select_range[1]) > 0:
@@ -602,9 +619,9 @@ class UITextEntryLine(UIElement):
             self.edit_position = 0
             self.cursor_has_moved_recently = True
             consumed_event = True
-        elif event.key == pygame.K_END or (event.key == pygame.K_RIGHT
-            and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)
-            ):
+        elif (event.key == pygame.K_END or
+              (event.key == pygame.K_RIGHT and
+               (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META))):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 if event.mod & pygame.KMOD_SHIFT:
                     if self.edit_position == self.select_range[0]:
@@ -635,7 +652,7 @@ class UITextEntryLine(UIElement):
                 elif self.edit_position == self.select_range[1]:
                     # reduce to the left
                     self.select_range = [self.select_range[0], max(0,
-                                                    self.edit_position - 1)]
+                                                                   self.edit_position - 1)]
             else:
                 self.select_range = [max(0, self.edit_position - 1),
                                      self.edit_position]
@@ -656,7 +673,7 @@ class UITextEntryLine(UIElement):
                                          self.select_range[1]]
             else:
                 self.select_range = [self.edit_position, min(len(self.text),
-                                                    self.edit_position + 1)]
+                                                             self.edit_position + 1)]
             if self.edit_position < len(self.text):
                 self.edit_position += 1
                 self.cursor_has_moved_recently = True
@@ -704,14 +721,16 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if (event.key == pygame.K_a and
-                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META)):
+                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
             self.select_range = [0, len(self.text)]
             self.edit_position = len(self.text)
             self.cursor_has_moved_recently = True
             consumed_event = True
         elif (event.key == pygame.K_x and
               (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden):
+              not self.is_text_hidden and
+              not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -729,7 +748,8 @@ class UITextEntryLine(UIElement):
                 consumed_event = True
         elif (event.key == pygame.K_c and
               (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden):
+              not self.is_text_hidden and
+              not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 low_end = min(self.select_range[0], self.select_range[1])
                 high_end = max(self.select_range[0], self.select_range[1])
@@ -749,55 +769,60 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if event.key == pygame.K_v and (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META):
-            new_text = clipboard_paste()
-            if self.validate_text_string(new_text):
-                if abs(self.select_range[0] - self.select_range[1]) > 0:
-                    low_end = min(self.select_range[0], self.select_range[1])
-                    high_end = max(self.select_range[0], self.select_range[1])
-                    final_text = self.text[:low_end] + new_text + self.text[high_end:]
-                    within_length_limit = True
-                    if self.length_limit is not None and len(final_text) > self.length_limit:
-                        within_length_limit = False
-                    if within_length_limit:
-                        self.text = final_text
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.delete_selected_text()
-                            self.drawable_shape.apply_active_text_changes()
-                        display_new_text = new_text
-                        if self.is_text_hidden:
-                            display_new_text = self.hidden_text_char * len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.insert_text(display_new_text, low_end)
-                        self.edit_position = low_end + len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.set_cursor_position(
-                                self.edit_position)
-                            self.drawable_shape.apply_active_text_changes()
-                        self.select_range = [0, 0]
-                        self.cursor_has_moved_recently = True
-                elif len(new_text) > 0:
-                    final_text = (self.text[:self.edit_position] +
-                                  new_text +
-                                  self.text[self.edit_position:])
-                    within_length_limit = True
-                    if self.length_limit is not None and len(final_text) > self.length_limit:
-                        within_length_limit = False
-                    if within_length_limit:
-                        self.text = final_text
-                        display_new_text = new_text
-                        if self.is_text_hidden:
-                            display_new_text = self.hidden_text_char * len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.insert_text(display_new_text, self.edit_position)
-                        self.edit_position += len(new_text)
-                        if self.drawable_shape is not None:
-                            self.drawable_shape.text_box_layout.set_cursor_position(
-                                self.edit_position)
-                            self.drawable_shape.apply_active_text_changes()
-                        self.cursor_has_moved_recently = True
-                consumed_event = True
+        if (event.key == pygame.K_v and
+                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
+                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
+            self._do_paste()
+            consumed_event = True
         return consumed_event
+
+    def _do_paste(self):
+        new_text = clipboard_paste()
+        if self.validate_text_string(new_text):
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                final_text = self.text[:low_end] + new_text + self.text[high_end:]
+                within_length_limit = True
+                if self.length_limit is not None and len(final_text) > self.length_limit:
+                    within_length_limit = False
+                if within_length_limit:
+                    self.text = final_text
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.delete_selected_text()
+                        self.drawable_shape.apply_active_text_changes()
+                    display_new_text = new_text
+                    if self.is_text_hidden:
+                        display_new_text = self.hidden_text_char * len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.insert_text(display_new_text, low_end)
+                    self.edit_position = low_end + len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.set_cursor_position(
+                            self.edit_position)
+                        self.drawable_shape.apply_active_text_changes()
+                    self.select_range = [0, 0]
+                    self.cursor_has_moved_recently = True
+            elif len(new_text) > 0:
+                final_text = (self.text[:self.edit_position] +
+                              new_text +
+                              self.text[self.edit_position:])
+                within_length_limit = True
+                if self.length_limit is not None and len(final_text) > self.length_limit:
+                    within_length_limit = False
+                if within_length_limit:
+                    self.text = final_text
+                    display_new_text = new_text
+                    if self.is_text_hidden:
+                        display_new_text = self.hidden_text_char * len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.insert_text(display_new_text, self.edit_position)
+                    self.edit_position += len(new_text)
+                    if self.drawable_shape is not None:
+                        self.drawable_shape.text_box_layout.set_cursor_position(
+                            self.edit_position)
+                        self.drawable_shape.apply_active_text_changes()
+                    self.cursor_has_moved_recently = True
 
     def _process_mouse_button_event(self, event: pygame.event.Event) -> bool:
         """
@@ -855,7 +880,7 @@ class UITextEntryLine(UIElement):
 
     def _calculate_double_click_word_selection(self):
         """
-        If we double clicked on a word in the text, select that word.
+        If we double-clicked on a word in the text, select that word.
 
         """
         if self.edit_position != self.select_range[0]:
@@ -863,7 +888,7 @@ class UITextEntryLine(UIElement):
         index = min(self.edit_position, len(self.text) - 1)
         if index >= 0:
             char = self.text[index]
-            # Check we clicked in the same place on a our second click.
+            # Check we clicked in the same place on our second click.
             pattern = re.compile(r"[\w']+")
             if index > 0:
                 while not pattern.match(char):
@@ -971,7 +996,7 @@ class UITextEntryLine(UIElement):
 
     def validate_text_string(self, text_to_validate: str) -> bool:
         """
-        Checks a string of text to see if any of it's characters don't meet the requirements of
+        Checks a string of text to see if any of its characters don't meet the requirements of
         the allowed and forbidden character sets.
 
         :param text_to_validate: The text string to check.
@@ -983,11 +1008,13 @@ class UITextEntryLine(UIElement):
                 for character in text_to_validate:
                     if character in self.forbidden_characters:
                         is_valid = False
+                        break
 
             if is_valid and self.allowed_characters is not None:
                 for character in text_to_validate:
                     if character not in self.allowed_characters:
                         is_valid = False
+                        break
         else:
             is_valid = False
 
@@ -1115,7 +1142,7 @@ class UITextEntryLine(UIElement):
 
     def enable(self):
         """
-        Re-enables the element so we can once again interact with it.
+        Re-enables the element, so we can once again interact with it.
         """
         if not self.is_enabled:
             self.is_enabled = True

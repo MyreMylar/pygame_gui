@@ -3,7 +3,6 @@ import warnings
 
 from typing import Dict, Union, Tuple, List, Optional
 
-
 import pygame
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -18,14 +17,19 @@ class DefaultFontData:
     Data class to wrap up all the data for a default font. Used now that we have multiple
     default fonts for different locales.
     """
+
     def __init__(self, size: int, name: str, style: str,
                  regular_file_name: str,
                  bold_file_name: str,
                  italic_file_name: str,
-                 bold_italic_file_name: str):
+                 bold_italic_file_name: str,
+                 script: str = 'Latn',
+                 direction: int = pygame.DIRECTION_LTR):
         self.size = size
         self.name = name
         self.style = style
+        self.script = script
+        self.direction = direction
         self.idx = (self.name + '_' + self.style + '_' + 'aa_' + str(self.size))
 
         self.regular_file_name = regular_file_name
@@ -83,12 +87,20 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         # match up two letter locale ids with a font that supports their alphabet
         self._latin_font = DefaultFontData(14,
-                                           'fira_code',
+                                           'noto_sans',
                                            'regular',
-                                           'FiraCode-Regular.ttf',
-                                           'FiraCode-Bold.ttf',
-                                           'FiraMono-RegularItalic.ttf',
-                                           'FiraMono-BoldItalic.ttf')
+                                           'NotoSans-Regular.ttf',
+                                           'NotoSans-Bold.ttf',
+                                           'NotoSans-Italic.ttf',
+                                           'NotoSans-BoldItalic.ttf')
+
+        self._symbols_font = DefaultFontData(14,
+                                             'fira_code_symbols',
+                                             'regular',
+                                             'FiraCode-Regular.ttf',
+                                             'FiraCode-Regular.ttf',
+                                             'FiraCode-Regular.ttf',
+                                             'FiraCode-Regular.ttf')
 
         self._japanese_font = DefaultFontData(14,
                                               'noto_sans_jp',
@@ -105,37 +117,79 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              'NotoSansSC-Regular.otf',
                                              'NotoSansSC-Bold.otf')
         self._korean_font = DefaultFontData(14,
-                                             'noto_sans_kr',
-                                             'regular',
-                                             'NotoSansKR-Regular.ttf',
-                                             'NotoSansKR-Bold.ttf',
-                                             'NotoSansKR-Regular.ttf',
-                                             'NotoSansKR-Bold.ttf')
-        self.default_font_dictionary = {'en': self._latin_font,
-                                        'fr': self._latin_font,
+                                            'noto_sans_kr',
+                                            'regular',
+                                            'NotoSansKR-Regular.ttf',
+                                            'NotoSansKR-Bold.ttf',
+                                            'NotoSansKR-Regular.ttf',
+                                            'NotoSansKR-Bold.ttf')
+        self._hebrew_font = DefaultFontData(14,
+                                            'noto_sans_he',
+                                            'regular',
+                                            'NotoSansHebrew-Regular.ttf',
+                                            'NotoSansHebrew-Bold.ttf',
+                                            'NotoSansHebrew-Regular.ttf',
+                                            'NotoSansHebrew-Bold.ttf',
+                                            script='Hebr',
+                                            direction=pygame.DIRECTION_RTL)
+        self._arabic_font = DefaultFontData(14,
+                                            'noto_sans_ar',
+                                            'regular',
+                                            'NotoSansArabic-Regular.ttf',
+                                            'NotoSansArabic-Bold.ttf',
+                                            'NotoSansArabic-Regular.ttf',
+                                            'NotoSansArabic-Bold.ttf',
+                                            script='Arab',
+                                            direction=pygame.DIRECTION_RTL
+                                            )
+
+        self._georgian_font = DefaultFontData(14,
+                                              'noto_sans_ge',
+                                              'regular',
+                                              'NotoSansGeorgian-Regular.ttf',
+                                              'NotoSansGeorgian-Bold.ttf',
+                                              'NotoSansGeorgian-Regular.ttf',
+                                              'NotoSansGeorgian-Bold.ttf',
+                                              script='Geor',
+                                              direction=pygame.DIRECTION_LTR
+                                              )
+
+        self.default_font_dictionary = {'ar': self._arabic_font,
                                         'de': self._latin_font,
-                                        'it': self._latin_font,
+                                        'en': self._latin_font,
                                         'es': self._latin_font,
-                                        'ru': self._latin_font,
+                                        'fr': self._latin_font,
+                                        'ge': self._georgian_font,
+                                        'he': self._hebrew_font,
                                         'id': self._latin_font,
-                                        'pt': self._latin_font,
+                                        'it': self._latin_font,
                                         'ja': self._japanese_font,
+                                        'ko': self._korean_font,
+                                        'pl': self._latin_font,
+                                        'pt': self._latin_font,
+                                        'ru': self._latin_font,
+                                        'uk': self._latin_font,
+                                        'vi': self._latin_font,
                                         'zh': self._chinese_font,
-                                        'ko': self._korean_font}
+
+                                        }
 
         try:
             self.default_font: DefaultFontData = self.default_font_dictionary[locale]
         except KeyError:
             self.default_font: DefaultFontData = self._latin_font
 
+        self._default_symbols_font: DefaultFontData = self._symbols_font
+
         self.debug_font_size = 8
 
         self.loaded_fonts = {}  # type: Dict[str, FontResource]
         self.known_font_paths: Dict[str, List[Tuple[Union[str, PackageResource, bytes], bool]]] = {}
 
-        self._load_default_font()
+        self._load_default_font(self.default_font)
+        self._load_default_font(self._default_symbols_font)
 
-        self.used_font_ids = [self.default_font.idx]
+        self.used_font_ids = [self.default_font.idx, self._default_symbols_font.idx]
 
     def set_locale(self, new_locale: str):
         try:
@@ -145,39 +199,42 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         if self.default_font != new_font:
             self.default_font = new_font
-            self._load_default_font()
+            self._load_default_font(self.default_font)
 
-    def _load_default_font(self):
+    def _load_default_font(self, font):
         """
         Load a default font.
 
         """
         default_font_res = FontResource(
-            font_id=self.default_font.idx,
-            size=self.default_font.size,
-            style={'bold': False, 'italic': False, 'antialiased': True},
+            font_id=font.idx,
+            size=font.size,
+            style={'bold': False, 'italic': False, 'antialiased': True,
+                   'script': font.script, 'direction': font.direction},
             location=(
                 PackageResource(package='pygame_gui.data',
-                                resource=self.default_font.regular_file_name),
+                                resource=font.regular_file_name),
                 False))
 
         error = default_font_res.load()
         if error is not None and isinstance(error, Exception):
             raise error
-        self.loaded_fonts[self.default_font.idx] = default_font_res
 
-        self.known_font_paths[self.default_font.name] = [
+        self.loaded_fonts[font.idx] = default_font_res
+
+        self.known_font_paths[font.name] = [
             (PackageResource(package='pygame_gui.data',
-                             resource=self.default_font.regular_file_name), False),
+                             resource=font.regular_file_name), False),
             (PackageResource(package='pygame_gui.data',
-                             resource=self.default_font.bold_file_name), False),
+                             resource=font.bold_file_name), False),
             (PackageResource(package='pygame_gui.data',
-                             resource=self.default_font.italic_file_name), False),
+                             resource=font.italic_file_name), False),
             (PackageResource(package='pygame_gui.data',
-                             resource=self.default_font.bold_italic_file_name), False)]
+                             resource=font.bold_italic_file_name), False)]
 
     def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False, antialiased: bool = True) -> IGUIFontInterface:
+                  bold: bool = False, italic: bool = False, antialiased: bool = True,
+                  script: str = 'Latn', direction: int = pygame.DIRECTION_LTR) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -192,14 +249,18 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
         :param antialiased: Whether the font is antialiased or not.
+        :param script: The ISO 15924 script code used for text shaping as a string.
+        :param direction: the direction of text e.g. left to right or right to left. An integer.
 
         :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
         """
-        return self.find_font_resource(font_size, font_name, bold, italic, antialiased).loaded_font
+        return self.find_font_resource(font_size, font_name, bold, italic, antialiased,
+                                       script=script, direction=direction).loaded_font
 
     def find_font_resource(self, font_size: int, font_name: str,
-                           bold: bool = False, italic: bool = False, antialiased: bool = True) -> FontResource:
+                           bold: bool = False, italic: bool = False, antialiased: bool = True,
+                           script: str = 'Latn', direction: int = pygame.DIRECTION_LTR) -> FontResource:
         """
         Find a loaded font resource from the font dictionary. Will load a font if it does not
         already exist and we have paths to the needed files, however it will issue a warning
@@ -214,6 +275,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param bold: Whether the font is bold or not.
         :param italic: Whether the font is italic or not.
         :param antialiased: Whether the font is antialiased or not.
+        :param script: The ISO 15924 script code used for text shaping as a string.
+        :param direction: the direction of text e.g. left to right or right to left. An integer.
 
         :return FontResource: Returns either the font resource we asked for, or the default font.
 
@@ -244,12 +307,13 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                               " that is not already loaded.\n"
                               "Preload this font with {'name': "
                               "'" + font_name + "',"
-                              " 'point_size': " + str(font_size) + ","
-                              " 'style': '" + style_string + "'," +
+                                                " 'point_size': " + str(font_size) + ","
+                                                                                     " 'style': '" + style_string + "'," +
                               " 'antialiased': '" + font_aliasing +
                               "'}")
             warnings.warn(warning_string, UserWarning)
-            self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True, antialiased=antialiased)
+            self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True, antialiased=antialiased,
+                              script=script, direction=direction)
             return self.loaded_fonts[font_id]
         else:
             return self.loaded_fonts[self.default_font.idx]
@@ -262,6 +326,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         """
         return self.find_font(self.default_font.size, self.default_font.name)
+
+    def get_default_symbol_font(self) -> IGUIFontInterface:
+        return self.find_font(self._symbols_font.size, self._symbols_font.name)
 
     def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool, antialiased: bool = True) -> str:
         """
@@ -296,7 +363,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False,
-                     force_immediate_load: bool = False, antialiased: bool = True):
+                     force_immediate_load: bool = False, antialiased: bool = True,
+                     script: str = 'Latn', direction: int = pygame.DIRECTION_LTR):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
@@ -309,10 +377,12 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :param force_immediate_load: resource loading setup to immediately
                                      load the font on the main thread.
         :param antialiased: Whether the font is antialiased or not.
+        :param script: The ISO 15924 script code used for text shaping as a string.
+        :param direction: the direction of text e.g. left to right or right to left. An integer.
 
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic, antialiased)
-        if font_id in self.loaded_fonts:    # font already loaded
+        if font_id in self.loaded_fonts:  # font already loaded
             warnings.warn('Trying to pre-load font id: ' +
                           font_id +
                           ' that is already loaded', UserWarning)
@@ -328,7 +398,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_size,
                                              font_style={'bold': True,
                                                          'italic': True,
-                                                         'antialiased': antialiased},
+                                                         'antialiased': antialiased,
+                                                         'script': script,
+                                                         'direction': direction},
                                              force_immediate_load=force_immediate_load)
 
             elif bold:
@@ -337,7 +409,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_size,
                                              font_style={'bold': True,
                                                          'italic': False,
-                                                         'antialiased': antialiased},
+                                                         'antialiased': antialiased,
+                                                         'script': script,
+                                                         'direction': direction},
                                              force_immediate_load=force_immediate_load)
             elif italic:
                 self._load_single_font_style(italic_path,
@@ -345,7 +419,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_size,
                                              font_style={'bold': False,
                                                          'italic': True,
-                                                         'antialiased': antialiased},
+                                                         'antialiased': antialiased,
+                                                         'script': script,
+                                                         'direction': direction},
                                              force_immediate_load=force_immediate_load)
             else:
                 self._load_single_font_style(regular_path,
@@ -353,7 +429,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              font_size,
                                              font_style={'bold': False,
                                                          'italic': False,
-                                                         'antialiased': antialiased},
+                                                         'antialiased': antialiased,
+                                                         'script': script,
+                                                         'direction': direction},
                                              force_immediate_load=force_immediate_load)
         else:
             warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')

@@ -41,7 +41,7 @@ class TestUILabel:
                         text="Test Label",
                         manager=default_ui_manager)
         label.set_text("new text")
-        assert label.image is not None and label.rect.width == 64
+        assert label.image is not None and label.rect.width == 56
 
     def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):

@@ -116,6 +116,43 @@ class TestUIScrollingContainer:
         assert container._view_container.rect.size == (200-container.vert_scroll_bar.rect.width,
                                                        200-container.horiz_scroll_bar.rect.height)
 
+    def test_set_scrollable_area_dimensions_constrained_x_axis(self, _init_pygame, default_ui_manager,
+                                                               _display_surface_return_none):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager,
+                                         allow_scroll_x=False)
+
+        assert container.vert_scroll_bar is None
+        assert container.horiz_scroll_bar is None
+        assert container.scrollable_container.rect.size == (200, 200)
+
+        container.set_scrollable_area_dimensions((200, 600))
+
+        assert container.vert_scroll_bar is not None
+        assert container.horiz_scroll_bar is None
+        assert container._view_container.rect.size == (200 - container.vert_scroll_bar.rect.width,
+                                                       200)
+        assert container.scrollable_container.rect.size == (200 - container.vert_scroll_bar.rect.width, 600)
+
+    def test_set_scrollable_area_dimensions_constrained_y_axis(self, _init_pygame, default_ui_manager,
+                                                               _display_surface_return_none):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
+                                         manager=default_ui_manager,
+                                         allow_scroll_y=False)
+
+        assert container.vert_scroll_bar is None
+        assert container.horiz_scroll_bar is None
+        assert container.scrollable_container.rect.size == (200, 200)
+
+        container.set_scrollable_area_dimensions((600, 200))
+
+        assert container.vert_scroll_bar is None
+        assert container.horiz_scroll_bar is not None
+        assert container._view_container.rect.size == (200,
+                                                       200 - container.horiz_scroll_bar.rect.height)
+        assert container.scrollable_container.rect.size == (600,
+                                                            200 - container.horiz_scroll_bar.rect.height)
+
     def test_update(self, _init_pygame, default_ui_manager,
                     _display_surface_return_none):
         container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200),
@@ -128,7 +165,7 @@ class TestUIScrollingContainer:
 
         container.update(0.02)
 
-        assert container.get_container().relative_rect.x == -37
+        assert container.get_container().get_relative_rect().x == -37
 
         container.vert_scroll_bar.scroll_wheel_moved = True
         container.vert_scroll_bar.scroll_wheel_amount = -1.0
@@ -136,7 +173,7 @@ class TestUIScrollingContainer:
 
         container.update(0.02)
 
-        assert container.get_container().relative_rect.y == -67
+        assert container.get_container().get_relative_rect().y == -67
 
         container.horiz_scroll_bar.scroll_wheel_right = True
         container.horiz_scroll_bar.update(0.02)
@@ -351,6 +388,20 @@ class TestUIScrollingContainer:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=container)
+
+        count = 0
+        for button in container:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
 
 
 if __name__ == '__main__':

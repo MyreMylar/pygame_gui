@@ -1,9 +1,9 @@
-from typing import Union, Dict, Tuple, Optional
+from typing import Union, Dict, Tuple, Optional, Iterator
 
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 
 from pygame_gui.core import UIElement, UIContainer
@@ -308,3 +308,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if self.panel_container is not None:
             self.panel_container.hide()
         super().hide()
+    
+    def __iter__(self) -> Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container.
+        """
+        return iter(self.get_container())

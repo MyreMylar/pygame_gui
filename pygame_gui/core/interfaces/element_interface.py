@@ -1,10 +1,14 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, List, Set, Any
+from typing import Tuple, Union, List, Set, Any, Dict
 
 import pygame
 
+from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
-class IUIElementInterface(metaclass=ABCMeta):
+Coordinate = Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]
+
+
+class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     """
     Interface for the ui element class. This is so we can refer to ui elements in other classes
     before the UIElement has itself been defined.
@@ -62,16 +66,31 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_anchors(self) -> Dict[str, Union[str, "IUIElementInterface"]]:
+        """
+        A dictionary containing all the anchors defining what the relative rect is relative to
+
+        :return: A dictionary containing all the anchors defining what the relative rect is relative to
+        """
+
+    @abstractmethod
+    def set_anchors(self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]) -> None:
+        """
+        Wraps the setting of the anchors with some validation
+
+        :param anchors: A dictionary of anchors defining what the relative rect is relative to
+        :return: None
+        """
+
+    @abstractmethod
     def update_containing_rect_position(self):
         """
-        Updates the position of this element based on the position of it's container. Usually
+        Updates the position of this element based on the position of its container. Usually
         called when the container has moved.
         """
 
     @abstractmethod
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -80,9 +99,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -91,10 +108,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -128,7 +142,7 @@ class IUIElementInterface(metaclass=ABCMeta):
     @abstractmethod
     def kill(self):
         """
-        Overriding regular sprite kill() method to remove the element from it's container.
+        Overriding regular sprite kill() method to remove the element from its container.
         """
 
     @abstractmethod
@@ -261,7 +275,7 @@ class IUIElementInterface(metaclass=ABCMeta):
         """
         Obtain the current image clipping rect.
 
-        :return: The current clipping rect. May be None.
+        :return: The current clipping rect. Maybe None.
 
         """
 
@@ -323,7 +337,7 @@ class IUIElementInterface(metaclass=ABCMeta):
     @abstractmethod
     def join_focus_sets(self, element):
         """
-        Join this element's focus set with another's.
+        Join this element's focus set with another element's focus set.
 
         :param element: The other element whose focus set we are joining with.
         """
@@ -375,6 +389,6 @@ class IUIElementInterface(metaclass=ABCMeta):
     @abstractmethod
     def get_anchor_targets(self) -> list:
         """
-        Get any anchor targets this element has so we can update them when their targets change
+        Get any anchor targets this element has, so we can update them when their targets change
         :return: the list of anchor targets.
         """

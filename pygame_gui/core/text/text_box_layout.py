@@ -33,11 +33,13 @@ class TextBoxLayout:
                  view_rect: pygame.Rect,
                  line_spacing: float,
                  default_font_data: Dict[str, Any],
-                 allow_split_dashes: bool = True):
+                 allow_split_dashes: bool = True,
+                 text_direction: int = pygame.DIRECTION_LTR):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
+        self.text_direction = text_direction
 
         # this is the font used when we don't have anything else
         self.default_font_data = default_font_data
@@ -94,7 +96,7 @@ class TextBoxLayout:
             self._add_row_to_layout(current_row, True)
 
         self.edit_buffer = 2
-        self.cursor_text_row = None
+        self.cursor_text_row: Optional[TextBoxLayoutRow] = None
         self.last_horiz_cursor_row_pos = 0
 
         self.selection_colour = pygame.Color(128, 128, 200, 255)
@@ -185,7 +187,10 @@ class TextBoxLayout:
                     if floater.left < rhs_limit:
                         rhs_limit = floater.left
         # See if this rectangle will fit on the current line
-        if not self.expand_width and text_layout_rect.right > rhs_limit:
+        # also check whether this layout rect is a final unsplittable rectangle that is wider than the layout.
+        if not self.expand_width and text_layout_rect.right > rhs_limit and not (
+                len(input_queue) == 0 and not text_layout_rect.can_split() and current_row.x == 0
+        ):
             # move to next line and try to split if we can
             current_row = self._split_rect_and_move_to_next_line(current_row,
                                                                  rhs_limit,
@@ -579,6 +584,29 @@ class TextBoxLayout:
             row.bottom = new_y
             row.vert_align_items_to_row()
             new_y -= row.height
+
+    def set_cursor_to_end_of_current_row(self):
+        """
+        Set the edit cursor position in the text layout to the end of the current row and returns the overall
+        position in the text
+
+        :return: the overall position of the cursor in the text layout, after setting it to the end of the current row
+        """
+        if self.cursor_text_row is not None:
+            is_last_row = self.cursor_text_row == self.layout_rows[-1]
+            self.cursor_text_row.set_cursor_to_end(is_last_row)
+        return self.get_cursor_index()
+
+    def set_cursor_to_start_of_current_row(self):
+        """
+        Set the edit cursor position in the text layout to the end of the current row and returns the overall
+        position in the text
+
+        :return: the overall position of the cursor in the text layout, after setting it to the end of the current row
+        """
+        if self.cursor_text_row is not None:
+            self.cursor_text_row.set_cursor_to_start()
+        return self.get_cursor_index()
 
     def set_cursor_position(self, cursor_pos):
         """
