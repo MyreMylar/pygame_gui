@@ -697,7 +697,7 @@ class UIDropDownMenu(UIContainer):
         self.disabled_border_colour = None
 
         self.shape = "rectangle"
-        self.shape_corner_radius = 2
+        self.shape_corner_radius = [2, 2, 2, 2]
 
         self.current_state = None
         self.background_rect = None
@@ -853,7 +853,7 @@ class UIDropDownMenu(UIContainer):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',

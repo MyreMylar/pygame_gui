@@ -822,23 +822,23 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        assert button.shape_corner_radius == 2
+        assert button.shape_corner_radius == [2, 2, 2, 2]
         manager.get_theme().load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
         button.rebuild_from_changed_theme_data()
 
-        assert button.shape_corner_radius == 10
+        assert button.shape_corner_radius == [10, 10, 10, 10]
 
         manager = UIManager((800, 600))
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        assert button.shape_corner_radius == 2
+        assert button.shape_corner_radius == [2, 2, 2, 2]
         manager.get_theme().load_theme(os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
-        button.drawable_shape.theming['shape_corner_radius'] = 10
+        button.drawable_shape.theming['shape_corner_radius'] = [10, 10, 10, 10]
         button.set_dimensions((200, 30))
 
-        assert button.drawable_shape.shape_corner_radius == 10
+        assert button.drawable_shape.shape_corner_radius == [10, 10, 10, 10]
 
     def test_rebuild_shape_ellipse(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600),
@@ -1016,7 +1016,7 @@ class TestUIButton:
                               '}')
 
         assert button.shape == "rounded_rectangle"
-        assert button.shape_corner_radius == 10
+        assert button.shape_corner_radius == [10, 10, 10, 10]
         assert button.border_width == 4
         assert button.shadow_width == 4
         assert button.tool_tip_delay == 6.0

@@ -151,7 +151,7 @@ class UIManager(IUIManagerInterface):
         return self.ui_window_stack
 
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
+                   shape: str = 'rectangle', corner_radius: Optional[List[int]] = None) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -161,6 +161,8 @@ class UIManager(IUIManagerInterface):
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
         :return: A shadow as a pygame Surface.
         """
+        if corner_radius is None:
+            corner_radius = [2, 2, 2, 2]
         return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size,
                                                                                 shadow_width,
                                                                                 shape,

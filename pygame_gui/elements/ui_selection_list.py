@@ -93,7 +93,6 @@ class UISelectionList(UIElement):
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape_corner_radius = 0
         self.shape = 'rectangle'
 
         self.scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
@@ -610,7 +609,7 @@ class UISelectionList(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='list_item_height',

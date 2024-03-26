@@ -72,7 +72,6 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape_corner_radius = 0
         self.shape = 'rectangle'
 
         self.rebuild_from_changed_theme_data()
@@ -248,7 +247,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if has_any_changed:
