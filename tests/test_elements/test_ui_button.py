@@ -455,7 +455,7 @@ class TestUIButton:
                      _display_surface_return_none):
         button_clicked = False
 
-        def test_function():
+        def test_function(data):
             nonlocal button_clicked
             button_clicked = True
 
