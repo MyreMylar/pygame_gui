@@ -154,16 +154,21 @@ class DrawableShape:
 
         self.shadow_width = 0
         self.border_width = 0
-        self.shape_corner_radius = 0
-        self.rounded_corner_offset = 0
+        self.shape_corner_radius = [0, 0, 0, 0]
+        self.rounded_corner_width_offsets = [0, 0]
+        self.rounded_corner_height_offsets = [0, 0]
         if 'shadow_width' in self.theming:
             self.shadow_width = self.theming['shadow_width']
         if 'border_width' in self.theming:
             self.border_width = self.theming['border_width']
         if 'shape_corner_radius' in self.theming:
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            self.rounded_corner_offset = int(self.shape_corner_radius -
-                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
+            tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
+            bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
+            br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+            self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
+            self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
 
         self.text_box_layout: Optional[TextBoxLayout] = None
         self.build_text_layout()
@@ -212,7 +217,7 @@ class DrawableShape:
         if self.dynamic_width:
             # check to see if we have text and a font, this won't work with HTML
             # text - throw a warning?
-            # What we really need to to is process the html text layout by this
+            # What we really need to do is process the html text layout by this
             # point but hold off finalising and passing default colours until later?
             if self.text_box_layout is not None:
                 text_width = self.text_box_layout.layout_rect.width
@@ -226,7 +231,8 @@ class DrawableShape:
                 final_width = (text_width +
                                (2 * self.shadow_width) +
                                (2 * self.border_width) +
-                               (2 * self.rounded_corner_offset) +
+                               self.rounded_corner_width_offsets[0] +
+                               self.rounded_corner_width_offsets[1] +
                                (2 * horiz_padding))
 
                 self.text_view_rect.width = text_width
@@ -245,7 +251,8 @@ class DrawableShape:
                 final_height = (text_height +
                                 (2 * self.shadow_width) +
                                 (2 * self.border_width) +
-                                (2 * self.rounded_corner_offset) +
+                                self.rounded_corner_height_offsets[0] +
+                                self.rounded_corner_height_offsets[1] +
                                 (2 * vert_padding))
                 self.text_view_rect.height = text_height
                 self.text_box_layout.view_rect.height = self.text_view_rect.height
@@ -335,8 +342,12 @@ class DrawableShape:
         if ('shape_corner_radius' in self.theming and
                 self.shape_corner_radius != self.theming['shape_corner_radius']):
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            self.rounded_corner_offset = int(self.shape_corner_radius -
-                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
+            tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
+            bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
+            br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+            self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
+            self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
             shape_params_changed = True
 
         if shape_params_changed or self.initial_text_layout_size != self.containing_rect.size:
@@ -488,7 +499,10 @@ class DrawableShape:
             if 'text_vert_alignment_padding' in self.theming:
                 vert_padding = self.theming['text_vert_alignment_padding']
 
-            total_text_buffer = self.shadow_width + self.border_width + self.rounded_corner_offset
+            total_text_buffer = ((self.shadow_width * 2) +
+                                 (self.border_width * 2) +
+                                 self.rounded_corner_width_offsets[0] +
+                                 self.rounded_corner_width_offsets[1])
             self.text_view_rect = self.containing_rect.copy()
             self.text_view_rect.x = 0
             self.text_view_rect.y = 0
@@ -496,17 +510,19 @@ class DrawableShape:
                 self.text_view_rect.width = -1
             else:
                 self.text_view_rect.width = max(0, self.text_view_rect.width -
-                                                ((total_text_buffer * 2) + (2 * horiz_padding)))
+                                                (total_text_buffer + (2 * horiz_padding)))
 
             if self.dynamic_height:
                 self.text_view_rect.height = -1
             else:
                 self.text_view_rect.height = max(0, self.text_view_rect.height -
-                                                 ((total_text_buffer * 2) + (2 * vert_padding)))
+                                                 (total_text_buffer + (2 * vert_padding)))
 
             text_actual_area_rect = self.text_view_rect.copy()
-            text_actual_area_rect.x = total_text_buffer + horiz_padding
-            text_actual_area_rect.y = total_text_buffer + vert_padding
+            text_actual_area_rect.x = (self.shadow_width + self.border_width +
+                                       self.rounded_corner_width_offsets[0] + horiz_padding)
+            text_actual_area_rect.y = (self.shadow_width + self.border_width +
+                                       self.rounded_corner_height_offsets[0] + vert_padding)
             if 'text_width' in self.theming:
                 text_actual_area_rect.width = self.theming['text_width']
             if 'text_height' in self.theming:

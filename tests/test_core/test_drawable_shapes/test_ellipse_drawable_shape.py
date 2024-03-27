@@ -132,7 +132,7 @@ class TestEllipseDrawableShape:
                                                                                  pygame.Color('#FFFFFF')),
                                                  'normal_bg': ColourGradient(0, pygame.Color('#000000'),
                                                                              pygame.Color('#FFFFFF')),
-                                                 'shape_corner_radius': 2,
+                                                 'shape_corner_radius': [2, 2, 2, 2],
                                                  'text_horiz_alignment': 'center',
                                                  'text_vert_alignment': 'center'},
                              states=['normal'], manager=default_ui_manager)

@@ -101,7 +101,6 @@ class UI2DSlider(UIElement):
 
         self.drawable_shape = None
         self.shape = "rectangle"
-        self.shape_corner_radius = None
 
         self.background_rect: Optional[pygame.Rect] = None
 
@@ -355,7 +354,7 @@ class UI2DSlider(UIElement):
 
         if self._check_shape_theming_changed(defaults={"border_width": 1,
                                                        "shadow_width": 2,
-                                                       "shape_corner_radius": 2}):
+                                                       "shape_corner_radius": [2, 2, 2, 2]}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient("dark_bg",

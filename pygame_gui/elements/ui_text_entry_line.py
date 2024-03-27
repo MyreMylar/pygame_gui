@@ -119,7 +119,6 @@ class UITextEntryLine(UIElement):
         self.padding = (0, 0)
 
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache
@@ -1042,7 +1041,7 @@ class UITextEntryLine(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='padding',

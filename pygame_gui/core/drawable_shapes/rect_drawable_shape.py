@@ -72,7 +72,10 @@ class RectDrawableShape(DrawableShape):
                                                  (2 * self.shadow_width)))
             shadow = self.ui_manager.get_shadow(self.containing_rect.size,
                                                 shadow_width=self.shadow_width,
-                                                corner_radius=self.shadow_width)
+                                                corner_radius=[self.shadow_width,
+                                                               self.shadow_width,
+                                                               self.shadow_width,
+                                                               self.shadow_width])
             if shadow is not None:
                 self.base_surface = shadow
 

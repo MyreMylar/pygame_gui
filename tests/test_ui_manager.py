@@ -64,7 +64,7 @@ class TestUIManager:
         """
         requested_size = (100, 100)
         shadow_surface = default_ui_manager.get_shadow(size=requested_size, shadow_width=2,
-                                                       shape='rectangle', corner_radius=2)
+                                                       shape='rectangle', corner_radius=[2, 2, 2, 2])
         shadow_surface_size = shadow_surface.get_size()
 
         assert ((type(shadow_surface) == pygame.Surface) and (shadow_surface_size == requested_size))
@@ -233,7 +233,7 @@ class TestUIManager:
 
         for x in range(0, 150):
             for y in range(0, 30):
-                assert result_surface.unmap_rgb(result_pixel_array[x, y]) == no_mismatch_colour
+                assert result_surface.unmap_rgb(result_pixel_array[x, y]) == no_mismatch_colour, f"Colours not equal at: {x}, {y}"
         try:
             result_pixel_array.close()
         except AttributeError:

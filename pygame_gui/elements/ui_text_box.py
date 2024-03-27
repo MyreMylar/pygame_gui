@@ -153,7 +153,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.background_surf = None
 
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         self.text_horiz_alignment = 'default'
         self.text_vert_alignment = 'default'
@@ -190,9 +189,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # of so that none  of it overlaps. Essentially we start with the containing box,
         # subtract the border, then subtract the padding, then if necessary subtract the width
         # of the scroll bar
-        self.rounded_corner_offset = int(self.shape_corner_radius -
-                                         (math.sin(math.pi / 4) *
-                                          self.shape_corner_radius))
+        if self.shape_corner_radius is not None:
+            self.rounded_corner_offset = int(self.shape_corner_radius[0] -
+                                             (math.sin(math.pi / 4) *
+                                              self.shape_corner_radius[0]))
+        else:
+            self.rounded_corner_offset = 0
         self.text_wrap_rect = pygame.Rect((self.rect[0] +
                                            self.padding[0] +
                                            self.border_width +
@@ -771,7 +773,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='padding',

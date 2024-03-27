@@ -435,10 +435,10 @@ class TestUIWindow:
         assert window.image is not None
         assert window.shadow_width == 1
         assert window.border_width == 2
-        assert window.shape_corner_radius == 10
+        assert window.shape_corner_radius == [10, 10, 10, 10]
         assert button.shadow_width == 1
         assert button.border_width == 2
-        assert button.shape_corner_radius == 4
+        assert button.shape_corner_radius == [4, 4, 4, 4]
 
     def test_rebuild_from_changed_theme_data_no_title_bar(self, _init_pygame,
                                                           _display_surface_return_none):

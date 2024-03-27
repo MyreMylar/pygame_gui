@@ -35,7 +35,7 @@ Misc
 :class:`UIDropDownMenu <pygame_gui.elements.UIDropDownMenu>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
- - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius, or radii, used for the rounded corners. Use a single integer to set all corners to the same radius, or four integers separated by commas to set each corner individually.
  - "**expand_direction**" - Can be set to **'up'** or **'down'**. Defaults to 'down'. Changing this parameter will change the direction that the menu will expand away from the initial starting point.
  - "**border_width**" - the width in pixels of the border around the drop down menu. Defaults to "1".
  - "**shadow_width**" - the width in pixels of the shadow behind the button. Defaults to "1".
