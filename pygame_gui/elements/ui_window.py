@@ -2,7 +2,7 @@ from typing import Union, Tuple, Optional, List, Iterator
 
 import pygame
 
-from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_BUTTON_PRESSED
+from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_WINDOW_RESIZED, UI_BUTTON_PRESSED
 from pygame_gui._constants import OldType
 
 from pygame_gui.core import ObjectID
@@ -195,7 +195,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 self.resizing_mode_active = True
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
-                consumed_event = True
+                consumed_event = True 
+                window_resize_event = pygame.event.Event(UI_WINDOW_RESIZED,
+                                        {'ui_element': self,
+                                         'ui_object_id': self.most_specific_combined_id})
+                pygame.event.post(window_resize_event)          
             elif self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
