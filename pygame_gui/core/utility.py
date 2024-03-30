@@ -194,7 +194,7 @@ def clipboard_copy(data: str):
 
     """
     if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
-        pygame.scrap.put_text(data)
+        pygame.scrap.put(data)
     else:
         current_platform = platform.system().upper()
         if current_platform == 'WINDOWS':
@@ -213,7 +213,7 @@ def clipboard_paste():
 
     """
     if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
-        return pygame.scrap.get_text()
+        return pygame.scrap.get()
     else:
         current_platform = platform.system().upper()
         if current_platform == 'WINDOWS':
