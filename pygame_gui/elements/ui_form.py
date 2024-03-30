@@ -459,7 +459,6 @@ class UIForm(UIAutoScrollingContainer):
         self.parse_form()
 
         self.rebuild_from_changed_theme_data()
-        self.vert_scroll_bar.rebuild()
 
     def _get_current_values(self, dic: Mapping[str, Union[IUIElementInterface, Mapping]]) -> Dict:
         """
@@ -668,7 +667,7 @@ class UIForm(UIAutoScrollingContainer):
 
         self.validate_questionnaire(self.questionnaire, raise_error=True)
 
-        anchors = {"left": "left", "right": "right", "top": "top", "right_target": self.vert_scroll_bar}
+        anchors = {"left": "left", "right": "right", "top": "top"}
 
         self.parsed_questionnaire = self.get_parsed_questionnaire(self, self.questionnaire, self.ui_manager,
                                                                   self.scrollable_container, self, anchors)
@@ -879,7 +878,6 @@ class UIForm(UIAutoScrollingContainer):
             anchors["centerx"] = "centerx"
         elif self.submit_button_horiz_alignment == "right":
             anchors["right"] = "right"
-            anchors["right_target"] = self.vert_scroll_bar
             pos.x = -self.submit_button.rect.width - x_padding
 
         self.submit_button.set_anchors(anchors)
