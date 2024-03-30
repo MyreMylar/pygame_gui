@@ -5,7 +5,7 @@ Basic guidelines for contributing
 ================================
 
 1. **Pygame GUI uses PEP8 as a style guide**, mainly because it is enforced by PyCharm. Contributions should be in the same general style.
-2. **Pygame GUI tries to use type hinting as much as possible**. This is mainly to help with code auto completion and refactoring operations, [See here](https://docs.python.org/3/library/typing.html) for the typing documentaion if you are unfamiliar with it's use.
+2. **Pygame GUI tries to use type hinting as much as possible**. This is mainly to help with code auto completion and refactoring operations, [See here](https://docs.python.org/3/library/typing.html) for the typing documentation if you are unfamiliar with it's use.
 3. **Pygame GUI uses docstrings**. At least most of the time; this is to help encourage better documentation.
 4. **Pygame GUI tries to use pygame-like approaches wherever possible**. This is to make using the library as familiar to users of pygame as possible. This is why we use the pygame event system for communicating GUI events and pygame sprites for drawing GUI elements.
 5. **Pygame GUI has a game focus** - but we also don't want to get too-specific to an individual project. New elements should have applicability to a reasonably wide range of game projects.
@@ -17,7 +17,7 @@ Basic guidelines for contributing
 Building the library
 ====================
 
-Building Pygame GUI as a developer has a few additional dependecies.
+Building Pygame GUI as a developer has a few additional dependencies.
 
 For building the documentation you will need:
 
@@ -46,9 +46,8 @@ Venv:
  
  1. Do the tests run?
  `pytest --cov-report term --cov=pygame_gui tests/`
- 2. Do the relevent [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
+ 2. Do the relevant [examples](https://github.com/MyreMylar/pygame_gui_examples) run & look OK?
  3. Have I documented any new features/code in a helpful fashion. If so, does the documentation build and look OK?
  
  
  Thank you for reading and considering contributing.
- 
