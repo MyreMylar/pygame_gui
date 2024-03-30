@@ -189,12 +189,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # of so that none  of it overlaps. Essentially we start with the containing box,
         # subtract the border, then subtract the padding, then if necessary subtract the width
         # of the scroll bar
-        if self.shape_corner_radius is not None:
-            self.rounded_corner_offset = int(self.shape_corner_radius[0] -
-                                             (math.sin(math.pi / 4) *
-                                              self.shape_corner_radius[0]))
-        else:
-            self.rounded_corner_offset = 0
+        self.rounded_corner_offset = int(self.shape_corner_radius[0] -
+                                         (math.sin(math.pi / 4) *
+                                          self.shape_corner_radius[0]))
         self.text_wrap_rect = pygame.Rect((self.rect[0] +
                                            self.padding[0] +
                                            self.border_width +
