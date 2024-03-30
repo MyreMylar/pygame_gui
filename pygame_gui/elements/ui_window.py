@@ -131,6 +131,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 container_pos = (self.relative_rect.x + self.shadow_width,
                                  self.relative_rect.y + self.shadow_width)
                 self._window_root_container.set_relative_position(container_pos)
+                window_resize_event = pygame.event.Event(UI_WINDOW_RESIZED,
+                                        {'ui_element': self,
+                                         'ui_object_id': self.most_specific_combined_id})
+                pygame.event.post(window_resize_event)    
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,
                                                     Tuple[int, int],
@@ -195,11 +199,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 self.resizing_mode_active = True
                 self.start_resize_point = scaled_mouse_pos
                 self.start_resize_rect = self.rect.copy()
-                consumed_event = True 
-                window_resize_event = pygame.event.Event(UI_WINDOW_RESIZED,
-                                        {'ui_element': self,
-                                         'ui_object_id': self.most_specific_combined_id})
-                pygame.event.post(window_resize_event)          
+                consumed_event = True       
             elif self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
