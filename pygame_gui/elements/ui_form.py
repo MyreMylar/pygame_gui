@@ -395,7 +395,7 @@ class UIForm(UIAutoScrollingContainer):
                        "long_text": {"default": "'.*'", "required": "True|False"},
                        "password": {"default": "'.*'", "required": "True|False"},
                        "integer": {"default": r"\d*", "required": "True|False"},
-                       "decimal": {"default": r"[/d.]*", "required": "True|False"},
+                       "decimal": {"default": r"\d*[.]?\d*", "required": "True|False"},
                        "boolean": {"default": "True|False", "required": "True|False"}
                        }
 
@@ -481,7 +481,26 @@ class UIForm(UIAutoScrollingContainer):
             elif isinstance(value, IUIElementInterface):
 
                 if isinstance(value, UITextEntryLine):
-                    value_dic[key] = value.get_text()
+                    text = value.get_text()
+                    zero_text = False
+
+                    if type_name in ["integer", "decimal"]:
+                        if text:
+                            try:
+                                text = literal_eval(text)
+                            except SyntaxError:
+                                zero_text = True
+                        else:
+                            zero_text = True
+
+                    # If no text was entered or value could not be converted to integer or float then default to 0.
+                    if zero_text:
+                        if type_name == "integer":
+                            text = 0
+                        elif type_name == "decimal":
+                            text = 0.0
+
+                    value_dic[key] = text
 
                 elif isinstance(value, UITextEntryBox):
                     value_dic[key] = value.get_text()
@@ -607,26 +626,26 @@ class UIForm(UIAutoScrollingContainer):
                 element = None
 
                 if type_name == "character":
-                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryLine(initial_text=str(args.get("default", "")), **param_dict)
                     element.set_text_length_limit(1)
 
                 elif type_name == "short_text":
-                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryLine(initial_text=str(args.get("default", "")), **param_dict)
 
                 elif type_name == "long_text":
                     param_dict["relative_rect"].height = large_field_height
-                    element = UITextEntryBox(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryBox(initial_text=str(args.get("default", "")), **param_dict)
 
                 elif type_name == "password":
-                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryLine(initial_text=str(args.get("default", "")), **param_dict)
                     element.set_text_hidden(True)
 
                 elif type_name == "integer":
-                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryLine(initial_text=str(args.get("default", "")), **param_dict)
                     element.set_allowed_characters("numbers")
 
                 elif type_name == "decimal":
-                    element = UITextEntryLine(initial_text=args.get("default", ""), **param_dict)
+                    element = UITextEntryLine(initial_text=str(args.get("default", "")), **param_dict)
                     element.set_allowed_characters([".", *list("0123456789")])
 
                 elif type_name == "boolean":
@@ -777,6 +796,7 @@ class UIForm(UIAutoScrollingContainer):
         :return: None
         """
 
+        form = element if isinstance(element, UIForm) else element.form
         label_height = element.label_height
         field_height = element.field_height
         large_field_height = element.large_field_height
@@ -786,7 +806,7 @@ class UIForm(UIAutoScrollingContainer):
         section_indent = element.section_indent
 
         relative_rect = pygame.Rect(*element.padding,
-                                    element.relative_rect.width - 2 * element.padding[0],
+                                    element.relative_rect.width - 2 * element.padding[0], # - form.scroll_bar_width,
                                     field_height)
 
         for key, value in questionnaire.items():
