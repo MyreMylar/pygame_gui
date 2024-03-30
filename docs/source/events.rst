@@ -319,9 +319,9 @@ clicked on by a user.
    :linenos:
 
     for event in pygame.event.get():
-        if event.type == pygame_gui.UI_WINDOW_CLOSE:
+        if event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if event.ui_element == window:
-                print("Window closed")
+                print("Window moved to front")
 
 :class:`UIWindow <pygame_gui.elements.UIWindow>` - UI_WINDOW_RESIZED
 ..................................................................
