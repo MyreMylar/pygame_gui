@@ -363,7 +363,7 @@ class HTMLParser(html.parser.HTMLParser):
         elements currently on the stack when we parse that bit of text.
 
         Styles on top of the stack will be evaluated last so they can overwrite elements earlier
-        in the stack (i.e. a later 'font_size' of 5 wil overwrite an earlier 'font_size' of 3).
+        in the stack (i.e. a later 'font_size' of 5 will overwrite an earlier 'font_size' of 3).
 
         :param key: Name for this styling element so we can identify when to remove it when the
         styling block is closed
