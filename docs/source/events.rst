@@ -319,9 +319,30 @@ clicked on by a user.
    :linenos:
 
     for event in pygame.event.get():
-        if event.type == pygame_gui.UI_WINDOW_CLOSE:
+        if event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if event.ui_element == window:
-                print("Window closed")
+                print("Window moved to front")
+
+:class:`UIWindow <pygame_gui.elements.UIWindow>` - UI_WINDOW_RESIZED
+..................................................................
+
+Fired when a window is resized.
+
+ - **'type'** : pygame_gui.UI_WINDOW_RESIZED,
+ - **'ui_element'** : The :class:`UIWindow <pygame_gui.elements.UIWindow>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the element that fired this event.
+ - **'external_size'** : The total size of the window including title bar, borders & shadows.
+ - **'internal_size'** : The size inside the window where other elements are place (excluding title bar, borders & shadows).
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+        if event.type == pygame_gui.UI_WINDOW_RESIZED:
+            if event.ui_element == window:
+                print("Window resized")
 
 :class:`UIConfirmationDialog <pygame_gui.windows.UIConfirmationDialog>` - UI_CONFIRMATION_DIALOG_CONFIRMED
 ...........................................................................................................

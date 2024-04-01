@@ -190,7 +190,7 @@ class SurfaceCache:
         Takes an existing free space rectangle that we are placing a new surface inside of and
         then divides up the remaining space into new, smaller free space rectangles.
 
-        :param found_rectangle_to_split: The rectangle we are spliting.
+        :param found_rectangle_to_split: The rectangle we are splitting.
         :param dividing_rect: The rectangle dividing up the split rectangle.
         :param free_space_rectangles: A list of all free space rectangles for a particular surface.
         """

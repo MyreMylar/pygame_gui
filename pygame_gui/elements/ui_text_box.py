@@ -900,7 +900,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def enable(self):
         """
-        Enable the text box. Renables the scroll bar if one exists.
+        Enable the text box. Re-enables the scroll bar if one exists.
         """
         if not self.is_enabled:
             self.is_enabled = True
