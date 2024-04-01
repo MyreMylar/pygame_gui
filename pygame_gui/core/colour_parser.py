@@ -571,7 +571,7 @@ def parse_colour_string(strdata: str) -> Optional[pygame.Color]:
         Developer Notes:
             - This function uses the implemented colour parsing and colour validating functions available through _colourParsers in order to determine a proper colour data
             - Additionally, named colour strings are taken into account firstly when determining the data of the colour
-            - Note that this function returns the first valid occurance that they find
+            - Note that this function returns the first valid occurrence that they find
 
     :param strdata: The string to parse into a Colour
     :type strdata: str

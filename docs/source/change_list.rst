@@ -321,7 +321,7 @@ Bug Fixes & Other Changes
  - Fixed a bug with removing the close button on a window theme not correctly resizing the title bar.
  - Changed UIElement to take a copy of passed in rectangles in case they are re-used elsewhere.
  - Fixed  bugs in UIPanel and UISelection list where anchors and containers of the element were not being copied to their root container leading to shenanigans.
- - Resizing the elemnet container for the UIWindow element was missing off the border leading to overlaps. This is now fixed.
+ - Resizing the element container for the UIWindow element was missing off the border leading to overlaps. This is now fixed.
  - Fix for elements owning root containers anchored to the top and bottom of containers having their root containers incorrectly resized before they were positioned, thereby causing a mess of appearance bugs. It was a bad scene. Should now be fixed.
 
 --------

@@ -204,7 +204,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
                                               Tuple[int, ...]]):
         """
         This is for users of the library to set the currently active cursor, it will be currently
-        only be overriden by the resizing cursors.
+        only be overridden by the resizing cursors.
 
         The expected input is in the same format as the standard pygame cursor module, except
         without expanding the initial Tuple. So, to call this function with the default pygame
