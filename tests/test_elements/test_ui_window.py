@@ -86,6 +86,22 @@ class TestUIWindow:
         assert button.rect.topright == (window.get_container().rect.right - 10,
                                         window.get_container().rect.top + 10)
         assert button.rect.topright == (474, 253)
+        
+        confirm_event_fired = False
+        event_object_id = None
+        new_external_dimensions = (0, 0)
+        new_internal_dimensions = (0, 0)
+        for event in pygame.event.get():
+            if (event.type == pygame_gui.UI_WINDOW_RESIZED and
+                    event.ui_element == window):
+                confirm_event_fired = True
+                event_object_id = event.ui_object_id
+                new_external_dimensions = event.external_size
+                new_internal_dimensions = event.internal_size
+        assert confirm_event_fired
+        assert event_object_id == 'window'
+        assert new_external_dimensions == (300, 400)
+        assert new_internal_dimensions == (268, 341)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
