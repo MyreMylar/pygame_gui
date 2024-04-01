@@ -6,9 +6,9 @@ Use Notes:
     Mostly all that one will ever need is these 5 functions 
         - **parse_colour_or_gradient_string**: Attempt to parse a string that may be a colour or gradient into its respective value
         - **is_valid_colour_string**: Check if a string represents a valid pygame Color
-        - **is_valid_gradient_string**: Check if a string represents a valid ColourGradient
+        - **is_valid_gradient_string**: Check if a string represents a valid pygame_gui.core.colour_gradient.ColourGradient
         - **parse_colour_string**: Parse a string into a pygame Color
-        - **parse_gradient_string**: Parse a string into a ColourGradient
+        - **parse_gradient_string**: Parse a string into a pygame_gui.core.colour_gradient.ColourGradient
         
     The documentation for what counts as a 'Valid' colour and gradient string can be found in the Theme Guide of the pygame_gui documentation at https://pygame-gui.readthedocs.io/en/v_065/theme_guide.html
 
@@ -22,9 +22,9 @@ Developer Notes:
             Therefore, this system is not concrete at all, and should be extremely extensible to add **any 2 functions that can validate and parse a developer-determined schema**
 
         Parsing A Gradient:
-            As of now, the gradient parser is implemented in such a way where it assumes that all commas outside an enclosing glyph ( Any comma not inside of a (), [], or {} ) is a separator in a gradient list
+            As of now, the gradient parser is implemented in such a way where it assumes that all commas outside an enclosing glyph ( Any comma not inside a (), [], or {} ) is a separator in a gradient list
             Generally, if creating new colour string schemas, this will break if there is a new colour which uses commas not enclosed in a glyph. This shouldn't be a problem right now, but it is worth noting as a warning in case of any additions to this parser
-            TL,DR: Dev life will be easier if it is ensured that commas in colour schemas are inside of parentheses, brackets, or curly braces ( like "rgb(20, 20, 20)" )
+            TL,DR: Dev life will be easier if it is ensured that commas in colour schemas are inside of parentheses, brackets, or curly braces (like "rgb(20, 20, 20)")
 """
 
 import pygame
@@ -91,8 +91,8 @@ def is_percentage_string(strdata: str) -> bool:
             return True
 
         if is_float_str(strdata):
-            floatvalue = float(strdata)
-            return 0 <= floatvalue <= 1
+            float_value = float(strdata)
+            return 0 <= float_value <= 1
     return False
 
 
@@ -199,7 +199,7 @@ def is_valid_hex_string(strdata: str) -> bool:
             - "#A3F" (Shorthand)
             - "#98C4" (Shorthand with Alpha)
             - "#F3FAFF" (Full)
-            - "#BD24A017" (Full with Alpha)
+            - "#BD24A017" (Full, with Alpha)
 
     :param strdata: the hex string to validate
     :type strdata: str
@@ -237,7 +237,7 @@ def parse_hex_string(strdata: str) -> pygame.Color:
             - "#A3F" (Shorthand)
             - "#98C4" (Shorthand with Alpha)
             - "#F3FAFF" (Full)
-            - "#BD24A017" (Full with Alpha)
+            - "#BD24A017" (Full, with Alpha)
 
     :param strdata: the hex string to parse
     :type strdata: str
@@ -729,7 +729,7 @@ def parse_gradient_string(strdata: str) -> Optional[ColourGradient]:
 
     :param strdata: the gradient string to validate
     :type strdata: str
-    :returns: A ColourGradient object if strdata is a valid gradient string, otherwise None
+    :returns: A pygame_gui.core.colour_gradient.ColourGradient object if strdata is a valid gradient string, otherwise None
     :rtype: bool or None
     """
 
@@ -743,14 +743,15 @@ def parse_gradient_string(strdata: str) -> Optional[ColourGradient]:
 
 
 def parse_colour_or_gradient_string(strdata: str) -> Optional[Union[pygame.Color, ColourGradient]]:
-    """| Parse a colour or gradient string into a pygame Color or a ColourGradient Object
+    """
+    | Parse a colour or gradient string into a pygame Color or a pygame_gui.core.colour_gradient.ColourGradient Object
     |
     | The documentation for what counts as a 'Valid' colour and gradient string, including the supported colour formats by pygame_gui, can be found in the Theme Guide of the pygame_gui documentation at https://pygame-gui.readthedocs.io/en/v_065/theme_guide.html
 
     :param strdata: the string data to parse into a colour or gradient
     :type strdata: str
     :return: The colour or gradient generated from the string data, or none
-    :rtype: pygame.Color, ColourGradient, or None
+    :rtype: pygame.Color, pygame_gui.core.colour_gradient.ColourGradient, or None
     """
 
     if is_valid_gradient_string(strdata):

@@ -65,7 +65,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
+                   shape: str = 'rectangle', corner_radius: Optional[List[int]] = None) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 

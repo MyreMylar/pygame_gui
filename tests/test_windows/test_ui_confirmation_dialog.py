@@ -173,7 +173,7 @@ class TestUIConfirmationDialog:
                                               window_title="Confirm",
                                               action_short_name="Confirm")
 
-        confirm_dialog.shape_corner_radius = 15
+        confirm_dialog.shape_corner_radius = [15, 15, 15, 15]
         confirm_dialog.shape = 'rounded_rectangle'
         confirm_dialog.rebuild()
 

@@ -1,6 +1,6 @@
 import warnings
 
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional
 
 import pygame
 
@@ -300,7 +300,7 @@ class SurfaceCache:
                        border_width: int,
                        border_colour: pygame.Color,
                        bg_colour: pygame.Color,
-                       corner_radius: Union[int, None] = None) -> str:
+                       corner_radius: Optional[List[int]] = None) -> str:
         """
         Create an ID string for a surface based on it's dimensions and parameters. The idea is
         that any surface in the cache with the same values in this ID should be identical.
