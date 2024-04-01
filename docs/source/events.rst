@@ -331,7 +331,8 @@ Fired when a window is resized.
  - **'type'** : pygame_gui.UI_WINDOW_RESIZED,
  - **'ui_element'** : The :class:`UIWindow <pygame_gui.elements.UIWindow>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the element that fired this event.
- - **'size'** : The new size of the window.
+ - **'external_size'** : The total size of the window including title bar, borders & shadows.
+ - **'internal_size'** : The size inside the window where other elements are place (excluding title bar, borders & shadows).
 
 **Example usage**:
 
