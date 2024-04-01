@@ -133,7 +133,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 self._window_root_container.set_relative_position(container_pos)
                 window_resize_event = pygame.event.Event(UI_WINDOW_RESIZED,
                                         {'ui_element': self,
-                                         'ui_object_id': self.most_specific_combined_id})
+                                         'ui_object_id': self.most_specific_combined_id,
+                                         'size': new_container_dimensions})
                 pygame.event.post(window_resize_event)    
 
     def set_relative_position(self, position: Union[pygame.math.Vector2,

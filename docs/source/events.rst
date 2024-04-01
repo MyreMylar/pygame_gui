@@ -331,6 +331,7 @@ Fired when a window is resized.
  - **'type'** : pygame_gui.UI_WINDOW_RESIZED,
  - **'ui_element'** : The :class:`UIWindow <pygame_gui.elements.UIWindow>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the element that fired this event.
+ - **'size'** : The new size of the window.
 
 **Example usage**:
 

@@ -95,8 +95,10 @@ class TestUIWindow:
                     event.ui_element == window):
                 confirm_event_fired = True
                 event_object_id = event.ui_object_id
+                new_dimensions = event.size
         assert confirm_event_fired
         assert event_object_id == 'window'
+        assert new_dimensions == (300, 400)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
