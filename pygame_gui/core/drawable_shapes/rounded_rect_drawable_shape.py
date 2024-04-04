@@ -138,7 +138,7 @@ class RoundedRectangleShape(DrawableShape):
                     corner_radius = int(min(self.click_area_shape.width / 2,
                                             self.click_area_shape.height / 2))
 
-                self.shape_corner_radius[1] = max(corner_radius, 0)
+                self.shape_corner_radius[i] = max(corner_radius, 0)
 
         if self.base_surface is None:
             self.base_surface = pygame.surface.Surface(self.containing_rect.size,
