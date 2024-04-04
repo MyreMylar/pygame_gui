@@ -25,8 +25,13 @@ class EllipseDrawableShape(DrawableShape):
     def __init__(self, containing_rect: pygame.Rect,
                  theming_parameters: Dict[str, Any],
                  states: List[str],
-                 manager: IUIManagerInterface):
-        super().__init__(containing_rect, theming_parameters, states, manager)
+                 manager: IUIManagerInterface,
+                 *,
+                 allow_text_outside_width_border=True,
+                 allow_text_outside_height_border=True):
+        super().__init__(containing_rect, theming_parameters, states, manager,
+                         allow_text_outside_width_border=allow_text_outside_width_border,
+                         allow_text_outside_height_border=allow_text_outside_height_border)
 
         self.ellipse_center = containing_rect.center
         self.ellipse_half_diameters = (0.5 * containing_rect.width, 0.5 * containing_rect.height)

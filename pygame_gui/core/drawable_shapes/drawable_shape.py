@@ -144,13 +144,18 @@ class DrawableShape:
                  containing_rect: pygame.Rect,
                  theming_parameters: Dict,
                  states: List[str],
-                 manager: IUIManagerInterface):
+                 manager: IUIManagerInterface,
+                 *,
+                 allow_text_outside_width_border=True,
+                 allow_text_outside_height_border=True):
 
         self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
         self.dynamic_width = True if self.containing_rect.width == -1 else False
         self.dynamic_height = True if self.containing_rect.height == -1 else False
         self.text_view_rect: Optional[pygame.Rect] = None
+        self.allow_text_outside_width_border = allow_text_outside_width_border
+        self.allow_text_outside_height_border = allow_text_outside_height_border
 
         self.shadow_width = 0
         self.border_width = 0
@@ -523,10 +528,6 @@ class DrawableShape:
                                        self.rounded_corner_width_offsets[0] + horiz_padding)
             text_actual_area_rect.y = (self.shadow_width + self.border_width +
                                        self.rounded_corner_height_offsets[0] + vert_padding)
-            if 'text_width' in self.theming:
-                text_actual_area_rect.width = self.theming['text_width']
-            if 'text_height' in self.theming:
-                text_actual_area_rect.height = self.theming['text_height']
 
             text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
@@ -538,8 +539,37 @@ class DrawableShape:
                                              using_default_text_colour=True,
                                              bg_colour=pygame.Color('#00000000'),
                                              text_shadow_data=text_shadow_data,
-                                             max_dimensions=(text_actual_area_rect.width,
-                                                             text_actual_area_rect.height))
+                                             max_dimensions=self.containing_rect.size)
+
+            # if our text chunk doesn't fit in the space inside the shadow, border and padding
+            # expand available text space to the whole button area - this is helpful for very small
+            # and oddly shaped buttons
+            if (self.allow_text_outside_height_border and
+                    not self.dynamic_height and text_chunk.height > text_actual_area_rect.height):
+                text_actual_area_rect.height = self.containing_rect.height
+                # if we are centred clear out the padding entirely,
+                # if top aligned add just the padding (might help give
+                # a bit of manual control in some odd cases)
+                text_actual_area_rect.y = 0
+                if 'text_vert_alignment' in self.theming:
+                    if self.theming['text_vert_alignment'] in ['top']:
+                        text_actual_area_rect.y = vert_padding
+                self.text_view_rect.height = self.containing_rect.height
+            if (self.allow_text_outside_width_border and
+                    not self.dynamic_width and text_chunk.width > text_actual_area_rect.width):
+                text_actual_area_rect.width = self.containing_rect.width
+                text_actual_area_rect.x = 0
+                if 'text_horiz_alignment' in self.theming:
+                    if self.theming['text_horiz_alignment'] in ['left']:
+                        text_actual_area_rect.x = horiz_padding
+                self.text_view_rect.width = self.containing_rect.width
+
+            # still allow overriding of text area with theming parameters
+            if 'text_width' in self.theming:
+                text_actual_area_rect.width = self.theming['text_width']
+            if 'text_height' in self.theming:
+                text_actual_area_rect.height = self.theming['text_height']
+
             text_chunk.should_centre_from_baseline = True
             default_font_data = {"font": self.theming['font'],
                                  "font_colour": (self.theming['normal_text']
