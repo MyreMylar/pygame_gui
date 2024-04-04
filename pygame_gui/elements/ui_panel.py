@@ -307,9 +307,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if self.panel_container is not None:
             self.panel_container.hide()
         super().hide()
-    
+
     def __iter__(self) -> Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container.
+        :return Iterator: An iterator over the elements within the container.
         """
         return iter(self.get_container())
+
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :param item: The element to check for containment.
+        :return bool: Return True if the element is found, False otherwise.
+        """
+        return item in self.get_container()

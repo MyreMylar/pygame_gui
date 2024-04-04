@@ -193,7 +193,13 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         Iterates over the elements within the container-like interface.
         This method allows iterating over the children elements within the container.
         """
-
+        
+    @abstractmethod
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :return bool: Return True if the element is found, False otherwise.
+        """
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
@@ -231,4 +237,11 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         """
         Iterates over the elements within the container-like interface. 
         This method allows iterating over the children elements within the container.
+        """
+        
+    @abstractmethod
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :return bool: Return True if the element is found, False otherwise.
         """

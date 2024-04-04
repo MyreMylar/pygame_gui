@@ -399,5 +399,14 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
     def __iter__(self) -> Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container.
+        :return Iterator: An iterator over the elements within the container.
         """
         return iter(self.elements)
+
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :param item: The element to check for containment.
+        :return bool: Return True if the element is found, False otherwise.
+        """
+        return item in self.elements
