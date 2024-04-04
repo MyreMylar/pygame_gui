@@ -55,15 +55,20 @@ class UIHorizontalScrollBar(UIElement):
         self.button_width = 20
         self.arrow_button_width = self.button_width
         self.scroll_position = 0.0
+        self.target_scroll_position = 0.0
+        self.scroll_to_target_speed = 40.0
         self.left_limit = 0.0
         self.starting_grab_x_difference = 0
         self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
-        self.start_percentage = 0.0
+        self._start_percentage = 0.0
 
         self.grabbed_slider = False
         self.has_moved_recently = False
-        self.scroll_wheel_left = False
-        self.scroll_wheel_right = False
+        self.scroll_wheel_moved = False
+        self.scroll_wheel_amount = 0
+        self.scroll_wheel_speed = 40.0
+
+        self.button_scroll_amount = 300.0
 
         self.background_colour = None
         self.border_colour = None
@@ -108,6 +113,18 @@ class UIHorizontalScrollBar(UIElement):
         self.join_focus_sets(self.sliding_button)
 
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
+
+    @property
+    def start_percentage(self):
+        """
+        turning start_percentage into a property, so we can round it to mitigate floating point errors
+        """
+        return self._start_percentage
+
+    @start_percentage.setter
+    def start_percentage(self, value):
+        rounded_value = round(value, 4)
+        self._start_percentage = rounded_value
 
     def rebuild(self):
         """
@@ -197,6 +214,7 @@ class UIHorizontalScrollBar(UIElement):
         scroll_bar_width = max(5, int(self.scrollable_width * self.visible_percentage))
         self.scroll_position = min(max(self.scroll_position, self.left_limit),
                                    self.right_limit - scroll_bar_width)
+        self.target_scroll_position = self.scroll_position
 
         x_pos = (self.scroll_position + self.arrow_button_width)
         y_pos = 0
@@ -241,17 +259,20 @@ class UIHorizontalScrollBar(UIElement):
         :return: Returns True if we've done something with the input event.
 
         """
+        consumed_event = False
         if (self.is_enabled and
                 self._check_is_focus_set_hovered() and
                 event.type == pygame.MOUSEWHEEL):
             if event.x != 0:
-                if event.x > 0:
-                    self.scroll_wheel_left = True
-                elif event.x < 0:
-                    self.scroll_wheel_right = True
-                return True
+                self.scroll_wheel_moved = True
+                if (self.scroll_wheel_amount > 0 > event.x) or (self.scroll_wheel_amount < 0 < event.x):
+                    # changed direction, reset target position
+                    self.target_scroll_position = self.scroll_position
+                self.scroll_wheel_amount = event.x
 
-        return False
+                consumed_event = True
+
+        return consumed_event
 
     def _check_is_focus_set_hovered(self) -> bool:
         """
@@ -261,6 +282,28 @@ class UIHorizontalScrollBar(UIElement):
 
         """
         return any(element.hovered for element in self.get_focus_set())
+
+    def _update_scroll_position_from_target(self, time_delta: float) -> bool:
+        moved_this_frame = False
+        distance = self.target_scroll_position - self.scroll_position
+
+        if distance != 0.0 and (self.scroll_position != self.left_limit or self.scroll_position != self.right_limit):
+            direction = distance / abs(distance)
+            self.scroll_position = self.scroll_position + (direction * max(abs(distance), 4.0) * self.scroll_to_target_speed * time_delta * self.visible_percentage)
+            new_distance = self.target_scroll_position - self.scroll_position
+            if new_distance != 0.0:
+                new_direction = new_distance / abs(new_distance)
+                if new_direction != direction:  # overshot
+                    self.scroll_position = self.target_scroll_position
+
+            self.scroll_position = min(max(self.scroll_position, self.left_limit),
+                                       self.right_limit -
+                                       self.sliding_button.relative_rect.width)
+            x_pos = (self.scroll_position + self.arrow_button_width)
+            y_pos = 0
+            self.sliding_button.set_relative_position((x_pos, y_pos))
+            moved_this_frame = True
+        return moved_this_frame
 
     def update(self, time_delta: float):
         """
@@ -278,36 +321,24 @@ class UIHorizontalScrollBar(UIElement):
         super().update(time_delta)
         self.has_moved_recently = False
         if self.alive():
-            moved_this_frame = False
-            if ((self.left_button is not None and self.left_button.held) or
-                    (self.scroll_wheel_left and self.scroll_position > self.left_limit)):
-                scroll_speed = 250.0
-                if self.scroll_wheel_left:
-                    # wheel events are less frequent than every frame so increase the speed
-                    scroll_speed *= 2
-                self.scroll_wheel_left = False
-                self.scroll_position -= (scroll_speed * time_delta)
-                self.scroll_position = max(self.scroll_position, self.left_limit)
-                x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
-            elif ((self.right_button is not None and self.right_button.held) or
-                  (self.scroll_wheel_right and self.scroll_position < self.right_limit)):
-                scroll_speed = 250.0
-                if self.scroll_wheel_right:
-                    # wheel events are less frequent than every frame so increase the speed
-                    scroll_speed *= 2
-                self.scroll_wheel_right = False
-                self.scroll_position += (scroll_speed * time_delta)
-                self.scroll_position = min(self.scroll_position,
-                                           self.right_limit -
-                                           self.sliding_button.relative_rect.width)
-                x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
+            if self.scroll_wheel_moved and (self.scroll_position > self.left_limit or
+                                            self.scroll_position < self.right_limit):
+                self.scroll_wheel_moved = False
+                scroll_wheel_proportional_amount = self.scroll_wheel_amount * self.visible_percentage
+                self.target_scroll_position -= scroll_wheel_proportional_amount * self.scroll_wheel_speed
+                # Don't clamp target on scroll wheel, so we get nice acceleration into the buffers
 
-                moved_this_frame = True
+            elif self.left_button is not None and self.left_button.held:
+                self.target_scroll_position -= (self.button_scroll_amount * self.visible_percentage * time_delta)
+                self.target_scroll_position = min(max(self.target_scroll_position, self.left_limit),
+                                                  self.right_limit - self.sliding_button.relative_rect.width)
+
+            elif self.right_button is not None and self.right_button.held:
+                self.target_scroll_position += (self.button_scroll_amount * self.visible_percentage * time_delta)
+                self.target_scroll_position = min(max(self.target_scroll_position, self.left_limit),
+                                                  self.right_limit - self.sliding_button.relative_rect.width)
+
+            moved_this_frame = self._update_scroll_position_from_target(time_delta)
 
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
@@ -320,15 +351,16 @@ class UIHorizontalScrollBar(UIElement):
                 real_scroll_pos = self.sliding_button.rect.left
                 current_grab_difference = mouse_x - real_scroll_pos
                 adjustment_required = current_grab_difference - self.starting_grab_x_difference
-                self.scroll_position = self.scroll_position + adjustment_required
+                self.target_scroll_position = self.target_scroll_position + adjustment_required
 
-                self.scroll_position = min(max(self.scroll_position, self.left_limit),
-                                           self.right_limit - self.sliding_button.rect.width)
-
+                self.target_scroll_position = min(max(self.target_scroll_position, self.left_limit),
+                                                  self.right_limit - self.sliding_button.rect.width)
+                self.scroll_position = self.target_scroll_position
                 x_pos = (self.scroll_position + self.arrow_button_width)
                 y_pos = 0
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
+
             elif not self.sliding_button.held:
                 self.grabbed_slider = False
 
@@ -350,6 +382,7 @@ class UIHorizontalScrollBar(UIElement):
 
         self.scroll_position = min(max(new_scroll_position, self.left_limit),
                                    self.right_limit - self.sliding_button.rect.width)
+        self.target_scroll_position = self.scroll_position
         self.start_percentage = self.scroll_position / self.scrollable_width
 
         x_pos = (self.scroll_position + self.arrow_button_width)
@@ -367,30 +400,14 @@ class UIHorizontalScrollBar(UIElement):
 
         scroll_bar_width = max(5, int(self.scrollable_width * self.visible_percentage))
 
-        x_pos = (self.scroll_position + self.arrow_button_width)
+        # x_pos = (self.scroll_position + self.arrow_button_width)
+        x_pos = min((self.right_limit + self.arrow_button_width) - scroll_bar_width,
+                    int(self.scroll_position + self.arrow_button_width))
         y_pos = 0
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
-        if self.sliding_button is None:
-            self.sliding_button = UIButton(pygame.Rect(int(x_pos),
-                                                       int(y_pos),
-                                                       scroll_bar_width,
-                                                       self.background_rect.height),
-                                           '', self.ui_manager,
-                                           container=self.button_container,
-                                           starting_height=1,
-                                           parent_element=self,
-                                           object_id="#sliding_button",
-                                           anchors={'left': 'left',
-                                                    'right': 'left',
-                                                    'top': 'top',
-                                                    'bottom': 'bottom'},
-                                           visible=self.visible)
-            self.join_focus_sets(self.sliding_button)
-
-        else:
-            self.sliding_button.set_relative_position(self.sliding_rect_position)
-            self.sliding_button.set_dimensions((scroll_bar_width, self.background_rect.height))
+        self.sliding_button.set_relative_position(self.sliding_rect_position)
+        self.sliding_button.set_dimensions((scroll_bar_width, self.background_rect.height))
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
 
     def set_visible_percentage(self, percentage: float):
@@ -414,6 +431,7 @@ class UIHorizontalScrollBar(UIElement):
 
         """
         self.scroll_position = 0.0
+        self.target_scroll_position = 0.0
         self.start_percentage = 0.0
 
     def rebuild_from_changed_theme_data(self):
@@ -429,6 +447,11 @@ class UIHorizontalScrollBar(UIElement):
                                                casting_func=str,
                                                allowed_values=['rectangle',
                                                                'rounded_rectangle']):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
+                                               default_value=1.0,
+                                               casting_func=float):
             has_any_changed = True
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
@@ -466,11 +489,6 @@ class UIHorizontalScrollBar(UIElement):
         if self._check_misc_theme_data_changed(attribute_name='enable_arrow_buttons',
                                                default_value=True,
                                                casting_func=parse_to_bool):
-            has_any_changed = True
-
-        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
-                                               default_value=1.0,
-                                               casting_func=float):
             has_any_changed = True
 
         if has_any_changed:
@@ -545,6 +563,7 @@ class UIHorizontalScrollBar(UIElement):
                                                     self.scrollable_width)),
                                                max_scroll_bar_x))
         self.scroll_position = self.sliding_rect_position.x - base_scroll_bar_x
+        self.target_scroll_position = self.scroll_position
 
         self.sliding_button.set_dimensions((scroll_bar_width, self.background_rect.height))
         self.sliding_button.set_relative_position(self.sliding_rect_position)
