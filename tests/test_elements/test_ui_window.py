@@ -690,7 +690,9 @@ class TestUIWindow:
                             manager=default_ui_manager, container=window)
         button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
                             manager=default_ui_manager, container=window)
-
+        
+        assert button_1 in window
+        assert button_2 in window
         count = 0
         for button in window:
             button.get_relative_rect()

@@ -271,7 +271,9 @@ class TestUIContainer:
                             manager=default_ui_manager, container=container)
         button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
                             manager=default_ui_manager, container=container)
-
+        
+        assert button_1 in container
+        assert button_2 in container
         count = 0
         for button in container:
             button.get_relative_rect()
