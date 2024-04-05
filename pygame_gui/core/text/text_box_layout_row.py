@@ -67,13 +67,13 @@ class TextBoxLayoutRow(pygame.Rect):
         if self.width > self.layout.layout_rect.width:
             assert RuntimeError("Row longer than layout")
 
-        if item.height > self.text_chunk_height:
-            self.text_chunk_height = item.height
+        if item.row_chunk_height > self.text_chunk_height:
+            self.text_chunk_height = item.row_chunk_height
             if self.layout.layout_rect.height != -1:
                 self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  int(item.height * self.line_spacing))
+                                  int(item.row_chunk_height * self.line_spacing))
             else:
-                self.height = int(item.height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.height = int(item.row_chunk_height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
             self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
 

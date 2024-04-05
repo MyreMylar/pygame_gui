@@ -31,11 +31,13 @@ class RoundedRectangleShape(DrawableShape):
                  *,
                  allow_text_outside_width_border=True,
                  allow_text_outside_height_border=True,
-                 text_x_scroll_enabled=False):
+                 text_x_scroll_enabled=False,
+                 editable_text=False):
         super().__init__(containing_rect, theming_parameters, states, manager,
                          allow_text_outside_width_border=allow_text_outside_width_border,
                          allow_text_outside_height_border=allow_text_outside_height_border,
-                         text_x_scroll_enabled=text_x_scroll_enabled)
+                         text_x_scroll_enabled=text_x_scroll_enabled,
+                         editable_text=editable_text)
 
         self.temp_additive_shape: Optional[pygame.Surface] = None
         self.temp_subtractive_shape: Optional[pygame.Surface] = None

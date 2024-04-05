@@ -593,7 +593,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              line_spacing=self.line_spacing,
                                              default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes,
-                                             text_direction=self.parser.default_style['direction'])
+                                             text_direction=self.parser.default_style['direction'],
+                                             editable=True)
         self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.parser.empty_layout_queue()
         if self.dynamic_height:

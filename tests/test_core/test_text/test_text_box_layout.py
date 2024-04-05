@@ -843,7 +843,7 @@ class TestTextBoxLayout:
 
         selected_text = ""
         for chunk in layout.selected_chunks:
-            selected_text += chunk.text
+            selected_text += chunk.selected_text
 
         assert selected_text == ' this is a t'
 
@@ -976,7 +976,7 @@ class TestTextBoxLayout:
 
         selected_text = ""
         for chunk in layout.selected_chunks:
-            selected_text += chunk.text
+            selected_text += chunk.selected_text
 
         assert selected_text == ' this is a t'
 
@@ -987,7 +987,7 @@ class TestTextBoxLayout:
 
         selected_text = ""
         for chunk in layout.selected_chunks:
-            selected_text += chunk.text
+            selected_text += chunk.selected_text
 
         assert selected_text == ''
 

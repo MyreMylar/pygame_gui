@@ -68,11 +68,13 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.target_surface: Optional[Surface] = None
         self.target_surface_area = None
         self.row_chunk_origin = 0
-        self.row_chunk_height = 0
+        self.row_chunk_height = text_height
         self.row_bg_height = 0
         self.layout_x_offset = 0
 
-        self.is_selected = False
+        self.selection_rect = None
+        self.selected_text = None
+        self.selection_start_index = 0
         self.is_active = False
         self.selection_colour = Color(128, 128, 128, 255)
 
@@ -148,12 +150,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_colour = self.colour == other_text_chunk.colour
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
-        match_selected = self.is_selected == other_text_chunk.is_selected
         match_active = self.is_active == other_text_chunk.is_active
         match_effect_id = self.effect_id == other_text_chunk.effect_id
 
         return (match_fonts and match_underlined and match_colour and
-                match_bg_color and match_shadow_data and match_selected and match_active
+                match_bg_color and match_shadow_data and match_active
                 and match_effect_id)
 
     def finalise(self,
@@ -167,10 +168,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         if len(self.text) == 0:
             return
 
-        if self.is_selected:
-            bg_col: Union[Color, ColourGradient] = self.selection_colour
-        else:
-            bg_col = self.bg_colour
+        # if self.selection_rect is not None:
+        #     bg_col: Union[Color, ColourGradient] = self.selection_colour
+        # else:
+        bg_col = self.bg_colour
 
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
@@ -254,6 +255,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
         surface = Surface((chunk_draw_width, row_bg_height), flags=SRCALPHA, depth=32)
         surface.fill(bg_col)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -268,6 +270,14 @@ class TextLineChunkFTFont(TextLayoutRect):
                                   text_surface, (chunk_x_origin, row_chunk_origin))
         surface.blit(text_surface, text_rect, special_flags=BLEND_PREMULTIPLIED)
         return surface
+
+    def _handle_text_selection_drawing(self, surface):
+        if self.selection_rect is not None and (self.selection_rect.width != 0 or self.selection_rect.height != 0):
+            if isinstance(self.selection_colour, Color):
+                surface.fill(self.selection_colour, self.selection_rect)
+            elif isinstance(self.selection_colour, ColourGradient):
+                surface.fill(Color('#FFFFFFFF'), self.selection_rect)
+                self.selection_colour.apply_gradient_to_surface(surface, self.selection_rect)
 
     def _draw_text_bg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
                                final_str_text, row_bg_height, row_chunk_origin):
@@ -287,6 +297,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                           flags=SRCALPHA, depth=32)
         surface.fill(Color('#FFFFFFFF'))
         bg_col.apply_gradient_to_surface(surface)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -326,6 +337,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             bg_col.apply_gradient_to_surface(surface)
         else:
             surface.fill(bg_col)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:

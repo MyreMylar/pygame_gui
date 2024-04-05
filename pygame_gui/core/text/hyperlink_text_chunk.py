@@ -45,7 +45,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         Handles hovering over this text chunk with the mouse. Used for links.
 
         """
-        if not (self.is_active or self.is_selected):
+        if not self.is_active:
             self.colour = self.hover_colour
             self.underlined = self.hover_underline
             self.is_hovered = True
@@ -56,7 +56,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         Handles hovering over this text chunk with the mouse. Used for links.
 
         """
-        if not (self.is_active or self.is_selected):
+        if not self.is_active:
             self.colour = self.normal_colour
             self.underlined = self.normal_underline
             self.is_hovered = False
