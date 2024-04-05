@@ -209,6 +209,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                           target_surface,
                                                           surface)
 
+        self.height = row_bg_height
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
         self.target_surface_area = target_area
