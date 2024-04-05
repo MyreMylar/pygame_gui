@@ -34,12 +34,16 @@ class TextBoxLayout:
                  line_spacing: float,
                  default_font_data: Dict[str, Any],
                  allow_split_dashes: bool = True,
-                 text_direction: int = pygame.DIRECTION_LTR):
+                 text_direction: int = pygame.DIRECTION_LTR,
+                 text_x_scroll_enabled: bool = False):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
         self.layout_rect = layout_rect.copy()
         self.line_spacing = line_spacing
         self.text_direction = text_direction
+        self.text_x_scroll_enabled = text_x_scroll_enabled
+
+        self.edit_cursor_width = 1
 
         # this is the font used when we don't have anything else
         self.default_font_data = default_font_data
@@ -174,7 +178,7 @@ class TextBoxLayout:
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
 
-        rhs_limit = self.layout_rect.right
+        rhs_limit = self.layout_rect.right - self.edit_cursor_width
         for floater in self.floating_rects:
             if floater.vertical_overlap(text_layout_rect):
                 if (current_row.at_start() and
@@ -310,7 +314,7 @@ class TextBoxLayout:
             split_point = rhs_limit - test_layout_rect.left
             try:
                 new_layout_rect = test_layout_rect.split(split_point,
-                                                         self.layout_rect.width,
+                                                         rhs_limit,
                                                          self.layout_rect.x,
                                                          self.allow_split_dashes)
                 if new_layout_rect is not None:

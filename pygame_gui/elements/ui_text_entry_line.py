@@ -235,11 +235,13 @@ class UITextEntryLine(UIElement):
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
                                                     ['normal', 'disabled'], self.ui_manager,
-                                                    allow_text_outside_width_border=False)
+                                                    allow_text_outside_width_border=False,
+                                                    text_x_scroll_enabled=True)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
                                                         ['normal', 'disabled'], self.ui_manager,
-                                                        allow_text_outside_width_border=False)
+                                                        allow_text_outside_width_border=False,
+                                                        text_x_scroll_enabled=True)
 
         if self.drawable_shape is not None:
             self._set_image(self.drawable_shape.get_fresh_surface())

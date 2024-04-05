@@ -147,7 +147,8 @@ class DrawableShape:
                  manager: IUIManagerInterface,
                  *,
                  allow_text_outside_width_border=True,
-                 allow_text_outside_height_border=True):
+                 allow_text_outside_height_border=True,
+                 text_x_scroll_enabled=False):
 
         self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
@@ -156,6 +157,7 @@ class DrawableShape:
         self.text_view_rect: Optional[pygame.Rect] = None
         self.allow_text_outside_width_border = allow_text_outside_width_border
         self.allow_text_outside_height_border = allow_text_outside_height_border
+        self.text_x_scroll_enabled = text_x_scroll_enabled
 
         self.shadow_width = 0
         self.border_width = 0
@@ -578,7 +580,8 @@ class DrawableShape:
                                  "bg_colour": pygame.Color('#00000000')}
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
                                                  self.text_view_rect, line_spacing=1.25,
-                                                 default_font_data=default_font_data)
+                                                 default_font_data=default_font_data,
+                                                 text_x_scroll_enabled=self.text_x_scroll_enabled)
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
             if 'text_cursor_colour' in self.theming:

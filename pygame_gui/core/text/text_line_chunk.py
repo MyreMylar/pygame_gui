@@ -428,7 +428,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         elif self.x == row_start_x and self.right > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
-            optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            # optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            optimum_split_point = max(1, self.x_pos_to_letter_index(requested_x) - 1)
             if allow_split_dashes:
                 if optimum_split_point != 1:
                     # have to be at least wide enough to fit in a dash and another character
@@ -643,12 +644,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         check_dir = -1
         changed_dir = 0
         step = 1
+        new_index = best_index
         # algorithm picks a good guess for the best letter
         # index and then checks either side for better indexes
-        while changed_dir < 2:
-            new_index = best_index + (step * check_dir)
-            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index +
-                                                               (step * check_dir), 0)])
+        while changed_dir < 2 and new_index != 0:
+            new_index = max(estimated_index + (step * check_dir), 0)
+            curr_text_rect = self.font.get_rect(self.text[:new_index])
             new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
             if new_diff < lowest_diff:
                 lowest_diff = new_diff
