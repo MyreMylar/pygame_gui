@@ -222,7 +222,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                     target_surface, surface):
         # sort out horizontal scrolling
         final_pos = (max(target_area.left, self.left - x_scroll_offset),
-                     self.top - self.origin_row_y_adjust)
+                     self.top - self.origin_row_y_adjust + text_shadow_width)
         distance_to_lhs_overlap = self.left - target_area.left
         lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
