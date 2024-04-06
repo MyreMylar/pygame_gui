@@ -26,8 +26,21 @@ class RectDrawableShape(DrawableShape):
                  containing_rect: pygame.Rect,
                  theming_parameters: Dict[str, Any],
                  states: List[str],
-                 manager: IUIManagerInterface):
-        super().__init__(containing_rect, theming_parameters, states, manager)
+                 manager: IUIManagerInterface,
+                 *,
+                 allow_text_outside_width_border=True,
+                 allow_text_outside_height_border=True,
+                 text_x_scroll_enabled=False,
+                 editable_text=False):
+        # make sure we don't have any corner radius on rectangular shapes
+        no_curvy_corner_theming_parameters = theming_parameters.copy()
+        if 'shape_corner_radius' in no_curvy_corner_theming_parameters:
+            no_curvy_corner_theming_parameters['shape_corner_radius'] = [0, 0, 0, 0]
+        super().__init__(containing_rect, no_curvy_corner_theming_parameters, states, manager,
+                         allow_text_outside_width_border=allow_text_outside_width_border,
+                         allow_text_outside_height_border=allow_text_outside_height_border,
+                         text_x_scroll_enabled=text_x_scroll_enabled,
+                         editable_text=editable_text)
 
         self.has_been_resized = False
 

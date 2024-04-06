@@ -412,26 +412,38 @@
     },
     "file_dialog.#home_icon_button":
     {
-        "prototype": "#file_dialog_icon_buttons"
+        "prototype": "#file_dialog_icon_buttons",
+        "misc":
+        {
+            "text_horiz_alignment": "left",
+            "text_horiz_alignment_padding": "6"
+        }
     },
     "file_dialog.#delete_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "0"
+            "text_horiz_alignment": "left",
+            "text_horiz_alignment_padding": "4"
         }
     },
     "file_dialog.#parent_icon_button":
     {
-        "prototype": "#file_dialog_icon_buttons"
+        "prototype": "#file_dialog_icon_buttons",
+        "misc":
+        {
+            "text_horiz_alignment": "left",
+            "text_horiz_alignment_padding": "5"
+        }
     },
     "file_dialog.#refresh_icon_button":
     {
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_vert_alignment_padding": "0"
+            "text_horiz_alignment": "left",
+            "text_horiz_alignment_padding": "6"
         }
     },
     "message_window.text_box":

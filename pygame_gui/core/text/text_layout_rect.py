@@ -45,6 +45,7 @@ class TextLayoutRect(pygame.rect.Rect):
         self.letter_count = 0
         self.descender = 0
         self.smallest_split_size = 1
+        self.row_chunk_height: int = int(self.height)
 
     @abstractmethod
     def finalise(self,

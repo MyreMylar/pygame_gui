@@ -190,10 +190,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # of so that none  of it overlaps. Essentially we start with the containing box,
         # subtract the border, then subtract the padding, then if necessary subtract the width
         # of the scroll bar
-        tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
-        tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
-        bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
-        br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+        tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+        tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+        bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+        br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
         self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
         self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
         total_corner_width_offsets = self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
@@ -593,7 +593,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              line_spacing=self.line_spacing,
                                              default_font_data=default_font_data,
                                              allow_split_dashes=self.allow_split_dashes,
-                                             text_direction=self.parser.default_style['direction'])
+                                             text_direction=self.parser.default_style['direction'],
+                                             editable=True)
         self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.parser.empty_layout_queue()
         if self.dynamic_height:
@@ -613,6 +614,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if (self.scroll_bar is None and not self.dynamic_height and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
+            return
         else:
             if self.scroll_bar is not None:
                 height_adjustment = int(self.scroll_bar.start_percentage *
@@ -620,9 +622,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 percentage_visible = (self.text_wrap_rect[3] /
                                       self.text_box_layout.layout_rect.height)
                 if percentage_visible >= 1.0:
-                    self.scroll_bar.kill()
-                    self.scroll_bar = None
-                    height_adjustment = 0
+                    self.rebuild()
+                    return
                 else:
                     self.scroll_bar.set_visible_percentage(percentage_visible)
             else:
