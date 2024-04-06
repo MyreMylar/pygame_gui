@@ -4,6 +4,10 @@ import warnings
 from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
+from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN, TEXTINPUT
+from pygame import KMOD_SHIFT, KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c, K_v
+from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE, K_RETURN
+from pygame import key
 from pygame.event import Event, post
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
