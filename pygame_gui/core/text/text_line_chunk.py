@@ -11,7 +11,7 @@ Once a layout for the text chunk is finalised the chunk's render function can be
 chunk onto it's final destination.
 
 """
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, List
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -34,7 +34,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  using_default_text_colour: bool,
                  bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
-                 max_dimensions: Optional[Tuple[int, int]] = None,
+                 max_dimensions: Optional[List[int]] = None,
                  effect_id: Optional[str] = None):
         self.text_shadow_data = text_shadow_data
         self.max_dimensions = max_dimensions
@@ -60,7 +60,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.y_origin = text_rect.y
         self.font_y_padding = self._calc_font_padding()
 
-        # we split text stings based on spaces,
+        # we split text strings based on spaces,
         # these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
@@ -68,11 +68,14 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.target_surface: Optional[Surface] = None
         self.target_surface_area = None
         self.row_chunk_origin = 0
-        self.row_chunk_height = 0
+        self.row_chunk_height = text_height
         self.row_bg_height = 0
         self.layout_x_offset = 0
 
-        self.is_selected = False
+        self.selection_rect = None
+        self.selected_text = None
+        self.selection_start_index = 0
+        self.is_selected = False  # True when the whole chunk is selected - or part of it.
         self.is_active = False
         self.selection_colour = Color(128, 128, 128, 255)
 
@@ -94,6 +97,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.effects_offset_pos = (0, 0)
         self.transform_effect_rect = Rect(self.topleft, self.size)
 
+    def can_split(self):
+        if len(self.text) > 0:
+            return super().can_split()
+        else:
+            return False
+
     def __repr__(self):
         return "< '" + self.text + "' " + super().__repr__() + " >"
 
@@ -109,13 +118,15 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _handle_dimensions(self, font, text):
         if len(text) == 0:
             text_rect = font.get_rect('A')
+            text_rect.width = 0
+            text_width = 0
         else:
             text_rect = font.get_rect(text)
-        text_shadow_width = 0
-        if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
-            # expand our text chunk if we have a text shadow
-            text_shadow_width = self.text_shadow_data[0]
-        text_width = self._text_render_width(text, font) + (2 * text_shadow_width)
+            text_shadow_width = 0
+            if self.text_shadow_data is not None and self.text_shadow_data[0] != 0:
+                # expand our text chunk if we have a text shadow
+                text_shadow_width = self.text_shadow_data[0]
+            text_width = text_rect.width + (2 * text_shadow_width)
         text_height = text_rect.height
         text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
         return text_height, text_rect, text_width
@@ -140,12 +151,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_colour = self.colour == other_text_chunk.colour
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
-        match_selected = self.is_selected == other_text_chunk.is_selected
         match_active = self.is_active == other_text_chunk.is_active
         match_effect_id = self.effect_id == other_text_chunk.effect_id
 
         return (match_fonts and match_underlined and match_colour and
-                match_bg_color and match_shadow_data and match_selected and match_active
+                match_bg_color and match_shadow_data and match_active
                 and match_effect_id)
 
     def finalise(self,
@@ -159,10 +169,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         if len(self.text) == 0:
             return
 
-        if self.is_selected:
-            bg_col: Union[Color, ColourGradient] = self.selection_colour
-        else:
-            bg_col = self.bg_colour
+        # if self.selection_rect is not None:
+        #     bg_col: Union[Color, ColourGradient] = self.selection_colour
+        # else:
+        bg_col = self.bg_colour
 
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
@@ -201,6 +211,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                           target_surface,
                                                           surface)
 
+        self.height = row_bg_height
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
         self.target_surface_area = target_area
@@ -214,7 +225,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                     target_surface, surface):
         # sort out horizontal scrolling
         final_pos = (max(target_area.left, self.left - x_scroll_offset),
-                     self.top - self.origin_row_y_adjust)
+                     self.top - self.origin_row_y_adjust + text_shadow_width)
         distance_to_lhs_overlap = self.left - target_area.left
         lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
@@ -245,6 +256,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
         surface = Surface((chunk_draw_width, row_bg_height), flags=SRCALPHA, depth=32)
         surface.fill(bg_col)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -259,6 +271,14 @@ class TextLineChunkFTFont(TextLayoutRect):
                                   text_surface, (chunk_x_origin, row_chunk_origin))
         surface.blit(text_surface, text_rect, special_flags=BLEND_PREMULTIPLIED)
         return surface
+
+    def _handle_text_selection_drawing(self, surface):
+        if self.selection_rect is not None and (self.selection_rect.width != 0 or self.selection_rect.height != 0):
+            if isinstance(self.selection_colour, Color):
+                surface.fill(self.selection_colour, self.selection_rect)
+            elif isinstance(self.selection_colour, ColourGradient):
+                surface.fill(Color('#FFFFFFFF'), self.selection_rect)
+                self.selection_colour.apply_gradient_to_surface(surface, self.selection_rect)
 
     def _draw_text_bg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
                                final_str_text, row_bg_height, row_chunk_origin):
@@ -278,6 +298,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                           flags=SRCALPHA, depth=32)
         surface.fill(Color('#FFFFFFFF'))
         bg_col.apply_gradient_to_surface(surface)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -317,6 +338,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             bg_col.apply_gradient_to_surface(surface)
         else:
             surface.fill(bg_col)
+        self._handle_text_selection_drawing(surface)
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -420,7 +442,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         elif self.x == row_start_x and self.right > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
-            optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            # optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            optimum_split_point = max(1, self.x_pos_to_letter_index(requested_x) - 1)
             if allow_split_dashes:
                 if optimum_split_point != 1:
                     # have to be at least wide enough to fit in a dash and another character
@@ -561,7 +584,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         :param index: the index we are sticking the new text at.
         """
         self.text = self.text[:index] + input_text + self.text[index:]
-        # we split text stings based on spaces
+        # we split text strings based on spaces
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
@@ -635,12 +658,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         check_dir = -1
         changed_dir = 0
         step = 1
+        new_index = best_index
         # algorithm picks a good guess for the best letter
         # index and then checks either side for better indexes
-        while changed_dir < 2:
-            new_index = best_index + (step * check_dir)
-            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index +
-                                                               (step * check_dir), 0)])
+        while changed_dir < 2 and new_index != 0:
+            new_index = max(estimated_index + (step * check_dir), 0)
+            curr_text_rect = self.font.get_rect(self.text[:new_index])
             new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
             if new_diff < lowest_diff:
                 lowest_diff = new_diff
@@ -682,8 +705,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
     @staticmethod
     def _text_render_width(text: str, font):
-        return sum([char_metric[4] if char_metric is not None else 0
-                    for char_metric in font.get_metrics(text)])
+        return font.get_rect(text).width
 
     def set_alpha(self, alpha: int):
         """

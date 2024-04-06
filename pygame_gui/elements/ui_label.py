@@ -53,12 +53,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='label')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['label'])
 
         self.dynamic_dimensions_orig_top_left = relative_rect.topleft
 
@@ -165,7 +163,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
 
     def _calc_dynamic_size(self):
         if self.dynamic_width or self.dynamic_height:
-            self.set_dimensions(self.image.get_size())
+            if self.image.get_size() == (0, 0):
+                self._set_dimensions(self._get_pre_clipped_image_size())
+            else:
+                self._set_dimensions(self.image.get_size())
 
             # if we have anchored the left side of our button to the right of its container then
             # changing the width is going to mess up the horiz position as well.

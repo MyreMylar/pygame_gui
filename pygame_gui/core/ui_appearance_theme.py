@@ -103,16 +103,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.need_to_rebuild_data_manually_changed = False
             return True
         return False
+    
+    @staticmethod
+    def _json_to_dict(json_data):
+        if isinstance(json_data, dict):
+            return json_data
+        else:
+            return json.loads(json_data)
 
-    def update_theming(self, new_theming_data: str, rebuild_all: bool = True):
+    def update_theming(self, new_theming_data: Union[str, dict], rebuild_all: bool = True):
         # parse new_theming data
-        theme_dict = json.loads(new_theming_data)
+        theme_dict = self._json_to_dict(new_theming_data)
         self._parse_theme_data_from_json_dict(theme_dict)
         if rebuild_all:
             self.need_to_rebuild_data_manually_changed = True
 
-    def update_single_element_theming(self, element_name: str, new_theming_data: str):
-        element_theming_dict = json.loads(new_theming_data)
+    def update_single_element_theming(self, element_name: str, new_theming_data: Union[str, dict]):
+        element_theming_dict = self._json_to_dict(new_theming_data)
 
         self._parse_single_element_data(element_name, element_theming_dict)
         self._load_fonts()
@@ -138,7 +145,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     stamp = os.stat(package_file_path).st_mtime
             else:
                 stamp = os.stat(self._theme_file_path).st_mtime
-        except(pygame.error, FileNotFoundError, OSError):
+        except (pygame.error, FileNotFoundError, OSError):
             need_to_reload = False
         else:
             if stamp != self._theme_file_last_modified:
@@ -210,13 +217,18 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 font_id = self.font_dict.create_font_id(font_info['size'],
                                                         font_info['name'],
                                                         font_info['bold'],
-                                                        font_info['italic'])
+                                                        font_info['italic'],
+                                                        font_info['antialiased'])
 
                 if font_id not in self.font_dict.loaded_fonts:
                     self.font_dict.preload_font(font_info['size'],
                                                 font_info['name'],
                                                 font_info['bold'],
-                                                font_info['italic'])
+                                                font_info['italic'],
+                                                False,
+                                                font_info['antialiased'],
+                                                font_info['script'],
+                                                font_info['direction'])
 
                 if element_key not in self.ele_font_res:
                     self.ele_font_res[element_key] = {}
@@ -224,7 +236,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     font_info['size'],
                     font_info['name'],
                     font_info['bold'],
-                    font_info['italic'])
+                    font_info['italic'],
+                    font_info['antialiased'],
+                    font_info['script'],
+                    font_info['direction'])
 
     def _load_images(self):
         """
@@ -307,7 +322,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
     def _preload_shadow_edges(self):
         """
         Looks through the theming data for any shadow edge combos we haven't loaded yet and
-        tries to pre-load them. This helps stop the UI from having to create the complicated
+        tries to preload them. This helps stop the UI from having to create the complicated
         parts of the shadows dynamically which can be noticeably slow (e.g. waiting a second
         for a window to appear).
 
@@ -319,7 +334,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
             shape = 'rectangle'
             shadow_width = 2
-            shape_corner_radius = 2
+            shape_corner_radii = [2, 2, 2, 2]
             element_misc_data = misc_data
             if 'shape' in element_misc_data:
                 shape = element_misc_data['shape']
@@ -335,9 +350,21 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
             if 'shape_corner_radius' in element_misc_data:
                 try:
-                    shape_corner_radius = int(element_misc_data['shape_corner_radius'])
+                    str_corner_radius = element_misc_data['shape_corner_radius']
+                    if isinstance(str_corner_radius, str):
+                        corner_radii_list = str_corner_radius.split(',')
+                        if len(corner_radii_list) == 4:
+                            shape_corner_radii[0] = int(corner_radii_list[0])
+                            shape_corner_radii[1] = int(corner_radii_list[1])
+                            shape_corner_radii[2] = int(corner_radii_list[2])
+                            shape_corner_radii[3] = int(corner_radii_list[3])
+                        if len(corner_radii_list) == 1:
+                            shape_corner_radii[0] = int(corner_radii_list[0])
+                            shape_corner_radii[1] = int(corner_radii_list[0])
+                            shape_corner_radii[2] = int(corner_radii_list[0])
+                            shape_corner_radii[3] = int(corner_radii_list[0])
                 except ValueError:
-                    shape_corner_radius = 2
+                    shape_corner_radii = [2, 2, 2, 2]
                     warnings.warn(
                         "Invalid value: " +
                         misc_data['shape_corner_radius'] +
@@ -346,31 +373,31 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             if shape in ['rounded_rectangle', 'rectangle'] and shadow_width > 0:
                 if ('shadow_width' in misc_data and
                         'shape_corner_radius' in misc_data):
-                    shadow_id = str(shadow_width) + 'x' + str(shadow_width + shape_corner_radius)
+                    shadow_id = str(shadow_width) + 'x' + str(shape_corner_radii)
                     if shadow_id not in self.shadow_generator.preloaded_shadow_corners:
                         self.shadow_generator.create_shadow_corners(shadow_width,
-                                                                    shadow_width +
-                                                                    shape_corner_radius)
+                                                                    shape_corner_radii)
                 elif 'shadow_width' in misc_data:
                     # have a shadow width but no idea on the corners, try most common -
-                    shadow_id_1 = str(shadow_width) + 'x' + str(2)
+                    shadow_id_1 = str(shadow_width) + 'x' + str([2, 2, 2, 2])
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(shadow_width, 2)
+                        self.shadow_generator.create_shadow_corners(shadow_width, [2, 2, 2, 2])
                     shadow_id_2 = str(shadow_width) + 'x' + str(shadow_width)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(shadow_width, shadow_width)
+                        self.shadow_generator.create_shadow_corners(shadow_width,
+                                                                    [shadow_width,
+                                                                     shadow_width,
+                                                                     shadow_width,
+                                                                     shadow_width
+                                                                     ])
                 elif 'shape_corner_radius' in misc_data:
                     # have a corner radius but no idea on the shadow width, try most common -
-                    shadow_id_1 = str(1) + 'x' + str(1 + shape_corner_radius)
+                    shadow_id_1 = str(1) + 'x' + str(shape_corner_radii)
                     if shadow_id_1 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(1, 1 + shape_corner_radius)
-                    shadow_id_2 = str(2) + 'x' + str(2 + shape_corner_radius)
+                        self.shadow_generator.create_shadow_corners(1, shape_corner_radii)
+                    shadow_id_2 = str(2) + 'x' + str(shape_corner_radii)
                     if shadow_id_2 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(2, 2 + shape_corner_radius)
-                    shadow_id_3 = str(shape_corner_radius) + 'x' + str(shape_corner_radius)
-                    if shadow_id_3 not in self.shadow_generator.preloaded_shadow_corners:
-                        self.shadow_generator.create_shadow_corners(shape_corner_radius,
-                                                                    shape_corner_radius)
+                        self.shadow_generator.create_shadow_corners(2, shape_corner_radii)
 
     def _get_next_id_node(self, current_node: Union[Dict[str, Union[str, Dict]], None],
                           element_base_ids: List[Union[str, None]],
@@ -518,7 +545,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Uses some data about a UIElement to get font data as dictionary
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return dictionary: Data about the font requested
@@ -536,7 +563,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Uses some data about a UIElement to get a font object.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
@@ -650,13 +677,31 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 yield file, None
             finally:
                 file.close()
+                
+    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]):
+        """
+        Loads a theme, and currently, all associated data like fonts and images required
+        by the theme.
 
-    def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]):
+        :param file_path: The location of the theme, or the theme data we want to load.
+        """
+        if isinstance(file_path, dict):
+            theme_dict = file_path
+        else:
+            theme_dict = self._load_theme_by_path(file_path)
+            if theme_dict is None:
+                return
+            
+        self._parse_theme_data_from_json_dict(theme_dict)
+            
+
+    def _load_theme_by_path(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]) -> dict:  
         """
         Loads a theme file, and currently, all associated data like fonts and images required
         by the theme.
 
         :param file_path: The path to the theme we want to load.
+        :return dict: The theme dictionary.
         """
         if isinstance(file_path, PackageResource):
             with (files(file_path.package) / file_path.resource).open('r', encoding='utf-8', errors='strict') as fp:
@@ -669,13 +714,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self._theme_file_path = create_resource_path(file_path)
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
-            except(pygame.error, FileNotFoundError, OSError):
+            except (pygame.error, FileNotFoundError, OSError):
                 self._theme_file_last_modified = 0
             used_file_path = self._theme_file_path
         else:
             used_file_path = file_path
 
-        with self._opened_w_error(used_file_path, 'rt') as (theme_file, error):
+        with self._opened_w_error(used_file_path) as (theme_file, error):
             if error:
                 warnings.warn("Failed to open theme file at path:" + str(file_path))
                 load_success = False
@@ -689,7 +734,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     load_success = True
 
             if load_success:
-                self._parse_theme_data_from_json_dict(theme_dict)
+                return theme_dict
 
     def _parse_theme_data_from_json_dict(self, theme_dict):
         for element_name in theme_dict.keys():
@@ -794,7 +839,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         Load miscellaneous theming data direct from the theme file's data dictionary into our
         misc data dictionary.
 
-        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+        Data is stored by its combined element ID and an ID specific to the type of data it is.
 
         :param data_type: The type of misc data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
@@ -815,7 +860,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         Load image theming data direct from the theme file's data dictionary into our image
         data dictionary.
 
-        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+        Data is stored by its combined element ID and an ID specific to the type of data it is.
 
         :param data_type: The type of image data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
@@ -872,7 +917,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         Load colour/gradient theming data direct from the theme file's data dictionary into our
         colour data dictionary.
 
-        Data is stored by it's combined element ID and an ID specific to the type of data it is.
+        Data is stored by its combined element ID and an ID specific to the type of data it is.
 
         :param data_type: The type of colour data as described by a string.
         :param element_name: The theming element ID that this data belongs to.
@@ -891,7 +936,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                            element_name: str):
         """
         Load font theming data direct from the theme file's data dictionary into our font
-        data dictionary. Data is stored by it's combined element ID and an ID specific to the
+        data dictionary. Data is stored by its combined element ID and an ID specific to the
         type of data it is.
 
         :param element_name: The theming element ID that this data belongs to.
@@ -939,6 +984,27 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if 'italic' not in font_info_dict:
             font_info_dict['italic'] = False
 
+        if 'antialiased' in file_dict:
+            try:
+                font_info_dict['antialiased'] = bool(int(file_dict['antialiased']))
+            except ValueError:
+                font_info_dict['antialiased'] = True
+        if 'antialiased' not in font_info_dict:
+            font_info_dict['antialiased'] = True
+
+        if 'script' in file_dict:
+            font_info_dict['script'] = file_dict['script']
+        if 'script' not in font_info_dict:
+            font_info_dict['script'] = self.font_dict.default_font.script
+
+        if 'direction' in file_dict:
+            if file_dict['direction'].lower() == 'ltr':
+                font_info_dict['direction'] = pygame.DIRECTION_LTR
+            elif file_dict['direction'].lower() == 'rtl':
+                font_info_dict['direction'] = pygame.DIRECTION_RTL
+        else:
+            font_info_dict['direction'] = pygame.DIRECTION_LTR
+
         if 'regular_path' in file_dict:
             font_info_dict['regular_path'] = file_dict['regular_path']
         if 'bold_path' in file_dict:
@@ -980,7 +1046,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                                       colour_key)
                     self.base_colours[colour_key] = colour
 
-
     @staticmethod
     def _load_colour_or_gradient_from_theme(theme_colours_dictionary: Dict[str, str],
                                             colour_id: str) -> Union[pygame.Color, ColourGradient]:
@@ -994,13 +1059,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         string_data = theme_colours_dictionary[colour_id]
         colour: Optional[Union[pygame.Color, ColourGradient]] = parse_colour_or_gradient_string(string_data)
         if colour is None:
-            if len(get_commas_outside_enclosing_glyphs(string_data)) > 0: # Was probably meant to be a gradient
+            if len(get_commas_outside_enclosing_glyphs(string_data)) > 0:  # Was probably meant to be a gradient
                 warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
             else:
                 if string_data.startswith("#"):
                     warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
                 else:
-                    warnings.warn("Invalid Theme Colour: " + string_data + " for id:" + colour_id + " invalid in theme file" )
+                    warnings.warn("Invalid Theme Colour: " + string_data + " for id:" + colour_id + " invalid in theme file")
             return pygame.Color("#000000")
         return colour
 
@@ -1008,6 +1073,6 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         Set the locale used in the appearance theme.
 
-        :param locale: a two letter ISO country code.
+        :param locale: a two-letter ISO country code.
         """
         self._locale = locale

@@ -74,12 +74,10 @@ class UISelectionList(UIElement):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='selection_list')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['selection_list'])
 
         self._parent_element = parent_element
         self.list_and_scroll_bar_container = None
@@ -95,7 +93,6 @@ class UISelectionList(UIElement):
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape_corner_radius = 0
         self.shape = 'rectangle'
 
         self.scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
@@ -612,7 +609,7 @@ class UISelectionList(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='list_item_height',

@@ -18,7 +18,7 @@ class UIMessageWindow(UIWindow):
     :param manager: The UIManager that manages this UIElement. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param window_title: The title of the  window.
-    :param object_id: A custom defined ID for fine tuning of theming. Defaults to '#message_window'.
+    :param object_id: A custom defined ID for fine-tuning of theming. Defaults to '#message_window'.
     :param visible: Whether the element is visible by default.
     """
     def __init__(self, rect: pygame.Rect,
@@ -32,7 +32,7 @@ class UIMessageWindow(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='message_window',
+                         element_id=['message_window'],
                          object_id=object_id,
                          resizable=True,
                          visible=visible)

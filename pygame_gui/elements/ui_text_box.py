@@ -62,7 +62,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
 
     :param html_text: The HTML formatted text to display in this text box.
-    :param relative_rect: The 'visible area' rectangle, positioned relative to it's container.
+    :param relative_rect: The 'visible area' rectangle, positioned relative to its container.
     :param manager: The UIManager that manages this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param wrap_to_height: False by default, if set to True the box will increase in height to
@@ -106,13 +106,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                          starting_height=starting_height,
                          layer_thickness=2,
                          anchors=anchors,
-                         visible=visible
-                         )
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='text_box')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['text_box'])
         self.should_html_unescape_input_text = should_html_unescape_input_text
         if self.should_html_unescape_input_text:
             self.html_text = html.unescape(html_text)
@@ -141,6 +138,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.background_colour = None
         self.border_colour = None
         self.line_spacing = 1.25
+        self.text_cursor_colour = pygame.Color("white")
 
         self.link_normal_colour = None
         self.link_hover_colour = None
@@ -149,13 +147,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.link_hover_underline = True
         self.link_style = None
 
-        self.rounded_corner_offset = None
+        self.rounded_corner_width_offsets = [0, 0]
+        self.rounded_corner_height_offsets = [0, 0]
         self.text_box_layout = None  # type: Optional[TextBoxLayout]
         self.text_wrap_rect = None  # type: Optional[pygame.Rect]
         self.background_surf = None
 
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         self.text_horiz_alignment = 'default'
         self.text_vert_alignment = 'default'
@@ -192,29 +190,34 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # of so that none  of it overlaps. Essentially we start with the containing box,
         # subtract the border, then subtract the padding, then if necessary subtract the width
         # of the scroll bar
-        self.rounded_corner_offset = int(self.shape_corner_radius -
-                                         (math.sin(math.pi / 4) *
-                                          self.shape_corner_radius))
+        tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+        tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+        bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+        br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
+        self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
+        self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
+        total_corner_width_offsets = self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
+        total_corner_height_offsets = self.rounded_corner_height_offsets[0] + self.rounded_corner_height_offsets[1]
         self.text_wrap_rect = pygame.Rect((self.rect[0] +
                                            self.padding[0] +
                                            self.border_width +
                                            self.shadow_width +
-                                           self.rounded_corner_offset),
+                                           self.rounded_corner_width_offsets[0]),
                                           (self.rect[1] +
                                            self.padding[1] +
                                            self.border_width +
                                            self.shadow_width +
-                                           self.rounded_corner_offset),
+                                           self.rounded_corner_height_offsets[0]),
                                           max(1, (self.rect[2] -
                                                   (self.padding[0] * 2) -
                                                   (self.border_width * 2) -
                                                   (self.shadow_width * 2) -
-                                                  (2 * self.rounded_corner_offset))),
+                                                  total_corner_width_offsets)),
                                           max(1, (self.rect[3] -
                                                   (self.padding[1] * 2) -
                                                   (self.border_width * 2) -
                                                   (self.shadow_width * 2) -
-                                                  (2 * self.rounded_corner_offset))))
+                                                  total_corner_height_offsets)))
         if self.dynamic_height:
             self.text_wrap_rect.height = -1
         if self.dynamic_width:
@@ -229,10 +232,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 final_text_area_size = self.text_box_layout.layout_rect.size
                 new_dimensions = ((final_text_area_size[0] + (self.padding[0] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
-                                   (2 * self.rounded_corner_offset)),
+                                   total_corner_width_offsets),
                                   (final_text_area_size[1] + (self.padding[1] * 2) +
                                    (self.border_width * 2) + (self.shadow_width * 2) +
-                                   (2 * self.rounded_corner_offset)))
+                                   total_corner_height_offsets))
                 self.set_dimensions(new_dimensions)
 
                 # need to regen this because it was dynamically generated
@@ -240,12 +243,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                               (self.padding[0] * 2) -
                                               (self.border_width * 2) -
                                               (self.shadow_width * 2) -
-                                              (2 * self.rounded_corner_offset))),
+                                              total_corner_width_offsets)),
                                       max(1, (self.rect[3] -
                                               (self.padding[1] * 2) -
                                               (self.border_width * 2) -
                                               (self.shadow_width * 2) -
-                                              (2 * self.rounded_corner_offset))))
+                                              total_corner_height_offsets)))
 
             elif self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]:
                 # We need a scrollbar because our text is longer than the space we
@@ -254,20 +257,20 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                    (self.padding[0] * 2) -
                                    (self.border_width * 2) -
                                    (self.shadow_width * 2) -
-                                   self.rounded_corner_offset - self.scroll_bar_width)
+                                   total_corner_width_offsets - self.scroll_bar_width)
                 self.text_wrap_rect = pygame.Rect((self.rect[0] + self.padding[0] +
                                                    self.border_width + self.shadow_width +
-                                                   self.rounded_corner_offset),
+                                                   self.rounded_corner_width_offsets[0]),
                                                   (self.rect[1] + self.padding[1] +
                                                    self.border_width +
                                                    self.shadow_width +
-                                                   self.rounded_corner_offset),
+                                                   self.rounded_corner_height_offsets[0]),
                                                   max(1, text_rect_width),
                                                   max(1, (self.rect[3] -
                                                           (self.padding[1] * 2) -
                                                           (self.border_width * 2) -
                                                           (self.shadow_width * 2) -
-                                                          (2 * self.rounded_corner_offset))))
+                                                          total_corner_height_offsets)))
                 self.parse_html_into_style_data()
                 percentage_visible = (self.text_wrap_rect[3] /
                                       self.text_box_layout.layout_rect.height)
@@ -297,7 +300,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius}
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'text_cursor_colour': self.text_cursor_colour}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -325,9 +329,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         basic_blit(new_image, self.text_box_layout.finalised_surface,
                    (self.padding[0] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset,
+                    self.shadow_width + self.rounded_corner_width_offsets[0],
                     self.padding[1] + self.border_width +
-                    self.shadow_width + self.rounded_corner_offset),
+                    self.shadow_width + self.rounded_corner_height_offsets[0]),
                    drawable_area)
 
         self._set_image(new_image)
@@ -339,9 +343,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def get_text_layout_top_left(self):
         return (self.rect.left + self.padding[0] + self.border_width +
-                self.shadow_width + self.rounded_corner_offset,
+                self.shadow_width + self.rounded_corner_width_offsets[0],
                 self.rect.top + self.padding[1] + self.border_width +
-                self.shadow_width + self.rounded_corner_offset
+                self.shadow_width + self.rounded_corner_height_offsets[0]
                 )
 
     def _align_all_text_rows(self):
@@ -357,6 +361,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
             else:
                 self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
+        elif self.text_horiz_alignment == 'default':
+            locale = self.ui_manager.get_locale()
+            if locale in ['ar', 'he']:
+                self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
+            else:
+                self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
 
         # Vertical alignment
         if self.text_vert_alignment != 'default':
@@ -383,16 +393,19 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             height_adjustment = int(self.scroll_bar.start_percentage *
                                     self.text_box_layout.layout_rect.height)
 
+            total_corner_width_offsets = self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
+            total_corner_height_offsets = self.rounded_corner_height_offsets[0] + self.rounded_corner_height_offsets[1]
+
             drawable_area_size = (max(1, (self.rect[2] -
                                           (self.padding[0] * 2) -
                                           (self.border_width * 2) -
                                           (self.shadow_width * 2) -
-                                          (2 * self.rounded_corner_offset))),
+                                          total_corner_width_offsets)),
                                   max(1, (self.rect[3] -
                                           (self.padding[1] * 2) -
                                           (self.border_width * 2) -
                                           (self.shadow_width * 2) -
-                                          (2 * self.rounded_corner_offset))))
+                                          total_corner_height_offsets)))
             drawable_area = pygame.Rect((0, height_adjustment),
                                         drawable_area_size)
 
@@ -405,10 +418,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             basic_blit(new_image, self.text_box_layout.finalised_surface,
                        (self.padding[0] + self.border_width +
                         self.shadow_width +
-                        self.rounded_corner_offset,
+                        self.rounded_corner_width_offsets[0],
                         self.padding[1] + self.border_width +
                         self.shadow_width +
-                        self.rounded_corner_offset),
+                        self.rounded_corner_height_offsets[0]),
                        drawable_area)
             self._set_image(new_image)
 
@@ -421,9 +434,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             else:
                 height_adjustment = 0
             base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset)
+                         self.shadow_width + self.rounded_corner_width_offsets[0])
             base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                         self.shadow_width + self.rounded_corner_height_offsets[0] - height_adjustment)
 
             for chunk in self.link_hover_chunks:
                 hovered_currently = False
@@ -464,7 +477,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                     Tuple[int, int],
                                                     Tuple[float, float]]):
         """
-        Sets the relative screen position of this text box, updating it's subordinate scroll bar at
+        Sets the relative screen position of this text box, updating its subordinate scroll bar at
         the same time.
 
         :param position: The relative screen position to set.
@@ -483,7 +496,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                            Tuple[int, int],
                                            Tuple[float, float]]):
         """
-        Sets the absolute screen position of this text box, updating it's subordinate scroll bar
+        Sets the absolute screen position of this text box, updating its subordinate scroll bar
         at the same time.
 
         :param position: The absolute screen position to set.
@@ -516,10 +529,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         if dimensions[0] >= 0 and dimensions[1] >= 0:
             if self.relative_right_margin is not None:
-                self.relative_right_margin = self.ui_container.rect.right - self.rect.right
+                self.relative_right_margin = self.ui_container.get_container().get_rect().right - self.rect.right
 
             if self.relative_bottom_margin is not None:
-                self.relative_bottom_margin = self.ui_container.rect.bottom - self.rect.bottom
+                self.relative_bottom_margin = self.ui_container.get_container().get_rect().bottom - self.rect.bottom
 
             self._update_container_clip()
 
@@ -564,7 +577,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             font_name=self.parser.default_style['font_name'],
             font_size=self.parser.default_style['font_size'],
             bold=self.parser.default_style['bold'],
-            italic=self.parser.default_style['italic'])
+            italic=self.parser.default_style['italic'],
+            antialiased=self.parser.default_style['antialiased'],
+            script=self.parser.default_style['script'],
+            direction=self.parser.default_style['direction'])
         default_font_data = {"font": default_font,
                              "font_colour": self.parser.default_style['font_colour'],
                              "bg_colour": self.parser.default_style['bg_colour']
@@ -576,9 +592,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                                   self.text_wrap_rect[3])),
                                              line_spacing=self.line_spacing,
                                              default_font_data=default_font_data,
-                                             allow_split_dashes=self.allow_split_dashes)
+                                             allow_split_dashes=self.allow_split_dashes,
+                                             text_direction=self.parser.default_style['direction'],
+                                             editable=True)
+        self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.parser.empty_layout_queue()
-        if not self.dynamic_height:
+        if self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
 
         self._align_all_text_rows()
@@ -595,6 +614,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if (self.scroll_bar is None and not self.dynamic_height and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
+            return
         else:
             if self.scroll_bar is not None:
                 height_adjustment = int(self.scroll_bar.start_percentage *
@@ -602,23 +622,24 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 percentage_visible = (self.text_wrap_rect[3] /
                                       self.text_box_layout.layout_rect.height)
                 if percentage_visible >= 1.0:
-                    self.scroll_bar.kill()
-                    self.scroll_bar = None
-                    height_adjustment = 0
+                    self.rebuild()
+                    return
                 else:
                     self.scroll_bar.set_visible_percentage(percentage_visible)
             else:
                 height_adjustment = 0
+            total_corner_width_offsets = self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
+            total_corner_height_offsets = self.rounded_corner_height_offsets[0] + self.rounded_corner_height_offsets[1]
             drawable_area_size = (max(1, (self.rect[2] -
                                           (self.padding[0] * 2) -
                                           (self.border_width * 2) -
                                           (self.shadow_width * 2) -
-                                          (2 * self.rounded_corner_offset))),
+                                          total_corner_width_offsets)),
                                   max(1, (self.rect[3] -
                                           (self.padding[1] * 2) -
                                           (self.border_width * 2) -
                                           (self.shadow_width * 2) -
-                                          (2 * self.rounded_corner_offset))))
+                                          total_corner_height_offsets)))
             drawable_area = pygame.Rect((0, height_adjustment),
                                         drawable_area_size)
             new_image = pygame.surface.Surface(self.rect.size, flags=pygame.SRCALPHA, depth=32)
@@ -626,9 +647,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             basic_blit(new_image, self.background_surf, (0, 0))
             basic_blit(new_image, self.text_box_layout.finalised_surface,
                        (self.padding[0] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset,
+                        self.shadow_width + self.rounded_corner_width_offsets[0],
                         self.padding[1] + self.border_width +
-                        self.shadow_width + self.rounded_corner_offset),
+                        self.shadow_width + self.rounded_corner_height_offsets[0]),
                        drawable_area)
             self._set_image(new_image)
 
@@ -639,7 +660,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         hovered) and now want to update the text block with those changes without doing a
         full redraw.
 
-        This won't work very well if redrawing a chunk changed it's dimensions.
+        This won't work very well if redrawing a chunk changed its dimensions.
         """
         self.text_box_layout.finalise_to_new()
         self.redraw_from_text_block()
@@ -650,7 +671,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         chunks in a more fundamental fashion and need to reposition them (say, if some of them
         have gotten wider after being made bold).
 
-        NOTE: This doesn't re-parse the text of our box. If you need to do that, just create a
+        NOTE: This doesn't reparse the text of our box. If you need to do that, just create a
         new text box.
 
         """
@@ -686,9 +707,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     else:
                         height_adjustment = 0
                     base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                                 self.shadow_width + self.rounded_corner_offset)
+                                 self.shadow_width + self.rounded_corner_width_offsets[0])
                     base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                                 self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                                 self.shadow_width + self.rounded_corner_height_offsets[0] - height_adjustment)
                     for chunk in self.link_hover_chunks:
 
                         hover_rect = pygame.Rect((base_x + chunk.x,
@@ -707,9 +728,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             else:
                 height_adjustment = 0
             base_x = int(self.rect[0] + self.padding[0] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset)
+                         self.shadow_width + self.rounded_corner_width_offsets[0])
             base_y = int(self.rect[1] + self.padding[1] + self.border_width +
-                         self.shadow_width + self.rounded_corner_offset - height_adjustment)
+                         self.shadow_width + self.rounded_corner_height_offsets[0] - height_adjustment)
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             for chunk in self.link_hover_chunks:
 
@@ -761,7 +782,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='padding',
@@ -801,7 +822,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _reparse_and_rebuild(self):
         self.parser = HTMLParser(self.ui_theme, self.combined_element_ids,
-                                 self.link_style, line_spacing=self.line_spacing)
+                                 self.link_style, line_spacing=self.line_spacing,
+                                 text_direction=self.font_dict.get_default_font().get_direction())
         self.rebuild()
 
     def _check_text_alignment_theming(self) -> bool:
@@ -814,7 +836,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         has_any_changed = False
 
         if self._check_misc_theme_data_changed(attribute_name='text_horiz_alignment',
-                                               default_value='left',
+                                               default_value='default',
                                                casting_func=str):
             has_any_changed = True
 
@@ -837,7 +859,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _check_link_style_changed(self) -> bool:
         """
-        Checks for any changes in hyper link related styling in the theme data.
+        Checks for any changes in hyperlink related styling in the theme data.
 
         :return: True if changes detected.
 
@@ -890,7 +912,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def enable(self):
         """
-        Enable the text box. Renables the scroll bar if one exists.
+        Enable the text box. Re-enables the scroll bar if one exists.
         """
         if not self.is_enabled:
             self.is_enabled = True

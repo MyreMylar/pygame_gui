@@ -1,4 +1,5 @@
 import os
+import io
 from typing import Tuple, List, Dict, Union, Set, Optional
 
 import pygame
@@ -29,18 +30,18 @@ class UIManager(IUIManagerInterface):
     frame.
 
     :param window_resolution: window resolution.
-    :param theme_path: relative file path to theme.
+    :param theme_path: relative file path to theme or theme dictionary.
     :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file
     """
 
     def __init__(self,
                  window_resolution: Tuple[int, int],
-                 theme_path: Optional[Union[str, PackageResource]] = None,
+                 theme_path: Optional[Union[str, os.PathLike, io.StringIO, PackageResource, dict]] = None,
                  enable_live_theme_updates: bool = True,
                  resource_loader: Optional[IResourceLoader] = None,
                  starting_language: str = 'en',
                  translation_directory_paths: Optional[List[str]] = None):
-
+        super().__init__()
         if get_default_manager() is None:
             set_default_manager(self)
         # Translation stuff
@@ -66,9 +67,7 @@ class UIManager(IUIManagerInterface):
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = UIAppearanceTheme(self.resource_loader, self._locale)
-        if theme_path is not None:
-            self.ui_theme.load_theme(theme_path)
+        self.ui_theme = self.create_new_theme(theme_path)
 
         self.universal_empty_surface = pygame.surface.Surface((0, 0),
                                                               flags=pygame.SRCALPHA,
@@ -106,6 +105,16 @@ class UIManager(IUIManagerInterface):
             self.resource_loader.start()
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
+        
+    def create_new_theme(self, theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]=None) -> UIAppearanceTheme:
+        """
+        Create a new theme using self information.
+        :param theme_path: relative file path to theme or theme dictionary.
+        """
+        theme = UIAppearanceTheme(self.resource_loader, self._locale)
+        if theme_path is not None:
+            theme.load_theme(theme_path)
+        return theme
 
     def get_double_click_time(self) -> float:
         """
@@ -132,7 +141,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.ui_theme
 
-    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
+    def get_sprite_group(self) -> LayeredGUIGroup:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -151,7 +160,7 @@ class UIManager(IUIManagerInterface):
         return self.ui_window_stack
 
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
+                   shape: str = 'rectangle', corner_radius: Optional[List[int]] = None) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -161,6 +170,8 @@ class UIManager(IUIManagerInterface):
         :param corner_radius: The radius of the shadow corners if this is a rectangular shadow.
         :return: A shadow as a pygame Surface.
         """
+        if corner_radius is None:
+            corner_radius = [2, 2, 2, 2]
         return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(size,
                                                                                 shadow_width,
                                                                                 shape,
@@ -232,6 +243,24 @@ class UIManager(IUIManagerInterface):
 
                             break
         return consumed_event
+    
+    def set_ui_theme(self, theme:IUIAppearanceThemeInterface, update_all_sprites:bool=False):
+        """
+        Set ui theme.
+        :param theme: The theme to set.
+        """
+        for sprite in self.ui_group.sprites():
+            if not update_all_sprites and sprite.ui_theme is not self.ui_theme:
+                continue
+            sprite.ui_theme = theme
+        self.ui_theme = theme
+        self.rebuild_all_from_changed_theme_data(self.ui_theme)
+    
+    def rebuild_all_from_changed_theme_data(self, theme:IUIAppearanceThemeInterface=None):
+        for sprite in self.ui_group.sprites():
+            if theme is not None and sprite.ui_theme is not theme:
+                continue
+            sprite.rebuild_from_changed_theme_data()
 
     def update(self, time_delta: float):
         """
@@ -253,12 +282,10 @@ class UIManager(IUIManagerInterface):
             if self.theme_update_acc > self.theme_update_check_interval:
                 self.theme_update_acc = 0.0
                 if self.ui_theme.check_need_to_reload():
-                    for sprite in self.ui_group.sprites():
-                        sprite.rebuild_from_changed_theme_data()
+                    self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
         if self.ui_theme.check_need_to_rebuild_data_manually_changed():
-            for sprite in self.ui_group.sprites():
-                sprite.rebuild_from_changed_theme_data()
+            self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
         self.ui_theme.update_caching(time_delta)
 
@@ -378,10 +405,10 @@ class UIManager(IUIManagerInterface):
         responsiveness when creating UI elements that use a lot of different fonts.
 
         To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default
-        'fira_code' font) you must first add the paths to the files for those fonts, then load the
+        'noto_sans' font) you must first add the paths to the files for those fonts, then load the
         specific fonts with a list of font descriptions in a dictionary form like so:
 
-            ``{'name': 'fira_code', 'point_size': 12, 'style': 'bold_italic'}``
+            ``{'name': 'noto_sans', 'point_size': 12, 'style': 'bold_italic', 'antialiased': 1}``
 
         You can specify size either in pygame.Font point sizes with 'point_size', or in HTML style
         sizes with 'html_size'. Style options are:
@@ -397,10 +424,13 @@ class UIManager(IUIManagerInterface):
 
         """
         for font in font_list:
-            name = 'fira_code'
+            name = 'noto_sans'
             bold = False
             italic = False
             size = 14
+            antialiased = True
+            script = 'Latn'
+            direction = pygame.DIRECTION_LTR
             if 'name' in font:
                 name = font['name']
             if 'style' in font:
@@ -408,13 +438,23 @@ class UIManager(IUIManagerInterface):
                     bold = True
                 if 'italic' in font['style']:
                     italic = True
+            if 'antialiased' in font:
+                antialiased = bool(int(font['antialiased']))
+            if 'script' in font:
+                script = font['script']
+            if 'direction' in font:
+                if 'ltr' == font['direction'].lower():
+                    direction = pygame.DIRECTION_LTR
+                if 'rtl' in font['direction'].lower():
+                    direction = pygame.DIRECTION_RTL
             if 'html_size' in font:
                 font_dict = self.ui_theme.get_font_dictionary()
                 size = font_dict.convert_html_to_point_size(font['html_size'])
             elif 'point_size' in font:
                 size = font['point_size']
 
-            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic)
+            self.ui_theme.get_font_dictionary().preload_font(size, name, bold, italic, False,
+                                                             antialiased, script=script, direction=direction)
 
     def print_unused_fonts(self):
         """
@@ -432,7 +472,7 @@ class UIManager(IUIManagerInterface):
     def get_focus_set(self):
         return self.focused_set
 
-    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
+    def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
         """
         Set a set of element as the focused set.
 

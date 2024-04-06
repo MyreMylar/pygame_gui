@@ -41,7 +41,7 @@ class TestUILabel:
                         text="Test Label",
                         manager=default_ui_manager)
         label.set_text("new text")
-        assert label.image is not None and label.rect.width == 64
+        assert label.image is not None and label.rect.width == 56
 
     def test_kwargs_set_text(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):
@@ -230,14 +230,14 @@ class TestUILabel:
                         default_ui_manager)
         default_ui_manager.set_locale('fr')
 
-        assert label.drawable_shape.theming['text'] == "Anglaise"
+        assert label.drawable_shape.theming['text'] == "Anglais"
 
         label = UILabel(pygame.Rect((10, 100), (-1, 30)),
                         'pygame-gui.English',
                         default_ui_manager)
         default_ui_manager.set_locale('fr')
 
-        assert label.drawable_shape.theming['text'] == "Anglaise"
+        assert label.drawable_shape.theming['text'] == "Anglais"
 
         label = UILabel(pygame.Rect((10, 100), (-1, -1)),
                         'pygame-gui.English',

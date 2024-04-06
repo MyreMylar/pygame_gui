@@ -11,10 +11,10 @@ class TestUIFontDictionary:
 
     def test_load_default_font_from_strings(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
-        font_dictionary._load_default_font()
-        font_dictionary.preload_font(font_size=14, font_name='fira_code', bold=True)
-        font_dictionary.preload_font(font_size=14, font_name='fira_code', italic=True)
-        font_dictionary.preload_font(font_size=14, font_name='fira_code', bold=True, italic=True)
+        font_dictionary._load_default_font(font_dictionary.default_font)
+        font_dictionary.preload_font(font_size=14, font_name='noto_sans', bold=True)
+        font_dictionary.preload_font(font_size=14, font_name='noto_sans', italic=True)
+        font_dictionary.preload_font(font_size=14, font_name='noto_sans', bold=True, italic=True)
 
         assert font_dictionary.loaded_fonts is not None
 
@@ -36,25 +36,25 @@ class TestUIFontDictionary:
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
 
         with pytest.warns(UserWarning, match="Finding font with id"):
-            font_dictionary.find_font(font_size=20, font_name='fira_code')
+            font_dictionary.find_font(font_size=20, font_name='noto_sans')
 
     def test_find_font_unloaded_style_bold(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
 
         with pytest.warns(UserWarning, match="Finding font with id"):
-            font_dictionary.find_font(font_size=20, font_name='fira_code', bold=True)
+            font_dictionary.find_font(font_size=20, font_name='noto_sans', bold=True)
 
     def test_find_font_unloaded_style_italic(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
 
         with pytest.warns(UserWarning, match="Finding font with id"):
-            font_dictionary.find_font(font_size=20, font_name='fira_code', italic=True)
+            font_dictionary.find_font(font_size=20, font_name='noto_sans', italic=True)
 
     def test_find_font_unloaded_style_bold_italic(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
 
         with pytest.warns(UserWarning, match="Finding font with id"):
-            font_dictionary.find_font(font_size=20, font_name='fira_code', bold=True, italic=True)
+            font_dictionary.find_font(font_size=20, font_name='noto_sans', bold=True, italic=True)
 
     def test_find_font_unloaded(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
@@ -64,16 +64,16 @@ class TestUIFontDictionary:
     def test_create_font_id(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=False, italic=False)
-        assert font_id_1 == 'bob_regular_10'
+        assert font_id_1 == 'bob_regular_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=True, italic=False)
-        assert font_id_1 == 'bob_bold_10'
+        assert font_id_1 == 'bob_bold_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=False, italic=True)
-        assert font_id_1 == 'bob_italic_10'
+        assert font_id_1 == 'bob_italic_aa_10'
 
         font_id_1 = font_dictionary.create_font_id(font_size=10, font_name='bob', bold=True, italic=True)
-        assert font_id_1 == 'bob_bold_italic_10'
+        assert font_id_1 == 'bob_bold_italic_aa_10'
 
         with pytest.warns(UserWarning, match="Font size less than or equal to 0"):
             font_dictionary.create_font_id(font_size=-50, font_name='bob', bold=True, italic=True)
@@ -81,7 +81,7 @@ class TestUIFontDictionary:
     def test_preload_already_loaded(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
         with pytest.warns(UserWarning, match="Trying to pre-load font id"):
-            font_dictionary.preload_font(font_name='fira_code', font_size=14)
+            font_dictionary.preload_font(font_name='noto_sans', font_size=14)
 
     def test_preload_no_paths(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
@@ -135,7 +135,7 @@ class TestUIFontDictionary:
         font_dictionary.print_unused_loaded_fonts()
         captured = capsys.readouterr()
 
-        assert captured.out == 'Unused font ids:\nroboto_regular_14(HTML size: 4)\n'
+        assert captured.out == 'Unused font ids:\nroboto_regular_aa_14(HTML size: 4)\n'
 
     def test_convert_html_size_to_point_size_invalid(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
@@ -156,7 +156,7 @@ class TestUIFontDictionary:
         loader.start()
         loader.update()
 
-        assert font_dictionary.check_font_preloaded('roboto_regular_14')
+        assert font_dictionary.check_font_preloaded('roboto_regular_aa_14')
 
 
 if __name__ == '__main__':

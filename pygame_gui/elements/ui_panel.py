@@ -1,9 +1,9 @@
-from typing import Union, Dict, Tuple, Optional
+from typing import Union, Dict, Tuple, Optional, Iterator
 
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 
 from pygame_gui.core import UIElement, UIContainer
@@ -62,19 +62,16 @@ class UIPanel(UIElement, IContainerLikeInterface):
                          starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id=element_id)
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=[element_id])
 
         self.background_colour = None
         self.border_colour = None
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape_corner_radius = 0
         self.shape = 'rectangle'
 
         self.rebuild_from_changed_theme_data()
@@ -250,7 +247,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if has_any_changed:
@@ -310,3 +307,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if self.panel_container is not None:
             self.panel_container.hide()
         super().hide()
+
+    def __iter__(self) -> Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container.
+        :return Iterator: An iterator over the elements within the container.
+        """
+        return iter(self.get_container())
+
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :param item: The element to check for containment.
+        :return bool: Return True if the element is found, False otherwise.
+        """
+        return item in self.get_container()

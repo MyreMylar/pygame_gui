@@ -52,12 +52,10 @@ class UIHorizontalSlider(UIElement):
                          layer_thickness=2,
                          starting_height=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='horizontal_slider')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['horizontal_slider'])
 
         self.default_button_width = 20
         self.arrow_button_width = self.default_button_width
@@ -93,7 +91,6 @@ class UIHorizontalSlider(UIElement):
 
         self.drawable_shape = None
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         self.background_rect = None  # type: Optional[pygame.Rect]
 
@@ -423,7 +420,7 @@ class UIHorizontalSlider(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',

@@ -159,15 +159,17 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
-        manager = UIManager((800, 600), os.path.join("tests", "data",
-                                                     "themes",
-                                                     "ui_text_entry_line_symbol_font.json"))
-
-        text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                     manager=manager)
-        text_entry.set_text('dan')
-        with pytest.raises(ValueError, match='Selected font for UITextEntryLine'):
-            text_entry.set_text_hidden(True)
+        # This test only works with freetype font as pygame font generates fake metrics for
+        # invalid characters. Revisit this when pygame.font has a way of testing for invalid characters.
+        # manager = UIManager((800, 600), os.path.join("tests", "data",
+        #                                              "themes",
+        #                                              "ui_text_entry_line_symbol_font.json"))
+        #
+        # text_entry = UITextEntryLine(relative_rect=pygame.Rect(100, 100, 200, 30),
+        #                              manager=manager)
+        # text_entry.set_text('dan')
+        # with pytest.raises(ValueError, match='Selected font for UITextEntryLine'):
+        #     text_entry.set_text_hidden(True)
 
     def test_rebuild_select_area_1(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
@@ -553,7 +555,7 @@ class TestUITextEntryLine:
 
         assert processed_down_event
         assert processed_up_event
-        assert text_entry.select_range == [3, 9]
+        assert text_entry.select_range == [3, 10]
 
     def test_process_event_mouse_button_double_click(self, _init_pygame: None,
                                                      default_ui_manager: UIManager,
@@ -591,10 +593,10 @@ class TestUITextEntryLine:
         text_entry.set_text('                      dan')
         processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                            {'button': 1,
-                                                                            'pos': (90, 15)}))
+                                                                            'pos': (50, 15)}))
         processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                          {'button': 1,
-                                                                          'pos': (90, 15)}))
+                                                                          'pos': (50, 15)}))
 
         assert (processed_down_event and processed_up_event and text_entry.select_range == [0, 1])
 
@@ -916,7 +918,7 @@ class TestUITextEntryLine:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-    def test_redraw_selected_text(self, _init_pygame):
+    def test_redraw_selected_text(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))

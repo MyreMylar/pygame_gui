@@ -227,6 +227,7 @@ class LayeredGUIGroup(LayeredUpdates):
     """
     A sprite group specifically for the GUI. Similar to pygame's LayeredDirty group but with the
     dirty flag stuff removed for simplicity and speed.
+    TODO: sever this entirely from LayeredUpdates at some point to fix the type hinting
     """
     def __init__(self, *sprites):
         """initialize group.
@@ -237,7 +238,7 @@ class LayeredGUIGroup(LayeredUpdates):
         self.visible = []
         self.should_update_visibility = True
 
-    def add_internal(self, sprite, layer=None):
+    def add_internal(self, sprite: GUISprite, layer=None):
         """Do not use this method directly.
 
         It is used by the group to add a sprite internally.
@@ -258,7 +259,7 @@ class LayeredGUIGroup(LayeredUpdates):
         LayeredUpdates.remove_internal(self, sprite)
         self.should_update_visibility = True
 
-    def change_layer(self, sprite, new_layer):
+    def change_layer(self, sprite: GUISprite, new_layer):
         LayeredUpdates.change_layer(self, sprite, new_layer)
         self.should_update_visibility = True
 

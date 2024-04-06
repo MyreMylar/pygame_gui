@@ -607,7 +607,7 @@ class UIClosedDropDownState:
         """
         Show selected_option_button and open_button.
         """
-        self.visible = 1
+        self.visible = True
 
         if self.open_button is not None:
             self.open_button.show()
@@ -618,7 +618,7 @@ class UIClosedDropDownState:
         """
         Hide selected_option_button and open_button.
         """
-        self.visible = 0
+        self.visible = False
 
         if self.open_button is not None:
             self.open_button.hide()
@@ -676,12 +676,9 @@ class UIDropDownMenu(UIContainer):
         super().__init__(relative_rect, manager, container=container,
                          starting_height=0,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='drop_down_menu')
+                         visible=visible,
+                         object_id=object_id,
+                         element_id=['drop_down_menu'])
 
         self.__layer_thickness_including_expansion = 4
         self.options_list = options_list
@@ -700,7 +697,7 @@ class UIDropDownMenu(UIContainer):
         self.disabled_border_colour = None
 
         self.shape = "rectangle"
-        self.shape_corner_radius = 2
+        self.shape_corner_radius = [2, 2, 2, 2]
 
         self.current_state = None
         self.background_rect = None
@@ -856,7 +853,7 @@ class UIDropDownMenu(UIContainer):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',

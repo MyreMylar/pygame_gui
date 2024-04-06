@@ -17,15 +17,20 @@ class GUIFontFreetype(IGUIFontInterface):
         self.__internal_font: Font = Font(file, size, resolution=72)
         self.__internal_font.pad = True
         self.__internal_font.origin = True
+        self.__internal_font.kerning = True
 
         self.__underline = False
         self.__underline_adjustment = 0.0
 
         self.point_size = size
 
-        if force_style and style is not None:
-            self.__internal_font.strong = style['bold']
-            self.__internal_font.oblique = style['italic']
+        if style is not None:
+            self.__internal_font.antialiased = style['antialiased']
+
+            if force_style:
+                self.__internal_font.strong = style['bold']
+                self.__internal_font.oblique = style['italic']
+
 
     @property
     def underline(self) -> bool:
@@ -46,17 +51,10 @@ class GUIFontFreetype(IGUIFontInterface):
     def get_point_size(self):
         return self.point_size
 
-    def get_font(self) -> Font:
-        return self.__internal_font
-
-    def get_text_height(self, text: str) -> int:
-        pass
-
-    def get_text_width(self, text: str) -> int:
-        pass
-
     def get_rect(self, text: str) -> Rect:
-        return self.__internal_font.get_rect(text)
+        supposed_rect = self.__internal_font.get_rect(text)
+        text_surface, text_rect = self.__internal_font.render(text, pygame.Color("white"))
+        return pygame.Rect(supposed_rect.topleft, text_surface.get_size())
 
     def get_metrics(self, text: str):
         return self.__internal_font.get_metrics(text)
@@ -84,18 +82,12 @@ class GUIFontFreetype(IGUIFontInterface):
         # that doesn't drop below the base line (no y's, g's, p's etc)
         # but also don't want it to flicker on and off. Base-line
         # centering is the default for chunks on a single style row.
-        padding_state = self.__internal_font.pad
 
-        self.__internal_font.pad = False
-        no_pad_origin = self.__internal_font.get_rect('A').y
+        return -self.__internal_font.get_sized_descender(self.point_size)
 
-        self.__internal_font.pad = True
-        pad_origin = self.__internal_font.get_rect('A').y
+    def get_direction(self) -> int:
+        """
 
-        self.__internal_font.pad = padding_state
-        return pad_origin - no_pad_origin
-
-    def remove_font_pad_and_origin(self):
-        self.__internal_font.pad = False
-        self.__internal_font.origin = False
-
+        :return:
+        """
+        return pygame.DIRECTION_LTR

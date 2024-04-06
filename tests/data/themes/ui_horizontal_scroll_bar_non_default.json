@@ -11,7 +11,8 @@
              "shape": "rounded_rectangle",
              "shape_corner_radius": "6",
              "border_width": "0",
-             "shadow_width": "3"
+             "shadow_width": "3",
+             "tool_tip_delay": "2.0"
          }
     }
 }

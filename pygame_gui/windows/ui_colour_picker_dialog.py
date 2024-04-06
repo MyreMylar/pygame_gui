@@ -4,21 +4,21 @@ from typing import Union, Tuple, Dict, Optional
 import pygame
 
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_HORIZONTAL_SLIDER_MOVED
-from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED
+from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED, UI_2D_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, Coordinate
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage
-from pygame_gui.elements import UIHorizontalSlider, UILabel, UITextEntryLine
+from pygame_gui.elements import UI2DSlider, UIHorizontalSlider, UILabel, UITextEntryLine
 
 
 class UIColourChannelEditor(UIElement):
     """
     This colour picker specific element lets us edit a single colour channel (Red, Green, Blue,
-    Hue etc). It's bundled along with the colour picker class because I don't see much use for it
-    outside of a colour picker, but it still seemed sensible to make a class for a pattern in the
+    Hue etc.). It's bundled along with the colour picker class because I don't see much use for it
+    outside a colour picker, but it still seemed sensible to make a class for a pattern in the
     colour picker that is repeated six times.
 
     :param relative_rect: The relative rectangle for sizing and positioning the element, relative
@@ -50,7 +50,7 @@ class UIColourChannelEditor(UIElement):
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors:  Optional[Dict[str, Union[str, UIElement]]] = None,
+                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor when hiding on creation
@@ -62,12 +62,10 @@ class UIColourChannelEditor(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='colour_channel_editor')
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=['colour_channel_editor'])
 
         self.range = value_range
         self.current_value = initial_value
@@ -193,7 +191,7 @@ class UIColourChannelEditor(UIElement):
     def _set_value_from_entry(self, new_value: int):
         """
         For updating the value the slider element is set to when we've edited the text entry. The
-        slider may have much less precision than the text entry depending on it's available width
+        slider may have much less precision than the text entry depending on its available width,
         so we need to be careful to make the change one way. Also sends out an event for the color
         picker and clips the value to within the allowed value range.
 
@@ -239,9 +237,7 @@ class UIColourChannelEditor(UIElement):
             self.entry.set_text(str(self.current_value))
             self.slider.set_current_value(self.current_value)
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this channel, updating all subordinate elements at the
         same time.
@@ -252,9 +248,7 @@ class UIColourChannelEditor(UIElement):
         super().set_position(position)
         self.element_container.set_relative_position(self.relative_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this channel, updating all subordinate elements at the
         same time.
@@ -265,13 +259,13 @@ class UIColourChannelEditor(UIElement):
         super().set_relative_position(position)
         self.element_container.set_relative_position(self.relative_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
         :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
 
         """
         super().set_dimensions(dimensions)
@@ -320,7 +314,7 @@ class UIColourPickerDialog(UIWindow):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
-                         element_id='colour_picker_dialog',
+                         element_id=['colour_picker_dialog'],
                          object_id=object_id,
                          resizable=True,
                          visible=visible)
@@ -403,8 +397,37 @@ class UIColourPickerDialog(UIWindow):
 
         self._setup_channels(default_sizes)
 
+        self.colour_2d_slider = UI2DSlider(self.sat_value_square.relative_rect,
+                                           start_value_x=50, value_range_x=(0, 100),
+                                           start_value_y=50, value_range_y=(0, 100),
+                                           invert_y=True,
+                                           manager=self.ui_manager,
+                                           container=self)
+
+        self.update_colour_2d_slider()
+
+    def get_colour(self) -> pygame.Color:
+        """
+        Get the current colour
+        :return:
+        """
+        return self.current_colour
+
+    def set_colour(self, colour: pygame.Color) -> None:
+        """
+        Set the current colour and update all the necessary elements
+        :param colour: The colour to set
+        :return: None
+        """
+        self.current_colour = colour
+        self.changed_hsv_update_rgb()
+        self.changed_rgb_update_hsv()
+        self.update_current_colour_image()
+        self.update_saturation_value_square()
+        self.update_colour_2d_slider()
+
     def _setup_channels(self, default_sizes):
-        # group up setting up the channels, possibly we can make this into a
+        # Set up the channels, possibly we can make this into a
         # slimmer method called with just the bits that change like names, position and value range.
         channel_width = (self.rect.right -
                          self.sat_value_square.rect.right) - (default_sizes['element_spacing'] * 2)
@@ -510,7 +533,7 @@ class UIColourPickerDialog(UIWindow):
         """
         Handles events that this UI element is interested in. In this case we are responding to
         the colour channel elements being changed, the OK or Cancel buttons being pressed or the
-        user clicking the mouse inside of the Saturation & Value picking square.
+        user clicking the mouse inside the Saturation & Value picking square.
 
         :param event: The pygame Event to process.
 
@@ -543,17 +566,21 @@ class UIColourPickerDialog(UIWindow):
                                             self.value_channel.current_value,
                                             100)
                 self.changed_hsv_update_rgb()
-                self.update_current_colour_image()
-                self.update_saturation_value_square()
             elif event.ui_element in [self.red_channel, self.green_channel, self.blue_channel]:
                 self.current_colour[event.channel_index] = event.value
                 self.changed_rgb_update_hsv()
-                self.update_current_colour_image()
-                self.update_saturation_value_square()
+
+            self.update_current_colour_image()
+            self.update_saturation_value_square()
+
+            # Update 2D slider values
+            self.update_colour_2d_slider()
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
-            if self.sat_value_square.rect.collidepoint(scaled_mouse_pos):
+            rect = self.sat_value_square.rect
+            extended_rect = pygame.Rect(rect.x, rect.y, rect.w + 1, rect.h + 1)
+            if extended_rect.collidepoint(scaled_mouse_pos):
                 relative_click_pos = [scaled_mouse_pos[0] - self.sat_value_square.rect.left,
                                       scaled_mouse_pos[1] - self.sat_value_square.rect.top]
                 # put in range 0 - 100 and reverse y
@@ -570,6 +597,20 @@ class UIColourPickerDialog(UIWindow):
                                             100)
                 self.changed_hsv_update_rgb()
                 self.update_current_colour_image()
+
+                # Update 2D slider values
+                self.update_colour_2d_slider()
+
+        if event.type == UI_2D_SLIDER_MOVED and event.ui_element == self.colour_2d_slider:
+            v, s = self.colour_2d_slider.get_current_value()
+            self.sat_channel.set_value(s)
+            self.value_channel.set_value(v)
+            self.current_colour.hsva = (self.hue_channel.current_value,
+                                        self.sat_channel.current_value,
+                                        self.value_channel.current_value,
+                                        100)
+            self.changed_hsv_update_rgb()
+            self.update_current_colour_image()
 
         return consumed_event
 
@@ -588,7 +629,7 @@ class UIColourPickerDialog(UIWindow):
         Value of our current Hue. This is done by drawing a very small 4x4 pixel square with a
         pattern like so:
 
-                   [black] [hue at max saturation & value)]
+                   [black] [hue at max saturation & value]
                    [black] [white]
 
         And then using the smoothscale transform to enlarge it so that the colours blend smoothly
@@ -603,6 +644,14 @@ class UIColourPickerDialog(UIWindow):
                            100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
         self.sat_value_square._set_image(pygame.transform.smoothscale(mini_colour_surf, (200, 200)))
+
+    def update_colour_2d_slider(self):
+        """
+        This is used to update the 2D slider from the sliders
+        :return: None
+        """
+        s, v = self.sat_channel.current_value, self.value_channel.current_value
+        self.colour_2d_slider.set_current_value(v, s)
 
     def changed_hsv_update_rgb(self):
         """

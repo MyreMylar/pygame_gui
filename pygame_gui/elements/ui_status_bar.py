@@ -38,7 +38,6 @@ class UIStatusBar(UIElement):
                     may override this.
 
     """
-
     element_id = 'status_bar'
 
     def __init__(self,
@@ -57,12 +56,10 @@ class UIStatusBar(UIElement):
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
-                         visible=visible)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id=self.element_id)
+                         visible=visible,
+                         parent_element=parent_element,
+                         object_id=object_id,
+                         element_id=[self.element_id])
 
         self.sprite = sprite
         self.follow_sprite = follow_sprite
@@ -86,7 +83,6 @@ class UIStatusBar(UIElement):
 
         self.drawable_shape = None
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         self.font = None
         self.text_shadow_colour = None
@@ -235,7 +231,7 @@ class UIStatusBar(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='hover_height',

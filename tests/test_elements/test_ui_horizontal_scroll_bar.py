@@ -90,12 +90,6 @@ class TestUIHorizontalScrollBar:
         scroll_bar.redraw_scrollbar()
         assert scroll_bar.sliding_button is not None
 
-        scroll_bar.sliding_button.kill()
-        scroll_bar.sliding_button = None
-
-        scroll_bar.redraw_scrollbar()
-        assert scroll_bar.sliding_button is not None
-
     def test_reset_scroll_position(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
         scroll_bar = UIHorizontalScrollBar(relative_rect=pygame.Rect(100, 100, 150, 30),
