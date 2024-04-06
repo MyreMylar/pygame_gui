@@ -29,9 +29,10 @@ class GUISprite:
             self.add(*groups)
 
     def add(self, *groups):
-        """add the sprite to groups
+        """
+        add the sprite to groups
 
-        Sprite.add(*groups): return None
+        :param groups: sprite groups to add to.
 
         Any number of Group instances can be passed as arguments. The
         Sprite will be added to the Groups it is not already a member of.
@@ -49,7 +50,7 @@ class GUISprite:
     def remove(self, *groups):
         """remove the sprite from groups
 
-        Sprite.remove(*groups): return None
+        :param groups: sprite groups to remove from.
 
         Any number of Group instances can be passed as arguments. The Sprite
         will be removed from the Groups it is currently a member of.
@@ -127,7 +128,7 @@ class GUISprite:
         """
         A stub to override.
 
-        :param time_delta the time passed in seconds between calls to this function.
+        :param time_delta: the time passed in seconds between calls to this function.
         """
 
     @property
@@ -270,6 +271,11 @@ class LayeredGUIGroup(LayeredUpdates):
         surface.blits(self.visible)
 
     def update(self, *args, **kwargs) -> None:
+        """
+
+        :param args:
+        :param kwargs:
+        """
         super().update(*args, **kwargs)
         if self.should_update_visibility:
             self.should_update_visibility = False

@@ -22,7 +22,7 @@ pygame\_gui.core.colour\_gradient module
    :show-inheritance:
 
 pygame\_gui.core.colour\_parser module
-----------------------------------------
+--------------------------------------
 
 .. automodule:: pygame_gui.core.colour_parser
    :members:
@@ -30,7 +30,7 @@ pygame\_gui.core.colour\_parser module
    :show-inheritance:
 
 pygame\_gui.core.gui\_font\_pygame module
---------------------------------------
+-----------------------------------------
 
 .. automodule:: pygame_gui.core.gui_font_pygame
    :members:
@@ -38,7 +38,7 @@ pygame\_gui.core.gui\_font\_pygame module
    :show-inheritance:
 
 pygame\_gui.core.layered\_gui\_group module
---------------------------------------
+-------------------------------------------
 
 .. automodule:: pygame_gui.core.layered_gui_group
    :members:
@@ -46,7 +46,7 @@ pygame\_gui.core.layered\_gui\_group module
    :show-inheritance:
 
 pygame\_gui.core.object\_id module
---------------------------------------
+----------------------------------
 
 .. automodule:: pygame_gui.core.object_id
    :members:
@@ -54,7 +54,7 @@ pygame\_gui.core.object\_id module
    :show-inheritance:
 
 pygame\_gui.core.resource\_loaders module
---------------------------------------
+-----------------------------------------
 
 .. automodule:: pygame_gui.core.resource_loaders
    :members:
@@ -78,7 +78,7 @@ pygame\_gui.core.ui\_appearance\_theme module
    :show-inheritance:
 
 pygame\_gui.core.ui\_container module
----------------------------------------------
+-------------------------------------
 
 .. automodule:: pygame_gui.core.ui_container
    :members:

@@ -817,8 +817,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         Grab the 'pre effect' surface, used to get a 'normal' pre-effect surface to apply effects
         to.
-        TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
-              text surface again. Perhaps only hold the chunk's part?
+
         """
+        # TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
+        #       text surface again. Perhaps only hold the chunk's part?
         if self.target_surface is not None:
             self.pre_effect_target_surface = self.target_surface.copy()
