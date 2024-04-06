@@ -59,7 +59,10 @@ class TestUIFontDictionary:
     def test_find_font_unloaded(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
 
-        font_dictionary.find_font(font_size=20, font_name='arial')
+        # try genuine (for match font) & nonsense
+        font_dictionary.find_font(font_size=20, font_name='sans')
+
+        font_dictionary.find_font(font_size=20, font_name='nonsense_adhawdw')
 
     def test_create_font_id(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
@@ -85,8 +88,11 @@ class TestUIFontDictionary:
 
     def test_preload_no_paths(self, _init_pygame, _display_surface_return_none):
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
+        # test probably universally valid system font
+        font_dictionary.preload_font(font_name='sans', font_size=14)
+
         with pytest.warns(UserWarning, match="Trying to pre-load font id"):
-            font_dictionary.preload_font(font_name='arial', font_size=14)
+            font_dictionary.preload_font(font_name='nonsense_adhawdw', font_size=14)
 
     def test_preload_bad_paths(self, _init_pygame, _display_surface_return_none):
         loader = BlockingThreadedResourceLoader()
