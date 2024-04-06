@@ -390,6 +390,7 @@ class UIForm(UIAutoScrollingContainer):
     """
     # TODO: Implement a show password button
     # TODO: Implement colour inputs
+    # TODO: Implement required input
     SUPPORTED_TYPES = {"character": {"default": "'.'", "required": "True|False"},
                        "short_text": {"default": "'.*'", "required": "True|False"},
                        "long_text": {"default": "'.*'", "required": "True|False"},
@@ -440,6 +441,8 @@ class UIForm(UIAutoScrollingContainer):
         self.label_gap = 0
         self.section_gap = 15
         self.section_indent = 5
+
+        self.rebuild_sub_elements = False
 
         self.shape = "rectangle"
         self.shape_corner_radius = 0
@@ -567,8 +570,12 @@ class UIForm(UIAutoScrollingContainer):
         section_gap = element.section_gap
         section_indent = element.section_indent
 
+        if element == form:
+            width = form.scrollable_container.relative_rect.width - 2 * element.padding[0]
+        else:
+            width = element.relative_rect.width - 2 * element.padding[0]
         rel_rect = pygame.Rect(*element.padding,
-                               element.relative_rect.width - 2 * element.padding[0],
+                               width,
                                field_height)
 
         for key, value in questionnaire.items():
@@ -669,6 +676,11 @@ class UIForm(UIAutoScrollingContainer):
                 value.set_dimensions((rect.width, rect.height))
                 value.set_relative_position(rect.topleft)
 
+                # TODO: Remove when UIDropDownMenu does this automatically eventually?
+                if isinstance(value, UIDropDownMenu):
+                    value.current_state.update_position()
+                    value.current_state.update_dimensions()
+
                 rel_rect.y = gap
                 parsed_questionnaire[key] = value
 
@@ -706,6 +718,7 @@ class UIForm(UIAutoScrollingContainer):
         """
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
+        rebuild_submit_button = False
 
         background_colour = self.ui_theme.get_colour_or_gradient("dark_bg",
                                                                  self.combined_element_ids)
@@ -736,41 +749,49 @@ class UIForm(UIAutoScrollingContainer):
                                                default_value=(5, 5),
                                                casting_func=self.tuple_extract):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="label_height",
                                                default_value=30,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="field_height",
                                                default_value=40,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="large_field_height",
                                                default_value=80,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="gap",
                                                default_value=10,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="label_gap",
                                                default_value=0,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="section_gap",
                                                default_value=15,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="section_indent",
                                                default_value=5,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="submit_button_horiz_alignment",
                                                default_value="right",
@@ -778,10 +799,13 @@ class UIForm(UIAutoScrollingContainer):
                                                allowed_values=["left",
                                                                "center",
                                                                "right"]):
-            has_any_changed = True
+            rebuild_submit_button = True
 
         if has_any_changed:
             self.rebuild()
+
+        if rebuild_submit_button:
+            self.rebuild_submit_button()
 
     @staticmethod
     def rebuild_parsed_questionnaire(element: Union["UIForm", UISection],
@@ -805,8 +829,12 @@ class UIForm(UIAutoScrollingContainer):
         section_gap = element.section_gap
         section_indent = element.section_indent
 
+        if element == form:
+            width = form.scrollable_container.relative_rect.width - 2 * element.padding[0]
+        else:
+            width = element.relative_rect.width - 2 * element.padding[0]
         relative_rect = pygame.Rect(*element.padding,
-                                    element.relative_rect.width - 2 * element.padding[0], # - form.scroll_bar_width,
+                                    width,
                                     field_height)
 
         for key, value in questionnaire.items():
@@ -878,6 +906,11 @@ class UIForm(UIAutoScrollingContainer):
                 value.set_dimensions((rel_rect.width, rel_rect.height))
                 value.set_relative_position(rel_rect.topleft)
 
+                # TODO: Remove when UIDropDownMenu does this automatically eventually?
+                if isinstance(value, UIDropDownMenu):
+                    value.current_state.update_position()
+                    value.current_state.update_dimensions()
+
                 relative_rect.y = gap
 
     def rebuild_submit_button(self) -> None:
@@ -921,9 +954,13 @@ class UIForm(UIAutoScrollingContainer):
         if self._root_container.relative_rect != root_rect:
             self._root_container.set_relative_position(root_rect.topleft)
             self._root_container.set_dimensions(root_rect.size)
+            self._calculate_scrolling_dimensions()
+            self._sort_out_element_container_scroll_bars()
+            self.rebuild_sub_elements = True
 
-        self.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
-        self.rebuild_submit_button()
+        if self.rebuild_sub_elements:
+            self.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
+            self.rebuild_sub_elements = False
 
         theming_parameters = {"normal_bg": self.background_colour,
                               "normal_border": self.border_colour,
