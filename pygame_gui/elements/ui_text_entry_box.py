@@ -739,40 +739,91 @@ class UITextEntryBox(UITextBox):
 
         """
         consumed_event = False
-        if (event.key == K_a and
-                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters)
-            self.select_range = [0, len(self.html_text)]
-            self.edit_position = len(self.html_text)
-            self.cursor_has_moved_recently = True
+        if self._process_select_all_event(event):
             consumed_event = True
-        elif (event.key == K_x and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-              not (event.mod & KMOD_ALT)):
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                clipboard_copy(self.html_text[low_end:high_end])
-                self.text_box_layout.delete_selected_text()
-                self.edit_position = low_end
-                self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
-                self.text_box_layout.set_cursor_position(self.edit_position)
-                self.select_range = [0, 0]
-                self.redraw_from_text_block()
-                self.cursor_has_moved_recently = True
-                consumed_event = True
-        elif (event.key == K_c and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-              not (event.mod & KMOD_ALT)):
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                clipboard_copy(self.html_text[low_end:high_end])
-                consumed_event = True
+        elif self._process_cut_event(event):
+            consumed_event = True            
+        elif self._process_copy_event(event):
+            consumed_event = True
         elif self._process_paste_event(event):
             consumed_event = True
         return consumed_event
 
+    def _process_select_all_event(self, event: Event) -> bool:
+        """
+        Process a select all shortcut event. (CTRL+ A)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_a and
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters)
+            self._do_select_all()
+            consumed_event = True
+        return consumed_event
+
+    def _do_select_all(self):
+        self.select_range = [0, len(self.html_text)]
+        self.edit_position = len(self.html_text)
+        self.cursor_has_moved_recently = True
+        
+    def _process_cut_event(self, event: Event) -> bool:
+        """
+        Process a cut shortcut event. (CTRL+ X)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_x and
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+              not (event.mod & KMOD_ALT)):
+            self._do_cut()
+            consumed_event = True
+        return consumed_event
+
+    def _do_cut(self):
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            low_end = min(self.select_range[0], self.select_range[1])
+            high_end = max(self.select_range[0], self.select_range[1])
+            clipboard_copy(self.html_text[low_end:high_end])
+            self.text_box_layout.delete_selected_text()
+            self.edit_position = low_end
+            self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
+            self.text_box_layout.set_cursor_position(self.edit_position)
+            self.select_range = [0, 0]
+            self.redraw_from_text_block()
+            self.cursor_has_moved_recently = True
+    
+    def _process_copy_event(self, event: Event) -> bool:
+        """
+        Process a copy shortcut event. (CTRL+ C)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_c and
+              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+              not (event.mod & KMOD_ALT)):
+            self._do_copy()
+            consumed_event = True
+        return consumed_event
+
+    def _do_copy(self):
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            low_end = min(self.select_range[0], self.select_range[1])
+            high_end = max(self.select_range[0], self.select_range[1])
+            clipboard_copy(self.html_text[low_end:high_end])
+    
     def _process_paste_event(self, event: Event) -> bool:
         """
         Process a paste shortcut event. (CTRL+ V)
