@@ -790,6 +790,7 @@ class TextBoxLayout:
         for chunk in self.selected_chunks:
             chunk.selection_rect = None
             chunk.selected_text = None
+            chunk.is_selected = False
             chunk.selection_start_index = 0
         self.selected_chunks.clear()
         for row in self.selected_rows:
@@ -818,43 +819,59 @@ class TextBoxLayout:
                 self.selected_rows.append(row)
                 rows_to_finalise.add(row)
                 for chunk in row.items:
-                    if chunk is not None and isinstance(chunk, TextLineChunkFTFont):
-                        if chunk == start_chunk and chunk == end_chunk:
-                            start_selection = True
-                            chunk.selected_text = chunk.text[
-                                                  start_letter_index:end_letter_index]  # should probably check for text rect here
-                            chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
-                                                               (end_chunk_x_pos - start_chunk_x_pos, chunk.height))
-                            chunk.selection_colour = self.selection_colour
-                            chunk.selection_start_index = start_letter_index
-                            self.selected_chunks.append(chunk)
-                        elif chunk == start_chunk:
-                            start_selection = True
-                            chunk.selected_text = chunk.text[
-                                                  start_letter_index:]  # should probably check for text rect here
-                            chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
-                                                               (chunk.width - start_chunk_x_pos, chunk.height))
-                            chunk.selection_colour = self.selection_colour
-                            chunk.selection_start_index = start_letter_index
-                            self.selected_chunks.append(chunk)
-                        elif chunk == end_chunk:
-                            if end_letter_index == 0:
-                                pass
-                            else:
-                                end_selection = True
+                    if chunk is not None:
+                        if isinstance(chunk, TextLineChunkFTFont):
+                            if chunk == start_chunk and chunk == end_chunk:
+                                start_selection = True
                                 chunk.selected_text = chunk.text[
-                                                      :end_letter_index]  # should probably check for text rect here
-                                chunk.selection_rect = pygame.Rect((0, 0),
-                                                                   (end_chunk_x_pos, chunk.height))
+                                                      start_letter_index:end_letter_index]  # should probably check for text rect here
+                                chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
+                                                                   (end_chunk_x_pos - start_chunk_x_pos, chunk.height))
                                 chunk.selection_colour = self.selection_colour
+                                chunk.selection_start_index = start_letter_index
+                                chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
+                            elif chunk == start_chunk:
+                                start_selection = True
+                                chunk.selected_text = chunk.text[
+                                                      start_letter_index:]  # should probably check for text rect here
+                                chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
+                                                                   (chunk.width - start_chunk_x_pos, chunk.height))
+                                chunk.selection_colour = self.selection_colour
+                                chunk.selection_start_index = start_letter_index
+                                chunk.is_selected = True
+                                self.selected_chunks.append(chunk)
+                            elif chunk == end_chunk:
+                                if end_letter_index == 0:
+                                    pass
+                                else:
+                                    end_selection = True
+                                    chunk.selected_text = chunk.text[
+                                                          :end_letter_index]  # should probably check for text rect here
+                                    chunk.selection_rect = pygame.Rect((0, 0),
+                                                                       (end_chunk_x_pos, chunk.height))
+                                    chunk.selection_colour = self.selection_colour
+                                    chunk.is_selected = True
+                                    self.selected_chunks.append(chunk)
 
-                        if start_selection and not end_selection and not chunk == start_chunk:
-                            # middle chunks
-                            chunk.selected_text = chunk.text[:]
-                            chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
-                            chunk.selection_colour = self.selection_colour
-                            self.selected_chunks.append(chunk)
+                            if start_selection and not end_selection and not chunk == start_chunk:
+                                # middle text chunks
+                                chunk.selected_text = chunk.text[:]
+                                chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
+                                chunk.selection_colour = self.selection_colour
+                                chunk.is_selected = True
+                                self.selected_chunks.append(chunk)
+                        elif isinstance(chunk, LineBreakLayoutRect) or isinstance(chunk, ImageLayoutRect):
+                            if chunk == start_chunk:
+                                start_selection = True
+                            if start_selection and not end_selection:
+                                if chunk == end_chunk and end_letter_index == 0:
+                                    pass
+                                else:
+                                    chunk.is_selected = True
+                                    self.selected_chunks.append(chunk)
+                            if chunk == end_chunk:
+                                end_selection = True
                     else:
                         print("found None chunk in row: ", row.row_index, " with items: ", row.items)
 
@@ -1076,6 +1093,7 @@ class TextBoxLayout:
         for chunk in self.selected_chunks:
             chunk.selection_rect = None
             chunk.selected_text = None
+            chunk.is_selected = False
             chunk.selection_start_index = 0
         self.selected_chunks.clear()
         for row in self.selected_rows:
@@ -1097,16 +1115,20 @@ class TextBoxLayout:
                 row.clear()
                 self.selected_rows.append(row)
                 for chunk in row.items:
-                    if chunk is not None and isinstance(chunk, TextLineChunkFTFont):
+                    if chunk is not None:
                         if chunk == start_chunk:
                             start_selection = True
                         if start_selection and not end_selection:
                             if chunk == end_chunk and end_letter_index == 0:
                                 pass
                             else:
-                                chunk.selected_text = chunk.text[:]
-                                chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
-                                chunk.selection_colour = self.selection_colour
+                                if isinstance(chunk, TextLineChunkFTFont):
+                                    chunk.selected_text = chunk.text[:]
+                                    chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
+                                    chunk.selection_colour = self.selection_colour
+                                    chunk.is_selected = True
+                                elif isinstance(chunk, ImageLayoutRect) or isinstance(chunk, LineBreakLayoutRect):
+                                    chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
 
                         if chunk == end_chunk:
@@ -1130,7 +1152,7 @@ class TextBoxLayout:
 
         current_row_starting_chunk = self.selected_rows[0].items[0]
         for row in reversed(self.selected_rows):
-            row.items = [chunk for chunk in row.items if chunk.selection_rect is None]
+            row.items = [chunk for chunk in row.items if not chunk.is_selected]
             if row.row_index > max_row_index:
                 max_row_index = row.row_index
 
@@ -1162,6 +1184,7 @@ class TextBoxLayout:
             current_row_starting_chunk.selection_rect = None
             current_row_starting_chunk.selected_text = None
             current_row_starting_chunk.selection_start_index = 0
+            current_row_starting_chunk.is_selected = False
             current_row.add_item(current_row_starting_chunk)
 
         if self.finalised_surface is not None:

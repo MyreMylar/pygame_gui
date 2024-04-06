@@ -614,6 +614,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if (self.scroll_bar is None and not self.dynamic_height and
                 (self.text_box_layout.layout_rect.height > self.text_wrap_rect[3])):
             self.rebuild()
+            return
         else:
             if self.scroll_bar is not None:
                 height_adjustment = int(self.scroll_bar.start_percentage *
@@ -621,9 +622,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 percentage_visible = (self.text_wrap_rect[3] /
                                       self.text_box_layout.layout_rect.height)
                 if percentage_visible >= 1.0:
-                    self.scroll_bar.kill()
-                    self.scroll_bar = None
-                    height_adjustment = 0
+                    self.rebuild()
+                    return
                 else:
                     self.scroll_bar.set_visible_percentage(percentage_visible)
             else:

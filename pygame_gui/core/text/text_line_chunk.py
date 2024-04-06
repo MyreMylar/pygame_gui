@@ -75,6 +75,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.selection_rect = None
         self.selected_text = None
         self.selection_start_index = 0
+        self.is_selected = False  # True when the whole chunk is selected - or part of it.
         self.is_active = False
         self.selection_colour = Color(128, 128, 128, 255)
 
