@@ -11,7 +11,7 @@ Once a layout for the text chunk is finalised the chunk's render function can be
 chunk onto it's final destination.
 
 """
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, List
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -34,7 +34,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  using_default_text_colour: bool,
                  bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
-                 max_dimensions: Optional[Tuple[int, int]] = None,
+                 max_dimensions: Optional[List[int]] = None,
                  effect_id: Optional[str] = None):
         self.text_shadow_data = text_shadow_data
         self.max_dimensions = max_dimensions

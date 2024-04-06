@@ -64,8 +64,6 @@ class TextBoxLayoutRow(pygame.Rect):
         item.left = self.right
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-        if self.width > self.layout.layout_rect.width:
-            assert RuntimeError("Row longer than layout")
 
         if item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = item.row_chunk_height

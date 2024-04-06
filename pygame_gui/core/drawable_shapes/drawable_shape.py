@@ -172,10 +172,10 @@ class DrawableShape:
             self.border_width = self.theming['border_width']
         if 'shape_corner_radius' in self.theming:
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
-            tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
-            bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
-            br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+            tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+            tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+            bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+            br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
             self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
             self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
 
@@ -351,10 +351,10 @@ class DrawableShape:
         if ('shape_corner_radius' in self.theming and
                 self.shape_corner_radius != self.theming['shape_corner_radius']):
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
-            tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
-            bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
-            br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+            tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+            tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+            bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+            br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
             self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
             self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
             shape_params_changed = True
@@ -536,6 +536,14 @@ class DrawableShape:
             text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
                 text_shadow_data = self.theming['text_shadow']
+
+            # gather any override parameters for text_width and text_height now
+            # as we need to feed them into max_dimensions
+            max_dimensions = [self.containing_rect.width, self.containing_rect.height]
+            if 'text_width' in self.theming:
+                max_dimensions[0] = self.theming['text_width']
+            if 'text_height' in self.theming:
+                max_dimensions[1] = self.theming['text_height']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
                                              self.theming['font'],
                                              underlined=False,
@@ -543,7 +551,7 @@ class DrawableShape:
                                              using_default_text_colour=True,
                                              bg_colour=pygame.Color('#00000000'),
                                              text_shadow_data=text_shadow_data,
-                                             max_dimensions=self.containing_rect.size)
+                                             max_dimensions=max_dimensions)
 
             # if our text chunk doesn't fit in the space inside the shadow, border and padding
             # expand available text space to the whole button area - this is helpful for very small

@@ -209,6 +209,9 @@ class TextBoxLayout:
             current_row.add_item(text_layout_rect)
             if isinstance(text_layout_rect, HyperlinkTextChunk):
                 self.link_chunks.append(text_layout_rect)
+            if self.expand_width:
+                if self.layout_rect.width < current_row.width:
+                    self.layout_rect.width = current_row.width
         return current_row
 
     def _handle_float_rect(self, current_row, test_layout_rect, input_queue):

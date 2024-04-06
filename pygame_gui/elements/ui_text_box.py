@@ -190,10 +190,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # of so that none  of it overlaps. Essentially we start with the containing box,
         # subtract the border, then subtract the padding, then if necessary subtract the width
         # of the scroll bar
-        tl_offset = self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
-        tr_offset = self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
-        bl_offset = self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
-        br_offset = self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+        tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+        tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+        bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+        br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
         self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
         self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
         total_corner_width_offsets = self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
