@@ -61,6 +61,9 @@ class TestUIFontDictionary:
 
         # try genuine (for match font) & nonsense
         font_dictionary.find_font(font_size=20, font_name='sans')
+        font_dictionary.find_font(font_size=20, font_name='sans', bold=True, italic=True)
+        font_dictionary.find_font(font_size=20, font_name='sans', bold=True, italic=False)
+        font_dictionary.find_font(font_size=20, font_name='sans', bold=False, italic=True)
 
         font_dictionary.find_font(font_size=20, font_name='nonsense_adhawdw')
 
@@ -90,6 +93,9 @@ class TestUIFontDictionary:
         font_dictionary = UIFontDictionary(BlockingThreadedResourceLoader(), locale='en')
         # test probably universally valid system font
         font_dictionary.preload_font(font_name='sans', font_size=14)
+        font_dictionary.preload_font(font_size=20, font_name='sans', bold=True, italic=True)
+        font_dictionary.preload_font(font_size=20, font_name='sans', bold=True, italic=False)
+        font_dictionary.preload_font(font_size=20, font_name='sans', bold=False, italic=True)
 
         with pytest.warns(UserWarning, match="Trying to pre-load font id"):
             font_dictionary.preload_font(font_name='nonsense_adhawdw', font_size=14)
