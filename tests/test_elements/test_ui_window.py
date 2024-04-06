@@ -86,6 +86,22 @@ class TestUIWindow:
         assert button.rect.topright == (window.get_container().rect.right - 10,
                                         window.get_container().rect.top + 10)
         assert button.rect.topright == (474, 253)
+        
+        confirm_event_fired = False
+        event_object_id = None
+        new_external_dimensions = (0, 0)
+        new_internal_dimensions = (0, 0)
+        for event in pygame.event.get():
+            if (event.type == pygame_gui.UI_WINDOW_RESIZED and
+                    event.ui_element == window):
+                confirm_event_fired = True
+                event_object_id = event.ui_object_id
+                new_external_dimensions = event.external_size
+                new_internal_dimensions = event.internal_size
+        assert confirm_event_fired
+        assert event_object_id == 'window'
+        assert new_external_dimensions == (300, 400)
+        assert new_internal_dimensions == (268, 341)
 
     def test_set_relative_position(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                    _display_surface_return_none):
@@ -435,10 +451,10 @@ class TestUIWindow:
         assert window.image is not None
         assert window.shadow_width == 1
         assert window.border_width == 2
-        assert window.shape_corner_radius == 10
+        assert window.shape_corner_radius == [10, 10, 10, 10]
         assert button.shadow_width == 1
         assert button.border_width == 2
-        assert button.shape_corner_radius == 4
+        assert button.shape_corner_radius == [4, 4, 4, 4]
 
     def test_rebuild_from_changed_theme_data_no_title_bar(self, _init_pygame,
                                                           _display_surface_return_none):
@@ -666,6 +682,22 @@ class TestUIWindow:
         window.edge_hovering[0] = False
 
         assert window.rect.width == 100 and window.rect.height == 100
+
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=window)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=window)
+        
+        assert button_1 in window
+        assert button_2 in window
+        count = 0
+        for button in window:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
 
 
 if __name__ == '__main__':

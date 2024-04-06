@@ -60,7 +60,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.y_origin = text_rect.y
         self.font_y_padding = self._calc_font_padding()
 
-        # we split text stings based on spaces,
+        # we split text strings based on spaces,
         # these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
@@ -569,7 +569,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         :param index: the index we are sticking the new text at.
         """
         self.text = self.text[:index] + input_text + self.text[index:]
-        # we split text stings based on spaces
+        # we split text strings based on spaces
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 

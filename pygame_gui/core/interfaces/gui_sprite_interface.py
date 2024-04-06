@@ -9,9 +9,10 @@ class IGUISpriteInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def add(self, *groups):
-        """add the sprite to groups
+        """
+        add the sprite to groups
 
-        Sprite.add(*groups): return None
+        :param groups: sprite groups to add this sprite to.
 
         Any number of Group instances can be passed as arguments. The
         Sprite will be added to the Groups it is not already a member of.
@@ -20,9 +21,10 @@ class IGUISpriteInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def remove(self, *groups):
-        """remove the sprite from groups
+        """
+        remove the sprite from groups
 
-        Sprite.remove(*groups): return None
+        :param groups: sprite groups to remove this sprite from.
 
         Any number of Group instances can be passed as arguments. The Sprite
         will be removed from the Groups it is currently a member of.

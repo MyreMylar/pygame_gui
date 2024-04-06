@@ -54,7 +54,7 @@
          "misc":
          {
              "shape": "rounded_rectangle",
-             "shape_corner_radius": "10",
+             "shape_corner_radius": "10,5,10,5",
              "border_width": "4",
              "shadow_width": "4",
              "tool_tip_delay": "6.0",

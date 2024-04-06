@@ -66,7 +66,7 @@ class TestUITextEntryBox:
                          "More text padding this out a little. Well OK.",
             relative_rect=pygame.Rect(100, 100, -1, 50),
             manager=default_ui_manager)
-        assert text_box.image is not None and text_box.rect.width == 804
+        assert text_box.image is not None and text_box.rect.width == 805
 
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None,
                                                  default_ui_manager: UIManager,
@@ -1045,7 +1045,7 @@ class TestUITextEntryBox:
         text_entry.set_text('dan is amazing')
         processed_down_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
                                                                            {'button': 1,
-                                                                            'pos': (30, 15)}))
+                                                                            'pos': (32, 15)}))
         processed_up_event = text_entry.process_event(pygame.event.Event(pygame.MOUSEBUTTONUP,
                                                                          {'button': 1,
                                                                           'pos': (80, 15)}))

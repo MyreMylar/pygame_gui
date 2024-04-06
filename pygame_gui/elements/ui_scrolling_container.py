@@ -1,10 +1,10 @@
-from typing import Union, Dict, Tuple, Optional, List
+from typing import Union, Dict, Tuple, Optional, List, Iterator
 
 import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
-from pygame_gui.core.interfaces import IUIManagerInterface, Coordinate
+from pygame_gui.core.interfaces import IUIManagerInterface, Coordinate, IUIElementInterface
 from pygame_gui.core import UIElement, UIContainer
 
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
@@ -469,3 +469,18 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if self._root_container is not None:
             self._root_container.hide()
         super().hide()
+
+    def __iter__(self) -> Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container.
+        :return Iterator: An iterator over the elements within the container.
+        """
+        return iter(self.get_container())
+
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :param item: The element to check for containment.
+        :return bool: Return True if the element is found, False otherwise.
+        """
+        return item in self.get_container()

@@ -160,12 +160,13 @@ class TestUIScrollingContainer:
 
         container.set_scrollable_area_dimensions((500, 600))
 
-        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = -1.0
         container.horiz_scroll_bar.update(0.02)
 
         container.update(0.02)
 
-        assert container.get_container().get_relative_rect().x == -37
+        assert container.get_container().get_relative_rect().x == -15
 
         container.vert_scroll_bar.scroll_wheel_moved = True
         container.vert_scroll_bar.scroll_wheel_amount = -1.0
@@ -173,32 +174,39 @@ class TestUIScrollingContainer:
 
         container.update(0.02)
 
-        assert container.get_container().get_relative_rect().y == -67
+        assert container.get_container().get_relative_rect().y == -12
 
-        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = -5.0
         container.horiz_scroll_bar.update(0.02)
         container.horiz_scroll_bar.start_percentage = 0.6
         container.update(0.02)
-        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = -5.0
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
-        container.horiz_scroll_bar.scroll_wheel_right = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = -5.0
         container.horiz_scroll_bar.update(0.02)
         container.scrolling_right = container._view_container.rect.right - 1
         container.update(0.02)
 
-        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = 5.0
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
-        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = 5.0
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
-        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = 5.0
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
 
         container.scrollable_container.set_dimensions((150, 600))
-        container.horiz_scroll_bar.scroll_wheel_left = True
+        container.horiz_scroll_bar.scroll_wheel_moved = True
+        container.horiz_scroll_bar.scroll_wheel_amount = 5.0
         container.horiz_scroll_bar.update(0.02)
         container.update(0.02)
 
@@ -388,6 +396,22 @@ class TestUIScrollingContainer:
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
+
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=container)
+        
+        assert button_1 in container
+        assert button_2 in container
+        count = 0
+        for button in container:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
 
 
 if __name__ == '__main__':

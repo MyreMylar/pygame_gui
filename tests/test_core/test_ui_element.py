@@ -22,6 +22,12 @@ class TestUIElement:
                   starting_height=0,
                   layer_thickness=1)
 
+        UIElement(relative_rect=(0, 0, 50, 50),
+                  manager=None,
+                  container=None,
+                  starting_height=0,
+                  layer_thickness=1)
+
         set_default_manager(None)
 
         with pytest.raises(ValueError, match="Need to create at least one UIManager to create UIElements"):

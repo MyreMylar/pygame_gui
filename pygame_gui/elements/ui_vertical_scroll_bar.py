@@ -54,6 +54,8 @@ class UIVerticalScrollBar(UIElement):
         self.button_height = 20
         self.arrow_button_height = self.button_height
         self.scroll_position = 0.0
+        self.target_scroll_position = 0.0
+        self.scroll_to_target_speed = 40.0
         self.top_limit = 0.0
         self.starting_grab_y_difference = 0
         self.visible_percentage = max(0.0, min(visible_percentage, 1.0))
@@ -63,6 +65,9 @@ class UIVerticalScrollBar(UIElement):
         self.has_moved_recently = False
         self.scroll_wheel_moved = False
         self.scroll_wheel_amount = 0
+        self.scroll_wheel_speed = 40.0
+
+        self.button_scroll_amount = 300.0
 
         self.background_colour = None
         self.border_colour = None
@@ -74,7 +79,6 @@ class UIVerticalScrollBar(UIElement):
 
         self.drawable_shape = None
         self.shape = 'rectangle'
-        self.shape_corner_radius = None
 
         self.background_rect = None  # type: Union[None, pygame.Rect]
 
@@ -109,7 +113,7 @@ class UIVerticalScrollBar(UIElement):
     @property
     def start_percentage(self):
         """
-        turning start_percentage into a property so we can round it to mitigate floating point errors
+        turning start_percentage into a property, so we can round it to mitigate floating point errors
         """
         return self._start_percentage
 
@@ -206,6 +210,7 @@ class UIVerticalScrollBar(UIElement):
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
         self.scroll_position = min(max(self.scroll_position, self.top_limit),
                                    self.bottom_limit - scroll_bar_height)
+        self.target_scroll_position = self.scroll_position
 
         x_pos = 0
         y_pos = (self.scroll_position + self.arrow_button_height)
@@ -257,7 +262,11 @@ class UIVerticalScrollBar(UIElement):
                 event.type == pygame.MOUSEWHEEL):
             if event.y != 0:
                 self.scroll_wheel_moved = True
+                if (self.scroll_wheel_amount > 0 > event.y) or (self.scroll_wheel_amount < 0 < event.y):
+                    # changed direction, reset target position
+                    self.target_scroll_position = self.scroll_position
                 self.scroll_wheel_amount = event.y
+
                 consumed_event = True
 
         return consumed_event
@@ -270,6 +279,28 @@ class UIVerticalScrollBar(UIElement):
 
         """
         return any(element.hovered for element in self.get_focus_set())
+
+    def _update_scroll_position_from_target(self, time_delta: float) -> bool:
+        moved_this_frame = False
+        distance = self.target_scroll_position - self.scroll_position
+
+        if distance != 0.0 and (self.scroll_position != self.top_limit or self.scroll_position != self.bottom_limit):
+            direction = distance / abs(distance)
+            self.scroll_position = self.scroll_position + (direction * max(abs(distance), 4.0) * self.scroll_to_target_speed * time_delta * self.visible_percentage)
+            new_distance = self.target_scroll_position - self.scroll_position
+            if new_distance != 0.0:
+                new_direction = new_distance / abs(new_distance)
+                if new_direction != direction:  # overshot
+                    self.scroll_position = self.target_scroll_position
+
+            self.scroll_position = min(max(self.scroll_position, self.top_limit),
+                                       self.bottom_limit -
+                                       self.sliding_button.relative_rect.height)
+            x_pos = 0
+            y_pos = (self.scroll_position + self.arrow_button_height)
+            self.sliding_button.set_relative_position((x_pos, y_pos))
+            moved_this_frame = True
+        return moved_this_frame
 
     def update(self, time_delta: float):
         """
@@ -287,35 +318,24 @@ class UIVerticalScrollBar(UIElement):
         super().update(time_delta)
         self.has_moved_recently = False
         if self.alive():
-            moved_this_frame = False
             if self.scroll_wheel_moved and (self.scroll_position > self.top_limit or
                                             self.scroll_position < self.bottom_limit):
                 self.scroll_wheel_moved = False
-                self.scroll_position -= self.scroll_wheel_amount * (750.0 * time_delta)
-                self.scroll_position = min(max(self.scroll_position, self.top_limit),
-                                           self.bottom_limit -
-                                           self.sliding_button.relative_rect.height)
-                x_pos = 0
-                y_pos = (self.scroll_position + self.arrow_button_height)
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
-            elif self.top_button is not None and self.top_button.held:
-                self.scroll_position -= (250.0 * time_delta)
-                self.scroll_position = max(self.scroll_position, self.top_limit)
-                x_pos = 0
-                y_pos = (self.scroll_position + self.arrow_button_height)
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
-            elif self.bottom_button is not None and self.bottom_button.held:
-                self.scroll_position += (250.0 * time_delta)
-                self.scroll_position = min(self.scroll_position,
-                                           self.bottom_limit -
-                                           self.sliding_button.relative_rect.height)
-                x_pos = 0
-                y_pos = (self.scroll_position + self.arrow_button_height)
-                self.sliding_button.set_relative_position((x_pos, y_pos))
+                scroll_wheel_proportional_amount = self.scroll_wheel_amount * self.visible_percentage
+                self.target_scroll_position -= scroll_wheel_proportional_amount * self.scroll_wheel_speed
+                # Don't clamp target on scroll wheel so we get nice acceleration into the buffers
 
-                moved_this_frame = True
+            elif self.top_button is not None and self.top_button.held:
+                self.target_scroll_position -= (self.button_scroll_amount * self.visible_percentage * time_delta)
+                self.target_scroll_position = min(max(self.target_scroll_position, self.top_limit),
+                                                  self.bottom_limit - self.sliding_button.relative_rect.height)
+
+            elif self.bottom_button is not None and self.bottom_button.held:
+                self.target_scroll_position += (self.button_scroll_amount * self.visible_percentage * time_delta)
+                self.target_scroll_position = min(max(self.target_scroll_position, self.top_limit),
+                                                  self.bottom_limit - self.sliding_button.relative_rect.height)
+
+            moved_this_frame = self._update_scroll_position_from_target(time_delta)
 
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
@@ -328,15 +348,15 @@ class UIVerticalScrollBar(UIElement):
                 real_scroll_pos = self.sliding_button.rect.top
                 current_grab_difference = mouse_y - real_scroll_pos
                 adjustment_required = current_grab_difference - self.starting_grab_y_difference
-                self.scroll_position = self.scroll_position + adjustment_required
-
-                self.scroll_position = min(max(self.scroll_position, self.top_limit),
-                                           self.bottom_limit - self.sliding_button.rect.height)
-
+                self.target_scroll_position = self.target_scroll_position + adjustment_required
+                self.target_scroll_position = min(max(self.target_scroll_position, self.top_limit),
+                                                  self.bottom_limit - self.sliding_button.relative_rect.height)
+                self.scroll_position = self.target_scroll_position
                 x_pos = 0
                 y_pos = (self.scroll_position + self.arrow_button_height)
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
+
             elif not self.sliding_button.held:
                 self.grabbed_slider = False
 
@@ -359,6 +379,7 @@ class UIVerticalScrollBar(UIElement):
 
         self.scroll_position = min(max(new_scroll_position, self.top_limit),
                                    self.bottom_limit - self.sliding_button.rect.height)
+        self.target_scroll_position = self.scroll_position
         self.start_percentage = self.scroll_position / self.scrollable_height
 
         x_pos = 0
@@ -377,7 +398,8 @@ class UIVerticalScrollBar(UIElement):
         scroll_bar_height = max(5, int(self.scrollable_height * self.visible_percentage))
 
         x_pos = 0
-        y_pos = min((self.bottom_limit + self.arrow_button_height) - scroll_bar_height, (self.scroll_position + self.arrow_button_height))
+        y_pos = min((self.bottom_limit + self.arrow_button_height) - scroll_bar_height,
+                    int(self.scroll_position + self.arrow_button_height))
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
         self.sliding_button.set_relative_position(self.sliding_rect_position)
@@ -405,6 +427,7 @@ class UIVerticalScrollBar(UIElement):
 
         """
         self.scroll_position = 0.0
+        self.target_scroll_position = 0.0
         self.start_percentage = 0.0
 
     def rebuild_from_changed_theme_data(self):
@@ -429,7 +452,7 @@ class UIVerticalScrollBar(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
@@ -536,6 +559,7 @@ class UIVerticalScrollBar(UIElement):
                                                     self.scrollable_height)),
                                                max_scroll_bar_y))
         self.scroll_position = self.sliding_rect_position.y - base_scroll_bar_y
+        self.target_scroll_position = self.scroll_position
 
         self.sliding_button.set_dimensions((self.background_rect.width, scroll_bar_height))
         self.sliding_button.set_relative_position(self.sliding_rect_position)

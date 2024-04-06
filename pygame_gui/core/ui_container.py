@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple, Dict
+from typing import List, Union, Tuple, Dict, Iterator
 
 import pygame
 
@@ -395,3 +395,18 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
             if target in element.get_anchor_targets():
                 element.update_containing_rect_position()
                 self.on_contained_elements_changed(element)
+                
+    def __iter__(self) -> Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container.
+        :return Iterator: An iterator over the elements within the container.
+        """
+        return iter(self.elements)
+
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :param item: The element to check for containment.
+        :return bool: Return True if the element is found, False otherwise.
+        """
+        return item in self.elements
