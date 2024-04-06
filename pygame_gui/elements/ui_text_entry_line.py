@@ -4,6 +4,7 @@ import warnings
 from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
+from pygame.event import Event, post
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
