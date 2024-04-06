@@ -8,6 +8,7 @@ Subpackages
 
    pygame_gui.core.drawable_shapes
    pygame_gui.core.interfaces
+   pygame_gui.core.text
 
 Submodules
 ----------
@@ -28,6 +29,38 @@ pygame\_gui.core.colour\_parser module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.core.gui\_font\_pygame module
+--------------------------------------
+
+.. automodule:: pygame_gui.core.gui_font_pygame
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.core.layered\_gui\_group module
+--------------------------------------
+
+.. automodule:: pygame_gui.core.layered_gui_group
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.core.object\_id module
+--------------------------------------
+
+.. automodule:: pygame_gui.core.object_id
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.core.resource\_loaders module
+--------------------------------------
+
+.. automodule:: pygame_gui.core.resource_loaders
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.core.surface\_cache module
 --------------------------------------
 
@@ -40,6 +73,14 @@ pygame\_gui.core.ui\_appearance\_theme module
 ---------------------------------------------
 
 .. automodule:: pygame_gui.core.ui_appearance_theme
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.core.ui\_container module
+---------------------------------------------
+
+.. automodule:: pygame_gui.core.ui_container
    :members:
    :no-undoc-members:
    :show-inheritance:
