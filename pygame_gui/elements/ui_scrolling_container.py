@@ -30,7 +30,12 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
     :param anchors: Layout anchors in a dictionary.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param allow_scroll_x: Whether a scrollbar should be added to scroll horizontally (when needed).
+                           Defaults to True.
+    :param allow_scroll_y: Whether a scrollbar should be added to scroll vertically (when needed).
+                           Defaults to True.
     """
+
     def __init__(self,
                  relative_rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
@@ -61,9 +66,6 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                          object_id=object_id,
                          element_id=element_id)
 
-        self.scroll_bar_width = 0
-        self.scroll_bar_height = 0
-
         self.need_to_sort_out_scrollbars = False
 
         self.allow_scroll_x = allow_scroll_x
@@ -73,6 +75,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self.horiz_scroll_bar: Optional[UIHorizontalScrollBar] = None
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
+
+        # The order to define the following is important. Both scroll_bars are part of the root container, so root
+        # container is defined first. Then the scroll bars, and only then the view container as it is anchored to the
+        # scroll bars so that it resizes automatically as the scroll bars are added and "removed".
 
         # this contains the scroll bars and the 'view' container
         self._root_container = UIContainer(relative_rect=relative_rect,
@@ -84,6 +90,36 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                               class_id=None),
                                            anchors=anchors,
                                            visible=self.visible)
+
+        scroll_bar_rect = pygame.Rect(-20, 0, 20, relative_rect.height)
+        self.vert_scroll_bar = UIVerticalScrollBar(relative_rect=scroll_bar_rect,
+                                                   visible_percentage=1.0,
+                                                   manager=self.ui_manager,
+                                                   container=self._root_container,
+                                                   parent_element=self,
+                                                   anchors={'left': 'right',
+                                                            'right': 'right',
+                                                            'top': 'top',
+                                                            'bottom': 'bottom'})
+
+        self.vert_scroll_bar.set_dimensions((0, relative_rect.height))  # TODO: Remove these when anchoring is fixed
+        self.vert_scroll_bar.set_relative_position((0, 0))  # Without this, they look off-centered
+        self.join_focus_sets(self.vert_scroll_bar)
+
+        scroll_bar_rect = pygame.Rect(0, -20, relative_rect.width, 20)
+        self.horiz_scroll_bar = UIHorizontalScrollBar(relative_rect=scroll_bar_rect,
+                                                      visible_percentage=1.0,
+                                                      manager=self.ui_manager,
+                                                      container=self._root_container,
+                                                      parent_element=self,
+                                                      anchors={'left': 'left',
+                                                               'right': 'right',
+                                                               'top': 'bottom',
+                                                               'bottom': 'bottom'})
+
+        self.horiz_scroll_bar.set_dimensions((relative_rect.width, 0))
+        self.horiz_scroll_bar.set_relative_position((0, 0))
+        self.join_focus_sets(self.horiz_scroll_bar)
 
         # This container is the view on to the scrollable container it's size is determined by
         # the size of the root container and whether there are any scroll bars or not.
@@ -98,12 +134,26 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            anchors={'left': 'left',
                                                     'right': 'right',
                                                     'top': 'top',
-                                                    'bottom': 'bottom'})
+                                                    'bottom': 'bottom',
+                                                    'right_target': self.vert_scroll_bar,
+                                                    'bottom_target': self.horiz_scroll_bar})
 
         # This container is what we actually put other stuff in.
         # It is aligned to the top left corner but that isn't that important for a container that
         # can be much larger than it's view
         scrollable_rect = pygame.Rect(0, 0, relative_rect.width, relative_rect.height)
+        scrollable_anchors = {'left': 'left',
+                              'right': 'left',
+                              'top': 'top',
+                              'bottom': 'top'}
+        if not self.allow_scroll_x:
+            # horizontal scrolling and resizing is not allowed, so container can be anchored to the vertical scrollbar
+            scrollable_anchors['right'] = 'right'
+            scrollable_anchors['right_target'] = self.vert_scroll_bar
+        if not self.allow_scroll_y:
+            # vertical scrolling and resizing is not allowed, so container can be anchored to the horizontal scrollbar
+            scrollable_anchors['bottom'] = 'bottom'
+            scrollable_anchors['bottom_target'] = self.horiz_scroll_bar
         self.scrollable_container = UIContainer(relative_rect=scrollable_rect,
                                                 manager=manager,
                                                 starting_height=0,
@@ -112,10 +162,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                 object_id=ObjectID(
                                                     object_id='#scrollable_container',
                                                     class_id=None),
-                                                anchors={'left': 'left',
-                                                         'right': 'left',
-                                                         'top': 'top',
-                                                         'bottom': 'top'})
+                                                anchors=scrollable_anchors.copy())
+
+        self.scroll_bar_width = 0
+        self.scroll_bar_height = 0
 
         self.scrolling_height = 0
         self.scrolling_width = 0
@@ -188,6 +238,17 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         :param dimensions: The new dimensions.
         """
+        if not self.allow_scroll_x:
+            # There is no horizontal scrollbar so the width is fixed to viewing container's width otherwise some part of
+            # the container may not be visible
+            width = self._root_container.rect.width - self.scroll_bar_width
+            dimensions = width, dimensions[1]
+        if not self.allow_scroll_y:
+            # There is no vertical scrollbar so the height is fixed to viewing container's height otherwise some part of
+            # the container may not be visible
+            height = self._root_container.rect.height - self.scroll_bar_height
+            dimensions = dimensions[0], height
+
         self.scrollable_container.set_dimensions(dimensions)
 
         self._calculate_scrolling_dimensions()
@@ -202,6 +263,13 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         """
         super().update(time_delta)
+
+        # Both scroll bars are the sole cause for each other's existence, terminate them both
+        self._calculate_scrolling_dimensions()
+        if (self.scrolling_width == self._view_container.rect.width + self.scroll_bar_width
+                and self.scrolling_height == self._view_container.rect.height + self.scroll_bar_height):
+            self._remove_vert_scrollbar()
+            self._remove_horiz_scrollbar()
 
         if (self.vert_scroll_bar is not None and
                 self.vert_scroll_bar.check_has_moved_recently()):
@@ -281,154 +349,94 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         they were in before resizing
         """
 
-        # First call to see if scrolling container size on its own necessitates scroll bars
-        self._check_scroll_bars_and_adjust()
-        # second call to see if the view space contraction produced by any scroll bars created
-        # in the first call, require an additional scroll bar
-        need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars_and_adjust()
+        need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars()
 
         if need_vert_scroll_bar:
-            vis_percent = self._view_container.rect.height / self.scrolling_height
-            if self.vert_scroll_bar is None:
-                self.scroll_bar_width = 20
-                scroll_bar_rect = pygame.Rect(-self.scroll_bar_width,
-                                              0,
-                                              self.scroll_bar_width,
-                                              self._view_container.rect.height)
-                self.vert_scroll_bar = UIVerticalScrollBar(relative_rect=scroll_bar_rect,
-                                                           visible_percentage=vis_percent,
-                                                           manager=self.ui_manager,
-                                                           container=self._root_container,
-                                                           parent_element=self,
-                                                           anchors={'left': 'right',
-                                                                    'right': 'right',
-                                                                    'top': 'top',
-                                                                    'bottom': 'bottom'})
-                self.join_focus_sets(self.vert_scroll_bar)
-                start_percent = ((self._view_container.rect.top -
-                                  self.scrollable_container.rect.top)
-                                 / self.scrolling_height)
-                self.vert_scroll_bar.set_scroll_from_start_percentage(start_percent)
-            else:
-                start_percent = ((self._view_container.rect.top -
-                                  self.scrollable_container.rect.top)
-                                 / self.scrolling_height)
-                self.vert_scroll_bar.start_percentage = start_percent
-                self.vert_scroll_bar.set_visible_percentage(vis_percent)
-                self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
-                                                     self._view_container.rect.height))
+            vis_percent = (self._view_container.rect.height - self.scroll_bar_height) / self.scrolling_height
+            start_percent = ((self._view_container.rect.top -
+                              self.scrollable_container.rect.top)
+                             / self.scrolling_height)
+            self.vert_scroll_bar.set_scroll_from_start_percentage(start_percent)
+            self.vert_scroll_bar.set_visible_percentage(vis_percent)
+            self.vert_scroll_bar.set_relative_position((-self.scroll_bar_width, 0))
+
+            # This is important as horiz scroll bar's dimensions are evaluated after. If horizontal scrollbar is not
+            # needed, then scroll bar height is 0.
+            height = self._view_container.rect.height - self.scroll_bar_height
+            self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
+                                                 height))
         else:
             self._remove_vert_scrollbar()
 
         if need_horiz_scroll_bar:
-            vis_percent = self._view_container.rect.width / self.scrolling_width
-            if self.horiz_scroll_bar is None:
-                self.scroll_bar_height = 20
-                scroll_bar_rect = pygame.Rect(0,
-                                              -self.scroll_bar_height,
-                                              self._view_container.rect.width,
-                                              self.scroll_bar_height)
-                self.horiz_scroll_bar = UIHorizontalScrollBar(relative_rect=scroll_bar_rect,
-                                                              visible_percentage=vis_percent,
-                                                              manager=self.ui_manager,
-                                                              container=self._root_container,
-                                                              parent_element=self,
-                                                              anchors={'left': 'left',
-                                                                       'right': 'right',
-                                                                       'top': 'bottom',
-                                                                       'bottom': 'bottom'})
-                self.join_focus_sets(self.horiz_scroll_bar)
+            vis_percent = (self._view_container.rect.width - self.scroll_bar_width) / self.scrolling_width
 
-                start_percent = ((self._view_container.rect.left -
-                                  self.scrollable_container.rect.left)
-                                 / self.scrolling_width)
-                self.horiz_scroll_bar.set_scroll_from_start_percentage(start_percent)
-
-            else:
-                start_percent = ((self._view_container.rect.left -
-                                  self.scrollable_container.rect.left)
-                                 / self.scrolling_width)
-                self.horiz_scroll_bar.start_percentage = start_percent
-                self.horiz_scroll_bar.set_visible_percentage(vis_percent)
-                self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
-                                                      self.scroll_bar_height))
+            start_percent = ((self._view_container.rect.left -
+                              self.scrollable_container.rect.left)
+                             / self.scrolling_width)
+            self.horiz_scroll_bar.set_scroll_from_start_percentage(start_percent)
+            self.horiz_scroll_bar.set_visible_percentage(vis_percent)
+            self.horiz_scroll_bar.set_relative_position((0, -self.scroll_bar_height))
+            self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
+                                                  self.scroll_bar_height))
         else:
             self._remove_horiz_scrollbar()
 
-    def _check_scroll_bars_and_adjust(self) -> Tuple[bool, bool]:
+    def _check_scroll_bars(self) -> Tuple[bool, bool]:
         """
-        Check if we need a horizontal or vertical scrollbar and adjust the containers if we do.
-
-        Adjusting the containers for a scrollbar, may mean we now need a scrollbar in the other
-        dimension, so we need to call this twice.
+        Check if we need a horizontal or vertical scrollbar.
         """
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
         need_horiz_scroll_bar = False
         need_vert_scroll_bar = False
+
         if (self.scrolling_height > self._view_container.rect.height or
                 self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
             need_vert_scroll_bar = True
             self.scroll_bar_width = 20
-        if (self.scrolling_width > self._view_container.rect.width or
+
+        # Need to subtract scrollbar width here to account for when the above statement evaluated to True
+        if (self.scrolling_width > self._view_container.rect.width - self.scroll_bar_width or
                 self.scrollable_container.relative_rect.left != 0) and self.allow_scroll_x:
             need_horiz_scroll_bar = True
             self.scroll_bar_height = 20
-        if need_vert_scroll_bar or need_horiz_scroll_bar:
-            new_width = (self._root_container.rect.width - self.scroll_bar_width)
-            new_height = (self._root_container.rect.height - self.scroll_bar_height)
-            new_dimensions = (new_width, new_height)
-            self._view_container.set_dimensions(new_dimensions)
 
-            if not self.allow_scroll_x:
-                # horizontal scrolling is banned, lets shrink the scrollable width
-                # to account for any scroll bar as well
-                self.scrollable_container.set_dimensions((new_width,
-                                                          self.scrollable_container.rect.height))
-            if not self.allow_scroll_y:
-                self.scrollable_container.set_dimensions((self.scrollable_container.rect.width,
-                                                          new_height))
+            # Needs a second check for the case where we didn't need the vertical scroll bar until after creating a
+            # horizontal scroll bar
+            if (self.scrolling_height > self._view_container.rect.height - self.scroll_bar_height or
+                    self.scrollable_container.relative_rect.top != 0) and self.allow_scroll_y:
+                need_vert_scroll_bar = True
+                self.scroll_bar_width = 20
 
         self._calculate_scrolling_dimensions()
         return need_horiz_scroll_bar, need_vert_scroll_bar
 
     def _remove_vert_scrollbar(self):
         """
-        Get rid of the vertical scroll bar and resize the containers appropriately.
-
+        Doesn't delete the vert scroll bar, instead just resizes it to (0, height of the view container).
         """
         if self.vert_scroll_bar is not None:
-            self.vert_scroll_bar.kill()
-            self.vert_scroll_bar = None
             self.scroll_bar_width = 0
-            new_width = (self._root_container.rect.width - self.scroll_bar_width)
-
-            old_height = self._view_container.rect.height
-            new_dimensions = (new_width, old_height)
-            self._view_container.set_dimensions(new_dimensions)
+            self.vert_scroll_bar.set_dimensions((0, self._view_container.rect.height))
+            self.vert_scroll_bar.set_relative_position((0, 0))
             self._calculate_scrolling_dimensions()
-            if self.horiz_scroll_bar is not None:
-                self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
-                                                      self.scroll_bar_height))
+
+            self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
+                                                  self.scroll_bar_height))
 
     def _remove_horiz_scrollbar(self):
         """
-        Get rid of the horiz scroll bar and resize the containers appropriately.
-
+        Doesn't delete the horiz scroll bar, instead just resizes it to (width of the view container, 0).
         """
         if self.horiz_scroll_bar is not None:
-            self.horiz_scroll_bar.kill()
-            self.horiz_scroll_bar = None
             self.scroll_bar_height = 0
-            new_height = (self._root_container.rect.height - self.scroll_bar_height)
-
-            old_width = self._view_container.rect.width
-            new_dimensions = (old_width, new_height)
-            self._view_container.set_dimensions(new_dimensions)
+            self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width, 0))
+            self.horiz_scroll_bar.set_relative_position((0, 0))
             self._calculate_scrolling_dimensions()
-            if self.vert_scroll_bar is not None:
-                self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
-                                                     self._view_container.rect.height))
+
+            self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
+                                                 self._view_container.rect.height))
 
     def disable(self):
         """
