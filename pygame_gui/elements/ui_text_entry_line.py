@@ -4,11 +4,8 @@ import warnings
 from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
-from pygame import Rect, MOUSEBUTTONDOWN, MOUSEBUTTONUP, BUTTON_LEFT, KEYDOWN, TEXTINPUT
-from pygame import KMOD_SHIFT, KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c, K_v
-from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN, K_HOME, K_END, K_BACKSPACE, K_DELETE, K_RETURN
-from pygame import key
-from pygame.event import Event, post
+from pygame import KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c
+from pygame.event import Event
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -728,7 +725,7 @@ class UITextEntryLine(UIElement):
         if self._process_select_all_event(event):
             consumed_event = True
         elif self._process_cut_event(event):
-            consumed_event = True            
+            consumed_event = True
         elif self._process_copy_event(event):
             consumed_event = True
         elif self._process_paste_event(event):
@@ -747,16 +744,16 @@ class UITextEntryLine(UIElement):
         consumed_event = False
         if (event.key == K_a and
                 (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters)
+                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters
             self._do_select_all()
             consumed_event = True
         return consumed_event
 
     def _do_select_all(self):
-        self.select_range = [0, len(self.html_text)]
-        self.edit_position = len(self.html_text)
+        self.select_range = [0, len(self.text)]
+        self.edit_position = len(self.text)
         self.cursor_has_moved_recently = True
-        
+
     def _process_cut_event(self, event: Event) -> bool:
         """
         Process a cut shortcut event. (CTRL+ X)
@@ -768,9 +765,9 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if (event.key == K_x and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-              not self.is_text_hidden and # This is not in UITextEntryBox
-              not (event.mod & KMOD_ALT)):
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not self.is_text_hidden and  # This is not in UITextEntryBox
+                not (event.mod & KMOD_ALT)):
             self._do_cut()
             consumed_event = True
         return consumed_event
@@ -779,15 +776,18 @@ class UITextEntryLine(UIElement):
         if abs(self.select_range[0] - self.select_range[1]) > 0:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.html_text[low_end:high_end])
-            self.text_box_layout.delete_selected_text()
+            clipboard_copy(self.text[low_end:high_end])
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.delete_selected_text()
+                self.drawable_shape.apply_active_text_changes()
             self.edit_position = low_end
-            self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
-            self.text_box_layout.set_cursor_position(self.edit_position)
+            self.text = self.text[:low_end] + self.text[high_end:]
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.drawable_shape.apply_active_text_changes()
             self.select_range = [0, 0]
-            self.redraw_from_text_block()
             self.cursor_has_moved_recently = True
-    
+
     def _process_copy_event(self, event: Event) -> bool:
         """
         Process a copy shortcut event. (CTRL+ C)
@@ -799,9 +799,9 @@ class UITextEntryLine(UIElement):
         """
         consumed_event = False
         if (event.key == K_c and
-              (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-              not self.is_text_hidden and #This line is not in UITextEntryBoox
-              not (event.mod & KMOD_ALT)):
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not self.is_text_hidden and  # This line is not in UITextEntryBox
+                not (event.mod & KMOD_ALT)):
             self._do_copy()
             consumed_event = True
         return consumed_event
@@ -810,7 +810,7 @@ class UITextEntryLine(UIElement):
         if abs(self.select_range[0] - self.select_range[1]) > 0:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.html_text[low_end:high_end])
+            clipboard_copy(self.text[low_end:high_end])
 
     def _process_paste_event(self, event: pygame.event.Event) -> bool:
         """
