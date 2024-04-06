@@ -3,7 +3,6 @@ import warnings
 
 from typing import Dict, Union, Tuple, List, Optional
 
-
 import pygame
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -18,6 +17,7 @@ class DefaultFontData:
     Data class to wrap up all the data for a default font. Used now that we have multiple
     default fonts for different locales.
     """
+
     def __init__(self, size: int, name: str, style: str,
                  regular_file_name: str,
                  bold_file_name: str,
@@ -117,12 +117,12 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                              'NotoSansSC-Regular.otf',
                                              'NotoSansSC-Bold.otf')
         self._korean_font = DefaultFontData(14,
-                                             'noto_sans_kr',
-                                             'regular',
-                                             'NotoSansKR-Regular.ttf',
-                                             'NotoSansKR-Bold.ttf',
-                                             'NotoSansKR-Regular.ttf',
-                                             'NotoSansKR-Bold.ttf')
+                                            'noto_sans_kr',
+                                            'regular',
+                                            'NotoSansKR-Regular.ttf',
+                                            'NotoSansKR-Bold.ttf',
+                                            'NotoSansKR-Regular.ttf',
+                                            'NotoSansKR-Bold.ttf')
         self._hebrew_font = DefaultFontData(14,
                                             'noto_sans_he',
                                             'regular',
@@ -143,11 +143,23 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                             direction=pygame.DIRECTION_RTL
                                             )
 
+        self._georgian_font = DefaultFontData(14,
+                                              'noto_sans_ge',
+                                              'regular',
+                                              'NotoSansGeorgian-Regular.ttf',
+                                              'NotoSansGeorgian-Bold.ttf',
+                                              'NotoSansGeorgian-Regular.ttf',
+                                              'NotoSansGeorgian-Bold.ttf',
+                                              script='Geor',
+                                              direction=pygame.DIRECTION_LTR
+                                              )
+
         self.default_font_dictionary = {'ar': self._arabic_font,
                                         'de': self._latin_font,
                                         'en': self._latin_font,
                                         'es': self._latin_font,
                                         'fr': self._latin_font,
+                                        'ge': self._georgian_font,
                                         'he': self._hebrew_font,
                                         'id': self._latin_font,
                                         'it': self._latin_font,
@@ -159,7 +171,6 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                         'uk': self._latin_font,
                                         'vi': self._latin_font,
                                         'zh': self._chinese_font,
-
 
                                         }
 
@@ -296,8 +307,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                               " that is not already loaded.\n"
                               "Preload this font with {'name': "
                               "'" + font_name + "',"
-                              " 'point_size': " + str(font_size) + ","
-                              " 'style': '" + style_string + "'," +
+                                                " 'point_size': " + str(font_size) + ","
+                                                                                     " 'style': '" + style_string + "'," +
                               " 'antialiased': '" + font_aliasing +
                               "'}")
             warnings.warn(warning_string, UserWarning)
@@ -371,7 +382,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
         """
         font_id = self.create_font_id(font_size, font_name, bold, italic, antialiased)
-        if font_id in self.loaded_fonts:    # font already loaded
+        if font_id in self.loaded_fonts:  # font already loaded
             warnings.warn('Trying to pre-load font id: ' +
                           font_id +
                           ' that is already loaded', UserWarning)

@@ -62,12 +62,12 @@ class UIElement(GUISprite, IUIElementInterface):
         super().__init__(self.ui_manager.get_sprite_group())
 
         self.minimum_dimensions = (-1, -1)
-        relative_rect.size = self._get_clamped_to_minimum_dimensions(relative_rect.size)
 
         if isinstance(relative_rect, pygame.Rect):
             self.relative_rect = relative_rect.copy()
         else:
             self.relative_rect = pygame.Rect(relative_rect)
+        self.relative_rect.size = self._get_clamped_to_minimum_dimensions(self.relative_rect.size)
         self.rect = self.relative_rect.copy()
 
         self.dynamic_width = True if self.relative_rect.width == -1 else False
@@ -118,7 +118,7 @@ class UIElement(GUISprite, IUIElementInterface):
         # Themed parameters
         self.shadow_width = None  # type: Union[None, int]
         self.border_width = None  # type: Union[None, int]
-        self.shape_corner_radius = None  # type: Union[None, int]
+        self.shape_corner_radius: Optional[List[int]] = None
 
         self.tool_tip_text = None
         self.tool_tip_text_kwargs = None
@@ -1269,9 +1269,28 @@ class UIElement(GUISprite, IUIElementInterface):
         if self._check_misc_theme_data_changed('shadow_width', defaults['shadow_width'], int):
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed('shape_corner_radius',
-                                               defaults['shape_corner_radius'], int):
-            has_any_changed = True
+        # corner radius
+        temp_corner_radius = [0, 0, 0, 0]
+        try:
+            str_corner_radius = self.ui_theme.get_misc_data('shape_corner_radius', self.combined_element_ids)
+            if isinstance(str_corner_radius, str):
+                corner_radii_list = str_corner_radius.split(',')
+                if len(corner_radii_list) == 4:
+                    temp_corner_radius[0] = int(corner_radii_list[0])
+                    temp_corner_radius[1] = int(corner_radii_list[1])
+                    temp_corner_radius[2] = int(corner_radii_list[2])
+                    temp_corner_radius[3] = int(corner_radii_list[3])
+                if len(corner_radii_list) == 1:
+                    temp_corner_radius[0] = int(corner_radii_list[0])
+                    temp_corner_radius[1] = int(corner_radii_list[0])
+                    temp_corner_radius[2] = int(corner_radii_list[0])
+                    temp_corner_radius[3] = int(corner_radii_list[0])
+        except (LookupError, ValueError):
+            self.shape_corner_radius = defaults['shape_corner_radius']
+        finally:
+            if temp_corner_radius != self.shape_corner_radius:
+                self.shape_corner_radius = temp_corner_radius
+                has_any_changed = True
 
         return has_any_changed
 

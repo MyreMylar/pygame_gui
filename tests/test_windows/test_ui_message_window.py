@@ -135,7 +135,7 @@ class TestUIMessageWindow:
                                                       "message box functionality.",
                                          manager=default_ui_manager)
 
-        message_window.shape_corner_radius = 15
+        message_window.shape_corner_radius = [15, 15, 15, 15]
         message_window.shape = 'rounded_rectangle'
         message_window.rebuild()
 

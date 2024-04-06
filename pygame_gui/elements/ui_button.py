@@ -214,8 +214,8 @@ class UIButton(UIElement):
         button for a purpose(e.g. dragging a window around by it's menu bar) the hover radius can
         be made to grow so we don't keep losing touch with whatever we are moving.
 
-        :param hover_x: horizontal pixel co-ordinate to test.
-        :param hover_y: vertical pixel co-ordinate to test
+        :param hover_x: horizontal pixel coordinate to test.
+        :param hover_y: vertical pixel coordinate to test
 
         :return: Returns True if we are hovering.
 
@@ -620,7 +620,7 @@ class UIButton(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',

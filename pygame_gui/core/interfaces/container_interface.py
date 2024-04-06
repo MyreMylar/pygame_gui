@@ -1,3 +1,4 @@
+import typing
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union
 
@@ -186,6 +187,19 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         :param element: the element to check.
         """
 
+    @abstractmethod
+    def __iter__(self) -> typing.Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container-like interface.
+        This method allows iterating over the children elements within the container.
+        """
+        
+    @abstractmethod
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :return bool: Return True if the element is found, False otherwise.
+        """
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
@@ -216,4 +230,18 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         Hides the container, which means the container will not get drawn and will not
         process events. Should also hide all the children elements.
         If the container was hidden before - ignore.
+        """
+        
+    @abstractmethod
+    def __iter__(self) -> typing.Iterator[IUIElementInterface]:
+        """
+        Iterates over the elements within the container-like interface. 
+        This method allows iterating over the children elements within the container.
+        """
+        
+    @abstractmethod
+    def __contains__(self, item: IUIElementInterface) -> bool:
+        """
+        Checks if the given element is contained within the container.
+        :return bool: Return True if the element is found, False otherwise.
         """

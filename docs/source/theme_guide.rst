@@ -105,19 +105,19 @@ within the colours block you can start to set individual colours by their IDs. I
       - :blue:`blue`
       - A List of valid colour names can be found `here <https://w3schools.sinsixx.com/css/css_colornames.asp.htm>`_
     * - Hex
-      - 6 Hexidecimal Digits
+      - 6 Hexadecimal Digits
       - :example-hex:`#A2F3BB`
       - Native Pygame Color
     * - Hex (With Alpha)
-      - 8 Hexidecimal Digits
+      - 8 Hexadecimal Digits
       - :example-hex-with-alpha:`#C2558F9F`
       - Native Pygame Color
     * - Shorthand Hex
-      - 3 Hexidecimal Digits
+      - 3 Hexadecimal Digits
       - :example-shorthand-hex:`#FAB`
       - Expands doubly (e.g. would be #FFAABB)
     * - Shorthand Hex (With Alpha)
-      - 4 Hexidecimal Digits
+      - 4 Hexadecimal Digits
       - :example-shorthand-hex-with-alpha:`#AF2F`
       - Expands doubly (e.g. would be #AAFF22FF)
     * - RGB
@@ -278,7 +278,7 @@ then you can create on and pass it into your element when you create it. See the
    from pygame_gui.core import ObjectID
    from pygame_gui.elements import UIButton
 
-   ...  # other code ommitted here -
+   ...  # other code omitted here -
         # see quick start guide for how to get up and running with a single button
 
    hello_button = UIButton(relative_rect=pygame.Rect((350, 280), (-1, -1)),
@@ -452,7 +452,7 @@ Multiple Theme Files
 --------------------
 
 Because of the way that pygame_gui loads theme files you can load multiple theme
-files with different stuff defined in each one into a single UI Manger:
+files with different stuff defined in each one into a single UI Manager:
 
 .. code-block:: python
    :linenos:

@@ -203,10 +203,14 @@ class UIFileDialog(UIWindow):
         self.file_path_text_line.select_range = [highlight_start, highlight_end]
         self.file_path_text_line.cursor_has_moved_recently = True
         self.file_path_text_line.edit_position = highlight_end
-
+        left_max_corner_radius = max(self.file_path_text_line.shape_corner_radius[0],
+                                     self.file_path_text_line.shape_corner_radius[2])
+        right_max_corner_radius = max(self.file_path_text_line.shape_corner_radius[1],
+                                      self.file_path_text_line.shape_corner_radius[3])
         text_clip_width = (self.file_path_text_line.rect.width -
                            (self.file_path_text_line.padding[0] * 2) -
-                           (self.file_path_text_line.shape_corner_radius * 2) -
+                           left_max_corner_radius -
+                           right_max_corner_radius -
                            (self.file_path_text_line.border_width * 2) -
                            (self.file_path_text_line.shadow_width * 2))
 
