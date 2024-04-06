@@ -41,7 +41,7 @@ class UIManager(IUIManagerInterface):
                  resource_loader: Optional[IResourceLoader] = None,
                  starting_language: str = 'en',
                  translation_directory_paths: Optional[List[str]] = None):
-
+        super().__init__()
         if get_default_manager() is None:
             set_default_manager(self)
         # Translation stuff
@@ -472,7 +472,7 @@ class UIManager(IUIManagerInterface):
     def get_focus_set(self):
         return self.focused_set
 
-    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
+    def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
         """
         Set a set of element as the focused set.
 

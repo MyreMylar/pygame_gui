@@ -20,6 +20,9 @@ class IUIManagerInterface(metaclass=ABCMeta):
     actual manager class later on and have it make use of the classes that use the interface.
     """
 
+    def __init__(self):
+        self.window_resolution = None
+
     @abstractmethod
     def get_double_click_time(self) -> float:
         """
@@ -173,7 +176,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
+    def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
         """
         Set a set of element as the focused set.
 

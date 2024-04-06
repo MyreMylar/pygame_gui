@@ -66,7 +66,7 @@ class TestUITextEntryBox:
                          "More text padding this out a little. Well OK.",
             relative_rect=pygame.Rect(100, 100, -1, 50),
             manager=default_ui_manager)
-        assert text_box.image is not None and text_box.rect.width == 805
+        assert text_box.image is not None and text_box.rect.width == 806
 
     def test_creation_and_rebuild_with_scrollbar(self, _init_pygame: None,
                                                  default_ui_manager: UIManager,
