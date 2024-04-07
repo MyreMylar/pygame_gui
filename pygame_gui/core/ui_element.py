@@ -54,6 +54,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._layer = 0
         self.ui_manager = manager
         self.ui_container: Optional[IContainerLikeInterface] = None
+        self.parent_element = parent_element
         if self.ui_manager is None:
             self.ui_manager = get_default_manager()
         if self.ui_manager is None:
@@ -473,6 +474,23 @@ class UIElement(GUISprite, IUIElementInterface):
             self.object_ids)
 
         self.most_specific_combined_id = self.combined_element_ids[0]
+
+    def change_object_id(self, new_object_id: Union[ObjectID, str, None]):
+        """
+        Allows for easy switching of an element's ObjectID used for theming and events.
+
+        Will rebuild the element after switching the ID
+
+        :param new_object_id: The new ID to use for this element.
+        :return:
+        """
+        self._create_valid_ids(container=self.ui_container,
+                               parent_element=self.parent_element,
+                               object_id=new_object_id,
+                               element_id=self.element_ids[-1],
+                               element_base_id=self.element_base_ids[-1])
+
+        self.rebuild_from_changed_theme_data()
 
     @staticmethod
     def _calc_top_offset(container: Optional[IContainerLikeInterface],

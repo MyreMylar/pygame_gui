@@ -5,7 +5,7 @@ Submodules
 ----------
 
 pygame\_gui.elements.ui\_2d\_slider module
---------------------------------------
+------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_2d_slider
    :members:
@@ -13,9 +13,9 @@ pygame\_gui.elements.ui\_2d\_slider module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_auto\_resizing\_container module
---------------------------------------
+---------------------------------------------------------
 
-.. automodule:: pygame_gui.elements.auto_resizing_container
+.. automodule:: pygame_gui.elements.ui_auto_resizing_container
    :members:
    :no-undoc-members:
    :show-inheritance:
@@ -37,7 +37,7 @@ pygame\_gui.elements.ui\_drop\_down\_menu module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_horizontal\_scroll\_bar module
---------------------------------------------------
+-------------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_horizontal_scroll_bar
    :members:
@@ -93,7 +93,7 @@ pygame\_gui.elements.ui\_screen\_space\_health\_bar module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_scrolling\_container module
------------------------------------------------
+----------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_scrolling_container
    :members:
@@ -109,7 +109,7 @@ pygame\_gui.elements.ui\_selection\_list module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_status\_bar module
-----------------------------------------------------------
+-------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_status_bar
    :members:
@@ -125,7 +125,7 @@ pygame\_gui.elements.ui\_text\_box module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_text\_entry\_box module
--------------------------------------------------
+------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_text_entry_box
    :members:
