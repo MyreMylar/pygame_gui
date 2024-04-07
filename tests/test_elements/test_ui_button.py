@@ -10,7 +10,7 @@ from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_button import UIButton
-from pygame_gui.core.ui_container import UIContainer
+from pygame_gui.core.ui_container import UIContainer, ObjectID
 from pygame_gui import PackageResource
 
 
@@ -777,6 +777,20 @@ class TestUIButton:
                           manager=manager)
 
         assert button.image is not None
+
+    def test_switching_object_ids(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_button_non_default.json"))
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          manager=manager,
+                          object_id=ObjectID(object_id=None, class_id="@rounded_button"))
+        assert button.image is not None
+        assert button.drawable_shape.shape_corner_radius == [5, 5, 5, 5]
+
+        button.change_object_id(ObjectID(object_id=None, class_id="@rectangular_button"))
+
+        assert button.image is not None
+        assert button.drawable_shape.shape_corner_radius == [0, 0, 0, 0]
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
