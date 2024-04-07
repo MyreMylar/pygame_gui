@@ -289,7 +289,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                       self.ui_manager,
                                                       self.ui_container,
                                                       parent_element=self,
-                                                      visible=self.visible)
+                                                      visible=self.visible,
+                                                      anchors=self.anchors)
                 self.join_focus_sets(self.scroll_bar)
             else:
                 # we don't need a scroll bar, make sure our text box is aligned to the top
