@@ -12,6 +12,9 @@ format. To load one, simply pass the path to the theme file into the UIManager w
 
     manager = pygame_gui.UIManager((800, 600), 'theme.json')
 
+Paths can be absolute or relative. Relative paths are relative to the current working directory
+of your python application at runtime - not to the file location where you create the manager.
+
 You can also theme your elements 'on the fly', while your pygame application is running. Just edit your theme file and
 save it, and you should see the UI update to reflect your changes. This is particularly helpful when trying to fiddle
 with colours, or visualise what the theming parameters do. You can also turn off live theming if you want to save a few
