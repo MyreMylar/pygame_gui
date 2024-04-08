@@ -84,13 +84,14 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                               class_id=None),
                                            anchors=anchors,
                                            visible=self.visible)
+        self.join_focus_sets(self._root_container)
 
         # This container is the view on to the scrollable container it's size is determined by
         # the size of the root container and whether there are any scroll bars or not.
         view_rect = pygame.Rect(0, 0, relative_rect.width, relative_rect.height)
         self._view_container = UIContainer(relative_rect=view_rect,
                                            manager=manager,
-                                           starting_height=0,
+                                           starting_height=1,
                                            container=self._root_container,
                                            parent_element=parent_element,
                                            object_id=ObjectID(object_id='#view_container',
@@ -99,6 +100,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                     'right': 'right',
                                                     'top': 'top',
                                                     'bottom': 'bottom'})
+        self.join_focus_sets(self._view_container)
 
         # This container is what we actually put other stuff in.
         # It is aligned to the top left corner but that isn't that important for a container that
@@ -106,7 +108,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         scrollable_rect = pygame.Rect(0, 0, relative_rect.width, relative_rect.height)
         self.scrollable_container = UIContainer(relative_rect=scrollable_rect,
                                                 manager=manager,
-                                                starting_height=0,
+                                                starting_height=1,
                                                 container=self._view_container,
                                                 parent_element=parent_element,
                                                 object_id=ObjectID(
@@ -116,6 +118,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                          'right': 'left',
                                                          'top': 'top',
                                                          'bottom': 'top'})
+        self.join_focus_sets(self.scrollable_container)
 
         self.scrolling_height = 0
         self.scrolling_width = 0
@@ -305,6 +308,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                     'top': 'top',
                                                                     'bottom': 'bottom'})
                 self.join_focus_sets(self.vert_scroll_bar)
+                self.vert_scroll_bar.set_container_this_will_scroll(self.scrollable_container)
                 start_percent = ((self._view_container.rect.top -
                                   self.scrollable_container.rect.top)
                                  / self.scrolling_height)
@@ -338,7 +342,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                        'top': 'bottom',
                                                                        'bottom': 'bottom'})
                 self.join_focus_sets(self.horiz_scroll_bar)
-
+                self.horiz_scroll_bar.set_container_this_will_scroll(self.scrollable_container)
                 start_percent = ((self._view_container.rect.left -
                                   self.scrollable_container.rect.left)
                                  / self.scrolling_width)

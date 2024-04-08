@@ -410,3 +410,16 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         :return bool: Return True if the element is found, False otherwise.
         """
         return item in self.elements
+
+    def are_contents_hovered(self) -> bool:
+        """
+        Are any of the elements in the container hovered? Used for handling mousewheel events.
+
+        :return: True if one of the elements is hovered, False otherwise.
+        """
+        any_hovered = False
+        for item in self:
+            if item.hovered:
+                any_hovered = True
+                break
+        return any_hovered
