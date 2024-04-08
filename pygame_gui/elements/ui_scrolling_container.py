@@ -68,6 +68,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         self.need_to_sort_out_scrollbars = False
 
+        # These properties are currently read-only
+        # TODO: Make allow_scroll_x and y rewritable
         self.allow_scroll_x = allow_scroll_x
         self.allow_scroll_y = allow_scroll_y
 
@@ -91,35 +93,49 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            anchors=anchors,
                                            visible=self.visible)
 
-        scroll_bar_rect = pygame.Rect(-20, 0, 20, relative_rect.height)
-        self.vert_scroll_bar = UIVerticalScrollBar(relative_rect=scroll_bar_rect,
-                                                   visible_percentage=1.0,
-                                                   manager=self.ui_manager,
-                                                   container=self._root_container,
-                                                   parent_element=self,
-                                                   anchors={'left': 'right',
-                                                            'right': 'right',
-                                                            'top': 'top',
-                                                            'bottom': 'bottom'})
+        view_container_anchors = {'left': 'left',
+                                  'right': 'right',
+                                  'top': 'top',
+                                  'bottom': 'bottom'}
 
-        self.vert_scroll_bar.set_dimensions((0, relative_rect.height))  # TODO: Remove these when anchoring is fixed
-        self.vert_scroll_bar.set_relative_position((0, 0))  # Without this, they look off-centered
-        self.join_focus_sets(self.vert_scroll_bar)
+        self.vert_scroll_bar = None
+        if self.allow_scroll_y:
 
-        scroll_bar_rect = pygame.Rect(0, -20, relative_rect.width, 20)
-        self.horiz_scroll_bar = UIHorizontalScrollBar(relative_rect=scroll_bar_rect,
-                                                      visible_percentage=1.0,
-                                                      manager=self.ui_manager,
-                                                      container=self._root_container,
-                                                      parent_element=self,
-                                                      anchors={'left': 'left',
-                                                               'right': 'right',
-                                                               'top': 'bottom',
-                                                               'bottom': 'bottom'})
+            scroll_bar_rect = pygame.Rect(-20, 0, 20, relative_rect.height)
+            self.vert_scroll_bar = UIVerticalScrollBar(relative_rect=scroll_bar_rect,
+                                                       visible_percentage=1.0,
+                                                       manager=self.ui_manager,
+                                                       container=self._root_container,
+                                                       parent_element=self,
+                                                       anchors={'left': 'right',
+                                                                'right': 'right',
+                                                                'top': 'top',
+                                                                'bottom': 'bottom'})
 
-        self.horiz_scroll_bar.set_dimensions((relative_rect.width, 0))
-        self.horiz_scroll_bar.set_relative_position((0, 0))
-        self.join_focus_sets(self.horiz_scroll_bar)
+            self.vert_scroll_bar.set_dimensions((0, relative_rect.height))  # TODO: Remove these when anchoring is fixed
+            self.vert_scroll_bar.set_relative_position((0, 0))  # Without this, they look off-centered
+            self.join_focus_sets(self.vert_scroll_bar)
+
+            view_container_anchors['right_target'] = self.vert_scroll_bar
+
+        self.horiz_scroll_bar = None
+        if self.allow_scroll_x:
+            scroll_bar_rect = pygame.Rect(0, -20, relative_rect.width, 20)
+            self.horiz_scroll_bar = UIHorizontalScrollBar(relative_rect=scroll_bar_rect,
+                                                          visible_percentage=1.0,
+                                                          manager=self.ui_manager,
+                                                          container=self._root_container,
+                                                          parent_element=self,
+                                                          anchors={'left': 'left',
+                                                                   'right': 'right',
+                                                                   'top': 'bottom',
+                                                                   'bottom': 'bottom'})
+
+            self.horiz_scroll_bar.set_dimensions((relative_rect.width, 0))
+            self.horiz_scroll_bar.set_relative_position((0, 0))
+            self.join_focus_sets(self.horiz_scroll_bar)
+
+            view_container_anchors['bottom_target'] = self.horiz_scroll_bar
 
         # This container is the view on to the scrollable container it's size is determined by
         # the size of the root container and whether there are any scroll bars or not.
@@ -131,12 +147,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                            parent_element=parent_element,
                                            object_id=ObjectID(object_id='#view_container',
                                                               class_id=None),
-                                           anchors={'left': 'left',
-                                                    'right': 'right',
-                                                    'top': 'top',
-                                                    'bottom': 'bottom',
-                                                    'right_target': self.vert_scroll_bar,
-                                                    'bottom_target': self.horiz_scroll_bar})
+                                           anchors=view_container_anchors.copy())
 
         # This container is what we actually put other stuff in.
         # It is aligned to the top left corner but that isn't that important for a container that
@@ -424,8 +435,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             self.vert_scroll_bar.set_relative_position((0, 0))
             self._calculate_scrolling_dimensions()
 
-            self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
-                                                  self.scroll_bar_height))
+            if self.horiz_scroll_bar is not None:
+                self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width,
+                                                      self.scroll_bar_height))
 
     def _remove_horiz_scrollbar(self):
         """
@@ -437,8 +449,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             self.horiz_scroll_bar.set_relative_position((0, 0))
             self._calculate_scrolling_dimensions()
 
-            self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
-                                                 self._view_container.rect.height))
+            if self.vert_scroll_bar is not None:
+                self.vert_scroll_bar.set_dimensions((self.scroll_bar_width,
+                                                     self._view_container.rect.height))
 
     def disable(self):
         """

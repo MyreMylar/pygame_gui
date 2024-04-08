@@ -122,7 +122,7 @@ class TestUIScrollingContainer:
                                          manager=default_ui_manager,
                                          allow_scroll_x=False)
 
-        assert container.vert_scroll_bar is None
+        assert container.vert_scroll_bar.rect.width == 0
         assert container.horiz_scroll_bar is None
         assert container.scrollable_container.rect.size == (200, 200)
 
@@ -141,7 +141,7 @@ class TestUIScrollingContainer:
                                          allow_scroll_y=False)
 
         assert container.vert_scroll_bar is None
-        assert container.horiz_scroll_bar is None
+        assert container.horiz_scroll_bar.rect.height == 0
         assert container.scrollable_container.rect.size == (200, 200)
 
         container.set_scrollable_area_dimensions((600, 200))
