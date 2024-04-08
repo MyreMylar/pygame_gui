@@ -413,6 +413,32 @@ class TestUIScrollingContainer:
             count += 1
         assert count == 2
 
+    def test_are_contents_hovered(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
+                                  _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIScrollingContainer(pygame.Rect(100, 100, 200, 200), manager=manager)
+        container.set_scrollable_area_dimensions((400, 400))
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(50, 300, 50, 50), text="2",
+                            manager=manager, container=container)
+        manager.mouse_position = (155, 155)
+        button_1.check_hover(0.1, False)
+        button_2.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+        assert container.vert_scroll_bar is not None
+
+        container.vert_scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5}))
+
+        assert container.vert_scroll_bar.scroll_wheel_moved
+
+        assert container.horiz_scroll_bar is not None
+
+        container.horiz_scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': -0.5}))
+
+        assert container.horiz_scroll_bar.scroll_wheel_moved
+
 
 if __name__ == '__main__':
     pytest.console_main()

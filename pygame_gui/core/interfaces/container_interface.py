@@ -201,6 +201,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         :return bool: Return True if the element is found, False otherwise.
         """
 
+
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
         A metaclass that defines the interface for containers used by elements.
@@ -244,4 +245,11 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         """
         Checks if the given element is contained within the container.
         :return bool: Return True if the element is found, False otherwise.
+        """
+
+    def are_contents_hovered(self) -> bool:
+        """
+        Are any of the elements in the container hovered? Used for handling mousewheel events.
+
+        :return: True if one of the elements is hovered, False otherwise.
         """

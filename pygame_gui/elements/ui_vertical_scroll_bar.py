@@ -3,7 +3,7 @@ from typing import Union, Tuple, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface, IUIContainerInterface
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -109,6 +109,11 @@ class UIVerticalScrollBar(UIElement):
                                                 'bottom': 'top'})
         self.join_focus_sets(self.sliding_button)
         self.sliding_button.set_hold_range((100, self.background_rect.height))
+
+        self._container_to_scroll = None
+
+    def set_container_this_will_scroll(self, container:  IUIContainerInterface):
+        self._container_to_scroll = container
 
     @property
     def start_percentage(self):
@@ -258,7 +263,7 @@ class UIVerticalScrollBar(UIElement):
         consumed_event = False
 
         if (self.is_enabled and
-                self._check_is_focus_set_hovered() and
+                self._check_should_handle_mousewheel_event() and
                 event.type == pygame.MOUSEWHEEL):
             if event.y != 0:
                 self.scroll_wheel_moved = True
@@ -279,6 +284,14 @@ class UIVerticalScrollBar(UIElement):
 
         """
         return any(element.hovered for element in self.get_focus_set())
+
+    def _check_should_handle_mousewheel_event(self) -> bool:
+        should_handle = False
+        if self._container_to_scroll and self._container_to_scroll.are_contents_hovered():
+            should_handle = True
+        if self._check_is_focus_set_hovered():
+            should_handle = True
+        return should_handle
 
     def _update_scroll_position_from_target(self, time_delta: float) -> bool:
         moved_this_frame = False
