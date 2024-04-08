@@ -991,7 +991,6 @@ class UIForm(UIAutoScrollingContainer):
             if event.ui_element == self.submit_button:
                 form_values = self.get_current_values()
 
-
                 # new event
                 event_data = {"form_values": form_values,
                               "ui_element": self,
