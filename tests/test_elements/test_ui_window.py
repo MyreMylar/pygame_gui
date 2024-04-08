@@ -699,6 +699,20 @@ class TestUIWindow:
             count += 1
         assert count == 2
 
+    def test_are_contents_hovered(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
+                                  _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIWindow(pygame.Rect(100, 100, 200, 200), manager=manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(125, 50, 50, 50), text="2",
+                            manager=manager, container=container)
+        manager.mouse_position = button_1.rect.center
+        button_1.check_hover(0.1, False)
+        button_2.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+
 
 if __name__ == '__main__':
     pytest.console_main()
