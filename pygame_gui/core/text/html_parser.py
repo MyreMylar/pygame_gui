@@ -362,12 +362,12 @@ class HTMLParser(html.parser.HTMLParser):
         The eventual style of a character/bit of text is built up by evaluating all styling
         elements currently on the stack when we parse that bit of text.
 
-        Styles on top of the stack will be evaluated last so they can overwrite elements earlier
+        Styles on top of the stack will be evaluated last, so they can overwrite elements earlier
         in the stack (i.e. a later 'font_size' of 5 will overwrite an earlier 'font_size' of 3).
 
-        :param key: Name for this styling element so we can identify when to remove it when the
-        styling block is closed
+        :param key: Name for this styling element so, we can identify when to remove it
         :param styles: The styling dictionary that contains the actual styling.
+
         """
         old_styles = {name: self.current_style.get(name) for name in styles}
         self.style_stack.append((key, old_styles))

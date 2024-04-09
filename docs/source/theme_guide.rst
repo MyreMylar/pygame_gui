@@ -12,6 +12,9 @@ format. To load one, simply pass the path to the theme file into the UIManager w
 
     manager = pygame_gui.UIManager((800, 600), 'theme.json')
 
+Paths can be absolute or relative. Relative paths are relative to the current working directory
+of your python application at runtime - not to the file location where you create the manager.
+
 You can also theme your elements 'on the fly', while your pygame application is running. Just edit your theme file and
 save it, and you should see the UI update to reflect your changes. This is particularly helpful when trying to fiddle
 with colours, or visualise what the theming parameters do. You can also turn off live theming if you want to save a few
@@ -320,6 +323,27 @@ Once the ObjectID is in place in the code you can refer to it in a block in your
        }
    }
 
+If you want to change a created element's Object ID later on, just use the `.change_object_id()` function. E.g.:
+
+.. code-block:: python
+   :caption: object_id.py
+   :linenos:
+   :emphasize-lines: 13,14
+
+   from pygame_gui.core import ObjectID
+   from pygame_gui.elements import UIButton
+
+   ...  # other code omitted here -
+        # see quick start guide for how to get up and running with a single button
+
+   hello_button = UIButton(relative_rect=pygame.Rect((350, 280), (-1, -1)),
+                           text='Hello',
+                           manager=manager,
+                           object_id=ObjectID(class_id='@friendly_buttons',
+                                              object_id='#hello_button'))
+
+   hello_button.change_object_id(ObjectID(class_id='@unfriendly_buttons',
+                                          object_id='#hello_button'))
 
 
 Theme block categories

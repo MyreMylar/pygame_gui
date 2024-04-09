@@ -4,6 +4,8 @@ import warnings
 from typing import Union, List, Dict, Optional, Tuple
 
 import pygame
+from pygame import KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c
+from pygame.event import Event
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -234,10 +236,16 @@ class UITextEntryLine(UIElement):
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal', 'disabled'], self.ui_manager)
+                                                    ['normal', 'disabled'], self.ui_manager,
+                                                    allow_text_outside_width_border=False,
+                                                    text_x_scroll_enabled=True,
+                                                    editable_text=True)
         elif self.shape == 'rounded_rectangle':
             self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal', 'disabled'], self.ui_manager)
+                                                        ['normal', 'disabled'], self.ui_manager,
+                                                        allow_text_outside_width_border=False,
+                                                        text_x_scroll_enabled=True,
+                                                        editable_text=True)
 
         if self.drawable_shape is not None:
             self._set_image(self.drawable_shape.get_fresh_surface())
@@ -719,44 +727,95 @@ class UITextEntryLine(UIElement):
 
         """
         consumed_event = False
-        if (event.key == pygame.K_a and
-                (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-                not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
-            self.select_range = [0, len(self.text)]
-            self.edit_position = len(self.text)
-            self.cursor_has_moved_recently = True
+        if self._process_select_all_event(event):
             consumed_event = True
-        elif (event.key == pygame.K_x and
-              (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden and
-              not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                clipboard_copy(self.text[low_end:high_end])
-                if self.drawable_shape is not None:
-                    self.drawable_shape.text_box_layout.delete_selected_text()
-                    self.drawable_shape.apply_active_text_changes()
-                self.edit_position = low_end
-                self.text = self.text[:low_end] + self.text[high_end:]
-                if self.drawable_shape is not None:
-                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-                    self.drawable_shape.apply_active_text_changes()
-                self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
-                consumed_event = True
-        elif (event.key == pygame.K_c and
-              (event.mod & pygame.KMOD_CTRL or event.mod & pygame.KMOD_META) and
-              not self.is_text_hidden and
-              not (event.mod & pygame.KMOD_ALT)):  # hopefully enable diacritic letters:
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                clipboard_copy(self.text[low_end:high_end])
-                consumed_event = True
+        elif self._process_cut_event(event):
+            consumed_event = True
+        elif self._process_copy_event(event):
+            consumed_event = True
         elif self._process_paste_event(event):
             consumed_event = True
         return consumed_event
+
+    def _process_select_all_event(self, event: Event) -> bool:
+        """
+        Process a select all shortcut event. (CTRL+ A)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_a and
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters
+            self._do_select_all()
+            consumed_event = True
+        return consumed_event
+
+    def _do_select_all(self):
+        self.select_range = [0, len(self.text)]
+        self.edit_position = len(self.text)
+        self.cursor_has_moved_recently = True
+
+    def _process_cut_event(self, event: Event) -> bool:
+        """
+        Process a cut shortcut event. (CTRL+ X)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_x and
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not self.is_text_hidden and  # This is not in UITextEntryBox
+                not (event.mod & KMOD_ALT)):
+            self._do_cut()
+            consumed_event = True
+        return consumed_event
+
+    def _do_cut(self):
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            low_end = min(self.select_range[0], self.select_range[1])
+            high_end = max(self.select_range[0], self.select_range[1])
+            clipboard_copy(self.text[low_end:high_end])
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.delete_selected_text()
+                self.drawable_shape.apply_active_text_changes()
+            self.edit_position = low_end
+            self.text = self.text[:low_end] + self.text[high_end:]
+            if self.drawable_shape is not None:
+                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                self.drawable_shape.apply_active_text_changes()
+            self.select_range = [0, 0]
+            self.cursor_has_moved_recently = True
+
+    def _process_copy_event(self, event: Event) -> bool:
+        """
+        Process a copy shortcut event. (CTRL+ C)
+
+        :param event: The event to process.
+
+        :return: True if the event is consumed.
+
+        """
+        consumed_event = False
+        if (event.key == K_c and
+                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
+                not self.is_text_hidden and  # This line is not in UITextEntryBox
+                not (event.mod & KMOD_ALT)):
+            self._do_copy()
+            consumed_event = True
+        return consumed_event
+
+    def _do_copy(self):
+        if abs(self.select_range[0] - self.select_range[1]) > 0:
+            low_end = min(self.select_range[0], self.select_range[1])
+            high_end = max(self.select_range[0], self.select_range[1])
+            clipboard_copy(self.text[low_end:high_end])
 
     def _process_paste_event(self, event: pygame.event.Event) -> bool:
         """

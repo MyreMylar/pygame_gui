@@ -71,5 +71,16 @@
                 "hovered_normal": "0.5"
             }
          }
-     }
- }
+     },
+    "@rounded_button": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "5,5,5,5"
+        }
+    },
+    "@rectangular_button": {
+        "misc": {
+            "shape": "rectangle"
+        }
+    }
+}

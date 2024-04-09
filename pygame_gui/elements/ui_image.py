@@ -35,10 +35,12 @@ class UIImage(UIElement):
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 *,
+                 starting_height: int = 1,):
 
         super().__init__(relative_rect, manager, container,
-                         starting_height=1,
+                         starting_height=starting_height,
                          layer_thickness=1,
                          anchors=anchors,
                          visible=visible,

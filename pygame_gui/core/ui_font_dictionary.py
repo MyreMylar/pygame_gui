@@ -5,6 +5,7 @@ from typing import Dict, Union, Tuple, List, Optional
 
 import pygame
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+from pygame.font import match_font
 
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.resource_loaders import IResourceLoader
@@ -236,12 +237,12 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                   bold: bool = False, italic: bool = False, antialiased: bool = True,
                   script: str = 'Latn', direction: int = pygame.DIRECTION_LTR) -> IGUIFontInterface:
         """
-        Find a loaded font from the font dictionary. Will load a font if it does not already exist
+        Find a loaded font from the font dictionary. Will load a font if it does not already exist,
         and we have paths to the needed files, however it will issue a warning after doing so
         because dynamic file loading is normally a bad idea as you will get frame rate hitches
         while the running program waits for the font to load.
 
-        Instead it's best to preload all your needed files at another time in your program when
+        Instead, it's best to preload all your needed files at another time in your program when
         you have more control over the user experience.
 
         :param font_size: The size of the font to find.
@@ -263,11 +264,11 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                            script: str = 'Latn', direction: int = pygame.DIRECTION_LTR) -> FontResource:
         """
         Find a loaded font resource from the font dictionary. Will load a font if it does not
-        already exist and we have paths to the needed files, however it will issue a warning
+        already exist, and we have paths to the needed files, however it will issue a warning
         after doing so because dynamic file loading is normally a bad idea as you will get frame
         rate hitches while the running program waits for the font to load.
 
-        Instead it's best to preload all your needed files at another time in your program when
+        Instead, it's best to preload all your needed files at another time in your program when
         you have more control over the user experience.
 
         :param font_size: The size of the font to find.
@@ -316,7 +317,47 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                               script=script, direction=direction)
             return self.loaded_fonts[font_id]
         else:
-            return self.loaded_fonts[self.default_font.idx]
+            if self._load_system_font(font_id, font_size, font_name, bold,
+                                      italic, antialiased, script, direction,
+                                      force_immediate_load=True):
+                return self.loaded_fonts[font_id]
+            else:
+                return self.loaded_fonts[self.default_font.idx]
+
+    def _load_system_font(self, font_id: str,font_size: int, font_name: str,
+                          bold: bool = False, italic: bool = False, antialiased: bool = True,
+                          script: str = 'Latn', direction: int = pygame.DIRECTION_LTR,
+                          force_immediate_load: bool = False) -> bool:
+        # let's try and use the SystemFonts
+        found_system_no_style_font_path = match_font(font_name, bold=False, italic=False)
+        if bold or italic:
+            found_system_font_path = match_font(font_name, bold, italic)
+        else:
+            found_system_font_path = found_system_no_style_font_path
+        if found_system_no_style_font_path is not None and found_system_font_path is not None:
+            if bold and italic and found_system_font_path is not None:
+                self.add_font_path(font_name, font_path=found_system_no_style_font_path,
+                                   bold_italic_path=found_system_font_path)
+            elif bold and not italic and found_system_font_path is not None:
+                self.add_font_path(font_name, font_path=found_system_no_style_font_path,
+                                   bold_path=found_system_font_path)
+            elif not bold and italic and found_system_font_path is not None:
+                self.add_font_path(font_name, font_path=found_system_no_style_font_path,
+                                   italic_path=found_system_font_path)
+            else:
+                self.add_font_path(font_name, font_path=found_system_no_style_font_path)
+
+            self._load_single_font_style((found_system_no_style_font_path, False),
+                                         font_id, font_size,
+                                         font_style={'bold': True,
+                                                     'italic': True,
+                                                     'antialiased': antialiased,
+                                                     'script': script,
+                                                     'direction': direction},
+                                         force_immediate_load=force_immediate_load
+                                         )
+            return True
+        return False
 
     def get_default_font(self) -> IGUIFontInterface:
         """
@@ -368,7 +409,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
-        pre-load all your font data at a controlled time, which is where this method comes in.
+        preload all your font data at a controlled time, which is where this method comes in.
 
         :param font_size: The size of the font to load.
         :param font_name: The name of the font to load.
@@ -434,7 +475,9 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                                          'direction': direction},
                                              force_immediate_load=force_immediate_load)
         else:
-            warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set')
+            if not self._load_system_font(font_id, font_size, font_name, bold,
+                                          italic, antialiased, script, direction, force_immediate_load):
+                warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set & its not a system font')
 
     def _load_single_font_style(self,
                                 font_loc: Tuple[Union[str, PackageResource, bytes], bool],
@@ -446,7 +489,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         Load a single font file with a given style.
 
         :param font_loc: Path to the font file.
-        :param font_id: id for the font in the loaded fonts dictionary.
+        :param font_id: id for the font in the loaded 'fonts' dictionary.
         :param font_size: pygame font size.
         :param font_style: style dictionary (italic, bold, antialiased, all, some or none)
 
@@ -515,7 +558,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
 
     def convert_html_to_point_size(self, html_size: float) -> int:
         """
-        Takes in a HTML style font size and converts it into a point font size.
+        Takes in an HTML style font size and converts it into a point font size.
 
         :param html_size: Size in HTML style.
 
