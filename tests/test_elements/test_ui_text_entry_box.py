@@ -1640,11 +1640,11 @@ class TestUITextEntryBox:
         text_entry.update(0.01)
 
         assert text_entry.alive()
-        assert not manager.text_input_hovered
+        assert not manager.text_hovered
 
         MouselessManager.fixed_mouse_pos = (200, 115)
         manager.update(0.01)
-        assert manager.text_input_hovered
+        assert manager.text_hovered
 
         text_entry.kill()
 

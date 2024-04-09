@@ -31,6 +31,8 @@ class GUIFontFreetype(IGUIFontInterface):
                 self.__internal_font.strong = style['bold']
                 self.__internal_font.oblique = style['italic']
 
+    def size(self, text: str) -> Tuple[int, int]:
+        return self.get_rect(text).size
 
     @property
     def underline(self) -> bool:

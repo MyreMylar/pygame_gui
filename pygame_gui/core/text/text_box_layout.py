@@ -85,6 +85,8 @@ class TextBoxLayout:
         self.alpha = 255
         self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
 
+        self.plain_text = ""
+
         self.layout_rect_queue = self.input_data_rect_queue.copy()
         current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
                                        row_start_y=self.layout_rect.y, row_index=0,
@@ -114,6 +116,16 @@ class TextBoxLayout:
         self.x_scroll_offset = 0
 
         self.cursor_colour = pygame.Color('#FFFFFFFF')
+
+    def _update_plain_text(self):
+        plain_text = ""
+        for row in self.layout_rows:
+            for item in row.items:
+                if isinstance(item, TextLineChunkFTFont) or isinstance(item, HyperlinkTextChunk):
+                    plain_text += item.text
+                if isinstance(item, LineBreakLayoutRect):
+                    plain_text += "\n"
+        self.plain_text = plain_text
 
     def reprocess_layout_queue(self, layout_rect):
         """
@@ -165,6 +177,8 @@ class TextBoxLayout:
             self.view_rect.width = self.layout_rect.width
         if self.dynamic_height:
             self.view_rect.height = self.layout_rect.height
+
+        self._update_plain_text()
 
     def _add_row_to_layout(self, current_row: TextBoxLayoutRow, last_row=False):
         # handle an empty row being added to layout
@@ -826,6 +840,7 @@ class TextBoxLayout:
                         if isinstance(chunk, TextLineChunkFTFont):
                             if chunk == start_chunk and chunk == end_chunk:
                                 start_selection = True
+                                end_selection = True
                                 chunk.selected_text = chunk.text[
                                                       start_letter_index:end_letter_index]  # should probably check for text rect here
                                 chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
@@ -845,10 +860,10 @@ class TextBoxLayout:
                                 chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
                             elif chunk == end_chunk:
+                                end_selection = True
                                 if end_letter_index == 0:
                                     pass
                                 else:
-                                    end_selection = True
                                     chunk.selected_text = chunk.text[
                                                           :end_letter_index]  # should probably check for text rect here
                                     chunk.selection_rect = pygame.Rect((0, 0),
@@ -872,6 +887,7 @@ class TextBoxLayout:
                                     pass
                                 else:
                                     chunk.is_selected = True
+                                    chunk.selection_colour = self.selection_colour
                                     self.selected_chunks.append(chunk)
                             if chunk == end_chunk:
                                 end_selection = True
@@ -921,10 +937,7 @@ class TextBoxLayout:
                             break
 
         if found_chunk is not None and isinstance(found_chunk, TextLineChunkFTFont):
-            x_pos_in_chunk = sum([char_metric[4]
-                                  for char_metric in
-                                  found_chunk.font.get_metrics(
-                                      found_chunk.text[:letter_index]) if char_metric])
+            x_pos_in_chunk = found_chunk.font.size(found_chunk.text[:letter_index])[0]
         return found_chunk, x_pos_in_chunk, letter_index, row_index
 
     def _find_and_split_chunk(self, index: int, return_rhs: bool = False):
@@ -1128,7 +1141,6 @@ class TextBoxLayout:
                                 if isinstance(chunk, TextLineChunkFTFont):
                                     chunk.selected_text = chunk.text[:]
                                     chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
-                                    chunk.selection_colour = self.selection_colour
                                     chunk.is_selected = True
                                 elif isinstance(chunk, ImageLayoutRect) or isinstance(chunk, LineBreakLayoutRect):
                                     chunk.is_selected = True
