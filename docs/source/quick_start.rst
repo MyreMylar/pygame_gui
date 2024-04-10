@@ -233,6 +233,10 @@ we can just compare the event's ui_element attribute with our hello_button varia
 Try running the code again and clicking on the button. If it's all worked you should see 'Hello World!' printed to the
 python console each time you click the button.
 
-Congratulations, you've learned the basics of using Pygame GUI! If you want to explore more, check out the API Reference
-and try creating some of the other UI Elements, have a look at how layout works with the :ref:`layout-guide` or head
-over to the :ref:`theme-guide` to learn how to style your elements.
+Now that we've got the basics of the code up and running, let's try experimenting with a custom them file in part 2 of
+this quick start guide:
+
+Quick Start Guides
+------------------
+.. toctree::
+    quick_start_theming
