@@ -25,10 +25,13 @@ Colours
 also be a colour gradient:
 
  - "**dark_bg**" -  The background colour/gradient of the text box element.
+ - "**selected_bg**" - The colour/gradient the background changes to when the text above it is selected.
  - "**normal_border**" - The colour/gradient of the border around the text box element.
+ - "**selected_text**" - The colour/gradient of text when it has been selected.
  - "**link_text**" - The default colour/gradient of any links in the text.
  - "**link_hover**" - The colour/gradient of link text when we hover over it with the mouse.
  - "**link_selected**" - The colour/gradient of link text when they are clicked on with the mouse.
+ - "**text_cursor**" - The colour of the text cursor.
 
 Misc
 ----

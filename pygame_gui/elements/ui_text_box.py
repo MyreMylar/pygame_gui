@@ -149,6 +149,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.line_spacing = 1.25
         self.text_cursor_colour = pygame.Color("white")
         self.selected_bg_colour = pygame.Color(128, 128, 200, 255)
+        self.selected_text_colour = pygame.Color(255, 255, 255, 255)
 
         self.link_normal_colour = None
         self.link_hover_colour = None
@@ -690,6 +691,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                              editable=True)
         self.text_box_layout.set_cursor_colour(self.text_cursor_colour)
         self.text_box_layout.selection_colour = self.selected_bg_colour
+        self.text_box_layout.selection_text_colour = self.selected_text_colour
         self.parser.empty_layout_queue()
         if self.dynamic_height:
             self.text_box_layout.view_rect.height = self.text_box_layout.layout_rect.height
@@ -1074,6 +1076,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                                                   self.combined_element_ids)
         if selected_bg_colour != self.selected_bg_colour:
             self.selected_bg_colour = selected_bg_colour
+            has_any_changed = True
+
+        selected_text_colour = self.ui_theme.get_colour_or_gradient('selected_text',
+                                                                    self.combined_element_ids)
+        if selected_text_colour != self.selected_text_colour:
+            self.selected_text_colour = selected_text_colour
             has_any_changed = True
 
         if self._check_text_alignment_theming():
