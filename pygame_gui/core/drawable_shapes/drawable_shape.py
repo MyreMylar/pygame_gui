@@ -595,6 +595,8 @@ class DrawableShape:
                                                  editable=self.editable_text)
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
+            if 'selected_text' in self.theming:
+                self.text_box_layout.selection_text_colour = self.theming['selected_text']
             if 'text_cursor_colour' in self.theming:
                 self.text_box_layout.set_cursor_colour(self.theming['text_cursor_colour'])
             self.align_all_text_rows()

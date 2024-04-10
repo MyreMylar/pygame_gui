@@ -108,6 +108,7 @@ class TextBoxLayout:
         self.last_horiz_cursor_row_pos = 0
 
         self.selection_colour = pygame.Color(128, 128, 200, 255)
+        self.selection_text_colour = pygame.Color(255, 255, 255, 255)
         self.selected_chunks = []
         self.selected_rows = []
         self.selection_start_index = 0
@@ -846,6 +847,7 @@ class TextBoxLayout:
                                 chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
                                                                    (end_chunk_x_pos - start_chunk_x_pos, chunk.height))
                                 chunk.selection_colour = self.selection_colour
+                                chunk.selection_text_colour = self.selection_text_colour
                                 chunk.selection_start_index = start_letter_index
                                 chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
@@ -856,6 +858,7 @@ class TextBoxLayout:
                                 chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
                                                                    (chunk.width - start_chunk_x_pos, chunk.height))
                                 chunk.selection_colour = self.selection_colour
+                                chunk.selection_text_colour = self.selection_text_colour
                                 chunk.selection_start_index = start_letter_index
                                 chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
@@ -869,6 +872,7 @@ class TextBoxLayout:
                                     chunk.selection_rect = pygame.Rect((0, 0),
                                                                        (end_chunk_x_pos, chunk.height))
                                     chunk.selection_colour = self.selection_colour
+                                    chunk.selection_text_colour = self.selection_text_colour
                                     chunk.is_selected = True
                                     self.selected_chunks.append(chunk)
 
@@ -877,6 +881,7 @@ class TextBoxLayout:
                                 chunk.selected_text = chunk.text[:]
                                 chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
                                 chunk.selection_colour = self.selection_colour
+                                chunk.selection_text_colour = self.selection_text_colour
                                 chunk.is_selected = True
                                 self.selected_chunks.append(chunk)
                         elif isinstance(chunk, LineBreakLayoutRect) or isinstance(chunk, ImageLayoutRect):
@@ -888,6 +893,7 @@ class TextBoxLayout:
                                 else:
                                     chunk.is_selected = True
                                     chunk.selection_colour = self.selection_colour
+                                    chunk.selection_text_colour = self.selection_text_colour
                                     self.selected_chunks.append(chunk)
                             if chunk == end_chunk:
                                 end_selection = True
