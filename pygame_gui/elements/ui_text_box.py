@@ -432,13 +432,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if not self.alive():
             return
 
-        scaled_mouse_pos = self.ui_manager.get_mouse_position()
-        if self.hovered:
-            if (self.scroll_bar is None or
-                    (self.scroll_bar is not None and
-                     not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]))):
-                self.ui_manager.set_text_hovered(True)
-
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
 
@@ -515,6 +508,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                        drawable_area)
             self._set_image(new_image)
 
+        any_hyper_link_hovered = False
         if len(self.link_hover_chunks) > 0:
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
             should_redraw_from_layout = False
@@ -537,6 +531,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 if hover_rect.collidepoint(mouse_x, mouse_y) and self.rect.collidepoint(mouse_x,
                                                                                         mouse_y):
                     hovered_currently = True
+                    any_hyper_link_hovered = True
                 if chunk.is_hovered and not hovered_currently:
                     chunk.on_unhovered()
                     should_redraw_from_layout = True
@@ -546,6 +541,15 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
             if should_redraw_from_layout:
                 self.redraw_from_text_block()
+
+        scaled_mouse_pos = self.ui_manager.get_mouse_position()
+        if self.hovered:
+            if (self.scroll_bar is None or
+                    (self.scroll_bar is not None and
+                     not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]))):
+
+                if not (any_hyper_link_hovered and not self.selection_in_progress):
+                    self.ui_manager.set_text_hovered(True)
 
         self.update_text_effect(time_delta)
 
@@ -815,15 +819,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                             self.double_click_timer = 0.0
 
         if (event.type == MOUSEBUTTONUP and
-                event.button == BUTTON_LEFT and
-                self.selection_in_progress):
+                event.button == BUTTON_LEFT):
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
 
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
                     consumed_event = True
-                    should_redraw_from_layout = self._handle_hyper_link_mouse_button_down(scaled_mouse_pos)
-                    if not should_redraw_from_layout:
+                    should_redraw_from_layout = self._handle_hyper_link_mouse_button_up(scaled_mouse_pos)
+                    if not should_redraw_from_layout and self.selection_in_progress:
                         text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
                         self.text_box_layout.set_cursor_from_click_pos(text_layout_space_pos)
                         new_edit_pos = self.text_box_layout.get_cursor_index()
@@ -832,6 +835,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                             self.cursor_has_moved_recently = True
                             self.select_range = [self.select_range[0], self.edit_position]
                             self.redraw_from_text_block()
+
             self.selection_in_progress = False
 
         if should_redraw_from_layout:
