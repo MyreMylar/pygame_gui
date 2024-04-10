@@ -324,7 +324,7 @@ class UITextEntryLine(UIElement):
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
         if self.hovered:
-            self.ui_manager.set_text_input_hovered(True)
+            self.ui_manager.set_text_hovered(True)
 
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta

@@ -415,16 +415,11 @@ class TextBoxLayoutRow(pygame.Rect):
                         found_chunk = True
                     elif chunk.collidepoint((scrolled_click_pos[0], chunk.centery)):
                         letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
-                        cursor_draw_width += sum([char_metric[4]
-                                                  for char_metric in
-                                                  chunk.font.get_metrics(
-                                                      chunk.text[:letter_index]) if char_metric])
+                        cursor_draw_width += chunk.font.size(chunk.text[:letter_index])[0]
                         letter_acc += letter_index
                         found_chunk = True
                     else:
-                        cursor_draw_width += sum([char_metric[4]
-                                                  for char_metric in
-                                                  chunk.font.get_metrics(chunk.text) if char_metric])
+                        cursor_draw_width += chunk.font.size(chunk.text)[0]
                         letter_acc += chunk.letter_count
         if (not found_chunk and scrolled_click_pos[0] >= self.right) or (letter_acc == self.letter_count):
             # if we have more than two rows check if we are on right of whole row and if row has space at the end.
@@ -433,9 +428,7 @@ class TextBoxLayoutRow(pygame.Rect):
                 letter_acc -= 1
                 last_chunk = self.get_last_text_chunk()
                 if last_chunk is not None:
-                    char_metric = last_chunk.font.get_metrics(" ")[0]
-                    if char_metric:
-                        cursor_draw_width -= char_metric[4]
+                    cursor_draw_width -= last_chunk.font.size(" ")[0]
 
         cursor_index = min(self.letter_count, max(0, letter_acc))
         return cursor_index, cursor_draw_width
@@ -459,16 +452,11 @@ class TextBoxLayoutRow(pygame.Rect):
             if isinstance(chunk, TextLineChunkFTFont):
                 if cursor_pos <= letter_acc + chunk.letter_count:
                     chunk_letter_pos = cursor_pos - letter_acc
-                    cursor_draw_width += sum([char_metric[4]
-                                              for char_metric
-                                              in chunk.font.get_metrics(chunk.text[:chunk_letter_pos]) if char_metric])
-
+                    cursor_draw_width += chunk.font.size(chunk.text[:chunk_letter_pos])[0]
                     break
 
                 letter_acc += chunk.letter_count
-                cursor_draw_width += sum([char_metric[4]
-                                          for char_metric in
-                                          chunk.font.get_metrics(chunk.text) if char_metric])
+                cursor_draw_width += chunk.font.size(chunk.text)[0]
             elif isinstance(chunk, LineBreakLayoutRect):
                 pass
 
