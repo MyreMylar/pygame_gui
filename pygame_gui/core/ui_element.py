@@ -45,11 +45,11 @@ class UIElement(GUISprite, IUIElementInterface):
                  *,
                  starting_height: int,
                  layer_thickness: int,
-                 anchors: Dict[str, Union[str, IUIElementInterface]] = None,
+                 anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
                  visible: int = 1,
-                 parent_element: Union[None, IUIElementInterface] = None,
+                 parent_element: Optional[IUIElementInterface] = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 element_id: List[str] = None):
+                 element_id: Optional[List[str]] = None):
 
         self._layer = 0
         self.ui_manager = manager

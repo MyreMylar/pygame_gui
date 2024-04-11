@@ -65,6 +65,7 @@ class UIButton(UIElement):
                  tool_tip_object_id: Optional[ObjectID] = None,
                  text_kwargs: Optional[Dict[str, str]] = None,
                  tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
+                 max_dynamic_width: Optional[int] = None
                  ):
 
         rel_rect = (relative_rect if isinstance(relative_rect, pygame.Rect)
@@ -130,6 +131,7 @@ class UIButton(UIElement):
         self.shape = 'rectangle'
         self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
+        self.max_dynamic_width = max_dynamic_width
 
         self.state_transitions = {}
         
@@ -749,6 +751,8 @@ class UIButton(UIElement):
         drawable_shape_rect = self.rect.copy()
         if self.dynamic_width:
             drawable_shape_rect.width = -1
+            if self.max_dynamic_width is not None:
+                theming_parameters["max_text_width"] = self.max_dynamic_width
         if self.dynamic_height:
             drawable_shape_rect.height = -1
 

@@ -540,10 +540,10 @@ class DrawableShape:
             # gather any override parameters for text_width and text_height now
             # as we need to feed them into max_dimensions
             max_dimensions = [self.containing_rect.width, self.containing_rect.height]
-            if 'text_width' in self.theming:
-                max_dimensions[0] = self.theming['text_width']
-            if 'text_height' in self.theming:
-                max_dimensions[1] = self.theming['text_height']
+            if 'max_text_width' in self.theming:
+                max_dimensions[0] = self.theming['max_text_width']
+            if 'max_text_height' in self.theming:
+                max_dimensions[1] = self.theming['max_text_height']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
                                              self.theming['font'],
                                              underlined=False,
