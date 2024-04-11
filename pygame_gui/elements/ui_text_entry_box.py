@@ -29,6 +29,8 @@ class UITextEntryBox(UITextBox):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param: placeholder_text: If the text line is empty, and not focused, this placeholder text will be
+                              shown instead.
     """
 
     def __init__(self,
@@ -39,7 +41,9 @@ class UITextEntryBox(UITextBox):
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1):
+                 visible: int = 1,
+                 *,
+                 placeholder_text: Optional[str] = None):
 
         super().__init__(initial_text,
                          relative_rect,
@@ -51,7 +55,8 @@ class UITextEntryBox(UITextBox):
                          visible=visible,
                          allow_split_dashes=False,
                          plain_text_display_only=True,
-                         should_html_unescape_input_text=True)
+                         should_html_unescape_input_text=True,
+                         placeholder_text=placeholder_text)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,

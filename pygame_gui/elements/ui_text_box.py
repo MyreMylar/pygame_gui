@@ -83,9 +83,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param pre_parsing_enabled: when enabled will replace all '\n' characters with html <br> tags.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated text
                         useful when you have multiple translations that need variables inserted
                         in the middle.
+    :param allow_split_dashes: sets whether long words that don't fit on a single line will be split with a dash
+                               or just split without a dash (more compact).
+    :param plain_text_display_only: no markup based styling & formatting will be done on the input text.
+    :param should_html_unescape_input_text: when enabled turns plain text encoded html back into html for
+                                            this text box. e.g. &lt; will become <
+    :param placeholder_text: If the text line is empty, and not focused, this placeholder text will be
+                              shown instead.
     """
 
     def __init__(self,
@@ -104,7 +112,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  text_kwargs: Optional[Dict[str, str]] = None,
                  allow_split_dashes: bool = True,
                  plain_text_display_only: bool = False,
-                 should_html_unescape_input_text: bool = False):
+                 should_html_unescape_input_text: bool = False,
+                 placeholder_text: Optional[str] = None):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self.scroll_bar = None
@@ -124,6 +133,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.html_text = html.unescape(html_text)
         else:
             self.html_text = html_text
+
+        self.placeholder_text = placeholder_text
+
         self.appended_text = ""
         self.text_kwargs = {}
         if text_kwargs is not None:
@@ -665,7 +677,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         Parses HTML styled string text into a format more useful for styling rendered text.
         """
-        feed_input = self.html_text
+        if len(self.html_text) == 0 and self.placeholder_text is not None and not self.is_focused:
+            feed_input = self.placeholder_text
+        else:
+            feed_input = self.html_text
         if self.plain_text_display_only:
             feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
         feed_input = self._pre_parse_text(translate(feed_input, **self.text_kwargs) + self.appended_text)
@@ -1468,6 +1483,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Called when this element is no longer the current focus.
         """
         super().unfocus()
+        if self.placeholder_text is not None:
+            self.rebuild()
 
     def focus(self):
         """
@@ -1475,6 +1492,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         super().focus()
         self.cursor_has_moved_recently = True
+        if self.placeholder_text is not None:
+            self.rebuild()
 
     def _process_edit_pos_move_key(self, event: Event) -> bool:
         """
