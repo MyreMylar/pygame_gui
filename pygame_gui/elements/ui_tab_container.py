@@ -60,7 +60,7 @@ class UITabContainer(UIElement):
         self.current_container_index: Optional[int] = None
 
         self.button_height: int = 30
-        self.max_button_width: int = 100
+        self.max_button_width: int = self.rect.width
 
     @property
     def tab_count(self) -> int:
@@ -80,17 +80,22 @@ class UITabContainer(UIElement):
         :return : the integer id of the newly created tab
         """
         self.rebuild(self.tab_count + 1)
-        button_rects = self._calculate_button_rect_by_layout(self.tab_count + 1)
-        button_rect = button_rects[self.tab_count]
+        max_button_width = self._calculate_max_button_width(self.tab_count + 1)
+        furthest_right = 0
+        if len(self.tabs) > 0:
+            for tab in self.tabs:
+                furthest_right += tab["button"].rect.width
+        button_rect = pygame.Rect(furthest_right, 0, -1, self.button_height)
         button = UIButton(button_rect, title_text, manager=self.ui_manager, container=self._root_container,
-                          object_id=ObjectID(title_object_id, '@tab_title_button'))
-
+                          parent_element=self, object_id=ObjectID(title_object_id, '@tab_title_button'),
+                          max_dynamic_width=max_button_width)
         container_rect = self._calculate_container_rect_by_layout()
-        container = UIPanel(container_rect, manager=self.ui_manager, container=self._root_container)
+        container = UIPanel(container_rect, manager=self.ui_manager, container=self._root_container, parent_element=self)
         self.tabs.append({"text": title_text, "button": button, "container": container})
         tab_id = self.tab_count - 1
         if self.current_container_index is None:
             self.current_container_index = tab_id
+            button.select()
         else:
             container.hide()
         return tab_id
@@ -131,7 +136,7 @@ class UITabContainer(UIElement):
         del self.tabs[tab_id]
         self.rebuild()
 
-    def _calculate_button_rect_by_layout(self, count: Optional[int] = None):
+    def _calculate_max_button_width(self, count: Optional[int] = None):
         width = self._root_container.rect.width
         if count is None:
             count = self.tab_count
@@ -142,12 +147,7 @@ class UITabContainer(UIElement):
             button_width = width // count
             button_width = min(button_width, self.max_button_width)
 
-        button_rects = []
-        for i in range(count):
-            rect = pygame.Rect(button_width * i, 0, button_width, self.button_height)
-            button_rects.append(rect)
-
-        return button_rects
+        return button_width
 
     def _calculate_container_rect_by_layout(self) -> pygame.Rect:
         return pygame.Rect(0, self.button_height, self._root_container.rect.width,
@@ -207,18 +207,21 @@ class UITabContainer(UIElement):
         super().rebuild()
         if count is None:
             count = self.tab_count
-
-        button_rects = self._calculate_button_rect_by_layout(count)
+        max_button_width = self._calculate_max_button_width(count)
+        current_right = 0
         for i, tab in enumerate(self.tabs, 0):
-            button = tab["button"]
+            button: UIButton = tab["button"]
             if i >= count:
                 continue
-            button.set_dimensions((button_rects[i].width, button_rects[i].height))
-            button.set_relative_position((button_rects[i].left, button_rects[i].top))
+            button.max_dynamic_width = max_button_width
+            button.rebuild()
+            button.set_relative_position((current_right, 0))
+            current_right += button.rect.width
 
             container = tab["container"]
             if i == self.current_container_index:
                 container.show()
+                button.select()
             else:
                 container.hide()
 
@@ -264,9 +267,13 @@ class UITabContainer(UIElement):
 
         if event.type == UI_BUTTON_PRESSED:
             for i, tab in enumerate(self.tabs, 0):
-                if event.ui_element == tab["button"]:
+                tab_title_button: UIButton = tab["button"]
+                if event.ui_element == tab_title_button:
                     self.switch_current_container(i)
                     consumed_event = True
+                    tab_title_button.select()
+                elif tab_title_button.is_selected:
+                    tab_title_button.unselect()
 
         return consumed_event
 
