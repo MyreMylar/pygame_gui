@@ -540,10 +540,10 @@ class DrawableShape:
             # gather any override parameters for text_width and text_height now
             # as we need to feed them into max_dimensions
             max_dimensions = [self.containing_rect.width, self.containing_rect.height]
-            if 'text_width' in self.theming:
-                max_dimensions[0] = self.theming['text_width']
-            if 'text_height' in self.theming:
-                max_dimensions[1] = self.theming['text_height']
+            if 'max_text_width' in self.theming:
+                max_dimensions[0] = self.theming['max_text_width']
+            if 'max_text_height' in self.theming:
+                max_dimensions[1] = self.theming['max_text_height']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
                                              self.theming['font'],
                                              underlined=False,
@@ -595,6 +595,8 @@ class DrawableShape:
                                                  editable=self.editable_text)
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
+            if 'selected_text' in self.theming:
+                self.text_box_layout.selection_text_colour = self.theming['selected_text']
             if 'text_cursor_colour' in self.theming:
                 self.text_box_layout.set_cursor_colour(self.theming['text_cursor_colour'])
             self.align_all_text_rows()

@@ -273,9 +273,9 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_text_input_hovered(self, hovering_text_input: bool):
+    def set_text_hovered(self, hovering_text_input: bool):
         """
-        Set to true when hovering an area text can be input into.
+        Set to true when hovering an area containing selectable text.
 
         Currently, switches the cursor to the I-Beam cursor.
 

@@ -98,7 +98,7 @@ class UIManager(IUIManagerInterface):
         self._load_default_cursors()
         self.active_user_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
         self._active_cursor = self.active_user_cursor
-        self.text_input_hovered = False
+        self.text_hovered = False
         self.hovering_any_ui_element = False
 
         if auto_load:
@@ -106,7 +106,7 @@ class UIManager(IUIManagerInterface):
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
         
-    def create_new_theme(self, theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]=None) -> UIAppearanceTheme:
+    def create_new_theme(self, theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict] = None) -> UIAppearanceTheme:
         """
         Create a new theme using self information.
         :param theme_path: relative file path to theme or theme dictionary.
@@ -237,17 +237,19 @@ class UIManager(IUIManagerInterface):
                         consumed_event = ui_element.process_event(event)
                         if consumed_event:
                             # Generally clicks should only be handled by the top layer of whatever
-                            # GUI thing we are  clicking on. I am trusting UIElments to decide
+                            # GUI thing we are  clicking on. I am trusting UIElements to decide
                             # whether they need to consume the events they respond to. Hopefully
                             # this is not a mistake.
 
                             break
         return consumed_event
     
-    def set_ui_theme(self, theme:IUIAppearanceThemeInterface, update_all_sprites:bool=False):
+    def set_ui_theme(self, theme: IUIAppearanceThemeInterface, update_all_sprites: bool = False):
         """
         Set ui theme.
+
         :param theme: The theme to set.
+        :param update_all_sprites:
         """
         for sprite in self.ui_group.sprites():
             if not update_all_sprites and sprite.ui_theme is not self.ui_theme:
@@ -256,7 +258,7 @@ class UIManager(IUIManagerInterface):
         self.ui_theme = theme
         self.rebuild_all_from_changed_theme_data(self.ui_theme)
     
-    def rebuild_all_from_changed_theme_data(self, theme:IUIAppearanceThemeInterface=None):
+    def rebuild_all_from_changed_theme_data(self, theme: IUIAppearanceThemeInterface = None):
         for sprite in self.ui_group.sprites():
             if theme is not None and sprite.ui_theme is not theme:
                 continue
@@ -265,7 +267,7 @@ class UIManager(IUIManagerInterface):
     def update(self, time_delta: float):
         """
         From here all our UI elements are updated and which element is currently 'hovered' is
-        checked; which means the mouse pointer is overlapping them. This is managed centrally so
+        checked; which means the mouse pointer is overlapping them. This is managed centrally, so
         we aren't ever overlapping two elements at once.
 
         It also updates the shape cache to continue storing already created elements shapes in the
@@ -292,12 +294,12 @@ class UIManager(IUIManagerInterface):
         self._update_mouse_position()
         self._handle_hovering(time_delta)
 
-        self.set_text_input_hovered(False)  # reset the text hovered status each loop
+        self.set_text_hovered(False)  # reset the text hovered status each loop
 
         self.ui_group.update(time_delta)
 
         # handle mouse cursors
-        if self.text_input_hovered:
+        if self.text_hovered:
             new_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)
             if new_cursor != self._active_cursor:
                 self._active_cursor = new_cursor
@@ -319,7 +321,7 @@ class UIManager(IUIManagerInterface):
                     except pygame.error:
                         pass
 
-        if (not any_window_edge_hovered and not self.text_input_hovered and
+        if (not any_window_edge_hovered and not self.text_hovered and
                 self._active_cursor != self.active_user_cursor):
             self._active_cursor = self.active_user_cursor
             try:
@@ -334,8 +336,8 @@ class UIManager(IUIManagerInterface):
             for ui_element in self.ui_group.get_sprites_from_layer(layer):
                 if ui_element.visible:
                     # Only check hover for visible elements - ignore hidden elements
-                    # we need to check hover even after already found what we are hovering
-                    # so we can unhover previously hovered stuff
+                    # we need to check hover even after already found what we are hovering,
+                    # so, we can unhover previously hovered stuff
                     element_is_hovered = ui_element.check_hover(time_delta, hover_handled)
                     if element_is_hovered and ui_element != self.root_container:
                         hover_handled = True
@@ -347,7 +349,7 @@ class UIManager(IUIManagerInterface):
 
     def get_mouse_position(self) -> Tuple[int, int]:
         """
-        Wrapping pygame mouse position so we can mess with it.
+        Wrapping pygame mouse position, so we can mess with it.
         """
         return self.mouse_position
 
@@ -377,7 +379,7 @@ class UIManager(IUIManagerInterface):
         The font name you specify here can be used to choose the font in the blocks of HTML-subset
         formatted text, available in some of the UI elements like the UITextBox.
 
-        It is recommended that you also pre-load any fonts you use at an appropriate moment in your
+        It is recommended that you also preload any fonts you use at an appropriate moment in your
         project rather than letting the library dynamically load them when they are required. That
         is because dynamic loading of large font files can cause UI elements with a lot of font
         usage to appear rather slowly as they are waiting for the fonts they need to load.
@@ -399,12 +401,12 @@ class UIManager(IUIManagerInterface):
 
     def preload_fonts(self, font_list: List[Dict[str, Union[str, int, float]]]):
         """
-        It's a good idea to pre-load the exact fonts your program uses during the loading phase of
-        your program. By default the pygame_gui library will still work, but will spit out reminder
+        It's a good idea to preload the exact fonts your program uses during the loading phase of
+        your program. By default, the pygame_gui library will still work, but will spit out reminder
         warnings when you haven't done this. Loading fonts on the fly will slow down the apparent
         responsiveness when creating UI elements that use a lot of different fonts.
 
-        To pre-load custom fonts, or to use custom fonts at all (i.e. ones that aren't the default
+        To preload custom fonts, or to use custom fonts at all (i.e. ones that aren't the default
         'noto_sans' font) you must first add the paths to the files for those fonts, then load the
         specific fonts with a list of font descriptions in a dictionary form like so:
 
@@ -458,12 +460,12 @@ class UIManager(IUIManagerInterface):
 
     def print_unused_fonts(self):
         """
-        Helps you identify which pre-loaded fonts you are actually still using in your project
+        Helps you identify which preloaded fonts you are actually still using in your project
         after you've fiddled around with the text a lot by printing out a list of fonts that have
         not been used yet at the time this function is called.
 
         Of course if you don't run the code path in which a particular font is used before calling
-        this function then it won't be of much use, so take it's results under advisement rather
+        this function then it won't be of much use, so take its results under advisement rather
         than as gospel.
 
         """
@@ -563,7 +565,7 @@ class UIManager(IUIManagerInterface):
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.surface.Surface
+        :return: An empty and therefore invisible pygame.surface.Surface
         """
         return self.universal_empty_surface
 
@@ -577,7 +579,7 @@ class UIManager(IUIManagerInterface):
                         wrap_width: Optional[int] = None,
                         text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
         """
-        Creates a tool tip ands returns it. Have hidden this away in the manager so we can call it
+        Creates a tool tip ands returns it. Have hidden this away in the manager, so we can call it
         from other UI elements and create tool tips without creating cyclical import problems.
 
         :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
@@ -599,7 +601,7 @@ class UIManager(IUIManagerInterface):
 
     def _update_mouse_position(self):
         """
-        Wrapping pygame mouse position so we can mess with it.
+        Wrapping pygame mouse position, so we can mess with it.
         """
         self.mouse_position = self.calculate_scaled_mouse_position(pygame.mouse.get_pos())
 
@@ -636,8 +638,8 @@ class UIManager(IUIManagerInterface):
     def get_locale(self):
         return self._locale
 
-    def set_text_input_hovered(self, hovering_text_input: bool):
-        self.text_input_hovered = hovering_text_input
+    def set_text_hovered(self, hovering_text: bool):
+        self.text_hovered = hovering_text
 
     def get_hovering_any_element(self) -> bool:
         return self.hovering_any_ui_element

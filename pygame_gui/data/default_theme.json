@@ -577,5 +577,36 @@
             "border_width": "1",
             "shadow_width": "0"
         }
+    },
+    "tab_container.@tab_title_button":
+    {
+        "colours":
+        {
+            "normal_bg": "#4c5052",
+            "hovered_bg": "#63686b",
+            "disabled_bg": "#25292e",
+            "selected_bg": "#5c6062",
+            "active_bg": "#5c6062",
+            "normal_border": "#3c4042",
+            "selected_border": "#5c6062",
+            "hovered_border": "#5c6062",
+            "disabled_border": "#35393e",
+            "active_border": "#5c6062"
+        },
+        "misc":
+        {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "5,5,0,0",
+            "border_width": "1",
+            "shadow_width": "0"
+        }
+    },
+    "tab_container.panel":
+    {
+        "misc":
+        {
+            "border_width": "1",
+            "shadow_width": "0"
+        }
     }
 }

@@ -12,13 +12,22 @@ you only want to alter one.
 Horizontal & Vertical positioning
 ---------------------------------
 
-Just as in regular pygame, the x and y axis used by pygame GUI run from 0 in the top left corner down to the pixel
+Just as in regular pygame-ce, the x and y axis used by pygame GUI run from 0 in the top left corner down to the pixel
 size of whatever surface/window you are positioning your elements on.
 
 The standard way of positioning elements is through using a 'relative rectangle'; this rectangle's position is always
 relative to the container it is inside of. If you do not supply a container when creating your element, they will be
 assigned the default 'root container' which  is created when you make the GUI's UI Manager and is the same size as the
 supplied window_resolution parameter.
+
+Relative rectangles, by default also follow the pygame-ce style of being defined by four values - a top position, a left
+position, a width and a height. Unlike pygame-ce we also add a couple of extra features for some elements. For example,
+UIButtons & UILabels can also have a 'dynamic' width and/or height - which means their final width and height will be
+determined by the width and height of the text supplied when they are created. To specify the width or height as dynamic
+you just set the corresponding value in their relative rect parameter to '-1'.
+
+As you will see later, we can also change what the 'top' and 'left' positioning values are relative to. By default they
+are relative to the 'top' and 'left' position values of their container - but adding an anchor can change this.
 
 If you do supply a container when creating an element, by default it will normally be positioned relative to the top
 left corner of the container. For example, if we were to position a 'hello' UIButton element inside of a UIWindow

@@ -712,7 +712,7 @@ class TestTextBoxLayout:
 
         assert layout.cursor_text_row is not None
         assert layout.cursor_text_row.cursor_index == 2
-        assert layout.cursor_text_row.cursor_draw_width == 17
+        assert layout.cursor_text_row.cursor_draw_width == 18
 
         layout.cursor_text_row.edit_cursor_active = True
         layout.set_cursor_position(10)
@@ -752,7 +752,7 @@ class TestTextBoxLayout:
         layout.set_cursor_from_click_pos((17, 24))
         assert layout.cursor_text_row is not None
         assert layout.cursor_text_row.cursor_index == 2
-        assert layout.cursor_text_row.cursor_draw_width == 17
+        assert layout.cursor_text_row.cursor_draw_width == 18
 
         layout.cursor_text_row.edit_cursor_active = True
         layout.set_cursor_from_click_pos((17, 24))

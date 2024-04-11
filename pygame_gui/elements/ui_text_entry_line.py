@@ -228,6 +228,7 @@ class UITextEntryLine(UIElement):
                               'font': display_font,
                               'text': display_text if len(display_text) > 0 else translate(self.placeholder_text),
                               'text_width': -1,
+                              'max_text_width': -1,
                               'text_horiz_alignment': text_horiz_alignment,
                               'text_vert_alignment': 'centre',
                               'text_horiz_alignment_padding': self.padding[0],
@@ -324,7 +325,7 @@ class UITextEntryLine(UIElement):
             return
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
         if self.hovered:
-            self.ui_manager.set_text_input_hovered(True)
+            self.ui_manager.set_text_hovered(True)
 
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta

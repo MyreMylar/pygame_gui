@@ -42,7 +42,7 @@ class GUIFontPygame(IGUIFontInterface):
                 self.__internal_font.bold = style['bold']
                 self.__internal_font.italic = style['italic']
 
-    def size(self, text: str):
+    def size(self, text: str) -> Tuple[int, int]:
         return self.get_rect(text).size
 
     @property

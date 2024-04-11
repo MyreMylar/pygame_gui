@@ -30,7 +30,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     Warning - it's parent container visibility may override this.
     """
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
                  manager: IUIManagerInterface,
                  *,
                  starting_height: int = 1,
