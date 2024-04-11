@@ -228,6 +228,7 @@ class UITextEntryLine(UIElement):
                               'font': display_font,
                               'text': display_text if len(display_text) > 0 else translate(self.placeholder_text),
                               'text_width': -1,
+                              'max_text_width': -1,
                               'text_horiz_alignment': text_horiz_alignment,
                               'text_vert_alignment': 'centre',
                               'text_horiz_alignment_padding': self.padding[0],

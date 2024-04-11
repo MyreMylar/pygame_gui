@@ -11,7 +11,7 @@ from pygame_gui.elements import UIButton, UIPanel
 
 class UITabContainer(UIElement):
     """
-    A tab container. The displayed panel can be switched by clicking on the tab.
+    ** EXPERIMENTAL ** A tab container. The displayed panel can be switched by clicking on the tab.
 
     :param relative_rect: Normally a rectangle describing the position (relative to its container) and
                           dimensions. Also accepts a position Tuple, or Vector2 where the dimensions
@@ -67,11 +67,11 @@ class UITabContainer(UIElement):
         return len(self.tabs)
 
     def switch_current_container(self, index: int):
-        current_container = self.get_container()
+        current_container = self.get_tab_container()
         if current_container is not None:
             current_container.hide()
         self.current_container_index = index
-        self.get_container().show()
+        self.get_tab_container().show()
 
     def add_tab(self, title_text: str, title_object_id: str) -> int:
         """
@@ -123,7 +123,7 @@ class UITabContainer(UIElement):
         else:
             return tab["button"]
 
-    def get_container(self, tab_id=None):
+    def get_tab_container(self, tab_id=None) -> Optional[UIPanel]:
         tab = self.get_tab(tab_id)
         if tab is None:
             return None
@@ -224,34 +224,6 @@ class UITabContainer(UIElement):
                 button.select()
             else:
                 container.hide()
-
-    def rebuild_from_changed_theme_data(self):
-        """
-        Checks if any theming parameters have changed, and if so triggers a full rebuild of the
-        button's drawable shape.
-        """
-        super().rebuild_from_changed_theme_data()
-        has_any_changed = False
-
-        if self._check_misc_theme_data_changed(attribute_name='shape',
-                                               default_value='rectangle',
-                                               casting_func=str,
-                                               allowed_values=['rectangle',
-                                                               'rounded_rectangle']):
-            has_any_changed = True
-
-        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
-                                               default_value=1.0,
-                                               casting_func=float):
-            has_any_changed = True
-
-        if self._check_shape_theming_changed(defaults={'border_width': 1,
-                                                       'shadow_width': 15,
-                                                       'shape_corner_radius': 2}):
-            has_any_changed = True
-
-        if has_any_changed:
-            self.rebuild()
 
     def process_event(self, event: pygame.Event):
         """
