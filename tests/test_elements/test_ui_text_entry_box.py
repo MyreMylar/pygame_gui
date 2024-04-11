@@ -1782,6 +1782,19 @@ class TestUITextEntryBox:
 
         assert text_entry.rect.topleft == (100, 80)
 
+    def test_placeholder_text(self, _init_pygame, default_ui_manager,
+                              _display_surface_return_none):
+        text_box = UITextEntryBox(
+            initial_text="",
+            relative_rect=pygame.Rect(100, 100, 200, 300),
+            manager=default_ui_manager,
+            placeholder_text='Enter text here...')
+        assert text_box.image is not None
+        assert text_box.text_box_layout.plain_text == "Enter text here..."
+
+        text_box.focus()
+        assert text_box.text_box_layout.plain_text == ""
+
 
 if __name__ == '__main__':
     pytest.console_main()

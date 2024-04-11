@@ -29,6 +29,8 @@ class UITextEntryBox(UITextBox):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param: placeholder_text: If the text line is empty, and not focused, this placeholder text will be
+                              shown instead.
     """
 
     def __init__(self,

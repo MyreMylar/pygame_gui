@@ -83,9 +83,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
+    :param pre_parsing_enabled: when enabled will replace all '\n' characters with html <br> tags.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated text
                         useful when you have multiple translations that need variables inserted
                         in the middle.
+    :param allow_split_dashes: sets whether long words that don't fit on a single line will be split with a dash
+                               or just split without a dash (more compact).
+    :param plain_text_display_only: no markup based styling & formatting will be done on the input text.
+    :param should_html_unescape_input_text: when enabled turns plain text encoded html back into html for
+                                            this text box. e.g. &lt; will become <
+    :param placeholder_text: If the text line is empty, and not focused, this placeholder text will be
+                              shown instead.
     """
 
     def __init__(self,
