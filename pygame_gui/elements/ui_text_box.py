@@ -104,7 +104,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                  text_kwargs: Optional[Dict[str, str]] = None,
                  allow_split_dashes: bool = True,
                  plain_text_display_only: bool = False,
-                 should_html_unescape_input_text: bool = False):
+                 should_html_unescape_input_text: bool = False,
+                 placeholder_text: Optional[str] = None):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self.scroll_bar = None
@@ -124,6 +125,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.html_text = html.unescape(html_text)
         else:
             self.html_text = html_text
+
+        self.placeholder_text = placeholder_text
+
         self.appended_text = ""
         self.text_kwargs = {}
         if text_kwargs is not None:
@@ -665,7 +669,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         Parses HTML styled string text into a format more useful for styling rendered text.
         """
-        feed_input = self.html_text
+        if len(self.html_text) == 0 and self.placeholder_text is not None and not self.is_focused:
+            feed_input = self.placeholder_text
+        else:
+            feed_input = self.html_text
         if self.plain_text_display_only:
             feed_input = html.escape(feed_input)  # might have to add true to second param here for quotes
         feed_input = self._pre_parse_text(translate(feed_input, **self.text_kwargs) + self.appended_text)
@@ -1468,6 +1475,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Called when this element is no longer the current focus.
         """
         super().unfocus()
+        if self.placeholder_text is not None:
+            self.rebuild()
 
     def focus(self):
         """
@@ -1475,6 +1484,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         super().focus()
         self.cursor_has_moved_recently = True
+        if self.placeholder_text is not None:
+            self.rebuild()
 
     def _process_edit_pos_move_key(self, event: Event) -> bool:
         """
