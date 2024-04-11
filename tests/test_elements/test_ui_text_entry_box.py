@@ -1794,6 +1794,8 @@ class TestUITextEntryBox:
 
         text_box.focus()
         assert text_box.text_box_layout.plain_text == ""
+        text_box.unfocus()
+        assert text_box.text_box_layout.plain_text == "Enter text here..."
 
 
 if __name__ == '__main__':
