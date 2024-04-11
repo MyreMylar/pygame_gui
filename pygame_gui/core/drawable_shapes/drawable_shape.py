@@ -144,26 +144,40 @@ class DrawableShape:
                  containing_rect: pygame.Rect,
                  theming_parameters: Dict,
                  states: List[str],
-                 manager: IUIManagerInterface):
+                 manager: IUIManagerInterface,
+                 *,
+                 allow_text_outside_width_border=True,
+                 allow_text_outside_height_border=True,
+                 text_x_scroll_enabled=False,
+                 editable_text=False):
 
         self.theming = theming_parameters
         self.containing_rect = containing_rect.copy()
         self.dynamic_width = True if self.containing_rect.width == -1 else False
         self.dynamic_height = True if self.containing_rect.height == -1 else False
         self.text_view_rect: Optional[pygame.Rect] = None
+        self.allow_text_outside_width_border = allow_text_outside_width_border
+        self.allow_text_outside_height_border = allow_text_outside_height_border
+        self.text_x_scroll_enabled = text_x_scroll_enabled
+        self.editable_text = editable_text
 
         self.shadow_width = 0
         self.border_width = 0
-        self.shape_corner_radius = 0
-        self.rounded_corner_offset = 0
+        self.shape_corner_radius = [0, 0, 0, 0]
+        self.rounded_corner_width_offsets = [0, 0]
+        self.rounded_corner_height_offsets = [0, 0]
         if 'shadow_width' in self.theming:
             self.shadow_width = self.theming['shadow_width']
         if 'border_width' in self.theming:
             self.border_width = self.theming['border_width']
         if 'shape_corner_radius' in self.theming:
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            self.rounded_corner_offset = int(self.shape_corner_radius -
-                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+            tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+            bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+            br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
+            self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
+            self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
 
         self.text_box_layout: Optional[TextBoxLayout] = None
         self.build_text_layout()
@@ -212,7 +226,7 @@ class DrawableShape:
         if self.dynamic_width:
             # check to see if we have text and a font, this won't work with HTML
             # text - throw a warning?
-            # What we really need to to is process the html text layout by this
+            # What we really need to do is process the html text layout by this
             # point but hold off finalising and passing default colours until later?
             if self.text_box_layout is not None:
                 text_width = self.text_box_layout.layout_rect.width
@@ -226,7 +240,8 @@ class DrawableShape:
                 final_width = (text_width +
                                (2 * self.shadow_width) +
                                (2 * self.border_width) +
-                               (2 * self.rounded_corner_offset) +
+                               self.rounded_corner_width_offsets[0] +
+                               self.rounded_corner_width_offsets[1] +
                                (2 * horiz_padding))
 
                 self.text_view_rect.width = text_width
@@ -245,7 +260,8 @@ class DrawableShape:
                 final_height = (text_height +
                                 (2 * self.shadow_width) +
                                 (2 * self.border_width) +
-                                (2 * self.rounded_corner_offset) +
+                                self.rounded_corner_height_offsets[0] +
+                                self.rounded_corner_height_offsets[1] +
                                 (2 * vert_padding))
                 self.text_view_rect.height = text_height
                 self.text_box_layout.view_rect.height = self.text_view_rect.height
@@ -335,8 +351,12 @@ class DrawableShape:
         if ('shape_corner_radius' in self.theming and
                 self.shape_corner_radius != self.theming['shape_corner_radius']):
             self.shape_corner_radius = self.theming['shape_corner_radius']
-            self.rounded_corner_offset = int(self.shape_corner_radius -
-                                             (math.sin(math.pi / 4) * self.shape_corner_radius))
+            tl_offset = round(self.shape_corner_radius[0] - (math.sin(math.pi / 4) * self.shape_corner_radius[0]))
+            tr_offset = round(self.shape_corner_radius[1] - (math.sin(math.pi / 4) * self.shape_corner_radius[1]))
+            bl_offset = round(self.shape_corner_radius[2] - (math.sin(math.pi / 4) * self.shape_corner_radius[2]))
+            br_offset = round(self.shape_corner_radius[3] - (math.sin(math.pi / 4) * self.shape_corner_radius[3]))
+            self.rounded_corner_width_offsets = [max(tl_offset, bl_offset), max(tr_offset, br_offset)]
+            self.rounded_corner_height_offsets = [max(tl_offset, tr_offset), max(bl_offset, br_offset)]
             shape_params_changed = True
 
         if shape_params_changed or self.initial_text_layout_size != self.containing_rect.size:
@@ -488,7 +508,10 @@ class DrawableShape:
             if 'text_vert_alignment_padding' in self.theming:
                 vert_padding = self.theming['text_vert_alignment_padding']
 
-            total_text_buffer = self.shadow_width + self.border_width + self.rounded_corner_offset
+            total_text_buffer = ((self.shadow_width * 2) +
+                                 (self.border_width * 2) +
+                                 self.rounded_corner_width_offsets[0] +
+                                 self.rounded_corner_width_offsets[1])
             self.text_view_rect = self.containing_rect.copy()
             self.text_view_rect.x = 0
             self.text_view_rect.y = 0
@@ -496,25 +519,31 @@ class DrawableShape:
                 self.text_view_rect.width = -1
             else:
                 self.text_view_rect.width = max(0, self.text_view_rect.width -
-                                                ((total_text_buffer * 2) + (2 * horiz_padding)))
+                                                (total_text_buffer + (2 * horiz_padding)))
 
             if self.dynamic_height:
                 self.text_view_rect.height = -1
             else:
                 self.text_view_rect.height = max(0, self.text_view_rect.height -
-                                                 ((total_text_buffer * 2) + (2 * vert_padding)))
+                                                 (total_text_buffer + (2 * vert_padding)))
 
             text_actual_area_rect = self.text_view_rect.copy()
-            text_actual_area_rect.x = total_text_buffer + horiz_padding
-            text_actual_area_rect.y = total_text_buffer + vert_padding
-            if 'text_width' in self.theming:
-                text_actual_area_rect.width = self.theming['text_width']
-            if 'text_height' in self.theming:
-                text_actual_area_rect.height = self.theming['text_height']
+            text_actual_area_rect.x = (self.shadow_width + self.border_width +
+                                       self.rounded_corner_width_offsets[0] + horiz_padding)
+            text_actual_area_rect.y = (self.shadow_width + self.border_width +
+                                       self.rounded_corner_height_offsets[0] + vert_padding)
 
             text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
                 text_shadow_data = self.theming['text_shadow']
+
+            # gather any override parameters for text_width and text_height now
+            # as we need to feed them into max_dimensions
+            max_dimensions = [self.containing_rect.width, self.containing_rect.height]
+            if 'text_width' in self.theming:
+                max_dimensions[0] = self.theming['text_width']
+            if 'text_height' in self.theming:
+                max_dimensions[1] = self.theming['text_height']
             text_chunk = TextLineChunkFTFont(self.theming['text'],
                                              self.theming['font'],
                                              underlined=False,
@@ -522,8 +551,37 @@ class DrawableShape:
                                              using_default_text_colour=True,
                                              bg_colour=pygame.Color('#00000000'),
                                              text_shadow_data=text_shadow_data,
-                                             max_dimensions=(text_actual_area_rect.width,
-                                                             text_actual_area_rect.height))
+                                             max_dimensions=max_dimensions)
+
+            # if our text chunk doesn't fit in the space inside the shadow, border and padding
+            # expand available text space to the whole button area - this is helpful for very small
+            # and oddly shaped buttons
+            if (self.allow_text_outside_height_border and
+                    not self.dynamic_height and text_chunk.height > text_actual_area_rect.height):
+                text_actual_area_rect.height = self.containing_rect.height
+                # if we are centred clear out the padding entirely,
+                # if top aligned add just the padding (might help give
+                # a bit of manual control in some odd cases)
+                text_actual_area_rect.y = 0
+                if 'text_vert_alignment' in self.theming:
+                    if self.theming['text_vert_alignment'] in ['top']:
+                        text_actual_area_rect.y = vert_padding
+                self.text_view_rect.height = self.containing_rect.height
+            if (self.allow_text_outside_width_border and
+                    not self.dynamic_width and text_chunk.width > text_actual_area_rect.width):
+                text_actual_area_rect.width = self.containing_rect.width
+                text_actual_area_rect.x = 0
+                if 'text_horiz_alignment' in self.theming:
+                    if self.theming['text_horiz_alignment'] in ['left']:
+                        text_actual_area_rect.x = horiz_padding
+                self.text_view_rect.width = self.containing_rect.width
+
+            # still allow overriding of text area with theming parameters
+            if 'text_width' in self.theming:
+                text_actual_area_rect.width = self.theming['text_width']
+            if 'text_height' in self.theming:
+                text_actual_area_rect.height = self.theming['text_height']
+
             text_chunk.should_centre_from_baseline = True
             default_font_data = {"font": self.theming['font'],
                                  "font_colour": (self.theming['normal_text']
@@ -532,9 +590,13 @@ class DrawableShape:
                                  "bg_colour": pygame.Color('#00000000')}
             self.text_box_layout = TextBoxLayout(deque([text_chunk]), text_actual_area_rect,
                                                  self.text_view_rect, line_spacing=1.25,
-                                                 default_font_data=default_font_data)
+                                                 default_font_data=default_font_data,
+                                                 text_x_scroll_enabled=self.text_x_scroll_enabled,
+                                                 editable=self.editable_text)
             if 'selected_bg' in self.theming:
                 self.text_box_layout.selection_colour = self.theming['selected_bg']
+            if 'selected_text' in self.theming:
+                self.text_box_layout.selection_text_colour = self.theming['selected_text']
             if 'text_cursor_colour' in self.theming:
                 self.text_box_layout.set_cursor_colour(self.theming['text_cursor_colour'])
             self.align_all_text_rows()

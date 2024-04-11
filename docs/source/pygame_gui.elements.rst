@@ -4,6 +4,22 @@ pygame\_gui.elements package
 Submodules
 ----------
 
+pygame\_gui.elements.ui\_2d\_slider module
+------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_2d_slider
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_auto\_resizing\_container module
+---------------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_auto_resizing_container
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.elements.ui\_button module
 --------------------------------------
 
@@ -16,6 +32,14 @@ pygame\_gui.elements.ui\_drop\_down\_menu module
 ------------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_drop_down_menu
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_horizontal\_scroll\_bar module
+-------------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_horizontal_scroll_bar
    :members:
    :no-undoc-members:
    :show-inheritance:
@@ -68,6 +92,14 @@ pygame\_gui.elements.ui\_screen\_space\_health\_bar module
    :no-undoc-members:
    :show-inheritance:
 
+pygame\_gui.elements.ui\_scrolling\_container module
+----------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_scrolling_container
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
 pygame\_gui.elements.ui\_selection\_list module
 -----------------------------------------------
 
@@ -77,7 +109,7 @@ pygame\_gui.elements.ui\_selection\_list module
    :show-inheritance:
 
 pygame\_gui.elements.ui\_status\_bar module
-----------------------------------------------------------
+-------------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_status_bar
    :members:
@@ -88,6 +120,14 @@ pygame\_gui.elements.ui\_text\_box module
 -----------------------------------------
 
 .. automodule:: pygame_gui.elements.ui_text_box
+   :members:
+   :no-undoc-members:
+   :show-inheritance:
+
+pygame\_gui.elements.ui\_text\_entry\_box module
+------------------------------------------------
+
+.. automodule:: pygame_gui.elements.ui_text_entry_box
    :members:
    :no-undoc-members:
    :show-inheritance:

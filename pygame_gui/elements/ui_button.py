@@ -214,8 +214,8 @@ class UIButton(UIElement):
         button for a purpose(e.g. dragging a window around by it's menu bar) the hover radius can
         be made to grow so we don't keep losing touch with whatever we are moving.
 
-        :param hover_x: horizontal pixel co-ordinate to test.
-        :param hover_y: vertical pixel co-ordinate to test
+        :param hover_x: horizontal pixel coordinate to test.
+        :param hover_y: vertical pixel coordinate to test
 
         :return: Returns True if we are hovering.
 
@@ -620,7 +620,7 @@ class UIButton(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
@@ -775,7 +775,10 @@ class UIButton(UIElement):
 
     def _calc_dynamic_size(self):
         if self.dynamic_width or self.dynamic_height:
-            self.set_dimensions(self.image.get_size())
+            if self.image.get_size() == (0, 0):
+                self._set_dimensions(self._get_pre_clipped_image_size())
+            else:
+                self._set_dimensions(self.image.get_size())
 
             # if we have anchored the left side of our button to the right of its container then
             # changing the width is going to mess up the horiz position as well.

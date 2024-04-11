@@ -83,8 +83,16 @@ class ColourGradient(IColourGradientInterface):
         """
         # scale the gradient up to the right size
         input_surface_size = input_surface.get_size()
-        inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
-        gradient_size = inverse_rotated_input.get_rect().size
+        if rect is not None:
+            input_surface_size = rect.size
+        gradient_size = input_surface_size
+        if self.angle_direction != 0:
+            if rect is not None:
+                clip_area_surf = pygame.surface.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
+                inverse_rotated_input = pygame.transform.rotate(clip_area_surf, -self.angle_direction)
+            else:
+                inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
+            gradient_size = inverse_rotated_input.get_rect().size
         gradient_surf = pygame.surface.Surface(gradient_size, flags=pygame.SRCALPHA, depth=32)
 
         pygame.transform.scale(self.gradient_surface, gradient_size, gradient_surf)

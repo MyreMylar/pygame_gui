@@ -93,7 +93,6 @@ class UISelectionList(UIElement):
         self.background_image = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape_corner_radius = 0
         self.shape = 'rectangle'
 
         self.scroll_bar = None  # type: Union[UIVerticalScrollBar, None]
@@ -128,15 +127,21 @@ class UISelectionList(UIElement):
         self._raw_item_list = [item for item in self._raw_item_list if item not in items_to_remove]
         self.set_item_list(self._raw_item_list)
 
-    def get_single_selection(self) -> Union[str, None]:
+    def get_single_selection(self, include_object_id: bool = False) -> Union[Tuple[str, str], str, None]:
         """
         Get the selected item in a list, if any. Only works if this is a single-selection list.
+
+        :param include_object_id: if True adds the object id of this list item to the returned list of Tuples.
+                                  If False we just get a list of the visible text strings only.
 
         :return: A single item name as a string or None.
 
         """
         if not self.allow_multi_select:
-            selected_list = [item['text'] for item in self.item_list if item['selected']]
+            if include_object_id:
+                selected_list = [(item['text'], item['object_id']) for item in self.item_list if item['selected']]
+            else:
+                selected_list = [item['text'] for item in self.item_list if item['selected']]
             if len(selected_list) == 1:
                 return selected_list[0]
             elif len(selected_list) == 0:
@@ -148,17 +153,23 @@ class UISelectionList(UIElement):
             raise RuntimeError('Requesting single selection,'
                                ' from multi-selection list')
 
-    def get_multi_selection(self) -> List[str]:
+    def get_multi_selection(self, include_object_id: bool = False) -> Union[List[str], List[Tuple[str, str]]]:
         """
         Get all the selected items in our selection list. Only works if this is a
         multi-selection list.
+
+        :param include_object_id: if True adds the object id of this list item to the returned list of Tuples.
+                                  If False we just get a list of the visible text strings only.
 
         :return: A list of the selected items in our selection list. May be empty if nothing
                  selected.
 
         """
         if self.allow_multi_select:
-            return [item['text'] for item in self.item_list if item['selected']]
+            if include_object_id:
+                return [(item['text'], item["object_id"]) for item in self.item_list if item['selected']]
+            else:
+                return [item['text'] for item in self.item_list if item['selected']]
         else:
             raise RuntimeError('Requesting multi selection, from single-selection list')
 
@@ -610,7 +621,7 @@ class UISelectionList(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
-                                                       'shape_corner_radius': 2}):
+                                                       'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(attribute_name='list_item_height',

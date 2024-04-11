@@ -600,6 +600,36 @@ class TestUIPanel:
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
 
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        panel = UIPanel(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=panel)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=panel)
+        
+        assert button_1 in panel
+        assert button_2 in panel
+        count = 0
+        for button in panel:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
+
+    def test_are_contents_hovered(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
+                                  _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIPanel(pygame.Rect(100, 100, 200, 200), manager=manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(125, 50, 50, 50), text="2",
+                            manager=manager, container=container)
+        manager.mouse_position = (155, 155)
+        button_1.check_hover(0.1, False)
+        button_2.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+
 
 if __name__ == '__main__':
     pytest.console_main()

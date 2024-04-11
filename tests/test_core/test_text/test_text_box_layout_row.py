@@ -463,12 +463,12 @@ class TestTextBoxLayoutRow:
         layout_row.finalise(layout_surface)
 
         assert layout_row.edit_cursor_active is False
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#00000000')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#00000000')
 
         layout_row.toggle_cursor()
 
         assert layout_row.edit_cursor_active is True
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#FFFFFF')
 
         # for x in range(0, 30):
         #     for y in range(0, 30):
@@ -547,7 +547,7 @@ class TestTextBoxLayoutRow:
         layout_row.toggle_cursor()
 
         assert layout_row.edit_cursor_active is True
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#FFFFFF')
         assert layout_row.cursor_index == 0
 
         layout_row.set_cursor_from_click_pos((44, 5), num_rows=1)
@@ -556,7 +556,7 @@ class TestTextBoxLayoutRow:
         layout_row.toggle_cursor()
 
         assert layout_row.edit_cursor_active is True
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#00000000')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#00000000')
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 
@@ -605,7 +605,7 @@ class TestTextBoxLayoutRow:
         layout_row.toggle_cursor()
 
         assert layout_row.edit_cursor_active is True
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#FFFFFF')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#FFFFFF')
         assert layout_row.cursor_index == 0
         assert layout_row.cursor_draw_width == 0
 
@@ -615,7 +615,7 @@ class TestTextBoxLayoutRow:
         layout_row.toggle_cursor()
 
         assert layout_row.edit_cursor_active is True
-        assert layout_surface.get_at((1, 5)) == pygame.Color('#00000000')
+        assert layout_surface.get_at((0, 5)) == pygame.Color('#00000000')
         assert layout_row.cursor_index == 3
         assert layout_row.cursor_draw_width == 44
 

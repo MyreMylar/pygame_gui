@@ -16,6 +16,7 @@ class ImageLayoutRect(TextLayoutRect):
         self.image_path = image_path
         self.image_surf = load(image_path).convert_alpha().premul_alpha()
         self.padding = padding
+        self.is_selected = False
         self.size_with_padding = (self.image_surf.get_width() + padding.left + padding.right,
                                   self.image_surf.get_height() + padding.top + padding.bottom)
         super().__init__(self.size_with_padding, float_pos=float_position)

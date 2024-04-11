@@ -29,9 +29,10 @@ class GUISprite:
             self.add(*groups)
 
     def add(self, *groups):
-        """add the sprite to groups
+        """
+        add the sprite to groups
 
-        Sprite.add(*groups): return None
+        :param groups: sprite groups to add to.
 
         Any number of Group instances can be passed as arguments. The
         Sprite will be added to the Groups it is not already a member of.
@@ -49,7 +50,7 @@ class GUISprite:
     def remove(self, *groups):
         """remove the sprite from groups
 
-        Sprite.remove(*groups): return None
+        :param groups: sprite groups to remove from.
 
         Any number of Group instances can be passed as arguments. The Sprite
         will be removed from the Groups it is currently a member of.
@@ -127,7 +128,7 @@ class GUISprite:
         """
         A stub to override.
 
-        :param time_delta the time passed in seconds between calls to this function.
+        :param time_delta: the time passed in seconds between calls to this function.
         """
 
     @property
@@ -227,6 +228,7 @@ class LayeredGUIGroup(LayeredUpdates):
     """
     A sprite group specifically for the GUI. Similar to pygame's LayeredDirty group but with the
     dirty flag stuff removed for simplicity and speed.
+    TODO: sever this entirely from LayeredUpdates at some point to fix the type hinting
     """
     def __init__(self, *sprites):
         """initialize group.
@@ -237,7 +239,7 @@ class LayeredGUIGroup(LayeredUpdates):
         self.visible = []
         self.should_update_visibility = True
 
-    def add_internal(self, sprite, layer=None):
+    def add_internal(self, sprite: GUISprite, layer=None):
         """Do not use this method directly.
 
         It is used by the group to add a sprite internally.
@@ -258,7 +260,7 @@ class LayeredGUIGroup(LayeredUpdates):
         LayeredUpdates.remove_internal(self, sprite)
         self.should_update_visibility = True
 
-    def change_layer(self, sprite, new_layer):
+    def change_layer(self, sprite: GUISprite, new_layer):
         LayeredUpdates.change_layer(self, sprite, new_layer)
         self.should_update_visibility = True
 
@@ -269,6 +271,11 @@ class LayeredGUIGroup(LayeredUpdates):
         surface.blits(self.visible)
 
     def update(self, *args, **kwargs) -> None:
+        """
+
+        :param args:
+        :param kwargs:
+        """
         super().update(*args, **kwargs)
         if self.should_update_visibility:
             self.should_update_visibility = False

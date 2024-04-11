@@ -9,15 +9,19 @@ from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 from pygame_gui.core.object_id import ObjectID
+from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 
 
 class IUIManagerInterface(metaclass=ABCMeta):
     """
-    A meta class that defines the interface that a UI Manager uses.
+    A metaclass that defines the interface that a UI Manager uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
     """
+
+    def __init__(self):
+        self.window_resolution = None
 
     @abstractmethod
     def get_double_click_time(self) -> float:
@@ -45,7 +49,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_sprite_group(self) -> pygame.sprite.LayeredDirty:
+    def get_sprite_group(self) -> LayeredGUIGroup:
         """
         Gets the sprite group used by the entire UI to keep it in the correct order for drawing and
         processing input.
@@ -64,7 +68,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: int = 2) -> pygame.surface.Surface:
+                   shape: str = 'rectangle', corner_radius: Optional[List[int]] = None) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -172,7 +176,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_focus_set(self, focus: Union[IUIElementInterface, Set[IUIElementInterface]]):
+    def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
         """
         Set a set of element as the focused set.
 
@@ -203,7 +207,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
                                               Tuple[int, ...]]):
         """
         This is for users of the library to set the currently active cursor, it will be currently
-        only be overriden by the resizing cursors.
+        only be overridden by the resizing cursors.
 
         The expected input is in the same format as the standard pygame cursor module, except
         without expanding the initial Tuple. So, to call this function with the default pygame
@@ -219,7 +223,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         Sometimes we want to hide sprites or just have sprites with no visual component, when we
         do we can just use this empty surface to save having lots of empty surfaces all over memory.
 
-        :return: An empty, and therefore invisible pygame.surface.Surface
+        :return: An empty and therefore invisible pygame.surface.Surface
 
         """
 
@@ -265,15 +269,15 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
         Get the locale language code being used in the UIManager
 
-        :return: A two letter ISO 639-1 code for the current locale.
+        :return: A two-letter ISO 639-1 code for the current locale.
         """
 
     @abstractmethod
-    def set_text_input_hovered(self, hovering_text_input: bool):
+    def set_text_hovered(self, hovering_text_input: bool):
         """
-        Set to true when hovering an area text can be input into.
+        Set to true when hovering an area containing selectable text.
 
-        Currently switches the cursor to the I-Beam cursor.
+        Currently, switches the cursor to the I-Beam cursor.
 
         :param hovering_text_input: set to True to toggle the I-Beam cursor
         """

@@ -34,11 +34,11 @@ Misc
 :class:`UIVerticalScrollBar <pygame_gui.elements.UIVerticalScrollBar>` accepts the following miscellaneous parameters in a 'misc' block:
 
  - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
- - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius used for the rounded corners.
+ - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius, or radii, used for the rounded corners. Use a single integer to set all corners to the same radius, or four integers separated by commas to set each corner individually.
  - "**border_width**" - the width in pixels of the border around the bar. Defaults to 1.
  - "**shadow_width**" - the width in pixels of the shadow behind the bar. Defaults to 1.
  - "**enable_arrow_buttons**" - Enables or disables the arrow buttons for the scroll bar. "1" is enabled, "0" is disabled. Defaults to "1".
- - "**tool_tip_delay**" - time in seconds before the button's tool tip (if it has one) will appear. Default is "1.0".
+ - "**tool_tip_delay**" - time in seconds before the scroll bar's tool tip (if it has one) will appear. Default is "1.0".
 
 Sub-elements
 --------------

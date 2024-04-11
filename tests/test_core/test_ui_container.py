@@ -6,6 +6,7 @@ from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIVerticalScrollBar
+from pygame_gui.ui_manager import UIManager
 
 
 class TestUIContainer:
@@ -144,7 +145,7 @@ class TestUIContainer:
         default_ui_manager.mouse_position = (150, 150)
         assert container.check_hover(0.5, False) is True  # already hovering
         container.kill()
-        assert container.check_hover(0.5, False) is False  # dead so can't hover any more
+        assert container.check_hover(0.5, False) is False  # dead so can't hover anymore
 
     def test_resizing_with_anchors(self, _init_pygame, default_ui_manager,
                                    _display_surface_return_none):
@@ -231,6 +232,68 @@ class TestUIContainer:
         container.hide()
         assert container.visible == 0
         assert button.visible == 1
+
+    def test_expand_left(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                         _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0)
+        button = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="",
+                          manager=default_ui_manager, container=container)
+
+        assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
+        assert button.get_relative_rect() == pygame.Rect(50, 50, 50, 50)
+        assert container.get_relative_rect() == pygame.Rect(100, 100, 200, 200)
+
+        container.expand_left(50)
+
+        assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
+        assert button.get_relative_rect() == pygame.Rect(100, 50, 50, 50)
+        assert container.get_relative_rect() == pygame.Rect(50, 100, 250, 200)
+
+    def test_expand_top(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                        _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager, visible=0)
+        button = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="",
+                          manager=default_ui_manager, container=container)
+
+        assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
+        assert button.get_relative_rect() == pygame.Rect(50, 50, 50, 50)
+        assert container.get_relative_rect() == pygame.Rect(100, 100, 200, 200)
+
+        container.expand_top(50)
+
+        assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
+        assert button.get_relative_rect() == pygame.Rect(50, 100, 50, 50)
+        assert container.get_relative_rect() == pygame.Rect(100, 50, 200, 250)
+
+    def test_iteration(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                       _display_surface_return_none):
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=default_ui_manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(150, 50, 50, 50), text="2",
+                            manager=default_ui_manager, container=container)
+        
+        assert button_1 in container
+        assert button_2 in container
+        count = 0
+        for button in container:
+            button.get_relative_rect()
+            count += 1
+        assert count == 2
+
+    def test_are_contents_hovered(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
+                                  _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIContainer(pygame.Rect(100, 100, 200, 200), manager=manager)
+        button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                            manager=manager, container=container)
+        button_2 = UIButton(relative_rect=pygame.Rect(125, 50, 50, 50), text="2",
+                            manager=manager, container=container)
+        manager.mouse_position = (155, 155)
+        button_1.check_hover(0.1, False)
+        button_2.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
 
 
 if __name__ == '__main__':

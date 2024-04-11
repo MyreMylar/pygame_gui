@@ -11,7 +11,9 @@ Once a layout for the text chunk is finalised the chunk's render function can be
 chunk onto it's final destination.
 
 """
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, List
+
+import pygame
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -34,7 +36,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  using_default_text_colour: bool,
                  bg_colour: Union[Color, ColourGradient],
                  text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
-                 max_dimensions: Optional[Tuple[int, int]] = None,
+                 max_dimensions: Optional[List[int]] = None,
                  effect_id: Optional[str] = None):
         self.text_shadow_data = text_shadow_data
         self.max_dimensions = max_dimensions
@@ -60,7 +62,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.y_origin = text_rect.y
         self.font_y_padding = self._calc_font_padding()
 
-        # we split text stings based on spaces,
+        # we split text strings based on spaces,
         # these variables need recalculating when splitting or merging chunks
         self.split_points = [pos+1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
@@ -68,13 +70,17 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.target_surface: Optional[Surface] = None
         self.target_surface_area = None
         self.row_chunk_origin = 0
-        self.row_chunk_height = 0
+        self.row_chunk_height = text_height
         self.row_bg_height = 0
         self.layout_x_offset = 0
 
-        self.is_selected = False
+        self.selection_rect = None
+        self.selected_text = None
+        self.selection_start_index = 0
+        self.is_selected = False  # True when the whole chunk is selected - or part of it.
         self.is_active = False
         self.selection_colour = Color(128, 128, 128, 255)
+        self.selection_text_colour = Color(255, 255, 255, 255)
 
         self.should_centre_from_baseline = False
 
@@ -148,12 +154,11 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_colour = self.colour == other_text_chunk.colour
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
-        match_selected = self.is_selected == other_text_chunk.is_selected
         match_active = self.is_active == other_text_chunk.is_active
         match_effect_id = self.effect_id == other_text_chunk.effect_id
 
         return (match_fonts and match_underlined and match_colour and
-                match_bg_color and match_shadow_data and match_selected and match_active
+                match_bg_color and match_shadow_data and match_active
                 and match_effect_id)
 
     def finalise(self,
@@ -166,11 +171,6 @@ class TextLineChunkFTFont(TextLayoutRect):
                  letter_end: Optional[int] = None):
         if len(self.text) == 0:
             return
-
-        if self.is_selected:
-            bg_col: Union[Color, ColourGradient] = self.selection_colour
-        else:
-            bg_col = self.bg_colour
 
         final_str_text = self.text if letter_end is None else self.text[:letter_end]
         # update chunk width for drawing only, need to include the text origin offset
@@ -189,19 +189,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.font.underline = self.underlined  # set underlined state
         if self.underlined:
             self.font.underline_adjustment = 0.5
-        if isinstance(self.colour, ColourGradient):
-            surface = self._draw_text_fg_gradient(bg_col, chunk_draw_height, chunk_draw_width,
-                                                  chunk_x_origin, final_str_text, row_bg_height,
-                                                  row_chunk_origin)
 
-        elif isinstance(bg_col, ColourGradient):
-            surface = self._draw_text_bg_gradient(bg_col, chunk_draw_height, chunk_draw_width,
-                                                  chunk_x_origin, final_str_text, row_bg_height,
-                                                  row_chunk_origin)
-        else:
-            surface = self._draw_text_no_gradient(bg_col, chunk_draw_height, chunk_draw_width,
-                                                  chunk_x_origin, final_str_text, row_bg_height,
-                                                  row_chunk_origin)
+        surface = self._draw_text(chunk_draw_height, chunk_draw_width,
+                                  chunk_x_origin, final_str_text, row_bg_height, row_chunk_origin)
 
         target_surface = self._finalise_horizontal_scroll(target_area,
                                                           text_shadow_width,
@@ -209,6 +199,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                                           target_surface,
                                                           surface)
 
+        self.height = row_bg_height
         # In case we need to redraw this chunk, keep hold of the input parameters
         self.target_surface = target_surface
         self.target_surface_area = target_area
@@ -222,7 +213,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                     target_surface, surface):
         # sort out horizontal scrolling
         final_pos = (max(target_area.left, self.left - x_scroll_offset),
-                     self.top - self.origin_row_y_adjust)
+                     self.top - self.origin_row_y_adjust + text_shadow_width)
         distance_to_lhs_overlap = self.left - target_area.left
         lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
@@ -238,21 +229,85 @@ class TextLineChunkFTFont(TextLayoutRect):
                                 special_flags=BLEND_PREMULTIPLIED)
         return target_surface
 
-    def _draw_text_no_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
-                               final_str_text, row_bg_height, row_chunk_origin):
+    def _handle_bg_selection_and_bg_drawing(self, size) -> pygame.Surface:
+        surface = Surface(size, flags=SRCALPHA, depth=32)
+        if self.selection_rect is not None and (self.selection_rect.width != 0 or self.selection_rect.height != 0):
+            # we have a selection rect, we may have up to two rects of normal background either side of this
+            before_rect = pygame.Rect(0, 0, self.selection_rect.left, self.selection_rect.height)
+            after_rect = pygame.Rect(self.selection_rect.right, 0, surface.get_width(), self.selection_rect.height)
+            if before_rect.width > 0:
+                if isinstance(self.bg_colour, ColourGradient):
+                    surface.fill(Color('#FFFFFFFF'), before_rect)
+                    self.bg_colour.apply_gradient_to_surface(surface, before_rect)
+                elif isinstance(self.bg_colour, Color):
+                    surface.fill(self.bg_colour, before_rect)
 
-        text_surface = self.font.render_premul_to(final_str_text, self.colour,
-                                                  surf_size=(chunk_draw_width, chunk_draw_height),
-                                                  surf_position=(chunk_x_origin, row_chunk_origin))
-        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        # text_surface = Surface((chunk_draw_width, chunk_draw_height),
-        #                        flags=SRCALPHA, depth=32)
-        # temp_text_surface = text_surface.copy()
-        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-        #                     final_str_text, fgcolor=self.colour)
-        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-        surface = Surface((chunk_draw_width, row_bg_height), flags=SRCALPHA, depth=32)
-        surface.fill(bg_col)
+            if isinstance(self.selection_colour, ColourGradient):
+                surface.fill(Color('#FFFFFFFF'), self.selection_rect)
+                self.selection_colour.apply_gradient_to_surface(surface, self.selection_rect)
+            elif isinstance(self.selection_colour, Color):
+                surface.fill(self.selection_colour, self.selection_rect)
+
+            if after_rect.width > 0:
+                if isinstance(self.bg_colour, ColourGradient):
+                    surface.fill(Color('#FFFFFFFF'), after_rect)
+                    self.bg_colour.apply_gradient_to_surface(surface, after_rect)
+                elif isinstance(self.bg_colour, Color):
+                    surface.fill(self.bg_colour, after_rect)
+
+        else:
+            if isinstance(self.bg_colour, ColourGradient):
+                surface.fill(Color('#FFFFFFFF'))
+                self.bg_colour.apply_gradient_to_surface(surface)
+            else:
+                surface.fill(self.bg_colour)
+
+        return surface
+
+    def _handle_text_selection_and_text_drawing(self, final_str_text, chunk_draw_width, chunk_draw_height,
+                                                chunk_x_origin, row_chunk_origin) -> pygame.Surface:
+        text_surface: pygame.Surface = self.font.render_premul_to(final_str_text, Color('#FFFFFFFF'),
+                                                                  surf_size=(chunk_draw_width, chunk_draw_height),
+                                                                  surf_position=(chunk_x_origin, row_chunk_origin))
+
+        if (self.selection_rect is not None
+                and (self.selection_rect.width != 0 or self.selection_rect.height != 0)
+                and (self.selection_text_colour != self.colour)):
+            # we have a selection rect, we may have up to two rects of normal background either side of this
+            before_rect = pygame.Rect(0, 0, self.selection_rect.left, self.selection_rect.height)
+            after_rect = pygame.Rect(self.selection_rect.right, 0, chunk_draw_width, self.selection_rect.height)
+            if before_rect.width > 0:
+                if isinstance(self.colour, ColourGradient):
+                    self.colour.apply_gradient_to_surface(text_surface, before_rect)
+                elif isinstance(self.colour, Color):
+                    text_surface.fill(self.colour, before_rect, special_flags=pygame.BLEND_RGBA_MULT)
+
+            if isinstance(self.selection_text_colour, ColourGradient):
+                self.selection_text_colour.apply_gradient_to_surface(text_surface, self.selection_rect)
+            elif isinstance(self.selection_text_colour, Color):
+                text_surface.fill(self.selection_text_colour, self.selection_rect, special_flags=pygame.BLEND_RGBA_MULT)
+
+            if after_rect.width > 0:
+                if isinstance(self.colour, ColourGradient):
+                    self.colour.apply_gradient_to_surface(text_surface, after_rect)
+                elif isinstance(self.colour, Color):
+                    text_surface.fill(self.colour, after_rect, special_flags=pygame.BLEND_RGBA_MULT)
+
+        else:
+            if isinstance(self.colour, ColourGradient):
+                self.colour.apply_gradient_to_surface(text_surface)
+            else:
+                text_surface.fill(self.colour, special_flags=pygame.BLEND_RGBA_MULT)
+
+        return text_surface
+
+    def _draw_text(self, chunk_draw_height, chunk_draw_width, chunk_x_origin,
+                   final_str_text, row_bg_height, row_chunk_origin):
+
+        text_surface = self._handle_text_selection_and_text_drawing(final_str_text, chunk_draw_width, chunk_draw_height,
+                                                                    chunk_x_origin, row_chunk_origin)
+
+        surface = self._handle_bg_selection_and_bg_drawing((chunk_draw_width, row_bg_height))
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
@@ -260,77 +315,6 @@ class TextLineChunkFTFont(TextLayoutRect):
             half_padless_origin = int(round(0.5 * padless_origin))
             text_rect.y = (surface.get_rect().centery -
                            self.font_y_padding - half_padless_origin)
-        else:
-            text_rect.centery = surface.get_rect().centery
-        # apply any shadow effects
-        self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                  text_surface, (chunk_x_origin, row_chunk_origin))
-        surface.blit(text_surface, text_rect, special_flags=BLEND_PREMULTIPLIED)
-        return surface
-
-    def _draw_text_bg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
-                               final_str_text, row_bg_height, row_chunk_origin):
-        # draw the text first
-        text_surface = self.font.render_premul_to(final_str_text, self.colour,
-                                                  surf_size=(chunk_draw_width, chunk_draw_height),
-                                                  surf_position=(chunk_x_origin, row_chunk_origin))
-        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        # text_surface = Surface((chunk_draw_width, chunk_draw_height),
-        #                               flags=SRCALPHA, depth=32)
-        # temp_text_surface = text_surface.copy()
-        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-        #                     final_str_text, fgcolor=self.colour)
-        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-        # then make the background
-        surface = Surface((chunk_draw_width, row_bg_height),
-                          flags=SRCALPHA, depth=32)
-        surface.fill(Color('#FFFFFFFF'))
-        bg_col.apply_gradient_to_surface(surface)
-        # center the text in the line
-        text_rect = text_surface.get_rect()
-        if self.should_centre_from_baseline:
-            padless_origin = self.y_origin - self.font_y_padding
-            half_padless_origin = int(round(0.5 * padless_origin))
-            text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
-        else:
-            text_rect.centery = surface.get_rect().centery
-        # apply any shadow effects
-        self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                  text_surface, (chunk_x_origin, row_chunk_origin))
-        surface.blit(text_surface, text_rect, special_flags=BLEND_PREMULTIPLIED)
-        return surface
-
-    def _draw_text_fg_gradient(self, bg_col, chunk_draw_height, chunk_draw_width, chunk_x_origin,
-                               final_str_text, row_bg_height, row_chunk_origin):
-        # draw the text first
-        # Anti-aliasing on text is not done with pre-multiplied alpha so we need to bake
-        # this text onto a surface with a normal blit before it can enter the pre-multipled
-        # blitting pipeline. This current setup may be a bit wrong but it works OK for gradients
-        # on the normal text colour.
-        text_surface = self.font.render_premul_to(final_str_text, Color('#FFFFFFFF'),
-                                                  surf_size=(chunk_draw_width, chunk_draw_height),
-                                                  surf_position=(chunk_x_origin, row_chunk_origin))
-        # This is a hacky way to convert text to pre-multiplied alpha with a SDL2 alpha blit
-        # text_surface = Surface((chunk_draw_width, chunk_draw_height),
-        #                        flags=SRCALPHA, depth=32)
-        # temp_text_surface = text_surface.copy()
-        # self.font.render_to(temp_text_surface, (chunk_x_origin, row_chunk_origin),
-        #                     final_str_text, fgcolor=Color('#FFFFFFFF'))
-        # text_surface.blit(temp_text_surface, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-        self.colour.apply_gradient_to_surface(text_surface)
-        # then make the background
-        surface = Surface((chunk_draw_width, row_bg_height), flags=SRCALPHA, depth=32)
-        if isinstance(bg_col, ColourGradient):
-            surface.fill(Color('#FFFFFFFF'))
-            bg_col.apply_gradient_to_surface(surface)
-        else:
-            surface.fill(bg_col)
-        # center the text in the line
-        text_rect = text_surface.get_rect()
-        if self.should_centre_from_baseline:
-            padless_origin = self.y_origin - self.font_y_padding
-            half_padless_origin = int(round(0.5 * padless_origin))
-            text_rect.y = surface.get_rect().centery - self.font_y_padding - half_padless_origin
         else:
             text_rect.centery = surface.get_rect().centery
         # apply any shadow effects
@@ -350,16 +334,6 @@ class TextLineChunkFTFont(TextLayoutRect):
             shadow_surface = self.font.render_premul_to(text_str, shadow_colour,
                                                         surf_size=text_surface.get_size(),
                                                         surf_position=origin)
-            # This is a hacky way to convert text to
-            # pre-multiplied alpha with a SDL2 alpha blit
-            # shadow_surface = text_surface.copy()
-            # temp_shadow_surface = shadow_surface.copy()
-            #
-            # self.font.render_to(temp_shadow_surface, origin,
-            #                     text_str,
-            #                     fgcolor=shadow_colour)
-            # shadow_surface.blit(temp_shadow_surface, (0, 0),
-            #                     special_flags=pygame.BLEND_ALPHA_SDL2)
 
             for y_pos in range(-shadow_size, shadow_size + 1):
                 shadow_text_rect = Rect((text_rect.x + shadow_offset[0],
@@ -428,7 +402,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         elif self.x == row_start_x and self.right > line_width:
             # we have a chunk with no breaks (one long word usually) longer than a line
             # split it at the word
-            optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            # optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
+            optimum_split_point = max(1, self.x_pos_to_letter_index(requested_x) - 1)
             if allow_split_dashes:
                 if optimum_split_point != 1:
                     # have to be at least wide enough to fit in a dash and another character
@@ -569,7 +544,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         :param index: the index we are sticking the new text at.
         """
         self.text = self.text[:index] + input_text + self.text[index:]
-        # we split text stings based on spaces
+        # we split text strings based on spaces
         self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
         self.letter_count = len(self.text)
 
@@ -643,12 +618,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         check_dir = -1
         changed_dir = 0
         step = 1
+        new_index = best_index
         # algorithm picks a good guess for the best letter
         # index and then checks either side for better indexes
-        while changed_dir < 2:
-            new_index = best_index + (step * check_dir)
-            curr_text_rect = self.font.get_rect(self.text[:max(estimated_index +
-                                                               (step * check_dir), 0)])
+        while changed_dir < 2 and new_index != 0:
+            new_index = max(estimated_index + (step * check_dir), 0)
+            curr_text_rect = self.font.get_rect(self.text[:new_index])
             new_diff = abs((curr_text_rect.x + curr_text_rect.width) - chunk_space_x)
             if new_diff < lowest_diff:
                 lowest_diff = new_diff
@@ -802,8 +777,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         Grab the 'pre effect' surface, used to get a 'normal' pre-effect surface to apply effects
         to.
-        TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
-              text surface again. Perhaps only hold the chunk's part?
+
         """
+        # TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
+        #       text surface again. Perhaps only hold the chunk's part?
         if self.target_surface is not None:
             self.pre_effect_target_surface = self.target_surface.copy()

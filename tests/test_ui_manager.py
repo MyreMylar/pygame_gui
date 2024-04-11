@@ -41,21 +41,21 @@ class TestUIManager:
         Can we get the theme? Serves as a test of the theme being successfully created.
         """
         theme = default_ui_manager.get_theme()
-        assert (type(theme) == UIAppearanceTheme)
+        assert (isinstance(theme, UIAppearanceTheme))
 
     def test_get_sprite_group(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the sprite group? Serves as a test of the sprite group being successfully created.
         """
         sprite_group = default_ui_manager.get_sprite_group()
-        assert (type(sprite_group) == LayeredGUIGroup)
+        assert (isinstance(sprite_group, LayeredGUIGroup))
 
     def test_get_window_stack(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
         Can we get the window stack? Serves as a test of the window stack being successfully created.
         """
         window_stack = default_ui_manager.get_window_stack()
-        assert (type(window_stack) == UIWindowStack)
+        assert (isinstance(window_stack, UIWindowStack))
 
     def test_get_shadow(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
@@ -64,10 +64,10 @@ class TestUIManager:
         """
         requested_size = (100, 100)
         shadow_surface = default_ui_manager.get_shadow(size=requested_size, shadow_width=2,
-                                                       shape='rectangle', corner_radius=2)
+                                                       shape='rectangle', corner_radius=[2, 2, 2, 2])
         shadow_surface_size = shadow_surface.get_size()
 
-        assert ((type(shadow_surface) == pygame.Surface) and (shadow_surface_size == requested_size))
+        assert (isinstance(shadow_surface, pygame.Surface) and (shadow_surface_size == requested_size))
 
     def test_set_window_resolution(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
@@ -233,7 +233,8 @@ class TestUIManager:
 
         for x in range(0, 150):
             for y in range(0, 30):
-                assert result_surface.unmap_rgb(result_pixel_array[x, y]) == no_mismatch_colour
+                assert result_surface.unmap_rgb(
+                    result_pixel_array[x, y]) == no_mismatch_colour, f"Colours not equal at: {x}, {y}"
         try:
             result_pixel_array.close()
         except AttributeError:
@@ -242,9 +243,9 @@ class TestUIManager:
 
     def test_add_font_paths_and_preload_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         """
-        Combined test of setting font paths and pre-loading.
+        Combined test of setting font paths and preloading.
 
-        We sets the path to a font, preload it then try and use it in a text box and see if any errors or warnings
+        We set the path to a font, preload it then try and use it in a text box and see if any errors or warnings
         happen.
         """
         default_ui_manager.add_font_paths(font_name='roboto',
@@ -260,7 +261,7 @@ class TestUIManager:
 
     def test_print_unused_fonts(self, _init_pygame, default_ui_manager, _display_surface_return_none, capsys):
         """
-        Test unused font printing, by creating a font we don't use and seeing if the print out reports it.
+        Test unused font printing, by creating a font we don't use and seeing if the print-out reports it.
 
         :param _init_pygame:
         :param default_ui_manager:
@@ -344,15 +345,16 @@ class TestUIManager:
         class MouselessManager(UIManager):
             def _update_mouse_position(self):
                 self.mouse_position = (400, 15)
+
         manager = MouselessManager((800, 600))
 
-        text_entry = UITextEntryLine(pygame.Rect(0, 0, 800, 30), manager=manager)
+        UITextEntryLine(pygame.Rect(0, 0, 800, 30), manager=manager)
 
         manager.update(0.5)
         assert manager._active_cursor == pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)
 
     def test_translation_dir_path(self):
-        manager = UIManager((800, 600), translation_directory_paths=['pygame_gui/data/translations/'])
+        UIManager((800, 600), translation_directory_paths=['pygame_gui/data/translations/'])
 
     def test_incremental_loading_something(self, _init_pygame, _display_surface_return_none):
         incremental_loader = IncrementalThreadedResourceLoader()
@@ -369,6 +371,13 @@ class TestUIManager:
         while not finished:
             finished, _ = incremental_loader.update()
         assert finished
+
+    def test_set_ui_theme(self, _init_pygame, _display_surface_return_none):
+        manager = UIManager((800, 600))
+        theme_dict = {"text_box": {"colours": {"dark_bg": "#25f92e"}}}
+        theme = manager.create_new_theme(theme_dict)
+        manager.set_ui_theme(theme)
+        assert manager.ui_theme is theme
 
     def test_get_hovering_any_element(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600))
