@@ -190,6 +190,7 @@ Fired when a user selects an option in a drop down menu.
 
  - **'type'** : pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
  - **'text'** : The text of the selected option.
+ - **'selected_option_id'** : The ID of the selected option, if no ids were specified this will be the same as 'text'.
  - **'ui_element'** : The :class:`UIDropDownMenu <pygame_gui.elements.UIDropDownMenu>` that fired this event.
  - **'ui_object_id'** : The most unique ID for the drop down menu that fired this event.
 

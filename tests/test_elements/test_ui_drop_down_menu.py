@@ -55,7 +55,7 @@ class TestUIDropDownMenu:
 
         menu.add_options(['spam', 'bad spam'])
 
-        assert menu.options_list[-1] == 'bad spam'
+        assert menu.options_list[-1] == ('bad spam', 'bad spam')
 
         menu.current_state.should_transition = True
         menu.update(0.01)
@@ -64,7 +64,7 @@ class TestUIDropDownMenu:
 
         menu.add_options(['steak'])
 
-        assert menu.options_list[-1] == 'steak'
+        assert menu.options_list[-1] == ('steak', 'steak')
         assert menu.current_state == menu.menu_states['closed']
 
     def test_removal(self, _init_pygame, default_ui_manager,
@@ -76,7 +76,7 @@ class TestUIDropDownMenu:
 
         menu.remove_options(['flour', 'sugar'])
 
-        assert menu.options_list[-1] == 'eggs'
+        assert menu.options_list[-1] == ('eggs', 'eggs')
 
         menu.current_state.should_transition = True
         menu.update(0.01)
@@ -85,7 +85,7 @@ class TestUIDropDownMenu:
 
         menu.remove_options(['eggs'])
 
-        assert menu.options_list[-1] == 'cheese'
+        assert menu.options_list[-1] == ('cheese', 'cheese')
         assert menu.current_state == menu.menu_states['closed']
 
     def test_kill(self, _init_pygame, default_ui_manager, _display_surface_return_none):
@@ -500,7 +500,7 @@ class TestUIDropDownMenu:
         menu.current_state.should_transition = True
         menu.update(0.01)
 
-        assert menu.selected_option == 'eggs'
+        assert menu.selected_option == ('eggs', 'eggs')
         flour_button = menu.current_state.options_selection_list.item_list_container.elements[1]
 
         flour_button.process_event(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
@@ -517,7 +517,7 @@ class TestUIDropDownMenu:
         for event in pygame.event.get():
             default_ui_manager.process_events(event)
 
-        assert menu.selected_option == 'flour'
+        assert menu.selected_option == ('flour', 'flour')
 
     def test_disable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
@@ -532,7 +532,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
 
         assert menu.current_state == menu.menu_states['expanded']
-        assert menu.selected_option == 'eggs'
+        assert menu.selected_option == ('eggs', 'eggs')
 
         menu.disable()
         assert menu.is_enabled is False
@@ -559,8 +559,10 @@ class TestUIDropDownMenu:
     def test_enable(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         test_container = UIContainer(relative_rect=pygame.Rect(0, 0, 300, 300),
                                      manager=default_ui_manager)
-        menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],
-                              starting_option='eggs',
+        menu = UIDropDownMenu(options_list=[('eggs', 'eggs_id'),
+                                            ('flour', 'flour_id'),
+                                            ('sugar', 'sugar_id')],
+                              starting_option=('eggs', 'eggs_id'),
                               relative_rect=pygame.Rect(10, 10, 200, 30),
                               manager=default_ui_manager,
                               container=test_container)
@@ -569,7 +571,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
 
         assert menu.current_state == menu.menu_states['expanded']
-        assert menu.selected_option == 'eggs'
+        assert menu.selected_option == ('eggs', 'eggs_id')
 
         menu.disable()
         assert menu.is_enabled is False
@@ -599,7 +601,7 @@ class TestUIDropDownMenu:
         menu.update(0.01)
 
         assert menu.current_state == menu.menu_states['expanded']
-        assert menu.selected_option == 'eggs'
+        assert menu.selected_option == ('eggs', 'eggs_id')
 
     def test_show_of_dropdown(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         menu = UIDropDownMenu(options_list=['eggs', 'flour', 'sugar'],

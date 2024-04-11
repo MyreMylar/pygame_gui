@@ -35,8 +35,8 @@ class UIExpandedDropDownState:
 
     def __init__(self,
                  drop_down_menu_ui: 'UIDropDownMenu',
-                 options_list: List[str],
-                 selected_option: str,
+                 options_list: List[Tuple[str, str]],
+                 selected_option: Tuple[str, str],
                  base_position_rect: Union[pygame.Rect, None],
                  close_button_width: int,
                  expand_direction: Union[str, None],
@@ -47,8 +47,8 @@ class UIExpandedDropDownState:
                  expand_on_option_click):
 
         self.drop_down_menu_ui = drop_down_menu_ui
-        self.options_list = options_list
-        self.selected_option = selected_option
+        self.options_list: List[Tuple[str, str]] = options_list
+        self.selected_option: Tuple[str, str] = selected_option
         self.base_position_rect = base_position_rect
 
         self.expand_direction = expand_direction
@@ -121,16 +121,21 @@ class UIExpandedDropDownState:
         border_and_shadow = (self.drop_down_menu_ui.shadow_width +
                              self.drop_down_menu_ui.border_width)
         self.active_buttons = []
+
+        if self.selected_option[0] == self.selected_option[1]:
+            object_id = ObjectID('#selected_option', '@selected_option')
+        else:
+            object_id = ObjectID(self.selected_option[1], '@selected_option')
         self.selected_option_button = UIButton(pygame.Rect((border_and_shadow, border_and_shadow),
                                                            (self.base_position_rect.width -
                                                             self.close_button_width,
                                                             self.base_position_rect.height)),
-                                               self.selected_option,
+                                               self.selected_option[0],
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
                                                parent_element=self.drop_down_menu_ui,
-                                               object_id=ObjectID('#selected_option', None))
+                                               object_id=object_id)
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
         self.active_buttons.append(self.selected_option_button)
 
@@ -269,19 +274,20 @@ class UIExpandedDropDownState:
 
         if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.options_selection_list):
-            selection = self.options_selection_list.get_single_selection()
+            selection = self.options_selection_list.get_single_selection(include_object_id=True)
             self.drop_down_menu_ui.selected_option = selection
             self.should_transition = True
 
             # old event - to be removed in 0.8.0
             event_data = {'user_type': OldType(UI_DROP_DOWN_MENU_CHANGED),
-                          'text': self.drop_down_menu_ui.selected_option,
+                          'text': self.drop_down_menu_ui.selected_option[0],
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
             # new event
-            event_data = {'text': self.drop_down_menu_ui.selected_option,
+            event_data = {'text': self.drop_down_menu_ui.selected_option[0],
+                          'selected_option_id': self.drop_down_menu_ui.selected_option[1],
                           'ui_element': self.drop_down_menu_ui,
                           'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
             pygame.event.post(pygame.event.Event(UI_DROP_DOWN_MENU_CHANGED, event_data))
@@ -385,7 +391,7 @@ class UIClosedDropDownState:
 
     def __init__(self,
                  drop_down_menu_ui: 'UIDropDownMenu',
-                 selected_option: str,
+                 selected_option: Tuple[str, str],
                  base_position_rect: Union[pygame.Rect, None],
                  open_button_width: int,
                  expand_direction: Union[str, None],
@@ -489,16 +495,20 @@ class UIClosedDropDownState:
         border_and_shadow = (self.drop_down_menu_ui.shadow_width +
                              self.drop_down_menu_ui.border_width)
         self.active_buttons = []
+        if self.selected_option[0] == self.selected_option[1]:
+            object_id = ObjectID('#selected_option', '@selected_option')
+        else:
+            object_id = ObjectID(self.selected_option[1], '@selected_option')
         self.selected_option_button = UIButton(pygame.Rect((border_and_shadow, border_and_shadow),
                                                            (self.base_position_rect.width -
                                                             self.open_button_width,
                                                             self.base_position_rect.height)),
-                                               self.selected_option,
+                                               self.selected_option[0],
                                                self.ui_manager,
                                                self.ui_container,
                                                starting_height=2,
                                                parent_element=self.drop_down_menu_ui,
-                                               object_id='#selected_option',
+                                               object_id=object_id,
                                                visible=self.visible)
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
         self.active_buttons.append(self.selected_option_button)
@@ -656,8 +666,8 @@ class UIDropDownMenu(UIContainer):
     """
 
     def __init__(self,
-                 options_list: List[str],
-                 starting_option: str,
+                 options_list: Union[List[str], List[Tuple[str, str]]],
+                 starting_option: Union[str, Tuple[str, str]],
                  relative_rect: pygame.Rect,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -681,8 +691,16 @@ class UIDropDownMenu(UIContainer):
                          element_id=['drop_down_menu'])
 
         self.__layer_thickness_including_expansion = 4
-        self.options_list = options_list
-        self.selected_option = starting_option
+        self.options_list = []
+        for option in options_list:
+            if isinstance(option, str):
+                self.options_list.append((option, option))
+            else:
+                self.options_list.append(option)
+        if isinstance(starting_option, str):
+            self.selected_option = (starting_option, starting_option)
+        else:
+            self.selected_option = starting_option
         self.open_button_width = 20
 
         self.expansion_height_limit = expansion_height_limit
@@ -740,27 +758,38 @@ class UIDropDownMenu(UIContainer):
         # ignore passed in value and hardcode to 4
         self.__layer_thickness_including_expansion = 4
 
-    def add_options(self, new_options: List[str]) -> None:
+    def add_options(self, new_options: Union[List[str], List[Tuple[str, str]]]) -> None:
         """
-        Add new options to the drop down. Will close the drop down if it is currently open.
+        Add new options to the drop down. Will close the drop-down if it is currently open.
 
-        In many cases it may be easier just to recreate the drop down with whatever the new options list is.
+        In many cases it may be easier just to recreate the drop-down with whatever the new options list is.
 
         :param new_options: The list of new options to add.
         """
-        self.options_list.extend(new_options)
+        for option in new_options:
+            if isinstance(option, str):
+                self.options_list.append((option, option))
+            else:
+                self.options_list.append(option)
+
         self.menu_states['expanded'].options_list = self.options_list
 
         # if we have the dropdown open, close it so it can be reopened with the new options in place
         self._close_dropdown_if_open()
 
-    def remove_options(self, options_to_remove: List[str]) -> None:
+    def remove_options(self, options_to_remove: Union[List[str], List[Tuple[str, str]]]) -> None:
         """
         Will remove all instances of the options provided.
 
         :param options_to_remove: The list of new options to remove.
         """
-        self.options_list = [option for option in self.options_list if option not in options_to_remove]
+        real_options_to_remove = []
+        for option in options_to_remove:
+            if isinstance(option, str):
+                real_options_to_remove.append((option, option))
+            else:
+                real_options_to_remove.append(option)
+        self.options_list = [option for option in self.options_list if option not in real_options_to_remove]
         self.menu_states['expanded'].options_list = self.options_list
 
         # if we have the dropdown open, close it so it can be reopened with the new options in place
