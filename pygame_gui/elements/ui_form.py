@@ -515,7 +515,7 @@ class UIForm(UIAutoScrollingContainer):
                         value_dic[key] = value.get_multi_selection()
 
                 elif isinstance(value, UIDropDownMenu):
-                    selected_option = value.selected_option
+                    selected_option = value.selected_option[0]
                     if type_name == "boolean":
                         selected_option = literal_eval(selected_option)
                     value_dic[key] = selected_option
