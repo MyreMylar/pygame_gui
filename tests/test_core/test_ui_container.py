@@ -295,6 +295,20 @@ class TestUIContainer:
 
         assert container.are_contents_hovered()
 
+    def test_are_nested_contents_hovered(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                         _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIContainer(pygame.Rect(100, 100, 250, 300), manager=manager)
+
+        container_2 = UIContainer(pygame.Rect(10, 10, 230, 280), manager=manager, container=container)
+
+        button = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
+                          manager=manager, container=container_2)
+        manager.mouse_position = button.rect.center
+        button.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+
 
 if __name__ == '__main__':
     pytest.console_main()

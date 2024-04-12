@@ -490,6 +490,29 @@ class TestUIScrollingContainer:
 
         assert not container.vert_scroll_bar.scroll_wheel_moved
 
+    def test_scroll_while_hovering_nested_contents(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                   _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIScrollingContainer(pygame.Rect(100, 100, 250, 300), manager=manager)
+        container.set_scrollable_area_dimensions((250, 600))
+
+        container_2 = UIScrollingContainer(pygame.Rect(10, 10, 230, 280), manager=manager, container=container,
+                                           should_grow_automatically=False)
+
+        text_box_inside_two_scrolling_containers = UITextBox(html_text="Some text",
+                                                             relative_rect=pygame.Rect(10, 10, 210, 260),
+                                                             container=container_2,
+                                                             manager=manager)
+        manager.mouse_position = text_box_inside_two_scrolling_containers.rect.center
+        text_box_inside_two_scrolling_containers.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+        assert container.vert_scroll_bar is not None
+
+        manager.process_events(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5}))
+
+        assert container.vert_scroll_bar.scroll_wheel_moved
+
 
 if __name__ == '__main__':
     pytest.console_main()

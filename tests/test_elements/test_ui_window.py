@@ -6,7 +6,9 @@ import pygame_gui
 from tests.shared_comparators import compare_surfaces
 
 from pygame_gui.elements.ui_window import UIWindow
+from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui import UIManager
 
@@ -702,16 +704,34 @@ class TestUIWindow:
     def test_are_contents_hovered(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
                                   _display_surface_return_none):
         manager = UIManager((800, 600))
-        container = UIWindow(pygame.Rect(100, 100, 200, 200), manager=manager)
+        window = UIWindow(pygame.Rect(100, 100, 200, 200), manager=manager)
         button_1 = UIButton(relative_rect=pygame.Rect(50, 50, 50, 50), text="1",
-                            manager=manager, container=container)
+                            manager=manager, container=window)
         button_2 = UIButton(relative_rect=pygame.Rect(125, 50, 50, 50), text="2",
-                            manager=manager, container=container)
+                            manager=manager, container=window)
         manager.mouse_position = button_1.rect.center
         button_1.check_hover(0.1, False)
         button_2.check_hover(0.1, False)
 
-        assert container.are_contents_hovered()
+        assert window.are_contents_hovered()
+
+    def test_are_nested_contents_hovered(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                         _display_surface_return_none):
+        manager = UIManager((800, 600))
+        window = UIWindow(pygame.Rect(100, 100, 250, 300), manager=manager)
+
+        container_2 = UIScrollingContainer(pygame.Rect(10, 10, 230, 280), manager=manager, container=window)
+
+        nested_text_box = UITextBox(html_text="Some text inside a scrolling text box, itself"
+                                              " inside a container that scrolls inside "
+                                              " another container. ",
+                                    relative_rect=pygame.Rect(10, 10, 180, 200),
+                                    container=container_2,
+                                    manager=manager)
+        manager.mouse_position = nested_text_box.rect.center
+        nested_text_box.check_hover(0.1, False)
+
+        assert window.are_contents_hovered()
 
 
 if __name__ == '__main__':
