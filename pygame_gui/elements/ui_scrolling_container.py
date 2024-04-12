@@ -9,6 +9,7 @@ from pygame_gui.core import UIElement, UIContainer
 
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 from pygame_gui.elements.ui_horizontal_scroll_bar import UIHorizontalScrollBar
+from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
 
 
 class UIScrollingContainer(UIElement, IContainerLikeInterface):
@@ -47,6 +48,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                  element_id: Union[List[str], None] = None,
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
+                 should_grow_automatically: bool = True,
                  allow_scroll_x: bool = True,
                  allow_scroll_y: bool = True,
                  ):
@@ -67,6 +69,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                          element_id=element_id)
 
         self.need_to_sort_out_scrollbars = False
+        self.should_grow_automatically = should_grow_automatically
 
         # These properties are currently read-only
         # TODO: Make allow_scroll_x and y rewritable
@@ -163,15 +166,42 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             scrollable_anchors['right'] = 'right'
         if not self.allow_scroll_y:
             scrollable_anchors['bottom'] = 'bottom'
-        self.scrollable_container = UIContainer(relative_rect=scrollable_rect,
-                                                manager=manager,
-                                                starting_height=1,
-                                                container=self._view_container,
-                                                parent_element=parent_element,
-                                                object_id=ObjectID(
-                                                    object_id='#scrollable_container',
-                                                    class_id=None),
-                                                anchors=scrollable_anchors.copy())
+        if self.should_grow_automatically:
+            resize_left: bool = True
+            resize_right: bool = True
+            resize_top: bool = True
+            resize_bottom: bool = True
+
+            if not self.allow_scroll_x:
+                resize_left = False
+                resize_right = False
+
+            if not self.allow_scroll_y:
+                resize_top = False
+                resize_bottom = False
+            self.scrollable_container = UIAutoResizingContainer(relative_rect=scrollable_rect,
+                                                                manager=manager,
+                                                                resize_left=resize_left,
+                                                                resize_right=resize_right,
+                                                                resize_top=resize_top,
+                                                                resize_bottom=resize_bottom,
+                                                                starting_height=1,
+                                                                container=self._view_container,
+                                                                parent_element=parent_element,
+                                                                object_id=ObjectID(
+                                                                    object_id="#scrollable_container",
+                                                                    class_id=None),
+                                                                anchors=scrollable_anchors)
+        else:
+            self.scrollable_container = UIContainer(relative_rect=scrollable_rect,
+                                                    manager=manager,
+                                                    starting_height=1,
+                                                    container=self._view_container,
+                                                    parent_element=parent_element,
+                                                    object_id=ObjectID(
+                                                        object_id='#scrollable_container',
+                                                        class_id=None),
+                                                    anchors=scrollable_anchors)
         self.join_focus_sets(self.scrollable_container)
 
         if self.vert_scroll_bar is not None:
@@ -333,6 +363,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             new_pos = (-start_width,
                        self.scrollable_container.relative_rect.y)
             self.scrollable_container.set_relative_position(new_pos)
+
+        if isinstance(self.scrollable_container, UIAutoResizingContainer):
+            if self.scrollable_container.has_recently_updated_dimensions:
+                self._calculate_scrolling_dimensions()
+                self._sort_out_element_container_scroll_bars()
 
     def _calculate_scrolling_dimensions(self):
         """

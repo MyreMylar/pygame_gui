@@ -1,7 +1,7 @@
 import pygame
 from pygame_gui.core import UIElement, ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
-from pygame_gui.elements import UIScrollingContainer, UIAutoResizingContainer
+from pygame_gui.elements import UIScrollingContainer
 
 from typing import *
 
@@ -48,54 +48,5 @@ class UIAutoScrollingContainer(UIScrollingContainer):
                          object_id=object_id,
                          anchors=anchors,
                          visible=visible,
+                         should_grow_automatically=True,
                          element_id=["auto_scrolling_container"])
-
-        resize_left: bool = True
-        resize_right: bool = True
-        resize_top: bool = True
-        resize_bottom: bool = True
-
-        anchors = {"left": "left",
-                   "right": "left",
-                   "top": "top",
-                   "bottom": "top"}
-
-        if not self.allow_scroll_x:
-            resize_left = False
-            resize_right = False
-            anchors["right"] = "right"
-
-        if not self.allow_scroll_y:
-            resize_top = False
-            resize_bottom = False
-            anchors["bottom"] = "bottom"
-
-        self.scrollable_container.kill()
-        scrollable_rect = pygame.Rect(0, 0, relative_rect.width, relative_rect.height)
-        self.scrollable_container = UIAutoResizingContainer(relative_rect=scrollable_rect,
-                                                            manager=manager,
-                                                            resize_left=resize_left,
-                                                            resize_right=resize_right,
-                                                            resize_top=resize_top,
-                                                            resize_bottom=resize_bottom,
-                                                            starting_height=0,
-                                                            container=self._view_container,
-                                                            parent_element=parent_element,
-                                                            object_id=ObjectID(
-                                                                object_id="#scrollable_container",
-                                                                class_id=None),
-                                                            anchors=anchors)
-
-    def update(self, time_delta: float):
-        """
-        Updates the scrolling container's position based upon the scroll bars and updates the
-        scrollbar's visible percentage as well if that has changed.
-
-        :param time_delta: The time passed between frames, measured in seconds.
-
-        """
-        super().update(time_delta)
-
-        if self.scrollable_container.has_recently_updated_dimensions:
-            self._calculate_scrolling_dimensions()
-            self._sort_out_element_container_scroll_bars()
