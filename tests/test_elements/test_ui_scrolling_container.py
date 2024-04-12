@@ -6,6 +6,7 @@ from tests.shared_comparators import compare_surfaces
 from pygame_gui.ui_manager import UIManager
 from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.core.interfaces import IUIManagerInterface
 
 
@@ -438,6 +439,52 @@ class TestUIScrollingContainer:
         container.horiz_scroll_bar.process_event(pygame.event.Event(pygame.MOUSEWHEEL, {'x': -0.5}))
 
         assert container.horiz_scroll_bar.scroll_wheel_moved
+
+    def test_scrolls_while_hovering_non_scrolling_contents(self,  _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                           _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIScrollingContainer(pygame.Rect(100, 100, 250, 300), manager=manager)
+        container.set_scrollable_area_dimensions((250, 600))
+
+        text_box_inside_scrolling_container = UITextBox(html_text="Some text inside a text box, itself"
+                                                                  " inside a container that scrolls",
+                                                        relative_rect=pygame.Rect(20, 20, 150, 200),
+                                                        container=container,
+                                                        manager=manager)
+        manager.mouse_position = text_box_inside_scrolling_container.rect.center
+        text_box_inside_scrolling_container.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+        assert container.vert_scroll_bar is not None
+
+        manager.process_events(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5}))
+
+        assert container.vert_scroll_bar.scroll_wheel_moved
+
+    def test_does_not_scroll_while_hovering_scrolling_contents(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                                               _display_surface_return_none):
+        manager = UIManager((800, 600))
+        container = UIScrollingContainer(pygame.Rect(100, 100, 250, 300), manager=manager)
+        container.set_scrollable_area_dimensions((250, 600))
+
+        text_box_inside_scrolling_container = UITextBox(html_text="Some text inside a scrolling text box, itself"
+                                                                  " inside a container that scrolls. "
+                                                                  "scrolling should work correctly with the mousewheel, "
+                                                                  "depending on whether we are hovering this text box, or"
+                                                                  " whether we are hovering other stuff in the "
+                                                                  "scrolling container",
+                                                        relative_rect=pygame.Rect(20, 20, 180, 200),
+                                                        container=container,
+                                                        manager=manager)
+        manager.mouse_position = text_box_inside_scrolling_container.rect.center
+        text_box_inside_scrolling_container.check_hover(0.1, False)
+
+        assert container.are_contents_hovered()
+        assert container.vert_scroll_bar is not None
+
+        manager.process_events(pygame.event.Event(pygame.MOUSEWHEEL, {'y': -0.5}))
+
+        assert not container.vert_scroll_bar.scroll_wheel_moved
 
 
 if __name__ == '__main__':
