@@ -130,6 +130,7 @@ class TestUIAutoScrollingContainer:
                                              manager=default_ui_manager,
                                              allow_scroll_x=False)
 
+        assert container.vert_scroll_bar is not None
         assert container.vert_scroll_bar.rect.width == 0
         assert container.horiz_scroll_bar is None
         assert container.scrollable_container.rect.size == (200, 200)
@@ -137,6 +138,7 @@ class TestUIAutoScrollingContainer:
         container.set_scrollable_area_dimensions((200, 600))
 
         assert container.vert_scroll_bar is not None
+        assert container.vert_scroll_bar.rect.width != 0
         assert container.horiz_scroll_bar is None
         assert container._view_container.rect.size == (200 - container.vert_scroll_bar.rect.width,
                                                        200)
@@ -149,6 +151,7 @@ class TestUIAutoScrollingContainer:
                                              allow_scroll_y=False)
 
         assert container.vert_scroll_bar is None
+        assert container.horiz_scroll_bar is not None
         assert container.horiz_scroll_bar.rect.height == 0
         assert container.scrollable_container.rect.size == (200, 200)
 
@@ -156,6 +159,7 @@ class TestUIAutoScrollingContainer:
 
         assert container.vert_scroll_bar is None
         assert container.horiz_scroll_bar is not None
+        assert container.horiz_scroll_bar.rect.height != 0
         assert container._view_container.rect.size == (200,
                                                        200 - container.horiz_scroll_bar.rect.height)
         assert container.scrollable_container.rect.size == (600,

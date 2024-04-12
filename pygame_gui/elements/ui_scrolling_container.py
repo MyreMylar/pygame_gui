@@ -160,13 +160,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                               'top': 'top',
                               'bottom': 'top'}
         if not self.allow_scroll_x:
-            # horizontal scrolling and resizing is not allowed, so container can be anchored to the vertical scrollbar
             scrollable_anchors['right'] = 'right'
-            scrollable_anchors['right_target'] = self.vert_scroll_bar
         if not self.allow_scroll_y:
-            # vertical scrolling and resizing is not allowed, so container can be anchored to the horizontal scrollbar
             scrollable_anchors['bottom'] = 'bottom'
-            scrollable_anchors['bottom_target'] = self.horiz_scroll_bar
         self.scrollable_container = UIContainer(relative_rect=scrollable_rect,
                                                 manager=manager,
                                                 starting_height=1,
@@ -177,6 +173,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                     class_id=None),
                                                 anchors=scrollable_anchors.copy())
         self.join_focus_sets(self.scrollable_container)
+
+        if self.vert_scroll_bar is not None:
+            self.vert_scroll_bar.set_container_this_will_scroll(self.scrollable_container)
+        if self.horiz_scroll_bar is not None:
+            self.horiz_scroll_bar.set_container_this_will_scroll(self.scrollable_container)
 
         self.scroll_bar_width = 0
         self.scroll_bar_height = 0
