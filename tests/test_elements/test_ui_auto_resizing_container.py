@@ -7,7 +7,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIVerticalScrollBar
 
 
-class TestUIContainer:
+class TestUIAutoResizingContainer:
     def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
         UIAutoResizingContainer(pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
 
