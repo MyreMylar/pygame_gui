@@ -418,8 +418,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         :return: True if one of the elements is hovered, False otherwise.
         """
         any_hovered = False
-        for item in self:
-            if item.hovered:
-                any_hovered = True
+        for element in self:
+            any_hovered = any(sub_element.hovered for sub_element in element.get_focus_set())
+            if any_hovered:
                 break
         return any_hovered
