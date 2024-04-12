@@ -774,7 +774,11 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         any_hovered = False
         for element in self:
-            any_hovered = any(sub_element.hovered for sub_element in element.get_focus_set())
+            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+                any_hovered = True
+            elif isinstance(element, IContainerLikeInterface):
+                any_hovered = element.are_contents_hovered()
+
             if any_hovered:
                 break
         return any_hovered
