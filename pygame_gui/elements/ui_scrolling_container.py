@@ -218,6 +218,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self.scrolling_bottom = 0
         self.scrolling_right = 0
         self._calculate_scrolling_dimensions()
+        self._sort_out_element_container_scroll_bars()
 
     def get_container(self) -> IUIContainerInterface:
         """
@@ -402,6 +403,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars()
 
         if need_vert_scroll_bar:
+            self.vert_scroll_bar.enable()
             # It is important to subtract scroll_bar_height as horiz scroll bar's dimensions are evaluated after.
             # If horizontal scrollbar is not needed, then scroll bar height is 0.
             vis_percent = (self._view_container.rect.height - self.scroll_bar_height) / self.scrolling_height
@@ -421,6 +423,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             self._remove_vert_scrollbar()
 
         if need_horiz_scroll_bar:
+            self.horiz_scroll_bar.enable()
             vis_percent = self._view_container.rect.width / self.scrolling_width
             start_percent = ((self._view_container.rect.left -
                               self.scrollable_container.rect.left)
@@ -471,6 +474,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             self.scroll_bar_width = 0
             self.vert_scroll_bar.set_dimensions((0, self._view_container.rect.height))
             self.vert_scroll_bar.set_relative_position((0, 0))
+            self.vert_scroll_bar.disable()
             self._calculate_scrolling_dimensions()
 
             if self.horiz_scroll_bar is not None:
@@ -485,6 +489,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             self.scroll_bar_height = 0
             self.horiz_scroll_bar.set_dimensions((self._view_container.rect.width, 0))
             self.horiz_scroll_bar.set_relative_position((0, 0))
+            self.horiz_scroll_bar.disable()
             self._calculate_scrolling_dimensions()
 
             if self.vert_scroll_bar is not None:
@@ -554,7 +559,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         any_hovered = False
         for element in self:
-            any_hovered = any(sub_element.hovered for sub_element in element.get_focus_set())
+            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+                any_hovered = True
+            elif isinstance(element, IContainerLikeInterface):
+                any_hovered = element.are_contents_hovered()
+
             if any_hovered:
                 break
         return any_hovered

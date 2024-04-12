@@ -7,7 +7,9 @@ from tests.shared_comparators import compare_surfaces
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.ui_container import UIContainer
 from pygame_gui.elements.ui_panel import UIPanel
+from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.ui_manager import UIManager
 
 
@@ -629,6 +631,24 @@ class TestUIPanel:
         button_2.check_hover(0.1, False)
 
         assert container.are_contents_hovered()
+
+    def test_are_nested_contents_hovered(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                                         _display_surface_return_none):
+        manager = UIManager((800, 600))
+        panel = UIPanel(pygame.Rect(100, 100, 250, 300), manager=manager)
+
+        container_2 = UIScrollingContainer(pygame.Rect(10, 10, 230, 280), manager=manager, container=panel)
+
+        nested_text_box = UITextBox(html_text="Some text inside a scrolling text box, itself"
+                                              " inside a container that scrolls inside "
+                                              " another container. ",
+                                    relative_rect=pygame.Rect(10, 10, 180, 200),
+                                    container=container_2,
+                                    manager=manager)
+        manager.mouse_position = nested_text_box.rect.center
+        nested_text_box.check_hover(0.1, False)
+
+        assert panel.are_contents_hovered()
 
 
 if __name__ == '__main__':
