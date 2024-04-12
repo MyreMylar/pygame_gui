@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5.0.0
+      uses: actions/setup-python@v5.1.0
       with:
         python-version: ${{ matrix.python-version }}
         pygame-ce-version: ${{ matrix.pygame-ce-version }}
@@ -37,7 +37,7 @@ jobs:
       run: |
         xvfb-run pytest --cov-report=xml --cov=pygame_gui tests/
     - name: Upload to Code Cov
-      uses: codecov/codecov-action@v3.1.5
+      uses: codecov/codecov-action@v4.3.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }} #required
 
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: ${{ matrix.python-version }}
           pygame-ce-version: ${{ matrix.pygame-ce-version }}
@@ -73,7 +73,7 @@ jobs:
         run: |
           pytest --cov-report=xml --cov=pygame_gui tests/
       - name: Upload to Code Cov
-        uses: codecov/codecov-action@v3.1.5
+        uses: codecov/codecov-action@v4.3.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }} #required
 
@@ -86,9 +86,9 @@ jobs:
         python-version: [ '3.11', '3.12' ]
         pygame-ce-version: [ '2.3.2' ]
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.7.1
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: ${{ matrix.python-version }}
           pygame-ce-version: ${{ matrix.pygame-ce-version }}
@@ -109,6 +109,6 @@ jobs:
         run: |
           pytest --cov-report=xml --cov=pygame_gui tests/
       - name: Upload to Code Cov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.3.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }} #required
