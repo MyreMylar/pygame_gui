@@ -68,11 +68,8 @@ class UIWindowStack(IUIWindowStackInterface):
     def refresh_window_stack_from_window(self, window_to_refresh_from: IWindowInterface):
         if window_to_refresh_from in self.stack:
             popped_windows_to_add_back = []
-            window = self.stack.pop()
-            while window != window_to_refresh_from:
-                popped_windows_to_add_back.append(window)
-                window = self.stack.pop()
-            popped_windows_to_add_back.append(window_to_refresh_from)
+
+            # first clear out the top stack
             try:
                 top_window = self.top_stack.pop()
                 while top_window is not None:
@@ -84,6 +81,16 @@ class UIWindowStack(IUIWindowStackInterface):
             except IndexError:
                 pass
 
+            # then clear out everything above our target
+            window = self.stack.pop()
+            while window != window_to_refresh_from:
+                popped_windows_to_add_back.append(window)
+                window = self.stack.pop()
+
+            # add back our target as well
+            popped_windows_to_add_back.append(window_to_refresh_from)
+
+            # reverse the list and re-add them
             popped_windows_to_add_back.reverse()
             for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)

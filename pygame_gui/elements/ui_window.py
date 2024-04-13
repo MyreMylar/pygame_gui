@@ -108,8 +108,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     @always_on_top.setter
     def always_on_top(self, value: bool):
         if value != self._always_on_top:
-            self._always_on_top = value
             self.window_stack.remove_window(self)
+            self._always_on_top = value
             self.window_stack.add_new_window(self)
 
     def set_blocking(self, state: bool):
