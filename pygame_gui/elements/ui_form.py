@@ -1,10 +1,10 @@
 import pygame
 
-from pygame_gui._constants import UI_BUTTON_PRESSED, OldType, UI_FORM_SUBMITTED
+from pygame_gui._constants import UI_BUTTON_PRESSED, UI_FORM_SUBMITTED
 from pygame_gui.core import UIElement, ObjectID
 from pygame_gui.core.interfaces import IUIElementInterface, IUIManagerInterface, IContainerLikeInterface
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.elements import UIAutoResizingContainer, UIAutoScrollingContainer
+from pygame_gui.elements import UIAutoResizingContainer, UIScrollingContainer
 from pygame_gui.elements import UITextEntryLine, UITextEntryBox, UISelectionList, UIDropDownMenu, UILabel, UIButton
 
 import re
@@ -314,7 +314,7 @@ class UISection(UIAutoResizingContainer):
         return False  # Should the section expansion/contraction events be consumed?
 
 
-class UIForm(UIAutoScrollingContainer):
+class UIForm(UIScrollingContainer):
     """
     UIForm is used to create basic forms which can contain text fields, text boxes, dropdowns and more. The form can be
     divided in sections. A section can be expanded/contracted using a button. It also creates a submit button which will
