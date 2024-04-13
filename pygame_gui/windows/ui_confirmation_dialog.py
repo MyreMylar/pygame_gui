@@ -43,7 +43,8 @@ class UIConfirmationDialog(UIWindow):
                  blocking: bool = True,
                  object_id: Union[ObjectID, str] = ObjectID('#confirmation_dialog', None),
                  visible: int = 1,
-                 action_long_desc_text_kwargs: Optional[Dict[str, str]] = None
+                 action_long_desc_text_kwargs: Optional[Dict[str, str]] = None,
+                 always_on_top: bool = False
                  ):
 
         super().__init__(rect, manager,
@@ -51,7 +52,8 @@ class UIConfirmationDialog(UIWindow):
                          element_id=['confirmation_dialog'],
                          object_id=object_id,
                          resizable=True,
-                         visible=visible)
+                         visible=visible,
+                         always_on_top=always_on_top)
 
         minimum_dimensions = (260, 200)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:

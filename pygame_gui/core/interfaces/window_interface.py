@@ -7,12 +7,36 @@ import pygame
 
 class IWindowInterface(metaclass=ABCMeta):
     """
-    A meta class that defines the interface that the window stack uses to interface with the
+    A metaclass that defines the interface that the window stack uses to interface with the
     UIWindow class.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual window class later on and have it make use of the window stack.
     """
+
+    @property
+    @abstractmethod
+    def layer(self) -> int:
+        """
+        The layer of this window (read-only)
+        """
+
+    @property
+    @abstractmethod
+    def always_on_top(self) -> bool:
+        """
+        Whether the window is always above normal windows or not.
+        :return:
+        """
+
+    @always_on_top.setter
+    @abstractmethod
+    def always_on_top(self, value: bool):
+        """
+        Sets whether the window is always above normal windows or not.
+        :param value: the value to set
+
+        """
 
     @abstractmethod
     def set_blocking(self, state: bool):
@@ -79,7 +103,7 @@ class IWindowInterface(metaclass=ABCMeta):
     @abstractmethod
     def check_clicked_inside_or_blocking(self, event: pygame.event.Event) -> bool:
         """
-        A quick event check outside of the normal event processing so that this window is brought
+        A quick event check outside the normal event processing so that this window is brought
         to the front of the window stack if we click on any of the elements contained within it.
 
         :param event: The event to check.
@@ -112,7 +136,7 @@ class IWindowInterface(metaclass=ABCMeta):
         For the window the only hovering we care about is the edges if this is a resizable window.
 
         :param time_delta: time passed in seconds between one call to this method and the next.
-        :param hovered_higher_element: Have we already hovered an element/window above this one.
+        :param hovered_higher_element: Have we already hovered an element/window above this one?
 
         """
 
@@ -185,4 +209,10 @@ class IWindowInterface(metaclass=ABCMeta):
         Set the title of the window.
 
         :param new_title: The title to set.
+        """
+
+    def get_layer_thickness(self) -> int:
+        """
+        The layer 'thickness' of this window/
+        :return: an integer
         """

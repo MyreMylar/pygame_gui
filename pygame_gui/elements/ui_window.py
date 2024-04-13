@@ -44,12 +44,14 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                  visible: int = 1,
                  draggable: bool = True,
                  *,
-                 ignore_shadow_for_initial_size_and_pos: bool = True):
+                 ignore_shadow_for_initial_size_and_pos: bool = True,
+                 always_on_top: bool = False):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Optional[UIContainer]
         self.resizable = resizable
         self.draggable = draggable
+        self._always_on_top = always_on_top
 
         self.edge_hovering = [False, False, False, False]
 
@@ -98,6 +100,17 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.window_stack = self.ui_manager.get_window_stack()
         self.window_stack.add_new_window(self)
+
+    @property
+    def always_on_top(self) -> bool:
+        return self._always_on_top
+
+    @always_on_top.setter
+    def always_on_top(self, value: bool):
+        if value != self._always_on_top:
+            self._always_on_top = value
+            self.window_stack.remove_window(self)
+            self.window_stack.add_new_window(self)
 
     def set_blocking(self, state: bool):
         """
@@ -252,6 +265,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         # This is needed to keep the window in sync with the container after adding elements to it
         if self._window_root_container.layer_thickness != self.layer_thickness:
             self.layer_thickness = self._window_root_container.layer_thickness
+            self.window_stack.refresh_window_stack_from_window(self)
         if self.title_bar is not None:
             if self.title_bar.held:
                 mouse_x, mouse_y = self.ui_manager.get_mouse_position()
@@ -677,7 +691,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
     def on_moved_to_front(self):
         """
-        Called when a window is moved to the front of the stack.
+        Called when a window is moved to the front of its stack.
         """
         # old event - to be removed in 0.8.0
         window_front_event = pygame.event.Event(pygame.USEREVENT,
@@ -689,6 +703,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         # new event
         window_front_event = pygame.event.Event(UI_WINDOW_MOVED_TO_FRONT,
                                                 {'ui_element': self,
+                                                 'always_on_top': int(self.always_on_top),
                                                  'ui_object_id': self.most_specific_combined_id})
         pygame.event.post(window_front_event)
 
@@ -786,3 +801,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             if any_hovered:
                 break
         return any_hovered
+
+    def get_layer_thickness(self) -> int:
+        """
+        The layer 'thickness' of this window/
+        :return: an integer
+        """
+        return self.layer_thickness

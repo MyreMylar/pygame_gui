@@ -35,13 +35,15 @@ class UIConsoleWindow(UIWindow):
                  window_title: str = 'pygame-gui.console_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#console_window', None),
                  visible: int = 1,
-                 preload_bold_log_font: bool = True):
+                 preload_bold_log_font: bool = True,
+                 always_on_top: bool = False):
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          element_id=['console_window'],
                          object_id=object_id,
                          resizable=True,
-                         visible=visible)
+                         visible=visible,
+                         always_on_top=always_on_top)
 
         self.default_log_prefix = '> '
         self.log_prefix = self.default_log_prefix
