@@ -1,7 +1,8 @@
 import pygame
 from pygame_gui._constants import UI_2D_SLIDER_MOVED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, Coordinate
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.elements import UIButton
 
@@ -32,7 +33,7 @@ class UI2DSlider(UIElement):
     """
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  start_value_x: Union[float, int],
                  value_range_x: Union[Tuple[float, float], Tuple[int, int]],
                  start_value_y: Union[float, int],

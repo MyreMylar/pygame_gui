@@ -1,7 +1,7 @@
 from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
 from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
-from pygame_gui.core.interfaces.element_interface import IUIElementInterface, Coordinate
+from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.container_interface import IContainerLikeInterface
 from pygame_gui.core.interfaces.window_interface import IWindowInterface
@@ -25,5 +25,5 @@ __all__ = ['IColourGradientInterface',
            'IUIManagerInterface',
            'IUITextOwnerInterface',
            'IGUIFontInterface',
-           'IGUISpriteInterface',
-           'Coordinate']
+           'IGUISpriteInterface'
+           ]

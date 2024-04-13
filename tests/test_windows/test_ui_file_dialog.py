@@ -84,7 +84,7 @@ class TestUIUIFileDialog:
 
     def test_press_ok_button(self, _init_pygame, default_ui_manager,
                              _display_surface_return_none):
-        file_dialog = UIFileDialog(rect=pygame.Rect(100, 100, 440, 500),
+        file_dialog = UIFileDialog(rect=(100, 100, 440, 500),
                                    manager=default_ui_manager)
 
         file_dialog.current_file_path = Path('tests/data/images/splat.png').absolute()

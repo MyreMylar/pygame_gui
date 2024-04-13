@@ -1,12 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union
 
-import pygame
+from pygame_gui.core.gui_type_hints import Coordinate
 
 
 class IUITooltipInterface(metaclass=ABCMeta):
     """
-       A meta class that defines the interface that a UI Tool tip uses.
+       A metaclass that defines the interface that a UI Tool tip uses.
 
        Interfaces like this help us evade cyclical import problems by allowing us to define the
        actual manager class later on and have it make use of the classes that use the interface.
@@ -27,7 +26,7 @@ class IUITooltipInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def find_valid_position(self, position: pygame.math.Vector2) -> bool:
+    def find_valid_position(self, position: Coordinate) -> bool:
         """
         Finds a valid position for the tool tip inside the root container of the UI.
 
@@ -36,7 +35,7 @@ class IUITooltipInterface(metaclass=ABCMeta):
         the left and to the right, until we find a position that fits the whole tooltip rectangle
         on the screen at once.
 
-        If we fail to manage this then the method will return False. Otherwise it returns True and
+        If we fail to manage this then the method will return False. Otherwise, it returns True and
         set the position of the tool tip to our valid position.
 
         :param position: A 2D vector representing the position of the target this tool tip is for.
@@ -53,11 +52,9 @@ class IUITooltipInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
-        Sets the absolute screen position of this tool tip, updating it's subordinate text box at
+        Sets the absolute screen position of this tool tip, updating its subordinate text box at
         the same time.
 
         :param position: The absolute screen position to set.
@@ -65,11 +62,9 @@ class IUITooltipInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
-        Sets the relative screen position of this tool tip, updating it's subordinate text box at
+        Sets the relative screen position of this tool tip, updating its subordinate text box at
         the same time.
 
         :param position: The relative screen position to set.
@@ -77,9 +72,7 @@ class IUITooltipInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Coordinate):
         """
         Directly sets the dimensions of this tool tip. This will overwrite the normal theming.
 

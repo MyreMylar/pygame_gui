@@ -14,6 +14,7 @@ from pygame_gui._constants import UITextEffectType, TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 from pygame_gui.core.text.text_effects import TypingAppearEffect, FadeInEffect, FadeOutEffect
 from pygame_gui.core.text import TextLineChunkFTFont
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UILabel(UIElement, IUITextOwnerInterface):
@@ -21,15 +22,17 @@ class UILabel(UIElement, IUITextOwnerInterface):
     A label lets us display a single line of text with a single font style. It's a quick to
     rebuild and simple alternative to the text box element.
 
-    :param relative_rect: The rectangle that contains and positions the label relative to it's
-                          container.
+    :param relative_rect: Normally a rectangle describing the position (relative to its container) and
+                          dimensions. Also accepts a position Coordinate where the dimensions
+                          will be dynamic depending on the text contents. Dynamic dimensions can
+                          be requested by setting the required dimension to -1.
     :param text: The text to display in the label.
     :param manager: The UIManager that manages this label. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
@@ -38,7 +41,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
                         in the middle.
     """
 
-    def __init__(self, relative_rect: pygame.Rect,
+    def __init__(self, relative_rect: Union[RectLike, Coordinate],
                  text: str,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -49,7 +52,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
                  *,
                  text_kwargs: Optional[Dict[str, str]] = None):
 
-        super().__init__(relative_rect, manager, container,
+        rel_rect = (relative_rect if len(relative_rect) == 4
+                    else pygame.Rect(relative_rect, (-1, -1)))
+
+        super().__init__(rel_rect, manager, container,
                          starting_height=1,
                          layer_thickness=1,
                          anchors=anchors,
@@ -175,7 +181,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             if 'left' in self.anchors and self.anchors['left'] == 'right' and self.dynamic_width:
                 left_offset = self.dynamic_dimensions_orig_top_left[0]
                 new_left = left_offset - self.relative_rect.width
-            # if we have anchored the top side of our button to the bottom of it's container then
+            # if we have anchored the top side of our button to the bottom of its container then
             # changing the height is going to mess up the vert position as well.
             if 'top' in self.anchors and self.anchors['top'] == 'bottom' and self.dynamic_height:
                 top_offset = self.dynamic_dimensions_orig_top_left[1]

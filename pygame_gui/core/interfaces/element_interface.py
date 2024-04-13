@@ -5,7 +5,7 @@ import pygame
 
 from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
-Coordinate = Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]
+from pygame_gui.core.gui_type_hints import Coordinate
 
 
 class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
@@ -14,6 +14,25 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     before the UIElement has itself been defined.
 
     """
+
+    @property
+    @abstractmethod
+    def hovered(self) -> bool:
+        """
+        Are we hovering over this element with the mouse pointer or other input highlighting method.
+
+        :return: True if hovered.
+        """
+
+    @hovered.setter
+    @abstractmethod
+    def hovered(self, value: bool):
+        """
+        Setter for if we are hovering over this element with the mouse pointer or other input highlighting method.
+
+        :param value: the hovering value to set.
+        :return:
+        """
 
     @abstractmethod
     def get_relative_rect(self) -> pygame.Rect:

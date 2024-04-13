@@ -5,6 +5,7 @@ from typing import Tuple, Union
 import pygame
 
 from pygame_gui.core.interfaces.element_interface import IUIElementInterface
+from pygame_gui.core.gui_type_hints import Coordinate
 
 
 class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
@@ -72,9 +73,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Set the absolute position of this container - it is usually less chaotic to deal with
         setting relative positions.
@@ -84,9 +83,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Set the position of this container, relative to the container it is within.
 
@@ -95,10 +92,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.

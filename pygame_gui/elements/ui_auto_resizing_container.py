@@ -1,6 +1,7 @@
 import pygame
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.interfaces import IUIElementInterface, IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.gui_type_hints import RectLike
 
 from typing import *
 
@@ -33,7 +34,7 @@ class UIAutoResizingContainer(UIContainer):
     """
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  min_edges_rect: pygame.Rect = None,
                  max_edges_rect: pygame.Rect = None,
                  resize_left: bool = True,

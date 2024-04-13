@@ -1,11 +1,12 @@
-from typing import List, Dict, Optional, Union, Tuple
+from typing import List, Dict, Optional, Union
 
 import pygame
 
-from pygame_gui.core.interfaces import (Coordinate, IContainerLikeInterface,
+from pygame_gui.core.interfaces import (IContainerLikeInterface,
                                         IUIManagerInterface, IUIElementInterface)
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.elements import UIButton, UIPanel
 
 
@@ -30,7 +31,7 @@ class UITabContainer(UIElement):
                     override this.
     """
 
-    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+    def __init__(self, relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  *,
