@@ -162,6 +162,9 @@ class TestWindowStack:
         window_always_on_top = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
                                         manager=default_ui_manager, element_id='test_window',
                                         always_on_top=True)
+        window_always_on_top_2 = UIWindow(pygame.Rect(0, 0, 200, 200), window_display_title="Test Window",
+                                          manager=default_ui_manager, element_id='test_window',
+                                          always_on_top=True)
         window = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                           manager=default_ui_manager, element_id='test_window')
         window_2 = UIWindow(pygame.Rect(50, 50, 200, 200), window_display_title="Test Window",
@@ -170,17 +173,20 @@ class TestWindowStack:
                             manager=default_ui_manager, element_id='test_window')
 
         stack.add_new_window(window_always_on_top)
+        stack.add_new_window(window_always_on_top_2)
         stack.add_new_window(window)
         stack.add_new_window(window_2)
         stack.add_new_window(window_3)
         stack.move_window_to_front(window)
         stack.move_window_to_front(window_3)
         stack.move_window_to_front(window_2)
+        stack.move_window_to_front(window_always_on_top)
 
         assert stack.stack[0] == window
         assert stack.stack[2] == window_2
-        assert stack.top_stack[0] == window_always_on_top
-        assert window_always_on_top.layer > window_2.layer
+        assert stack.top_stack[0] == window_always_on_top_2
+        assert stack.top_stack[1] == window_always_on_top
+        assert window_always_on_top_2.layer > window_2.layer
 
     def test_swap_window_always_on_top(self, _init_pygame, default_ui_manager,
                                        _display_surface_return_none):
@@ -210,8 +216,8 @@ class TestWindowStack:
         UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                  manager=manager, element_id='test_window')
         assert manager.get_window_stack().get_full_stack()[-1].get_top_layer() == 8
-        UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
-                 manager=manager, element_id='test_window', always_on_top=True)
+        window_always_on_top = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
+                                        manager=manager, element_id='test_window', always_on_top=True)
         assert manager.get_window_stack().get_full_stack()[-1].get_top_layer() == 11
         window_always_on_top_2 = UIWindow(pygame.Rect(100, 100, 200, 200), window_display_title="Test Window",
                                           manager=manager, element_id='test_window', always_on_top=True)
@@ -227,6 +233,13 @@ class TestWindowStack:
         assert window.layer_thickness == 4
         assert manager.get_window_stack().get_full_stack()[-1].get_top_layer() == 16
         assert window_always_on_top_2.get_top_layer() == 16
+
+        UIDropDownMenu(["Test", "Test"], "Test", (50, 50, 120, 30), container=window_always_on_top, manager=manager)
+        assert window_always_on_top.layer_thickness == 2
+        window_always_on_top.update(0.4)
+        assert window_always_on_top.layer_thickness == 4
+        assert manager.get_window_stack().get_full_stack()[-1].get_top_layer() == 18
+        assert window_always_on_top_2.get_top_layer() == 18
 
 
 if __name__ == '__main__':
