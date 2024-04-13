@@ -6,13 +6,14 @@ from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.gui_type_hints import RectLike, SpriteWithHealth
 
 
 class UIStatusBar(UIElement):
     """
     Displays a status/progress bar.
 
-    This is a flexible class that can be used to display status for a sprite (health/mana/fatigue, etc),
+    This is a flexible class that can be used to display status for a sprite (health/mana/fatigue, etc.),
     or to provide a status bar on the screen not attached to any particular object. You can use multiple
     status bars for a sprite to show different status items if desired.
 
@@ -32,7 +33,7 @@ class UIStatusBar(UIElement):
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
@@ -41,9 +42,9 @@ class UIStatusBar(UIElement):
     element_id = 'status_bar'
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
-                 sprite: Union[pygame.sprite.Sprite, None] = None,
+                 sprite: Optional[SpriteWithHealth] = None,
                  follow_sprite: bool = True,
                  percent_method: Union[Callable[[], float], None] = None,
                  container: Union[IContainerLikeInterface, None] = None,
@@ -61,7 +62,7 @@ class UIStatusBar(UIElement):
                          object_id=object_id,
                          element_id=[self.element_id])
 
-        self.sprite = sprite
+        self.sprite: SpriteWithHealth = sprite
         self.follow_sprite = follow_sprite
         self.follow_sprite_offset = (0, 0)
 

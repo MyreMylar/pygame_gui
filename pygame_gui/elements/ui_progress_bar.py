@@ -1,11 +1,11 @@
 from typing import Union, Dict, Optional
 
-import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
+from pygame_gui.core.gui_type_hints import RectLike
 
 
 class UIProgressBar(UIStatusBar):
@@ -18,7 +18,7 @@ class UIProgressBar(UIStatusBar):
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
@@ -26,7 +26,7 @@ class UIProgressBar(UIStatusBar):
     element_id = 'progress_bar'
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,

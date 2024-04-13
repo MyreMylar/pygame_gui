@@ -17,6 +17,7 @@ from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_FILE_DIAL
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelectionList
 from pygame_gui.windows.ui_confirmation_dialog import UIConfirmationDialog
+from pygame_gui.core.gui_type_hints import RectLike
 
 
 class UIFileDialog(UIWindow):
@@ -36,7 +37,7 @@ class UIFileDialog(UIWindow):
     """
 
     def __init__(self,
-                 rect: pygame.Rect,
+                 rect: RectLike,
                  manager: Optional[IUIManagerInterface],
                  window_title: str = 'pygame-gui.file_dialog_title_bar',
                  allowed_suffixes: Optional[Set[str]] = None,
@@ -57,8 +58,8 @@ class UIFileDialog(UIWindow):
         locale.setlocale(locale.LC_ALL, "")
 
         minimum_dimensions = (260, 300)
-        if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(rect.size) +
+        if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
+            warn_string = ("Initial size: " + str(self.relative_rect.size) +
                            " is less than minimum dimensions: " + str(minimum_dimensions))
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)

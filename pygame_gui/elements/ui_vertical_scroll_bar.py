@@ -8,6 +8,7 @@ from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UIVerticalScrollBar(UIElement):
@@ -30,7 +31,7 @@ class UIVerticalScrollBar(UIElement):
     """
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  visible_percentage: float,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -503,9 +504,7 @@ class UIVerticalScrollBar(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this scroll bar, updating all subordinate button
         elements at the same time.
@@ -521,9 +520,7 @@ class UIVerticalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this scroll bar, updating all subordinate button
         elements at the same time.
@@ -539,10 +536,7 @@ class UIVerticalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 

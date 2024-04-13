@@ -4,7 +4,8 @@ import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
-from pygame_gui.core.interfaces import IUIManagerInterface, Coordinate, IUIElementInterface
+from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
+from pygame_gui.core.gui_type_hints import Coordinate
 from pygame_gui.core import UIElement, UIContainer
 
 from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar

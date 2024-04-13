@@ -6,6 +6,7 @@ from pygame_gui.core.ui_element import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.interfaces import IUIContainerInterface, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.gui_type_hints import RectLike, Coordinate
 
 
 class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
@@ -30,7 +31,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     Warning - it's parent container visibility may override this.
     """
     def __init__(self,
-                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+                 relative_rect: RectLike,
                  manager: IUIManagerInterface,
                  *,
                  starting_height: int = 1,
@@ -178,9 +179,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         for element in self.elements:
             element.update_containing_rect_position()
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Set the absolute position of this container - it is usually less chaotic to deal with
         setting relative positions.
@@ -191,9 +190,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         super().set_position(position)
         self.update_containing_rect_position()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Set the position of this container, relative to the container it is within.
 
@@ -203,10 +200,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         super().set_relative_position(position)
         self.update_containing_rect_position()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Set the dimension of this container and update the positions of elements within it
         accordingly.

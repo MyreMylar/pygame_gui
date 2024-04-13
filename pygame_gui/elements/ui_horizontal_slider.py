@@ -11,6 +11,7 @@ from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UIHorizontalSlider(UIElement):
@@ -26,14 +27,14 @@ class UIHorizontalSlider(UIElement):
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     :param click_increment: the amount to increment by when clicking one of the arrow buttons.
     """
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  start_value: Union[float, int],
                  value_range: Tuple[Union[float, int], Union[float, int]],
                  manager: Optional[IUIManagerInterface] = None,
@@ -364,7 +365,7 @@ class UIHorizontalSlider(UIElement):
         issue a warning if the value set is not in the value range.
 
         :param value: The value to set.
-        :param warn: set to false to suppress the default warning,
+        :param warn: set to 'False' to suppress the default warning,
                      instead the value will be clamped.
 
         """
@@ -458,9 +459,7 @@ class UIHorizontalSlider(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -476,9 +475,7 @@ class UIHorizontalSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this slider, updating all subordinate button elements
         at the same time.
@@ -494,10 +491,7 @@ class UIHorizontalSlider(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 

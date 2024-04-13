@@ -6,9 +6,10 @@ from pygame_gui._constants import UI_WINDOW_CLOSE, UI_WINDOW_MOVED_TO_FRONT, UI_
 from pygame_gui._constants import OldType
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface, Coordinate
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
 from pygame_gui.core.interfaces import IWindowInterface, IUIManagerInterface, IUIElementInterface
 from pygame_gui.core import UIElement, UIContainer
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
@@ -34,14 +35,16 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     """
 
     def __init__(self,
-                 rect: pygame.Rect,
+                 rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  window_display_title: str = "",
                  element_id: Union[List[str], str, None] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
                  resizable: bool = False,
                  visible: int = 1,
-                 draggable: bool = True):
+                 draggable: bool = True,
+                 *,
+                 ignore_shadow_for_initial_size_and_pos: bool = True):
 
         self.window_display_title = window_display_title
         self._window_root_container = None  # type: Optional[UIContainer]
@@ -61,7 +64,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                          layer_thickness=1,
                          visible=visible,
                          object_id=object_id,
-                         element_id=element_ids)
+                         element_id=element_ids,
+                         ignore_shadow_for_initial_size_and_pos=ignore_shadow_for_initial_size_and_pos)
 
         self.minimum_dimensions = (100, 100)
 

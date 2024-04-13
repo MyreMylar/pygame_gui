@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict, Optional
+from typing import Union, Dict, Optional
 
 import pygame
 
@@ -8,6 +8,7 @@ from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UIHorizontalScrollBar(UIElement):
@@ -23,14 +24,14 @@ class UIHorizontalScrollBar(UIElement):
     :param container: The container that this element is within. If set to None will be the
                       root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  visible_percentage: float,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -507,9 +508,7 @@ class UIHorizontalScrollBar(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this scroll bar, updating all subordinate button
         elements at the same time.
@@ -525,9 +524,7 @@ class UIHorizontalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this scroll bar, updating all subordinate button
         elements at the same time.
@@ -543,10 +540,7 @@ class UIHorizontalScrollBar(UIElement):
 
         self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -583,7 +577,7 @@ class UIHorizontalScrollBar(UIElement):
 
     def disable(self):
         """
-        Disables the scroll bar so it is no longer interactive.
+        Disables the scroll bar, so it is no longer interactive.
         """
         if self.is_enabled:
             self.is_enabled = False
@@ -595,7 +589,7 @@ class UIHorizontalScrollBar(UIElement):
 
     def enable(self):
         """
-        Enables the scroll bar so it is interactive once again.
+        Enables the scroll bar, so it is interactive once again.
         """
         if not self.is_enabled:
             self.is_enabled = True

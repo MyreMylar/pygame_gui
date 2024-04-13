@@ -1,7 +1,7 @@
 import re
 import warnings
 
-from typing import Union, List, Dict, Optional, Tuple
+from typing import Union, List, Dict, Optional
 
 import pygame
 from pygame import KMOD_META, KMOD_CTRL, KMOD_ALT, K_a, K_x, K_c
@@ -17,6 +17,7 @@ from pygame_gui.core.utility import clipboard_paste, clipboard_copy, translate
 
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.gui_type_hints import RectLike
 
 
 class UITextEntryLine(UIElement):
@@ -69,7 +70,7 @@ class UITextEntryLine(UIElement):
                                         _number_character_set['en'])}
 
     def __init__(self,
-                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+                 relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
