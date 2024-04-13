@@ -45,7 +45,8 @@ class UIFileDialog(UIWindow):
                  object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
                  allow_existing_files_only: bool = False,
                  allow_picking_directories: bool = False,
-                 visible: int = 1
+                 visible: int = 1,
+                 always_on_top: bool = False
                  ):
 
         super().__init__(rect, manager,
@@ -53,7 +54,8 @@ class UIFileDialog(UIWindow):
                          element_id=['file_dialog'],
                          object_id=object_id,
                          resizable=True,
-                         visible=visible)
+                         visible=visible,
+                         always_on_top=always_on_top)
 
         locale.setlocale(locale.LC_ALL, "")
 

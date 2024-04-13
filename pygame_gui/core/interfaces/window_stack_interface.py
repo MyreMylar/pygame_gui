@@ -57,10 +57,20 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
 
         """
 
-    @abstractmethod
-    def get_stack(self) -> List[IWindowInterface]:
+    def is_window_at_top_of_top(self, window: IWindowInterface) -> bool:
         """
-        Return the internal window stack directly.
+        Checks if a window is at the top of the top window stack or not.
+
+        :param window: The window to check.
+
+        :return: returns True if this window is at the top of the stack.
+
+        """
+
+    @abstractmethod
+    def get_full_stack(self) -> List[IWindowInterface]:
+        """
+        Returns the full stack of normal and always on top windows.
 
         :return: a list of Windows
         """

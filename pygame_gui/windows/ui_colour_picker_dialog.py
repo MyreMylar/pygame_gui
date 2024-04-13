@@ -311,14 +311,16 @@ class UIColourPickerDialog(UIWindow):
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
                  window_title: str = "pygame-gui.colour_picker_title_bar",
                  object_id: Union[ObjectID, str] = ObjectID('#colour_picker_dialog', None),
-                 visible: int = 1):
+                 visible: int = 1,
+                 always_on_top: bool = False):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          element_id=['colour_picker_dialog'],
                          object_id=object_id,
                          resizable=True,
-                         visible=visible)
+                         visible=visible,
+                         always_on_top=always_on_top)
 
         minimum_dimensions = (390, 390)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:

@@ -29,14 +29,16 @@ class UIMessageWindow(UIWindow):
                  window_title: str = 'pygame-gui.message_window_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#message_window', None),
                  visible: int = 1,
-                 html_message_text_kwargs: Optional[Dict[str, str]] = None):
+                 html_message_text_kwargs: Optional[Dict[str, str]] = None,
+                 always_on_top: bool = False):
 
         super().__init__(rect, manager,
                          window_display_title=window_title,
                          element_id=['message_window'],
                          object_id=object_id,
                          resizable=True,
-                         visible=visible)
+                         visible=visible,
+                         always_on_top=always_on_top)
 
         minimum_dimensions = (250, 160)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:

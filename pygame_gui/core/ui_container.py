@@ -124,7 +124,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         max_element_top_layer = self._layer
         for element in self.elements:
             if (element.get_top_layer() > max_element_top_layer
-                    and element not in self.ui_manager.get_window_stack().get_stack()
+                    and element not in self.ui_manager.get_window_stack().get_full_stack()
                     and (not isinstance(element, UIContainer) or
                          not element.is_window_root_container)):
                 max_element_top_layer = element.get_top_layer()
@@ -143,7 +143,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         :param element: the element to check.
         """
         if (element.get_top_layer() > self.max_element_top_layer
-                and element not in self.ui_manager.get_window_stack().get_stack()
+                and element not in self.ui_manager.get_window_stack().get_full_stack()
                 and (not isinstance(element, UIContainer) or not element.is_window_root_container)):
 
             self.max_element_top_layer = element.get_top_layer()
