@@ -7,7 +7,8 @@ from pygame_gui._constants import UI_BUTTON_PRESSED, UI_HORIZONTAL_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_PICKED, UI_TEXT_ENTRY_FINISHED, UI_2D_SLIDER_MOVED
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, Coordinate
+from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 
 from pygame_gui.elements import UIWindow, UIButton, UIImage
@@ -41,7 +42,7 @@ class UIColourChannelEditor(UIElement):
                     may override this.
     """
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  name: str,
                  channel_index: int,
                  value_range: Tuple[int, int],
@@ -73,7 +74,7 @@ class UIColourChannelEditor(UIElement):
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
-        self.element_container = UIContainer(relative_rect,
+        self.element_container = UIContainer(self.relative_rect,
                                              self.ui_manager,
                                              container=self.ui_container,
                                              parent_element=self,
@@ -304,7 +305,7 @@ class UIColourPickerDialog(UIWindow):
                       '#colour_picker_dialog'
     :param visible: Whether the element is visible by default.
     """
-    def __init__(self, rect: pygame.Rect,
+    def __init__(self, rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
                  initial_colour: pygame.Color = pygame.Color(0, 0, 0, 255),
@@ -320,8 +321,8 @@ class UIColourPickerDialog(UIWindow):
                          visible=visible)
 
         minimum_dimensions = (390, 390)
-        if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(rect.size) +
+        if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
+            warn_string = ("Initial size: " + str(self.relative_rect.size) +
                            " is less than minimum dimensions: " + str(minimum_dimensions))
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)

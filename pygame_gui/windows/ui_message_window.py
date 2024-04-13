@@ -7,6 +7,7 @@ from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIButton, UITextBox, UIWindow
+from pygame_gui.core.gui_type_hints import RectLike
 
 
 class UIMessageWindow(UIWindow):
@@ -21,7 +22,7 @@ class UIMessageWindow(UIWindow):
     :param object_id: A custom defined ID for fine-tuning of theming. Defaults to '#message_window'.
     :param visible: Whether the element is visible by default.
     """
-    def __init__(self, rect: pygame.Rect,
+    def __init__(self, rect: RectLike,
                  html_message: str,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
@@ -38,8 +39,8 @@ class UIMessageWindow(UIWindow):
                          visible=visible)
 
         minimum_dimensions = (250, 160)
-        if rect.width < minimum_dimensions[0] or rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(rect.size) +
+        if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
+            warn_string = ("Initial size: " + str(self.relative_rect.size) +
                            " is less than minimum dimensions: " + str(minimum_dimensions))
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)

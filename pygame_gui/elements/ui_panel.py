@@ -1,4 +1,4 @@
-from typing import Union, Dict, Tuple, Optional, Iterator
+from typing import Union, Dict, Optional, Iterator
 
 import pygame
 
@@ -8,6 +8,8 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInte
 
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UIPanel(UIElement, IContainerLikeInterface):
@@ -29,7 +31,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                     it will try to use the first UIManager that was created by your application.
     :param margins: Controls the distance between the edge of the panel and where it's
                     container should begin.
-    :param container: The container this panel is inside of - distinct from this panel's own
+    :param container: The container this panel is inside - distinct from this panel's own
                       container.
     :param parent_element: A hierarchical 'parent' used for signifying belonging and used in
                            theming and events.
@@ -41,7 +43,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
                     may override this.
     """
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  starting_height: int = 1,
                  manager: Optional[IUIManagerInterface] = None,
                  *,
@@ -153,10 +155,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.get_container().kill()
         super().kill()
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Set the size of this panel and then re-sizes and shifts the contents of the panel container
         to fit the new size.
@@ -177,9 +176,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         if new_container_dimensions != self.get_container().get_size():
             self.get_container().set_dimensions(new_container_dimensions)
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -189,9 +186,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         super().set_relative_position(position)
         self.get_container().set_relative_position(self.relative_rect.topleft)
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
@@ -276,7 +271,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def disable(self):
         """
-        Disables all elements in the panel so they are no longer interactive.
+        Disables all elements in the panel, so they are no longer interactive.
         """
         if self.is_enabled:
             self.is_enabled = False
@@ -285,7 +280,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def enable(self):
         """
-        Enables all elements in the panel so they are interactive again.
+        Enables all elements in the panel, so they are interactive again.
         """
         if not self.is_enabled:
             self.is_enabled = True

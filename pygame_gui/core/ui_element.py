@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from pygame_gui.core.interfaces import IUIElementInterface, Coordinate
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
+from pygame_gui.core.interfaces import IUIElementInterface
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
@@ -39,7 +40,7 @@ class UIElement(GUISprite, IUIElementInterface):
     :param element_id: A list of string ID representing this element's class.
     """
 
-    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+    def __init__(self, relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface],
                  container: Optional[IContainerLikeInterface],
                  *,
@@ -49,7 +50,8 @@ class UIElement(GUISprite, IUIElementInterface):
                  visible: int = 1,
                  parent_element: Optional[IUIElementInterface] = None,
                  object_id: Union[ObjectID, str, None] = None,
-                 element_id: Optional[List[str]] = None):
+                 element_id: Optional[List[str]] = None,
+                 ignore_shadow_for_initial_size_and_pos: bool = False):
 
         self._layer = 0
         self.ui_manager = manager
@@ -62,20 +64,10 @@ class UIElement(GUISprite, IUIElementInterface):
 
         super().__init__(self.ui_manager.get_sprite_group())
 
-        self.minimum_dimensions = (-1, -1)
-
-        if isinstance(relative_rect, pygame.Rect):
-            self.relative_rect = relative_rect.copy()
-        else:
-            self.relative_rect = pygame.Rect(relative_rect)
-        self.relative_rect.size = self._get_clamped_to_minimum_dimensions(self.relative_rect.size)
-        self.rect = self.relative_rect.copy()
-
-        self.dynamic_width = True if self.relative_rect.width == -1 else False
-        self.dynamic_height = True if self.relative_rect.height == -1 else False
-
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
+
+        self.minimum_dimensions = (-1, -1)
 
         self.object_ids = None
         self.class_ids = None
@@ -83,6 +75,55 @@ class UIElement(GUISprite, IUIElementInterface):
         self.element_base_ids = None
         self.combined_element_ids = None
         self.most_specific_combined_id = 'no_id'
+
+        # Themed parameters
+        self.shadow_width = None  # type: Union[None, int]
+        self.border_width = None  # type: Union[None, int]
+        self.shape_corner_radius: Optional[List[int]] = None
+
+        self.tool_tip_text = None
+        self.tool_tip_text_kwargs = None
+        self.tool_tip_object_id = None
+        self.tool_tip_delay = 1.0
+        self.tool_tip_wrap_width = None
+        self.tool_tip = None
+
+        element_ids = element_id
+        element_id = None
+        base_id = None
+        if element_ids is not None:
+            if len(element_ids) >= 1:
+                element_id = element_ids[0]
+
+            if len(element_ids) >= 2:
+                base_id = element_ids[1]
+
+            self._create_valid_ids(container=container,
+                                   parent_element=parent_element,
+                                   object_id=object_id,
+                                   element_id=element_id,
+                                   element_base_id=base_id)
+
+        if isinstance(relative_rect, pygame.Rect) or isinstance(relative_rect, pygame.FRect):
+            self.relative_rect = relative_rect.copy()
+        else:
+            self.relative_rect = pygame.Rect(relative_rect)
+
+        if ignore_shadow_for_initial_size_and_pos:
+            # need to expand our rect by the shadow size and adjust position by it as well.
+            self._check_shape_theming_changed(defaults={'border_width': 1,
+                                                        'shadow_width': 2,
+                                                        'shape_corner_radius': [2, 2, 2, 2]})
+            self.relative_rect.width += self.shadow_width * 2
+            self.relative_rect.height += self.shadow_width * 2
+            self.relative_rect.top -= self.shadow_width  # This will need to be changed when we can adjust the anchor source
+            self.relative_rect.left -= self.shadow_width  # This will need to be changed when we can adjust the anchor source
+
+        self.relative_rect.size = self._get_clamped_to_minimum_dimensions(self.relative_rect.size)
+        self.rect = self.relative_rect.copy()
+
+        self.dynamic_width = True if self.relative_rect.width == -1 else False
+        self.dynamic_height = True if self.relative_rect.height == -1 else False
 
         self.anchors = {}
         self.set_anchors(anchors)
@@ -105,7 +146,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.starting_height = starting_height
 
         self.is_enabled = True
-        self.hovered = False
+        self._hovered = False
         self.is_focused = False
         self.hover_time = 0.0
 
@@ -115,18 +156,6 @@ class UIElement(GUISprite, IUIElementInterface):
         self._image_clip = None
 
         self._visual_debug_mode = False
-
-        # Themed parameters
-        self.shadow_width = None  # type: Union[None, int]
-        self.border_width = None  # type: Union[None, int]
-        self.shape_corner_radius: Optional[List[int]] = None
-
-        self.tool_tip_text = None
-        self.tool_tip_text_kwargs = None
-        self.tool_tip_object_id = None
-        self.tool_tip_delay = 1.0
-        self.tool_tip_wrap_width = None
-        self.tool_tip = None
 
         self._setup_container(container)
 
@@ -139,21 +168,13 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._focus_set = {self}
 
-        element_ids = element_id
-        element_id = None
-        base_id = None
-        if element_ids is not None:
-            if len(element_ids) >= 1:
-                element_id = element_ids[0]
+    @property
+    def hovered(self) -> bool:
+        return self._hovered
 
-            if len(element_ids) >= 2:
-                base_id = element_ids[1]
-
-            self._create_valid_ids(container=container,
-                                   parent_element=parent_element,
-                                   object_id=object_id,
-                                   element_id=element_id,
-                                   element_base_id=base_id)
+    @hovered.setter
+    def hovered(self, value: bool):
+        self._hovered = value
 
     def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
         if self.ui_container is not None and clamp_to_container:
@@ -909,7 +930,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
-        if dimensions[0] >= 0 and dimensions[1] >= 0:
+        if self.relative_rect.width >= 0 and self.relative_rect.height >= 0:
             self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
             if self.drawable_shape is not None:

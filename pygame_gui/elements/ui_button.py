@@ -11,20 +11,21 @@ from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectang
 from pygame_gui.core.drawable_shapes import RectDrawableShape
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core.ui_element import UIElement
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UIButton(UIElement):
     """
     A push button, a lot of the appearance of the button, including images to be displayed, is
-    setup via the theme file. This button is designed to be pressed, do something, and then reset -
+    set up via the theme file. This button is designed to be pressed, do something, and then reset -
     rather than to be toggled on or off.
 
     The button element is reused throughout the UI as part of other elements as it happens to be a
     very flexible interactive element.
 
     :param relative_rect: Normally a rectangle describing the position (relative to its container) and
-                          dimensions. Also accepts a position Tuple, or Vector2 where the dimensions
-                          will be dynamic depending on the button's contents. Dynamic dimensions can
+                          dimensions. Also accepts a position Coordinate where the dimensions
+                          will be dynamic depending on the text contents. Dynamic dimensions can
                           be requested by setting the required dimension to -1.
     :param text: Text for the button.
     :param manager: The UIManager that manages this element. If not provided or set to None,
@@ -33,12 +34,12 @@ class UIButton(UIElement):
                       will be the root window's container.
     :param tool_tip_text: Optional tool tip text, can be formatted with HTML. If supplied will
                           appear on hover.
-    :param starting_height: The height in layers above it's container that this element will be
+    :param starting_height: The height in layers above its container that this element will be
                             placed.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param allow_double_clicks: Enables double clicking on buttons which will generate a
+    :param allow_double_clicks: Enables double-clicking on buttons which will generate a
                                 unique event.
     :param visible: Whether the element is visible by default. Warning - container visibility may
                     override this.
@@ -48,7 +49,7 @@ class UIButton(UIElement):
                         in the middle.
     """
 
-    def __init__(self, relative_rect: Union[pygame.Rect, Tuple[float, float], pygame.Vector2],
+    def __init__(self, relative_rect: Union[RectLike, Coordinate],
                  text: str,
                  manager: Optional[IUIManagerInterface] = None,
                  container: Optional[IContainerLikeInterface] = None,
@@ -68,7 +69,7 @@ class UIButton(UIElement):
                  max_dynamic_width: Optional[int] = None
                  ):
 
-        rel_rect = (relative_rect if isinstance(relative_rect, pygame.Rect)
+        rel_rect = (relative_rect if len(relative_rect) == 4
                     else pygame.Rect(relative_rect, (-1, -1)))
         super().__init__(rel_rect,
                          manager, container,
@@ -213,8 +214,8 @@ class UIButton(UIElement):
         """
         Tests if a position should be considered 'hovering' the button. Normally this just means
         our mouse pointer is inside the buttons rectangle, however if we are holding onto the
-        button for a purpose(e.g. dragging a window around by it's menu bar) the hover radius can
-        be made to grow so we don't keep losing touch with whatever we are moving.
+        button for a purpose(e.g. dragging a window around by its menu bar) the hover radius can
+        be made to grow, so we don't keep losing touch with whatever we are moving.
 
         :param hover_x: horizontal pixel coordinate to test.
         :param hover_y: vertical pixel coordinate to test
@@ -317,7 +318,7 @@ class UIButton(UIElement):
 
         :param event: The event to process.
 
-        :return: Return True if we want to consume this event so it is not passed on to the
+        :return: Return True if we want to consume this event, so it is not passed on to the
                  rest of the UI.
 
         """
@@ -329,9 +330,9 @@ class UIButton(UIElement):
                 if self.is_enabled:
                     if (self.allow_double_clicks and self.last_click_button == event.button and
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
-                        self.on_self_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button':event.button})
+                        self.on_self_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button': event.button})
                     else:
-                        self.on_self_event(UI_BUTTON_START_PRESS, {'mouse_button':event.button})
+                        self.on_self_event(UI_BUTTON_START_PRESS, {'mouse_button': event.button})
                         self.double_click_timer = 0.0
                         self.last_click_button = event.button
                         self.held = True
@@ -349,7 +350,7 @@ class UIButton(UIElement):
                 self._set_inactive()
                 consumed_event = True
                 self.pressed_event = True
-                self.on_self_event(UI_BUTTON_PRESSED, {'mouse_button':event.button})
+                self.on_self_event(UI_BUTTON_PRESSED, {'mouse_button': event.button})
 
             if self.is_enabled and self.held:
                 self.held = False
@@ -358,7 +359,7 @@ class UIButton(UIElement):
 
         return consumed_event
     
-    def bind(self, event:int, function:Callable = None):
+    def bind(self, event: int, function: Callable = None):
         """
         Bind a function to an element event.
 
@@ -376,7 +377,7 @@ class UIButton(UIElement):
             if num_params == 1:
                 self._handler[event] = function
             elif num_params == 0:
-                self._handler[event] = lambda _:function()
+                self._handler[event] = lambda _: function()
             else:
                 raise ValueError("Command function signatures can have 0 or 1 parameter. "
                                  "If one parameter is set it will contain data for the id of the mouse button used "
@@ -384,7 +385,7 @@ class UIButton(UIElement):
         else:
             raise TypeError("Command function must be callable")
     
-    def on_self_event(self, event:int, data:Dict[str, Any]=None):
+    def on_self_event(self, event: int, data: Dict[str, Any] = None):
         """
         Called when an event is triggered by this element. Handles these events either by posting the event back
         to the event queue, or by running a function supplied by the user.
@@ -438,7 +439,7 @@ class UIButton(UIElement):
 
     def enable(self):
         """
-        Re-enables the button so we can once again interact with it.
+        Re-enables the button, so we can once again interact with it.
         """
         if not self.is_enabled:
             self.is_enabled = True
@@ -791,7 +792,7 @@ class UIButton(UIElement):
             if 'left' in self.anchors and self.anchors['left'] == 'right' and self.dynamic_width:
                 left_offset = self.dynamic_dimensions_orig_top_left[0]
                 new_left = left_offset - self.relative_rect.width
-            # if we have anchored the top side of our button to the bottom of it's container then
+            # if we have anchored the top side of our button to the bottom of its container then
             # changing the height is going to mess up the vert position as well.
             if 'top' in self.anchors and self.anchors['top'] == 'bottom' and self.dynamic_height:
                 top_offset = self.dynamic_dimensions_orig_top_left[1]

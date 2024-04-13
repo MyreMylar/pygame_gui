@@ -33,6 +33,7 @@ from pygame_gui.core.text.text_box_layout import TextBoxLayout
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import TextEffect, TypingAppearEffect, FadeInEffect, FadeOutEffect
 from pygame_gui.core.text.text_effects import BounceEffect, TiltEffect, ExpandContractEffect, ShakeEffect
+from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
 class UITextBox(UIElement, IUITextOwnerInterface):
@@ -98,7 +99,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def __init__(self,
                  html_text: str,
-                 relative_rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+                 relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  wrap_to_height: bool = False,
                  starting_height: int = 1,
@@ -117,7 +118,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self.scroll_bar = None
-        relative_rect.height = -1 if wrap_to_height else relative_rect.height
+        relative_rect[3] = -1 if wrap_to_height else relative_rect[3]
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=2,
@@ -583,9 +584,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.background_surf = self.drawable_shape.get_fresh_surface()
         self.redraw_from_text_block()
 
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Sets the relative screen position of this text box, updating its subordinate scroll bar at
         the same time.
@@ -602,9 +601,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                    self.shadow_width)
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Sets the absolute screen position of this text box, updating its subordinate scroll bar
         at the same time.
@@ -621,10 +618,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                                    self.shadow_width)
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]],
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of a text box.
 

@@ -8,6 +8,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UITextBox, UITextEntryLine
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 from pygame_gui._constants import UI_CONSOLE_COMMAND_ENTERED
+from pygame_gui.core.gui_type_hints import RectLike
 
 
 class UIConsoleWindow(UIWindow):
@@ -29,7 +30,7 @@ class UIConsoleWindow(UIWindow):
     :param visible: Whether the element is visible by default.
     """
     def __init__(self,
-                 rect: pygame.Rect,
+                 rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
                  window_title: str = 'pygame-gui.console_title_bar',
                  object_id: Union[ObjectID, str] = ObjectID('#console_window', None),

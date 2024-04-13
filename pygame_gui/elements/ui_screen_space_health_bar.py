@@ -1,12 +1,12 @@
 from typing import Union, Dict, Optional
 
-import pygame
 from pygame.sprite import Sprite
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
+from pygame_gui.core.gui_type_hints import RectLike, SpriteWithHealth
 
 
 class UIScreenSpaceHealthBar(UIStatusBar):
@@ -21,7 +21,7 @@ class UIScreenSpaceHealthBar(UIStatusBar):
     :param container: The container that this element is within. If set to None will be the root
                       window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
@@ -29,9 +29,9 @@ class UIScreenSpaceHealthBar(UIStatusBar):
     element_id = 'screen_space_health_bar'
 
     def __init__(self,
-                 relative_rect: pygame.Rect,
+                 relative_rect: RectLike,
                  manager: Optional[IUIManagerInterface] = None,
-                 sprite_to_monitor: Optional[Sprite] = None,
+                 sprite_to_monitor: Optional[SpriteWithHealth] = None,
                  container: Optional[IContainerLikeInterface] = None,
                  parent_element: Optional[UIElement] = None,
                  object_id: Optional[Union[ObjectID, str]] = None,
@@ -75,7 +75,7 @@ class UIScreenSpaceHealthBar(UIStatusBar):
         # Now that we subclass UIStatusBar, this is here for backward compatibility.
         return self.health_percent()
 
-    def set_sprite_to_monitor(self, sprite_to_monitor: pygame.sprite.Sprite):
+    def set_sprite_to_monitor(self, sprite_to_monitor: Sprite):
         if sprite_to_monitor:
             if not hasattr(sprite_to_monitor, 'health_capacity'):
                 raise AttributeError('Sprite does not have health_capacity attribute')
@@ -86,4 +86,3 @@ class UIScreenSpaceHealthBar(UIStatusBar):
     def status_text(self):
         """ Subclass and override this method to change what text is displayed, or to suppress the text. """
         return f"{int(self.current_health)}/{int(self.health_capacity)}"
-

@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union
+
+from pygame_gui.core.gui_type_hints import Coordinate
 
 import pygame
 
@@ -24,9 +25,7 @@ class IWindowInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_minimum_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                                       Tuple[int, int],
-                                                       Tuple[float, float]]):
+    def set_minimum_dimensions(self, dimensions: Coordinate):
         """
         If this window is resizable, then the dimensions we set here will be the minimum that
         users can change the window to. They are also used as the minimum size when
@@ -37,9 +36,7 @@ class IWindowInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
-                                               Tuple[int, int],
-                                               Tuple[float, float]]):
+    def set_dimensions(self, dimensions: Coordinate):
         """
         Set the size of this window and then re-sizes and shifts the contents of the windows
         container to fit the new size.
@@ -49,9 +46,7 @@ class IWindowInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_relative_position(self, position: Union[pygame.math.Vector2,
-                                                    Tuple[int, int],
-                                                    Tuple[float, float]]):
+    def set_relative_position(self, position: Coordinate):
         """
         Method to directly set the relative rect position of an element.
 
@@ -60,9 +55,7 @@ class IWindowInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_position(self, position: Union[pygame.math.Vector2,
-                                           Tuple[int, int],
-                                           Tuple[float, float]]):
+    def set_position(self, position: Coordinate):
         """
         Method to directly set the absolute screen rect position of an element.
 
