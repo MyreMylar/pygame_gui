@@ -343,7 +343,11 @@ class UIForm(UIScrollingContainer):
     * short_text (normal UITextEntryLine input)
     * long_text (UITextEntryBox)
     * integer (UITextEntryLine with only numeric inputs allowed)
-    * decimal (UITextEntryLine with numeric inputs and decimal point allowed)
+    * decimal (UITextEntryLine with numeric inputs and decimal point allowed).
+    **IMPORTANT: Any number of decimal points are currently allowed in this form of input.
+    If a value is entered which cannot be converted to a decimal, then 0.0 will be returned.**
+
+    * password (UITextEntryLine with hidden characters)
     * boolean (UIDropDownMenu with True and False as the options. Default option is True)
     * boolean(default=False) (UIDropDownMenu with True and False as the options and the default option as *default*)
     The value of default must be either True or False. The types must be passed as a string only.
@@ -371,7 +375,11 @@ class UIForm(UIScrollingContainer):
     * A current_input attribute or property which holds the currently input values
 
     If they do not implement any of the above, then this class will not handle its input, and you'll have to check
-    for the input of the element once the form has been submitted
+    for the input of the element once the form has been submitted.
+    If they implement both, then get_current_input() will be used.
+
+    **NOTE: All elements passed in will automatically be repositioned, resized, and re-anchored automatically.
+    Their container will be set to the scrollable container of the UIForm.**
 
     :param relative_rect: The starting size and relative position of the form.
     :param questionnaire: The questionnaire is a mapping which contains the questions in the form in a specific format.
@@ -473,7 +481,8 @@ class UIForm(UIScrollingContainer):
         """
         value_dic = {}
         for key, value in dic.items():
-            type_name = ""  # Used for re-casting str to boolean in Dropdowns created from the boolean type
+            # Used for re-casting values from str to int/decimal/boolean
+            type_name = ""
             if isinstance(value, InputField):
                 type_name = value.question_type
                 value = value.element  # This is because it includes both the label and the actual element we want.
