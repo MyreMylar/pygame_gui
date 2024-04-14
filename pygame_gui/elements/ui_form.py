@@ -685,6 +685,20 @@ class UIForm(UIScrollingContainer):
                 value.set_dimensions((rect.width, rect.height))
                 value.set_relative_position(rect.topleft)
 
+                # TODO: Remove when UIElements get a set_container method eventually? Or perhaps the
+                #  list_and_scroll_bar_container should be contained within the UISelectionList?
+                if isinstance(value, UISelectionList):
+
+                    list_container = value.list_and_scroll_bar_container
+
+                    list_container.ui_container.remove_element(list_container)
+                    container.add_element(list_container)
+                    list_container.ui_container = container
+
+                    list_container.set_anchors(anchors)
+                    list_container.set_dimensions((rect.width, rect.height))
+                    list_container.set_relative_position(rect.topleft)
+
                 # TODO: Remove when UIDropDownMenu does this automatically eventually?
                 if isinstance(value, UIDropDownMenu):
                     value.current_state.update_position()
