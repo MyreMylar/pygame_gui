@@ -190,7 +190,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.underlined:
             self.font.underline_adjustment = 0.5
 
-        surface = self._draw_text(chunk_draw_height, chunk_draw_width,
+        surface = self._draw_text(chunk_draw_height, chunk_draw_width, text_shadow_width,
                                   chunk_x_origin, final_str_text, row_bg_height, row_chunk_origin)
 
         target_surface = self._finalise_horizontal_scroll(target_area,
@@ -213,7 +213,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                     target_surface, surface):
         # sort out horizontal scrolling
         final_pos = (max(target_area.left, self.left - x_scroll_offset),
-                     self.top - self.origin_row_y_adjust + text_shadow_width)
+                     self.top - self.origin_row_y_adjust)
         distance_to_lhs_overlap = self.left - target_area.left
         lhs_overlap = max(0, x_scroll_offset - distance_to_lhs_overlap)
         remaining_rhs_space = target_area.width - (final_pos[0] - target_area.left)
@@ -264,11 +264,12 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         return surface
 
-    def _handle_text_selection_and_text_drawing(self, final_str_text, chunk_draw_width, chunk_draw_height,
-                                                chunk_x_origin, row_chunk_origin) -> pygame.Surface:
+    def _handle_text_selection_and_text_drawing(self, final_str_text, chunk_draw_width, text_shadow_width,
+                                                chunk_draw_height, chunk_x_origin, row_chunk_origin) -> pygame.Surface:
         text_surface: pygame.Surface = self.font.render_premul_to(final_str_text, Color('#FFFFFFFF'),
                                                                   surf_size=(chunk_draw_width, chunk_draw_height),
-                                                                  surf_position=(chunk_x_origin, row_chunk_origin))
+                                                                  surf_position=(chunk_x_origin,
+                                                                                 row_chunk_origin + text_shadow_width))
 
         if (self.selection_rect is not None
                 and (self.selection_rect.width != 0 or self.selection_rect.height != 0)
@@ -301,11 +302,11 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         return text_surface
 
-    def _draw_text(self, chunk_draw_height, chunk_draw_width, chunk_x_origin,
+    def _draw_text(self, chunk_draw_height, chunk_draw_width, text_shadow_width, chunk_x_origin,
                    final_str_text, row_bg_height, row_chunk_origin):
 
-        text_surface = self._handle_text_selection_and_text_drawing(final_str_text, chunk_draw_width, chunk_draw_height,
-                                                                    chunk_x_origin, row_chunk_origin)
+        text_surface = self._handle_text_selection_and_text_drawing(final_str_text, chunk_draw_width, text_shadow_width,
+                                                                    chunk_draw_height, chunk_x_origin, row_chunk_origin)
 
         surface = self._handle_bg_selection_and_bg_drawing((chunk_draw_width, row_bg_height))
         # center the text in the line
@@ -319,7 +320,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             text_rect.centery = surface.get_rect().centery
         # apply any shadow effects
         self._apply_shadow_effect(surface, text_rect, final_str_text,
-                                  text_surface, (chunk_x_origin, row_chunk_origin))
+                                  text_surface, (chunk_x_origin, row_chunk_origin + text_shadow_width))
         surface.blit(text_surface, text_rect, special_flags=BLEND_PREMULTIPLIED)
         return surface
 

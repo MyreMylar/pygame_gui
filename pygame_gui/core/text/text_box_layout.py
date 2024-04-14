@@ -903,6 +903,9 @@ class TextBoxLayout:
         if self.finalised_surface is not None:
             for row in rows_to_finalise:
                 row.finalise(self.finalised_surface)
+            for floating_rect in self.floating_rects:
+                floating_rect.finalise(self.finalised_surface,
+                                       self.view_rect, 0, 0, 0)
 
     def _find_chunk_and_chunk_x(self, index: int):
         found_chunk = None
