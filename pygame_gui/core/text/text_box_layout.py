@@ -186,7 +186,7 @@ class TextBoxLayout:
         # otherwise we add infinite rows with no height
         # instead add a line break rect to an empty row.
         if len(current_row.items) == 0 and not last_row:
-            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height),
+            current_row.add_item(LineBreakLayoutRect(dimensions=(4, self.last_row_height),
                                                      font=current_row.fall_back_font))
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)

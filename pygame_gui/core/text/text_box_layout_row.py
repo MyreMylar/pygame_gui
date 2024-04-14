@@ -364,7 +364,7 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         if self.target_surface is not None and self.surf_row_dirty:
             slightly_wider_rect = pygame.Rect(self.x, self.y,
-                                              self.layout.view_rect.width,
+                                              self.width + self.cursor_draw_width,
                                               self.height)
             self.target_surface.fill(pygame.Color('#00000000'), slightly_wider_rect)
             self.surf_row_dirty = False

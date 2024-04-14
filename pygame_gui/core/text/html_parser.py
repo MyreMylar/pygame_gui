@@ -255,7 +255,7 @@ class HTMLParser(html.parser.HTMLParser):
             antialiased=self.current_style['antialiased'],
             script=self.current_style['script'],
             direction=self.current_style['direction'])
-        dimensions = (current_font.get_rect(' ').width,
+        dimensions = (4,
                       int(round(self.current_style['font_size'] *
                                 self.line_spacing)))
         chunk = self.create_styled_text_chunk('')
