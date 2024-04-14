@@ -7,6 +7,29 @@ A record of changes between versions of Pygame GUI.
 
 --------
 
+Version 0.6.10
+--------------------------------------------------
+See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0610>`_.
+
+Hello!
+
+It's been almost a year since the last Pygame GUI release, a period when I've personally had less time to work on the library. However that has been compensated for by the lovely Pygame GUI community contributors with this release having contributions from ten new contributors - our largest number ever.
+
+I had intended at one point for 0.7.0 to be the next release of the library with lots of changes to the handling of loaded images - but as things go this release happened instead, with the focus mainly on changes to handling of text.
+
+Please let me know about any bugs, and I apologise in advance to anyone doing more complicated things with the library as I have messed around with the innards quite substantially again and probably broken a few things some of you might have been relying on. I promise I will stop when we hit version 1.0.0.
+
+Big changes
+...........
+
+- Switched from using pygame.freetype submodule to the pygame.font submodule internally. This has allowed us to support a wider range of written language features like right-to-left and text-shaping (via the pygame.font->SDLttf->Harfbuzz tech stack). As a result we can support languages like Arabic, Hebrew and Georgian. Though I will caveat that by saying I do not personally speak these languages, nor have any experience using GUIs designed with them in mind so I consider us at the start of the journey here for support of many of these non-latin alphabet languages. Please let me know how you get on, and PRs to adjust things are very welcome!
+- Partially as a result of the above we have basic language support for six new languages Vietnamese, Korean, Georgian, Ukrainian, Arabic & Hebrew. That brings us up to 17 languages with basic translation support now.
+- Text Selection overhaul. You can now select text and 'CTRL+C' shortcut copy text in regular Text boxes as well as Text Entry boxes, hopefully the experience of selecting text is smoother now as many bugs were located and squished in this area.
+- Three new UI Elements were added, thanks to our contributors:
+    - A Tabbed container, allowing you to switch between containers of elements with the other un-selected tabs kept hidden - Added by @LondonClass.
+    - An Auto-resizing container that expands to fit whenever elements are added outside of it's boundaries - Added by @GimLala
+    - A 2D slider - that lets you select a two-dimensional value in a rectangular space. It's been incorporated into the colour picker window if you want to try it out. - Added by @GimLala
+
 Version 0.6.9
 --------------------------------------------------
 See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_069>`_.
