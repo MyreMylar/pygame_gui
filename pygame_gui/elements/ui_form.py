@@ -95,6 +95,8 @@ class UISection(UIAutoResizingContainer):
         self.section_gap = 15
         self.section_indent = 5
 
+        self.rebuild_sub_elements = False
+
         self.shape = "rectangle"
         self.shape_corner_radius = 0
 
@@ -217,54 +219,61 @@ class UISection(UIAutoResizingContainer):
                                                default_value=(5, 5),
                                                casting_func=self.tuple_extract):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="label_height",
                                                default_value=30,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="section_label_height",
                                                default_value=30,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="field_height",
                                                default_value=40,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="large_field_height",
                                                default_value=80,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
+
+        if self._check_misc_theme_data_changed(attribute_name="selection_list_height",
+                                               default_value=-1,
+                                               casting_func=int):
+            has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="gap",
                                                default_value=10,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="label_gap",
                                                default_value=0,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="section_gap",
                                                default_value=15,
                                                casting_func=int):
             has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if self._check_misc_theme_data_changed(attribute_name="section_indent",
                                                default_value=5,
                                                casting_func=int):
             has_any_changed = True
-
-        if self._check_misc_theme_data_changed(attribute_name="submit_button_horiz_alignment",
-                                               default_value="right",
-                                               casting_func=str,
-                                               allowed_values=["left",
-                                                               "center",
-                                                               "right"]):
-            has_any_changed = True
+            self.rebuild_sub_elements = True
 
         if has_any_changed:
             self.rebuild()
@@ -278,7 +287,9 @@ class UISection(UIAutoResizingContainer):
 
         super().rebuild()
 
-        self.form.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
+        if self.rebuild_sub_elements:
+            self.form.rebuild_parsed_questionnaire(self, self.parsed_questionnaire)
+            self.rebuild_sub_elements = False
 
         size = (self.relative_rect.width - 2 * self.padding[0], self.section_label_height)
         self.main_expand_button.set_dimensions(size)
@@ -445,6 +456,7 @@ class UIForm(UIScrollingContainer):
         self.label_height = 30
         self.field_height = 40
         self.large_field_height = 80
+        self.selection_list_height = -1
         self.gap = 10
         self.label_gap = 0
         self.section_gap = 15
@@ -463,7 +475,7 @@ class UIForm(UIScrollingContainer):
         self.submit_button = UIButton(pygame.Rect(0, 0, -1, self.field_height),
                                       text="Submit",
                                       manager=manager,
-                                      container=self,
+                                      container=self.scrollable_container,
                                       parent_element=parent_element,
                                       object_id=ObjectID("#submit_button", None))
 
@@ -574,6 +586,7 @@ class UIForm(UIScrollingContainer):
         label_height = element.label_height
         field_height = element.field_height
         large_field_height = element.large_field_height
+        selection_list_height = element.selection_list_height
         gap = element.gap
         label_gap = element.label_gap
         section_gap = element.section_gap
@@ -688,6 +701,11 @@ class UIForm(UIScrollingContainer):
                 # TODO: Remove when UIElements get a set_container method eventually? Or perhaps the
                 #  list_and_scroll_bar_container should be contained within the UISelectionList?
                 if isinstance(value, UISelectionList):
+                    rect.height = selection_list_height
+                    if selection_list_height == -1:
+                        rect.height = value.total_height_of_list + (value.border_width + value.shadow_width) * 2
+
+                    value.set_dimensions((rect.width, rect.height))
 
                     list_container = value.list_and_scroll_bar_container
 
@@ -696,8 +714,6 @@ class UIForm(UIScrollingContainer):
                     list_container.ui_container = container
 
                     list_container.set_anchors(anchors)
-                    list_container.set_dimensions((rect.width, rect.height))
-                    list_container.set_relative_position(rect.topleft)
 
                 # TODO: Remove when UIDropDownMenu does this automatically eventually?
                 if isinstance(value, UIDropDownMenu):
@@ -792,6 +808,12 @@ class UIForm(UIScrollingContainer):
             has_any_changed = True
             self.rebuild_sub_elements = True
 
+        if self._check_misc_theme_data_changed(attribute_name="selection_list_height",
+                                               default_value=-1,
+                                               casting_func=int):
+            has_any_changed = True
+            self.rebuild_sub_elements = True
+
         if self._check_misc_theme_data_changed(attribute_name="gap",
                                                default_value=10,
                                                casting_func=int):
@@ -847,6 +869,7 @@ class UIForm(UIScrollingContainer):
         label_height = element.label_height
         field_height = element.field_height
         large_field_height = element.large_field_height
+        selection_list_height = element.selection_list_height
         gap = element.gap
         label_gap = element.label_gap
         section_gap = element.section_gap
@@ -929,6 +952,12 @@ class UIForm(UIScrollingContainer):
                 value.set_dimensions((rel_rect.width, rel_rect.height))
                 value.set_relative_position(rel_rect.topleft)
 
+                if isinstance(value, UISelectionList):
+                    rel_rect.height = selection_list_height
+                    if selection_list_height == -1:
+                        rel_rect.height = value.total_height_of_list + (value.border_width + value.shadow_width) * 2
+                    value.set_dimensions((rel_rect.width, rel_rect.height))
+
                 # TODO: Remove when UIDropDownMenu does this automatically eventually?
                 if isinstance(value, UIDropDownMenu):
                     value.current_state.update_position()
@@ -1000,6 +1029,9 @@ class UIForm(UIScrollingContainer):
                                                         ["normal"], self.ui_manager)
 
         self.on_fresh_drawable_shape_ready()
+
+        # TODO: Remove when resizing bugs are fixed
+        self.scrollable_container.update_min_edges_rect(self.scrollable_container.relative_rect)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
