@@ -325,7 +325,7 @@ clicked on by a user.
                 print("Window moved to front")
 
 :class:`UIWindow <pygame_gui.elements.UIWindow>` - UI_WINDOW_RESIZED
-..................................................................
+....................................................................
 
 Fired when a window is resized.
 

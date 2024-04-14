@@ -68,7 +68,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     final dimension to whatever the text rendering produces. This lets us make dynamically sized
     text boxes depending on their contents.
 
-
     :param html_text: The HTML formatted text to display in this text box.
     :param relative_rect: The 'visible area' rectangle, positioned relative to its container.
     :param manager: The UIManager that manages this element. If not provided or set to None,
@@ -76,7 +75,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     :param wrap_to_height: False by default, if set to True the box will increase in height to
                            match the text within.
     :param starting_height: Sets the height, above its container, to start placing the text
-                                  box at.
+                            box at.
     :param container: The container that this element is within. If not provided or set to None
                       will be the root window's container.
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
@@ -84,17 +83,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
-    :param pre_parsing_enabled: when enabled will replace all '\n' characters with html <br> tags.
-    :param text_kwargs: a dictionary of variable arguments to pass to the translated text
+    :param pre_parsing_enabled: When enabled will replace all newline characters with html <br> tags.
+    :param text_kwargs: A dictionary of variable arguments to pass to the translated text
                         useful when you have multiple translations that need variables inserted
                         in the middle.
-    :param allow_split_dashes: sets whether long words that don't fit on a single line will be split with a dash
+    :param allow_split_dashes: Sets whether long words that don't fit on a single line will be split with a dash
                                or just split without a dash (more compact).
-    :param plain_text_display_only: no markup based styling & formatting will be done on the input text.
-    :param should_html_unescape_input_text: when enabled turns plain text encoded html back into html for
-                                            this text box. e.g. &lt; will become <
-    :param placeholder_text: If the text line is empty, and not focused, this placeholder text will be
-                              shown instead.
+    :param plain_text_display_only: No markup based styling & formatting will be done on the input text.
+    :param should_html_unescape_input_text: When enabled turns plain text encoded html back into html for this text box.
+                                            e.g. &lt; will become '<'
+    :param placeholder_text: If the text line is empty, and not focused, this placeholder text will be shown instead.
+
     """
 
     def __init__(self,
