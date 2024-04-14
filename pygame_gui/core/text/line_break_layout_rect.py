@@ -39,4 +39,5 @@ class LineBreakLayoutRect(TextLayoutRect):
             self.select_surf = Surface((self.selection_chunk_width, row_bg_height), flags=pygame.SRCALPHA)
             self.select_surf.fill(self.selection_colour)
             target_surface.blit(self.select_surf, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
+        # should be cleared by row
 

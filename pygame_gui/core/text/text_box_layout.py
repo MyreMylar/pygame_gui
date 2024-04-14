@@ -186,7 +186,7 @@ class TextBoxLayout:
         # otherwise we add infinite rows with no height
         # instead add a line break rect to an empty row.
         if len(current_row.items) == 0 and not last_row:
-            current_row.add_item(LineBreakLayoutRect(dimensions=(2, self.last_row_height),
+            current_row.add_item(LineBreakLayoutRect(dimensions=(4, self.last_row_height),
                                                      font=current_row.fall_back_font))
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)
@@ -903,6 +903,9 @@ class TextBoxLayout:
         if self.finalised_surface is not None:
             for row in rows_to_finalise:
                 row.finalise(self.finalised_surface)
+            for floating_rect in self.floating_rects:
+                floating_rect.finalise(self.finalised_surface,
+                                       self.view_rect, 0, 0, 0)
 
     def _find_chunk_and_chunk_x(self, index: int):
         found_chunk = None
