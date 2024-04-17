@@ -744,8 +744,9 @@ class UIForm(UIScrollingContainer):
 
         # Submit Button
 
-        self.submit_button.anchors["top_target"] = anchors["top_target"]
-        self.submit_button.relative_rect.y = self.gap
+        if "top_target" in anchors:
+            self.submit_button.anchors["top_target"] = anchors["top_target"]
+            self.submit_button.relative_rect.y = self.gap
         self.rebuild_submit_button()
 
     def rebuild_from_changed_theme_data(self) -> None:
@@ -972,7 +973,10 @@ class UIForm(UIScrollingContainer):
         :return: None
         """
 
-        anchors = {"top": "top", "top_target": self.submit_button.anchors["top_target"]}
+        anchors = {"top": "top"}
+        if "top_target" in self.submit_button.anchors:
+            anchors["top_target"] = self.submit_button.anchors["top_target"]
+
         x_padding = self.padding[0]
         pos = pygame.Vector2(0, self.submit_button.relative_rect.y)
 
