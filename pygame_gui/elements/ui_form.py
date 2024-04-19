@@ -1069,9 +1069,9 @@ class UIForm(UIScrollingContainer):
         * character (UITextEntryLine with 1 letter input)
         * short_text (normal UITextEntryLine input)
         * long_text (UITextEntryBox)
-        * password (UITextEntryLine input with characters hidden)
         * integer (UITextEntryLine with only numeric inputs allowed)
         * decimal (UITextEntryLine with numeric inputs and decimal point allowed)
+        * password (UITextEntryLine input with characters hidden)
         * boolean (UIDropDownMenu with True and False as the options. Default option is True)
 
         :param string: The string to check
@@ -1088,7 +1088,7 @@ class UIForm(UIScrollingContainer):
             raise ValueError(f"Question type '{string}' is not supported")
 
         if string.endswith("()"):
-            raise SyntaxError(f"No parameters passed for question")
+            raise SyntaxError(f"Parenthesis used without passing parameters for question")
 
         type_name = type_name_match.group("type_name").lower()
         params = supported_types[type_name]
