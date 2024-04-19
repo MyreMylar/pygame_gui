@@ -1121,9 +1121,11 @@ class UIForm(UIScrollingContainer):
                 if char == "=":
                     if i == 0:
                         raise SyntaxError("Found '=' at the beginning of arguments")
+                    if i == arg_start_i:
+                        raise SyntaxError("No keyword passed for argument before '=' symbol")
                     if keyword_present:
                         # Found 2 "=" symbols in the same argument: incorrect syntax
-                        raise SyntaxError(f"Found 2 '=' symbols after keyword argument '{keyword}'")
+                        raise SyntaxError(f"Found 2 consecutive '=' symbols")
                     else:
                         keyword_present = True
                         keyword_end_i = i - 1
@@ -1131,13 +1133,13 @@ class UIForm(UIScrollingContainer):
                         keyword = arg_group[arg_start_i: keyword_end_i + 1].strip()
 
                 elif char == ",":
-                    if arg_start_i == i:
-                        # Either comma found at the beginning of arguments or two commas found consecutively
-                        if i == 0:
-                            raise SyntaxError("Found comma at the beginning of arguments")
-                        else:
-                            raise SyntaxError("Found 2 consecutive commas")
-                    elif keyword_present and arg_value_start_i == i:
+                    if i == 0:
+                        # Comma found at the beginning of arguments
+                        raise SyntaxError("Found comma at the beginning of arguments")
+                    if i == arg_start_i:
+                        # Two commas found consecutively
+                        raise SyntaxError("Found 2 consecutive commas")
+                    if keyword_present and i == arg_value_start_i:
                         # No value passed after = sign
                         raise SyntaxError(f"No value passed for keyword argument '{keyword}'")
 
