@@ -410,7 +410,7 @@ class UIForm(UIScrollingContainer):
     # TODO: Implement a show password button
     # TODO: Implement colour inputs
     # TODO: Implement required input
-    SUPPORTED_TYPES = {"character": {"default": "'.'", "required": "True|False"},
+    SUPPORTED_TYPES = {"character": {"default": "'.?'", "required": "True|False"},
                        "short_text": {"default": "'.*'", "required": "True|False"},
                        "long_text": {"default": "'.*'", "required": "True|False"},
                        "password": {"default": "'.*'", "required": "True|False"},
@@ -1061,7 +1061,7 @@ class UIForm(UIScrollingContainer):
         return consumed
 
     @staticmethod
-    def type_checker(string) -> Tuple[str, Dict[str, Any]]:
+    def type_checker(string: str) -> Tuple[str, Dict[str, Any]]:
         """
         This is used to check whether a string can be used in a questionnaire to represent a type. Raises an appropriate
         exception (either a NameError, SyntaxError or ValueError) if the string is not valid. Supported types are:
@@ -1078,10 +1078,11 @@ class UIForm(UIScrollingContainer):
         :return: A tuple of the type name with a list of argument-value tuples if the string is valid
         """
 
+        string = string.strip()
         # Type with their args and supported values for args
         supported_types = UIForm.SUPPORTED_TYPES
 
-        type_check = re.compile(f"(?P<type_name>{'|'.join(supported_types)})(?:\\((?P<type_args>.*)\\))?",
+        type_check = re.compile(f"(?P<type_name>{'|'.join(supported_types)})(\\s)*(?:\\((?P<type_args>.*)\\))?",
                                 re.IGNORECASE)
         type_name_match = type_check.fullmatch(string)
         if not type_name_match:
@@ -1097,6 +1098,8 @@ class UIForm(UIScrollingContainer):
         if not arg_group:
             return type_name, {}
 
+        arg_group.strip()
+
         # Split the arguments passed based on commas. This is actually a more complicated process than you'd expect,
         # because some commas might be contained in quotes. But we can't just check that the number of ' and " quotes
         # are both even on each side because some ' might be contained within "" (for example in use of apostrophes) and
@@ -1105,32 +1108,72 @@ class UIForm(UIScrollingContainer):
         args = []
         in_quotes = False
         quotes_type = None
+        # Used to raise more informative errors when quotes are used in keywords and
+        # also for allowing whitespace between quotes in the same argument values, for e.g. "short_text('abc' 'def')"
+        was_in_quotes = False
         arg_start_i = 0
         keyword_present = False
         keyword = None
+        white_spaces_after_keyword = 0
         arg_value_start_i = 0
 
         if arg_group[-1] != ",":
             # This is needed to ensure last argument passed is added to the args list
             arg_group += ","
 
+        # TODO: Implement support for brackets
+        # TODO: Implement f strings, r strings eventually maybe
+        # TODO: Update docs about whitespace rules
         for i, char in enumerate(arg_group):
 
             if not in_quotes:
+                if char.isspace():
+                    # Whitespace is allowed only in certain places. These are:
+                    # Before type name (It is stripped above)
+                    # In between the type name and parenthesis (handled during regex matching)
+                    # After first parenthesis (It is stripped above)
+                    # Before keywords
+                    # Before '=' symbols
+                    # Before values for arguments
+                    # In values encased in quotes (Ignored due to parent if statement above)
+                    # In values between quotes
+                    # Before final parenthesis (It is stripped above)
+                    # After final type name (It is stripped above)
+                    if i == arg_start_i:
+                        arg_start_i += 1
+                        # We don't know yet whether a positional or keyword argument is being processed
+                        arg_value_start_i += 1
+                    elif not keyword_present:
+                        # Reaching here implies being between keyword and '=' symbols
+                        # unless there is a space in the middle of the keyword or value.
+                        next_char = arg_group[i + 1]
+                        if next_char in "'\"" and was_in_quotes:
+                            pass
+                        elif not next_char.isspace() and next_char not in "=,":
+                            raise SyntaxError(f"Found whitespace between keyword or value")
+                        else:
+                            white_spaces_after_keyword += 1
 
-                if char == "=":
+                    elif keyword_present and i == arg_value_start_i:
+                        arg_value_start_i += 1
+
+                elif char == "=":
                     if i == 0:
                         raise SyntaxError("Found '=' at the beginning of arguments")
                     if i == arg_start_i:
                         raise SyntaxError("No keyword passed for argument before '=' symbol")
+                    if was_in_quotes:
+                        raise SyntaxError("Found keyword wrapped in quotes")
                     if keyword_present:
                         # Found 2 "=" symbols in the same argument: incorrect syntax
                         raise SyntaxError(f"Found 2 consecutive '=' symbols")
                     else:
                         keyword_present = True
-                        keyword_end_i = i - 1
+                        keyword_end_i = i - 1 - white_spaces_after_keyword
                         arg_value_start_i = i + 1
                         keyword = arg_group[arg_start_i: keyword_end_i + 1].strip()
+
+                        white_spaces_after_keyword = 0
 
                 elif char == ",":
                     if i == 0:
@@ -1155,6 +1198,7 @@ class UIForm(UIScrollingContainer):
                     keyword_present = False
                     keyword = None
                     arg_value_start_i = i + 1
+                    was_in_quotes = False
 
                 elif char == "'":
                     in_quotes = True
@@ -1167,6 +1211,7 @@ class UIForm(UIScrollingContainer):
             elif char == quotes_type:
                 in_quotes = False
                 quotes_type = None
+                was_in_quotes = True
 
             elif i == len(arg_group) - 1:
                 # Last quotes symbol was unmatched
@@ -1195,6 +1240,7 @@ class UIForm(UIScrollingContainer):
                 value = f"'{value}'"
             if not re.fullmatch(params[name], str(value)):
                 raise ValueError(f"Invalid value '{value}' for argument '{name}'")
+            names_checked.append(name)
 
         return type_name, dict(args)
 
