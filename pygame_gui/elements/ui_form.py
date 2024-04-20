@@ -90,6 +90,7 @@ class UISection(UIAutoResizingContainer):
         self.section_label_height = 30
         self.field_height = 40
         self.large_field_height = 80
+        self.selection_list_height = -1
         self.gap = 10
         self.label_gap = 0
         self.section_gap = 15

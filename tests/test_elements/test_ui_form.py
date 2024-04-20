@@ -59,13 +59,13 @@ class TestUIForm:
                          _display_surface_return_none):
         container = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(),
                            manager=default_ui_manager)
-        assert len(container.get_container().elements) == 20
+        assert len(container.get_container().elements) == 16
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager)
         default_ui_manager.get_root_container().remove_element(button)
         container.get_container().add_element(button)
-        assert len(container.get_container().elements) == 21
+        assert len(container.get_container().elements) == 17
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 250), text="",
                           manager=default_ui_manager)
@@ -73,20 +73,20 @@ class TestUIForm:
         container.get_container().add_element(button)
         container.scrollable_container.update(0.4)
         container.update(0.4)
-        assert len(container.get_container().elements) == 22
+        assert len(container.get_container().elements) == 18
 
     def test_remove_element(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                             _display_surface_return_none):
         container = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(),
                            manager=default_ui_manager)
-        assert len(container.get_container().elements) == 20
+        assert len(container.get_container().elements) == 16
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager,
                           container=container)
 
         container.get_container().remove_element(button)
-        assert len(container.get_container().elements) == 20
+        assert len(container.get_container().elements) == 16
 
     def test_set_position(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
@@ -292,9 +292,13 @@ class TestUIForm:
 
         assert container.get_current_values() == {'Character Test:': '', 'Short Text Test:': '', 'Long Text Test:': '',
                                                   'Integer Test:': 0, 'Decimal Test:': 0.0, 'Password Test:': '',
-                                                  'Boolean Test:': True, 'UITextEntryLine Test': '',
-                                                  'UITextEntryBox Test': '', 'UISelectionList Test': None,
-                                                  'UIDropDownMenu Test': 'item 1'}
+                                                  'Boolean Test:': True,
+                                                  'Section Test:': {
+                                                      'UITextEntryLine Test': '',
+                                                      'UITextEntryBox Test': '', 'UISelectionList Test': None,
+                                                      'UIDropDownMenu Test': 'item 1'
+                                                  }
+                                                  }
 
         container.kill()
 
@@ -428,7 +432,7 @@ class TestUIForm:
         button = element.current_state.open_button
         default_ui_manager.mouse_position = element.rect.center
         default_ui_manager.process_events(
-            pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, {"button": pygame.BUTTON_LEFT, 'ui_element': button,
+            pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED, {"mouse_button": pygame.BUTTON_LEFT, 'ui_element': button,
                                                               'ui_object_id': button.most_specific_combined_id})
         )
 
@@ -495,7 +499,6 @@ class TestUIForm:
 
     def test_type_checker_bad_values(self, _init_pygame, default_ui_manager,
                                      _display_surface_return_none):
-
         # General
 
         with pytest.raises(ValueError, match="Question type 'unknown' is not supported"):
