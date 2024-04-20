@@ -22,17 +22,26 @@ def get_questionnaire():
         "Password Test:": "password",
         "Boolean Test:": "boolean",
 
-        "UITextEntryLine Test": UITextEntryLine(test_rect),
-        "UITextEntryBox Test": UITextEntryBox(test_rect),
-        "UISelectionList Test": UISelectionList(test_rect, ["item 1", "item 2"]),
-        "UIDropDownMenu Test": UIDropDownMenu(["item 1", "item 2"], "item 1", test_rect)
+        "Section Test:": {
+            "UITextEntryLine Test": UITextEntryLine(test_rect),
+            "UITextEntryBox Test": UITextEntryBox(test_rect),
+            "UISelectionList Test": UISelectionList(test_rect, ["item 1", "item 2"]),
+            "UIDropDownMenu Test": UIDropDownMenu(["item 1", "item 2"], "item 1", test_rect)
+        }
     }
     return questionnaire
 
 
+# class TestUISection:
+#     # TODO: Add tests for UISections
+#
+#     def test_creation(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+#         form = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(), manager=default_ui_manager)
+#         UISection(pygame.Rect(100, 100, 200, 200), form, "section", questionnaire=get_questionnaire(), manager=default_ui_manager)
+
+
 class TestUIForm:
 
-    # TODO: Add tests for UISections
     # TODO: Add tests testing various inputs
     # TODO: Add tests for validate_questionnaire
     # TODO: Add tests for theming
