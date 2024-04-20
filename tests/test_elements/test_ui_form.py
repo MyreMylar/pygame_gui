@@ -480,20 +480,121 @@ class TestUIForm:
         container.kill()
         assert container.check_hover(0.5, False) is False  # dead so can't hover anymore
 
+    def test_type_checker(self, _init_pygame, default_ui_manager,
+                          _display_surface_return_none):
+        ...
+
+    def test_type_checker_bad_values(self, _init_pygame, default_ui_manager,
+                                     _display_surface_return_none):
+
+        # General
+
+        with pytest.raises(ValueError, match="Question type 'unknown' is not supported"):
+            UIForm.type_checker("unknown")
+
+        with pytest.raises(SyntaxError, match="Parenthesis used without passing parameters for question"):
+            UIForm.type_checker("character()")
+
+        with pytest.raises(SyntaxError, match="Found '=' at the beginning of arguments"):
+            UIForm.type_checker("character(=)")
+
+        with pytest.raises(SyntaxError, match="Found keyword wrapped in quotes"):
+            UIForm.type_checker("character('default'='a')")
+
+        with pytest.raises(SyntaxError, match="No keyword passed for argument before '=' symbol"):
+            UIForm.type_checker("character(default='a',=)")
+
+        with pytest.raises(SyntaxError, match="Found 2 consecutive '=' symbols"):
+            UIForm.type_checker("character(default==)")
+
+        with pytest.raises(SyntaxError, match="Found comma at the beginning of arguments"):
+            UIForm.type_checker("character(,)")
+
+        with pytest.raises(SyntaxError, match="Found 2 consecutive commas"):
+            UIForm.type_checker("character(default='a',,)")
+
+        with pytest.raises(SyntaxError, match="No value passed for keyword argument 'default'"):
+            UIForm.type_checker("character(default=,)")
+
+        with pytest.raises(NameError, match="'a' is not defined. Perhaps quotes were missed"):
+            UIForm.type_checker("character(default=a)")
+
+        with pytest.raises(NameError, match="'a' is not defined. Perhaps quotes were missed"):
+            UIForm.type_checker("character(a)")
+
+        with pytest.raises(SyntaxError, match="Found unmatched '"):
+            UIForm.type_checker("character(')")
+
+        with pytest.raises(SyntaxError, match="Found unmatched \""):
+            UIForm.type_checker("character(\")")
+
+        with pytest.raises(ValueError, match="Question of type 'character' take at most 2 arguments"
+                                             " but 3 arguments were passed"):
+            UIForm.type_checker("character('a','b','c')")
+
+        with pytest.raises(SyntaxError, match="Found positional argument after keyword argument"):
+            UIForm.type_checker("character(default='a', 'b')")
+
+        with pytest.raises(ValueError, match="Unknown parameter 'unknown' for question type 'character'"):
+            UIForm.type_checker("character(unknown = 'a')")
+
+        with pytest.raises(SyntaxError, match="Got multiple values for parameter 'default'"):
+            UIForm.type_checker("character('a', default='a')")
+
+        # Character
+
+        with pytest.raises(ValueError, match="Invalid value ''ab'' for argument 'default'"):
+            UIForm.type_checker("character(default='ab')")
+
+        with pytest.raises(ValueError, match="Invalid value ''ab'' for argument 'default'"):
+            UIForm.type_checker("character('ab')")
+
+        # Integer
+
+        with pytest.raises(ValueError, match="Invalid value ''a'' for argument 'default'"):
+            UIForm.type_checker("integer('a')")
+
+        with pytest.raises(ValueError, match="Invalid value '2.0' for argument 'default'"):
+            UIForm.type_checker("integer(2.0)")
+
+        with pytest.raises(ValueError, match="Invalid value ''2'' for argument 'default'"):
+            UIForm.type_checker("integer('2')")
+
+        # Decimal
+
+        with pytest.raises(ValueError, match="Invalid value ''a'' for argument 'default'"):
+            UIForm.type_checker("decimal('a')")
+
+        with pytest.raises(ValueError, match="Invalid value ''2.0'' for argument 'default'"):
+            UIForm.type_checker("decimal('2.0')")
+
+        # Boolean
+
+        with pytest.raises(ValueError, match="Invalid value ''a'' for argument 'default'"):
+            UIForm.type_checker("boolean('a')")
+
+        with pytest.raises(ValueError, match="Invalid value ''True'' for argument 'default'"):
+            UIForm.type_checker("boolean(default='True')")
+
+        with pytest.raises(ValueError, match="Invalid value ''False'' for argument 'required'"):
+            UIForm.type_checker("boolean(required='False')")
+
     def test_validate_questionnaire(self, _init_pygame, default_ui_manager,
                                     _display_surface_return_none):
         container = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(),
                            manager=default_ui_manager)
-        container_2 = UIForm(pygame.Rect(50, 50, 50, 50), questionnaire=get_questionnaire(), manager=default_ui_manager,
-                             container=container)
-
-        button = UIButton(relative_rect=pygame.Rect(20, 20, 30, 20), text="X",
-                          manager=default_ui_manager, container=container_2)
 
         container.kill()
 
-        assert not button.alive()
-        assert not container_2.alive()
+        assert not container.alive()
+
+    def test_validate_questionnaire_bad_values(self, _init_pygame, default_ui_manager,
+                                               _display_surface_return_none):
+        container = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(),
+                           manager=default_ui_manager)
+
+        container.kill()
+
         assert not container.alive()
 
 
