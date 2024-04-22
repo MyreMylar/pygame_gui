@@ -118,9 +118,9 @@ class UISection(UIAutoResizingContainer):
                    "top_target": self.main_expand_button}
         # Container for the rest of the section
         self.section_container = UIAutoResizingContainer(pygame.Rect(0, 0, self.relative_rect.width, 0),
-                                                         # resize_left=False,
+                                                         resize_left=False,
                                                          resize_right=False,
-                                                         # resize_top=False,
+                                                         resize_top=False,
                                                          # resize_bottom=True,
                                                          manager=manager,
                                                          container=self,
@@ -569,7 +569,7 @@ class UIForm(UIScrollingContainer):
                                  anchors: Dict[str, Union[str, UIElement]]) -> \
             Dict[str, Union[UISection, InputField, IUIElementInterface]]:
         """
-        This function is used by UIForm.parse_questionnaire to recursively create the ui elements to gather input based
+        This function is used by UIForm.parse_form to recursively create the ui elements to gather input based
         on the questionnaire passed. This prevents duplication of code as UISection elements created also call this
         function
 
