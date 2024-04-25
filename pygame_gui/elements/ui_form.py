@@ -512,8 +512,11 @@ class UIForm(UIScrollingContainer):
                     if type_name in ["integer", "decimal"]:
                         if text:
                             try:
-                                text = literal_eval(text)
-                            except SyntaxError:
+                                if type_name == "integer":
+                                    text = int(text)
+                                else:
+                                    text = float(text)
+                            except ValueError:
                                 zero_text = True
                         else:
                             zero_text = True
@@ -1084,7 +1087,7 @@ class UIForm(UIScrollingContainer):
         supported_types = UIForm.SUPPORTED_TYPES
 
         type_check = re.compile(f"(?P<type_name>{'|'.join(supported_types)})(\\s)*(?:\\((?P<type_args>.*)\\))?",
-                                re.IGNORECASE)
+                                re.IGNORECASE | re.DOTALL)
         type_name_match = type_check.fullmatch(string)
         if not type_name_match:
             raise ValueError(f"Question type '{string}' is not supported")
@@ -1115,7 +1118,6 @@ class UIForm(UIScrollingContainer):
         arg_start_i = 0
         keyword_present = False
         keyword = None
-        white_spaces_after_keyword = 0
         arg_value_start_i = 0
 
         if arg_group[-1] != ",":
@@ -1137,9 +1139,9 @@ class UIForm(UIScrollingContainer):
                     # Before '=' symbols
                     # Before values for arguments
                     # In values encased in quotes (Ignored due to parent if statement above)
-                    # In values between quotes
+                    # In values between quotes (Only " ", \t and \f allowed)
                     # Before final parenthesis (It is stripped above)
-                    # After final type name (It is stripped above)
+                    # After final parenthesis (It is stripped above)
                     if i == arg_start_i:
                         arg_start_i += 1
                         # We don't know yet whether a positional or keyword argument is being processed
@@ -1148,12 +1150,9 @@ class UIForm(UIScrollingContainer):
                         # Reaching here implies being between keyword and '=' symbols
                         # unless there is a space in the middle of the keyword or value.
                         next_char = arg_group[i + 1]
-                        if next_char in "'\"" and was_in_quotes:
-                            pass
-                        elif not next_char.isspace() and next_char not in "=,":
+                        if not next_char.isspace() and next_char not in "=," and not (
+                                next_char in "'\"" and was_in_quotes):
                             raise SyntaxError(f"Found whitespace between keyword or value")
-                        else:
-                            white_spaces_after_keyword += 1
 
                     elif keyword_present and i == arg_value_start_i:
                         arg_value_start_i += 1
@@ -1170,11 +1169,9 @@ class UIForm(UIScrollingContainer):
                         raise SyntaxError(f"Found 2 consecutive '=' symbols")
                     else:
                         keyword_present = True
-                        keyword_end_i = i - 1 - white_spaces_after_keyword
+                        keyword_end_i = i - 1
                         arg_value_start_i = i + 1
                         keyword = arg_group[arg_start_i: keyword_end_i + 1].strip()
-
-                        white_spaces_after_keyword = 0
 
                 elif char == ",":
                     if i == 0:
