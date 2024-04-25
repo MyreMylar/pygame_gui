@@ -61,6 +61,8 @@ class TestUIForm:
         container = UIForm(pygame.Rect(100, 100, 200, 200), questionnaire=get_questionnaire(),
                            manager=default_ui_manager)
         assert len(container.get_container().elements) == 16
+        assert len(container.parsed_questionnaire["Section Test:"].elements) == 2
+        assert len(container.parsed_questionnaire["Section Test:"].section_container.elements) == 7
 
         button = UIButton(relative_rect=pygame.Rect(0, 0, 50, 50), text="",
                           manager=default_ui_manager)
