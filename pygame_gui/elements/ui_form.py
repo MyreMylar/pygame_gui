@@ -642,15 +642,12 @@ class UIForm(UIScrollingContainer):
 
                 # This is to prevent labels from resizing and becoming too small to hold their text
                 right = param_dict["anchors"].pop("right", None)
-                right_target = param_dict["anchors"].pop("right_target", None)
 
                 label = UILabel(text=key, object_id=ObjectID(f"#{key.lower()}", "@form_label"), **param_dict)
 
                 param_dict["anchors"]["top_target"] = label
                 if right:
                     param_dict["anchors"]["right"] = right
-                if right_target:
-                    param_dict["anchors"]["right_target"] = right_target
                 param_dict["relative_rect"] = rel_rect.copy()
                 param_dict["relative_rect"].y = label_gap
                 param_dict["relative_rect"].height = field_height
