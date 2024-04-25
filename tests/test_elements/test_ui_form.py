@@ -496,7 +496,46 @@ class TestUIForm:
 
     def test_type_checker(self, _init_pygame, default_ui_manager,
                           _display_surface_return_none):
-        ...
+        # General
+
+        value = UIForm.type_checker("character")
+        assert isinstance(value, tuple)
+        assert isinstance(value[0], str)
+        assert isinstance(value[1], dict)
+
+        # White Space
+        w = " \n\t\v\r\f"  # stands for white_spaces
+        assert UIForm.type_checker(f"{w}short_text{w}({w}' a' \t\f'b' \t\f\"c\"{w},{w}required{w}={w}True{w}){w}") == ("short_text", {"default": " abc", "required": True})
+
+        # Syntax + Character
+
+        assert UIForm.type_checker("character") == ("character", {})
+        assert UIForm.type_checker("character('a')") == ("character", {"default": "a"})
+        assert UIForm.type_checker("character(default='a')") == ("character", {"default": "a"})
+        assert UIForm.type_checker("character('a',True)") == ("character", {"default": "a", "required": True})
+        assert UIForm.type_checker("character('a',False)") == ("character", {"default": "a", "required": False})
+        assert UIForm.type_checker("character('a',required=True)") == ("character", {"default": "a", "required": True})
+        assert UIForm.type_checker("character(default='a',required=False)") == ("character", {"default": "a", "required": False})
+
+        # Short Text
+        assert UIForm.type_checker("short_text('abc', required=True)") == ("short_text", {"default": "abc", "required": True})
+
+        # Long Text
+        assert UIForm.type_checker("long_text('abc', required=True)") == ("long_text", {"default": "abc", "required": True})
+
+        # Integer Text
+        assert UIForm.type_checker("integer(1,required=True)") == ("integer", {"default": 1, "required": True})
+
+        # Decimal Text
+        assert UIForm.type_checker("decimal(1,required=True)") == ("decimal", {"default": 1, "required": True})
+        assert UIForm.type_checker("decimal(1.0,required=False)") == ("decimal", {"default": 1.0, "required": False})
+
+        # Password Text
+        assert UIForm.type_checker("password('abc', True)") == ("password", {"default": "abc", "required": True})
+
+        # Boolean Text
+        assert UIForm.type_checker("boolean(True, True)") == ("boolean", {"default": True, "required": True})
+        assert UIForm.type_checker("boolean(False, False)") == ("boolean", {"default": False, "required": False})
 
     def test_type_checker_bad_values(self, _init_pygame, default_ui_manager,
                                      _display_surface_return_none):
@@ -507,6 +546,12 @@ class TestUIForm:
 
         with pytest.raises(SyntaxError, match="Parenthesis used without passing parameters for question"):
             UIForm.type_checker("character()")
+
+        with pytest.raises(SyntaxError, match="Found whitespace between keyword or value"):
+            UIForm.type_checker("character(de fault='a')")
+
+        with pytest.raises(SyntaxError, match="Found whitespace between keyword or value"):
+            UIForm.type_checker("character(a b)")
 
         with pytest.raises(SyntaxError, match="Found '=' at the beginning of arguments"):
             UIForm.type_checker("character(=)")
