@@ -26,6 +26,7 @@ def get_questionnaire():
             "UITextEntryLine Test": UITextEntryLine(test_rect),
             "UITextEntryBox Test": UITextEntryBox(test_rect),
             "UISelectionList Test": UISelectionList(test_rect, ["item 1", "item 2"]),
+            "UISelectionList Multiselect Test": UISelectionList(test_rect, ["item 1", "item 2"], allow_multi_select=True),
             "UIDropDownMenu Test": UIDropDownMenu(["item 1", "item 2"], "item 1", test_rect)
         }
     }
@@ -296,7 +297,9 @@ class TestUIForm:
                                                   'Boolean Test:': True,
                                                   'Section Test:': {
                                                       'UITextEntryLine Test': '',
-                                                      'UITextEntryBox Test': '', 'UISelectionList Test': None,
+                                                      'UITextEntryBox Test': '',
+                                                      'UISelectionList Test': None,
+                                                      'UISelectionList Multiselect Test': [],
                                                       'UIDropDownMenu Test': 'item 1'
                                                   }
                                                   }
