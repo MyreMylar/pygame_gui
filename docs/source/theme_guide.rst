@@ -134,11 +134,11 @@ within the colours block you can start to set individual colours by their IDs. I
     * - HSL
       - Degree, 2 Percentage Values
       - :example-hsl:`hsl(190deg, 40%, .5)`
-      - Hue, Saturation, Luminence
+      - Hue, Saturation, Luminance
     * - HSLA
       - Degree, 3 Percentage Values
       - :example-hsla:`hsla(10deg, 40%, .5, 0.7)`
-      - Hue, Saturation, Luminence, Alpha
+      - Hue, Saturation, Luminance, Alpha
     * - HSV
       - Degree, 2 Percentage Values
       - :example-hsv:`hsv(282deg, 63%, 92%)`
@@ -150,7 +150,7 @@ within the colours block you can start to set individual colours by their IDs. I
     * - CMY
       - 3 percentage values
       - :example-cmy:`cmy(.3, .5, .7)`
-      - Cyan, Magneta, Yellow
+      - Cyan, Magenta, Yellow
 
 .. list-table:: Value Types
     :widths: 10 40 20 20 20

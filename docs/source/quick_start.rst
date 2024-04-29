@@ -233,7 +233,7 @@ we can just compare the event's ui_element attribute with our hello_button varia
 Try running the code again and clicking on the button. If it's all worked you should see 'Hello World!' printed to the
 python console each time you click the button.
 
-Now that we've got the basics of the code up and running, let's try experimenting with a custom them file in part 2 of
+Now that we've got the basics of the code up and running, let's try experimenting with a custom theme file in part 2 of
 this quick start guide:
 
 Quick Start Guides
