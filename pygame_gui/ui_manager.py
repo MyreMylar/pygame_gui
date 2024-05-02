@@ -101,6 +101,9 @@ class UIManager(IUIManagerInterface):
         self.text_hovered = False
         self.hovering_any_ui_element = False
 
+        self.copy_text_enabled = True
+        self.paste_text_enabled = True
+
         if auto_load:
             self.resource_loader.start()
             # If we are using a blocking loader this will only return when loading is complete

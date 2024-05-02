@@ -147,6 +147,9 @@ class UITextEntryLine(UIElement):
         self.forbidden_characters: Optional[List[str]] = None
         self.length_limit: Optional[int] = None
 
+        self.copy_text_enabled = True
+        self.paste_text_enabled = True
+
         self.rebuild_from_changed_theme_data()
 
     @property
@@ -780,20 +783,21 @@ class UITextEntryLine(UIElement):
         return consumed_event
 
     def _do_cut(self):
-        if abs(self.select_range[0] - self.select_range[1]) > 0:
-            low_end = min(self.select_range[0], self.select_range[1])
-            high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.text[low_end:high_end])
-            if self.drawable_shape is not None:
-                self.drawable_shape.text_box_layout.delete_selected_text()
-                self.drawable_shape.apply_active_text_changes()
-            self.edit_position = low_end
-            self.text = self.text[:low_end] + self.text[high_end:]
-            if self.drawable_shape is not None:
-                self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
-                self.drawable_shape.apply_active_text_changes()
-            self.select_range = [0, 0]
-            self.cursor_has_moved_recently = True
+        if self.ui_manager.copy_text_enabled and self.copy_text_enabled:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+                clipboard_copy(self.text[low_end:high_end])
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.delete_selected_text()
+                    self.drawable_shape.apply_active_text_changes()
+                self.edit_position = low_end
+                self.text = self.text[:low_end] + self.text[high_end:]
+                if self.drawable_shape is not None:
+                    self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
+                    self.drawable_shape.apply_active_text_changes()
+                self.select_range = [0, 0]
+                self.cursor_has_moved_recently = True
 
     def _process_copy_event(self, event: Event) -> bool:
         """
@@ -817,7 +821,8 @@ class UITextEntryLine(UIElement):
         if abs(self.select_range[0] - self.select_range[1]) > 0:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.text[low_end:high_end])
+            if self.ui_manager.copy_text_enabled and self.copy_text_enabled:
+                clipboard_copy(self.text[low_end:high_end])
 
     def _process_paste_event(self, event: pygame.event.Event) -> bool:
         """
@@ -837,52 +842,53 @@ class UITextEntryLine(UIElement):
         return consumed_event
 
     def _do_paste(self):
-        new_text = clipboard_paste()
-        if self.validate_text_string(new_text):
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                final_text = self.text[:low_end] + new_text + self.text[high_end:]
-                within_length_limit = True
-                if self.length_limit is not None and len(final_text) > self.length_limit:
-                    within_length_limit = False
-                if within_length_limit:
-                    self.text = final_text
-                    if self.drawable_shape is not None:
-                        self.drawable_shape.text_box_layout.delete_selected_text()
-                        self.drawable_shape.apply_active_text_changes()
-                    display_new_text = new_text
-                    if self.is_text_hidden:
-                        display_new_text = self.hidden_text_char * len(new_text)
-                    if self.drawable_shape is not None:
-                        self.drawable_shape.insert_text(display_new_text, low_end)
-                    self.edit_position = low_end + len(new_text)
-                    if self.drawable_shape is not None:
-                        self.drawable_shape.text_box_layout.set_cursor_position(
-                            self.edit_position)
-                        self.drawable_shape.apply_active_text_changes()
-                    self.select_range = [0, 0]
-                    self.cursor_has_moved_recently = True
-            elif len(new_text) > 0:
-                final_text = (self.text[:self.edit_position] +
-                              new_text +
-                              self.text[self.edit_position:])
-                within_length_limit = True
-                if self.length_limit is not None and len(final_text) > self.length_limit:
-                    within_length_limit = False
-                if within_length_limit:
-                    self.text = final_text
-                    display_new_text = new_text
-                    if self.is_text_hidden:
-                        display_new_text = self.hidden_text_char * len(new_text)
-                    if self.drawable_shape is not None:
-                        self.drawable_shape.insert_text(display_new_text, self.edit_position)
-                    self.edit_position += len(new_text)
-                    if self.drawable_shape is not None:
-                        self.drawable_shape.text_box_layout.set_cursor_position(
-                            self.edit_position)
-                        self.drawable_shape.apply_active_text_changes()
-                    self.cursor_has_moved_recently = True
+        if self.ui_manager.paste_text_enabled and self.paste_text_enabled:
+            new_text = clipboard_paste()
+            if self.validate_text_string(new_text):
+                if abs(self.select_range[0] - self.select_range[1]) > 0:
+                    low_end = min(self.select_range[0], self.select_range[1])
+                    high_end = max(self.select_range[0], self.select_range[1])
+                    final_text = self.text[:low_end] + new_text + self.text[high_end:]
+                    within_length_limit = True
+                    if self.length_limit is not None and len(final_text) > self.length_limit:
+                        within_length_limit = False
+                    if within_length_limit:
+                        self.text = final_text
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.delete_selected_text()
+                            self.drawable_shape.apply_active_text_changes()
+                        display_new_text = new_text
+                        if self.is_text_hidden:
+                            display_new_text = self.hidden_text_char * len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.insert_text(display_new_text, low_end)
+                        self.edit_position = low_end + len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.set_cursor_position(
+                                self.edit_position)
+                            self.drawable_shape.apply_active_text_changes()
+                        self.select_range = [0, 0]
+                        self.cursor_has_moved_recently = True
+                elif len(new_text) > 0:
+                    final_text = (self.text[:self.edit_position] +
+                                  new_text +
+                                  self.text[self.edit_position:])
+                    within_length_limit = True
+                    if self.length_limit is not None and len(final_text) > self.length_limit:
+                        within_length_limit = False
+                    if within_length_limit:
+                        self.text = final_text
+                        display_new_text = new_text
+                        if self.is_text_hidden:
+                            display_new_text = self.hidden_text_char * len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.insert_text(display_new_text, self.edit_position)
+                        self.edit_position += len(new_text)
+                        if self.drawable_shape is not None:
+                            self.drawable_shape.text_box_layout.set_cursor_position(
+                                self.edit_position)
+                            self.drawable_shape.apply_active_text_changes()
+                        self.cursor_has_moved_recently = True
 
     def _process_mouse_button_event(self, event: pygame.event.Event) -> bool:
         """

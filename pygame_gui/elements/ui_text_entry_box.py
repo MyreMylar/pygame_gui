@@ -71,6 +71,7 @@ class UITextEntryBox(UITextBox):
         self.cursor_blink_delay_after_moving = 1.0
         self.blink_cursor_time_acc = 0.0
         self.blink_cursor_time = 0.4
+        self.paste_text_enabled = True
 
         self.cursor_on = False
 
@@ -333,17 +334,19 @@ class UITextEntryBox(UITextBox):
         return consumed_event
 
     def _do_cut(self):
-        if abs(self.select_range[0] - self.select_range[1]) > 0:
-            low_end = min(self.select_range[0], self.select_range[1])
-            high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.html_text[low_end:high_end])
-            self.text_box_layout.delete_selected_text()
-            self.edit_position = low_end
-            self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
-            self.text_box_layout.set_cursor_position(self.edit_position)
-            self.select_range = [0, 0]
-            self.redraw_from_text_block()
-            self.cursor_has_moved_recently = True
+        if self.ui_manager.copy_text_enabled and self.copy_text_enabled:
+            if abs(self.select_range[0] - self.select_range[1]) > 0:
+                low_end = min(self.select_range[0], self.select_range[1])
+                high_end = max(self.select_range[0], self.select_range[1])
+
+                clipboard_copy(self.html_text[low_end:high_end])
+                self.text_box_layout.delete_selected_text()
+                self.edit_position = low_end
+                self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
+                self.text_box_layout.set_cursor_position(self.edit_position)
+                self.select_range = [0, 0]
+                self.redraw_from_text_block()
+                self.cursor_has_moved_recently = True
 
     def _process_paste_event(self, event: Event) -> bool:
         """
@@ -362,30 +365,31 @@ class UITextEntryBox(UITextBox):
         return consumed_event
 
     def _do_paste(self):
-        paste = clipboard_paste()
-        if paste is not None:
-            new_text = self.convert_all_line_endings_to_unix(clipboard_paste())
+        if self.ui_manager.paste_text_enabled and self.paste_text_enabled:
+            paste = clipboard_paste()
+            if paste is not None:
+                new_text = self.convert_all_line_endings_to_unix(clipboard_paste())
 
-            if abs(self.select_range[0] - self.select_range[1]) > 0:
-                low_end = min(self.select_range[0], self.select_range[1])
-                high_end = max(self.select_range[0], self.select_range[1])
-                self.html_text = self.html_text[:low_end] + new_text + self.html_text[high_end:]
-                self.set_text(self.html_text)
-                self.edit_position = low_end + len(new_text)
-                self.text_box_layout.set_cursor_position(self.edit_position)
-                self.redraw_from_text_block()
-                self.select_range = [0, 0]
-                self.cursor_has_moved_recently = True
-            elif len(new_text) > 0:
-                self.html_text = (self.html_text[:self.edit_position] +
-                                  new_text +
-                                  self.html_text[self.edit_position:])
-                original_edit_pos = self.edit_position
-                self.set_text(self.html_text)
-                self.edit_position = original_edit_pos + len(new_text)
-                self.text_box_layout.set_cursor_position(self.edit_position)
-                self.redraw_from_text_block()
-                self.cursor_has_moved_recently = True
+                if abs(self.select_range[0] - self.select_range[1]) > 0:
+                    low_end = min(self.select_range[0], self.select_range[1])
+                    high_end = max(self.select_range[0], self.select_range[1])
+                    self.html_text = self.html_text[:low_end] + new_text + self.html_text[high_end:]
+                    self.set_text(self.html_text)
+                    self.edit_position = low_end + len(new_text)
+                    self.text_box_layout.set_cursor_position(self.edit_position)
+                    self.redraw_from_text_block()
+                    self.select_range = [0, 0]
+                    self.cursor_has_moved_recently = True
+                elif len(new_text) > 0:
+                    self.html_text = (self.html_text[:self.edit_position] +
+                                      new_text +
+                                      self.html_text[self.edit_position:])
+                    original_edit_pos = self.edit_position
+                    self.set_text(self.html_text)
+                    self.edit_position = original_edit_pos + len(new_text)
+                    self.text_box_layout.set_cursor_position(self.edit_position)
+                    self.redraw_from_text_block()
+                    self.cursor_has_moved_recently = True
 
     def redraw_from_text_block(self):
         self.text_box_layout.fit_layout_rect_height_to_rows()

@@ -199,6 +199,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.vertical_cursor_movement = False
         self.last_horiz_cursor_index = 0
 
+        self.copy_text_enabled = True
+        self.paste_text_enabled = False
+
         self.rebuild_from_changed_theme_data()
 
     @property
@@ -922,7 +925,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if self.text_box_layout is not None and abs(self.select_range[0] - self.select_range[1]) > 0:
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
-            clipboard_copy(self.text_box_layout.plain_text[low_end:high_end])
+            if self.ui_manager.copy_text_enabled and self.copy_text_enabled:
+                clipboard_copy(self.text_box_layout.plain_text[low_end:high_end])
 
     def _calculate_double_click_word_selection(self):
         """

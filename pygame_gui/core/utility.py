@@ -173,7 +173,7 @@ elif PLATFORM == 'LINUX':
             stdout, _ = process.communicate()
             return stdout.decode('utf-8')
 
-else:
+elif PLATFORM == 'DARWIN':
     def __mac_copy(data: str):
         with subprocess.Popen('pbcopy',
                               env={'LANG': 'en_US.UTF-8'},
@@ -185,10 +185,19 @@ else:
         return subprocess.check_output(
             'pbpaste', env={'LANG': 'en_US.UTF-8'}).decode('utf-8')
 
+else:
+    def __unknown_copy(data: str):
+        # copy not supported on this platform
+        pass
+
+    def __unknown_paste():
+        # paste not supported on this platform
+        return ""
+
 
 def clipboard_copy(data: str):
     """
-    Hopefully cross platform, copy to a clipboard.
+    Hopefully cross-platform, copy to a clipboard.
 
     :return: A platform specific copy function.
 
@@ -201,13 +210,15 @@ def clipboard_copy(data: str):
             __windows_copy(data)
         elif current_platform == 'LINUX':
             __linux_copy(data)
-        else:
+        elif current_platform == 'DARWIN':
             __mac_copy(data)
+        else:
+            __unknown_copy(data)
 
 
 def clipboard_paste():
     """
-    Hopefully cross platform, paste from a clipboard.
+    Hopefully cross-platform, paste from a clipboard.
 
     :return: A platform specific paste function.
 
@@ -220,8 +231,10 @@ def clipboard_paste():
             return __windows_paste()
         elif current_platform == 'LINUX':
             return __linux_paste()
-        else:
+        elif current_platform == 'DARWIN':
             return __mac_paste()
+        else:
+            return __unknown_paste()
 
 
 def create_resource_path(relative_path: Union[str, Path]):
