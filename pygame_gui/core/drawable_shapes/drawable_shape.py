@@ -657,7 +657,7 @@ class DrawableShape:
         """
         self.theming['text'] = text
         self.build_text_layout()
-        if 'disabled' in self.states and self.active_state == self.states['disabled']:
+        if 'disabled' in self.states:
             self.redraw_all_states(force_full_redraw=True)
         else:
             self.redraw_all_states()
