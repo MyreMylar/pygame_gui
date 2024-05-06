@@ -202,7 +202,7 @@ def clipboard_copy(data: str):
     :return: A platform specific copy function.
 
     """
-    if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
+    if (pygame.vernum.major == 2 and pygame.vernum.minor >= 2) or pygame.vernum.major > 2:
         pygame.scrap.put_text(data)
     else:
         current_platform = platform.system().upper()
@@ -223,7 +223,7 @@ def clipboard_paste():
     :return: A platform specific paste function.
 
     """
-    if pygame.vernum.major == 2 and pygame.vernum.minor >= 2:
+    if (pygame.vernum.major == 2 and pygame.vernum.minor >= 2) or pygame.vernum.major > 2:
         return pygame.scrap.get_text()
     else:
         current_platform = platform.system().upper()
