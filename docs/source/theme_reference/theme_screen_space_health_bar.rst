@@ -23,7 +23,7 @@ Colours
 :class:`UIScreenSpaceHealthBar <pygame_gui.elements.UIScreenSpaceHealthBar>` makes use of these colour parameters in a 'colours' block. Most of these colours can
 also be a colour gradient:
 
- - "**normal_text**" - The colour/gradient of the health bars's text.
+ - "**normal_text**" - The colour/gradient of the health bar's text.
  - "**text_shadow**" - The colour of the shadow behind the text (so it stands out better).
  - "**normal_border**" - The colour/gradient of the border around the health bar.
  - "**filled_bar**" - The colour/gradient of the actual bar itself, of the portion of it that is still full.

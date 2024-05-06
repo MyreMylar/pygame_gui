@@ -179,7 +179,7 @@ class TestUIScrollingContainer:
 
         container.update(0.02)
 
-        assert container.get_container().get_relative_rect().y == -12
+        assert container.get_container().get_relative_rect().y == -11
 
         container.horiz_scroll_bar.scroll_wheel_moved = True
         container.horiz_scroll_bar.scroll_wheel_amount = -5.0
