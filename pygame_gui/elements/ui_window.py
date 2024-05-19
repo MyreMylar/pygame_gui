@@ -52,6 +52,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.resizable = resizable
         self.draggable = draggable
         self._always_on_top = always_on_top
+        self._blocking_always_on_top = False
 
         self.edge_hovering = [False, False, False, False]
 
@@ -115,12 +116,26 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     def set_blocking(self, state: bool):
         """
         Sets whether this window being open should block clicks to the rest of the UI or not.
+        On  being set True it will move the window to the top of the stack if it is not there already.
         Defaults to False.
+
+        If there are any 'always on top' windows at this is set True this window will become one of
+        them,and move to the front of them too.
 
         :param state: True if this window should block mouse clicks.
 
         """
-        self.window_stack.move_window_to_front(self)
+        if state:
+            if len(self.window_stack.top_stack) > 0:
+                if not self.always_on_top:
+                    self._blocking_always_on_top = True
+                self.always_on_top = True
+            self.window_stack.move_window_to_front(self)
+        else:
+            if self._blocking_always_on_top:
+                self._blocking_always_on_top = False
+                self.always_on_top = False
+
         self.is_blocking = state
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
