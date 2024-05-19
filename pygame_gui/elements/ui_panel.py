@@ -58,16 +58,18 @@ class UIPanel(UIElement, IContainerLikeInterface):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self.panel_container = None
-        super().__init__(relative_rect,
-                         manager,
-                         container,
-                         starting_height=starting_height,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=[element_id])
+        #super().__init__(relative_rect,
+        UIElement.__init__(self,
+                           relative_rect,
+                           manager,
+                           container,
+                           starting_height=starting_height,
+                           layer_thickness=1,
+                           anchors=anchors,
+                           visible=visible,
+                           parent_element=parent_element,
+                           object_id=object_id,
+                           element_id=[element_id])
 
         self.background_colour = None
         self.border_colour = None

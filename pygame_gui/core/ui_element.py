@@ -643,7 +643,8 @@ class UIElement(GUISprite, IUIElementInterface):
 
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
-            self.set_dimensions((new_width, new_height))
+            UIElement.set_dimensions(self, (new_width, new_height))
+            #self.set_dimensions((new_width, new_height))
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
