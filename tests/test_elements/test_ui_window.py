@@ -58,6 +58,18 @@ class TestUIWindow:
         assert not button.held
 
         window.set_blocking(False)
+        window.always_on_top = False
+
+        UIWindow(pygame.Rect(0, 0, 100, 100), window_display_title="Test On Top Window",
+                 manager=default_ui_manager, element_id='window', always_on_top=True)
+
+        window.set_blocking(True)
+        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
+                                                             {'button': pygame.BUTTON_LEFT,
+                                                              'pos': button.rect.center}))
+        assert not button.held
+
+        window.set_blocking(False)
 
     def test_set_minimum_dimensions(self, _init_pygame, default_ui_manager: IUIManagerInterface,
                                     _display_surface_return_none):
