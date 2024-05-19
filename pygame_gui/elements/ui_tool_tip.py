@@ -129,7 +129,7 @@ class UITooltip(UIElement, IUITooltipInterface):
                 return True
             else:
                 if self.rect.bottom > window_rect.bottom:
-                    self.rect.bottom = int(position[0] - self.hover_distance_from_target[1])
+                    self.rect.bottom = int(position[1] - self.hover_distance_from_target[1])
                 if self.rect.right > window_rect.right:
                     self.rect.right = window_rect.right - self.hover_distance_from_target[0]
                 if self.rect.left < window_rect.left:
