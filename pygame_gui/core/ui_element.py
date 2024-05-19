@@ -564,8 +564,8 @@ class UIElement(GUISprite, IUIElementInterface):
             'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0) - relative_rect.top,
             'left': UIElement._calc_left_offset(container, anchors) + relative_rect.left,
             'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0) - relative_rect.left,
-            'centerx': UIElement._calc_centerx_offset(container, anchors),
-            'centery': UIElement._calc_centery_offset(container, anchors),
+            'centerx': UIElement._calc_centerx_offset(container, anchors) + relative_rect.left,
+            'centery': UIElement._calc_centery_offset(container, anchors) + relative_rect.top,
             None:None
             }
         
