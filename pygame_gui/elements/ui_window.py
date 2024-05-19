@@ -120,7 +120,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         Defaults to False.
 
         If there are any 'always on top' windows at this is set True this window will become one of
-        them,and move to the front of them too.
+        them, and move to the front of them too.
 
         :param state: True if this window should block mouse clicks.
 
