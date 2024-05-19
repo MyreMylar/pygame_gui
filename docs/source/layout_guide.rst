@@ -63,8 +63,7 @@ being relative to the top left we anchor to, say the bottom right. That would lo
 .. code-block:: python
    :linenos:
 
-    button_layout_rect = pygame.Rect(0, 0, 100, 20)
-    button_layout_rect.bottomright = (-30, -20)
+    button_layout_rect = pygame.Rect(30, 20, 100, 20)
 
     UIButton(relative_rect=button_layout_rect,
              text='Hello', manager=manager,

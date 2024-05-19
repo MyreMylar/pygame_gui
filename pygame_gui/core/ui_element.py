@@ -560,10 +560,10 @@ class UIElement(GUISprite, IUIElementInterface):
         """
 
         edge_map = {
-            'top': UIElement._calc_top_offset(container, anchors), 
-            'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0),
-            'left': UIElement._calc_left_offset(container, anchors),
-            'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0),
+            'top': UIElement._calc_top_offset(container, anchors) + relative_rect.top, 
+            'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0) - relative_rect.top,
+            'left': UIElement._calc_left_offset(container, anchors) + relative_rect.left,
+            'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0) - relative_rect.left,
             'centerx': UIElement._calc_centerx_offset(container, anchors),
             'centery': UIElement._calc_centery_offset(container, anchors),
             None:None
@@ -574,11 +574,11 @@ class UIElement(GUISprite, IUIElementInterface):
 
             'top': lambda edges: edges['bottom'] - relative_rect.height if edges['bottom'] is not None \
                 else edges['centery'] - relative_rect.height//2 if edges['centery'] is not None \
-                    else edge_map['top'] + relative_rect.top,
+                    else edge_map['top'],
 
             'left': lambda edges: edges['right'] - relative_rect.width if edges['right'] is not None \
                 else edges['centerx'] - relative_rect.width//2 if edges['centerx'] is not None \
-                    else edge_map['left'] + relative_rect.left,
+                    else edge_map['left'],
 
             'bottom': lambda edges: edges['top'] + relative_rect.height if edges['top'] is not None \
                 else edges['centery'] + relative_rect.height//2 if edges['centery'] is not None \
