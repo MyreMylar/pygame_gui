@@ -120,6 +120,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param state: True if this window should block mouse clicks.
 
         """
+        self.window_stack.move_window_to_front(self)
         self.is_blocking = state
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
