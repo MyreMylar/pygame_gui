@@ -163,6 +163,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._setup_visibility(visible)
 
         self._update_absolute_rect_position_from_anchors()
+        #self._update_absolute_rect_position_from_anchors_init()
 
         self._update_container_clip()
 
@@ -388,14 +389,18 @@ class UIElement(GUISprite, IUIElementInterface):
         :param anchors: A dictionary of anchors defining what the relative rect is relative to
         :return: None
         """
+        #print(f'element: {anchors}')
         old_anchors = self.anchors.copy()
         
+        horizontal_anchors = ['left', 'centerx', 'right' ]
+        vertical_anchors = ['top', 'centery', 'bottom' ]
+        horizontal_targets = ['left_target', 'centerx_target', 'right_target' ]
+        vertical_targets = ['top_target', 'centery_target', 'bottom_target' ]
+        target_anchors = ['top_target', 'bottom_target', 'left_target', 'right_target', 'centerx_target', 'centery_target']
+
         def is_valid_anchor_map(source, target):
             if source == 'center' and target == 'center':
                 return True
-            horizontal_anchors = ['left', 'right', 'centerx']
-            vertical_anchors = ['top', 'bottom', 'centery']
-            target_anchors = ['top_target', 'bottom_target', 'left_target', 'right_target', 'centerx_target', 'centery_target']
             if source in target_anchors and hasattr(target, 'get_abs_rect'):
                 return True
             if source in horizontal_anchors and target in horizontal_anchors:
@@ -404,12 +409,31 @@ class UIElement(GUISprite, IUIElementInterface):
                 return True
             return False
 
-        # drop invalid anchors
+        # drop invalid
         if anchors is None:
             anchors = {}
-        self.anchors = {
+        valid_anchors = {
             source:target for source, target in anchors.items() if is_valid_anchor_map(source, target)
             }
+        
+        print(f'element-valid: {valid_anchors}')
+        self.anchors = valid_anchors
+        '''
+        # drop redundant
+        targets = set()
+        unique_target_anchors = {}
+        for source in horizontal_anchors+vertical_anchors+target_anchors:
+            target = valid_anchors.get(source, None)
+            if target not in targets and target is not None:
+                targets.add(target)
+                unique_target_anchors[source] = target
+            elif source in target_anchors and target is not None:
+                unique_target_anchors[source] = target
+
+        self.anchors = unique_target_anchors
+
+        #print(f'element-self: {self.anchors}')
+        '''
         
         if self.anchors != old_anchors and self.ui_container is not None:
             self.ui_container.get_container().on_contained_elements_changed(self)
@@ -559,34 +583,59 @@ class UIElement(GUISprite, IUIElementInterface):
         relative right and bottom margins
         """
 
-        edge_map = {
-            'top': UIElement._calc_top_offset(container, anchors) + relative_rect.top, 
-            'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0) - relative_rect.top,
-            'left': UIElement._calc_left_offset(container, anchors) + relative_rect.left,
-            'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0) - relative_rect.left,
-            'centerx': UIElement._calc_centerx_offset(container, anchors) + relative_rect.left,
-            'centery': UIElement._calc_centery_offset(container, anchors) + relative_rect.top,
+        #vertical_margin = relative_rect.top if relative_rect.bottom>0 else -relative_rect.bottom
+        #horizontal_margin = relative_rect.left if relative_rect.right>0 else -relative_rect.right
+        '''
+        source_map = {
+            'top': vertical_margin,
+            'bottom': -vertical_margin,
+            'left': horizontal_margin,
+            'right': -horizontal_margin,
+            'centerx': 0,
+            'centery': 0,
+            None:None
+        }'''
+        #print(anchors)
+        #print(relative_rect)
+
+        source_map = {
+            'top': relative_rect.top,
+            'bottom': -abs(relative_rect.top) if 'top' in anchors else relative_rect.bottom,
+            'left': relative_rect.left,
+            'right': -abs(relative_rect.left) if 'left' in anchors else relative_rect.right,
+            'centerx': 0,
+            'centery': 0,
+            None:None
+        }
+
+        target_map = {
+            'top': UIElement._calc_top_offset(container, anchors) , 
+            'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0),
+            'left': UIElement._calc_left_offset(container, anchors),
+            'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0),
+            'centerx': UIElement._calc_centerx_offset(container, anchors),
+            'centery': UIElement._calc_centery_offset(container, anchors),
             None:None
             }
         
         
         computed_edge_map = {
 
-            'top': lambda edges: edges['bottom'] - relative_rect.height if edges['bottom'] is not None \
-                else edges['centery'] - relative_rect.height//2 if edges['centery'] is not None \
-                    else edge_map['top'],
+            'top': lambda edges: edges['bottom'] - relative_rect.height if 'bottom' in edges \
+                else edges['centery'] - relative_rect.height//2 if 'centery' in edges \
+                    else target_map['top'] + source_map['top'],
 
-            'left': lambda edges: edges['right'] - relative_rect.width if edges['right'] is not None \
-                else edges['centerx'] - relative_rect.width//2 if edges['centerx'] is not None \
-                    else edge_map['left'],
+            'left': lambda edges: edges['right'] - relative_rect.width if 'right' in edges \
+                else edges['centerx'] - relative_rect.width//2 if 'centerx' in edges \
+                    else target_map['left'] + source_map['left'],
 
-            'bottom': lambda edges: edges['top'] + relative_rect.height if edges['top'] is not None \
-                else edges['centery'] + relative_rect.height//2 if edges['centery'] is not None \
-                    else edge_map['top'] + relative_rect.bottom,
+            'bottom': lambda edges: edges['top'] + relative_rect.height if 'top' in edges \
+                else edges['centery'] + relative_rect.height//2 if 'centery' in edges \
+                    else target_map['top'] + source_map['top'] + relative_rect.height,
 
-            'right': lambda edges: edges['left'] + relative_rect.width if edges['left'] is not None \
-                else edges['centerx'] + relative_rect.width//2 if edges['centerx'] is not None \
-                    else edge_map['left'] + relative_rect.right,
+            'right': lambda edges: edges['left'] + relative_rect.width if 'left' in edges \
+                else edges['centerx'] + relative_rect.width//2 if 'centerx' in edges \
+                    else target_map['left'] + source_map['left'] + relative_rect.width,
 
         }
 
@@ -598,10 +647,11 @@ class UIElement(GUISprite, IUIElementInterface):
                 anchors['centery'] = 'centery'
 
         
-        new_edges = {i:edge_map[anchors.get(i)] for i in edge_map if i is not None }
+        #new_edges = {i:source_map[i] + target_map[anchors.get(i)] for i in target_map if i is not None }
+        new_edges = {i:source_map[i] + target_map[anchors.get(i)] for i in anchors if i in target_map}
 
         for i in computed_edge_map:
-            if new_edges[i] is None:
+            if i not in new_edges:
                 new_edges[i] = computed_edge_map[i](new_edges)
 
 
@@ -643,8 +693,36 @@ class UIElement(GUISprite, IUIElementInterface):
 
         new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
         if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
-            UIElement.set_dimensions(self, (new_width, new_height))
+            self.set_dimensions((new_width, new_height))
+
+
+    def _update_absolute_rect_position_from_anchors_init(self, recalculate_margins=False):
+        """
+        Called when our element's relative position has changed.
+        """
+        relative_right_margin = None if recalculate_margins else self.relative_right_margin
+        relative_bottom_margin = None if recalculate_margins else self.relative_bottom_margin
+
+        rect, self.relative_right_margin, self.relative_bottom_margin = self._calc_abs_rect_pos_from_rel_rect(
+            self.relative_rect,
+            self.ui_container,
+            self.anchors,
+            relative_right_margin,
+            relative_bottom_margin,
+            self.dynamic_width,
+            self.dynamic_height)
+
+        new_left, new_top = rect.topleft
+        new_width, new_height = rect.size
+
+        self.rect.left = new_left
+        self.rect.top = new_top
+
+        new_width, new_height = self._get_clamped_to_minimum_dimensions((new_width, new_height))
+        if (new_height != self.relative_rect.height) or (new_width != self.relative_rect.width):
+            UIElement.set_dimensions_init(self, (new_width, new_height))
             #self.set_dimensions((new_width, new_height))
+
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -871,6 +949,36 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if is_dynamic:
             self.rebuild()
+        else:
+            self._set_dimensions(dimensions, clamp_to_container)
+
+    def set_dimensions_init(self, dimensions: Coordinate, clamp_to_container: bool = False):
+        """
+        Method to directly set the dimensions of an element. And set whether the elements are dynamic.
+
+        NOTE: Using this on elements inside containers with non-default anchoring arrangements
+        may make a mess of them.
+
+        :param dimensions: The new dimensions to set. If it is a negative value, the element will become
+                            dynamically sized, otherwise it will become statically sized.
+        :param clamp_to_container: Whether we should clamp the dimensions to the
+                                   dimensions of the container or not.
+        """
+        is_dynamic = False
+        if dimensions[0] < 0:
+            self._set_dynamic_width()
+            is_dynamic = True
+        else:
+            self._set_dynamic_width(False)
+
+        if dimensions[1] < 0:
+            self._set_dynamic_height()
+            is_dynamic = True
+        else:
+            self._set_dynamic_height(False)
+
+        if is_dynamic:
+            UIElement.rebuild(self)
         else:
             self._set_dimensions(dimensions, clamp_to_container)
 
