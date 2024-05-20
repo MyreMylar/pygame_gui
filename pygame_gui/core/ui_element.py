@@ -391,50 +391,48 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         #print(f'element: {anchors}')
         old_anchors = self.anchors.copy()
-        
-        horizontal_anchors = ['left', 'centerx', 'right' ]
-        vertical_anchors = ['top', 'centery', 'bottom' ]
-        horizontal_targets = ['left_target', 'centerx_target', 'right_target' ]
-        vertical_targets = ['top_target', 'centery_target', 'bottom_target' ]
-        target_anchors = ['top_target', 'bottom_target', 'left_target', 'right_target', 'centerx_target', 'centery_target']
+        self.anchors = {}
 
-        def is_valid_anchor_map(source, target):
-            if source == 'center' and target == 'center':
-                return True
-            if source in target_anchors and hasattr(target, 'get_abs_rect'):
-                return True
-            if source in horizontal_anchors and target in horizontal_anchors:
-                return True
-            if source in vertical_anchors and target in vertical_anchors:
-                return True
-            return False
+        if anchors is not None:
+            if 'center' in anchors and anchors['center'] == 'center':
+                self.anchors.update({'center': 'center'})
+            else:
+                if self._validate_horizontal_anchors(anchors):
+                    if 'left' in anchors:
+                        self.anchors['left'] = anchors['left']
+                    if 'right' in anchors:
+                        self.anchors['right'] = anchors['right']
+                    if 'centerx' in anchors:
+                        self.anchors['centerx'] = anchors['centerx']
+                else:
+                    self.anchors.update({'left': 'left'})
 
-        # drop invalid
-        if anchors is None:
-            anchors = {}
-        valid_anchors = {
-            source:target for source, target in anchors.items() if is_valid_anchor_map(source, target)
-            }
-        
-        print(f'element-valid: {valid_anchors}')
-        self.anchors = valid_anchors
-        '''
-        # drop redundant
-        targets = set()
-        unique_target_anchors = {}
-        for source in horizontal_anchors+vertical_anchors+target_anchors:
-            target = valid_anchors.get(source, None)
-            if target not in targets and target is not None:
-                targets.add(target)
-                unique_target_anchors[source] = target
-            elif source in target_anchors and target is not None:
-                unique_target_anchors[source] = target
+                if self._validate_vertical_anchors(anchors):
+                    if 'top' in anchors:
+                        self.anchors['top'] = anchors['top']
+                    if 'bottom' in anchors:
+                        self.anchors['bottom'] = anchors['bottom']
+                    if 'centery' in anchors:
+                        self.anchors['centery'] = anchors['centery']
+                else:
+                    self.anchors.update({'top': 'top'})
 
-        self.anchors = unique_target_anchors
+            if 'left_target' in anchors:
+                self.anchors['left_target'] = anchors['left_target']
+            if 'right_target' in anchors:
+                self.anchors['right_target'] = anchors['right_target']
+            if 'top_target' in anchors:
+                self.anchors['top_target'] = anchors['top_target']
+            if 'bottom_target' in anchors:
+                self.anchors['bottom_target'] = anchors['bottom_target']
+            if 'centerx_target' in anchors:
+                self.anchors['centerx_target'] = anchors['centerx_target']
+            if 'centery_target' in anchors:
+                self.anchors['centery_target'] = anchors['centery_target']
+        else:
+            self.anchors = {'left': 'left',
+                            'top': 'top'}
 
-        #print(f'element-self: {self.anchors}')
-        '''
-        
         if self.anchors != old_anchors and self.ui_container is not None:
             self.ui_container.get_container().on_contained_elements_changed(self)
 
@@ -582,92 +580,89 @@ class UIElement(GUISprite, IUIElementInterface):
         :return: A tuple containing a Rect representing the absolute position of the rect from the screen, and the
         relative right and bottom margins
         """
+        new_top = 0
+        new_bottom = 0
+        top_offset = UIElement._calc_top_offset(container, anchors)
+        bottom_offset = UIElement._calc_bottom_offset(container, anchors)
+        center_x_and_y = False
 
-        #vertical_margin = relative_rect.top if relative_rect.bottom>0 else -relative_rect.bottom
-        #horizontal_margin = relative_rect.left if relative_rect.right>0 else -relative_rect.right
-        '''
-        source_map = {
-            'top': vertical_margin,
-            'bottom': -vertical_margin,
-            'left': horizontal_margin,
-            'right': -horizontal_margin,
-            'centerx': 0,
-            'centery': 0,
-            None:None
-        }'''
-        #print(anchors)
-        #print(relative_rect)
+        if 'center' in anchors:
+            if anchors['center'] == 'center':
+                center_x_and_y = True
 
-        source_map = {
-            'top': relative_rect.top,
-            'bottom': -abs(relative_rect.top) if 'top' in anchors else relative_rect.bottom,
-            'left': relative_rect.left,
-            'right': -abs(relative_rect.left) if 'left' in anchors else relative_rect.right,
-            'centerx': 0,
-            'centery': 0,
-            None:None
-        }
+        if ('centery' in anchors and anchors['centery'] == 'centery') or center_x_and_y:
+            centery_offset = UIElement._calc_centery_offset(container, anchors)
+            new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
+            new_bottom = relative_rect.bottom - relative_rect.height // 2 + centery_offset
 
-        target_map = {
-            'top': UIElement._calc_top_offset(container, anchors) , 
-            'bottom': UIElement._calc_bottom_offset(container, anchors) - (relative_bottom_margin or 0),
-            'left': UIElement._calc_left_offset(container, anchors),
-            'right': UIElement._calc_right_offset(container, anchors) - (relative_right_margin or 0),
-            'centerx': UIElement._calc_centerx_offset(container, anchors),
-            'centery': UIElement._calc_centery_offset(container, anchors),
-            None:None
-            }
-        
-        
-        computed_edge_map = {
+        if 'top' in anchors:
+            if anchors['top'] == 'top':
+                new_top = relative_rect.top + top_offset
+                new_bottom = relative_rect.bottom + top_offset
+            elif anchors['top'] == 'bottom':
+                new_top = relative_rect.top + bottom_offset
 
-            'top': lambda edges: edges['bottom'] - relative_rect.height if 'bottom' in edges \
-                else edges['centery'] - relative_rect.height//2 if 'centery' in edges \
-                    else target_map['top'] + source_map['top'],
+                if relative_bottom_margin is None:
+                    relative_bottom_margin = (bottom_offset - (new_top + relative_rect.height))
+                new_bottom = bottom_offset - relative_bottom_margin
 
-            'left': lambda edges: edges['right'] - relative_rect.width if 'right' in edges \
-                else edges['centerx'] - relative_rect.width//2 if 'centerx' in edges \
-                    else target_map['left'] + source_map['left'],
+        if 'bottom' in anchors:
+            if anchors['bottom'] == 'top':
+                new_top = relative_rect.top + top_offset
+                new_bottom = relative_rect.bottom + top_offset
+            elif anchors['bottom'] == 'bottom':
+                if not ('top' in anchors and anchors['top'] == 'top'):
+                    new_top = relative_rect.top + bottom_offset
 
-            'bottom': lambda edges: edges['top'] + relative_rect.height if 'top' in edges \
-                else edges['centery'] + relative_rect.height//2 if 'centery' in edges \
-                    else target_map['top'] + source_map['top'] + relative_rect.height,
+                if relative_bottom_margin is None:
+                    relative_bottom_margin = (bottom_offset - (new_top + relative_rect.height))
+                new_bottom = bottom_offset - relative_bottom_margin
 
-            'right': lambda edges: edges['left'] + relative_rect.width if 'left' in edges \
-                else edges['centerx'] + relative_rect.width//2 if 'centerx' in edges \
-                    else target_map['left'] + source_map['left'] + relative_rect.width,
+        new_left = 0
+        new_right = 0
+        left_offset = UIElement._calc_left_offset(container, anchors)
+        right_offset = UIElement._calc_right_offset(container, anchors)
 
-        }
+        if ('centerx' in anchors and anchors['centerx'] == 'centerx') or center_x_and_y:
+            centerx_offset = UIElement._calc_centerx_offset(container, anchors)
+            new_left = relative_rect.left - relative_rect.width // 2 + centerx_offset
+            new_right = relative_rect.right - relative_rect.width // 2 + centerx_offset
 
+        if 'left' in anchors:
+            if anchors['left'] == 'left':
+                new_left = relative_rect.left + left_offset
+                new_right = relative_rect.right + left_offset
+            elif anchors['left'] == 'right':
+                new_left = relative_rect.left + right_offset
 
-        if anchors.get('center') == 'center':
-            if anchors.get('centerx') is None:
-                anchors['centerx'] = 'centerx'
-            if anchors.get('centery') is None:
-                anchors['centery'] = 'centery'
+                if relative_right_margin is None:
+                    relative_right_margin = (right_offset - (new_left + relative_rect.width))
+                new_right = right_offset - relative_right_margin
 
-        
-        #new_edges = {i:source_map[i] + target_map[anchors.get(i)] for i in target_map if i is not None }
-        new_edges = {i:source_map[i] + target_map[anchors.get(i)] for i in anchors if i in target_map}
+        if 'right' in anchors:
+            if anchors['right'] == 'left':
+                new_left = relative_rect.left + left_offset
+                new_right = relative_rect.right + left_offset
+            elif anchors['right'] == 'right':
+                if not ('left' in anchors and anchors['left'] == 'left'):
+                    new_left = relative_rect.left + right_offset
 
-        for i in computed_edge_map:
-            if i not in new_edges:
-                new_edges[i] = computed_edge_map[i](new_edges)
-
+                if relative_right_margin is None:
+                    relative_right_margin = (right_offset - (new_left + relative_rect.width))
+                new_right = right_offset - relative_right_margin
 
         if dynamic_height:
-            new_height = new_edges['bottom'] - new_edges['top']
+            new_height = new_bottom - new_top
         else:
-            new_height = max(0, new_edges['bottom'] - new_edges['top'])
+            new_height = max(0, new_bottom - new_top)
 
         if dynamic_width:
-            new_width = new_edges['right'] - new_edges['left']
+            new_width = new_right - new_left
         else:
-            new_width = max(0, new_edges['right'] - new_edges['left'])
+            new_width = max(0, new_right - new_left)
 
-        rect = pygame.Rect(new_edges['left'], new_edges['top'], new_width, new_height)
+        rect = pygame.Rect(new_left, new_top, new_width, new_height)
         return rect, relative_right_margin, relative_bottom_margin
-
 
     def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
         """

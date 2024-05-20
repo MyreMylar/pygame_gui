@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
       name='pygame_gui',
-      version='0.6.11',
+      version='0.6.10',
       description='A GUI module for pygame Community Edition',
       long_description="Helps create GUIs for games made using pygame Community Edition. "
                        "Features HTML-style text formatting, localization,"
