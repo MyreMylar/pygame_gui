@@ -334,3 +334,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
             if any_hovered:
                 break
         return any_hovered
+
+    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+        super().set_anchors(anchors)
+        if self.panel_container is not None:
+            self.panel_container.set_anchors(anchors)

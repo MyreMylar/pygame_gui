@@ -650,6 +650,22 @@ class TestUIPanel:
 
         assert panel.are_contents_hovered()
 
+    def test_set_anchors(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                         _display_surface_return_none):
+        panel = UIPanel(relative_rect=pygame.Rect(0, 0, 50, 50),
+                        manager=default_ui_manager,
+                        starting_height=5,
+                        anchors={'left': 'left',
+                                 'right': 'left',
+                                 'top': 'top',
+                                 'bottom': 'top'})
+        panel.set_anchors(anchors={'left': 'right',
+                                   'right': 'right',
+                                   'top': 'top',
+                                   'bottom': 'top'})
+        assert panel.get_anchors()["left"] == "right"
+        assert panel.get_anchors()["right"] == "right"
+
 
 if __name__ == '__main__':
     pytest.console_main()
