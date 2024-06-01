@@ -513,6 +513,21 @@ class TestUIScrollingContainer:
 
         assert container.vert_scroll_bar.scroll_wheel_moved
 
+    def test_set_anchors(self, _init_pygame, default_ui_manager: IUIManagerInterface,
+                         _display_surface_return_none):
+        panel = UIScrollingContainer(relative_rect=pygame.Rect(0, 0, 50, 50),
+                                     manager=default_ui_manager,
+                                     anchors={'left': 'left',
+                                              'right': 'left',
+                                              'top': 'top',
+                                              'bottom': 'top'})
+        panel.set_anchors(anchors={'left': 'right',
+                                   'right': 'right',
+                                   'top': 'top',
+                                   'bottom': 'top'})
+        assert panel.get_anchors()["left"] == "right"
+        assert panel.get_anchors()["right"] == "right"
+
 
 if __name__ == '__main__':
     pytest.console_main()

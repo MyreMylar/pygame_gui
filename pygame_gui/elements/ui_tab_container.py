@@ -40,7 +40,7 @@ class UITabContainer(UIElement):
                  object_id: Union[ObjectID, str, None] = None,
                  anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
                  visible: int = 1):
-
+        self._root_container = None
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
                          layer_thickness=1,
@@ -258,3 +258,8 @@ class UITabContainer(UIElement):
         """
         self._root_container.kill()
         super().kill()
+
+    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+        super().set_anchors(anchors)
+        if self._root_container is not None:
+            self._root_container.set_anchors(anchors)
