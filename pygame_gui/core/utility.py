@@ -476,7 +476,7 @@ class ImageResource:
 
         # perform pre-multiply alpha operation
         if error is None and self.loaded_surface is not None and not self.is_file_premultiplied:
-            self.loaded_surface.premul_alpha()
+            self.loaded_surface = self.loaded_surface.premul_alpha()
 
         return error
 
