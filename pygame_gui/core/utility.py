@@ -279,21 +279,6 @@ def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
                         premul_colour.a)
 
 
-def premul_alpha_surface(surface: pygame.surface.Surface) -> pygame.surface.Surface:
-    """
-    Perform a pre-multiply alpha operation on a pygame surface's colours.
-    """
-    surf_copy = surface.copy()
-    surf_copy.fill(pygame.Color('#FFFFFF00'), special_flags=pygame.BLEND_RGB_MAX)
-    manipulate_surf = pygame.surface.Surface(surf_copy.get_size(),
-                                             flags=pygame.SRCALPHA, depth=32)
-    # Can't be exactly transparent black or we trigger SDL1 'bug'
-    manipulate_surf.fill(pygame.Color('#00000001'))
-    manipulate_surf.blit(surf_copy, (0, 0))
-    surface.blit(manipulate_surf, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
-    return surface
-
-
 def render_white_text_alpha_black_bg(font: IGUIFontInterface,
                                      text: str) -> pygame.surface.Surface:
     """
@@ -458,10 +443,12 @@ class ImageResource:
     """
     def __init__(self,
                  image_id: str,
-                 location: Union[PackageResource, str]):
+                 location: Union[PackageResource, str],
+                 premultiplied: bool):
         self.image_id = image_id
         self.location = location
         self.loaded_surface: Optional[pygame.Surface] = None
+        self.is_file_premultiplied = premultiplied
 
     def load(self) -> Union[Exception, None]:
         """
@@ -488,8 +475,8 @@ class ImageResource:
                                           str(self.location))
 
         # perform pre-multiply alpha operation
-        if error is None and self.loaded_surface is not None:
-            premul_alpha_surface(self.loaded_surface)
+        if error is None and self.loaded_surface is not None and not self.is_file_premultiplied:
+            self.loaded_surface.premul_alpha()
 
         return error
 

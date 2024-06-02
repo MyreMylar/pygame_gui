@@ -93,6 +93,7 @@ Images
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
 
  - "**hovered_image**" - The image displayed in the buttons hovered state. It has the following block of sub-parameters:
 
@@ -100,6 +101,7 @@ Images
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
 
  - "**selected_image**" - The image displayed in the buttons select focused state. It has the following block of sub-parameters:
 
@@ -107,6 +109,7 @@ Images
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
 
  - "**disabled_image**" - The image displayed in the buttons disabled state. It has the following block of sub-parameters:
 
@@ -114,6 +117,7 @@ Images
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
 
 
 Misc

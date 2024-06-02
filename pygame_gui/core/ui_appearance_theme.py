@@ -288,11 +288,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         self.ui_element_image_surfaces[element_key][image_id] = surf_resource
 
     def _load_image_from_path(self, res_data):
+        premultiplied = False
+        if 'premultiplied' in res_data:
+            premultiplied = bool(res_data['premultiplied'])
         resource_id = res_data['path']
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
         else:
-            image_resource = ImageResource(resource_id, res_data['path'])
+            image_resource = ImageResource(resource_id, res_data['path'], premultiplied)
             if self._resource_loader.started():
                 error = image_resource.load()
                 if error is not None:
@@ -304,12 +307,15 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         return image_resource
 
     def _load_image_resource(self, res_data):
+        premultiplied = False
+        if 'premultiplied' in res_data:
+            premultiplied = bool(res_data['premultiplied'])
         resource_id = (str(res_data['package']) + '/' + str(res_data['resource']))
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
         else:
             package_resource = PackageResource(res_data['package'], res_data['resource'])
-            image_resource = ImageResource(resource_id, package_resource)
+            image_resource = ImageResource(resource_id, package_resource, premultiplied)
             if self._resource_loader.started():
                 error = image_resource.load()
                 if error is not None:

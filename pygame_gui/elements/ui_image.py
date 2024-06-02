@@ -5,7 +5,6 @@ import pygame
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
 from pygame_gui.core import UIElement
-from pygame_gui.core.utility import premul_alpha_surface
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
 
@@ -94,7 +93,7 @@ class UIImage(UIElement):
         """
         image_surface = new_image.convert_alpha()
         if not image_is_alpha_premultiplied:
-            image_surface = premul_alpha_surface(image_surface)
+            image_surface = image_surface.premul_alpha()
         if (image_surface.get_width() != self.rect.width or
                 image_surface.get_height() != self.rect.height):
             self.original_image = image_surface
