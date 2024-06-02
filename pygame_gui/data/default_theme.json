@@ -318,7 +318,11 @@
     },
     "section.#expand_section_button":
     {
-        "prototype": "#no_frills_button"
+        "prototype": "#no_frills_button",
+        "font": {
+            "name": "fira_code_symbols",
+            "size": "14"
+        }
     },
     "form":
     {
