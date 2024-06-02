@@ -403,6 +403,8 @@ class UITextEntryLine(UIElement):
                 self.drawable_shape.set_text(self.text)
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.drawable_shape.apply_active_text_changes()
+        self.drawable_shape.text_box_layout.turn_on_cursor()
+        self.redraw()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -568,6 +570,8 @@ class UITextEntryLine(UIElement):
                     self.drawable_shape.text_box_layout.backspace_at_cursor()
                     self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                     self.drawable_shape.apply_active_text_changes()
+                    if len(self.text) == 0:
+                        self.redraw()
             consumed_event = True
         elif event.key == pygame.K_DELETE:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
