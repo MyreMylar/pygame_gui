@@ -385,7 +385,11 @@ class TestUIScrollingContainer:
         container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 200, 100),
                                          manager=manager,
                                          visible=0)
-        container.set_scrollable_area_dimensions((600, 600))
+        button_1 = UIButton(relative_rect=pygame.Rect(300, 100, 150, 30),
+                            text="Test Button",
+                            tool_tip_text="This is a test of the button's tool tip functionality.",
+                            manager=default_ui_manager,
+                            container=container)
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)

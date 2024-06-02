@@ -198,6 +198,8 @@ class UIAutoResizingContainer(UIContainer):
                                                                             container=self.ui_container,
                                                                             anchors=self.anchors)[0]
 
+        self.should_update_dimensions = True
+
     def update_containing_rect_position(self) -> None:
         """
         Overridden to also recalculate the absolute rects which control the minimum and maximum sizes of the container
