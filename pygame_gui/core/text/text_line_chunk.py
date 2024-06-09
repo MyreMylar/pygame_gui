@@ -72,6 +72,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.row_chunk_origin = 0
         self.row_chunk_height = text_height
         self.row_bg_height = 0
+        self.row_line_spacing_height = 0
         self.layout_x_offset = 0
 
         self.selection_rect = None
@@ -167,6 +168,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 row_line_spacing_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
         if len(self.text) == 0:
@@ -206,6 +208,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.row_chunk_origin = row_chunk_origin
         self.row_chunk_height = row_chunk_height
         self.row_bg_height = row_bg_height
+        self.row_line_spacing_height = row_line_spacing_height
         self.layout_x_offset = x_scroll_offset
         self.letter_end = letter_end
 
@@ -650,6 +653,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                           self.row_chunk_origin,
                           self.row_chunk_height,
                           self.row_bg_height,
+                          self.row_line_spacing_height,
                           self.layout_x_offset,
                           self.letter_end)
             if self.pre_effect_target_surface is not None:

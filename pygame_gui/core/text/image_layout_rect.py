@@ -27,6 +27,7 @@ class ImageLayoutRect(TextLayoutRect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 row_line_spacing_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
         blit_rect = self.copy()

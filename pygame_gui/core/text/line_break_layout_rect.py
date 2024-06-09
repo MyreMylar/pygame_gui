@@ -33,10 +33,12 @@ class LineBreakLayoutRect(TextLayoutRect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 row_line_spacing_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
+        self.height = row_bg_height
         if self.is_selected:
-            self.select_surf = Surface((self.selection_chunk_width, row_bg_height), flags=pygame.SRCALPHA)
+            self.select_surf = Surface((self.selection_chunk_width, self.height), flags=pygame.SRCALPHA)
             self.select_surf.fill(self.selection_colour)
             target_surface.blit(self.select_surf, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
         # should be cleared by row

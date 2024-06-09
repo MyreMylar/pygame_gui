@@ -54,6 +54,7 @@ class TextLayoutRect(pygame.rect.Rect):
                  row_chunk_origin: int,
                  row_chunk_height: int,
                  row_bg_height: int,
+                 row_line_spacing_height: int,
                  x_scroll_offset: int = 0,
                  letter_end: Optional[int] = None):
         """
@@ -64,6 +65,7 @@ class TextLayoutRect(pygame.rect.Rect):
         :param row_chunk_origin:
         :param row_chunk_height:
         :param row_bg_height:
+        :param row_line_spacing_height:
         :param x_scroll_offset:
         :param letter_end:
         """
