@@ -24,11 +24,12 @@ class TestLineBreakLayoutRect:
                                  target_area=pygame.Rect(0, 0, 200, 30),
                                  row_chunk_origin=0,
                                  row_chunk_height=20,
-                                 row_bg_height=20)
+                                 row_bg_height=20,
+                                 row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((1, 5)) == pygame.Color(0, 0, 0)
         assert line_break_rect.width == 200
-        assert line_break_rect.height == 30
+        assert line_break_rect.height == 20
 
 
 if __name__ == '__main__':

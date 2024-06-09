@@ -31,7 +31,8 @@ class TestSimpleTestLayoutRect:
                              target_area=pygame.Rect(0, 0, 200, 30),
                              row_chunk_origin=0,
                              row_chunk_height=20,
-                             row_bg_height=20)
+                             row_bg_height=20,
+                             row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((1, 5)) != pygame.Color(0, 0, 0)
         assert simple_rect.width == 200

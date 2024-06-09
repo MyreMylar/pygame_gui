@@ -193,7 +193,10 @@ class TextBoxLayout:
         if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
             self.layout_rect.height = current_row.bottom - self.layout_rect.y
         self._refresh_row_letter_counts()
-        self.last_row_height = current_row.height
+        if len(current_row.items) != 0:
+            self.last_row_height = current_row.items[-1].height
+        else:
+            self.last_row_height = current_row.height
 
     def _handle_regular_rect(self, current_row, text_layout_rect, input_queue):
         rhs_limit = self.layout_rect.right
@@ -292,7 +295,7 @@ class TextBoxLayout:
             self._add_row_to_layout(current_row)
             # ...and start new one
             current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                           row_start_y=current_row.bottom,
+                                           row_start_y=current_row.top + current_row.line_spacing_height,
                                            row_index=len(self.layout_rows),
                                            layout=self, line_spacing=self.line_spacing)
             current_row.fall_back_font = prev_row_font
@@ -306,7 +309,7 @@ class TextBoxLayout:
         self._add_row_to_layout(current_row)
         # ...then start a new row
         current_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                       row_start_y=current_row.bottom,
+                                       row_start_y=current_row.top + current_row.line_spacing_height,
                                        row_index=len(self.layout_rows),
                                        layout=self, line_spacing=self.line_spacing)
         current_row.fall_back_font = prev_row_font
@@ -320,7 +323,7 @@ class TextBoxLayout:
 
         # ...then start a new row
         new_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                   row_start_y=current_row.bottom,
+                                   row_start_y=current_row.top + current_row.line_spacing_height,
                                    row_index=len(self.layout_rows),
                                    layout=self, line_spacing=self.line_spacing)
         new_row.fall_back_font = prev_row_font
@@ -373,7 +376,7 @@ class TextBoxLayout:
                                        layout=self, line_spacing=self.line_spacing)
         else:
             new_row = TextBoxLayoutRow(row_start_x=self.layout_rect.x,
-                                       row_start_y=current_row.bottom,
+                                       row_start_y=current_row.top + current_row.line_spacing_height,
                                        row_index=len(self.layout_rows),
                                        layout=self, line_spacing=self.line_spacing)
         new_row.fall_back_font = prev_row_font
@@ -402,7 +405,8 @@ class TextBoxLayout:
                 # print("row height:", row.height)
 
         for floating_rect in self.floating_rects:
-            floating_rect.finalise(surface, self.view_rect, 0, 0, 0)
+            floating_rect.finalise(surface, self.view_rect,
+                                   0, 0, 0, 0)
 
         self.finalised_surface = surface
 
@@ -451,7 +455,7 @@ class TextBoxLayout:
                         if self.finalised_surface is not None:
                             rect.clear()
                             rect.finalise(self.finalised_surface, self.view_rect,
-                                          row.y_origin, row.text_chunk_height, row.height,
+                                          row.y_origin, row.text_chunk_height, row.height, row.line_spacing_height,
                                           self.x_scroll_offset,
                                           index_in_row - cumulative_row_letter_count)
 
@@ -585,7 +589,7 @@ class TextBoxLayout:
         for row in self.layout_rows:
             row.y = new_y
             row.vert_align_items_to_row()
-            new_y += row.height
+            new_y += row.line_spacing_height
 
     def vert_align_top_all_rows(self, y_padding):
         """
@@ -598,7 +602,7 @@ class TextBoxLayout:
         for row in self.layout_rows:
             row.y = new_y
             row.vert_align_items_to_row()
-            new_y += row.height
+            new_y += row.line_spacing_height
 
     def vert_align_bottom_all_rows(self, y_padding):
         """
@@ -611,7 +615,7 @@ class TextBoxLayout:
         for row in reversed(self.layout_rows):
             row.bottom = new_y
             row.vert_align_items_to_row()
-            new_y -= row.height
+            new_y -= row.line_spacing_height
 
     def set_cursor_to_end_of_current_row(self):
         """

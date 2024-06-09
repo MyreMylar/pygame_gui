@@ -54,7 +54,8 @@ class TestHyperlinkTextChunk:
                              target_area=pygame.Rect(0, 0, 200, 30),
                              row_chunk_origin=19,
                              row_chunk_height=20,
-                             row_bg_height=20)
+                             row_bg_height=20,
+                             row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.on_hovered()
@@ -88,7 +89,8 @@ class TestHyperlinkTextChunk:
                              target_area=pygame.Rect(0, 0, 200, 30),
                              row_chunk_origin=19,
                              row_chunk_height=20,
-                             row_bg_height=20)
+                             row_bg_height=20,
+                             row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.on_hovered()
@@ -125,7 +127,8 @@ class TestHyperlinkTextChunk:
                              target_area=pygame.Rect(0, 0, 200, 30),
                              row_chunk_origin=19,
                              row_chunk_height=20,
-                             row_bg_height=20)
+                             row_bg_height=20,
+                             row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.set_active()
@@ -159,7 +162,8 @@ class TestHyperlinkTextChunk:
                              target_area=pygame.Rect(0, 0, 200, 30),
                              row_chunk_origin=19,
                              row_chunk_height=20,
-                             row_bg_height=20)
+                             row_bg_height=20,
+                             row_line_spacing_height=20)
 
         assert rendered_chunk_surf.get_at((2, 6)) == pygame.Color('#FF0000')
         hyper_chunk.set_active()

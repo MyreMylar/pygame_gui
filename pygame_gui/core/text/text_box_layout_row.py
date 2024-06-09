@@ -39,6 +39,7 @@ class TextBoxLayoutRow(pygame.Rect):
         # this one.
         self.fall_back_font = self.layout.default_font
         self.surf_row_dirty = False
+        self.line_spacing_height = 0
 
     def __hash__(self):
         return self.row_index
@@ -69,10 +70,12 @@ class TextBoxLayoutRow(pygame.Rect):
             self.text_chunk_height = item.row_chunk_height
             if self.layout.layout_rect.height != -1:
                 self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                                  item.row_chunk_height)
+                self.line_spacing_height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                                   int(item.row_chunk_height * self.line_spacing))
             else:
-                self.height = int(item.row_chunk_height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-
+                self.height = int(item.row_chunk_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.line_spacing_height = int(item.row_chunk_height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
 
         if isinstance(item, TextLineChunkFTFont):
@@ -103,6 +106,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.width = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.height = 0  # pylint: disable=attribute-defined-outside-init; pylint getting confused
         self.text_chunk_height = 0
+        self.line_spacing_height = 0
         self.letter_count = 0
         self.y_origin = 0
 
@@ -264,17 +268,17 @@ class TextBoxLayoutRow(pygame.Rect):
                         if current_end_pos is not None and cumulative_letter_count is not None:
                             if cumulative_letter_count < current_end_pos:
                                 text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                                    self.text_chunk_height, self.height,
+                                                    self.text_chunk_height, self.height, self.line_spacing_height,
                                                     self.layout.x_scroll_offset,
                                                     current_end_pos - cumulative_letter_count)
                                 cumulative_letter_count += text_chunk.letter_count
                         else:
                             text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                                self.text_chunk_height, self.height,
+                                                self.text_chunk_height, self.height, self.line_spacing_height,
                                                 self.layout.x_scroll_offset)
                     else:
                         text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                            self.text_chunk_height, self.height,
+                                            self.text_chunk_height, self.height, self.line_spacing_height,
                                             self.layout.x_scroll_offset)
                 else:
                     print(self.items)
