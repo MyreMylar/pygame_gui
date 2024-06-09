@@ -405,7 +405,8 @@ class TextBoxLayout:
                 # print("row height:", row.height)
 
         for floating_rect in self.floating_rects:
-            floating_rect.finalise(surface, self.view_rect, 0, 0, 0)
+            floating_rect.finalise(surface, self.view_rect,
+                                   0, 0, 0, 0)
 
         self.finalised_surface = surface
 

@@ -3,6 +3,7 @@ from collections import deque
 import pytest
 import pygame
 
+from pygame_gui.core.gui_font_pygame import GUIFontPygame
 from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 from pygame_gui.core.text import HTMLParser, TextBoxLayoutRow, TextBoxLayout, TextFloatPosition
 from pygame_gui.core.text import SimpleTestLayoutRect, TextLineChunkFTFont
@@ -56,7 +57,7 @@ class TestTextBoxLayoutRow:
 
     def test_add_item(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
-        line_spacing = 1.25
+        line_spacing = 1.0
         default_font = default_ui_manager.get_theme().get_font_dictionary().get_default_font()
         default_font_data = {"font": default_font,
                              "font_colour": pygame.Color("#FFFFFF"),
@@ -79,7 +80,7 @@ class TestTextBoxLayoutRow:
         assert len(layout_row.items) == 1
         assert layout_row.width == simple_rect.width
         assert layout_row.text_chunk_height == simple_rect.height
-        assert layout_row.height == int(simple_rect.height * line_spacing)
+        assert layout_row.height == int(simple_rect.height)
 
     def test_rewind_row(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])
@@ -361,8 +362,8 @@ class TestTextBoxLayoutRow:
                                       line_spacing=line_spacing,
                                       layout=text_box_layout)
 
-        font_1 = GUIFontFreetype(None, 30)
-        font_2 = GUIFontFreetype(None, 20)
+        font_1 = GUIFontPygame(None, 30)
+        font_2 = GUIFontPygame(None, 20)
         text_chunk_1 = TextLineChunkFTFont(text='hello ',
                                            font=font_1,
                                            underlined=False,
@@ -389,7 +390,7 @@ class TestTextBoxLayoutRow:
         layout_surface.fill((0, 0, 0, 0))
         layout_row.finalise(layout_surface)
 
-        assert layout_surface.get_at((3, 3)) == pygame.Color(255, 0, 0, 255)
+        assert layout_surface.get_at((0, 0)) == pygame.Color(255, 0, 0, 255)
 
     def test_set_default_text_colour(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         input_data = deque([])

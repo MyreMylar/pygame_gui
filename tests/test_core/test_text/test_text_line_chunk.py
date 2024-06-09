@@ -99,7 +99,8 @@ class TestTextLineChunkFTFont:
                          pygame.Rect(0, 0, 200, 300),
                          chunk_1.y_origin,
                          chunk_1.height,
-                         chunk_1.height)
+                         chunk_1.height,
+                         chunk_1.row_line_spacing_height)
 
         assert layout_surface.get_at((10, 10)) == pygame.Color('#FF0000')
 
@@ -118,7 +119,8 @@ class TestTextLineChunkFTFont:
                          pygame.Rect(0, 0, 200, 300),
                          chunk_2.y_origin,
                          chunk_2.height,
-                         chunk_2.height)
+                         chunk_2.height,
+                         chunk_2.row_line_spacing_height)
 
         assert layout_surface_2.get_at((10, 10)) == pygame.Color('#FF0000')
 
@@ -139,7 +141,8 @@ class TestTextLineChunkFTFont:
                          pygame.Rect(0, 0, 200, 300),
                          chunk_3.y_origin,
                          chunk_3.height,
-                         chunk_3.height)
+                         chunk_3.height,
+                         chunk_3.row_line_spacing_height)
 
         assert layout_surface_3.get_at((10, 10)) != pygame.Color('#00000000')
 
@@ -158,7 +161,8 @@ class TestTextLineChunkFTFont:
                          pygame.Rect(0, 0, 200, 300),
                          chunk_4.y_origin,
                          chunk_4.height,
-                         chunk_4.height)
+                         chunk_4.height,
+                         chunk_4.row_line_spacing_height)
 
         assert layout_surface_4.get_at((10, 10)) != pygame.Color('#00000000')
 
@@ -231,7 +235,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
 
         assert layout_surface.get_at((10, 10)) == pygame.Color('#FF00FF')
 
@@ -466,7 +471,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
 
         assert layout_surface.get_at((10, 10)) == pygame.Color('#FF00FF')
 
@@ -493,7 +499,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
 
         chunk.grab_pre_effect_surface()
         chunk.set_alpha(128)
@@ -520,7 +527,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
         chunk.grab_pre_effect_surface()
         chunk.set_offset_pos((10, 10))
         chunk.redraw()
@@ -543,7 +551,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
         chunk.grab_pre_effect_surface()
         chunk.set_scale(2.0)
         chunk.redraw()
@@ -566,7 +575,8 @@ class TestTextLineChunkFTFont:
                        pygame.Rect(0, 0, 200, 300),
                        chunk.y_origin,
                        chunk.height,
-                       chunk.height)
+                       chunk.height,
+                       chunk.row_line_spacing_height)
         chunk.grab_pre_effect_surface()
         chunk.set_rotation(45)
         chunk.redraw()

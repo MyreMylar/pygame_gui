@@ -27,7 +27,8 @@ class TestHorizRuleLayoutRect:
                             target_area=pygame.Rect(0, 0, 200, 20),
                             row_chunk_origin=0,
                             row_chunk_height=20,
-                            row_bg_height=20)
+                            row_bg_height=20,
+                            row_line_spacing_height=20)
 
         assert rule_surface.get_at((10, 2)) == pygame.Color(0, 0, 0, 0)
         assert rule_surface.get_at((10, 10)) == pygame.Color(255, 255, 255, 255)
@@ -42,7 +43,8 @@ class TestHorizRuleLayoutRect:
                             target_area=pygame.Rect(0, 0, 200, 20),
                             row_chunk_origin=0,
                             row_chunk_height=20,
-                            row_bg_height=20)
+                            row_bg_height=20,
+                            row_line_spacing_height=20)
 
         horiz_rule = HorizRuleLayoutRect(height=20,
                                          colour_or_gradient=pygame.Color('#FFFFFF'),
@@ -55,7 +57,8 @@ class TestHorizRuleLayoutRect:
                             target_area=pygame.Rect(0, 0, 200, 20),
                             row_chunk_origin=0,
                             row_chunk_height=20,
-                            row_bg_height=20)
+                            row_bg_height=20,
+                            row_line_spacing_height=20)
 
 
 if __name__ == '__main__':
