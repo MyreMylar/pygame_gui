@@ -580,7 +580,7 @@ class TextBoxLayout:
         """
         total_row_height = 0
         for row in self.layout_rows:
-            total_row_height += row.height
+            total_row_height += row.line_spacing_height
 
         all_row_rect = pygame.Rect(0, 0, 1, total_row_height)
         all_row_rect.centery = self.layout_rect.centery
