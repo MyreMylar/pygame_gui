@@ -579,8 +579,11 @@ class TextBoxLayout:
         TODO: I expect we should have the arrow centering methods in here too.
         """
         total_row_height = 0
-        for row in self.layout_rows:
-            total_row_height += row.line_spacing_height
+        if len(self.layout_rows) > 1:
+            for row in self.layout_rows:
+                total_row_height += row.line_spacing_height
+        elif len(self.layout_rows) == 1:
+            total_row_height = self.layout_rows[0].height
 
         all_row_rect = pygame.Rect(0, 0, 1, total_row_height)
         all_row_rect.centery = self.layout_rect.centery
@@ -1426,7 +1429,7 @@ class TextBoxLayout:
 
     def fit_layout_rect_height_to_rows(self):
         if len(self.layout_rows) > 0:
-            self.layout_rect.height = self.layout_rows[-1].bottom - self.layout_rect.top
+            self.layout_rect.height = max(self.layout_rows[-1].bottom - self.layout_rect.top, self.view_rect.height)
 
     def get_cursor_y_pos(self):
         if self.cursor_text_row is not None:

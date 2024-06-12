@@ -73,6 +73,8 @@ class UITextEntryBox(UITextBox):
         self.blink_cursor_time = 0.4
         self.paste_text_enabled = True
 
+        self.text_box_rows = 0
+
         self.cursor_on = False
 
     def get_text(self) -> str:
@@ -123,6 +125,11 @@ class UITextEntryBox(UITextBox):
 
         if not self.alive():
             return
+
+        if self.text_box_rows != len(self.text_box_layout.layout_rows):
+            self.text_box_rows = len(self.text_box_layout.layout_rows)
+            self._align_all_text_rows()
+            self.redraw_from_chunks()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
             if self.blink_cursor_time_acc >= self.blink_cursor_time:
