@@ -1262,6 +1262,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.scroll_bar.scroll_position = (self.scroll_bar.start_percentage *
                                                    self.scroll_bar.scrollable_height)
             self.redraw_from_text_block()
+            self.link_hover_chunks = []
+            self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
     def on_locale_changed(self):
         self._reparse_and_rebuild()

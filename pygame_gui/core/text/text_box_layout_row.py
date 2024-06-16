@@ -68,14 +68,14 @@ class TextBoxLayoutRow(pygame.Rect):
 
         if item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = item.row_chunk_height
-            if self.layout.layout_rect.height != -1:
+            if not self.layout.dynamic_height:
                 self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                                   item.row_chunk_height)
                 self.line_spacing_height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  int(item.row_chunk_height * self.line_spacing))
+                                  int(round(item.row_chunk_height * self.line_spacing)))
             else:
                 self.height = int(item.row_chunk_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                self.line_spacing_height = int(item.row_chunk_height * self.line_spacing) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.line_spacing_height = int(round(item.row_chunk_height * self.line_spacing)) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
 
         if isinstance(item, TextLineChunkFTFont):

@@ -52,7 +52,7 @@ class TextBoxLayout:
         self.default_font = default_font_data["font"]
 
         self.allow_split_dashes = allow_split_dashes
-        self.last_row_height = int(14 * self.line_spacing)
+        self.last_row_height = int(round(14 * self.line_spacing))
 
         self.view_rect = view_rect
 
@@ -579,8 +579,11 @@ class TextBoxLayout:
         TODO: I expect we should have the arrow centering methods in here too.
         """
         total_row_height = 0
-        for row in self.layout_rows:
-            total_row_height += row.height
+        if len(self.layout_rows) > 1:
+            for row in self.layout_rows:
+                total_row_height += row.line_spacing_height
+        elif len(self.layout_rows) == 1:
+            total_row_height = self.layout_rows[0].height
 
         all_row_rect = pygame.Rect(0, 0, 1, total_row_height)
         all_row_rect.centery = self.layout_rect.centery
@@ -909,7 +912,7 @@ class TextBoxLayout:
                 row.finalise(self.finalised_surface)
             for floating_rect in self.floating_rects:
                 floating_rect.finalise(self.finalised_surface,
-                                       self.view_rect, 0, 0, 0)
+                                       self.view_rect, 0, 0, 0, 0)
 
     def _find_chunk_and_chunk_x(self, index: int):
         found_chunk = None
@@ -1426,7 +1429,7 @@ class TextBoxLayout:
 
     def fit_layout_rect_height_to_rows(self):
         if len(self.layout_rows) > 0:
-            self.layout_rect.height = self.layout_rows[-1].bottom - self.layout_rect.top
+            self.layout_rect.height = max(self.layout_rows[-1].bottom - self.layout_rect.top, self.view_rect.height)
 
     def get_cursor_y_pos(self):
         if self.cursor_text_row is not None:
