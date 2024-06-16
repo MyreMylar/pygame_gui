@@ -52,7 +52,7 @@ class TextBoxLayout:
         self.default_font = default_font_data["font"]
 
         self.allow_split_dashes = allow_split_dashes
-        self.last_row_height = int(14 * self.line_spacing)
+        self.last_row_height = int(round(14 * self.line_spacing))
 
         self.view_rect = view_rect
 
