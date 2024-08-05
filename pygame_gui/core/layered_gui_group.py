@@ -289,4 +289,4 @@ class LayeredGUIGroup(LayeredUpdates):
         """
         self.visible = [spr.blit_data
                         for spr in self._spritelist
-                        if spr.image is not None and spr.visible]
+                        if spr.image is not None and spr.visible][::-1]
