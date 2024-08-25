@@ -728,6 +728,9 @@ class UISelectionList(UIElement):
         children of list_and_scroll_bar_container, so it's visibility will propagate to them -
         there is no need to call their hide() methods separately.
         """
+        if not self.visible:
+            return
+
         super().hide()
         if self.list_and_scroll_bar_container is not None:
             self.list_and_scroll_bar_container.hide()

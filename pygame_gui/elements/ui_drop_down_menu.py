@@ -629,6 +629,9 @@ class UIClosedDropDownState:
         """
         Hide selected_option_button and open_button.
         """
+        if not self.visible:
+            return
+
         self.visible = False
 
         if self.open_button is not None:
@@ -1013,6 +1016,9 @@ class UIDropDownMenu(UIContainer):
         hide() method, which begins a transition of the UIDropDownMenu to the 'closed' state, and
         call the hide() method of the 'closed' state which hides all it's children widgets.
         """
+        if not self.visible:
+            return
+
         super().hide()
         if self.current_state is not None and self.menu_states is not None:
             if self.current_state == self.menu_states['expanded']:

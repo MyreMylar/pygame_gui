@@ -183,6 +183,9 @@ class UITabContainer(UIElement):
         In addition to the base UIElement.hide() - hide the _window_root_container which will
         propagate and hide all the children.
         """
+        if not self.visible:
+            return
+
         super().hide()
         if self._root_container is not None:
             self._root_container.hide()

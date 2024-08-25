@@ -299,6 +299,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         In addition to the base UIElement.hide() - call hide() of owned container - panel_container.
         """
+        if not self.visible:
+            return
+
         if self.panel_container is not None:
             self.panel_container.hide()
         super().hide()

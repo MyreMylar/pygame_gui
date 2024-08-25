@@ -609,6 +609,9 @@ class UIVerticalScrollBar(UIElement):
         In addition to the base UIElement.hide() - hide the self.button_container which will
         propagate and hide all the buttons.
         """
+        if not self.visible:
+            return
+
         super().hide()
         if self.button_container is not None:
             self.button_container.hide()

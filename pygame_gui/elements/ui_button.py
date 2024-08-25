@@ -804,9 +804,9 @@ class UIButton(UIElement):
         """
         In addition to the base UIElement.hide() - Change the hovered state to a normal state.
         """
-        super().hide()
-
-        self.on_unhovered()
+        if self.visible:
+            super().hide()
+            self.on_unhovered()
 
     def on_locale_changed(self):
         font = self.ui_theme.get_font(self.combined_element_ids)
