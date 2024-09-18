@@ -558,7 +558,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.redraw_from_text_block()
 
         scaled_mouse_pos = self.ui_manager.get_mouse_position()
-        if self.hovered:
+        if self.hovered and self.is_enabled:
             if (self.scroll_bar is None or
                     (self.scroll_bar is not None and
                      not self.scroll_bar.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]))):
