@@ -286,6 +286,9 @@ class UIColourChannelEditor(UIElement):
         In addition to the base UIElement.hide() - call hide() of the element_container
         - which will propagate to the sub-elements - label, entry and slider.
         """
+        if not self.visible:
+            return
+
         super().hide()
         if self.element_container is not None:
             self.element_container.hide()

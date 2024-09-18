@@ -1221,6 +1221,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         In addition to the base UIElement.hide() - call hide() of scroll_bar if it exists.
         """
+        if not self.visible:
+            return
+
         super().hide()
 
         if self.scroll_bar is not None:

@@ -567,6 +567,9 @@ class UIHorizontalSlider(UIElement):
         In addition to the base UIElement.hide() - hide the sliding button and hide
         the button_container which will propagate and hide the left and right buttons.
         """
+        if not self.visible:
+            return
+
         super().hide()
 
         if self.sliding_button is not None:

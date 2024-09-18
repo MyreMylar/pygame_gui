@@ -531,6 +531,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         it's visibility will propagate to them - there is no need to call their hide() methods
         separately.
         """
+        if not self.visible:
+            return
+
         if self._root_container is not None:
             self._root_container.hide()
         super().hide()
