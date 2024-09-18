@@ -77,6 +77,8 @@ class UITextEntryBox(UITextBox):
 
         self.cursor_on = False
 
+        self.should_redraw_from_text_block = False
+
     def get_text(self) -> str:
         """
         Gets the text in the entry box element.
@@ -100,7 +102,7 @@ class UITextEntryBox(UITextBox):
         self.cursor_on = False
         self.text_box_layout.turn_off_cursor()
         self.cursor_has_moved_recently = False
-        self.redraw_from_text_block()
+        self.should_redraw_from_text_block = True
 
     def focus(self):
         """
@@ -146,6 +148,10 @@ class UITextEntryBox(UITextBox):
                 self.blink_cursor_time_acc += time_delta
         else:
             self.cursor_blink_delay_after_moving_acc += time_delta
+
+        if self.should_redraw_from_text_block:
+            self.should_redraw_from_text_block = False
+            self.redraw_from_text_block()
 
     def _handle_cursor_visibility(self):
         self.cursor_blink_delay_after_moving_acc = 0.0

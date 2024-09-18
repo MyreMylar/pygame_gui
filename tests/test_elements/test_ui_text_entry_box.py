@@ -1793,8 +1793,10 @@ class TestUITextEntryBox:
         assert text_box.text_box_layout.plain_text == "Enter text here..."
 
         text_box.focus()
+        text_box.update(0.1)
         assert text_box.text_box_layout.plain_text == ""
         text_box.unfocus()
+        text_box.update(0.1)
         assert text_box.text_box_layout.plain_text == "Enter text here..."
 
 
