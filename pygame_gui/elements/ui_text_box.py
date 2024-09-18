@@ -1483,7 +1483,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         """
         super().unfocus()
         if self.placeholder_text is not None:
-            self.rebuild()
+            self.should_trigger_full_rebuild = True
+            self.full_rebuild_countdown = 0.0
 
     def focus(self):
         """
@@ -1492,7 +1493,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         super().focus()
         self.cursor_has_moved_recently = True
         if self.placeholder_text is not None:
-            self.rebuild()
+            self.should_trigger_full_rebuild = True
+            self.full_rebuild_countdown = 0.0
 
     def _process_edit_pos_move_key(self, event: Event) -> bool:
         """
