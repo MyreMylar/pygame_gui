@@ -428,7 +428,7 @@ class TextBoxLayoutRow(pygame.Rect):
         if (not found_chunk and scrolled_click_pos[0] >= self.right) or (letter_acc == self.letter_count):
             # if we have more than two rows check if we are on right of whole row and if row has space at the end.
             # If so stick the edit cursor before the space because this is how it works.
-            if num_rows > 1 and self.row_text_ends_with_a_space():
+            if num_rows > 1 and self.row_text_ends_with_a_single_space():
                 letter_acc -= 1
                 last_chunk = self.get_last_text_chunk()
                 if last_chunk is not None:
@@ -535,10 +535,18 @@ class TextBoxLayoutRow(pygame.Rect):
             empty_text_chunk = parser.create_styled_text_chunk('')
             self.items.insert(chunk_insert_index + 1, empty_text_chunk)
 
-    def row_text_ends_with_a_space(self):
+    @staticmethod
+    def string_ends_with_a_single_space(string_to_check: str) -> bool:
+        if string_to_check[-1] == " " and (
+                len(string_to_check) == 1 or string_to_check[-2] != " "
+        ):
+            return True
+        return False
+
+    def row_text_ends_with_a_single_space(self):
         for item in reversed(self.items):
             if isinstance(item, TextLineChunkFTFont):
-                if len(item.text) > 0 and item.text[-1] == " ":
+                if len(item.text) > 0 and TextBoxLayoutRow.string_ends_with_a_single_space(item.text):
                     return True
         return False
 
