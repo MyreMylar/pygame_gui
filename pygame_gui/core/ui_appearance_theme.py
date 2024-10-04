@@ -103,7 +103,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.need_to_rebuild_data_manually_changed = False
             return True
         return False
-    
+
     @staticmethod
     def _json_to_dict(json_data):
         if isinstance(json_data, dict):
