@@ -574,18 +574,19 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
         """
-        # set the default font as the final fall back
-        font = self.font_dict.get_default_font()
-
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ele_font_res:
                 if self._locale in self.ele_font_res[combined_element_id]:
-                    return self.ele_font_res[combined_element_id][self._locale].loaded_font
+                    font = self.ele_font_res[combined_element_id][self._locale].loaded_font
                 else:
-                    return self.ele_font_res[combined_element_id]['en'].loaded_font
+                    font = self.ele_font_res[combined_element_id]['en'].loaded_font
+                break
 
+        # set the default font as the final fall back
+        if font is None:
+            font = self.font_dict.get_default_font()
         return font
-
+        
     def get_misc_data(self, misc_data_id: str, combined_element_ids: List[str]) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
