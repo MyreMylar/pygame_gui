@@ -586,7 +586,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if font is None:
             font = self.font_dict.get_default_font()
         return font
-        
+
     def get_misc_data(self, misc_data_id: str, combined_element_ids: List[str]) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
