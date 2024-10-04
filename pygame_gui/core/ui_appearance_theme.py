@@ -574,6 +574,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
         """
+        font = None
+        
         for combined_element_id in combined_element_ids:
             if combined_element_id in self.ele_font_res:
                 if self._locale in self.ele_font_res[combined_element_id]:
