@@ -1452,10 +1452,11 @@ class TextBoxLayout:
                             row_above = self.layout_rows[i - 1]
                             cursor_index -= row_above.letter_count
                             row_above_end = row_above.letter_count
-                            if (row_above.row_text_ends_with_a_single_space() or
-                                    (len(row_above.items) > 0 and
-                                     isinstance(row_above.items[-1], LineBreakLayoutRect))):
-                                row_above_end = row_above.letter_count - 1
+                            space_count = row_above.row_text_count_final_whitespace()
+                            if space_count:
+                                row_above_end -= space_count
+                            if len(row_above.items) > 0 and isinstance(row_above.items[-1], LineBreakLayoutRect):
+                                row_above_end -= 1
                             cursor_index += min(last_cursor_horiz_index, row_above_end)
                             break
                         else:
@@ -1481,10 +1482,11 @@ class TextBoxLayout:
                             row_below = self.layout_rows[i + 1]
                             cursor_index += row.letter_count
                             row_below_end = row_below.letter_count
-                            if (row_below.row_text_ends_with_a_single_space() or
-                                    (len(row_below.items) > 0 and
-                                     isinstance(row_below.items[-1], LineBreakLayoutRect))):
-                                row_below_end = row_below.letter_count - 1
+                            space_count = row_below.row_text_count_final_whitespace()
+                            if space_count:
+                                row_below_end -= space_count
+                            if len(row_below.items) > 0 and isinstance(row_below.items[-1], LineBreakLayoutRect):
+                                row_below_end -= 1
                             cursor_index += min(last_cursor_horiz_index, row_below_end)
                             break
                         else:
