@@ -81,6 +81,8 @@ class UIHorizontalScrollBar(UIElement):
 
         self.drawable_shape = None
         self.shape = 'rectangle'
+        self.left_arrow_text = '◀'
+        self.right_arrow_text = '▶'
 
         self.background_rect = None  # type: Union[None, pygame.Rect]
 
@@ -179,7 +181,7 @@ class UIHorizontalScrollBar(UIElement):
                 self.left_button = UIButton(pygame.Rect((0, 0),
                                                         (self.arrow_button_width,
                                                          self.background_rect.height)),
-                                            '◀', self.ui_manager,
+                                            self.left_arrow_text, self.ui_manager,
                                             container=self.button_container,
                                             starting_height=1,
                                             parent_element=self,
@@ -195,7 +197,7 @@ class UIHorizontalScrollBar(UIElement):
                 self.right_button = UIButton(pygame.Rect((-self.arrow_button_width, 0),
                                                          (self.arrow_button_width,
                                                           self.background_rect.height)),
-                                             '▶', self.ui_manager,
+                                             self.right_arrow_text, self.ui_manager,
                                              container=self.button_container,
                                              starting_height=1,
                                              parent_element=self,

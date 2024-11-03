@@ -101,15 +101,18 @@
     {
         "prototype": "#no_frills_button"
     },
+    "horizontal_slider.@arrow_button":
+    {
+        "font": {
+            "name": "fira_code_symbols",
+            "size": "14"
+        }
+    },
     "horizontal_slider.#left_button":
     {
         "misc":
         {
             "text_horiz_alignment_method": "left_triangle"
-        },
-        "font": {
-            "name": "fira_code_symbols",
-            "size": "14"
         }
     },
     "horizontal_slider.#right_button":
@@ -117,10 +120,6 @@
         "misc":
         {
             "text_horiz_alignment_method": "right_triangle"
-        },
-        "font": {
-            "name": "fira_code_symbols",
-            "size": "14"
         }
     },
     "horizontal_slider.#sliding_button":

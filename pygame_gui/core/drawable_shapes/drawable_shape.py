@@ -494,7 +494,7 @@ class DrawableShape:
         containing_rect_when_text_built = self.containing_rect.copy()
         # Draw any text
         if 'text' in self.theming and 'font' in self.theming and self.theming['text'] is not None:
-            # we need two rectangles for the text. One is has actual area the
+            # we need two rectangles for the text. One has actual area the
             # text surface takes up, which may be larger than the displayed area,
             # and its position on the final surface. The other is the amount of
             # area of the text surface which we blit from, which may be much smaller
