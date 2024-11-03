@@ -86,8 +86,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
         else:
             self.container_margins = margins
 
-        container_rect = pygame.Rect(self.relative_rect.left,
-                                     self.relative_rect.top,
+        container_rect = pygame.Rect(self.relative_rect.left + self.container_margins['left'],
+                                     self.relative_rect.top + self.container_margins['top'],
                                      self.relative_rect.width - (self.container_margins['left'] +
                                                                  self.container_margins['right']),
                                      self.relative_rect.height - (self.container_margins['top'] +
