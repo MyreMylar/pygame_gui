@@ -758,8 +758,12 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param show_contents: whether to also show the contents of the window. Defaults to True.
         """
         super().show()
-        if self._window_root_container is not None:
-            self._window_root_container.show()
+        if self.title_bar is not None:
+            self.title_bar.show()
+        if self.close_window_button is not None:
+            self.close_window_button.show()
+        if self.window_element_container is not None:
+            self.window_element_container.show(show_contents)
 
     def hide(self, hide_contents: bool = True):
         """
@@ -772,8 +776,12 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             return
 
         super().hide()
-        if self._window_root_container is not None:
-            self._window_root_container.hide(hide_contents)
+        if self.title_bar is not None:
+            self.title_bar.hide()
+        if self.close_window_button is not None:
+            self.close_window_button.hide()
+        if self.window_element_container is not None:
+            self.window_element_container.hide(hide_contents)
 
     def get_relative_mouse_pos(self):
         """

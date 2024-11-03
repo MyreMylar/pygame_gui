@@ -523,8 +523,14 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         :param show_contents: whether to also show the contents of the container. Defaults to True.
         """
         super().show()
-        if self._root_container is not None:
-            self._root_container.show(show_contents)
+
+        if self.vert_scroll_bar is not None:
+            self.vert_scroll_bar.show()
+        if self.horiz_scroll_bar is not None:
+            self.horiz_scroll_bar.show()
+
+        if self._view_container is not None:
+            self._view_container.show(show_contents)
 
     def hide(self, hide_contents: bool = True):
         """
@@ -538,8 +544,13 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if not self.visible:
             return
 
-        if self._root_container is not None:
-            self._root_container.hide(hide_contents)
+        if self.vert_scroll_bar is not None:
+            self.vert_scroll_bar.hide()
+        if self.horiz_scroll_bar is not None:
+            self.horiz_scroll_bar.hide()
+
+        if self._view_container is not None:
+            self._view_container.hide(hide_contents)
         super().hide()
 
     def __iter__(self) -> Iterator[IUIElementInterface]:
