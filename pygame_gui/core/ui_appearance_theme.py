@@ -770,7 +770,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     self._load_element_font_data_from_theme(file_dict,
                                                             element_name)
 
-            if data_type == 'colours':
+            if data_type == 'colours' or data_type == 'colors':
                 self._load_element_colour_data_from_theme(data_type,
                                                           element_name,
                                                           element_theming)
@@ -1048,7 +1048,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param theme_dict: The data dictionary from the theming file to load data from.
         """
         for data_type in theme_dict['defaults']:
-            if data_type == 'colours':
+            if data_type == 'colours' or data_type == 'colors':
                 colours_dict = theme_dict['defaults'][data_type]
                 for colour_key in colours_dict:
                     colour = self._load_colour_or_gradient_from_theme(colours_dict,
