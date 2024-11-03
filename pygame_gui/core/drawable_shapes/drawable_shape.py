@@ -232,8 +232,10 @@ class DrawableShape:
                 text_width = self.text_box_layout.layout_rect.width
 
                 horiz_padding = 0
-                if 'text_horiz_alignment_padding' in self.theming:
-                    horiz_padding = self.theming['text_horiz_alignment_padding']
+                if 'text_horiz_alignment' in self.theming:
+                    if self.theming['text_horiz_alignment'] in ['left', 'right']:
+                        if 'text_horiz_alignment_padding' in self.theming:
+                            horiz_padding = self.theming['text_horiz_alignment_padding']
 
                 # As well as the text width we want to throw in the borders,
                 # shadows and any text padding
@@ -242,7 +244,7 @@ class DrawableShape:
                                (2 * self.border_width) +
                                self.rounded_corner_width_offsets[0] +
                                self.rounded_corner_width_offsets[1] +
-                               (2 * horiz_padding))
+                               horiz_padding)
 
                 self.text_view_rect.width = text_width
                 self.text_box_layout.view_rect.width = self.text_view_rect.width
@@ -252,8 +254,10 @@ class DrawableShape:
                 text_height = self.text_box_layout.layout_rect.height
 
                 vert_padding = 0
-                if 'text_vert_alignment_padding' in self.theming:
-                    vert_padding = self.theming['text_vert_alignment_padding']
+                if 'text_horiz_alignment' in self.theming:
+                    if self.theming['text_horiz_alignment'] in ['top', 'bottom']:
+                        if 'text_vert_alignment_padding' in self.theming:
+                            vert_padding = self.theming['text_vert_alignment_padding']
 
                 # As well as the text height we want to throw in the borders,
                 # shadows and any text padding
@@ -262,7 +266,7 @@ class DrawableShape:
                                 (2 * self.border_width) +
                                 self.rounded_corner_height_offsets[0] +
                                 self.rounded_corner_height_offsets[1] +
-                                (2 * vert_padding))
+                                vert_padding)
                 self.text_view_rect.height = text_height
                 self.text_box_layout.view_rect.height = self.text_view_rect.height
                 self.containing_rect.height = final_height
@@ -501,12 +505,16 @@ class DrawableShape:
             # than the total text area.
 
             horiz_padding = 0
-            if 'text_horiz_alignment_padding' in self.theming:
-                horiz_padding = self.theming['text_horiz_alignment_padding']
+            if 'text_horiz_alignment' in self.theming:
+                if self.theming['text_horiz_alignment'] in ['left', 'right']:
+                    if 'text_horiz_alignment_padding' in self.theming:
+                        horiz_padding = self.theming['text_horiz_alignment_padding']
 
             vert_padding = 0
-            if 'text_vert_alignment_padding' in self.theming:
-                vert_padding = self.theming['text_vert_alignment_padding']
+            if 'text_vert_alignment' in self.theming:
+                if self.theming['text_vert_alignment'] in ['top', 'bottom']:
+                    if 'text_vert_alignment_padding' in self.theming:
+                        vert_padding = self.theming['text_vert_alignment_padding']
 
             total_text_buffer = ((self.shadow_width * 2) +
                                  (self.border_width * 2) +
@@ -519,19 +527,25 @@ class DrawableShape:
                 self.text_view_rect.width = -1
             else:
                 self.text_view_rect.width = max(0, self.text_view_rect.width -
-                                                (total_text_buffer + (2 * horiz_padding)))
+                                                (total_text_buffer + horiz_padding))
 
             if self.dynamic_height:
                 self.text_view_rect.height = -1
             else:
                 self.text_view_rect.height = max(0, self.text_view_rect.height -
-                                                 (total_text_buffer + (2 * vert_padding)))
+                                                 (total_text_buffer + vert_padding))
 
             text_actual_area_rect = self.text_view_rect.copy()
             text_actual_area_rect.x = (self.shadow_width + self.border_width +
-                                       self.rounded_corner_width_offsets[0] + horiz_padding)
+                                       self.rounded_corner_width_offsets[0])
+            if 'text_horiz_alignment' in self.theming:
+                if self.theming['text_horiz_alignment'] in ['left']:
+                    text_actual_area_rect.x += horiz_padding
             text_actual_area_rect.y = (self.shadow_width + self.border_width +
-                                       self.rounded_corner_height_offsets[0] + vert_padding)
+                                       self.rounded_corner_height_offsets[0])
+            if 'text_vert_alignment' in self.theming:
+                if self.theming['text_vert_alignment'] in ['top']:
+                    text_actual_area_rect.y += vert_padding
 
             text_shadow_data = (0, 0, 0, pygame.Color('#10101070'), False)
             if 'text_shadow' in self.theming:
