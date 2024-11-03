@@ -557,7 +557,7 @@ class TextBoxLayoutRow(pygame.Rect):
                         inserted_text = True
                         break
 
-                    letter_acc += chunk.letter_count
+                letter_acc += chunk.letter_count
         if parser is None and not len(self.items):
             raise AttributeError("Trying to insert into empty text row with no Parser"
                                  " for style data - fix this later?")

@@ -1339,8 +1339,8 @@ class TextBoxLayout:
             row_index = bisect_left(self.row_lengths, text_box_index)
             if row_index >= len(self.layout_rows):
                 row_index = len(self.layout_rows) - 1
-            index_in_row = text_box_index - (self.row_lengths[row_index - 1]
-                                             if row_index != 0 else 0)
+            index_in_row = min(text_box_index - (self.row_lengths[row_index - 1]
+                                                 if row_index != 0 else 0), self.row_lengths[row_index])
             return self.layout_rows[row_index], index_in_row
 
         return None, 0
