@@ -37,7 +37,8 @@ class UIImage(UIElement):
                  anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
                  visible: int = 1,
                  *,
-                 starting_height: int = 1,):
+                 starting_height: int = 1,
+                 scale_func=pygame.transform.smoothscale):
 
         super().__init__(relative_rect, manager, container,
                          starting_height=starting_height,
@@ -50,7 +51,7 @@ class UIImage(UIElement):
 
         self.original_image = None
 
-        self.set_image(image_surface, image_is_alpha_premultiplied)
+        self.set_image(image_surface, image_is_alpha_premultiplied, scale_func)
         self.rebuild_from_changed_theme_data()
 
     def rebuild_from_changed_theme_data(self):
@@ -79,7 +80,8 @@ class UIImage(UIElement):
 
     def set_image(self,
                   new_image: Union[pygame.surface.Surface, None],
-                  image_is_alpha_premultiplied: bool = False) -> None:
+                  image_is_alpha_premultiplied: bool = False,
+                  scale_func = pygame.transform.smoothscale) -> None:
         """
         Allows users to change the image displayed on a UIImage element during run time, without recreating
         the element.
@@ -97,6 +99,6 @@ class UIImage(UIElement):
         if (image_surface.get_width() != self.rect.width or
                 image_surface.get_height() != self.rect.height):
             self.original_image = image_surface
-            self._set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
+            self._set_image(scale_func(self.original_image, self.rect.size))
         else:
             self._set_image(image_surface)
