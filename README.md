@@ -12,7 +12,7 @@ A GUI system for pygame CE.
 ## Requirements
 
  - Python 3.8+
- - Pygame Community Edition 2.4.0+
+ - Pygame Community Edition 2.5.2+
  - python-i18n (does localization to different languages)
 
 ## How to install
