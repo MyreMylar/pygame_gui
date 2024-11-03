@@ -222,6 +222,7 @@ class UIManager(IUIManagerInterface):
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             sprites_in_layer = self.ui_group.get_sprites_from_layer(layer)
+            sprites_in_layer.reverse()
             if not sorting_consumed_event:
                 windows_in_layer = [window for window in sprites_in_layer
                                     if 'window' in window.element_ids[-1]]
@@ -336,7 +337,9 @@ class UIManager(IUIManagerInterface):
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
-            for ui_element in self.ui_group.get_sprites_from_layer(layer):
+            layer_elements = self.ui_group.get_sprites_from_layer(layer)
+            layer_elements.reverse()
+            for ui_element in layer_elements:
                 if ui_element.visible:
                     # Only check hover for visible elements - ignore hidden elements
                     # we need to check hover even after already found what we are hovering,
