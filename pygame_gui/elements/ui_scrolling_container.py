@@ -524,6 +524,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         super().show()
 
+        self._root_container.show(show_contents=False)
         if self.vert_scroll_bar is not None:
             self.vert_scroll_bar.show()
         if self.horiz_scroll_bar is not None:
@@ -543,7 +544,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         if not self.visible:
             return
-
+        self._root_container.hide(hide_contents=False)
         if self.vert_scroll_bar is not None:
             self.vert_scroll_bar.hide()
         if self.horiz_scroll_bar is not None:

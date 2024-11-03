@@ -758,6 +758,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param show_contents: whether to also show the contents of the window. Defaults to True.
         """
         super().show()
+        self._window_root_container.show(show_contents=False)
         if self.title_bar is not None:
             self.title_bar.show()
         if self.close_window_button is not None:
@@ -776,6 +777,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             return
 
         super().hide()
+        self._window_root_container.hide(hide_contents=False)
         if self.title_bar is not None:
             self.title_bar.hide()
         if self.close_window_button is not None:
