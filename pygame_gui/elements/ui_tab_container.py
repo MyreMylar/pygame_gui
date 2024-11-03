@@ -170,25 +170,30 @@ class UITabContainer(UIElement):
         if not self.is_enabled:
             self._root_container.enable()
 
-    def show(self):
+    def show(self, show_contents: bool = True):
         """
         In addition to the base UIElement.show() - show the _window_root_container which will
         propagate and show all the children.
+
+        :param show_contents: whether to also show the contents of the tab container. Defaults to True.
+
         """
         super().show()
-        self._root_container.show()
+        self._root_container.show(show_contents)
 
-    def hide(self):
+    def hide(self, hide_contents: bool = True):
         """
         In addition to the base UIElement.hide() - hide the _window_root_container which will
         propagate and hide all the children.
+
+        :param hide_contents: whether to also hide the contents of the tab container. Defaults to True.
         """
         if not self.visible:
             return
 
         super().hide()
         if self._root_container is not None:
-            self._root_container.hide()
+            self._root_container.hide(hide_contents)
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """

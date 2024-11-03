@@ -513,29 +513,33 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             if self._root_container is not None:
                 self._root_container.enable()
 
-    def show(self):
+    def show(self, show_contents: bool = True):
         """
         In addition to the base UIElement.show() - call show() of owned container - _root_container.
         All other sub-elements (view_container, scrollbars) are children of _root_container, so
         it's visibility will propagate to them - there is no need to call their show() methods
         separately.
+
+        :param show_contents: whether to also show the contents of the container. Defaults to True.
         """
         super().show()
         if self._root_container is not None:
-            self._root_container.show()
+            self._root_container.show(show_contents)
 
-    def hide(self):
+    def hide(self, hide_contents: bool = True):
         """
         In addition to the base UIElement.hide() - call hide() of owned container - _root_container.
         All other sub-elements (view_container, scrollbars) are children of _root_container, so
         it's visibility will propagate to them - there is no need to call their hide() methods
         separately.
+
+        :param hide_contents: whether to also hide the contents of the container. Defaults to True.
         """
         if not self.visible:
             return
 
         if self._root_container is not None:
-            self._root_container.hide()
+            self._root_container.hide(hide_contents)
         super().hide()
 
     def __iter__(self) -> Iterator[IUIElementInterface]:

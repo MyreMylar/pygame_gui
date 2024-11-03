@@ -352,29 +352,35 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
             for element in self.elements:
                 element.enable()
 
-    def show(self):
+    def show(self, show_contents: bool = True):
         """
         Shows the container, which means the container will get drawn and will process events.
         Should also show all the children elements and containers.
         If the container was visible before - ignore.
+
+        :param show_contents: whether to also show the contents of the container. Defaults to True.
         """
         if not self.visible:
             self.visible = True
 
-            for element in self.elements:
-                if hasattr(element, 'show'):
-                    element.show()
+            if show_contents:
+                for element in self.elements:
+                    if hasattr(element, 'show'):
+                        element.show()
 
-    def hide(self):
+    def hide(self, hide_contents: bool = True):
         """
         Hides the container, which means the container will not get drawn and will not process
         events. Should also hide all the children elements and containers.
         If the container was hidden before - ignore.
+
+        :param hide_contents: whether to also hide the contents of the container. Defaults to True.
         """
         if self.visible:
-            for element in self.elements:
-                if hasattr(element, 'hide'):
-                    element.hide()
+            if hide_contents:
+                for element in self.elements:
+                    if hasattr(element, 'hide'):
+                        element.hide()
 
             self.visible = False
 
