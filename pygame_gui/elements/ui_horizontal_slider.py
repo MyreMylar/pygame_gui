@@ -65,6 +65,9 @@ class UIHorizontalSlider(UIElement):
         self.left_limit_position = 0.0
         self.starting_grab_x_difference = 0
 
+        self.left_arrow_text = '◀'
+        self.right_arrow_text = '▶'
+
         if (isinstance(start_value, int) and
                 isinstance(value_range[0], int) and
                 isinstance(value_range[1], int)):
@@ -181,7 +184,7 @@ class UIHorizontalSlider(UIElement):
                 self.left_button = UIButton(pygame.Rect((0, 0),
                                                         (self.arrow_button_width,
                                                          self.background_rect.height)),
-                                            '◀', self.ui_manager,
+                                            self.left_arrow_text, self.ui_manager,
                                             container=self.button_container,
                                             starting_height=1,
                                             parent_element=self,
@@ -197,7 +200,7 @@ class UIHorizontalSlider(UIElement):
                 self.right_button = UIButton(pygame.Rect((-self.arrow_button_width, 0),
                                                          (self.arrow_button_width,
                                                           self.background_rect.height)),
-                                             '▶', self.ui_manager,
+                                             self.right_arrow_text, self.ui_manager,
                                              container=self.button_container,
                                              starting_height=1,
                                              parent_element=self,

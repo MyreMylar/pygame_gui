@@ -91,6 +91,8 @@ class UIVerticalScrollBar(UIElement):
         self.bottom_button = None
         self.sliding_button = None
         self.enable_arrow_buttons = True
+        self.top_arrow_text = '▲'
+        self.bottom_arrow_text = '▼'
 
         self.rebuild_from_changed_theme_data()
 
@@ -175,7 +177,7 @@ class UIVerticalScrollBar(UIElement):
                 self.top_button = UIButton(pygame.Rect((0, 0),
                                                        (self.background_rect.width,
                                                         self.arrow_button_height)),
-                                           '▲', self.ui_manager,
+                                           self.top_arrow_text, self.ui_manager,
                                            container=self.button_container,
                                            starting_height=1,
                                            parent_element=self,
@@ -191,7 +193,7 @@ class UIVerticalScrollBar(UIElement):
                 self.bottom_button = UIButton(pygame.Rect((0, -self.arrow_button_height),
                                                           (self.background_rect.width,
                                                            self.arrow_button_height)),
-                                              '▼', self.ui_manager,
+                                              self.bottom_arrow_text, self.ui_manager,
                                               container=self.button_container,
                                               starting_height=1,
                                               parent_element=self,
