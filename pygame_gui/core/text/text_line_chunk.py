@@ -110,6 +110,9 @@ class TextLineChunkFTFont(TextLayoutRect):
     def __repr__(self):
         return "< '" + self.text + "' " + super().__repr__() + " >"
 
+    def __str__(self):
+        return "< '" + self.text + "' " + super().__str__() + " >"
+
     def _clamp_dimensions_to_maximums(self, text_width, text_height):
         if self.max_dimensions is not None:
             if not (self.max_dimensions[0] == -1 or self.max_dimensions[1] == -1):
