@@ -17,6 +17,7 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def __init__(self, row_start_x, row_start_y, row_index, line_spacing, layout):
         super().__init__(row_start_x, row_start_y, 0, 0)
+        self.row_start_x = row_start_x
         self.line_spacing = line_spacing
         self.row_index = row_index
         self.layout = layout
@@ -43,6 +44,9 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def __hash__(self):
         return self.row_index
+
+    def __repr__(self):
+        return "[" + str([item for item in self.items]) + "]"
 
     def at_start(self):
         """
@@ -90,6 +94,46 @@ class TextBoxLayoutRow(pygame.Rect):
             self.fall_back_font = item.font
 
         self.letter_count += item.letter_count
+
+    def insert_new_item_at_start(self, new_item: TextLayoutRect):
+        """
+        Insert a new item to the row at the start
+
+        :param new_item: The new item to add to the text row
+        """
+        # rejig existing items in row to accommodate the new one
+        new_rhs = self.row_start_x + new_item.width
+        for old_item in self.items:
+            old_item.left = new_rhs
+            new_rhs = old_item.right
+        # add the new item at the beginning
+        self.items.insert(0, new_item)
+        self.width += new_item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+
+        if new_item.row_chunk_height > self.text_chunk_height:
+            self.text_chunk_height = new_item.row_chunk_height
+            if not self.layout.dynamic_height:
+                self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                                  new_item.row_chunk_height)
+                self.line_spacing_height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                                  int(round(new_item.row_chunk_height * self.line_spacing)))
+            else:
+                self.height = int(item.row_chunk_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.line_spacing_height = int(round(item.row_chunk_height * self.line_spacing)) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
+
+        if isinstance(new_item, TextLineChunkFTFont):
+            if new_item.y_origin > self.y_origin:
+                self.y_origin = new_item.y_origin
+
+            for origin_item in self.items:
+                if isinstance(origin_item, TextLineChunkFTFont):
+                    origin_item.origin_row_y_adjust = self.y_origin - origin_item.y_origin
+                    origin_item.top = origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
+
+            self.fall_back_font = new_item.font
+
+        self.letter_count += new_item.letter_count
 
     def rewind_row(self, layout_rect_queue):
         """
@@ -503,21 +547,28 @@ class TextBoxLayoutRow(pygame.Rect):
         :param parser: An optional HTML parser for text styling data
         """
         letter_acc = 0
+        inserted_text = False
         if len(self.items) > 0:
             for chunk in self.items:
-                if isinstance(chunk, TextLineChunkFTFont):
-                    if letter_row_index <= letter_acc + chunk.letter_count:
+                if letter_row_index <= letter_acc + chunk.letter_count:
+                    if isinstance(chunk, TextLineChunkFTFont):
                         chunk_index = letter_row_index - letter_acc
                         chunk.insert_text(text, chunk_index)
+                        inserted_text = True
                         break
 
-                letter_acc += chunk.letter_count
-        elif parser is not None:
-            text_chunk = parser.create_styled_text_chunk(text)
-            self.add_item(text_chunk)
-        else:
+                    letter_acc += chunk.letter_count
+        if parser is None and not len(self.items):
             raise AttributeError("Trying to insert into empty text row with no Parser"
                                  " for style data - fix this later?")
+        if not inserted_text and letter_row_index == 0:
+            # have not managed to insert text into existing text chunk, create a new one.
+            text_chunk = parser.create_styled_text_chunk(text)
+            self.insert_new_item_at_start(text_chunk)
+            inserted_text = True
+
+        if not inserted_text:
+            raise RuntimeError("Failed to insert text at index: %d", letter_row_index)
 
     def insert_linebreak_after_chunk(self, chunk_to_insert_after: Union[TextLineChunkFTFont, LineBreakLayoutRect], parser: HTMLParser):
         if len(self.items) > 0:
