@@ -654,7 +654,10 @@ class DrawableShape:
     def apply_active_text_changes(self):
         """
         Updates the shape surface with any changes to the text surface. Useful when we've made
-        small edits to the text surface
+        small edits to the text surface.
+
+        This may be bugged.
+
         """
         if self.text_box_layout is not None:
             for state_id, state in self.states.items():
@@ -684,7 +687,10 @@ class DrawableShape:
         """
         self.text_box_layout.set_alpha(alpha)
         self.redraw_state(self.active_state.state_id, add_text=False)
-        self.finalise_text(self.active_state.state_id, only_text_changed=True)
+        self.finalise_text(self.active_state.state_id,
+                           self.active_state.state_id + "_text",
+                           self.active_state.state_id + '_text_shadow',
+                           only_text_changed=False)
 
     def redraw_active_state_no_text(self):
         """
@@ -699,7 +705,10 @@ class DrawableShape:
         to lose by recreating the text from scratch.
         """
         self.redraw_state(self.active_state.state_id, add_text=False)
-        self.finalise_text(self.active_state.state_id, only_text_changed=True)
+        self.finalise_text(self.active_state.state_id,
+                           self.active_state.state_id + "_text",
+                           self.active_state.state_id + '_text_shadow',
+                           only_text_changed=False)
 
     def insert_text(self, text: str, layout_index: int, parser: Optional[HTMLParser] = None):
         """
@@ -722,7 +731,7 @@ class DrawableShape:
         """
         if self.text_box_layout is not None:
             self.text_box_layout.toggle_cursor()
-            self.apply_active_text_changes()
+            self.finalise_text_onto_active_state()
             self.active_state.has_fresh_surface = True
 
     def redraw_state(self, state_str: str, add_text: bool = True):
