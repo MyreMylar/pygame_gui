@@ -356,7 +356,6 @@ class UITextEntryLine(UIElement):
             if self.drawable_shape is not None:
                 self.drawable_shape.text_box_layout.set_cursor_position(self.edit_position)
                 self.drawable_shape.toggle_text_cursor()
-                self.drawable_shape.apply_active_text_changes()
 
         if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
             if self.blink_cursor_time_acc >= self.blink_cursor_time:
