@@ -76,6 +76,7 @@ class UITextEntryBox(UITextBox):
         self.text_box_rows = 0
 
         self.cursor_on = False
+        self.has_edit_cursor = True
 
         self.should_redraw_from_text_block = False
 

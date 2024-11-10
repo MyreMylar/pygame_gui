@@ -440,7 +440,8 @@ class UIForm(UIScrollingContainer):
                          parent_element=parent_element,
                          object_id=object_id,
                          anchors=anchors,
-                         visible=visible)
+                         visible=visible,
+                         should_grow_automatically=True)
 
         self._create_valid_ids(container=container,
                                parent_element=parent_element,
