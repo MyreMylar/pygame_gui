@@ -202,6 +202,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.copy_text_enabled = True
         self.paste_text_enabled = False
 
+        self.has_edit_cursor = False
+
         self.rebuild_from_changed_theme_data()
 
     @property
@@ -461,7 +463,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.edit_position = self.select_range[1]
                 self.cursor_has_moved_recently = True
 
-        if self.cursor_has_moved_recently:
+        if self.cursor_has_moved_recently and self.has_edit_cursor:
             self.cursor_has_moved_recently = False
 
             self.text_box_layout.set_cursor_position(self.edit_position)
