@@ -436,7 +436,7 @@ class UIHorizontalScrollBar(UIElement):
 
         """
         self.visible_percentage = max(0.0, min(1.0, percentage))
-        if 1.0 - self.start_percentage != self.visible_percentage:
+        if 1.0 - self.start_percentage < self.visible_percentage:
             self.start_percentage = 1.0 - self.visible_percentage
 
         self.redraw_scrollbar()

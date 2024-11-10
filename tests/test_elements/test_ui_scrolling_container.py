@@ -384,7 +384,8 @@ class TestUIScrollingContainer:
 
         container = UIScrollingContainer(relative_rect=pygame.Rect(100, 100, 200, 100),
                                          manager=manager,
-                                         visible=0)
+                                         visible=0,
+                                         should_grow_automatically=True)
         button_1 = UIButton(relative_rect=pygame.Rect(300, 100, 150, 30),
                             text="Test Button",
                             tool_tip_text="This is a test of the button's tool tip functionality.",
