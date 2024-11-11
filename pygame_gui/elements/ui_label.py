@@ -64,7 +64,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
                          object_id=object_id,
                          element_id=['label'])
 
-        self.dynamic_dimensions_orig_top_left = relative_rect.topleft
+        self.dynamic_dimensions_orig_top_left = rel_rect.topleft
 
         self.text = text
         self.text_kwargs = {}
