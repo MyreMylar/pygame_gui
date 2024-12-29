@@ -79,6 +79,7 @@ class UIElement(GUISprite, IUIElementInterface):
         # Themed parameters
         self.shadow_width = None  # type: Union[None, int]
         self.border_width = None  # type: Union[None, int]
+        self.border_overlap = None  # type: Union[None, int]
         self.shape_corner_radius: Optional[List[int]] = None
 
         self.tool_tip_text = None
@@ -113,6 +114,7 @@ class UIElement(GUISprite, IUIElementInterface):
             # need to expand our rect by the shadow size and adjust position by it as well.
             self._check_shape_theming_changed(defaults={'border_width': 1,
                                                         'shadow_width': 2,
+                                                        'border_overlap': 1,
                                                         'shape_corner_radius': [2, 2, 2, 2]})
             self.relative_rect.width += self.shadow_width * 2
             self.relative_rect.height += self.shadow_width * 2
@@ -1306,6 +1308,9 @@ class UIElement(GUISprite, IUIElementInterface):
             has_any_changed = True
 
         if self._check_misc_theme_data_changed('shadow_width', defaults['shadow_width'], int):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed('border_overlap', defaults['border_overlap'], int):
             has_any_changed = True
 
         # corner radius

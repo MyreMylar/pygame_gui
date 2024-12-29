@@ -84,7 +84,8 @@ class UIExpandedDropDownState:
                               'normal_border': self.drop_down_menu_ui.border_colour,
                               'border_width': self.drop_down_menu_ui.border_width,
                               'shadow_width': self.drop_down_menu_ui.shadow_width,
-                              'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
+                              'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius,
+                              'border_overlap': self.drop_down_menu_ui.border_overlap}
 
         shape_rect = self.drop_down_menu_ui.relative_rect
         if self.drop_down_menu_ui.shape == 'rectangle':
@@ -457,7 +458,8 @@ class UIClosedDropDownState:
                               'disabled_border': self.drop_down_menu_ui.disabled_border_colour,
                               'border_width': self.drop_down_menu_ui.border_width,
                               'shadow_width': self.drop_down_menu_ui.shadow_width,
-                              'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius}
+                              'shape_corner_radius': self.drop_down_menu_ui.shape_corner_radius,
+                              'border_overlap': self.drop_down_menu_ui.border_overlap}
 
         if self.drop_down_menu_ui.shape == 'rectangle':
             self.drop_down_menu_ui.drawable_shape = RectDrawableShape(self.drop_down_menu_ui.rect,
@@ -888,6 +890,7 @@ class UIDropDownMenu(UIContainer):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
+                                                       'border_overlap': 1,
                                                        'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 

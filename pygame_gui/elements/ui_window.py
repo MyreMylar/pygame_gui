@@ -516,7 +516,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                               'normal_border': self.border_colour,
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius}
+                              'shape_corner_radius': self.shape_corner_radius,
+                              'border_overlap': self.border_overlap}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -616,6 +617,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 15,
+                                                       'border_overlap': 1,
                                                        'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 

@@ -172,6 +172,9 @@ class EllipseDrawableShape(DrawableShape):
             text_colour_state_str = state_str + '_text'
             text_shadow_colour_state_str = state_str + '_text_shadow'
             image_state_str = state_str + '_image'
+            border_overlap = 0
+            if 'border_overlap' in self.theming:
+                border_overlap = self.theming['border_overlap']
 
             found_shape = None
             shape_id = None
@@ -214,25 +217,25 @@ class EllipseDrawableShape(DrawableShape):
                     if isinstance(self.theming[border_colour_state_str], ColourGradient):
                         shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                             self.border_rect,
-                                                                            0, aa_amount=aa_amount,
+                                                                            border_overlap, aa_amount=aa_amount,
                                                                             clear=False)
                         self.theming[border_colour_state_str].apply_gradient_to_surface(shape_surface)
                     else:
                         shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                             self.border_rect,
-                                                                            0, aa_amount=aa_amount,
+                                                                            border_overlap, aa_amount=aa_amount,
                                                                             clear=False)
                         apply_colour_to_surface(self.theming[border_colour_state_str],
                                                 shape_surface)
                     basic_blit(bab_surface, shape_surface, self.border_rect)
                 if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.background_rect, 1,
+                                                                        self.background_rect, border_overlap,
                                                                         aa_amount=aa_amount)
                     self.theming[bg_colour_state_str].apply_gradient_to_surface(shape_surface)
                 else:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
-                                                                        self.background_rect, 1,
+                                                                        self.background_rect, border_overlap,
                                                                         aa_amount=aa_amount)
                     apply_colour_to_surface(self.theming[bg_colour_state_str], shape_surface)
 

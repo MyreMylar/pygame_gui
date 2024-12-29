@@ -360,7 +360,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                               'border_width': self.border_width,
                               'shadow_width': self.shadow_width,
                               'shape_corner_radius': self.shape_corner_radius,
-                              'text_cursor_colour': self.text_cursor_colour}
+                              'text_cursor_colour': self.text_cursor_colour,
+                              'border_overlap': self.border_overlap}
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
@@ -1055,6 +1056,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
+                                                       'border_overlap': 1,
                                                        'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 

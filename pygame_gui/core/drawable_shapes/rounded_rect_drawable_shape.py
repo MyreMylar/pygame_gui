@@ -330,6 +330,9 @@ class RoundedRectangleShape(DrawableShape):
             text_shadow_colour_state_str = state_str + '_text_shadow'
             bg_col = self.theming[state_str + '_bg']
             border_col = self.theming[state_str + '_border']
+            border_overlap = 0
+            if 'border_overlap' in self.theming:
+                border_overlap = self.theming['border_overlap']
 
             found_shape = None
             shape_id = None
@@ -378,7 +381,7 @@ class RoundedRectangleShape(DrawableShape):
                 if self.border_width > 0:
                     shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                         self.border_rect,
-                                                                        0,
+                                                                        border_overlap,
                                                                         self.shape_corner_radius,
                                                                         aa_amount=aa_amount,
                                                                         clear=False)
@@ -391,7 +394,7 @@ class RoundedRectangleShape(DrawableShape):
 
                 shape_surface = self.clear_and_create_shape_surface(bab_surface,
                                                                     self.background_rect,
-                                                                    0,
+                                                                    border_overlap,
                                                                     bg_corner_radii,
                                                                     aa_amount=aa_amount)
 
@@ -545,7 +548,8 @@ class RoundedRectangleShape(DrawableShape):
                 self.temp_subtractive_shape = pygame.surface.Surface(subtract_size,
                                                                      flags=pygame.SRCALPHA,
                                                                      depth=32)
-                self.temp_subtractive_shape.fill(pygame.Color('#00000000'))
+                clear_colour = '#00000000'
+                self.temp_subtractive_shape.fill(pygame.Color(clear_colour))
                 RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radii,
                                                                         self.temp_subtractive_shape,
                                                                         int(aa_amount / 2))

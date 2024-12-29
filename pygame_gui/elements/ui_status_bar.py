@@ -181,7 +181,8 @@ class UIStatusBar(UIElement):
                               'shape_corner_radius': self.shape_corner_radius,
                               'filled_bar': self.bar_filled_colour,
                               'filled_bar_width_percentage': self.percent_full,
-                              'follow_sprite_offset': self.follow_sprite_offset}
+                              'follow_sprite_offset': self.follow_sprite_offset,
+                              'border_overlap': self.border_overlap}
 
         text = self.status_text()
         if text:
@@ -232,6 +233,7 @@ class UIStatusBar(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
+                                                       'border_overlap': 1,
                                                        'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
