@@ -623,6 +623,7 @@ class UIButton(UIElement):
 
         if self._check_shape_theming_changed(defaults={'border_width': 1,
                                                        'shadow_width': 2,
+                                                       'border_overlap': 1,
                                                        'shape_corner_radius': [2, 2, 2, 2]}):
             has_any_changed = True
 
@@ -747,7 +748,8 @@ class UIButton(UIElement):
                               'text_horiz_alignment_method': self.text_horiz_alignment_method,
                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
                               'shape_corner_radius': self.shape_corner_radius,
-                              'transitions': self.state_transitions}
+                              'transitions': self.state_transitions,
+                              'border_overlap': self.border_overlap}
 
         drawable_shape_rect = self.rect.copy()
         if self.dynamic_width:

@@ -154,7 +154,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
                               'text_horiz_alignment': self.text_horiz_alignment,
                               'text_vert_alignment': self.text_vert_alignment,
                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
-                              'text_vert_alignment_padding': self.text_vert_alignment_padding}
+                              'text_vert_alignment_padding': self.text_vert_alignment_padding,
+                              'border_overlap': self.border_overlap}
 
         drawable_shape_rect = self.rect.copy()
         if self.dynamic_width:
