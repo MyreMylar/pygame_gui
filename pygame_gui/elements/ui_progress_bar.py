@@ -47,6 +47,11 @@ class UIProgressBar(UIStatusBar):
 
     @property
     def progress_percentage(self):
+        """
+        Get the current percentage progress of the bar from 0.0 to 1.0
+
+        :return: a float from 0.0 to 1.0
+        """
         return self.current_progress / self.maximum_progress
 
     def status_text(self):
@@ -54,6 +59,11 @@ class UIProgressBar(UIStatusBar):
         return f"{self.current_progress:0.1f}/{self.maximum_progress:0.1f}"
 
     def set_current_progress(self, progress: float):
+        """
+        Set the current percentage progress of the bar
+
+        :param progress: a float from 0.0 to 100.0
+        """
         # Now that we subclass UIStatusBar, set_current_progress() and self.current_progress are mostly here for backward compatibility.
         self.current_progress = progress
 
