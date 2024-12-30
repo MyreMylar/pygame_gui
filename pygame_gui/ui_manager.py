@@ -361,14 +361,19 @@ class UIManager(IUIManagerInterface):
 
     def draw_ui(self, window_surface: pygame.surface.Surface):
         """
-        Draws all the UI elements on the screen. Generally you want this to be after the rest of
-        your game sprites have been drawn.
+        Draws all the UI elements on to a surface passed in, usually an opaque surface the size of the screen or window.
+        Generally you want this to be after the rest of your game sprites have been drawn.
 
         If you want to do something particularly unusual with drawing you may have to write your
         own UI manager.
 
         :param window_surface: The screen or window surface on which we are going to draw all of
-         our UI Elements.
+         our UI Elements. As pygame_gui uses premultiplied alpha, if the surface passed in is
+         transparent or semi transparent then it should use premultiplied alpha as well and be
+         blitted afterward using the BLEND_PREMULTIPLIED special_flag.
+
+         You can read more about premultiplied alpha in this short tutorial:
+         https://pyga.me/docs/tutorials/en/premultiplied-alpha.html
 
         """
         self.ui_group.draw(window_surface)

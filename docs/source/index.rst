@@ -21,6 +21,9 @@ Features
 
  - Support for localizing your GUI into different languages.
 
+ - Uses premultiplied alpha blending for improved clarity and accuracy with semi-transparent pixels and improved
+   performance.
+
  - As closely respecting of the pygame way of doing things as possible.
 
 
