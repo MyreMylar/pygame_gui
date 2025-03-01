@@ -2,8 +2,11 @@ from typing import List, Dict, Optional, Union
 
 import pygame
 
-from pygame_gui.core.interfaces import (IContainerLikeInterface,
-                                        IUIManagerInterface, IUIElementInterface)
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
@@ -31,31 +34,40 @@ class UITabContainer(UIElement):
                     override this.
     """
 
-    def __init__(self, relative_rect: RectLike,
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 *,
-                 starting_height: int = 1,
-                 parent_element: Optional[IUIElementInterface] = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
-                 visible: int = 1):
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        *,
+        starting_height: int = 1,
+        parent_element: Optional[IUIElementInterface] = None,
+        object_id: Union[ObjectID, str, None] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        visible: int = 1,
+    ):
         self._root_container = None
-        super().__init__(relative_rect, manager, container,
-                         starting_height=starting_height,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['tab_container'])
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            starting_height=starting_height,
+            layer_thickness=1,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=["tab_container"],
+        )
 
-        self._root_container = UIContainer(relative_rect=relative_rect,
-                                           manager=manager,
-                                           starting_height=starting_height,
-                                           container=container,
-                                           anchors=anchors,
-                                           visible=self.visible)
+        self._root_container = UIContainer(
+            relative_rect=relative_rect,
+            manager=manager,
+            starting_height=starting_height,
+            container=container,
+            anchors=anchors,
+            visible=self.visible,
+        )
 
         self.tabs: List[Dict] = []
         self.current_container_index: Optional[int] = None
@@ -87,12 +99,22 @@ class UITabContainer(UIElement):
             for tab in self.tabs:
                 furthest_right += tab["button"].rect.width
         button_rect = pygame.Rect(furthest_right, 0, -1, self.button_height)
-        button = UIButton(button_rect, title_text, manager=self.ui_manager, container=self._root_container,
-                          parent_element=self, object_id=ObjectID(title_object_id, '@tab_title_button'),
-                          max_dynamic_width=max_button_width)
+        button = UIButton(
+            button_rect,
+            title_text,
+            manager=self.ui_manager,
+            container=self._root_container,
+            parent_element=self,
+            object_id=ObjectID(title_object_id, "@tab_title_button"),
+            max_dynamic_width=max_button_width,
+        )
         container_rect = self._calculate_container_rect_by_layout()
-        container = UIPanel(container_rect, manager=self.ui_manager,
-                            container=self._root_container, parent_element=self)
+        container = UIPanel(
+            container_rect,
+            manager=self.ui_manager,
+            container=self._root_container,
+            parent_element=self,
+        )
         self.tabs.append({"text": title_text, "button": button, "container": container})
         tab_id = self.tab_count - 1
         if self.current_container_index is None:
@@ -143,8 +165,12 @@ class UITabContainer(UIElement):
         return button_width
 
     def _calculate_container_rect_by_layout(self) -> pygame.Rect:
-        return pygame.Rect(0, self.button_height, self._root_container.rect.width,
-                           self.rect.height - self.button_height)
+        return pygame.Rect(
+            0,
+            self.button_height,
+            self._root_container.rect.width,
+            self.rect.height - self.button_height,
+        )
 
     def disable(self):
         """
@@ -261,7 +287,9 @@ class UITabContainer(UIElement):
         self._root_container.kill()
         super().kill()
 
-    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+    def set_anchors(
+        self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]
+    ) -> None:
         super().set_anchors(anchors)
         if self._root_container is not None:
             self._root_container.set_anchors(anchors)

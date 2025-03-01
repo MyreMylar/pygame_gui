@@ -23,27 +23,36 @@ class UIProgressBar(UIStatusBar):
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
-    element_id = 'progress_bar'
 
-    def __init__(self,
-                 relative_rect: RectLike,
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str, ]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1):
+    element_id = "progress_bar"
 
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[
+            Union[
+                ObjectID,
+                str,
+            ]
+        ] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        visible: int = 1,
+    ):
         self.current_progress = 0.0
         self.maximum_progress = 100.0
 
-        super().__init__(relative_rect=relative_rect,
-                         manager=manager,
-                         container=container,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         anchors=anchors,
-                         visible=visible)
+        super().__init__(
+            relative_rect=relative_rect,
+            manager=manager,
+            container=container,
+            parent_element=parent_element,
+            object_id=object_id,
+            anchors=anchors,
+            visible=visible,
+        )
 
     @property
     def progress_percentage(self):
@@ -55,7 +64,7 @@ class UIProgressBar(UIStatusBar):
         return self.current_progress / self.maximum_progress
 
     def status_text(self):
-        """ Subclass and override this method to change what text is displayed, or to suppress the text. """
+        """Subclass and override this method to change what text is displayed, or to suppress the text."""
         return f"{self.current_progress:0.1f}/{self.maximum_progress:0.1f}"
 
     def set_current_progress(self, progress: float):

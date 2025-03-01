@@ -11,16 +11,18 @@ from pygame_gui.core.resource_loaders import BlockingThreadedResourceLoader
 from pygame_gui.core.resource_loaders import IncrementalThreadedResourceLoader
 from pygame_gui.core.text import TextBoxLayout
 
-__all__ = ['UIAppearanceTheme',
-           'UIContainer',
-           'UIElement',
-           'ObjectID',
-           'UIFontDictionary',
-           'ShadowGenerator',
-           'UIWindowStack',
-           'IContainerLikeInterface',
-           'IWindowInterface',
-           'ColourGradient',
-           'BlockingThreadedResourceLoader',
-           'IncrementalThreadedResourceLoader',
-           'TextBoxLayout']
+__all__ = [
+    "UIAppearanceTheme",
+    "UIContainer",
+    "UIElement",
+    "ObjectID",
+    "UIFontDictionary",
+    "ShadowGenerator",
+    "UIWindowStack",
+    "IContainerLikeInterface",
+    "IWindowInterface",
+    "ColourGradient",
+    "BlockingThreadedResourceLoader",
+    "IncrementalThreadedResourceLoader",
+    "TextBoxLayout",
+]

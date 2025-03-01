@@ -13,8 +13,11 @@ class IColourGradientInterface(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def apply_gradient_to_surface(self, input_surface: pygame.surface.Surface,
-                                  rect: Union[pygame.Rect, None] = None):
+    def apply_gradient_to_surface(
+        self,
+        input_surface: pygame.surface.Surface,
+        rect: Union[pygame.Rect, None] = None,
+    ):
         """
         Applies this gradient to a specified input surface using blending multiplication.
         As a result this method works best when the input surface is a mostly white, stencil shape

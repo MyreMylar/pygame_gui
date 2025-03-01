@@ -7,7 +7,7 @@ parse a string that may be a colour or gradient into its respective value - **is
 string represents a valid pygame Color - **is_valid_gradient_string**: Check if a string represents a valid
 pygame_gui.core.colour_gradient.ColourGradient - **parse_colour_string**: Parse a string into a pygame Color -
 **parse_gradient_string**: Parse a string into a pygame_gui.core.colour_gradient.ColourGradient
-        
+
     The documentation for what counts as a 'Valid' colour and gradient string can be found in the Theme Guide of the
     pygame_gui documentation at https://pygame-gui.readthedocs.io/en/v_065/theme_guide.html
 
@@ -28,7 +28,18 @@ representations can be easily added without much bloat or *magic*
         are inside of parentheses, brackets, or curly braces (like "rgb(20, 20, 20)")"""
 
 import pygame
-from typing import Callable, Union, Iterable, TypeVar, Optional, List, Tuple, Set, Dict, TypedDict
+from typing import (
+    Callable,
+    Union,
+    Iterable,
+    TypeVar,
+    Optional,
+    List,
+    Tuple,
+    Set,
+    Dict,
+    TypedDict,
+)
 
 import enum
 from pygame_gui.core.colour_gradient import ColourGradient
@@ -38,6 +49,7 @@ from pygame_gui._constants import _namedColours
 
 class NumParserType(enum.Enum):
     """Enum for the supported value types in colour strings"""
+
     INT = "INT"
     FLOAT = "FLOAT"
     PERCENTAGE = "PERCENTAGE"
@@ -114,23 +126,46 @@ class ColourValueParserData(TypedDict):
 
 
 _valueParsers: Dict[NumParserType, ColourValueParserData] = {
-    NumParserType.PERCENTAGE: {"validator": is_percentage_string, "parser": parse_percentage_string},
+    NumParserType.PERCENTAGE: {
+        "validator": is_percentage_string,
+        "parser": parse_percentage_string,
+    },
     NumParserType.U8: {"validator": is_u8_string, "parser": parse_u8_string},
-    NumParserType.DEGREE: {"validator": is_degree_string, "parser": parse_degree_string},
-    NumParserType.FLOAT: {"validator": is_float_str, "parser": lambda string: float(string)},
-    NumParserType.INT: {"validator": is_int_str, "parser": lambda string: int(string)}
+    NumParserType.DEGREE: {
+        "validator": is_degree_string,
+        "parser": parse_degree_string,
+    },
+    NumParserType.FLOAT: {
+        "validator": is_float_str,
+        "parser": lambda string: float(string),
+    },
+    NumParserType.INT: {"validator": is_int_str, "parser": lambda string: int(string)},
 }
 """A mapping for each NumParserType to its corresponding validator and parser for strings of that type's 
 specification"""
 
 _colourModelSchemas: Dict[str, List[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
-    "hsla": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "hsla": [
+        NumParserType.DEGREE,
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+    ],
     "hsv": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
-    "hsva": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "hsva": [
+        NumParserType.DEGREE,
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+    ],
     "rgb": [NumParserType.U8, NumParserType.U8, NumParserType.U8],
     "rgba": [NumParserType.U8, NumParserType.U8, NumParserType.U8, NumParserType.U8],
-    "cmy": [NumParserType.PERCENTAGE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
+    "cmy": [
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+        NumParserType.PERCENTAGE,
+    ],
 }
 """Mapping for each supported colour model to the values that they take in"""
 
@@ -151,10 +186,12 @@ def validate_colour_model(strdata: str, name: str, types: List[NumParserType]) -
     :rtype: bool
     """
 
-    if strdata.lower().startswith(f'{name}(') and strdata.endswith(")"):
-        component_strings = [component.strip() for component in strdata[(len(name) + 1):-1].split(",")]
+    if strdata.lower().startswith(f"{name}(") and strdata.endswith(")"):
+        component_strings = [
+            component.strip() for component in strdata[(len(name) + 1) : -1].split(",")
+        ]
         if len(types) == len(component_strings) and all(
-                valueParserType in _valueParsers for valueParserType in types
+            valueParserType in _valueParsers for valueParserType in types
         ):
             return all(
                 _valueParsers[types[i]]["validator"](component_strings[i])
@@ -180,12 +217,18 @@ def parse_colour_model(strdata: str, name: str, types: List[NumParserType]) -> L
                       have a parser
     """
 
-    if strdata.lower().startswith(f'{name}(') and strdata.endswith(")"):
-        component_strings = [component.strip() for component in strdata[(len(name) + 1):-1].split(",")]
-        return [_valueParsers[types[i]]["parser"](component_strings[i]) for i in range(len(component_strings))]
+    if strdata.lower().startswith(f"{name}(") and strdata.endswith(")"):
+        component_strings = [
+            component.strip() for component in strdata[(len(name) + 1) : -1].split(",")
+        ]
+        return [
+            _valueParsers[types[i]]["parser"](component_strings[i])
+            for i in range(len(component_strings))
+        ]
     raise ValueError(
-        f'Given string data {strdata} does not meet the generic colour model schema <name(value, value, ...)>, '
-        f'always validate the colour model string first before parsing')
+        f"Given string data {strdata} does not meet the generic colour model schema <name(value, value, ...)>, "
+        f"always validate the colour model string first before parsing"
+    )
 
 
 def is_valid_hex_string(strdata: str) -> bool:
@@ -204,7 +247,24 @@ def is_valid_hex_string(strdata: str) -> bool:
     :rtype: bool
     """
 
-    hexdigits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+    hexdigits = [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+    ]
     if strdata.startswith("#"):
         valid_lengths = [4, 5, 7, 9]
         if len(strdata) in valid_lengths:
@@ -308,7 +368,9 @@ def parse_rgba_string(strdata: str) -> pygame.Color:
     :rtype: pygame.Color
     """
 
-    return pygame.Color(*parse_colour_model(strdata, "rgba", _colourModelSchemas["rgba"]))
+    return pygame.Color(
+        *parse_colour_model(strdata, "rgba", _colourModelSchemas["rgba"])
+    )
 
 
 def is_valid_cmy_string(strdata: str) -> bool:
@@ -518,7 +580,8 @@ _colourParsers: List[Tuple[ColourStringValidator, ColourStringParser]] = [
     (is_valid_rgba_string, parse_rgba_string),
     (is_valid_hsla_string, parse_hsla_string),
     (is_valid_hsv_string, parse_hsv_string),
-    (is_valid_hsva_string, parse_hsva_string)]
+    (is_valid_hsva_string, parse_hsva_string),
+]
 """The list of validator and parser function pairs that will be used by is_valid_colour_string and 
 parse_colour_string The functions have no requirement other than the validator confirming a schema and the parser 
 returning a pygame.Color value from the string data if it is valid Note that if new validator and parsing formulas 
@@ -538,7 +601,7 @@ def is_valid_colour_string(strdata: str) -> bool:
 
 
 def parse_colour_string(strdata: str) -> Optional[pygame.Color]:
-    """ Parse a Color String
+    """Parse a Color String
         Developer Notes:
             - This function uses the implemented colour parsing and colour validating functions available through
               _colourParsers in order to determine a proper colour data
@@ -553,11 +616,7 @@ def parse_colour_string(strdata: str) -> Optional[pygame.Color]:
     """
 
     return next(
-        (
-            parser(strdata)
-            for validator, parser in _colourParsers
-            if validator(strdata)
-        ),
+        (parser(strdata) for validator, parser in _colourParsers if validator(strdata)),
         None,
     )
 
@@ -575,11 +634,7 @@ def valid_enclosing_glyphs(strdata: str) -> bool:
     :rtype: bool
     """
 
-    glyphs: Dict[str, str] = {
-        ")": "(",
-        "]": "[",
-        "}": "{"
-    }
+    glyphs: Dict[str, str] = {")": "(", "]": "[", "}": "{"}
 
     opening_stack: List[str] = []
     for ch in strdata:
@@ -609,11 +664,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> List[int]:
     :rtype: list[int]
     """
 
-    glyphs: Dict[str, str] = {
-        ")": "(",
-        "]": "[",
-        "}": "{"
-    }
+    glyphs: Dict[str, str] = {")": "(", "]": "[", "}": "{"}
 
     opening_stack = []
     comma_indices_outside_parentheses: List[int] = []
@@ -646,13 +697,15 @@ def may_be_gradient_string(strdata: str) -> bool:
     """
 
     return (
-            "," in strdata
-            and valid_enclosing_glyphs(strdata)
-            and len(get_commas_outside_enclosing_glyphs(strdata)) in {2, 3}
+        "," in strdata
+        and valid_enclosing_glyphs(strdata)
+        and len(get_commas_outside_enclosing_glyphs(strdata)) in {2, 3}
     )
 
 
-def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tuple[int]]) -> List[str]:
+def split_string_at_indices(
+    strdata: str, indices: Union[List[int], Set[int], Tuple[int]]
+) -> List[str]:
     """Works similarly to the built-in string split function, where the split data is discarded from the resultant array
         Developer Notes:
             - Used in colour_parser module to split gradient strings into their respective colour and angle components
@@ -668,7 +721,7 @@ def split_string_at_indices(strdata: str, indices: Union[List[int], Set[int], Tu
     splits = []
     last = 0
     for i in range(len(indices)):
-        splits.append(strdata[last: indices[i]])
+        splits.append(strdata[last : indices[i]])
         last = indices[i] + 1
         if last >= len(strdata):
             return splits
@@ -692,8 +745,12 @@ def is_valid_gradient_string(strdata: str) -> bool:
     """
 
     if may_be_gradient_string(strdata):
-        gradient_data = [dataComponent.strip() for dataComponent in
-                         split_string_at_indices(strdata, get_commas_outside_enclosing_glyphs(strdata))]
+        gradient_data = [
+            dataComponent.strip()
+            for dataComponent in split_string_at_indices(
+                strdata, get_commas_outside_enclosing_glyphs(strdata)
+            )
+        ]
         if is_degree_string(gradient_data[-1]):
             colour_strings = gradient_data[:-1]
             return all(is_valid_colour_string(colour) for colour in colour_strings)
@@ -717,15 +774,23 @@ def parse_gradient_string(strdata: str) -> Optional[ColourGradient]:
     """
 
     if is_valid_gradient_string(strdata):
-        gradient_data = [dataComponent.strip() for dataComponent in
-                         split_string_at_indices(strdata, get_commas_outside_enclosing_glyphs(strdata))]
+        gradient_data = [
+            dataComponent.strip()
+            for dataComponent in split_string_at_indices(
+                strdata, get_commas_outside_enclosing_glyphs(strdata)
+            )
+        ]
         gradient_direction = parse_degree_string(gradient_data[-1])
-        colours = [premul_col(parse_colour_string(colour)) for colour in gradient_data[:-1]]
+        colours = [
+            premul_col(parse_colour_string(colour)) for colour in gradient_data[:-1]
+        ]
         return ColourGradient(gradient_direction, *colours)
     return None
 
 
-def parse_colour_or_gradient_string(strdata: str) -> Optional[Union[pygame.Color, ColourGradient]]:
+def parse_colour_or_gradient_string(
+    strdata: str,
+) -> Optional[Union[pygame.Color, ColourGradient]]:
     """
     | Parse a colour or gradient string into a pygame Color or a pygame_gui.core.colour_gradient.ColourGradient Object
     |

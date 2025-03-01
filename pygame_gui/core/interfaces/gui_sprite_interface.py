@@ -81,7 +81,7 @@ class IGUISpriteInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def _set_visible(self, val):
-        """set the visible value (0 or 1) """
+        """set the visible value (0 or 1)"""
         self._visible = val
 
     @abstractmethod
@@ -177,6 +177,7 @@ class IGUISpriteInterface(metaclass=ABCMeta):
 
         Overwrites dynamic property from sprite class for speed.
         """
+
     @blendmode.setter
     @abstractmethod
     def blendmode(self, value):

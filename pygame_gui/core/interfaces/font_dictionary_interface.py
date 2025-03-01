@@ -12,11 +12,16 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def find_font(self, font_size: int, font_name: str,
-                  bold: bool = False, italic: bool = False,
-                  antialiased: bool = True,
-                  script: str = 'Latn',
-                  direction: int = DIRECTION_LTR) -> IGUIFontInterface:
+    def find_font(
+        self,
+        font_size: int,
+        font_name: str,
+        bold: bool = False,
+        italic: bool = False,
+        antialiased: bool = True,
+        script: str = "Latn",
+        direction: int = DIRECTION_LTR,
+    ) -> IGUIFontInterface:
         """
         Find a loaded font from the font dictionary. Will load a font if it does not already exist,
         and we have paths to the needed files, however it will issue a warning after doing so
@@ -48,8 +53,14 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def create_font_id(self, font_size: int, font_name: str, bold: bool, italic: bool,
-                       antialiased: bool = True) -> str:
+    def create_font_id(
+        self,
+        font_size: int,
+        font_name: str,
+        bold: bool,
+        italic: bool,
+        antialiased: bool = True,
+    ) -> str:
         """
         Create an id for a particularly styled and sized font from those characteristics.
 
@@ -64,12 +75,17 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def preload_font(self, font_size: int, font_name: str,
-                     bold: bool = False, italic: bool = False,
-                     force_immediate_load: bool = False,
-                     antialiased: bool = True,
-                     script: str = 'Latn',
-                     direction: int = DIRECTION_LTR):
+    def preload_font(
+        self,
+        font_size: int,
+        font_name: str,
+        bold: bool = False,
+        italic: bool = False,
+        force_immediate_load: bool = False,
+        antialiased: bool = True,
+        script: str = "Latn",
+        direction: int = DIRECTION_LTR,
+    ):
         """
         Lets us load a font at a particular size and style before we use it. While you can get
         away with relying on dynamic font loading during development, it is better to eventually
@@ -88,8 +104,14 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add_font_path(self, font_name: str, font_path: str, bold_path: str = None,
-                      italic_path: str = None, bold_italic_path: str = None):
+    def add_font_path(
+        self,
+        font_name: str,
+        font_path: str,
+        bold_path: str = None,
+        italic_path: str = None,
+        bold_italic_path: str = None,
+    ):
         """
         Adds paths to different font files for a font name.
 

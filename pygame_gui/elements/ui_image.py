@@ -26,28 +26,34 @@ class UIImage(UIElement):
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
-    def __init__(self,
-                 relative_rect: RectLike,
-                 image_surface: pygame.surface.Surface,
-                 manager: Optional[IUIManagerInterface] = None,
-                 image_is_alpha_premultiplied: bool = False,
-                 container: Optional[IContainerLikeInterface] = None,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1,
-                 *,
-                 starting_height: int = 1,
-                 scale_func=pygame.transform.smoothscale):
 
-        super().__init__(relative_rect, manager, container,
-                         starting_height=starting_height,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['image'])
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        image_surface: pygame.surface.Surface,
+        manager: Optional[IUIManagerInterface] = None,
+        image_is_alpha_premultiplied: bool = False,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        visible: int = 1,
+        *,
+        starting_height: int = 1,
+        scale_func=pygame.transform.smoothscale,
+    ):
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            starting_height=starting_height,
+            layer_thickness=1,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=["image"],
+        )
 
         self.original_image = None
         self.scale_func = scale_func
@@ -55,9 +61,9 @@ class UIImage(UIElement):
         self.rebuild_from_changed_theme_data()
 
     def rebuild_from_changed_theme_data(self):
-        self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
-                                            default_value=1.0,
-                                            casting_func=float)
+        self._check_misc_theme_data_changed(
+            attribute_name="tool_tip_delay", default_value=1.0, casting_func=float
+        )
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -78,10 +84,12 @@ class UIImage(UIElement):
                     self.original_image = self.image
             self._set_image(self.scale_func(self.original_image, self.rect.size))
 
-    def set_image(self,
-                  new_image: Union[pygame.surface.Surface, None],
-                  image_is_alpha_premultiplied: bool = False,
-                  scale_func=pygame.transform.smoothscale) -> None:
+    def set_image(
+        self,
+        new_image: Union[pygame.surface.Surface, None],
+        image_is_alpha_premultiplied: bool = False,
+        scale_func=pygame.transform.smoothscale,
+    ) -> None:
         """
         Allows users to change the image displayed on a UIImage element during run time, without recreating
         the element.
@@ -98,8 +106,10 @@ class UIImage(UIElement):
         image_surface = new_image.convert_alpha()
         if not image_is_alpha_premultiplied:
             image_surface = image_surface.premul_alpha()
-        if (image_surface.get_width() != self.rect.width or
-                image_surface.get_height() != self.rect.height):
+        if (
+            image_surface.get_width() != self.rect.width
+            or image_surface.get_height() != self.rect.height
+        ):
             self.original_image = image_surface
             self._set_image(self.scale_func(self.original_image, self.rect.size))
         else:

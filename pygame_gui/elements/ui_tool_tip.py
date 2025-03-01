@@ -5,7 +5,11 @@ from typing import Union, Tuple, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IUITooltipInterface, IUIElementInterface
+from pygame_gui.core.interfaces import (
+    IUIManagerInterface,
+    IUITooltipInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core.ui_element import UIElement
 
 from pygame_gui.elements.ui_text_box import UITextBox
@@ -36,26 +40,30 @@ class UITooltip(UIElement, IUITooltipInterface):
                         in the middle.
 
     """
-    def __init__(self,
-                 html_text: str,
-                 hover_distance: Tuple[int, int],
-                 manager: Optional[IUIManagerInterface] = None,
-                 parent_element: Optional[IUIElementInterface] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 *,
-                 wrap_width: Optional[int] = None,
-                 text_kwargs: Dict[str, str] = None):
 
-        super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
-                         manager=manager,
-                         container=None,
-                         starting_height=manager.get_sprite_group().get_top_layer()+1,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['tool_tip'])
+    def __init__(
+        self,
+        html_text: str,
+        hover_distance: Tuple[int, int],
+        manager: Optional[IUIManagerInterface] = None,
+        parent_element: Optional[IUIElementInterface] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        *,
+        wrap_width: Optional[int] = None,
+        text_kwargs: Dict[str, str] = None,
+    ):
+        super().__init__(
+            relative_rect=pygame.Rect((0, 0), (-1, -1)),
+            manager=manager,
+            container=None,
+            starting_height=manager.get_sprite_group().get_top_layer() + 1,
+            layer_thickness=1,
+            anchors=anchors,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=["tool_tip"],
+        )
 
         self.text_block = None
         self.rect_width = None  # type: Optional[int]
@@ -64,12 +72,14 @@ class UITooltip(UIElement, IUITooltipInterface):
         self.overwrite_theme_wrap_width = wrap_width
         self.rebuild_from_changed_theme_data()
 
-        self.text_block = UITextBox(html_text,
-                                    pygame.Rect(0, 0, self.rect_width, -1),
-                                    manager=self.ui_manager,
-                                    starting_height=self._layer,
-                                    parent_element=self,
-                                    text_kwargs=text_kwargs)
+        self.text_block = UITextBox(
+            html_text,
+            pygame.Rect(0, 0, self.rect_width, -1),
+            manager=self.ui_manager,
+            starting_height=self._layer,
+            parent_element=self,
+            text_kwargs=text_kwargs,
+        )
 
         self.rect_width = self.text_block.rect.size[0]
         super().set_dimensions(self.text_block.rect.size)
@@ -141,9 +151,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         return (
             self._copy_rect_to_rel_and_set_text_pos()
             if window_rect.contains(self.rect)
-            else self._copy_rect_to_rel_and_warn(
-                "Unable to fit tool tip on screen"
-            )
+            else self._copy_rect_to_rel_and_warn("Unable to fit tool tip on screen")
         )
 
     def _copy_rect_to_rel_and_set_text_pos(self):
@@ -164,7 +172,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         super().rebuild_from_changed_theme_data()
         has_any_changed = bool(
             self._check_misc_theme_data_changed(
-                attribute_name='rect_width', default_value=170, casting_func=int
+                attribute_name="rect_width", default_value=170, casting_func=int
             )
         )
         if self.overwrite_theme_wrap_width is not None:
@@ -216,7 +224,9 @@ class UITooltip(UIElement, IUITooltipInterface):
         """
         super().show()
 
-        warnings.warn("Use of show() and hide() methods of UIToolTip objects is not supported.")
+        warnings.warn(
+            "Use of show() and hide() methods of UIToolTip objects is not supported."
+        )
 
     def hide(self):
         """
@@ -225,4 +235,6 @@ class UITooltip(UIElement, IUITooltipInterface):
         """
         super().hide()
 
-        warnings.warn("Use of show() and hide() methods of UIToolTip objects is not supported.")
+        warnings.warn(
+            "Use of show() and hide() methods of UIToolTip objects is not supported."
+        )

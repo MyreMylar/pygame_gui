@@ -13,7 +13,6 @@ class GUISprite:
     """
 
     def __init__(self, *groups):
-
         # referred to as special_flags in the documentation of Surface.blit
         self._blendmode = 0
         self._visible = 1
@@ -24,7 +23,7 @@ class GUISprite:
         self.blit_data = [self._image, self._rect, None, self._blendmode]
 
         # Default 0 unless initialized differently.
-        self._layer = getattr(self, '_layer', 0)
+        self._layer = getattr(self, "_layer", 0)
         self.source_rect = None
         self.__g = {}  # The groups the sprite is in
         if groups:
@@ -42,14 +41,16 @@ class GUISprite:
         """
         has = self.__g.__contains__
         for group in groups:
-            if hasattr(group, '_spritegroup'):
+            if hasattr(group, "_spritegroup"):
                 if not has(group):
                     group.add_internal(self)
                     self.add_internal(group)
             elif isinstance(group, Iterable):
                 self.add(*group)
             else:
-                raise TypeError("Expected group to be an iterable of groups, got non-iterable type")
+                raise TypeError(
+                    "Expected group to be an iterable of groups, got non-iterable type"
+                )
 
     def remove(self, *groups):
         """remove the sprite from groups
@@ -62,7 +63,7 @@ class GUISprite:
         """
         has = self.__g.__contains__
         for group in groups:
-            if hasattr(group, '_spritegroup'):
+            if hasattr(group, "_spritegroup"):
                 if has(group):
                     group.remove_internal(self)
                     self.remove_internal(group)
@@ -120,7 +121,7 @@ class GUISprite:
         return truth(self.__g)
 
     def _set_visible(self, val):
-        """set the visible value (0 or 1) """
+        """set the visible value (0 or 1)"""
         self._visible = val
 
     def _get_visible(self):
@@ -229,10 +230,9 @@ class LayeredGUIGroup(LayeredUpdates):
     dirty flag stuff removed for simplicity and speed.
     TODO: sever this entirely from LayeredUpdates at some point to fix the type hinting
     """
-    def __init__(self, *sprites):
-        """initialize group.
 
-        """
+    def __init__(self, *sprites):
+        """initialize group."""
         LayeredUpdates.__init__(self, *sprites)
         self._clip = None
         self.visible = []
@@ -245,9 +245,9 @@ class LayeredGUIGroup(LayeredUpdates):
 
         """
         # check if all needed attributes are set
-        if not hasattr(sprite, 'visible'):
+        if not hasattr(sprite, "visible"):
             raise AttributeError()
-        if not hasattr(sprite, 'blendmode'):
+        if not hasattr(sprite, "blendmode"):
             raise AttributeError()
         if not isinstance(sprite, GUISprite):
             raise TypeError()
@@ -264,9 +264,7 @@ class LayeredGUIGroup(LayeredUpdates):
         self.should_update_visibility = True
 
     def draw(self, surface):
-        """draw all sprites in the right order onto the given surface
-
-        """
+        """draw all sprites in the right order onto the given surface"""
         surface.blits(self.visible)
 
     def update(self, *args, **kwargs) -> None:
@@ -286,6 +284,8 @@ class LayeredGUIGroup(LayeredUpdates):
 
         Called when we add or remove elements from the group or when an element is hidden or shown.
         """
-        self.visible = [spr.blit_data
-                        for spr in self._spritelist
-                        if spr.image is not None and spr.visible]
+        self.visible = [
+            spr.blit_data
+            for spr in self._spritelist
+            if spr.image is not None and spr.visible
+        ]

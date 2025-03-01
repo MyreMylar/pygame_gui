@@ -14,7 +14,10 @@ class UIWindowStack(IUIWindowStackInterface):
     :param root_container: The root container for the whole UI.
 
     """
-    def __init__(self, window_resolution: Tuple[int, int], root_container: IUIContainerInterface):
+
+    def __init__(
+        self, window_resolution: Tuple[int, int], root_container: IUIContainerInterface
+    ):
         self.window_resolution = window_resolution
         self.stack: List[IWindowInterface] = []  # the main stack
         # a second stack that sits above the first,
@@ -42,19 +45,25 @@ class UIWindowStack(IUIWindowStackInterface):
 
         """
         if window.always_on_top:
-            new_layer = (self.top_stack[-1].get_top_layer() + 1
-                         if len(self.top_stack) > 0
-                         else (self.stack[-1].get_top_layer() + 1
-                         if len(self.stack) > 0
-                         else self.root_container.get_top_layer() + 1))
+            new_layer = (
+                self.top_stack[-1].get_top_layer() + 1
+                if len(self.top_stack) > 0
+                else (
+                    self.stack[-1].get_top_layer() + 1
+                    if len(self.stack) > 0
+                    else self.root_container.get_top_layer() + 1
+                )
+            )
 
             window.change_layer(new_layer)
             self.top_stack.append(window)
             window.on_moved_to_front()
         else:
-            new_layer = (self.stack[-1].get_top_layer() + 1
-                         if len(self.stack) > 0
-                         else self.root_container.get_top_layer() + 1)
+            new_layer = (
+                self.stack[-1].get_top_layer() + 1
+                if len(self.stack) > 0
+                else self.root_container.get_top_layer() + 1
+            )
 
             window.change_layer(new_layer)
             self.stack.append(window)
@@ -66,7 +75,9 @@ class UIWindowStack(IUIWindowStackInterface):
             for window in self.top_stack:
                 window.change_layer(window.layer + increased_height)
 
-    def refresh_window_stack_from_window(self, window_to_refresh_from: IWindowInterface):
+    def refresh_window_stack_from_window(
+        self, window_to_refresh_from: IWindowInterface
+    ):
         if window_to_refresh_from in self.stack:
             popped_windows_to_add_back = []
 
@@ -80,17 +91,19 @@ class UIWindowStack(IUIWindowStackInterface):
                     except IndexError:
                         top_window = None
             # then clear out everything above our target
-            self._refresh_existing_window_stack(self.stack,
-                                                popped_windows_to_add_back,
-                                                window_to_refresh_from)
+            self._refresh_existing_window_stack(
+                self.stack, popped_windows_to_add_back, window_to_refresh_from
+            )
         elif window_to_refresh_from in self.top_stack:
             popped_windows_to_add_back = []
 
-            self._refresh_existing_window_stack(self.top_stack,
-                                                popped_windows_to_add_back,
-                                                window_to_refresh_from)
+            self._refresh_existing_window_stack(
+                self.top_stack, popped_windows_to_add_back, window_to_refresh_from
+            )
 
-    def _refresh_existing_window_stack(self, stack, popped_windows_to_add_back, window_to_refresh_from):
+    def _refresh_existing_window_stack(
+        self, stack, popped_windows_to_add_back, window_to_refresh_from
+    ):
         window = stack.pop()
         while window != window_to_refresh_from:
             popped_windows_to_add_back.append(window)
@@ -140,7 +153,9 @@ class UIWindowStack(IUIWindowStackInterface):
                 self.add_new_window(old_window)
 
     # TODO Rename this here and in `refresh_window_stack_from_window`, `remove_window` and `move_window_to_front`
-    def _extracted_from_move_window_to_front_18(self, popped_windows_to_add_back, window_to_front):
+    def _extracted_from_move_window_to_front_18(
+        self, popped_windows_to_add_back, window_to_front
+    ):
         popped_windows_to_add_back.reverse()
         for old_window in popped_windows_to_add_back:
             self.add_new_window(old_window)

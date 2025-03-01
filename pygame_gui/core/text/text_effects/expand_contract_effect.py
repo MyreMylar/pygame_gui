@@ -12,9 +12,13 @@ class ExpandContractEffect(TextEffect):
     """
     Expands to a specified scale and then returns
     """
-    def __init__(self, text_owner: IUITextOwnerInterface,
-                 params: Optional[Dict[str, Any]] = None,
-                 text_sub_chunk: Optional[TextLineChunkFTFont] = None):
+
+    def __init__(
+        self,
+        text_owner: IUITextOwnerInterface,
+        params: Optional[Dict[str, Any]] = None,
+        text_sub_chunk: Optional[TextLineChunkFTFont] = None,
+    ):
         super().__init__()
         self.text_owner = text_owner
         self.text_sub_chunk = text_sub_chunk
@@ -30,18 +34,19 @@ class ExpandContractEffect(TextEffect):
     def _load_params(self, params: Optional[Dict[str, Any]]):
         if params is None:
             return
-        if 'loop' in params:
-            if isinstance(params['loop'], bool):
-                self.loop = params['loop']
-            elif isinstance(params['loop'], str):
-                self.loop = bool(int(params['loop']))
+        if "loop" in params:
+            if isinstance(params["loop"], bool):
+                self.loop = params["loop"]
+            elif isinstance(params["loop"], str):
+                self.loop = bool(int(params["loop"]))
             else:
-                self.loop = bool(params['loop'])
-        if 'max_scale' in params:
-            self.max_scale = float(params['max_scale'])
-        if 'time_to_complete_expand_contract' in params:
+                self.loop = bool(params["loop"])
+        if "max_scale" in params:
+            self.max_scale = float(params["max_scale"])
+        if "time_to_complete_expand_contract" in params:
             self.time_to_complete_expand_contract = float(
-                params['time_to_complete_expand_contract'])
+                params["time_to_complete_expand_contract"]
+            )
 
     def update(self, time_delta: float):
         """
@@ -51,13 +56,17 @@ class ExpandContractEffect(TextEffect):
         """
         self.time_acc += time_delta
         if self.time_acc < self.time_to_complete_expand_contract:
-
-            scale_progress = self.time_acc / max(self.time_to_complete_expand_contract, 0.000001)
+            scale_progress = self.time_acc / max(
+                self.time_to_complete_expand_contract, 0.000001
+            )
             if scale_progress < 0.5:
-                current_scale = 1.0 + float(((scale_progress * 2) ** 2) * (self.max_scale - 1.0))
+                current_scale = 1.0 + float(
+                    ((scale_progress * 2) ** 2) * (self.max_scale - 1.0)
+                )
             else:
-                current_scale = 1.0 + float((((1-scale_progress) * 2) ** 2)
-                                            * (self.max_scale - 1.0))
+                current_scale = 1.0 + float(
+                    (((1 - scale_progress) * 2) ** 2) * (self.max_scale - 1.0)
+                )
 
             if current_scale != self.current_scale:
                 self.current_scale = max(current_scale, 1.0)
@@ -68,11 +77,13 @@ class ExpandContractEffect(TextEffect):
             # finished effect
             self.text_owner.stop_finished_effect(self.text_sub_chunk)
 
-            event_data = {'ui_element': self.text_owner,
-                          'ui_object_id': self.text_owner.get_object_id(),
-                          'effect': TEXT_EFFECT_EXPAND_CONTRACT}
+            event_data = {
+                "ui_element": self.text_owner,
+                "ui_object_id": self.text_owner.get_object_id(),
+                "effect": TEXT_EFFECT_EXPAND_CONTRACT,
+            }
             if self.text_sub_chunk is not None:
-                event_data['effect_tag_id'] = self.text_sub_chunk.effect_id
+                event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
 
     def has_text_changed(self) -> bool:

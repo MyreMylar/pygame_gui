@@ -27,8 +27,8 @@ class UIStatusBar(UIElement):
     :param relative_rect: The rectangle that defines the size of the health bar.
     :param sprite: Optional sprite to monitor for status info, and for drawing the bar with the sprite.
     :param follow_sprite: If there's a sprite, this indicates whether the bar should be drawn at the sprite's location.
-    :param percent_method: Optional method signature to call to get the percent complete. 
-                           (To provide a method signature, simply reference the method without parenthesis, 
+    :param percent_method: Optional method signature to call to get the percent complete.
+                           (To provide a method signature, simply reference the method without parenthesis,
                            such as self.health_percent.)
     :param manager: The UIManager that manages this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
@@ -40,28 +40,34 @@ class UIStatusBar(UIElement):
                     may override this.
 
     """
-    element_id = 'status_bar'
 
-    def __init__(self,
-                 relative_rect: RectLike,
-                 manager: Optional[IUIManagerInterface] = None,
-                 sprite: Optional[SpriteWithHealth] = None,
-                 follow_sprite: bool = True,
-                 percent_method: Union[Callable[[], float], None] = None,
-                 container: Union[IContainerLikeInterface, None] = None,
-                 parent_element: UIElement = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Dict[str, Union[str, UIElement]] = None,
-                 visible: int = 1):
+    element_id = "status_bar"
 
-        super().__init__(relative_rect, manager, container,
-                         starting_height=1,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=[self.element_id])
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        manager: Optional[IUIManagerInterface] = None,
+        sprite: Optional[SpriteWithHealth] = None,
+        follow_sprite: bool = True,
+        percent_method: Union[Callable[[], float], None] = None,
+        container: Union[IContainerLikeInterface, None] = None,
+        parent_element: UIElement = None,
+        object_id: Union[ObjectID, str, None] = None,
+        anchors: Dict[str, Union[str, UIElement]] = None,
+        visible: int = 1,
+    ):
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            starting_height=1,
+            layer_thickness=1,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=[self.element_id],
+        )
 
         self.sprite: SpriteWithHealth = sprite
         self.follow_sprite = follow_sprite
@@ -84,13 +90,13 @@ class UIStatusBar(UIElement):
         self.current_status_rect = None
 
         self.drawable_shape = None
-        self.shape = 'rectangle'
+        self.shape = "rectangle"
 
         self.font = None
         self.text_shadow_colour = None
         self.text_colour = None
-        self.text_horiz_alignment = 'center'
-        self.text_vert_alignment = 'center'
+        self.text_horiz_alignment = "center"
+        self.text_vert_alignment = "center"
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
         self.background_text = None
@@ -102,7 +108,7 @@ class UIStatusBar(UIElement):
 
     @property
     def percent_full(self):
-        """ Use this property to directly change the status bar. """
+        """Use this property to directly change the status bar."""
         return self._percent_full
 
     @percent_full.setter
@@ -116,6 +122,11 @@ class UIStatusBar(UIElement):
 
     @property
     def position(self):
+        """
+        Returns the drawing position of the status bar.
+
+        :return: two integers representing the drawing position
+        """
         if not self.sprite or not self.follow_sprite:
             return self.relative_rect.x, self.relative_rect.y
         offset_x = self.sprite.rect.x + self.follow_sprite_offset[0]
@@ -131,15 +142,27 @@ class UIStatusBar(UIElement):
             # This triggers status_changed if necessary.
             self.percent_full = self.percent_method()
 
-        self.border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
-                                       (self.rect.width - (self.shadow_width * 2),
-                                        self.rect.height - (self.shadow_width * 2)))
+        self.border_rect = pygame.Rect(
+            (self.shadow_width, self.shadow_width),
+            (
+                self.rect.width - (self.shadow_width * 2),
+                self.rect.height - (self.shadow_width * 2),
+            ),
+        )
 
-        self.capacity_width = self.rect.width - (self.shadow_width * 2) - (self.border_width * 2)
-        self.capacity_height = self.rect.height - (self.shadow_width * 2) - (self.border_width * 2)
-        self.capacity_rect = pygame.Rect((self.border_width + self.shadow_width,
-                                          self.border_width + self.shadow_width),
-                                         (self.capacity_width, self.capacity_height))
+        self.capacity_width = (
+            self.rect.width - (self.shadow_width * 2) - (self.border_width * 2)
+        )
+        self.capacity_height = (
+            self.rect.height - (self.shadow_width * 2) - (self.border_width * 2)
+        )
+        self.capacity_rect = pygame.Rect(
+            (
+                self.border_width + self.shadow_width,
+                self.border_width + self.shadow_width,
+            ),
+            (self.capacity_width, self.capacity_height),
+        )
 
         self.redraw()
 
@@ -166,7 +189,7 @@ class UIStatusBar(UIElement):
                 self.redraw()
 
     def status_text(self):
-        """ To display text in the bar, subclass UIStatusBar and override this method. """
+        """To display text in the bar, subclass UIStatusBar and override this method."""
         return None
 
     def redraw(self):
@@ -174,39 +197,40 @@ class UIStatusBar(UIElement):
         Redraw the status bar when something, other than it's position has changed.
 
         """
-        theming_parameters = {'normal_bg': self.bar_unfilled_colour,
-                              'normal_border': self.border_colour,
-                              'border_width': self.border_width,
-                              'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius,
-                              'filled_bar': self.bar_filled_colour,
-                              'filled_bar_width_percentage': self.percent_full,
-                              'follow_sprite_offset': self.follow_sprite_offset,
-                              'border_overlap': self.border_overlap}
+        theming_parameters = {
+            "normal_bg": self.bar_unfilled_colour,
+            "normal_border": self.border_colour,
+            "border_width": self.border_width,
+            "shadow_width": self.shadow_width,
+            "shape_corner_radius": self.shape_corner_radius,
+            "filled_bar": self.bar_filled_colour,
+            "filled_bar_width_percentage": self.percent_full,
+            "follow_sprite_offset": self.follow_sprite_offset,
+            "border_overlap": self.border_overlap,
+        }
 
         if text := self.status_text():
-            text_parameters = {'font': self.font,
-                               'text': text,
-                               'normal_text': self.text_colour,
-                               'normal_text_shadow': self.text_shadow_colour,
-                               'text_shadow': (1,
-                                               0,
-                                               0,
-                                               self.text_shadow_colour,
-                                               False),
-                               'text_horiz_alignment': self.text_horiz_alignment,
-                               'text_vert_alignment': self.text_vert_alignment,
-                               'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
-                               'text_vert_alignment_padding': self.text_vert_alignment_padding,
-                               }
+            text_parameters = {
+                "font": self.font,
+                "text": text,
+                "normal_text": self.text_colour,
+                "normal_text_shadow": self.text_shadow_colour,
+                "text_shadow": (1, 0, 0, self.text_shadow_colour, False),
+                "text_horiz_alignment": self.text_horiz_alignment,
+                "text_vert_alignment": self.text_vert_alignment,
+                "text_horiz_alignment_padding": self.text_horiz_alignment_padding,
+                "text_vert_alignment_padding": self.text_vert_alignment_padding,
+            }
             theming_parameters |= text_parameters
 
-        if self.shape == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
-        elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+        if self.shape == "rectangle":
+            self.drawable_shape = RectDrawableShape(
+                self.rect, theming_parameters, ["normal"], self.ui_manager
+            )
+        elif self.shape == "rounded_rectangle":
+            self.drawable_shape = RoundedRectangleShape(
+                self.rect, theming_parameters, ["normal"], self.ui_manager
+            )
 
         self._set_image(self.drawable_shape.get_fresh_surface())
 
@@ -218,48 +242,58 @@ class UIStatusBar(UIElement):
         """
         has_any_changed = False
 
-        if self._check_misc_theme_data_changed(attribute_name='follow_sprite_offset',
-                                               default_value=(0, 0),
-                                               casting_func=self.tuple_extract):
+        if self._check_misc_theme_data_changed(
+            attribute_name="follow_sprite_offset",
+            default_value=(0, 0),
+            casting_func=self.tuple_extract,
+        ):
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed(attribute_name='shape',
-                                               default_value='rectangle',
-                                               casting_func=str,
-                                               allowed_values=['rectangle',
-                                                               'rounded_rectangle']):
+        if self._check_misc_theme_data_changed(
+            attribute_name="shape",
+            default_value="rectangle",
+            casting_func=str,
+            allowed_values=["rectangle", "rounded_rectangle"],
+        ):
             has_any_changed = True
 
-        if self._check_shape_theming_changed(defaults={'border_width': 1,
-                                                       'shadow_width': 2,
-                                                       'border_overlap': 1,
-                                                       'shape_corner_radius': [2, 2, 2, 2]}):
+        if self._check_shape_theming_changed(
+            defaults={
+                "border_width": 1,
+                "shadow_width": 2,
+                "border_overlap": 1,
+                "shape_corner_radius": [2, 2, 2, 2],
+            }
+        ):
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed(attribute_name='hover_height',
-                                               default_value=1,
-                                               casting_func=int):
+        if self._check_misc_theme_data_changed(
+            attribute_name="hover_height", default_value=1, casting_func=int
+        ):
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
-                                               default_value=1.0,
-                                               casting_func=float):
+        if self._check_misc_theme_data_changed(
+            attribute_name="tool_tip_delay", default_value=1.0, casting_func=float
+        ):
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
-                                                             self.combined_element_ids)
+        border_colour = self.ui_theme.get_colour_or_gradient(
+            "normal_border", self.combined_element_ids
+        )
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient('unfilled_bar',
-                                                                   self.combined_element_ids)
+        bar_unfilled_colour = self.ui_theme.get_colour_or_gradient(
+            "unfilled_bar", self.combined_element_ids
+        )
         if bar_unfilled_colour != self.bar_unfilled_colour:
             self.bar_unfilled_colour = bar_unfilled_colour
             has_any_changed = True
 
-        bar_filled_colour = self.ui_theme.get_colour_or_gradient('filled_bar',
-                                                                 self.combined_element_ids)
+        bar_filled_colour = self.ui_theme.get_colour_or_gradient(
+            "filled_bar", self.combined_element_ids
+        )
         if bar_filled_colour != self.bar_filled_colour:
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
@@ -270,12 +304,16 @@ class UIStatusBar(UIElement):
                 self.font = font
                 has_any_changed = True
 
-            text_shadow_colour = self.ui_theme.get_colour('text_shadow', self.combined_element_ids)
+            text_shadow_colour = self.ui_theme.get_colour(
+                "text_shadow", self.combined_element_ids
+            )
             if text_shadow_colour != self.text_shadow_colour:
                 self.text_shadow_colour = text_shadow_colour
                 has_any_changed = True
 
-            text_colour = self.ui_theme.get_colour_or_gradient('normal_text', self.combined_element_ids)
+            text_colour = self.ui_theme.get_colour_or_gradient(
+                "normal_text", self.combined_element_ids
+            )
             if text_colour != self.text_colour:
                 self.text_colour = text_colour
                 has_any_changed = True

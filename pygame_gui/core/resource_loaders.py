@@ -16,7 +16,9 @@ class IResourceLoader(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def add_resource(self, resource: Union[FontResource, ImageResource, SurfaceResource]):
+    def add_resource(
+        self, resource: Union[FontResource, ImageResource, SurfaceResource]
+    ):
         """
         Adds a resource to be loaded.
 
@@ -55,8 +57,8 @@ class ThreadedLoader:
     see if you can get any better loading performance with a different number.
 
     """
-    def __init__(self):
 
+    def __init__(self):
         self.num_loading_threads = 5
 
         self._threaded_loading_queue = ClosableQueue()
@@ -86,7 +88,9 @@ class ThreadedLoader:
         """
         return self._started
 
-    def add_resource(self, resource: Union[FontResource, ImageResource, SurfaceResource]):
+    def add_resource(
+        self, resource: Union[FontResource, ImageResource, SurfaceResource]
+    ):
         """
         Adds a resource to be loaded.
 
@@ -97,7 +101,7 @@ class ThreadedLoader:
         :param resource:  Either an ImageResource, SurfaceResource or a FontResource.
         """
         if self._started:
-            raise ValueError('Too late to add this resource to the loader')
+            raise ValueError("Too late to add this resource to the loader")
         if isinstance(resource, (ImageResource, FontResource)):
             self._threaded_loading_queue.put(resource)
         else:
@@ -117,30 +121,40 @@ class ThreadedLoader:
         self._threading_error_queue = ClosableQueue()
 
         self._threaded_load_queue_start_length = self._threaded_loading_queue.qsize()
-        self._start_output_threads(self.num_loading_threads,
-                                   ThreadedLoader._threaded_loader,
-                                   self._threaded_loading_queue,
-                                   self._threaded_loading_done_queue,
-                                   self._threading_error_queue)
+        self._start_output_threads(
+            self.num_loading_threads,
+            ThreadedLoader._threaded_loader,
+            self._threaded_loading_queue,
+            self._threaded_loading_done_queue,
+            self._threading_error_queue,
+        )
 
     def set_finished(self):
         """
         Called when loading is done.
         """
+
     # Currently we are relying on disabling the resource loader after one use
     # to support dynamic loading
     #     self._started = False
 
-    def _start_output_threads(self,
-                              count: int,
-                              func,
-                              in_queue: ClosableQueue,
-                              out_queue: ClosableQueue,
-                              error_queue: ClosableQueue):
-        self._load_threads = [StoppableOutputWorker(func=func,
-                                                    in_queue=in_queue,
-                                                    out_queue=out_queue,
-                                                    error_queue=error_queue) for _ in range(count)]
+    def _start_output_threads(
+        self,
+        count: int,
+        func,
+        in_queue: ClosableQueue,
+        out_queue: ClosableQueue,
+        error_queue: ClosableQueue,
+    ):
+        self._load_threads = [
+            StoppableOutputWorker(
+                func=func,
+                in_queue=in_queue,
+                out_queue=out_queue,
+                error_queue=error_queue,
+            )
+            for _ in range(count)
+        ]
         for thread in self._load_threads:
             thread.start()
 
@@ -192,21 +206,27 @@ class ThreadedLoader:
         return False
 
     def _calculate_progress(self) -> float:
-        if self._threaded_load_queue_start_length == self._threaded_loading_done_queue.qsize():
+        if (
+            self._threaded_load_queue_start_length
+            == self._threaded_loading_done_queue.qsize()
+        ):
             self._threaded_loading_finished = True
 
-        work_to_do = (self._threaded_load_queue_start_length +
-                      self._sequential_load_queue_start_length)
+        work_to_do = (
+            self._threaded_load_queue_start_length
+            + self._sequential_load_queue_start_length
+        )
 
-        work_done = (self._threaded_loading_done_queue.qsize() +
-                     len(self._sequential_loading_done_queue))
+        work_done = self._threaded_loading_done_queue.qsize() + len(
+            self._sequential_loading_done_queue
+        )
 
         if work_done == work_to_do:
             return 1.0
         elif work_done == 0.0:
             return 0.0
         else:
-            return work_done/work_to_do
+            return work_done / work_to_do
 
 
 class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
@@ -217,6 +237,7 @@ class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
     be careful not to use any assets that are still being loaded.
 
     """
+
     def __init__(self):
         super().__init__()
 
@@ -253,9 +274,12 @@ class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
                 warnings.warn(str(loading_error))
 
         self._sequential_loading_finished = self._timed_sequential_loading_update(
-            self._time_budget)
+            self._time_budget
+        )
 
-        return (self._threaded_loading_finished and self._sequential_loading_finished), progress
+        return (
+            self._threaded_loading_finished and self._sequential_loading_finished
+        ), progress
 
 
 class BlockingThreadedResourceLoader(ThreadedLoader, IResourceLoader):
@@ -279,8 +303,12 @@ class BlockingThreadedResourceLoader(ThreadedLoader, IResourceLoader):
             warnings.warn(str(loading_error))
 
         while not self._sequential_loading_finished:
-            self._sequential_loading_finished = self._untimed_sequential_loading_update()
+            self._sequential_loading_finished = (
+                self._untimed_sequential_loading_update()
+            )
 
         self.set_finished()
 
-        return (self._threaded_loading_finished and self._sequential_loading_finished), 1.0
+        return (
+            self._threaded_loading_finished and self._sequential_loading_finished
+        ), 1.0

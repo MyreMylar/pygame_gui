@@ -14,9 +14,13 @@ class FadeOutEffect(TextEffect):
     care of fading out an alpha value over time.
 
     """
-    def __init__(self, text_owner: IUITextOwnerInterface,
-                 params: Optional[Dict[str, Any]] = None,
-                 text_sub_chunk: Optional[TextLineChunkFTFont] = None):
+
+    def __init__(
+        self,
+        text_owner: IUITextOwnerInterface,
+        params: Optional[Dict[str, Any]] = None,
+        text_sub_chunk: Optional[TextLineChunkFTFont] = None,
+    ):
         super().__init__()
         self.text_owner = text_owner
         self.text_sub_chunk = text_sub_chunk
@@ -29,8 +33,8 @@ class FadeOutEffect(TextEffect):
         self.finished = False
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
-        if params is not None and 'time_per_alpha_change' in params:
-            self.time_per_alpha_change = float(params['time_per_alpha_change'])
+        if params is not None and "time_per_alpha_change" in params:
+            self.time_per_alpha_change = float(params["time_per_alpha_change"])
 
     def update(self, time_delta: float):
         """
@@ -41,7 +45,9 @@ class FadeOutEffect(TextEffect):
         if self.alpha_value > 0:
             self.time_per_alpha_change_acc += time_delta
 
-            alpha_progress = 255 - int(self.time_per_alpha_change_acc / self.time_per_alpha_change)
+            alpha_progress = 255 - int(
+                self.time_per_alpha_change_acc / self.time_per_alpha_change
+            )
 
             if alpha_progress != self.alpha_value:
                 self.alpha_value = max(alpha_progress, 0)
@@ -52,11 +58,13 @@ class FadeOutEffect(TextEffect):
             # finished effect
             self.text_owner.stop_finished_effect(self.text_sub_chunk)
 
-            event_data = {'ui_element': self.text_owner,
-                          'ui_object_id': self.text_owner.get_object_id(),
-                          'effect': TEXT_EFFECT_FADE_OUT}
+            event_data = {
+                "ui_element": self.text_owner,
+                "ui_object_id": self.text_owner.get_object_id(),
+                "effect": TEXT_EFFECT_FADE_OUT,
+            }
             if self.text_sub_chunk is not None:
-                event_data['effect_tag_id'] = self.text_sub_chunk.effect_id
+                event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
 
     def has_text_changed(self) -> bool:

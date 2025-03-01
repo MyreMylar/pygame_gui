@@ -9,10 +9,16 @@ import pygame
 from pygame_gui.core.utility import translate
 
 from pygame_gui.core import ObjectID
-from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
+from pygame_gui._constants import (
+    UI_BUTTON_PRESSED,
+    UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
+)
 from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION, OldType
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
-from pygame_gui._constants import UI_CONFIRMATION_DIALOG_CONFIRMED, UI_FILE_DIALOG_PATH_PICKED
+from pygame_gui._constants import (
+    UI_CONFIRMATION_DIALOG_CONFIRMED,
+    UI_FILE_DIALOG_PATH_PICKED,
+)
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine, UISelectionList
@@ -36,33 +42,41 @@ class UIFileDialog(UIWindow):
     :param visible: Whether the element is visible by default.
     """
 
-    def __init__(self,
-                 rect: RectLike,
-                 manager: Optional[IUIManagerInterface],
-                 window_title: str = 'pygame-gui.file_dialog_title_bar',
-                 allowed_suffixes: Optional[Set[str]] = None,
-                 initial_file_path: Optional[str] = None,
-                 object_id: Union[ObjectID, str] = ObjectID('#file_dialog', None),
-                 allow_existing_files_only: bool = False,
-                 allow_picking_directories: bool = False,
-                 visible: int = 1,
-                 always_on_top: bool = False
-                 ):
-
-        super().__init__(rect, manager,
-                         window_display_title=window_title,
-                         element_id=['file_dialog'],
-                         object_id=object_id,
-                         resizable=True,
-                         visible=visible,
-                         always_on_top=always_on_top)
+    def __init__(
+        self,
+        rect: RectLike,
+        manager: Optional[IUIManagerInterface],
+        window_title: str = "pygame-gui.file_dialog_title_bar",
+        allowed_suffixes: Optional[Set[str]] = None,
+        initial_file_path: Optional[str] = None,
+        object_id: Union[ObjectID, str] = ObjectID("#file_dialog", None),
+        allow_existing_files_only: bool = False,
+        allow_picking_directories: bool = False,
+        visible: int = 1,
+        always_on_top: bool = False,
+    ):
+        super().__init__(
+            rect,
+            manager,
+            window_display_title=window_title,
+            element_id=["file_dialog"],
+            object_id=object_id,
+            resizable=True,
+            visible=visible,
+            always_on_top=always_on_top,
+        )
 
         locale.setlocale(locale.LC_ALL, "")
 
         minimum_dimensions = (260, 300)
-        if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
-            warn_string = (f"Initial size: {self.relative_rect.size} "
-                           f"is less than minimum dimensions: {minimum_dimensions}")
+        if (
+            self.relative_rect.width < minimum_dimensions[0]
+            or self.relative_rect.height < minimum_dimensions[1]
+        ):
+            warn_string = (
+                f"Initial size: {self.relative_rect.size} "
+                f"is less than minimum dimensions: {minimum_dimensions}"
+            )
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
@@ -74,21 +88,30 @@ class UIFileDialog(UIWindow):
         self.allowed_suffixes = {""} if allowed_suffixes is None else allowed_suffixes
         if initial_file_path is not None:
             pathed_initial_file_path = Path(initial_file_path)
-            if pathed_initial_file_path.exists() and not pathed_initial_file_path.is_file():
+            if (
+                pathed_initial_file_path.exists()
+                and not pathed_initial_file_path.is_file()
+            ):
                 self.current_directory_path = str(pathed_initial_file_path.resolve())
                 if self.allow_picking_directories:
                     self.current_file_path = Path(self.current_directory_path)
             elif pathed_initial_file_path.is_file():
                 self.current_file_path = pathed_initial_file_path.resolve()
-                self.current_directory_path = str(pathed_initial_file_path.parent.resolve())
+                self.current_directory_path = str(
+                    pathed_initial_file_path.parent.resolve()
+                )
             elif pathed_initial_file_path.parent.exists():
-                self.current_directory_path = str(pathed_initial_file_path.parent.resolve())
-                self.current_file_path = (Path(initial_file_path).parent.resolve() /
-                                          Path(initial_file_path).name)
+                self.current_directory_path = str(
+                    pathed_initial_file_path.parent.resolve()
+                )
+                self.current_file_path = (
+                    Path(initial_file_path).parent.resolve()
+                    / Path(initial_file_path).name
+                )
             else:
-                self.current_directory_path = str(Path('.').resolve())
+                self.current_directory_path = str(Path(".").resolve())
         else:
-            self.current_directory_path = str(Path('.').resolve())
+            self.current_directory_path = str(Path(".").resolve())
 
         self.last_valid_directory_path = self.current_directory_path
 
@@ -98,120 +121,144 @@ class UIFileDialog(UIWindow):
         self._setup_ui_elements()
 
     def _setup_ui_elements(self):
-        self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
-                                      text='pygame-gui.Cancel',
-                                      manager=self.ui_manager,
-                                      container=self,
-                                      object_id='#cancel_button',
-                                      anchors={'left': 'right',
-                                               'right': 'right',
-                                               'top': 'bottom',
-                                               'bottom': 'bottom'})
-        self.ok_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
-                                  text='pygame-gui.OK',
-                                  manager=self.ui_manager,
-                                  container=self,
-                                  object_id='#ok_button',
-                                  anchors={'left': 'right',
-                                           'right': 'right',
-                                           'top': 'bottom',
-                                           'bottom': 'bottom',
-                                           'right_target': self.cancel_button})
+        self.cancel_button = UIButton(
+            relative_rect=pygame.Rect(-10, -40, -1, 30),
+            text="pygame-gui.Cancel",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#cancel_button",
+            anchors={
+                "left": "right",
+                "right": "right",
+                "top": "bottom",
+                "bottom": "bottom",
+            },
+        )
+        self.ok_button = UIButton(
+            relative_rect=pygame.Rect(-10, -40, -1, 30),
+            text="pygame-gui.OK",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#ok_button",
+            anchors={
+                "left": "right",
+                "right": "right",
+                "top": "bottom",
+                "bottom": "bottom",
+                "right_target": self.cancel_button,
+            },
+        )
         if not self._validate_file_path(self.current_file_path):
             self.ok_button.disable()
-        self.home_button = UIButton(relative_rect=pygame.Rect(10, 10, 20, 20),
-                                    text='⌂',
-                                    tool_tip_text='pygame-gui.Home_directory',
-                                    manager=self.ui_manager,
-                                    container=self,
-                                    object_id='#home_icon_button',
-                                    anchors={'left': 'left',
-                                             'right': 'left',
-                                             'top': 'top',
-                                             'bottom': 'top'})
-        self.delete_button = UIButton(relative_rect=pygame.Rect(32, 10, 20, 20),
-                                      text='⌧',
-                                      tool_tip_text='pygame-gui.Delete',
-                                      manager=self.ui_manager,
-                                      container=self,
-                                      object_id='#delete_icon_button',
-                                      anchors={'left': 'left',
-                                               'right': 'left',
-                                               'top': 'top',
-                                               'bottom': 'top'})
-        if not self._validate_path_exists_and_of_allowed_type(self.current_file_path,
-                                                              allow_directories=False):
+        self.home_button = UIButton(
+            relative_rect=pygame.Rect(10, 10, 20, 20),
+            text="⌂",
+            tool_tip_text="pygame-gui.Home_directory",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#home_icon_button",
+            anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
+        )
+        self.delete_button = UIButton(
+            relative_rect=pygame.Rect(32, 10, 20, 20),
+            text="⌧",
+            tool_tip_text="pygame-gui.Delete",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#delete_icon_button",
+            anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
+        )
+        if not self._validate_path_exists_and_of_allowed_type(
+            self.current_file_path, allow_directories=False
+        ):
             self.delete_button.disable()
-        self.parent_directory_button = UIButton(relative_rect=pygame.Rect(54, 10, 20, 20),
-                                                text='↑',
-                                                tool_tip_text='pygame-gui.Parent_directory',
-                                                manager=self.ui_manager,
-                                                container=self,
-                                                object_id='#parent_icon_button',
-                                                anchors={'left': 'left',
-                                                         'right': 'left',
-                                                         'top': 'top',
-                                                         'bottom': 'top'})
-        self.refresh_button = UIButton(relative_rect=pygame.Rect(76, 10, 20, 20),
-                                       text='⇪',
-                                       tool_tip_text='pygame-gui.Refresh_directory',
-                                       manager=self.ui_manager,
-                                       container=self,
-                                       object_id='#refresh_icon_button',
-                                       anchors={'left': 'left',
-                                                'right': 'left',
-                                                'top': 'top',
-                                                'bottom': 'top'})
-        text_line_rect = pygame.Rect(10, 40, self.get_container().get_size()[0] - 20, -1)
-        self.file_path_text_line = UITextEntryLine(relative_rect=text_line_rect,
-                                                   manager=self.ui_manager,
-                                                   container=self,
-                                                   object_id='#file_path_text_line',
-                                                   anchors={'left': 'left',
-                                                            'right': 'right',
-                                                            'top': 'top',
-                                                            'bottom': 'top'}
-                                                   )
+        self.parent_directory_button = UIButton(
+            relative_rect=pygame.Rect(54, 10, 20, 20),
+            text="↑",
+            tool_tip_text="pygame-gui.Parent_directory",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#parent_icon_button",
+            anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
+        )
+        self.refresh_button = UIButton(
+            relative_rect=pygame.Rect(76, 10, 20, 20),
+            text="⇪",
+            tool_tip_text="pygame-gui.Refresh_directory",
+            manager=self.ui_manager,
+            container=self,
+            object_id="#refresh_icon_button",
+            anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
+        )
+        text_line_rect = pygame.Rect(
+            10, 40, self.get_container().get_size()[0] - 20, -1
+        )
+        self.file_path_text_line = UITextEntryLine(
+            relative_rect=text_line_rect,
+            manager=self.ui_manager,
+            container=self,
+            object_id="#file_path_text_line",
+            anchors={"left": "left", "right": "right", "top": "top", "bottom": "top"},
+        )
         if self.current_file_path is not None:
             self.file_path_text_line.set_text(str(self.current_file_path))
             self._highlight_file_name_for_editing()
         else:
             self.file_path_text_line.set_text(str(self.current_directory_path))
-        file_selection_rect = pygame.Rect(10, 80, self.get_container().get_size()[0] - 20,
-                                          self.get_container().get_size()[1] - 130)
-        self.file_selection_list = UISelectionList(relative_rect=file_selection_rect,
-                                                   item_list=self.current_file_list,
-                                                   manager=self.ui_manager,
-                                                   container=self,
-                                                   object_id='#file_display_list',
-                                                   anchors={'left': 'left',
-                                                            'right': 'right',
-                                                            'top': 'top',
-                                                            'bottom': 'bottom'})
+        file_selection_rect = pygame.Rect(
+            10,
+            80,
+            self.get_container().get_size()[0] - 20,
+            self.get_container().get_size()[1] - 130,
+        )
+        self.file_selection_list = UISelectionList(
+            relative_rect=file_selection_rect,
+            item_list=self.current_file_list,
+            manager=self.ui_manager,
+            container=self,
+            object_id="#file_display_list",
+            anchors={
+                "left": "left",
+                "right": "right",
+                "top": "top",
+                "bottom": "bottom",
+            },
+        )
 
     def _highlight_file_name_for_editing(self):
         # try highlighting the file name
         if self.current_file_path is None or self.allow_existing_files_only:
             return
-        highlight_start = self.file_path_text_line.get_text().find(self.current_file_path.stem)
+        highlight_start = self.file_path_text_line.get_text().find(
+            self.current_file_path.stem
+        )
         highlight_end = highlight_start + len(self.current_file_path.stem)
         self.file_path_text_line.select_range = [highlight_start, highlight_end]
         self.file_path_text_line.cursor_has_moved_recently = True
         self.file_path_text_line.edit_position = highlight_end
-        left_max_corner_radius = max(self.file_path_text_line.shape_corner_radius[0],
-                                     self.file_path_text_line.shape_corner_radius[2])
-        right_max_corner_radius = max(self.file_path_text_line.shape_corner_radius[1],
-                                      self.file_path_text_line.shape_corner_radius[3])
-        text_clip_width = (self.file_path_text_line.rect.width -
-                           (self.file_path_text_line.padding[0] * 2) -
-                           left_max_corner_radius -
-                           right_max_corner_radius -
-                           (self.file_path_text_line.border_width * 2) -
-                           (self.file_path_text_line.shadow_width * 2))
+        left_max_corner_radius = max(
+            self.file_path_text_line.shape_corner_radius[0],
+            self.file_path_text_line.shape_corner_radius[2],
+        )
+        right_max_corner_radius = max(
+            self.file_path_text_line.shape_corner_radius[1],
+            self.file_path_text_line.shape_corner_radius[3],
+        )
+        text_clip_width = (
+            self.file_path_text_line.rect.width
+            - (self.file_path_text_line.padding[0] * 2)
+            - left_max_corner_radius
+            - right_max_corner_radius
+            - (self.file_path_text_line.border_width * 2)
+            - (self.file_path_text_line.shadow_width * 2)
+        )
 
         text_width = self.file_path_text_line.font.get_rect(
-            self.file_path_text_line.get_text()).width
-        self.file_path_text_line.start_text_offset = max(0, text_width - text_clip_width)
+            self.file_path_text_line.get_text()
+        ).width
+        self.file_path_text_line.start_text_offset = max(
+            0, text_width - text_clip_width
+        )
         if not self.file_path_text_line.is_focused:
             self.file_path_text_line.focus()
 
@@ -230,10 +277,15 @@ class UIFileDialog(UIWindow):
             self.last_valid_directory_path = self.current_directory_path
 
     def _create_list_of_directories_and_files_on_current_path(self):
-        directories_on_path: list[str] = [f.name for f in Path(self.current_directory_path).iterdir()
-                                          if not f.is_file()]
+        directories_on_path: list[str] = [
+            f.name
+            for f in Path(self.current_directory_path).iterdir()
+            if not f.is_file()
+        ]
         directories_on_path.sort(key=locale.strxfrm)
-        directories_on_path_tuples = [(f, '#directory_list_item') for f in directories_on_path]
+        directories_on_path_tuples = [
+            (f, "#directory_list_item") for f in directories_on_path
+        ]
 
         files_on_path = [
             f.name
@@ -241,14 +293,15 @@ class UIFileDialog(UIWindow):
             if f.is_file() and any(f.name.endswith(x) for x in self.allowed_suffixes)
         ]
         files_on_path.sort(key=locale.strxfrm)
-        files_on_path_tuples = [(f, '#file_list_item') for f in files_on_path]
+        files_on_path_tuples = [(f, "#file_list_item") for f in files_on_path]
 
         self.current_file_list = directories_on_path_tuples + files_on_path_tuples
 
     def _validate_file_path(self, path_to_validate: Path) -> bool:
         if self.allow_existing_files_only:
-            return self._validate_path_exists_and_of_allowed_type(path_to_validate,
-                                                                  self.allow_picking_directories)
+            return self._validate_path_exists_and_of_allowed_type(
+                path_to_validate, self.allow_picking_directories
+            )
         else:
             return self._validate_path_in_existing_directory(path_to_validate)
 
@@ -268,8 +321,9 @@ class UIFileDialog(UIWindow):
         return len(path_to_validate.name) > 0 and path_to_validate.parent.exists()
 
     @staticmethod
-    def _validate_path_exists_and_of_allowed_type(path_to_validate: Path,
-                                                  allow_directories: bool) -> bool:
+    def _validate_path_exists_and_of_allowed_type(
+        path_to_validate: Path, allow_directories: bool
+    ) -> bool:
         """
         Checks the selected path is valid.
 
@@ -279,7 +333,7 @@ class UIFileDialog(UIWindow):
         if path_to_validate is None:
             return False
         if allow_directories:
-            valid_type = (path_to_validate.is_file() or path_to_validate.is_dir())
+            valid_type = path_to_validate.is_file() or path_to_validate.is_dir()
         else:
             valid_type = path_to_validate.is_file()
         return path_to_validate.exists() and valid_type
@@ -312,18 +366,25 @@ class UIFileDialog(UIWindow):
         :param event: event to check.
 
         """
-        if (event.type not in [UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED]
-                or event.ui_element != self.file_path_text_line):
+        if (
+            event.type not in [UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED]
+            or event.ui_element != self.file_path_text_line
+        ):
             return
         entered_file_path = Path(self.file_path_text_line.get_text()).absolute()
         if self._validate_file_or_dir_path(entered_file_path.parent):
-            if len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
-                                                    (not self.allow_existing_files_only and
-                                                     not entered_file_path.exists())):
+            if len(entered_file_path.name) > 0 and (
+                entered_file_path.is_file()
+                or (
+                    not self.allow_existing_files_only
+                    and not entered_file_path.exists()
+                )
+            ):
                 self.current_file_path = entered_file_path
 
-                if self._validate_path_exists_and_of_allowed_type(self.current_file_path,
-                                                                  allow_directories=False):
+                if self._validate_path_exists_and_of_allowed_type(
+                    self.current_file_path, allow_directories=False
+                ):
                     self.delete_button.enable()
                 else:
                     self.delete_button.disable()
@@ -334,9 +395,12 @@ class UIFileDialog(UIWindow):
             if event.type == UI_TEXT_ENTRY_FINISHED:
                 if len(entered_file_path.name) > 0 and entered_file_path.is_dir():
                     self.current_directory_path = str(entered_file_path)
-                elif len(entered_file_path.name) > 0 and (entered_file_path.is_file() or
-                                                          not entered_file_path.exists()):
-                    self.current_directory_path = str(entered_file_path.parent.absolute())
+                elif len(entered_file_path.name) > 0 and (
+                    entered_file_path.is_file() or not entered_file_path.exists()
+                ):
+                    self.current_directory_path = str(
+                        entered_file_path.parent.absolute()
+                    )
                 else:
                     self.current_directory_path = str(entered_file_path)
 
@@ -363,22 +427,27 @@ class UIFileDialog(UIWindow):
         :param event: event to check.
 
         """
-        if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
-                event.ui_element == self.file_selection_list):
+        if (
+            event.type == UI_SELECTION_LIST_NEW_SELECTION
+            and event.ui_element == self.file_selection_list
+        ):
             current_path = Path(self.current_directory_path)
             if current_path.is_dir():
                 new_selection_file_path = current_path / event.text
             else:
                 new_selection_file_path = current_path.parent / event.text
-            if self._validate_path_exists_and_of_allowed_type(new_selection_file_path,
-                                                              self.allow_picking_directories):
+            if self._validate_path_exists_and_of_allowed_type(
+                new_selection_file_path, self.allow_picking_directories
+            ):
                 self.current_file_path = new_selection_file_path
                 self._prepare_valid_file_path_for_interaction()
             else:
                 self.ok_button.disable()
                 self.delete_button.disable()
-        if (event.type == UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
-                and event.ui_element == self.file_selection_list):
+        if (
+            event.type == UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
+            and event.ui_element == self.file_selection_list
+        ):
             new_directory_file_path = Path(self.current_directory_path) / event.text
             self._change_directory_path(new_directory_file_path)
 
@@ -397,8 +466,9 @@ class UIFileDialog(UIWindow):
 
         if self.current_file_path is not None and not self.allow_existing_files_only:
             if self.current_file_path != new_directory_path:
-                self.current_file_path = (new_directory_path /
-                                          self.current_file_path.name).resolve()
+                self.current_file_path = (
+                    new_directory_path / self.current_file_path.name
+                ).resolve()
             self._prepare_valid_file_path_for_interaction()
         else:
             self.current_file_path = None
@@ -424,8 +494,10 @@ class UIFileDialog(UIWindow):
         :param event: event to check.
 
         """
-        if (event.type != UI_CONFIRMATION_DIALOG_CONFIRMED
-                or event.ui_element != self.delete_confirmation_dialog):
+        if (
+            event.type != UI_CONFIRMATION_DIALOG_CONFIRMED
+            or event.ui_element != self.delete_confirmation_dialog
+        ):
             return
         try:
             self.current_file_path.unlink()
@@ -450,15 +522,20 @@ class UIFileDialog(UIWindow):
             confirmation_rect.center = self.rect.center
 
             selected_file_name = self.current_file_path.name
-            long_desc = translate("pygame-gui.Delete_filename",
-                                  file_name=str(selected_file_name))
+            long_desc = translate(
+                "pygame-gui.Delete_filename", file_name=str(selected_file_name)
+            )
             self.delete_confirmation_dialog = UIConfirmationDialog(
                 rect=confirmation_rect,
                 action_long_desc=long_desc,
                 manager=self.ui_manager,
-                action_short_name='pygame-gui.Delete',
-                window_title='pygame-gui.Delete')
-        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.parent_directory_button:
+                action_short_name="pygame-gui.Delete",
+                window_title="pygame-gui.Delete",
+            )
+        if (
+            event.type == UI_BUTTON_PRESSED
+            and event.ui_element == self.parent_directory_button
+        ):
             self._change_directory_path(Path(self.current_directory_path).parent)
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.refresh_button:
             self._change_directory_path(Path(self.current_directory_path))
@@ -474,18 +551,27 @@ class UIFileDialog(UIWindow):
         """
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.cancel_button:
             self.kill()
-        if (event.type == UI_BUTTON_PRESSED and event.ui_element == self.ok_button
-                and self._validate_file_path(self.current_file_path)):
+        if (
+            event.type == UI_BUTTON_PRESSED
+            and event.ui_element == self.ok_button
+            and self._validate_file_path(self.current_file_path)
+        ):
             # old event - to be removed in 0.8.0
-            event_data = {'user_type': OldType(UI_FILE_DIALOG_PATH_PICKED),
-                          'text': str(self.current_file_path),
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
+            event_data = {
+                "user_type": OldType(UI_FILE_DIALOG_PATH_PICKED),
+                "text": str(self.current_file_path),
+                "ui_element": self,
+                "ui_object_id": self.most_specific_combined_id,
+            }
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
             # new event
-            event_data = {'text': str(self.current_file_path),
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_FILE_DIALOG_PATH_PICKED, event_data))
+            event_data = {
+                "text": str(self.current_file_path),
+                "ui_element": self,
+                "ui_object_id": self.most_specific_combined_id,
+            }
+            pygame.event.post(
+                pygame.event.Event(UI_FILE_DIALOG_PATH_PICKED, event_data)
+            )
             self.kill()

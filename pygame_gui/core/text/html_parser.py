@@ -3,6 +3,7 @@ import html.parser
 from collections import deque
 from typing import List, Dict, Any, Tuple
 from pathlib import Path
+
 # noinspection PyPackageRequirements
 from _markupbase import ParserBase
 
@@ -43,16 +44,17 @@ class HTMLParser(html.parser.HTMLParser):
         5.5: 20,
         6: 24,
         6.5: 32,
-        7: 48
+        7: 48,
     }
 
-    def __init__(self,
-                 ui_theme: IUIAppearanceThemeInterface,
-                 combined_ids: List[str],
-                 link_style: Dict[str, Any],
-                 line_spacing: float = 1.0,
-                 text_direction: int = pygame.DIRECTION_LTR):
-
+    def __init__(
+        self,
+        ui_theme: IUIAppearanceThemeInterface,
+        combined_ids: List[str],
+        link_style: Dict[str, Any],
+        line_spacing: float = 1.0,
+        text_direction: int = pygame.DIRECTION_LTR,
+    ):
         super().__init__()
         ParserBase.__init__(self)
         self.ui_theme = ui_theme
@@ -67,15 +69,27 @@ class HTMLParser(html.parser.HTMLParser):
 
         font_info = self.ui_theme.get_font_info(combined_ids)
 
-        self.default_style = {'font_name': font_info['name'], 'font_size': int(font_info['size']),
-                              'font_colour': self.ui_theme.get_colour_or_gradient('normal_text',
-                                                                                  combined_ids),
-                              'bg_colour': pygame.Color('#00000000'), 'shadow_data': None, 'bold': False,
-                              'italic': False, 'underline': False, 'link': False, 'link_href': '', 'effect_id': None,
-                              'antialiased': True, 'script': 'Latn', 'direction': text_direction}
+        self.default_style = {
+            "font_name": font_info["name"],
+            "font_size": int(font_info["size"]),
+            "font_colour": self.ui_theme.get_colour_or_gradient(
+                "normal_text", combined_ids
+            ),
+            "bg_colour": pygame.Color("#00000000"),
+            "shadow_data": None,
+            "bold": False,
+            "italic": False,
+            "underline": False,
+            "link": False,
+            "link_href": "",
+            "effect_id": None,
+            "antialiased": True,
+            "script": "Latn",
+            "direction": text_direction,
+        }
 
         # this is the style used before any html is loaded
-        self.push_style('default_style', self.default_style)
+        self.push_style("default_style", self.default_style)
 
         self.layout_rect_queue = deque([])
 
@@ -100,40 +114,40 @@ class HTMLParser(html.parser.HTMLParser):
         """
         element = tag.lower()
 
-        if element not in ('img', 'br'):
+        if element not in ("img", "br"):
             # don't add self-closing tags to the element stack
             self.element_stack.append(element)
 
         attributes = {key.lower(): value for key, value in attrs}
         style = {}
-        if element in {'b', 'strong'}:
-            style['bold'] = True
-        elif element in {'i', 'em', 'var'}:
-            style['italic'] = True
-        elif element == 'u':
-            style['underline'] = True
-        elif element == 'a':
-            style['link'] = True
-            if 'href' in attributes:
-                style["link_href"] = attributes['href']
-        elif element == 'effect':
+        if element in {"b", "strong"}:
+            style["bold"] = True
+        elif element in {"i", "em", "var"}:
+            style["italic"] = True
+        elif element == "u":
+            style["underline"] = True
+        elif element == "a":
+            style["link"] = True
+            if "href" in attributes:
+                style["link_href"] = attributes["href"]
+        elif element == "effect":
             HTMLParser._handle_effect_tag(attributes, style)
-        elif element == 'shadow':
+        elif element == "shadow":
             self._handle_shadow_tag(attributes, style)
-        elif element == 'font':
+        elif element == "font":
             self._handle_font_tag(attributes, style)
-        elif element == 'body':
+        elif element == "body":
             self._handle_body_tag(attributes, style)
-        elif element == 'br':
+        elif element == "br":
             self._handle_line_break()
-        elif element == 'p':
+        elif element == "p":
             self._handle_p_tag()
-        elif element == 'img':
+        elif element == "img":
             self._handle_img_tag(attributes)
         else:
             warning_text = (
-                f'Unsupported HTML Tag <{element}' + '>. Check documentation'
-                ' for full range of supported tags.'
+                f"Unsupported HTML Tag <{element}" + ">. Check documentation"
+                " for full range of supported tags."
             )
             warnings.warn(warning_text, UserWarning)
 
@@ -141,109 +155,131 @@ class HTMLParser(html.parser.HTMLParser):
 
     @classmethod
     def _handle_effect_tag(cls, attributes, style):
-        if 'id' in attributes:
-            style['effect_id'] = str(attributes['id'])
+        if "id" in attributes:
+            style["effect_id"] = str(attributes["id"])
 
     def _handle_shadow_tag(self, attributes, style):
         shadow_size = 0
         shadow_offset = [0, 0]
         shadow_colour = [50, 50, 50]
-        if 'size' in attributes and (attributes['size'] is not None and len(attributes['size']) > 0):
+        if "size" in attributes and (
+            attributes["size"] is not None and len(attributes["size"]) > 0
+        ):
             try:
-                shadow_size = int(attributes['size'])
+                shadow_size = int(attributes["size"])
             except (ValueError, AttributeError):
                 shadow_size = 0
 
-        if 'offset' in attributes and (attributes['offset'] is not None and len(attributes['offset']) > 0):
+        if "offset" in attributes and (
+            attributes["offset"] is not None and len(attributes["offset"]) > 0
+        ):
             try:
-                offset_str = attributes['offset'].split(',')
+                offset_str = attributes["offset"].split(",")
                 if len(offset_str) == 2:
                     shadow_offset[0] = int(offset_str[0])
                     shadow_offset[1] = int(offset_str[1])
             except (ValueError, AttributeError):
                 shadow_offset = [0, 0]
-        if 'color' in attributes:
+        if "color" in attributes:
             try:
-                if self._is_legal_hex_colour(attributes['color']):
-                    shadow_colour = pygame.color.Color(attributes['color'])
-                elif attributes['color'] is not None and len(attributes['color']) > 0:
-                    shadow_colour = self.ui_theme.get_colour_or_gradient(attributes['color'],
-                                                                         self.combined_ids)
+                if self._is_legal_hex_colour(attributes["color"]):
+                    shadow_colour = pygame.color.Color(attributes["color"])
+                elif attributes["color"] is not None and len(attributes["color"]) > 0:
+                    shadow_colour = self.ui_theme.get_colour_or_gradient(
+                        attributes["color"], self.combined_ids
+                    )
             except (ValueError, AttributeError):
                 shadow_colour = [50, 50, 50]
 
-        style['shadow_data'] = (shadow_size, shadow_offset[0],
-                                shadow_offset[1], shadow_colour, False)
+        style["shadow_data"] = (
+            shadow_size,
+            shadow_offset[0],
+            shadow_offset[1],
+            shadow_colour,
+            False,
+        )
 
     def _handle_font_tag(self, attributes, style):
-        if 'face' in attributes and attributes['face'] is not None:
-            font_name = attributes['face'] if len(attributes['face']) > 0 else None
+        if "face" in attributes and attributes["face"] is not None:
+            font_name = attributes["face"] if len(attributes["face"]) > 0 else None
             style["font_name"] = font_name
-        if 'pixel_size' in attributes:
-            if attributes['pixel_size'] is not None and len(attributes['pixel_size']) > 0:
+        if "pixel_size" in attributes:
+            if (
+                attributes["pixel_size"] is not None
+                and len(attributes["pixel_size"]) > 0
+            ):
                 try:
-                    font_size = int(attributes['pixel_size'])
+                    font_size = int(attributes["pixel_size"])
                 except (ValueError, AttributeError):
-                    font_size = self.default_style['font_size']
+                    font_size = self.default_style["font_size"]
             else:
-                font_size = self.default_style['font_size']
+                font_size = self.default_style["font_size"]
             style["font_size"] = font_size
-        elif 'size' in attributes:
-            if attributes['size'] is not None and len(attributes['size']) > 0:
+        elif "size" in attributes:
+            if attributes["size"] is not None and len(attributes["size"]) > 0:
                 try:
-                    if float(attributes['size']) in self.font_sizes:
-                        font_size = self.font_sizes[float(attributes['size'])]
+                    if float(attributes["size"]) in self.font_sizes:
+                        font_size = self.font_sizes[float(attributes["size"])]
                     else:
-                        warnings.warn('Size of: ' + str(float(attributes['size'])) +
-                                      " - is not a supported html style size."
-                                      " Try .5 increments between 1 & 7 or use 'pixel_size' instead to "
-                                      "set the font size directly", category=UserWarning)
-                        font_size = self.default_style['font_size']
+                        warnings.warn(
+                            "Size of: "
+                            + str(float(attributes["size"]))
+                            + " - is not a supported html style size."
+                            " Try .5 increments between 1 & 7 or use 'pixel_size' instead to "
+                            "set the font size directly",
+                            category=UserWarning,
+                        )
+                        font_size = self.default_style["font_size"]
                 except (ValueError, AttributeError):
-                    font_size = self.default_style['font_size']
+                    font_size = self.default_style["font_size"]
             else:
-                font_size = self.default_style['font_size']
+                font_size = self.default_style["font_size"]
             style["font_size"] = font_size
-        if 'color' in attributes:
+        if "color" in attributes:
             style["font_colour"] = self.default_style["font_colour"]
             try:
-                if self._is_legal_hex_colour(attributes['color']):
-                    style["font_colour"] = pygame.color.Color(attributes['color'])
-                elif attributes['color'] is not None and len(attributes['color']) > 0:
-                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(attributes['color'],
-                                                                                self.combined_ids)
+                if self._is_legal_hex_colour(attributes["color"]):
+                    style["font_colour"] = pygame.color.Color(attributes["color"])
+                elif attributes["color"] is not None and len(attributes["color"]) > 0:
+                    style["font_colour"] = self.ui_theme.get_colour_or_gradient(
+                        attributes["color"], self.combined_ids
+                    )
             except (ValueError, AttributeError):
                 style["font_colour"] = self.default_style["font_colour"]
 
     def _handle_body_tag(self, attributes, style):
-        if 'bgcolor' in attributes:
-            if attributes['bgcolor'] is not None and len(attributes['bgcolor']) > 0:
+        if "bgcolor" in attributes:
+            if attributes["bgcolor"] is not None and len(attributes["bgcolor"]) > 0:
                 try:
-                    if self._is_legal_hex_colour(attributes['bgcolor']):
-                        style["bg_colour"] = pygame.color.Color(attributes['bgcolor'])
+                    if self._is_legal_hex_colour(attributes["bgcolor"]):
+                        style["bg_colour"] = pygame.color.Color(attributes["bgcolor"])
                     else:
                         style["bg_colour"] = self.ui_theme.get_colour_or_gradient(
-                            attributes['bgcolor'],
-                            self.combined_ids)
+                            attributes["bgcolor"], self.combined_ids
+                        )
                 except (ValueError, AttributeError):
-                    style["bg_colour"] = pygame.Color('#00000000')
+                    style["bg_colour"] = pygame.Color("#00000000")
             else:
-                style["bg_colour"] = pygame.Color('#00000000')
+                style["bg_colour"] = pygame.Color("#00000000")
 
     def _handle_line_break(self):
         current_font = self.ui_theme.get_font_dictionary().find_font(
-            font_name=self.current_style['font_name'],
-            font_size=self.current_style['font_size'],
-            bold=self.current_style['bold'],
-            italic=self.current_style['italic'],
-            antialiased=self.current_style['antialiased'],
-            script=self.current_style['script'],
-            direction=self.current_style['direction'])
-        dimensions = (4,
-                      int(round(self.current_style['font_size'] *
-                                self.line_spacing)))
-        chunk = self.create_styled_text_chunk('')
-        self.layout_rect_queue.append(LineBreakLayoutRect(dimensions=dimensions, font=current_font))
+            font_name=self.current_style["font_name"],
+            font_size=self.current_style["font_size"],
+            bold=self.current_style["bold"],
+            italic=self.current_style["italic"],
+            antialiased=self.current_style["antialiased"],
+            script=self.current_style["script"],
+            direction=self.current_style["direction"],
+        )
+        dimensions = (
+            4,
+            int(round(self.current_style["font_size"] * self.line_spacing)),
+        )
+        chunk = self.create_styled_text_chunk("")
+        self.layout_rect_queue.append(
+            LineBreakLayoutRect(dimensions=dimensions, font=current_font)
+        )
         self.layout_rect_queue.append(chunk)
 
     def _handle_p_tag(self):
@@ -252,25 +288,25 @@ class HTMLParser(html.parser.HTMLParser):
         self.in_paragraph_block = True
 
     def _handle_img_tag(self, attributes):
-        image_path = Path('')
+        image_path = Path("")
         image_float = TextFloatPosition.NONE
         padding_top = 0
         padding_right = 0
         padding_bottom = 0
         padding_left = 0
-        if 'src' in attributes:
-            image_path = Path(attributes['src'])
-        if 'float' in attributes:
-            if attributes['float'] == 'left':
+        if "src" in attributes:
+            image_path = Path(attributes["src"])
+        if "float" in attributes:
+            if attributes["float"] == "left":
                 image_float = TextFloatPosition.LEFT
-            elif attributes['float'] == 'right':
+            elif attributes["float"] == "right":
                 image_float = TextFloatPosition.RIGHT
             else:
                 image_float = TextFloatPosition.NONE
-        if 'padding' in attributes and isinstance(attributes['padding'], str):
-            paddings = attributes['padding'].split(' ')
+        if "padding" in attributes and isinstance(attributes["padding"], str):
+            paddings = attributes["padding"].split(" ")
             for index, padding in enumerate(paddings):
-                paddings[index] = int(padding.strip('px'))
+                paddings[index] = int(padding.strip("px"))
             if len(paddings) == 4:
                 padding_top = paddings[0]
                 padding_right = paddings[1]
@@ -297,9 +333,9 @@ class HTMLParser(html.parser.HTMLParser):
                 padding_left = 0
                 padding_bottom = 0
         all_paddings = Padding(padding_top, padding_right, padding_bottom, padding_left)
-        self.layout_rect_queue.append(ImageLayoutRect(image_path,
-                                                      image_float,
-                                                      all_paddings))
+        self.layout_rect_queue.append(
+            ImageLayoutRect(image_path, image_float, all_paddings)
+        )
 
     def handle_endtag(self, tag: str):
         """
@@ -315,7 +351,7 @@ class HTMLParser(html.parser.HTMLParser):
 
         self.pop_style(element)
 
-        if element == 'p':
+        if element == "p":
             self.in_paragraph_block = False
             self._handle_line_break()
 
@@ -394,58 +430,79 @@ class HTMLParser(html.parser.HTMLParser):
         :return: A text 'chunk' all in the same style.
         """
         chunk_font = self.ui_theme.get_font_dictionary().find_font(
-            font_name=self.current_style['font_name'],
-            font_size=self.current_style['font_size'],
-            bold=self.current_style['bold'],
-            italic=self.current_style['italic'],
-            antialiased=self.current_style['antialiased'],
-            script=self.current_style['script'],
-            direction=self.current_style['direction'])
+            font_name=self.current_style["font_name"],
+            font_size=self.current_style["font_size"],
+            bold=self.current_style["bold"],
+            italic=self.current_style["italic"],
+            antialiased=self.current_style["antialiased"],
+            script=self.current_style["script"],
+            direction=self.current_style["direction"],
+        )
 
-        if self.current_style['link']:
-            should_underline = (self.current_style['underline'] or
-                                self.link_style['link_normal_underline'])
+        if self.current_style["link"]:
+            should_underline = (
+                self.current_style["underline"]
+                or self.link_style["link_normal_underline"]
+            )
 
             return HyperlinkTextChunk(
-                self.current_style['link_href'],
+                self.current_style["link_href"],
                 text,
                 chunk_font,
                 should_underline,
-                colour=self.link_style['link_text'],
-                bg_colour=self.current_style['bg_colour'],
-                hover_colour=self.link_style['link_hover'],
-                active_colour=self.link_style['link_selected'],
-                hover_underline=self.link_style['link_hover_underline'],
-                text_shadow_data=self.current_style['shadow_data'],
-                effect_id=self.current_style['effect_id'],
+                colour=self.link_style["link_text"],
+                bg_colour=self.current_style["bg_colour"],
+                hover_colour=self.link_style["link_hover"],
+                active_colour=self.link_style["link_selected"],
+                hover_underline=self.link_style["link_hover_underline"],
+                text_shadow_data=self.current_style["shadow_data"],
+                effect_id=self.current_style["effect_id"],
             )
         else:
-            using_default_text_colour = (self.current_style['font_colour'] ==
-                                         self.default_style['font_colour'])
+            using_default_text_colour = (
+                self.current_style["font_colour"] == self.default_style["font_colour"]
+            )
 
             return TextLineChunkFTFont(
                 text,
                 chunk_font,
-                self.current_style['underline'],
-                colour=self.current_style['font_colour'],
+                self.current_style["underline"],
+                colour=self.current_style["font_colour"],
                 using_default_text_colour=using_default_text_colour,
-                bg_colour=self.current_style['bg_colour'],
-                text_shadow_data=self.current_style['shadow_data'],
-                effect_id=self.current_style['effect_id'],
+                bg_colour=self.current_style["bg_colour"],
+                text_shadow_data=self.current_style["shadow_data"],
+                effect_id=self.current_style["effect_id"],
             )
 
     @staticmethod
     def _is_legal_hex_colour(col):
-        if (
-            col is not None
-            and len(col) > 0
-            and col[0] == '#'
-            and len(col) in {7, 9}
-        ):
+        if col is not None and len(col) > 0 and col[0] == "#" and len(col) in {7, 9}:
             for col_index in range(1, len(col)):
                 col_letter = col[col_index]
-                if col_letter not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                                      'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F']:
+                if col_letter not in [
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "a",
+                    "A",
+                    "b",
+                    "B",
+                    "c",
+                    "C",
+                    "d",
+                    "D",
+                    "e",
+                    "E",
+                    "f",
+                    "F",
+                ]:
                     return False
             return True
         return False

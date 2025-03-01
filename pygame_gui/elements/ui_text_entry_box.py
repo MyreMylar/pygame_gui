@@ -1,11 +1,11 @@
 from typing import Union, Dict, Optional
 
-from pygame_gui.core.utility import clipboard_paste, clipboard_copy
-
 from pygame import KEYDOWN, TEXTINPUT
 from pygame import KMOD_META, KMOD_CTRL, KMOD_ALT, K_x, K_v
 from pygame import K_BACKSPACE, K_DELETE, K_RETURN
 from pygame import key
+
+from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 from pygame.event import Event, post
 from pygame_gui._constants import UI_TEXT_ENTRY_CHANGED
 from pygame_gui.core import ObjectID
@@ -34,35 +34,40 @@ class UITextEntryBox(UITextBox):
                               shown instead.
     """
 
-    def __init__(self,
-                 relative_rect: RectLike,
-                 initial_text: str = "",
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1,
-                 *,
-                 placeholder_text: Optional[str] = None):
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        initial_text: str = "",
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        visible: int = 1,
+        *,
+        placeholder_text: Optional[str] = None,
+    ):
+        super().__init__(
+            initial_text,
+            relative_rect,
+            manager=manager,
+            container=container,
+            parent_element=parent_element,
+            object_id=object_id,
+            anchors=anchors,
+            visible=visible,
+            allow_split_dashes=False,
+            plain_text_display_only=True,
+            should_html_unescape_input_text=True,
+            placeholder_text=placeholder_text,
+        )
 
-        super().__init__(initial_text,
-                         relative_rect,
-                         manager=manager,
-                         container=container,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         anchors=anchors,
-                         visible=visible,
-                         allow_split_dashes=False,
-                         plain_text_display_only=True,
-                         should_html_unescape_input_text=True,
-                         placeholder_text=placeholder_text)
-
-        self._create_valid_ids(container=container,
-                               parent_element=parent_element,
-                               object_id=object_id,
-                               element_id='text_entry_box')
+        self._create_valid_ids(
+            container=container,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id="text_entry_box",
+        )
 
         # input timings - I expect nobody really wants to mess with these that much
         # ideally we could populate from the os settings but that sounds like a headache
@@ -134,7 +139,10 @@ class UITextEntryBox(UITextBox):
             self._align_all_text_rows()
             self.redraw_from_chunks()
 
-        if self.cursor_blink_delay_after_moving_acc > self.cursor_blink_delay_after_moving:
+        if (
+            self.cursor_blink_delay_after_moving_acc
+            > self.cursor_blink_delay_after_moving
+        ):
             if self.blink_cursor_time_acc >= self.blink_cursor_time:
                 self.blink_cursor_time_acc = 0.0
                 if self.cursor_on:
@@ -198,9 +206,11 @@ class UITextEntryBox(UITextBox):
 
         if self.html_text != initial_text_state:
             # new event
-            event_data = {'text': self.html_text,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
+            event_data = {
+                "text": self.html_text,
+                "ui_element": self,
+                "ui_object_id": self.most_specific_combined_id,
+            }
             post(Event(UI_TEXT_ENTRY_CHANGED, event_data))
 
         return consumed_event
@@ -228,7 +238,10 @@ class UITextEntryBox(UITextBox):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self._delete_selected_text()
             elif self.edit_position < len(self.html_text):
-                self.html_text = self.html_text[:self.edit_position] + self.html_text[self.edit_position + 1:]
+                self.html_text = (
+                    self.html_text[: self.edit_position]
+                    + self.html_text[self.edit_position + 1 :]
+                )
                 self.edit_position = self.edit_position
                 self.cursor_has_moved_recently = True
 
@@ -239,14 +252,14 @@ class UITextEntryBox(UITextBox):
             consumed_event = True
 
         return consumed_event
-    
+
     def _replace_selected_text_with_character(self, character):
         start_of_selection = self._replace_selection_with_text_in_html_string(character)
         self.text_box_layout.delete_selected_text()
         self.text_box_layout.insert_text(character, start_of_selection, self.parser)
         self.edit_position = start_of_selection + 1
         self.select_range = [0, 0]
-        
+
     def _delete_selected_text(self):
         self.text_box_layout.delete_selected_text()
         low_end = min(self.select_range[0], self.select_range[1])
@@ -260,7 +273,7 @@ class UITextEntryBox(UITextBox):
         self.redraw_from_text_block()
 
     def _insert_line_break_at_edit_cursor(self):
-        self._insert_text_into_html_string('\n')
+        self._insert_text_into_html_string("\n")
         self.text_box_layout.insert_line_break(self.edit_position, self.parser)
         self.edit_position += 1
         self.redraw_from_text_block()
@@ -268,7 +281,10 @@ class UITextEntryBox(UITextBox):
         return True
 
     def _backspace_at_edit_cursor(self):
-        self.html_text = self.html_text[:self.edit_position - 1] + self.html_text[self.edit_position:]
+        self.html_text = (
+            self.html_text[: self.edit_position - 1]
+            + self.html_text[self.edit_position :]
+        )
         self.edit_position -= 1
         self.cursor_has_moved_recently = True
 
@@ -286,7 +302,7 @@ class UITextEntryBox(UITextBox):
         """
         consumed_event = False
 
-        if hasattr(event, 'unicode'):
+        if hasattr(event, "unicode"):
             character = event.unicode
             consumed_event = self._process_entered_character(character)
         return consumed_event
@@ -304,7 +320,9 @@ class UITextEntryBox(UITextBox):
                     self._replace_selected_text_with_character(character)
                 else:
                     self._insert_text_into_html_string(character)
-                    self.text_box_layout.insert_text(character, self.edit_position, self.parser)
+                    self.text_box_layout.insert_text(
+                        character, self.edit_position, self.parser
+                    )
                     self.edit_position += 1
                 self.redraw_from_text_block()
                 self.cursor_has_moved_recently = True
@@ -312,8 +330,8 @@ class UITextEntryBox(UITextBox):
         return processed_char
 
     def _insert_text_into_html_string(self, new_text):
-        start_str = self.html_text[:self.edit_position]
-        end_str = self.html_text[self.edit_position:]
+        start_str = self.html_text[: self.edit_position]
+        end_str = self.html_text[self.edit_position :]
         self.html_text = start_str + new_text + end_str
 
     def _process_keyboard_shortcut_event(self, event: Event) -> bool:
@@ -342,19 +360,24 @@ class UITextEntryBox(UITextBox):
 
         """
         consumed_event = False
-        if (event.key == K_x and
-                (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):
+        if (
+            event.key == K_x
+            and (event.mod & KMOD_CTRL or event.mod & KMOD_META)
+            and not (event.mod & KMOD_ALT)
+        ):
             self._do_cut()
             consumed_event = True
         return consumed_event
 
     def _do_cut(self):
-        if (self.ui_manager.copy_text_enabled and self.copy_text_enabled and 
-                abs(self.select_range[0] - self.select_range[1]) > 0):
+        if (
+            self.ui_manager.copy_text_enabled
+            and self.copy_text_enabled
+            and abs(self.select_range[0] - self.select_range[1]) > 0
+        ):
             low_end = min(self.select_range[0], self.select_range[1])
             high_end = max(self.select_range[0], self.select_range[1])
-        
+
             clipboard_copy(self.html_text[low_end:high_end])
             self.text_box_layout.delete_selected_text()
             self.edit_position = low_end
@@ -374,8 +397,11 @@ class UITextEntryBox(UITextBox):
 
         """
         consumed_event = False
-        if (event.key == K_v and (event.mod & KMOD_CTRL or event.mod & KMOD_META) and
-                not (event.mod & KMOD_ALT)):  # hopefully enable diacritic letters:
+        if (
+            event.key == K_v
+            and (event.mod & KMOD_CTRL or event.mod & KMOD_META)
+            and not (event.mod & KMOD_ALT)
+        ):  # hopefully enable diacritic letters:
             self._do_paste()
             consumed_event = True
         return consumed_event
@@ -390,11 +416,15 @@ class UITextEntryBox(UITextBox):
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self._replace_selection_with_new_pasted_text(new_text)
             elif len(new_text) > 0:
-                self.html_text = (self.html_text[:self.edit_position] +
-                                  new_text +
-                                  self.html_text[self.edit_position:])
+                self.html_text = (
+                    self.html_text[: self.edit_position]
+                    + new_text
+                    + self.html_text[self.edit_position :]
+                )
                 original_edit_pos = self.edit_position
-                self._set_text_and_adjust_edit_pos_after_paste(original_edit_pos, new_text)
+                self._set_text_and_adjust_edit_pos_after_paste(
+                    original_edit_pos, new_text
+                )
                 self.cursor_has_moved_recently = True
 
     def _set_text_and_adjust_edit_pos_after_paste(self, starting_paste_pos, new_text):
@@ -421,4 +451,10 @@ class UITextEntryBox(UITextBox):
 
     @staticmethod
     def convert_all_line_endings_to_unix(input_str: str):
-        return input_str.replace('\r\n', '\n').replace('\r', '\n')
+        """
+        Returns a copy of the input string with all the line endings changed to the unix style.
+
+        :param input_str: string to copy and replace
+        :return: a copy of the input string with the line endings replaced
+        """
+        return input_str.replace("\r\n", "\n").replace("\r", "\n")

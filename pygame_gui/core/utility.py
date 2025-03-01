@@ -2,6 +2,7 @@
 This code owes a lot to pyperclip by Al Sweigart al@inventwithpython.com.
 
 """
+
 import platform
 import subprocess
 import time
@@ -45,8 +46,9 @@ else:
     from importlib import resources
 
 PLATFORM = platform.system().upper()
-if PLATFORM == 'WINDOWS':
+if PLATFORM == "WINDOWS":
     import ctypes
+
     # from ctypes import c_size_t, sizeof, c_wchar_p, c_wchar
     from ctypes.wintypes import HGLOBAL, LPVOID, BOOL, UINT, HANDLE, HWND
     from ctypes.wintypes import DWORD, INT, HMENU, HINSTANCE, LPCSTR
@@ -88,6 +90,7 @@ if PLATFORM == 'WINDOWS':
         """
         Wrapper for platform functions.
         """
+
         def __init__(self, func):
             super().__setattr__("func", func)
             self.argtypes = []
@@ -100,11 +103,23 @@ if PLATFORM == 'WINDOWS':
             setattr(self.func, key, value)
 
     def __windows_copy(data: str):
-        msvcrt = ctypes.CDLL('msvcrt')
+        msvcrt = ctypes.CDLL("msvcrt")
 
         safe_create_window = CheckedCall(ctypes.windll.user32.CreateWindowExA)
-        safe_create_window.argtypes = [DWORD, LPCSTR, LPCSTR, DWORD, INT, INT,
-                                       INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
+        safe_create_window.argtypes = [
+            DWORD,
+            LPCSTR,
+            LPCSTR,
+            DWORD,
+            INT,
+            INT,
+            INT,
+            INT,
+            HWND,
+            HMENU,
+            HINSTANCE,
+            LPVOID,
+        ]
         safe_create_window.restype = HWND
 
         safe_destroy_window = CheckedCall(ctypes.windll.user32.DestroyWindow)
@@ -137,8 +152,9 @@ if PLATFORM == 'WINDOWS':
 
         # weirdly this temporary window handle seems to work for pasting where the
         # normal pygame window handle does not
-        hwnd = safe_create_window(0, b"STATIC", None, 0, 0, 0, 0, 0,
-                                  None, None, None, None)
+        hwnd = safe_create_window(
+            0, b"STATIC", None, 0, 0, 0, 0, 0, None, None, None, None
+        )
 
         with __windows_clipboard(hwnd):
             safe_empty()
@@ -147,42 +163,46 @@ if PLATFORM == 'WINDOWS':
                 count = wcslen(data) + 1
                 handle = safe_alloc(0x0002, count * ctypes.sizeof(ctypes.c_wchar))
 
-                ctypes.memmove(ctypes.c_wchar_p(safe_lock(handle)),
-                               ctypes.c_wchar_p(data),
-                               count * ctypes.sizeof(ctypes.c_wchar))
+                ctypes.memmove(
+                    ctypes.c_wchar_p(safe_lock(handle)),
+                    ctypes.c_wchar_p(data),
+                    count * ctypes.sizeof(ctypes.c_wchar),
+                )
 
                 safe_unlock(handle)
                 safe_set_clipboard(13, handle)  # cf_unicode_text = 13
 
         safe_destroy_window(hwnd)
-elif PLATFORM == 'LINUX':
+elif PLATFORM == "LINUX":
 
     def __linux_copy(data: str):
-        with subprocess.Popen(['xsel', '-b', '-i'],
-                              stdin=subprocess.PIPE,
-                              close_fds=True) as process:
-            process.communicate(input=data.encode('utf-8'))
+        with subprocess.Popen(
+            ["xsel", "-b", "-i"], stdin=subprocess.PIPE, close_fds=True
+        ) as process:
+            process.communicate(input=data.encode("utf-8"))
 
     def __linux_paste():
-        with subprocess.Popen(['xsel', '-b', '-o'],
-                              stdout=subprocess.PIPE,
-                              close_fds=True) as process:
+        with subprocess.Popen(
+            ["xsel", "-b", "-o"], stdout=subprocess.PIPE, close_fds=True
+        ) as process:
             stdout, _ = process.communicate()
-            return stdout.decode('utf-8')
+            return stdout.decode("utf-8")
 
-elif PLATFORM == 'DARWIN':
+elif PLATFORM == "DARWIN":
+
     def __mac_copy(data: str):
-        with subprocess.Popen('pbcopy',
-                              env={'LANG': 'en_US.UTF-8'},
-                              stdin=subprocess.PIPE) as process:
-
-            process.communicate(data.encode('utf-8'))
+        with subprocess.Popen(
+            "pbcopy", env={"LANG": "en_US.UTF-8"}, stdin=subprocess.PIPE
+        ) as process:
+            process.communicate(data.encode("utf-8"))
 
     def __mac_paste():
-        return subprocess.check_output(
-            'pbpaste', env={'LANG': 'en_US.UTF-8'}).decode('utf-8')
+        return subprocess.check_output("pbpaste", env={"LANG": "en_US.UTF-8"}).decode(
+            "utf-8"
+        )
 
 else:
+
     def __unknown_copy(data: str):
         # copy not supported on this platform
         pass
@@ -199,15 +219,17 @@ def clipboard_copy(data: str):
     :return: A platform specific copy function.
 
     """
-    if (pygame.vernum.major == 2 and pygame.vernum.minor >= 2) or pygame.vernum.major > 2:
+    if (
+        pygame.vernum.major == 2 and pygame.vernum.minor >= 2
+    ) or pygame.vernum.major > 2:
         pygame.scrap.put_text(data)
     else:
         current_platform = platform.system().upper()
-        if current_platform == 'WINDOWS':
+        if current_platform == "WINDOWS":
             __windows_copy(data)
-        elif current_platform == 'LINUX':
+        elif current_platform == "LINUX":
             __linux_copy(data)
-        elif current_platform == 'DARWIN':
+        elif current_platform == "DARWIN":
             __mac_copy(data)
         else:
             __unknown_copy(data)
@@ -220,14 +242,16 @@ def clipboard_paste():
     :return: A platform specific paste function.
 
     """
-    if (pygame.vernum.major == 2 and pygame.vernum.minor >= 2) or pygame.vernum.major > 2:
+    if (
+        pygame.vernum.major == 2 and pygame.vernum.minor >= 2
+    ) or pygame.vernum.major > 2:
         return pygame.scrap.get_text()
     current_platform = platform.system().upper()
-    if current_platform == 'WINDOWS':
+    if current_platform == "WINDOWS":
         return __windows_paste()
-    elif current_platform == 'LINUX':
+    elif current_platform == "LINUX":
         return __linux_paste()
-    elif current_platform == 'DARWIN':
+    elif current_platform == "DARWIN":
         return __mac_paste()
     else:
         return __unknown_paste()
@@ -255,10 +279,12 @@ def premul_col(original_colour: pygame.Color) -> pygame.Color:
     Perform a pre-multiply alpha operation on a pygame colour
     """
     alpha_mul = original_colour.a / 255
-    return pygame.Color(int(original_colour.r * alpha_mul),
-                        int(original_colour.g * alpha_mul),
-                        int(original_colour.b * alpha_mul),
-                        original_colour.a)
+    return pygame.Color(
+        int(original_colour.r * alpha_mul),
+        int(original_colour.g * alpha_mul),
+        int(original_colour.b * alpha_mul),
+        original_colour.a,
+    )
 
 
 def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
@@ -269,14 +295,17 @@ def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
     """
     inverse_alpha_mul = 1.0 / max(0.001, (premul_colour.a / 255))
 
-    return pygame.Color(int(premul_colour.r * inverse_alpha_mul),
-                        int(premul_colour.g * inverse_alpha_mul),
-                        int(premul_colour.b * inverse_alpha_mul),
-                        premul_colour.a)
+    return pygame.Color(
+        int(premul_colour.r * inverse_alpha_mul),
+        int(premul_colour.g * inverse_alpha_mul),
+        int(premul_colour.b * inverse_alpha_mul),
+        premul_colour.a,
+    )
 
 
-def render_white_text_alpha_black_bg(font: IGUIFontInterface,
-                                     text: str) -> pygame.surface.Surface:
+def render_white_text_alpha_black_bg(
+    font: IGUIFontInterface, text: str
+) -> pygame.surface.Surface:
     """
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
@@ -284,10 +313,12 @@ def render_white_text_alpha_black_bg(font: IGUIFontInterface,
     return font.render_premul(text, pygame.Color("white"))
 
 
-def basic_blit(destination: pygame.surface.Surface,
-               source: pygame.surface.Surface,
-               pos: Union[Tuple[int, int], pygame.Rect],
-               area: Union[pygame.Rect, None] = None):
+def basic_blit(
+    destination: pygame.surface.Surface,
+    source: pygame.surface.Surface,
+    pos: Union[Tuple[int, int], pygame.Rect],
+    area: Union[pygame.Rect, None] = None,
+):
     """
     The basic blitting function to use. WE need to wrap this, so we can support pre-multiplied alpha
     on post 2.0.0.dev10 versions of pygame and regular blitting on earlier versions.
@@ -301,9 +332,11 @@ def basic_blit(destination: pygame.surface.Surface,
     destination.blit(source, pos, area, special_flags=pygame.BLEND_PREMULTIPLIED)
 
 
-def apply_colour_to_surface(colour: pygame.Color,
-                            shape_surface: pygame.surface.Surface,
-                            rect: Union[pygame.Rect, None] = None):
+def apply_colour_to_surface(
+    colour: pygame.Color,
+    shape_surface: pygame.surface.Surface,
+    rect: Union[pygame.Rect, None] = None,
+):
     """
     Apply a colour to a shape surface by multiplication blend. This works best when the shape
     surface is predominantly white.
@@ -314,12 +347,15 @@ def apply_colour_to_surface(colour: pygame.Color,
 
     """
     if rect is not None:
-        colour_surface = pygame.surface.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
+        colour_surface = pygame.surface.Surface(
+            rect.size, flags=pygame.SRCALPHA, depth=32
+        )
         colour_surface.fill(colour)
         shape_surface.blit(colour_surface, rect, special_flags=pygame.BLEND_RGBA_MULT)
     else:
-        colour_surface = pygame.surface.Surface(shape_surface.get_size(),
-                                                flags=pygame.SRCALPHA, depth=32)
+        colour_surface = pygame.surface.Surface(
+            shape_surface.get_size(), flags=pygame.SRCALPHA, depth=32
+        )
         colour_surface.fill(colour)
         shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
@@ -331,12 +367,13 @@ class PackageResource:
     :param package: The python package our resource is located in (e.g. 'pygame_gui.data')
     :param resource: The name of the resource (e.g. 'default_theme.json')
     """
+
     def __init__(self, package: str, resource: str):
         self.package = package
         self.resource = resource
 
     def __repr__(self):
-        return f'{self.package}.{self.resource}'
+        return f"{self.package}.{self.resource}"
 
     def to_path(self) -> str:
         """
@@ -345,11 +382,13 @@ class PackageResource:
 
         :return: A string path.
         """
-        root_path = ''
-        relative_path = self.package.replace('.', '/') + '/' + self.resource
-        if self.package.find('pygame_gui') == 0:
+        root_path = ""
+        relative_path = self.package.replace(".", "/") + "/" + self.resource
+        if self.package.find("pygame_gui") == 0:
             # This is default data from pygame_gui so relative to pygame_gui rather than app
-            root_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            root_path = os.path.abspath(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            )
         return create_resource_path(os.path.join(root_path, relative_path))
 
 
@@ -363,12 +402,14 @@ class FontResource:
     :param style: A Style dictionary for bold and italic styling.
     :param location: A location for the font file - a PackageResource, or a file path.
     """
-    def __init__(self,
-                 font_id: str,
-                 size: int,
-                 style: Dict[str, bool],
-                 location: Tuple[Union[str, PackageResource, bytes], bool]):
 
+    def __init__(
+        self,
+        font_id: str,
+        size: int,
+        style: Dict[str, bool],
+        location: Tuple[Union[str, PackageResource, bytes], bool],
+    ):
         self.font_id = font_id
         self.size = size
         self.style = style
@@ -390,40 +431,62 @@ class FontResource:
             try:
                 if self.font_type_to_use == "freetype":
                     self.loaded_font = GUIFontFreetype(
-                        io.BytesIO((resources.files(self.location.package) /
-                                    self.location.resource).read_bytes()),
-                        self.size, self.force_style, self.style)
+                        io.BytesIO(
+                            (
+                                resources.files(self.location.package)
+                                / self.location.resource
+                            ).read_bytes()
+                        ),
+                        self.size,
+                        self.force_style,
+                        self.style,
+                    )
                 elif self.font_type_to_use == "pygame":
                     self.loaded_font = GUIFontPygame(
-                        io.BytesIO((resources.files(self.location.package) /
-                                    self.location.resource).read_bytes()),
-                        self.size, self.force_style, self.style)
+                        io.BytesIO(
+                            (
+                                resources.files(self.location.package)
+                                / self.location.resource
+                            ).read_bytes()
+                        ),
+                        self.size,
+                        self.force_style,
+                        self.style,
+                    )
             except (pygame.error, OSError):
                 error = FileNotFoundError(
-                    f'Unable to load resource with path: {str(self.location)}'
+                    f"Unable to load resource with path: {str(self.location)}"
                 )
 
         elif isinstance(self.location, str):
             try:
                 if self.font_type_to_use == "freetype":
-                    self.loaded_font = GUIFontFreetype(self.location, self.size, self.force_style, self.style)
+                    self.loaded_font = GUIFontFreetype(
+                        self.location, self.size, self.force_style, self.style
+                    )
                 elif self.font_type_to_use == "pygame":
-                    self.loaded_font = GUIFontPygame(self.location, self.size, self.force_style, self.style)
+                    self.loaded_font = GUIFontPygame(
+                        self.location, self.size, self.force_style, self.style
+                    )
             except (pygame.error, OSError):
                 error = FileNotFoundError(
-                    f'Unable to load resource with path: {str(self.location)}'
+                    f"Unable to load resource with path: {str(self.location)}"
                 )
 
         elif isinstance(self.location, bytes):
             try:
                 file_obj = io.BytesIO(base64.standard_b64decode(self.location))
                 if self.font_type_to_use == "freetype":
-                    self.loaded_font = GUIFontFreetype(file_obj, self.size, self.force_style, self.style)
+                    self.loaded_font = GUIFontFreetype(
+                        file_obj, self.size, self.force_style, self.style
+                    )
                 elif self.font_type_to_use == "pygame":
-                    self.loaded_font = GUIFontPygame(file_obj, self.size, self.force_style, self.style)
+                    self.loaded_font = GUIFontPygame(
+                        file_obj, self.size, self.force_style, self.style
+                    )
             except (pygame.error, OSError):
                 error = FileNotFoundError(
-                    f'Unable to load resource with path: {str(self.location)}'
+                    f"Unable to load resource with path: {str(self.location)}"
                 )
 
         return error
@@ -439,10 +502,10 @@ class ImageResource:
     :param image_id: A string ID for identifying this image in particular.
     :param location: A location for this image, a PackageResource, or a file path.
     """
-    def __init__(self,
-                 image_id: str,
-                 location: Union[PackageResource, str],
-                 premultiplied: bool):
+
+    def __init__(
+        self, image_id: str, location: Union[PackageResource, str], premultiplied: bool
+    ):
         self.image_id = image_id
         self.location = location
         self.loaded_surface: Optional[pygame.Surface] = None
@@ -458,12 +521,15 @@ class ImageResource:
         error = None
         if isinstance(self.location, PackageResource):
             try:
-                with (resources.files(self.location.package) /
-                      self.location.resource).open('rb') as open_resource:
-                    self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
+                with (
+                    resources.files(self.location.package) / self.location.resource
+                ).open("rb") as open_resource:
+                    self.loaded_surface = pygame.image.load(
+                        open_resource
+                    ).convert_alpha()
             except (pygame.error, OSError):
                 error = FileNotFoundError(
-                    f'Unable to load resource with path: {str(self.location)}'
+                    f"Unable to load resource with path: {str(self.location)}"
                 )
 
         elif isinstance(self.location, str):
@@ -471,11 +537,15 @@ class ImageResource:
                 self.loaded_surface = pygame.image.load(self.location).convert_alpha()
             except (pygame.error, OSError):
                 error = FileNotFoundError(
-                    f'Unable to load resource with path: {str(self.location)}'
+                    f"Unable to load resource with path: {str(self.location)}"
                 )
 
         # perform pre-multiply alpha operation
-        if error is None and self.loaded_surface is not None and not self.is_file_premultiplied:
+        if (
+            error is None
+            and self.loaded_surface is not None
+            and not self.is_file_premultiplied
+        ):
             self.loaded_surface = self.loaded_surface.premul_alpha()
 
         return error
@@ -491,10 +561,10 @@ class SurfaceResource:
     :param image_resource: The parent ImageResource of this surface.
     :param sub_surface_rect: An optional Rect for sub-surfacing.
     """
-    def __init__(self,
-                 image_resource: ImageResource,
-                 sub_surface_rect: pygame.Rect = None):
 
+    def __init__(
+        self, image_resource: ImageResource, sub_surface_rect: pygame.Rect = None
+    ):
         self.image_resource = image_resource
         self.sub_surface_rect = sub_surface_rect
         self._surface: Optional[pygame.surface.Surface] = None
@@ -508,8 +578,10 @@ class SurfaceResource:
         error = None
         if self.sub_surface_rect and self.image_resource.loaded_surface is not None:
             try:
-                self.surface = self.image_resource.loaded_surface.subsurface(self.sub_surface_rect)
-            except(pygame.error, OSError) as err:
+                self.surface = self.image_resource.loaded_surface.subsurface(
+                    self.sub_surface_rect
+                )
+            except (pygame.error, OSError) as err:
                 error = err
         return error
 
@@ -524,9 +596,7 @@ class SurfaceResource:
             return self.image_resource.loaded_surface
 
         # Return an empty surface here, error elsewhere
-        return pygame.surface.Surface((0, 0),
-                                      depth=32,
-                                      flags=pygame.SRCALPHA)
+        return pygame.surface.Surface((0, 0), depth=32, flags=pygame.SRCALPHA)
 
     @surface.setter
     def surface(self, surface: pygame.surface.Surface):
@@ -547,6 +617,7 @@ class ClosableQueue(Queue):
 
     It seems to work OK.
     """
+
     SENTINEL = object()
 
     def close(self):
@@ -575,12 +646,14 @@ class StoppableOutputWorker(Thread):
     :param out_queue: Queue of resources finished loading.
     :param error_queue: A Queue of any errors generated while loading to display at the end.
     """
-    def __init__(self,
-                 func,
-                 in_queue: ClosableQueue,
-                 out_queue: ClosableQueue,
-                 error_queue: ClosableQueue):
 
+    def __init__(
+        self,
+        func,
+        in_queue: ClosableQueue,
+        out_queue: ClosableQueue,
+        error_queue: ClosableQueue,
+    ):
         super().__init__()
         self.func = func
         self.in_queue = in_queue

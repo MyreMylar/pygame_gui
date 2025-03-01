@@ -11,10 +11,16 @@ FileArg = Union[AnyPath, IO]
 
 
 class GUIFontPygame(IGUIFontInterface):
-
-    def __init__(self, file: Optional[FileArg], size: Union[int, float],
-                 force_style: bool = False, style: Optional[Dict[str, bool]] = None):
-        self.__internal_font: Font = Font(file, size)  # no resolution option for pygame font?
+    def __init__(
+        self,
+        file: Optional[FileArg],
+        size: Union[int, float],
+        force_style: bool = False,
+        style: Optional[Dict[str, bool]] = None,
+    ):
+        self.__internal_font: Font = Font(
+            file, size
+        )  # no resolution option for pygame font?
 
         self.__internal_font.set_point_size(size)
         self.pad = True
@@ -27,20 +33,20 @@ class GUIFontPygame(IGUIFontInterface):
         self.direction = pygame.DIRECTION_LTR
 
         if style is not None:
-            self.antialiased = style['antialiased']
-            self.italic = style['italic']
-            self.bold = style['bold']
+            self.antialiased = style["antialiased"]
+            self.italic = style["italic"]
+            self.bold = style["bold"]
 
-            if 'script' in style:
-                self.__internal_font.set_script(style['script'])
+            if "script" in style:
+                self.__internal_font.set_script(style["script"])
 
-            if 'direction' in style:
-                self.__internal_font.set_direction(style['direction'])
-                self.direction = style['direction']
+            if "direction" in style:
+                self.__internal_font.set_direction(style["direction"])
+                self.direction = style["direction"]
 
             if force_style:
-                self.__internal_font.bold = style['bold']
-                self.__internal_font.italic = style['italic']
+                self.__internal_font.bold = style["bold"]
+                self.__internal_font.italic = style["italic"]
 
     def size(self, text: str) -> Tuple[int, int]:
         return self.get_rect(text).size
@@ -68,7 +74,9 @@ class GUIFontPygame(IGUIFontInterface):
     def get_rect(self, text: str) -> Rect:
         # only way to get accurate font layout data with kerning is to render it ourselves it seems
         if text != "":
-            text_surface = self.__internal_font.render(text, self.antialiased, pygame.Color("white"))
+            text_surface = self.__internal_font.render(
+                text, self.antialiased, pygame.Color("white")
+            )
             ascent = self.__internal_font.get_ascent()
             return pygame.Rect((0, ascent), text_surface.get_size())
         else:
@@ -85,16 +93,27 @@ class GUIFontPygame(IGUIFontInterface):
             text_surface = text_surface.premul_alpha()
         return text_surface
 
-    def render_premul_to(self, text: str, text_colour: Color,
-                         surf_size: Tuple[int, int], surf_position: Tuple[int, int]) -> Surface:
+    def render_premul_to(
+        self,
+        text: str,
+        text_colour: Color,
+        surf_size: Tuple[int, int],
+        surf_position: Tuple[int, int],
+    ) -> Surface:
         text_surface = pygame.Surface(surf_size, depth=32, flags=pygame.SRCALPHA)
         text_surface.fill((0, 0, 0, 0))
         temp_surf = self.__internal_font.render(text, self.antialiased, text_colour)
         temp_surf = temp_surf.convert_alpha()
         if temp_surf.get_width() > 0 and temp_surf.get_height() > 0:
             temp_surf = temp_surf.premul_alpha()
-            text_surface.blit(temp_surf, (surf_position[0], surf_position[1]-self.__internal_font.get_ascent()),
-                              special_flags=pygame.BLEND_PREMULTIPLIED)
+            text_surface.blit(
+                temp_surf,
+                (
+                    surf_position[0],
+                    surf_position[1] - self.__internal_font.get_ascent(),
+                ),
+                special_flags=pygame.BLEND_PREMULTIPLIED,
+            )
         return text_surface
 
     def get_padding_height(self):

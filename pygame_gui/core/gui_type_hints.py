@@ -17,6 +17,7 @@ class SpriteWithHealth(Protocol):
         rect: The rectangular area of the sprite.
         image: The image of the sprite.
     """
+
     current_health: int
     health_capacity: int
     rect: Rect

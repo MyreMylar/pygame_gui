@@ -5,11 +5,11 @@ from pygame_gui.core.gui_type_hints import Coordinate
 
 class IUITooltipInterface(metaclass=ABCMeta):
     """
-       A metaclass that defines the interface that a UI Tool tip uses.
+    A metaclass that defines the interface that a UI Tool tip uses.
 
-       Interfaces like this help us evade cyclical import problems by allowing us to define the
-       actual manager class later on and have it make use of the classes that use the interface.
-       """
+    Interfaces like this help us evade cyclical import problems by allowing us to define the
+    actual manager class later on and have it make use of the classes that use the interface.
+    """
 
     @abstractmethod
     def rebuild(self):

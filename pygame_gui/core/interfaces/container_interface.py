@@ -187,7 +187,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         Iterates over the elements within the container-like interface.
         This method allows iterating over the children elements within the container.
         """
-        
+
     @abstractmethod
     def __contains__(self, item: IUIElementInterface) -> bool:
         """
@@ -198,12 +198,12 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
-        A metaclass that defines the interface for containers used by elements.
+    A metaclass that defines the interface for containers used by elements.
 
-        This interface lets us treat classes like UIWindows and UIPanels like containers for
-        elements even though they actually pass this functionality off to the proper UIContainer
-        class.
-        """
+    This interface lets us treat classes like UIWindows and UIPanels like containers for
+    elements even though they actually pass this functionality off to the proper UIContainer
+    class.
+    """
 
     @abstractmethod
     def get_container(self) -> IUIContainerInterface:
@@ -226,14 +226,14 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         process events. Should also hide all the children elements.
         If the container was hidden before - ignore.
         """
-        
+
     @abstractmethod
     def __iter__(self) -> typing.Iterator[IUIElementInterface]:
         """
-        Iterates over the elements within the container-like interface. 
+        Iterates over the elements within the container-like interface.
         This method allows iterating over the children elements within the container.
         """
-        
+
     @abstractmethod
     def __contains__(self, item: IUIElementInterface) -> bool:
         """

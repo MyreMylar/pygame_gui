@@ -11,9 +11,13 @@ FileArg = Union[AnyPath, IO]
 
 
 class GUIFontFreetype(IGUIFontInterface):
-
-    def __init__(self, file: Optional[FileArg], size: Union[int, float],
-                 force_style: bool = False, style: Optional[Dict[str, bool]] = None):
+    def __init__(
+        self,
+        file: Optional[FileArg],
+        size: Union[int, float],
+        force_style: bool = False,
+        style: Optional[Dict[str, bool]] = None,
+    ):
         self.__internal_font: Font = Font(file, size, resolution=72)
         self.__internal_font.pad = True
         self.__internal_font.origin = True
@@ -25,11 +29,11 @@ class GUIFontFreetype(IGUIFontInterface):
         self.point_size = size
 
         if style is not None:
-            self.__internal_font.antialiased = style['antialiased']
+            self.__internal_font.antialiased = style["antialiased"]
 
             if force_style:
-                self.__internal_font.strong = style['bold']
-                self.__internal_font.oblique = style['italic']
+                self.__internal_font.strong = style["bold"]
+                self.__internal_font.oblique = style["italic"]
 
     def size(self, text: str) -> Tuple[int, int]:
         return self.get_rect(text).size
@@ -55,7 +59,9 @@ class GUIFontFreetype(IGUIFontInterface):
 
     def get_rect(self, text: str) -> Rect:
         supposed_rect = self.__internal_font.get_rect(text)
-        text_surface, text_rect = self.__internal_font.render(text, pygame.Color("white"))
+        text_surface, text_rect = self.__internal_font.render(
+            text, pygame.Color("white")
+        )
         return pygame.Rect(supposed_rect.topleft, text_surface.get_size())
 
     def get_metrics(self, text: str):
@@ -68,10 +74,17 @@ class GUIFontFreetype(IGUIFontInterface):
             text_surface = text_surface.premul_alpha()
         return text_surface
 
-    def render_premul_to(self, text: str, text_colour: Color,
-                         surf_size: Tuple[int, int], surf_position: Tuple[int, int]) -> Surface:
+    def render_premul_to(
+        self,
+        text: str,
+        text_colour: Color,
+        surf_size: Tuple[int, int],
+        surf_position: Tuple[int, int],
+    ) -> Surface:
         text_surface = pygame.Surface(surf_size, depth=32, flags=pygame.SRCALPHA)
-        self.__internal_font.render_to(text_surface, surf_position, text, fgcolor=text_colour)
+        self.__internal_font.render_to(
+            text_surface, surf_position, text, fgcolor=text_colour
+        )
         if text_surface.get_width() > 0 and text_surface.get_height() > 0:
             text_surface = text_surface.premul_alpha()
         return text_surface

@@ -93,7 +93,9 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_anchors(self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]) -> None:
+    def set_anchors(
+        self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]
+    ) -> None:
         """
         Wraps the setting of the anchors with some validation
 

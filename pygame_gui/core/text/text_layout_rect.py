@@ -7,7 +7,7 @@ import pygame
 from pygame.surface import Surface
 
 
-Padding = namedtuple('Padding', "top right bottom left")
+Padding = namedtuple("Padding", "top right bottom left")
 
 
 class TextFloatPosition(Enum):
@@ -23,6 +23,7 @@ class TextFloatPosition(Enum):
 
     Generally we use this to embed images into the flow of a text box.
     """
+
     NONE = 0
     LEFT = 1
     RIGHT = 2
@@ -33,11 +34,14 @@ class TextLayoutRect(pygame.rect.Rect):
     A base class for use in Layouts.
     """
 
-    def __init__(self, dimensions: Tuple[int, int],
-                 *,
-                 can_split=False,
-                 float_pos: TextFloatPosition = TextFloatPosition.NONE,
-                 should_span=False):
+    def __init__(
+        self,
+        dimensions: Tuple[int, int],
+        *,
+        can_split=False,
+        float_pos: TextFloatPosition = TextFloatPosition.NONE,
+        should_span=False,
+    ):
         super().__init__((0, 0), dimensions)
         self._can_split = can_split
         self._float_pos = float_pos
@@ -48,15 +52,17 @@ class TextLayoutRect(pygame.rect.Rect):
         self.row_chunk_height: int = int(self.height)
 
     @abstractmethod
-    def finalise(self,
-                 target_surface: Surface,
-                 target_area: pygame.Rect,
-                 row_chunk_origin: int,
-                 row_chunk_height: int,
-                 row_bg_height: int,
-                 row_line_spacing_height: int,
-                 x_scroll_offset: int = 0,
-                 letter_end: Optional[int] = None):
+    def finalise(
+        self,
+        target_surface: Surface,
+        target_area: pygame.Rect,
+        row_chunk_origin: int,
+        row_chunk_height: int,
+        row_bg_height: int,
+        row_line_spacing_height: int,
+        x_scroll_offset: int = 0,
+        letter_end: Optional[int] = None,
+    ):
         """
         Bake the contents of this layout rect onto a surface.
 
@@ -106,11 +112,13 @@ class TextLayoutRect(pygame.rect.Rect):
         """
         return self._float_pos
 
-    def split(self,
-              requested_x: int,
-              line_width: int,
-              row_start_x: int,
-              allow_split_dashes: bool = True) -> Union['TextLayoutRect', None]:  # noqa
+    def split(
+        self,
+        requested_x: int,
+        line_width: int,
+        row_start_x: int,
+        allow_split_dashes: bool = True,
+    ) -> Union["TextLayoutRect", None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the
         nearest point that is still less than the request (i.e. to the left of the request in
@@ -124,10 +132,10 @@ class TextLayoutRect(pygame.rect.Rect):
 
         """
         if line_width < self.smallest_split_size:
-            raise ValueError('Line width is too narrow')
+            raise ValueError("Line width is too narrow")
 
         if row_start_x < -1:
-            raise ValueError('Row start must be 0 or greater')
+            raise ValueError("Row start must be 0 or greater")
 
         original_width = self.width  # noqa: pylint: disable=access-member-before-definition,attribute-defined-outside-init
         self.width = requested_x  # noqa: pylint: disable=attribute-defined-outside-init

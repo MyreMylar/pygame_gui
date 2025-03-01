@@ -23,9 +23,13 @@ class IGUIFontInterface(metaclass=ABCMeta):
         Draws text to a surface ready for pre-multiplied alpha-blending
         """
 
-    def render_premul_to(self, text: str, text_colour: Color,
-                         surf_size: Tuple[int, int],
-                         surf_position: Tuple[int, int]):
+    def render_premul_to(
+        self,
+        text: str,
+        text_colour: Color,
+        surf_size: Tuple[int, int],
+        surf_position: Tuple[int, int],
+    ):
         """
 
 
@@ -53,9 +57,7 @@ class IGUIFontInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_point_size(self):
-        """
-
-        """
+        """ """
 
     @abstractmethod
     def get_padding_height(self):
