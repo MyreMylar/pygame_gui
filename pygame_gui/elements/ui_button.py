@@ -332,14 +332,7 @@ class UIButton(UIElement):
                             self.double_click_timer <= self.ui_manager.get_double_click_time()):
                         self.on_self_event(UI_BUTTON_DOUBLE_CLICKED, {'mouse_button': event.button})
                     else:
-                        self.on_self_event(UI_BUTTON_START_PRESS, {'mouse_button': event.button})
-                        self.double_click_timer = 0.0
-                        self.last_click_button = event.button
-                        self.held = True
-                        self.hovered = False
-                        self.on_unhovered()
-                        self._set_active()
-
+                        self._start_button_press(event)
                 consumed_event = True
         if event.type == pygame.MOUSEBUTTONUP and event.button in self.generate_click_events_from:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
@@ -358,6 +351,15 @@ class UIButton(UIElement):
                 consumed_event = True
 
         return consumed_event
+
+    def _start_button_press(self, event):
+        self.on_self_event(UI_BUTTON_START_PRESS, {'mouse_button': event.button})
+        self.double_click_timer = 0.0
+        self.last_click_button = event.button
+        self.held = True
+        self.hovered = False
+        self.on_unhovered()
+        self._set_active()
     
     def bind(self, event: int, function: Callable = None):
         """
@@ -772,35 +774,35 @@ class UIButton(UIElement):
                                                         ['normal', 'hovered', 'disabled',
                                                          'selected', 'active'], self.ui_manager)
 
-        if not self.is_enabled:
-            if self.drawable_shape is not None:
-                self.drawable_shape.set_active_state('disabled')
+        if not self.is_enabled and self.drawable_shape is not None:
+            self.drawable_shape.set_active_state('disabled')
 
         self.on_fresh_drawable_shape_ready()
 
         self._on_contents_changed()
 
     def _calc_dynamic_size(self):
-        if self.dynamic_width or self.dynamic_height:
-            if self.image.get_size() == (0, 0):
-                self._set_dimensions(self._get_pre_clipped_image_size())
-            else:
-                self._set_dimensions(self.image.get_size())
+        if not self.dynamic_width and not self.dynamic_height:
+            return
+        if self.image.get_size() == (0, 0):
+            self._set_dimensions(self._get_pre_clipped_image_size())
+        else:
+            self._set_dimensions(self.image.get_size())
 
-            # if we have anchored the left side of our button to the right of its container then
-            # changing the width is going to mess up the horiz position as well.
-            new_left = self.relative_rect.left
-            new_top = self.relative_rect.top
-            if 'left' in self.anchors and self.anchors['left'] == 'right' and self.dynamic_width:
-                left_offset = self.dynamic_dimensions_orig_top_left[0]
-                new_left = left_offset - self.relative_rect.width
-            # if we have anchored the top side of our button to the bottom of its container then
-            # changing the height is going to mess up the vert position as well.
-            if 'top' in self.anchors and self.anchors['top'] == 'bottom' and self.dynamic_height:
-                top_offset = self.dynamic_dimensions_orig_top_left[1]
-                new_top = top_offset - self.relative_rect.height
+        # if we have anchored the left side of our button to the right of its container then
+        # changing the width is going to mess up the horiz position as well.
+        new_left = self.relative_rect.left
+        new_top = self.relative_rect.top
+        if 'left' in self.anchors and self.anchors['left'] == 'right' and self.dynamic_width:
+            left_offset = self.dynamic_dimensions_orig_top_left[0]
+            new_left = left_offset - self.relative_rect.width
+        # if we have anchored the top side of our button to the bottom of its container then
+        # changing the height is going to mess up the vert position as well.
+        if 'top' in self.anchors and self.anchors['top'] == 'bottom' and self.dynamic_height:
+            top_offset = self.dynamic_dimensions_orig_top_left[1]
+            new_top = top_offset - self.relative_rect.height
 
-            self.set_relative_position((new_left, new_top))
+        self.set_relative_position((new_left, new_top))
 
     def hide(self):
         """
@@ -815,8 +817,7 @@ class UIButton(UIElement):
         if font != self.font:
             self.font = font
             self.rebuild()
+        elif self.dynamic_width or self.dynamic_height:
+            self.rebuild()
         else:
-            if self.dynamic_width or self.dynamic_height:
-                self.rebuild()
-            else:
-                self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
+            self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))

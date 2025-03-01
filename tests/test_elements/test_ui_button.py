@@ -938,17 +938,11 @@ class TestUIButton:
         manager = UIManager((800, 600),
                             PackageResource('tests.data.themes',
                                             'appearance_theme_class_id_test.json'))
-        if sys.version_info.minor >= 7:
-            button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
-                              text="Test Button",
-                              manager=manager,
-                              object_id=pygame_gui.core.ObjectID(class_id='@test_class'))
-        else:
-            button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
-                              text="Test Button",
-                              manager=manager,
-                              object_id=pygame_gui.core.ObjectID(object_id=None,
-                                                                 class_id='@test_class'))
+
+        button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
+                          text="Test Button",
+                          manager=manager,
+                          object_id=pygame_gui.core.ObjectID(class_id='@test_class'))
 
         assert button.combined_element_ids == ['@test_class', 'button']
 

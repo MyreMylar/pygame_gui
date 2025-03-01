@@ -44,7 +44,7 @@ class SurfaceCache:
     def update(self):
         """
         Takes care of steadily moving surfaces from the short term cache into the long term.
-        Long term caching takes a while so we limit it to adding one surface a frame.
+        Long term caching takes a while, so we limit it to adding one surface a frame.
 
         We also purge some lesser used surfaces from the long term cache when we run out of space.
         """
@@ -73,7 +73,7 @@ class SurfaceCache:
 
         if (isinstance(cached_item[0], pygame.Surface) and
                 cached_item[0].get_size() > self.cache_surface_size):
-            warnings.warn('Unable to cache surfaces larger than ' + str(self.cache_surface_size))
+            warnings.warn(f'Unable to cache surfaces larger than {self.cache_surface_size}')
             return None
         else:
 
@@ -127,10 +127,14 @@ class SurfaceCache:
         rects_to_remove = []
         rectangles_to_check = free_space_rectangles[:]
         for free_rectangle in free_space_rectangles:
-            for check_rect in rectangles_to_check:
-                if (free_rectangle != check_rect and
-                        check_rect.contains(free_rectangle)):
-                    rects_to_remove.append(free_rectangle)
+            rects_to_remove.extend(
+                free_rectangle
+                for check_rect in rectangles_to_check
+                if (
+                    free_rectangle != check_rect
+                    and check_rect.contains(free_rectangle)
+                )
+            )
         cache_surface['free_space_rectangles'] = [rect
                                                   for rect in
                                                   free_space_rectangles
@@ -143,8 +147,8 @@ class SurfaceCache:
 
         :param cache_surface: the surface to search.
         :param new_item: the item to cache.
-        :param string_id: the look up id.
-        :return: A tuple of the new rect we are reserving, and the rectangle it's inside of.
+        :param string_id: the look-up id.
+        :return: A tuple of the new rect we are reserving, and the rectangle it's inside.
         """
         found_rectangle_cache = None
         found_rectangle_to_split = None
@@ -187,7 +191,7 @@ class SurfaceCache:
                    dividing_rect: pygame.Rect,
                    free_space_rectangles: List[pygame.Rect]):
         """
-        Takes an existing free space rectangle that we are placing a new surface inside of and
+        Takes an existing free space rectangle that we are placing a new surface inside and
         then divides up the remaining space into new, smaller free space rectangles.
 
         :param found_rectangle_to_split: The rectangle we are splitting.
@@ -228,7 +232,7 @@ class SurfaceCache:
 
         :param lookup_id: ID of the surface to look for in the cache.
 
-        :return The found surface, or None.
+        :return: The found surface, or None.
 
         """
         # check short term
@@ -302,11 +306,11 @@ class SurfaceCache:
                        bg_colour: pygame.Color,
                        corner_radius: Optional[List[int]] = None) -> str:
         """
-        Create an ID string for a surface based on it's dimensions and parameters. The idea is
+        Create an ID string for a surface based on its dimensions and parameters. The idea is
         that any surface in the cache with the same values in this ID should be identical.
 
         :param shape: A string for the overall shape of the surface (rounded rectangle,
-         rectangle, etc).
+         rectangle, etc.).
         :param size: The dimensions of the surface.
         :param shadow_width: The thickness of the shadow around the shape.
         :param border_width: The thickness of the border around the shape.
@@ -314,26 +318,23 @@ class SurfaceCache:
         :param bg_colour: The background, or main colour of the surface.
         :param corner_radius: Optional corner radius parameter, only used for rounded rectangles.
 
-        :return: A assembled string ID from the provided data.
+        :return: An assembled string ID from the provided data.
 
         """
 
-        id_string = (shape + '_' + str(size[0]) + '_' + str(size[1]) + '_' +
-                     str(shadow_width) + '_' + str(border_width))
+        id_string = f'{shape}_{size[0]}_{size[1]}_{shadow_width}_{border_width}'
 
         if corner_radius is not None:
-            id_string += '_' + str(corner_radius)
+            id_string += f'_{corner_radius}'
 
         if isinstance(border_colour, ColourGradient):
-            id_string += '_' + str(border_colour)
+            id_string += f'_{str(border_colour)}'
         else:
-            id_string += ('_' + str(border_colour.r) + '_' + str(border_colour.g) +
-                          '_' + str(border_colour.b) + '_' + str(border_colour.a))
+            id_string += f'_{border_colour.r}_{border_colour.g}_{border_colour.b}_{border_colour.a}'
 
         if isinstance(bg_colour, ColourGradient):
-            id_string += '_' + str(bg_colour)
+            id_string += f'_{str(bg_colour)}'
         else:
-            id_string += ('_' + str(bg_colour.r) + '_' + str(bg_colour.g) +
-                          '_' + str(bg_colour.b) + '_' + str(bg_colour.a))
+            id_string += f'_{bg_colour.r}_{bg_colour.g}_{bg_colour.b}_{bg_colour.a}'
 
         return id_string

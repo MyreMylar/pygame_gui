@@ -90,19 +90,18 @@ class ThreadedLoader:
         """
         Adds a resource to be loaded.
 
-        Currently Fonts & Images are loaded with threads. Surfaces load sequentially after the
-        images are finished because they rely on their image being loaded and it is difficult to
+        Currently, fonts & images are loaded with threads. Surfaces load sequentially after the
+        images are finished because they rely on their image being loaded, and it is difficult to
         guarantee that with threads.
 
         :param resource:  Either an ImageResource, SurfaceResource or a FontResource.
         """
-        if not self._started:
-            if isinstance(resource, (ImageResource, FontResource)):
-                self._threaded_loading_queue.put(resource)
-            else:
-                self._sequential_loading_queue.append(resource)
-        else:
+        if self._started:
             raise ValueError('Too late to add this resource to the loader')
+        if isinstance(resource, (ImageResource, FontResource)):
+            self._threaded_loading_queue.put(resource)
+        else:
+            self._sequential_loading_queue.append(resource)
 
     def start(self):
         """
@@ -212,7 +211,7 @@ class ThreadedLoader:
 
 class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
     """
-    This loader is designed to have it's update function called repeatedly until it is finished.
+    This loader is designed to have its update function called repeatedly until it is finished.
 
     It's useful if you want to display a loading progress bar for the UI - Though you will have to
     be careful not to use any assets that are still being loaded.
@@ -261,7 +260,7 @@ class IncrementalThreadedResourceLoader(ThreadedLoader, IResourceLoader):
 
 class BlockingThreadedResourceLoader(ThreadedLoader, IResourceLoader):
     """
-    This loader is designed to have it's update function called once, after which it will
+    This loader is designed to have its update function called once, after which it will
     block the main thread until all it's assigned loading is complete.
 
     """

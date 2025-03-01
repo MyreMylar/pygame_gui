@@ -104,13 +104,15 @@ class UISection(UIAutoResizingContainer):
         anchors = {"left": "left", "right": "right", "top": "top"}
 
         # You can click this button to expand/hide the container
-        self.main_expand_button = UIButton(pygame.Rect(0, 0, 0, 0),
-                                           text=self.name + " ▼",
-                                           manager=manager,
-                                           container=self,
-                                           parent_element=parent_element,
-                                           object_id=ObjectID("#expand_section_button", None),
-                                           anchors=anchors.copy())
+        self.main_expand_button = UIButton(
+            pygame.Rect(0, 0, 0, 0),
+            text=f"{self.name} ▼",
+            manager=manager,
+            container=self,
+            parent_element=parent_element,
+            object_id=ObjectID("#expand_section_button", None),
+            anchors=anchors.copy(),
+        )
 
         self.should_transition = False  # Should the section container switch from shown/hidden to the other state?
 
@@ -162,10 +164,10 @@ class UISection(UIAutoResizingContainer):
         :param time_delta: The time in seconds between this update method call and the previous one.
         :return: None
         """
-        # Transition first, then resize so that the container size gets updates as soon as possible
-
-        container = self.section_container
         if self.should_transition:
+            # Transition first, then resize so that the container size gets updates as soon as possible
+
+            container = self.section_container
             if container.visible:
                 # Hide the container and make the size 0 to avoid a giant void where the section used to be
                 container.hide()
@@ -322,9 +324,10 @@ class UISection(UIAutoResizingContainer):
         :return: Whether the event was consumed
         """
 
-        if event.type == UI_BUTTON_PRESSED and event.mouse_button == pygame.BUTTON_LEFT:
-            if event.ui_element == self.main_expand_button:
-                self.should_transition = True
+        if (event.type == UI_BUTTON_PRESSED and 
+                event.mouse_button == pygame.BUTTON_LEFT and 
+                event.ui_element == self.main_expand_button):
+            self.should_transition = True
         return False  # Should the section expansion/contraction events be consumed?
 
 
@@ -762,8 +765,6 @@ class UIForm(UIScrollingContainer):
         """
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
-        rebuild_submit_button = False
-
         background_colour = self.ui_theme.get_colour_or_gradient("dark_bg",
                                                                  self.combined_element_ids)
         if background_colour != self.background_colour:
@@ -844,14 +845,14 @@ class UIForm(UIScrollingContainer):
             has_any_changed = True
             self.rebuild_sub_elements = True
 
-        if self._check_misc_theme_data_changed(attribute_name="submit_button_horiz_alignment",
-                                               default_value="right",
-                                               casting_func=str,
-                                               allowed_values=["left",
-                                                               "center",
-                                                               "right"]):
-            rebuild_submit_button = True
-
+        rebuild_submit_button = bool(
+            self._check_misc_theme_data_changed(
+                attribute_name="submit_button_horiz_alignment",
+                default_value="right",
+                casting_func=str,
+                allowed_values=["left", "center", "right"],
+            )
+        )
         if has_any_changed:
             self.rebuild()
 
@@ -985,11 +986,11 @@ class UIForm(UIScrollingContainer):
         x_padding = self.padding[0]
         pos = pygame.Vector2(0, self.submit_button.relative_rect.y)
 
-        if self.submit_button_horiz_alignment == "left":
+        if self.submit_button_horiz_alignment == "center":
+            anchors["centerx"] = "centerx"
+        elif self.submit_button_horiz_alignment == "left":
             anchors["left"] = "left"
             pos.x = x_padding
-        elif self.submit_button_horiz_alignment == "center":
-            anchors["centerx"] = "centerx"
         elif self.submit_button_horiz_alignment == "right":
             anchors["right"] = "right"
             pos.x = -self.submit_button.rect.width - x_padding
@@ -1052,17 +1053,18 @@ class UIForm(UIScrollingContainer):
         """
 
         consumed = False
-        if event.type == UI_BUTTON_PRESSED and event.mouse_button == pygame.BUTTON_LEFT:
-            if event.ui_element == self.submit_button:
-                form_values = self.get_current_values()
-
-                # new event
-                event_data = {"form_values": form_values,
-                              "ui_element": self,
-                              "ui_object_id": self.most_specific_combined_id}
-                pygame.event.post(pygame.event.Event(UI_FORM_SUBMITTED, event_data))
-
-                consumed = True
+        if (event.type == UI_BUTTON_PRESSED and
+                event.mouse_button == pygame.BUTTON_LEFT and 
+                event.ui_element == self.submit_button):
+            form_values = self.get_current_values()
+        
+            # new event
+            event_data = {"form_values": form_values,
+                          "ui_element": self,
+                          "ui_object_id": self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_FORM_SUBMITTED, event_data))
+        
+            consumed = True
 
         return consumed
 
@@ -1095,11 +1097,11 @@ class UIForm(UIScrollingContainer):
             raise ValueError(f"Question type '{string}' is not supported")
 
         if string.endswith("()"):
-            raise SyntaxError(f"Parenthesis used without passing parameters for question")
+            raise SyntaxError("Parenthesis used without passing parameters for question")
 
-        type_name = type_name_match.group("type_name").lower()
+        type_name = type_name_match["type_name"].lower()
         params = supported_types[type_name]
-        arg_group = type_name_match.group("type_args")
+        arg_group = type_name_match["type_args"]
 
         if not arg_group:
             return type_name, {}
@@ -1113,7 +1115,6 @@ class UIForm(UIScrollingContainer):
 
         args = []
         in_quotes = False
-        quotes_type = None
         # Used to raise more informative errors when quotes are used in keywords and
         # also for allowing whitespace between quotes in the same argument values, for e.g. "short_text('abc' 'def')"
         was_in_quotes = False
@@ -1126,6 +1127,7 @@ class UIForm(UIScrollingContainer):
             # This is needed to ensure last argument passed is added to the args list
             arg_group += ","
 
+        quotes_type = None
         # TODO: Implement support for brackets
         # TODO: Implement f strings, r strings eventually maybe
         # TODO: Update docs about whitespace rules
@@ -1152,11 +1154,14 @@ class UIForm(UIScrollingContainer):
                         # Reaching here implies being between keyword and '=' symbols
                         # unless there is a space in the middle of the keyword or value.
                         next_char = arg_group[i + 1]
-                        if not next_char.isspace() and next_char not in "=," and not (
-                                next_char in "'\"" and was_in_quotes):
-                            raise SyntaxError(f"Found whitespace between keyword or value")
+                        if (
+                            not next_char.isspace()
+                            and next_char not in "=,"
+                            and (next_char not in "'\"" or not was_in_quotes)
+                        ):
+                            raise SyntaxError("Found whitespace between keyword or value")
 
-                    elif keyword_present and i == arg_value_start_i:
+                    elif i == arg_value_start_i:
                         arg_value_start_i += 1
 
                 elif char == "=":
@@ -1168,12 +1173,11 @@ class UIForm(UIScrollingContainer):
                         raise SyntaxError("Found keyword wrapped in quotes")
                     if keyword_present:
                         # Found 2 "=" symbols in the same argument: incorrect syntax
-                        raise SyntaxError(f"Found 2 consecutive '=' symbols")
-                    else:
-                        keyword_present = True
-                        keyword_end_i = i - 1
-                        arg_value_start_i = i + 1
-                        keyword = arg_group[arg_start_i: keyword_end_i + 1].strip()
+                        raise SyntaxError("Found 2 consecutive '=' symbols")
+                    keyword_present = True
+                    keyword_end_i = i - 1
+                    arg_value_start_i = i + 1
+                    keyword = arg_group[arg_start_i: keyword_end_i + 1].strip()
 
                 elif char == ",":
                     if i == 0:
@@ -1189,9 +1193,9 @@ class UIForm(UIScrollingContainer):
                     value = arg_group[arg_value_start_i: i].strip()
                     try:
                         value = literal_eval(value)
-                    except (ValueError, SyntaxError):
+                    except (ValueError, SyntaxError) as e:
                         # Literal_eval couldn't pass it as a str, int, bool etc.
-                        raise NameError(f"'{value}' is not defined. Perhaps quotes were missed")
+                        raise NameError(f"'{value}' is not defined. Perhaps quotes were missed") from e
 
                     args.append((keyword, value))
                     arg_start_i = i + 1
@@ -1274,7 +1278,6 @@ class UIForm(UIScrollingContainer):
                 if not UIForm.validate_questionnaire(value, raise_error):
                     return False
 
-            # Value is one of the supported types, check for validity
             elif isinstance(value, str):
                 if raise_error:
                     UIForm.type_checker(value)
@@ -1287,18 +1290,15 @@ class UIForm(UIScrollingContainer):
             elif isinstance(value, IUIElementInterface):
                 continue
 
-            # Value not present
             elif not value:
                 if raise_error:
                     raise ValueError(f"Question type cannot be {value}")
                 else:
                     return False
 
-            # Type of Value is not supported
+            elif raise_error:
+                raise ValueError(f"Questions of type {type(value)} are not supported")
             else:
-                if raise_error:
-                    raise ValueError(f"Questions of type {type(value)} are not supported")
-                else:
-                    return False
+                return False
 
         return True

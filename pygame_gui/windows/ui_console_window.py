@@ -142,7 +142,7 @@ class UIConsoleWindow(UIWindow):
         output_to_log = html.escape(text_to_add) if escape_html else text_to_add
         line_ending = '' if remove_line_break else '<br>'
         if is_bold:
-            self.log.append_html_text('<b>' + output_to_log + '</b>' + line_ending)
+            self.log.append_html_text(f'<b>{output_to_log}</b>{line_ending}')
         else:
             self.log.append_html_text(output_to_log + line_ending)
 

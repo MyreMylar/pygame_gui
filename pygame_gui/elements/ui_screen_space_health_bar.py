@@ -1,6 +1,5 @@
 from typing import Union, Dict, Optional
 
-from pygame.sprite import Sprite
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
@@ -57,25 +56,21 @@ class UIScreenSpaceHealthBar(UIStatusBar):
 
     @property
     def current_health(self):
-        if not self.sprite:
-            return 50
-        return self.sprite.current_health
+        return self.sprite.current_health if self.sprite else 50
 
     @property
     def health_capacity(self):
-        if not self.sprite:
-            return 100
-        return self.sprite.health_capacity
+        return self.sprite.health_capacity if self.sprite else 100
 
     def health_percent(self):
-        return self.current_health / self.health_capacity
+        return self.current_health / max(self.health_capacity, 1)
 
     @property
     def health_percentage(self):
         # Now that we subclass UIStatusBar, this is here for backward compatibility.
         return self.health_percent()
 
-    def set_sprite_to_monitor(self, sprite_to_monitor: Sprite):
+    def set_sprite_to_monitor(self, sprite_to_monitor: SpriteWithHealth):
         if sprite_to_monitor:
             if not hasattr(sprite_to_monitor, 'health_capacity'):
                 raise AttributeError('Sprite does not have health_capacity attribute')

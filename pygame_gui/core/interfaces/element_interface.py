@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, List, Set, Any, Dict
+from typing import Union, List, Set, Any, Dict
 
 import pygame
 
@@ -19,7 +19,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     @abstractmethod
     def hovered(self) -> bool:
         """
-        Are we hovering over this element with the mouse pointer or other input highlighting method.
+        Returns True if we are hovering over this element with the mouse pointer, or other input highlighting method.
 
         :return: True if hovered.
         """

@@ -21,7 +21,6 @@ from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.resource_loaders import IResourceLoader
 from pygame_gui.core.colour_parser import parse_colour_or_gradient_string, get_commas_outside_enclosing_glyphs
 
-
 # First try importlib
 # Then importlib_resources
 try:
@@ -106,10 +105,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     @staticmethod
     def _json_to_dict(json_data):
-        if isinstance(json_data, dict):
-            return json_data
-        else:
-            return json.loads(json_data)
+        return json_data if isinstance(json_data, dict) else json.loads(json_data)
 
     def update_theming(self, new_theming_data: Union[str, dict], rebuild_all: bool = True):
         # parse new_theming data
@@ -122,9 +118,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         element_theming_dict = self._json_to_dict(new_theming_data)
 
         self._parse_single_element_data(element_name, element_theming_dict)
-        self._load_fonts()
-        self._load_images()
-        self._preload_shadow_edges()
+        self._load_fonts_images_and_shadow_edges()
 
     def check_need_to_reload(self) -> bool:
         """
@@ -140,12 +134,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         need_to_reload = False
         try:
             if isinstance(self._theme_file_path, PackageResource):
-                with as_file(files(self._theme_file_path.package) / self._theme_file_path.resource)\
-                        as package_file_path:
+                with as_file(files(self._theme_file_path.package) / self._theme_file_path.resource) \
+                            as package_file_path:
                     stamp = os.stat(package_file_path).st_mtime
             else:
                 stamp = os.stat(self._theme_file_path).st_mtime
-        except (pygame.error, FileNotFoundError, OSError):
+        except (pygame.error, OSError):
             need_to_reload = False
         else:
             if stamp != self._theme_file_last_modified:
@@ -257,7 +251,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     elif 'path' in image_resource_data:
                         image_resource = self._load_image_from_path(image_resource_data)
                     else:
-                        warnings.warn('Unable to find image with id: ' + str(image_id))
+                        warnings.warn(f'Unable to find image with id: {str(image_id)}')
 
                     if image_resource is not None:
                         if 'sub_surface_rect' in image_resource_data:
@@ -288,13 +282,15 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         self.ui_element_image_surfaces[element_key][image_id] = surf_resource
 
     def _load_image_from_path(self, res_data):
-        premultiplied = False
-        if 'premultiplied' in res_data:
-            premultiplied = bool(res_data['premultiplied'])
         resource_id = res_data['path']
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
         else:
+            premultiplied = (
+                bool(res_data['premultiplied'])
+                if 'premultiplied' in res_data
+                else False
+            )
             image_resource = ImageResource(resource_id, res_data['path'], premultiplied)
             if self._resource_loader.started():
                 error = image_resource.load()
@@ -307,14 +303,16 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         return image_resource
 
     def _load_image_resource(self, res_data):
-        premultiplied = False
-        if 'premultiplied' in res_data:
-            premultiplied = bool(res_data['premultiplied'])
         resource_id = (str(res_data['package']) + '/' + str(res_data['resource']))
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
         else:
             package_resource = PackageResource(res_data['package'], res_data['resource'])
+            premultiplied = (
+                bool(res_data['premultiplied'])
+                if 'premultiplied' in res_data
+                else False
+            )
             image_resource = ImageResource(resource_id, package_resource, premultiplied)
             if self._resource_loader.started():
                 error = image_resource.load()
@@ -461,18 +459,22 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 self._get_next_id_node(next_node, element_base_ids, element_ids, class_ids, object_ids,
                                        index + 1, tree_size, combined_ids)
         else:
-            # unwind
-            gathered_ids = []
-            unwind_node = current_node
-            while unwind_node is not None:
-                gathered_ids.append(unwind_node['id'])
-                unwind_node = unwind_node['parent']
-            gathered_ids.reverse()
-            combined_id = gathered_ids[0]
-            for gathered_index in range(1, len(gathered_ids)):
-                combined_id += '.'
-                combined_id += gathered_ids[gathered_index]
-            combined_ids.append(combined_id)
+            self._unwind_and_gather_ids(current_node, combined_ids)
+
+    @staticmethod
+    def _unwind_and_gather_ids(current_node, combined_ids):
+        # unwind
+        gathered_ids = []
+        unwind_node = current_node
+        while unwind_node is not None:
+            gathered_ids.append(unwind_node['id'])
+            unwind_node = unwind_node['parent']
+        gathered_ids.reverse()
+        combined_id = gathered_ids[0]
+        for gathered_index in range(1, len(gathered_ids)):
+            combined_id += '.'
+            combined_id += gathered_ids[gathered_index]
+        combined_ids.append(combined_id)
 
     def build_all_combined_ids(self, element_base_ids: Union[None, List[Union[str, None]]],
                                element_ids: Union[None, List[str]],
@@ -493,24 +495,24 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             return self.unique_theming_ids[combined_id]
 
         combined_ids = []
-        if object_ids is not None and element_ids is not None and class_ids is not None and element_base_ids is not None:
+        if (object_ids is not None and element_ids is not None and
+                class_ids is not None and element_base_ids is not None):
             if (len(object_ids) != len(element_ids) or len(class_ids) != len(element_ids) or
                     len(element_base_ids) != len(element_ids)):
-                raise ValueError("Object & class ID hierarchy is not equal "
-                                 "in length to Element ID hierarchy"
-                                 "Element IDs: " +
-                                 str(element_ids) +
-                                 "\nClass IDs: " +
-                                 str(class_ids) + "\n"
-                                 "\nObject IDs: " +
-                                 str(object_ids) + "\n")
+                raise ValueError(
+                    f"Object & class ID hierarchy is not equal in length to Element ID"
+                    f" hierarchyElement IDs: {str(element_ids)}"
+                    + "\nClass IDs: "
+                    + str(class_ids)
+                    + "\n"
+                      "\nObject IDs: " + str(object_ids) + "\n"
+                )
             if len(element_ids) != 0:
                 self._get_next_id_node(None, element_base_ids, element_ids, class_ids, object_ids,
                                        0, len(element_ids), combined_ids)
 
-            current_ids = combined_ids[:]
-
             found_all_ids = False
+            current_ids = combined_ids[:]
             while not found_all_ids:
                 if len(current_ids) > 0:
                     for index, current_id in enumerate(current_ids):
@@ -544,8 +546,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     image_id in self.ui_element_image_surfaces[combined_element_id]):
                 return self.ui_element_image_surfaces[combined_element_id][image_id].surface
 
-        raise LookupError('Unable to find any image with id: ' + str(image_id) +
-                          ' with combined_element_ids: ' + str(combined_element_ids))
+        raise LookupError(
+            f'Unable to find any image with id: {image_id} with combined_element_ids: {combined_element_ids}'
+        )
 
     def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
         """
@@ -556,14 +559,19 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return dictionary: Data about the font requested
         """
-        for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ui_element_fonts_info:
-                if self._locale in self.ui_element_fonts_info[combined_element_id]:
-                    return self.ui_element_fonts_info[combined_element_id][self._locale]
-                else:
-                    return self.ui_element_fonts_info[combined_element_id]['en']
-
-        return self.font_dict.default_font.info
+        return next(
+            (
+                (
+                    self.ui_element_fonts_info[combined_element_id][self._locale]
+                    if self._locale
+                    in self.ui_element_fonts_info[combined_element_id]
+                    else self.ui_element_fonts_info[combined_element_id]['en']
+                )
+                for combined_element_id in combined_element_ids
+                if combined_element_id in self.ui_element_fonts_info
+            ),
+            self.font_dict.default_font.info,
+        )
 
     def get_font(self, combined_element_ids: List[str]) -> IGUIFontInterface:
         """
@@ -574,16 +582,20 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
         """
-        font = None
-        
-        for combined_element_id in combined_element_ids:
-            if combined_element_id in self.ele_font_res:
-                if self._locale in self.ele_font_res[combined_element_id]:
-                    font = self.ele_font_res[combined_element_id][self._locale].loaded_font
-                else:
-                    font = self.ele_font_res[combined_element_id]['en'].loaded_font
-                break
-
+        font = next(
+            (
+                (
+                    self.ele_font_res[combined_element_id][
+                        self._locale
+                    ].loaded_font
+                    if self._locale in self.ele_font_res[combined_element_id]
+                    else self.ele_font_res[combined_element_id]['en'].loaded_font
+                )
+                for combined_element_id in combined_element_ids
+                if combined_element_id in self.ele_font_res
+            ),
+            None,
+        )
         # set the default font as the final fall back
         if font is None:
             font = self.font_dict.get_default_font()
@@ -607,8 +619,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     misc_data_id in self.ui_element_misc_data[combined_element_id]):
                 return self.ui_element_misc_data[combined_element_id][misc_data_id]
 
-        raise LookupError('Unable to find any data with id: ' + str(misc_data_id) +
-                          ' with combined_element_ids: ' + str(combined_element_ids))
+        raise LookupError(
+            f'Unable to find any data with id: {misc_data_id} with combined_element_ids: {combined_element_ids}'
+        )
 
     def get_colour(self, colour_id: str, combined_element_ids: List[str] = None) -> pygame.Color:
         """
@@ -622,16 +635,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         colour_or_gradient = self.get_colour_or_gradient(colour_id, combined_element_ids)
         if isinstance(colour_or_gradient, ColourGradient):
             gradient = colour_or_gradient
-            colour = gradient.colour_1
+            return gradient.colour_1
         elif isinstance(colour_or_gradient, pygame.Color):
-            colour = colour_or_gradient
+            return colour_or_gradient
         else:
-            colour = pygame.Color('#000000')
-        return colour
+            return pygame.Color('#000000')
 
     def get_colour_or_gradient(self, colour_id: str,
-                               combined_ids: List[str] = None) -> Union[pygame.Color,
-                                                                        IColourGradientInterface]:
+                               combined_ids: List[str] = None) -> Union[pygame.Color, IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,
         from our theme. Use this function if the UIElement can handle either type.
@@ -686,7 +697,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 yield file, None
             finally:
                 file.close()
-                
+
     def load_theme(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict]):
         """
         Loads a theme, and currently, all associated data like fonts and images required
@@ -700,11 +711,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             theme_dict = self._load_theme_by_path(file_path)
             if theme_dict is None:
                 return
-            
-        self._parse_theme_data_from_json_dict(theme_dict)
-            
 
-    def _load_theme_by_path(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]) -> dict:  
+        self._parse_theme_data_from_json_dict(theme_dict)
+
+    def _load_theme_by_path(self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]) -> dict:
         """
         Loads a theme file, and currently, all associated data like fonts and images required
         by the theme.
@@ -723,7 +733,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self._theme_file_path = create_resource_path(file_path)
             try:
                 self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
-            except (pygame.error, FileNotFoundError, OSError):
+            except (pygame.error, OSError):
                 self._theme_file_last_modified = 0
             used_file_path = self._theme_file_path
         else:
@@ -731,7 +741,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         with self._opened_w_error(used_file_path) as (theme_file, error):
             if error:
-                warnings.warn("Failed to open theme file at path:" + str(file_path))
+                warnings.warn(f"Failed to open theme file at path:{str(file_path)}")
                 load_success = False
             else:
                 try:
@@ -754,7 +764,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 element_theming = theme_dict[element_name]
                 self._parse_single_element_data(element_name, element_theming)
 
-        self._load_fonts()  # save to trigger load with the same data as it won't do anything
+        self._load_fonts_images_and_shadow_edges()
+
+    def _load_fonts_images_and_shadow_edges(self):
+        self._load_fonts()
         self._load_images()
         self._preload_shadow_edges()
 
@@ -770,7 +783,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     self._load_element_font_data_from_theme(file_dict,
                                                             element_name)
 
-            if data_type == 'colours' or data_type == 'colors':
+            if data_type in ['colours', 'colors']:
                 self._load_element_colour_data_from_theme(data_type,
                                                           element_name,
                                                           element_theming)
@@ -838,7 +851,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             found_prototypes.append(prototype_misc)
 
         if not found_prototypes:
-            warnings.warn("Failed to find any prototype data with ID: " + prototype_id, UserWarning)
+            warnings.warn(
+                f"Failed to find any prototype data with ID: {prototype_id}",
+                UserWarning,
+            )
 
     def _load_element_misc_data_from_theme(self,
                                            data_type: str,
@@ -880,8 +896,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         loaded_img_dict = element_theming[data_type]
         for image_key in loaded_img_dict:
             if image_key not in self.ui_element_image_locs[element_name]:
-                self.ui_element_image_locs[element_name][image_key] = {}
-                self.ui_element_image_locs[element_name][image_key]['changed'] = True
+                self.ui_element_image_locs[element_name][image_key] = {'changed': True}
             else:
                 self.ui_element_image_locs[element_name][image_key]['changed'] = False
 
@@ -955,10 +970,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
 
-        locale = 'en'
-        if 'locale' in file_dict:
-            locale = file_dict['locale']
-
+        locale = file_dict['locale'] if 'locale' in file_dict else 'en'
         if locale not in self.ui_element_fonts_info[element_name]:
             self.ui_element_fonts_info[element_name][locale] = {}
 
@@ -1048,7 +1060,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param theme_dict: The data dictionary from the theming file to load data from.
         """
         for data_type in theme_dict['defaults']:
-            if data_type == 'colours' or data_type == 'colors':
+            if data_type in ['colours', 'colors']:
                 colours_dict = theme_dict['defaults'][data_type]
                 for colour_key in colours_dict:
                     colour = self._load_colour_or_gradient_from_theme(colours_dict,
@@ -1069,12 +1081,20 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         colour: Optional[Union[pygame.Color, ColourGradient]] = parse_colour_or_gradient_string(string_data)
         if colour is None:
             if len(get_commas_outside_enclosing_glyphs(string_data)) > 0:  # Was probably meant to be a gradient
-                warnings.warn("Invalid gradient: " + string_data + " for id:" + colour_id + " in theme file")
+                warnings.warn(
+                    f"Invalid gradient: {string_data} for id:{colour_id} in theme file"
+                )
+            elif string_data.startswith("#"):
+                warnings.warn(
+                    f"Colour hex code: {string_data}"
+                    + " for id:"
+                    + colour_id
+                    + " invalid in theme file"
+                )
             else:
-                if string_data.startswith("#"):
-                    warnings.warn("Colour hex code: " + string_data + " for id:" + colour_id + " invalid in theme file")
-                else:
-                    warnings.warn("Invalid Theme Colour: " + string_data + " for id:" + colour_id + " invalid in theme file")
+                warnings.warn(
+                    f"Invalid Theme Colour: {string_data} for id:{colour_id} invalid in theme file"
+                )
             return pygame.Color("#000000")
         return colour
 

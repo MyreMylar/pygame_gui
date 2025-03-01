@@ -194,7 +194,7 @@ class UIAutoResizingContainer(UIContainer):
                                                                         anchors=self.anchors)[0]
 
         if self.max_edges_rect:
-            self.abs_max_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.min_edges_rect,
+            self.abs_max_edges_rect = self._calc_abs_rect_pos_from_rel_rect(relative_rect=self.max_edges_rect,
                                                                             container=self.ui_container,
                                                                             anchors=self.anchors)[0]
 

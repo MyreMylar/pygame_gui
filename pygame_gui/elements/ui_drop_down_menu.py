@@ -267,34 +267,43 @@ class UIExpandedDropDownState:
                  rest of the UI.
 
         """
-        if event.type == UI_BUTTON_PRESSED:
-            if ((self.expand_on_option_click and event.ui_element in self.active_buttons) or
-                    (not self.expand_on_option_click and
-                     self.close_button is not None and event.ui_element == self.close_button)):
-                self.should_transition = True
-                return True
+        if event.type == UI_BUTTON_PRESSED and (
+            (
+                self.expand_on_option_click
+                and event.ui_element in self.active_buttons
+            )
+            or (
+                not self.expand_on_option_click
+                and self.close_button is not None
+                and event.ui_element == self.close_button
+            )
+        ):
+            self.should_transition = True
+            return True
 
         if (event.type == UI_SELECTION_LIST_NEW_SELECTION and
                 event.ui_element == self.options_selection_list):
-            selection = self.options_selection_list.get_single_selection(include_object_id=True)
-            self.drop_down_menu_ui.selected_option = selection
-            self.should_transition = True
-
-            # old event - to be removed in 0.8.0
-            event_data = {'user_type': OldType(UI_DROP_DOWN_MENU_CHANGED),
-                          'text': self.drop_down_menu_ui.selected_option[0],
-                          'ui_element': self.drop_down_menu_ui,
-                          'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
-
-            # new event
-            event_data = {'text': self.drop_down_menu_ui.selected_option[0],
-                          'selected_option_id': self.drop_down_menu_ui.selected_option[1],
-                          'ui_element': self.drop_down_menu_ui,
-                          'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_DROP_DOWN_MENU_CHANGED, event_data))
-
+            self._on_new_item_selected()
         return False  # don't consume any events
+
+    def _on_new_item_selected(self):
+        selection = self.options_selection_list.get_single_selection(include_object_id=True)
+        self.drop_down_menu_ui.selected_option = selection
+        self.should_transition = True
+
+        # old event - to be removed in 0.8.0
+        event_data = {'user_type': OldType(UI_DROP_DOWN_MENU_CHANGED),
+                      'text': self.drop_down_menu_ui.selected_option[0],
+                      'ui_element': self.drop_down_menu_ui,
+                      'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+        # new event
+        event_data = {'text': self.drop_down_menu_ui.selected_option[0],
+                      'selected_option_id': self.drop_down_menu_ui.selected_option[1],
+                      'ui_element': self.drop_down_menu_ui,
+                      'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_DROP_DOWN_MENU_CHANGED, event_data))
 
     def update_position(self):
         """
@@ -473,7 +482,7 @@ class UIClosedDropDownState:
                                                                           ['normal', 'disabled'],
                                                                           self.ui_manager)
 
-        self.drop_down_menu_ui._set_image(self.drop_down_menu_ui.drawable_shape.get_fresh_surface())
+        self.drop_down_menu_ui.sub_state_refresh_image()
 
         # extra
         if self.open_button is not None:
@@ -517,28 +526,31 @@ class UIClosedDropDownState:
         self.active_buttons.append(self.selected_option_button)
 
         if self.open_button_width > 0:
-            open_button_x = (border_and_shadow +
-                             self.base_position_rect.width -
-                             self.open_button_width)
-            expand_button_symbol = '▼'
-            if self.expand_direction is not None:
-                if self.expand_direction == 'up':
-                    expand_button_symbol = '▲'
-                elif self.expand_direction == 'down':
-                    expand_button_symbol = '▼'
-            self.open_button = UIButton(pygame.Rect((open_button_x,
-                                                     border_and_shadow),
-                                                    (self.open_button_width,
-                                                     self.base_position_rect.height)),
-                                        expand_button_symbol,
-                                        self.ui_manager,
-                                        self.ui_container,
-                                        starting_height=2,
-                                        parent_element=self.drop_down_menu_ui,
-                                        object_id='#expand_button',
-                                        visible=self.visible)
-            self.drop_down_menu_ui.join_focus_sets(self.open_button)
-            self.active_buttons.append(self.open_button)
+            self._setup_open_arrow_button(border_and_shadow)
+
+    def _setup_open_arrow_button(self, border_and_shadow):
+        open_button_x = (border_and_shadow +
+                         self.base_position_rect.width -
+                         self.open_button_width)
+        expand_button_symbol = '▼'
+        if self.expand_direction is not None:
+            if self.expand_direction == 'down':
+                expand_button_symbol = '▼'
+            elif self.expand_direction == 'up':
+                expand_button_symbol = '▲'
+        self.open_button = UIButton(pygame.Rect((open_button_x,
+                                                 border_and_shadow),
+                                                (self.open_button_width,
+                                                 self.base_position_rect.height)),
+                                    expand_button_symbol,
+                                    self.ui_manager,
+                                    self.ui_container,
+                                    starting_height=2,
+                                    parent_element=self.drop_down_menu_ui,
+                                    object_id='#expand_button',
+                                    visible=self.visible)
+        self.drop_down_menu_ui.join_focus_sets(self.open_button)
+        self.active_buttons.append(self.open_button)
 
     def finish(self):
         """
@@ -557,12 +569,19 @@ class UIClosedDropDownState:
         :return: Return True if we want to consume this event, so it is not passed on to the
                  rest of the UI.
         """
-        if event.type == UI_BUTTON_PRESSED:
-            if ((self.expand_on_option_click and event.ui_element in self.active_buttons) or
-                    (not self.expand_on_option_click and
-                     self.open_button is not None and event.ui_element == self.open_button)):
-                self.should_transition = True
-                return True
+        if event.type == UI_BUTTON_PRESSED and (
+            (
+                self.expand_on_option_click
+                and event.ui_element in self.active_buttons
+            )
+            or (
+                not self.expand_on_option_click
+                and self.open_button is not None
+                and event.ui_element == self.open_button
+            )
+        ):
+            self.should_transition = True
+            return True
 
         return False
 
@@ -762,9 +781,8 @@ class UIDropDownMenu(UIContainer):
 
     @layer_thickness.setter
     def layer_thickness(self, value):
-        int(value)
-        # ignore passed in value and hardcode to 4
-        self.__layer_thickness_including_expansion = 4
+        # make sure thickness is minimum of 4
+        self.__layer_thickness_including_expansion = max(4, value)
 
     def add_options(self, new_options: Union[List[str], List[Tuple[str, str]]]) -> None:
         """
@@ -805,10 +823,7 @@ class UIDropDownMenu(UIContainer):
 
     def _close_dropdown_if_open(self):
         if self.current_state == self.menu_states['expanded']:
-            self.current_state.finish()
-            self.current_state = self.menu_states['closed']
-            self.current_state.selected_option = self.selected_option
-            self.current_state.start()
+            self._switch_to_closed_state()
 
     def kill(self):
         """
@@ -850,11 +865,7 @@ class UIDropDownMenu(UIContainer):
                  rest of the UI.
 
         """
-        consumed_event = False
-        if self.is_enabled:
-            consumed_event = self.current_state.process_event(event)
-
-        return consumed_event
+        return self.current_state.process_event(event) if self.is_enabled else False
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -989,11 +1000,14 @@ class UIDropDownMenu(UIContainer):
             # switch back to the closed state if we are in the expanded state
             if self.current_state is not None:
                 if self.current_state is self.menu_states['expanded']:
-                    self.current_state.finish()
-                    self.current_state = self.menu_states['closed']
-                    self.current_state.selected_option = self.selected_option
-                    self.current_state.start()
+                    self._switch_to_closed_state()
                 self.current_state.disable()
+
+    def _switch_to_closed_state(self):
+        self.current_state.finish()
+        self.current_state = self.menu_states['closed']
+        self.current_state.selected_option = self.selected_option
+        self.current_state.start()
 
     def enable(self):
         """
@@ -1004,16 +1018,16 @@ class UIDropDownMenu(UIContainer):
             if self.current_state is not None:
                 self.current_state.enable()
 
-    def show(self):
+    def show(self, show_contents: bool = True):
         """
         In addition to the base UIElement.show() - call show() on the closed state -
         showing its buttons.
         """
-        super().show()
+        super().show(show_contents)
         if self.current_state is not None and self.menu_states is not None:
             self.menu_states['closed'].show()
 
-    def hide(self):
+    def hide(self, hide_contents: bool = True):
         """
         In addition to the base UIElement.hide() - if the current state is 'expanded' call its
         hide() method, which begins a transition of the UIDropDownMenu to the 'closed' state, and
@@ -1022,8 +1036,16 @@ class UIDropDownMenu(UIContainer):
         if not self.visible:
             return
 
-        super().hide()
+        super().hide(hide_contents)
         if self.current_state is not None and self.menu_states is not None:
             if self.current_state == self.menu_states['expanded']:
                 self.menu_states['expanded'].hide()
             self.menu_states['closed'].hide()
+
+    def sub_state_refresh_image(self):
+        """
+        A method to refresh the image surface of this drop-down by calling _set_image.
+        Used by the substates of the drop-down to update the image when the drop-down is expanded
+        or closed.
+        """
+        self._set_image(self.drawable_shape.get_fresh_surface())

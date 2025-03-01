@@ -59,14 +59,22 @@ class ColourGradient(IColourGradientInterface):
 
         :return: The string representation.
         """
-        result = (str(self.angle_direction) + '_' +
-                  str(self.colour_1.r) + '_' + str(self.colour_1.g) + '_' +
-                  str(self.colour_1.b) + '_' + str(self.colour_1.a) + '_' +
-                  str(self.colour_2.r) + '_' + str(self.colour_2.g) + '_' +
-                  str(self.colour_2.b) + '_' + str(self.colour_2.a))
+        result = (f'{str(self.angle_direction)}_'
+                  f'{str(self.colour_1.r)}_'
+                  f'{str(self.colour_1.g)}_'
+                  f'{str(self.colour_1.b)}_'
+                  f'{str(self.colour_1.a)}_'
+                  f'{str(self.colour_2.r)}_'
+                  f'{str(self.colour_2.g)}_'
+                  f'{str(self.colour_2.b)}_'
+                  f'{str(self.colour_2.a)}')
+
         if self.colour_3 is not None:
-            result += ('_' + str(self.colour_3.r) + '_' + str(self.colour_3.g) +
-                       '_' + str(self.colour_3.b) + '_' + str(self.colour_3.a))
+            result += (
+                f'_{str(self.colour_3.r)}_'
+                f'{str(self.colour_3.g)}_'
+                f'{str(self.colour_3.b)}_'
+                f'{str(self.colour_3.a)}')
 
         return result
 

@@ -119,35 +119,42 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         window_rect = self.ui_manager.get_root_container().get_rect()
 
-        if window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
-            self.rect.left = int(position[0])
-            self.rect.top = int(position[1] + self.hover_distance_from_target[1])
+        if not window_rect.contains(
+            pygame.Rect(int(position[0]), int(position[1]), 1, 1)
+        ):
+            return self._copy_rect_to_rel_and_warn(
+                "initial position for tool tip is off screen,"
+                " unable to find valid position"
+            )
+        self.rect.left = int(position[0])
+        self.rect.top = int(position[1] + self.hover_distance_from_target[1])
 
-            if window_rect.contains(self.rect):
-                self.relative_rect = self.rect.copy()
-                self.text_block.set_position(self.rect.topleft)
-                return True
-            else:
-                if self.rect.bottom > window_rect.bottom:
-                    self.rect.bottom = int(position[1] - self.hover_distance_from_target[1])
-                if self.rect.right > window_rect.right:
-                    self.rect.right = window_rect.right - self.hover_distance_from_target[0]
-                if self.rect.left < window_rect.left:
-                    self.rect.left = window_rect.left + self.hover_distance_from_target[0]
+        if window_rect.contains(self.rect):
+            return self._copy_rect_to_rel_and_set_text_pos()
+        if self.rect.bottom > window_rect.bottom:
+            self.rect.bottom = int(position[1] - self.hover_distance_from_target[1])
+        if self.rect.right > window_rect.right:
+            self.rect.right = window_rect.right - self.hover_distance_from_target[0]
+        if self.rect.left < window_rect.left:
+            self.rect.left = window_rect.left + self.hover_distance_from_target[0]
 
-            if window_rect.contains(self.rect):
-                self.relative_rect = self.rect.copy()
-                self.text_block.set_position(self.rect.topleft)
-                return True
-            else:
-                self.relative_rect = self.rect.copy()
-                warnings.warn("Unable to fit tool tip on screen")
-                return False
-        else:
-            self.relative_rect = self.rect.copy()
-            warnings.warn("initial position for tool tip is off screen,"
-                          " unable to find valid position")
-            return False
+        return (
+            self._copy_rect_to_rel_and_set_text_pos()
+            if window_rect.contains(self.rect)
+            else self._copy_rect_to_rel_and_warn(
+                "Unable to fit tool tip on screen"
+            )
+        )
+
+    def _copy_rect_to_rel_and_set_text_pos(self):
+        self.relative_rect = self.rect.copy()
+        self.text_block.set_position(self.rect.topleft)
+        return True
+
+    def _copy_rect_to_rel_and_warn(self, arg0):
+        self.relative_rect = self.rect.copy()
+        warnings.warn(arg0)
+        return False
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -155,13 +162,11 @@ class UITooltip(UIElement, IUITooltipInterface):
         this element when the theme data has changed.
         """
         super().rebuild_from_changed_theme_data()
-        has_any_changed = False
-
-        if self._check_misc_theme_data_changed(attribute_name='rect_width',
-                                               default_value=170,
-                                               casting_func=int):
-            has_any_changed = True
-
+        has_any_changed = bool(
+            self._check_misc_theme_data_changed(
+                attribute_name='rect_width', default_value=170, casting_func=int
+            )
+        )
         if self.overwrite_theme_wrap_width is not None:
             self.rect_width = self.overwrite_theme_wrap_width
 

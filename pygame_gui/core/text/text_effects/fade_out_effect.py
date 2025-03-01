@@ -26,11 +26,11 @@ class FadeOutEffect(TextEffect):
         self.text_changed = False
         self.text_owner.set_text_alpha(255, self.text_sub_chunk)
         self._load_params(params)
+        self.finished = False
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
-        if params is not None:
-            if 'time_per_alpha_change' in params:
-                self.time_per_alpha_change = float(params['time_per_alpha_change'])
+        if params is not None and 'time_per_alpha_change' in params:
+            self.time_per_alpha_change = float(params['time_per_alpha_change'])
 
     def update(self, time_delta: float):
         """
@@ -47,7 +47,8 @@ class FadeOutEffect(TextEffect):
                 self.alpha_value = max(alpha_progress, 0)
                 self.text_changed = True
 
-        else:
+        elif not self.finished:
+            self.finished = True
             # finished effect
             self.text_owner.stop_finished_effect(self.text_sub_chunk)
 
@@ -63,7 +64,7 @@ class FadeOutEffect(TextEffect):
         Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us
         redrawing the text box with the new alpha value.
 
-        :return: True if it is is time to redraw our text.
+        :return: True if it is time to redraw our text.
         """
         if self.text_changed:
             self.text_changed = False

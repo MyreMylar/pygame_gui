@@ -29,18 +29,19 @@ class TiltEffect(TextEffect):
         self._load_params(params)
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
-        if params is not None:
-            if 'loop' in params:
-                if isinstance(params['loop'], bool):
-                    self.loop = params['loop']
-                elif isinstance(params['loop'], str):
-                    self.loop = bool(int(params['loop']))
-                else:
-                    self.loop = bool(params['loop'])
-            if 'max_rotation' in params:
-                self.max_rotation = int(params['max_rotation'])
-            if 'time_to_complete_rotation' in params:
-                self.time_to_complete_rotation = float(params['time_to_complete_rotation'])
+        if params is None:
+            return
+        if 'loop' in params:
+            if isinstance(params['loop'], bool):
+                self.loop = params['loop']
+            elif isinstance(params['loop'], str):
+                self.loop = bool(int(params['loop']))
+            else:
+                self.loop = bool(params['loop'])
+        if 'max_rotation' in params:
+            self.max_rotation = int(params['max_rotation'])
+        if 'time_to_complete_rotation' in params:
+            self.time_to_complete_rotation = float(params['time_to_complete_rotation'])
 
     def update(self, time_delta: float):
         """
@@ -60,7 +61,7 @@ class TiltEffect(TextEffect):
                 self.current_rotation = max(current_rotation, 0)
                 self.text_changed = True
         elif self.loop:
-            self.time_acc = 0.0
+            self.time_acc -= self.time_to_complete_rotation
         else:
             # finished effect
             self.text_owner.stop_finished_effect(self.text_sub_chunk)
@@ -76,7 +77,7 @@ class TiltEffect(TextEffect):
         """
         Lets us know when the effect has changed enough to warrant us redrawing the text.
 
-        :return: True if it is is time to redraw our text.
+        :return: True if it is time to redraw our text.
         """
         if self.text_changed:
             self.text_changed = False

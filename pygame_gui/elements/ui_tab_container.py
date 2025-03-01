@@ -91,7 +91,8 @@ class UITabContainer(UIElement):
                           parent_element=self, object_id=ObjectID(title_object_id, '@tab_title_button'),
                           max_dynamic_width=max_button_width)
         container_rect = self._calculate_container_rect_by_layout()
-        container = UIPanel(container_rect, manager=self.ui_manager, container=self._root_container, parent_element=self)
+        container = UIPanel(container_rect, manager=self.ui_manager,
+                            container=self._root_container, parent_element=self)
         self.tabs.append({"text": title_text, "button": button, "container": container})
         tab_id = self.tab_count - 1
         if self.current_container_index is None:
@@ -112,24 +113,15 @@ class UITabContainer(UIElement):
 
     def get_title_text(self, tab_id: Optional[int] = None):
         tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["text"]
+        return None if tab is None else tab["text"]
 
     def get_title_button(self, tab_id: Optional[int] = None):
         tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["button"]
+        return None if tab is None else tab["button"]
 
     def get_tab_container(self, tab_id=None) -> Optional[UIPanel]:
         tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["container"]
+        return None if tab is None else tab["container"]
 
     def delete_tab(self, tab_id):
         self.tabs[tab_id]["button"].kill()
@@ -158,16 +150,18 @@ class UITabContainer(UIElement):
         """
         Disables the window and it's contents so it is no longer interactive.
         """
+        was_enabled = self.is_enabled
         super().disable()
-        if self.is_enabled:
+        if was_enabled:
             self._root_container.disable()
 
     def enable(self):
         """
         Enables the window and it's contents so it is interactive again.
         """
+        was_enabled = self.is_enabled
         super().enable()
-        if not self.is_enabled:
+        if not was_enabled:
             self._root_container.enable()
 
     def show(self, show_contents: bool = True):

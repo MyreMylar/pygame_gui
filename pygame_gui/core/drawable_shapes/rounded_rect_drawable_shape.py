@@ -66,10 +66,9 @@ class RoundedRectangleShape(DrawableShape):
         super().full_rebuild_on_size_change()
 
         self.base_surface = None
-        self.temp_additive_shape = None
         self.temp_subtractive_shape = None
         self.temp_shadow_subtractive_shape = None
-
+        self.temp_additive_shape = None
         # clamping border, shadow widths and corner radii, so we can't form impossible shapes
         # having impossible values here will also mean the shadow pre-generating system fails
         # leading to slow down when creating elements
@@ -79,12 +78,13 @@ class RoundedRectangleShape(DrawableShape):
             self.shadow_width = min(math.floor(self.containing_rect.width / 2),
                                     math.floor(self.containing_rect.height / 2))
             warnings.warn(
-                'Clamping shadow_width of: ' + str(old_width) + ', to: ' + str(self.shadow_width))
+                f'Clamping shadow_width of: {str(old_width)}, to: {str(self.shadow_width)}'
+            )
 
         if self.shadow_width < 0:
             old_width = self.shadow_width
             self.shadow_width = 0
-            warnings.warn('Clamping shadow_width of: ' + str(old_width) + ', to: ' + str(0))
+            warnings.warn(f'Clamping shadow_width of: {str(old_width)}, to: 0')
 
         if self.border_width > min(math.floor((self.containing_rect.width -
                                                (self.shadow_width * 2)) / 2),
@@ -95,13 +95,13 @@ class RoundedRectangleShape(DrawableShape):
                                                 (self.shadow_width * 2)) / 2),
                                     math.floor((self.containing_rect.height -
                                                 (self.shadow_width * 2)) / 2))
-            warnings.warn('Clamping border_width of: ' +
-                          str(old_width) + ', to: ' +
-                          str(self.border_width))
+            warnings.warn(
+                f'Clamping border_width of: {str(old_width)}, to: {str(self.border_width)}'
+            )
         if self.border_width < 0:
             old_width = self.border_width
             self.border_width = 0
-            warnings.warn('Clamping border_width of: ' + str(old_width) + ', to: ' + str(0))
+            warnings.warn(f'Clamping border_width of: {str(old_width)}, to: 0')
 
         corner_radii = self.theming['shape_corner_radius']
         if self.shadow_width > 0:
@@ -120,12 +120,12 @@ class RoundedRectangleShape(DrawableShape):
                                        self.click_area_shape.height / 2):
                     corner_radius = int(min(self.click_area_shape.width / 2,
                                             self.click_area_shape.height / 2))
-                    warnings.warn('Clamping shape_corner_radius of: ' +
-                                  str(old_radius) + ', to: ' + str(corner_radius))
+                    warnings.warn(
+                        f'Clamping shape_corner_radius of: {str(old_radius)}, to: {corner_radius}'
+                    )
                 if corner_radius < 0:
                     corner_radius = 0
-                    warnings.warn('Clamping shape_corner_radius of: ' +
-                                  str(old_radius) + ', to: ' + str(0))
+                    warnings.warn(f'Clamping shape_corner_radius of: {str(old_radius)}, to: 0')
                 self.shape_corner_radius[i] = corner_radius
 
             shadow = self.ui_manager.get_shadow(self.containing_rect.size,
@@ -326,10 +326,10 @@ class RoundedRectangleShape(DrawableShape):
         if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
             self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            text_colour_state_str = state_str + '_text'
-            text_shadow_colour_state_str = state_str + '_text_shadow'
-            bg_col = self.theming[state_str + '_bg']
-            border_col = self.theming[state_str + '_border']
+            text_colour_state_str = f'{state_str}_text'
+            text_shadow_colour_state_str = f'{state_str}_text_shadow'
+            bg_col = self.theming[f'{state_str}_bg']
+            border_col = self.theming[f'{state_str}_border']
             border_overlap = 0
             if 'border_overlap' in self.theming:
                 border_overlap = self.theming['border_overlap']
@@ -425,9 +425,13 @@ class RoundedRectangleShape(DrawableShape):
                                                           shape_id)
                     self.states[state_str].cached_background_id = shape_id
 
-            self.finalise_images_and_text(state_str + '_image', state_str,
-                                          text_colour_state_str,
-                                          text_shadow_colour_state_str, add_text)
+            self.finalise_images_and_text(
+                f'{state_str}_image',
+                state_str,
+                text_colour_state_str,
+                text_shadow_colour_state_str,
+                add_text,
+            )
 
         self.states[state_str].has_fresh_surface = True
         self.states[state_str].generated = True
@@ -541,25 +545,22 @@ class RoundedRectangleShape(DrawableShape):
         surface to leave a transparent hole in it.
 
         """
-        if subtract_size[0] > 0 and subtract_size[1] > 0:
-            if self.temp_subtractive_shape is None:
-                # for the subtract surface we want to blend in all RGBA channels to clear
-                # correctly for our new shape
-                self.temp_subtractive_shape = pygame.surface.Surface(subtract_size,
-                                                                     flags=pygame.SRCALPHA,
-                                                                     depth=32)
-                clear_colour = '#00000000'
-                self.temp_subtractive_shape.fill(pygame.Color(clear_colour))
-                RoundedRectangleShape.draw_colourless_rounded_rectangle(corner_radii,
-                                                                        self.temp_subtractive_shape,
-                                                                        int(aa_amount / 2))
-                large_sub_surface = self.temp_subtractive_shape
-            else:
-                large_sub_surface = pygame.transform.scale(self.temp_subtractive_shape,
-                                                           subtract_size)
-
-            return large_sub_surface
-        return None
+        if subtract_size[0] <= 0 or subtract_size[1] <= 0:
+            return None
+        if self.temp_subtractive_shape is not None:
+            return pygame.transform.scale(
+                self.temp_subtractive_shape, subtract_size
+            )
+        # for the subtract surface we want to blend in all RGBA channels to clear
+        # correctly for our new shape
+        self.temp_subtractive_shape = pygame.surface.Surface(subtract_size,
+                                                             flags=pygame.SRCALPHA,
+                                                             depth=32)
+        self.temp_subtractive_shape.fill(pygame.Color('#00000000'))
+        RoundedRectangleShape.draw_colourless_rounded_rectangle(
+            corner_radii, self.temp_subtractive_shape, aa_amount // 2
+        )
+        return self.temp_subtractive_shape
 
     @staticmethod
     def draw_colourless_rounded_rectangle(large_corner_radius: List[int],

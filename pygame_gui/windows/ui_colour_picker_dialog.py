@@ -170,24 +170,27 @@ class UIColourChannelEditor(UIElement):
 
         """
         clipped_value = min(self.range[1], max(self.range[0], new_value))
-        if clipped_value != self.current_value:
-            self.current_value = clipped_value
-            self.entry.set_text(str(self.current_value))
-            # old event - to be removed in 0.8.0
-            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
-                          'value': self.current_value,
-                          'channel_index': self.channel_index,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
-            # new event
-            event_data = {'value': self.current_value,
-                          'channel_index': self.channel_index,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
-                                                 event_data))
+        if clipped_value != self.current_value:
+            self.entry.set_text(str(clipped_value))
+            self._set_value_and_post_event(clipped_value)
+
+    def _set_value_and_post_event(self, clipped_value):
+        self.current_value = clipped_value
+        # old event - to be removed in 0.8.0
+        event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
+                      'value': self.current_value,
+                      'channel_index': self.channel_index,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        # new event
+        event_data = {'value': self.current_value,
+                      'channel_index': self.channel_index,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED,
+                                             event_data))
 
     def _set_value_from_entry(self, new_value: int):
         """
@@ -203,25 +206,11 @@ class UIColourChannelEditor(UIElement):
         if clipped_value != new_value:
             self.entry.set_text(str(clipped_value))
         if clipped_value != self.current_value:
-            self.current_value = clipped_value
-            self.slider.set_current_value(self.current_value)
+            self._change_slider_value_and_fire_event(clipped_value)
 
-            # old event - to be removed in 0.8.0
-            event_data = {'user_type': OldType(UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED),
-                          'value': self.current_value,
-                          'channel_index': self.channel_index,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            colour_channel_changed_event = pygame.event.Event(pygame.USEREVENT, event_data)
-            pygame.event.post(colour_channel_changed_event)
-
-            event_data = {'value': self.current_value,
-                          'channel_index': self.channel_index,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            colour_channel_changed_event = pygame.event.Event(
-                UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, event_data)
-            pygame.event.post(colour_channel_changed_event)
+    def _change_slider_value_and_fire_event(self, clipped_value):
+        self.slider.set_current_value(clipped_value)
+        self._set_value_and_post_event(clipped_value)
 
     def set_value(self, new_value: int):
         """
@@ -327,8 +316,8 @@ class UIColourPickerDialog(UIWindow):
 
         minimum_dimensions = (390, 390)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(self.relative_rect.size) +
-                           " is less than minimum dimensions: " + str(minimum_dimensions))
+            warn_string = (f"Initial size: {self.relative_rect.size} "
+                           f"is less than minimum dimensions: {minimum_dimensions}")
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
@@ -428,9 +417,7 @@ class UIColourPickerDialog(UIWindow):
         self.current_colour = colour
         self.changed_hsv_update_rgb()
         self.changed_rgb_update_hsv()
-        self.update_current_colour_image()
-        self.update_saturation_value_square()
-        self.update_colour_2d_slider()
+        self._update_colour_image_sv_square_and_2d_slider()
 
     def _setup_channels(self, default_sizes):
         # Set up the channels, possibly we can make this into a
@@ -576,49 +563,45 @@ class UIColourPickerDialog(UIWindow):
                 self.current_colour[event.channel_index] = event.value
                 self.changed_rgb_update_hsv()
 
-            self.update_current_colour_image()
-            self.update_saturation_value_square()
-
-            # Update 2D slider values
-            self.update_colour_2d_slider()
-
+            self._update_colour_image_sv_square_and_2d_slider()
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
             rect = self.sat_value_square.rect
             extended_rect = pygame.Rect(rect.x, rect.y, rect.w + 1, rect.h + 1)
             if extended_rect.collidepoint(scaled_mouse_pos):
-                relative_click_pos = [scaled_mouse_pos[0] - self.sat_value_square.rect.left,
-                                      scaled_mouse_pos[1] - self.sat_value_square.rect.top]
-                # put in range 0 - 100 and reverse y
-                x_value = int((relative_click_pos[0] / self.sat_value_square.rect.width) * 100)
-                y_value = int((relative_click_pos[1] / self.sat_value_square.rect.height) * 100)
-                value = min(100, max(0, x_value))
-                saturation = min(100, max(0, 100 - y_value))
-
-                self.sat_channel.set_value(saturation)
-                self.value_channel.set_value(value)
-                self.current_colour.hsva = (self.hue_channel.current_value,
-                                            self.sat_channel.current_value,
-                                            self.value_channel.current_value,
-                                            100)
-                self.changed_hsv_update_rgb()
-                self.update_current_colour_image()
-
-                # Update 2D slider values
-                self.update_colour_2d_slider()
-
+                self._set_colours_from_mouse_pos(scaled_mouse_pos)
         if event.type == UI_2D_SLIDER_MOVED and event.ui_element == self.colour_2d_slider:
             v, s = self.colour_2d_slider.get_current_value()
-            self.sat_channel.set_value(s)
-            self.value_channel.set_value(v)
-            self.current_colour.hsva = (self.hue_channel.current_value,
-                                        self.sat_channel.current_value,
-                                        self.value_channel.current_value,
-                                        100)
-            self.changed_hsv_update_rgb()
-            self.update_current_colour_image()
-
+            self._set_colours_from_value_sat(v, s)
         return consumed_event
+
+    def _update_colour_image_sv_square_and_2d_slider(self):
+        self.update_current_colour_image()
+        self.update_saturation_value_square()
+        self.update_colour_2d_slider()
+
+    def _set_colours_from_value_sat(self,  value, saturation):
+        self.sat_channel.set_value(saturation)
+        self.value_channel.set_value(value)
+        self.current_colour.hsva = (self.hue_channel.current_value,
+                                    self.sat_channel.current_value,
+                                    self.value_channel.current_value,
+                                    100)
+        self.changed_hsv_update_rgb()
+        self.update_current_colour_image()
+
+    def _set_colours_from_mouse_pos(self, scaled_mouse_pos):
+        relative_click_pos = [scaled_mouse_pos[0] - self.sat_value_square.rect.left,
+                              scaled_mouse_pos[1] - self.sat_value_square.rect.top]
+        # put in range 0 - 100 and reverse y
+        x_value = int((relative_click_pos[0] / self.sat_value_square.rect.width) * 100)
+        y_value = int((relative_click_pos[1] / self.sat_value_square.rect.height) * 100)
+        saturation = min(100, max(0, 100 - y_value))
+        value = min(100, max(0, x_value))
+        
+        self._set_colours_from_value_sat(value, saturation)
+        # Update 2D slider values
+        self.update_colour_2d_slider()
 
     def update_current_colour_image(self):
         """

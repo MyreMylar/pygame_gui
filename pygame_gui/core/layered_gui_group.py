@@ -1,5 +1,7 @@
 from operator import truth
 from abc import abstractmethod
+from collections.abc import Iterable
+
 
 from pygame.sprite import LayeredUpdates
 
@@ -44,8 +46,10 @@ class GUISprite:
                 if not has(group):
                     group.add_internal(self)
                     self.add_internal(group)
-            else:
+            elif isinstance(group, Iterable):
                 self.add(*group)
+            else:
+                raise TypeError("Expected group to be an iterable of groups, got non-iterable type")
 
     def remove(self, *groups):
         """remove the sprite from groups
@@ -160,11 +164,6 @@ class GUISprite:
     def layer(self, value):
         if not self.alive():
             self._layer = value
-        # else:
-        #     raise AttributeError("Can't set layer directly after "
-        #                          "adding to group. Use "
-        #                          "group.change_layer(sprite, new_layer) "
-        #                          "instead.")
 
     def __repr__(self):
         return f"<{self.__class__.__name__} GUISprite(in {len(self.groups())} groups)>"

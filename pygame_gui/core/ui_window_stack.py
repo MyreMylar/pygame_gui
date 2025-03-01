@@ -1,3 +1,4 @@
+import contextlib
 from typing import Tuple, List
 
 from pygame_gui.core.interfaces import IWindowInterface, IUIContainerInterface
@@ -70,7 +71,7 @@ class UIWindowStack(IUIWindowStackInterface):
             popped_windows_to_add_back = []
 
             # first clear out the top stack
-            try:
+            with contextlib.suppress(IndexError):
                 top_window = self.top_stack.pop()
                 while top_window is not None:
                     popped_windows_to_add_back.append(top_window)
@@ -78,34 +79,45 @@ class UIWindowStack(IUIWindowStackInterface):
                         top_window = self.top_stack.pop()
                     except IndexError:
                         top_window = None
-            except IndexError:
-                pass
-
             # then clear out everything above our target
-            window = self.stack.pop()
-            while window != window_to_refresh_from:
-                popped_windows_to_add_back.append(window)
-                window = self.stack.pop()
-
-            # add back our target as well
-            popped_windows_to_add_back.append(window_to_refresh_from)
-
-            # reverse the list and re-add them
-            popped_windows_to_add_back.reverse()
-            for old_window in popped_windows_to_add_back:
-                self.add_new_window(old_window)
-
+            self._refresh_existing_window_stack(self.stack,
+                                                popped_windows_to_add_back,
+                                                window_to_refresh_from)
         elif window_to_refresh_from in self.top_stack:
             popped_windows_to_add_back = []
-            window = self.top_stack.pop()
-            while window != window_to_refresh_from:
-                popped_windows_to_add_back.append(window)
-                window = self.top_stack.pop()
-            popped_windows_to_add_back.append(window_to_refresh_from)
 
-            popped_windows_to_add_back.reverse()
-            for old_window in popped_windows_to_add_back:
-                self.add_new_window(old_window)
+            self._refresh_existing_window_stack(self.top_stack,
+                                                popped_windows_to_add_back,
+                                                window_to_refresh_from)
+
+    def _refresh_existing_window_stack(self, stack, popped_windows_to_add_back, window_to_refresh_from):
+        window = stack.pop()
+        while window != window_to_refresh_from:
+            popped_windows_to_add_back.append(window)
+            window = stack.pop()
+        popped_windows_to_add_back.append(window_to_refresh_from)
+        popped_windows_to_add_back.reverse()
+        for old_window in popped_windows_to_add_back:
+            self.add_new_window(old_window)
+
+    def _remove_main_stack_window(self, window_to_remove):
+        window = self.stack.pop()
+        popped_windows_to_add_back = []
+        while window != window_to_remove:
+            popped_windows_to_add_back.append(window)
+            window = self.stack.pop()
+
+        with contextlib.suppress(IndexError):
+            top_window = self.top_stack.pop()
+            while top_window is not None:
+                popped_windows_to_add_back.append(top_window)
+                try:
+                    top_window = self.top_stack.pop()
+                except IndexError:
+                    top_window = None
+        popped_windows_to_add_back.reverse()
+        for old_window in popped_windows_to_add_back:
+            self.add_new_window(old_window)
 
     def remove_window(self, window_to_remove: IWindowInterface):
         """
@@ -116,38 +128,27 @@ class UIWindowStack(IUIWindowStackInterface):
 
         """
         if window_to_remove in self.stack:
-            popped_windows_to_add_back = []
-            window = self.stack.pop()
-            while window != window_to_remove:
-                popped_windows_to_add_back.append(window)
-                window = self.stack.pop()
-
-            try:
-                top_window = self.top_stack.pop()
-                while top_window is not None:
-                    popped_windows_to_add_back.append(top_window)
-                    try:
-                        top_window = self.top_stack.pop()
-                    except IndexError:
-                        top_window = None
-            except IndexError:
-                pass
-
-            popped_windows_to_add_back.reverse()
-            for old_window in popped_windows_to_add_back:
-                self.add_new_window(old_window)
-
+            self._remove_main_stack_window(window_to_remove)
         elif window_to_remove in self.top_stack:
             popped_windows_to_add_back = []
             window = self.top_stack.pop()
             while window != window_to_remove:
                 popped_windows_to_add_back.append(window)
                 window = self.top_stack.pop()
-
             popped_windows_to_add_back.reverse()
             for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)
 
+    # TODO Rename this here and in `refresh_window_stack_from_window`, `remove_window` and `move_window_to_front`
+    def _extracted_from_move_window_to_front_18(self, popped_windows_to_add_back, window_to_front):
+        popped_windows_to_add_back.reverse()
+        for old_window in popped_windows_to_add_back:
+            self.add_new_window(old_window)
+
+        self.add_new_window(window_to_front)
+        window_to_front.on_moved_to_front()
+
+    # TODO Rename this here and in `refresh_window_stack_from_window`, `remove_window` and `move_window_to_front`
     def move_window_to_front(self, window_to_front: IWindowInterface):
         """
         Moves the passed in window to the top of its stack and resorts the other windows
@@ -165,13 +166,9 @@ class UIWindowStack(IUIWindowStackInterface):
                 popped_windows_to_add_back.append(window)
                 window = self.top_stack.pop()
 
-            popped_windows_to_add_back.reverse()
-            for old_window in popped_windows_to_add_back:
-                self.add_new_window(old_window)
-
-            self.add_new_window(window_to_front)
-            window_to_front.on_moved_to_front()
-
+            self._extracted_from_move_window_to_front_18(
+                popped_windows_to_add_back, window_to_front
+            )
         if window_to_front not in self.stack or window_to_front == self.stack[-1]:
             return
         popped_windows_to_add_back = []
@@ -180,12 +177,9 @@ class UIWindowStack(IUIWindowStackInterface):
             popped_windows_to_add_back.append(window)
             window = self.stack.pop()
 
-        popped_windows_to_add_back.reverse()
-        for old_window in popped_windows_to_add_back:
-            self.add_new_window(old_window)
-
-        self.add_new_window(window_to_front)
-        window_to_front.on_moved_to_front()
+        self._extracted_from_move_window_to_front_18(
+            popped_windows_to_add_back, window_to_front
+        )
 
     def is_window_at_top(self, window: IWindowInterface) -> bool:
         """

@@ -174,11 +174,11 @@ class RectDrawableShape(DrawableShape):
         if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
             self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
-            border_colour_state_str = state_str + '_border'
-            bg_colour_state_str = state_str + '_bg'
-            text_colour_state_str = state_str + '_text'
-            text_shadow_colour_state_str = state_str + '_text_shadow'
-            image_state_str = state_str + '_image'
+            border_colour_state_str = f'{state_str}_border'
+            bg_colour_state_str = f'{state_str}_bg'
+            text_colour_state_str = f'{state_str}_text'
+            text_shadow_colour_state_str = f'{state_str}_text_shadow'
+            image_state_str = f'{state_str}_image'
 
             found_shape = None
             shape_id = None

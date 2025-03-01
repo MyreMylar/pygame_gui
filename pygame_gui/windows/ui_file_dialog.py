@@ -61,8 +61,8 @@ class UIFileDialog(UIWindow):
 
         minimum_dimensions = (260, 300)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(self.relative_rect.size) +
-                           " is less than minimum dimensions: " + str(minimum_dimensions))
+            warn_string = (f"Initial size: {self.relative_rect.size} "
+                           f"is less than minimum dimensions: {minimum_dimensions}")
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
@@ -71,17 +71,14 @@ class UIFileDialog(UIWindow):
 
         self.delete_confirmation_dialog = None  # type: Union[UIConfirmationDialog, None]
         self.current_file_path = None  # type: Union[Path, None]
-        if allowed_suffixes is None:
-            self.allowed_suffixes = {""}
-        else:
-            self.allowed_suffixes = allowed_suffixes
+        self.allowed_suffixes = {""} if allowed_suffixes is None else allowed_suffixes
         if initial_file_path is not None:
             pathed_initial_file_path = Path(initial_file_path)
             if pathed_initial_file_path.exists() and not pathed_initial_file_path.is_file():
                 self.current_directory_path = str(pathed_initial_file_path.resolve())
                 if self.allow_picking_directories:
                     self.current_file_path = Path(self.current_directory_path)
-            elif pathed_initial_file_path.exists() and pathed_initial_file_path.is_file():
+            elif pathed_initial_file_path.is_file():
                 self.current_file_path = pathed_initial_file_path.resolve()
                 self.current_directory_path = str(pathed_initial_file_path.parent.resolve())
             elif pathed_initial_file_path.parent.exists():
@@ -98,6 +95,9 @@ class UIFileDialog(UIWindow):
         self.current_file_list = None  # type: Union[List[str], None]
         self.update_current_file_list()
 
+        self._setup_ui_elements()
+
+    def _setup_ui_elements(self):
         self.cancel_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                       text='pygame-gui.Cancel',
                                       manager=self.ui_manager,
@@ -107,7 +107,6 @@ class UIFileDialog(UIWindow):
                                                'right': 'right',
                                                'top': 'bottom',
                                                'bottom': 'bottom'})
-
         self.ok_button = UIButton(relative_rect=pygame.Rect(-10, -40, -1, 30),
                                   text='pygame-gui.OK',
                                   manager=self.ui_manager,
@@ -118,10 +117,8 @@ class UIFileDialog(UIWindow):
                                            'top': 'bottom',
                                            'bottom': 'bottom',
                                            'right_target': self.cancel_button})
-
         if not self._validate_file_path(self.current_file_path):
             self.ok_button.disable()
-
         self.home_button = UIButton(relative_rect=pygame.Rect(10, 10, 20, 20),
                                     text='⌂',
                                     tool_tip_text='pygame-gui.Home_directory',
@@ -132,7 +129,6 @@ class UIFileDialog(UIWindow):
                                              'right': 'left',
                                              'top': 'top',
                                              'bottom': 'top'})
-
         self.delete_button = UIButton(relative_rect=pygame.Rect(32, 10, 20, 20),
                                       text='⌧',
                                       tool_tip_text='pygame-gui.Delete',
@@ -146,7 +142,6 @@ class UIFileDialog(UIWindow):
         if not self._validate_path_exists_and_of_allowed_type(self.current_file_path,
                                                               allow_directories=False):
             self.delete_button.disable()
-
         self.parent_directory_button = UIButton(relative_rect=pygame.Rect(54, 10, 20, 20),
                                                 text='↑',
                                                 tool_tip_text='pygame-gui.Parent_directory',
@@ -157,7 +152,6 @@ class UIFileDialog(UIWindow):
                                                          'right': 'left',
                                                          'top': 'top',
                                                          'bottom': 'top'})
-
         self.refresh_button = UIButton(relative_rect=pygame.Rect(76, 10, 20, 20),
                                        text='⇪',
                                        tool_tip_text='pygame-gui.Refresh_directory',
@@ -168,7 +162,6 @@ class UIFileDialog(UIWindow):
                                                 'right': 'left',
                                                 'top': 'top',
                                                 'bottom': 'top'})
-
         text_line_rect = pygame.Rect(10, 40, self.get_container().get_size()[0] - 20, -1)
         self.file_path_text_line = UITextEntryLine(relative_rect=text_line_rect,
                                                    manager=self.ui_manager,
@@ -184,7 +177,6 @@ class UIFileDialog(UIWindow):
             self._highlight_file_name_for_editing()
         else:
             self.file_path_text_line.set_text(str(self.current_directory_path))
-
         file_selection_rect = pygame.Rect(10, 80, self.get_container().get_size()[0] - 20,
                                           self.get_container().get_size()[1] - 130)
         self.file_selection_list = UISelectionList(relative_rect=file_selection_rect,
@@ -223,28 +215,35 @@ class UIFileDialog(UIWindow):
         if not self.file_path_text_line.is_focused:
             self.file_path_text_line.focus()
 
-    def update_current_file_list(self):
+    def update_current_file_list(self, should_try_again=True):
         """
         Updates the currently displayed list of files and directories. Usually called when the
         directory path has changed.
         """
         try:
-            directories_on_path: list[str] = [f.name for f in Path(self.current_directory_path).iterdir()
-                                              if not f.is_file()]
-            directories_on_path.sort(key=locale.strxfrm)
-            directories_on_path_tuples = [(f, '#directory_list_item') for f in directories_on_path]
-
-            files_on_path = [f.name for f in Path(self.current_directory_path).iterdir()
-                             if f.is_file() and any([f.name.endswith(x) for x in self.allowed_suffixes])]
-            files_on_path.sort(key=locale.strxfrm)
-            files_on_path_tuples = [(f, '#file_list_item') for f in files_on_path]
-
-            self.current_file_list = directories_on_path_tuples + files_on_path_tuples
+            self._create_list_of_directories_and_files_on_current_path()
         except (PermissionError, FileNotFoundError):
-            self.current_directory_path = self.last_valid_directory_path
-            self.update_current_file_list()
+            if should_try_again:
+                self.current_directory_path = self.last_valid_directory_path
+                self.update_current_file_list(should_try_again=False)
         else:
             self.last_valid_directory_path = self.current_directory_path
+
+    def _create_list_of_directories_and_files_on_current_path(self):
+        directories_on_path: list[str] = [f.name for f in Path(self.current_directory_path).iterdir()
+                                          if not f.is_file()]
+        directories_on_path.sort(key=locale.strxfrm)
+        directories_on_path_tuples = [(f, '#directory_list_item') for f in directories_on_path]
+
+        files_on_path = [
+            f.name
+            for f in Path(self.current_directory_path).iterdir()
+            if f.is_file() and any(f.name.endswith(x) for x in self.allowed_suffixes)
+        ]
+        files_on_path.sort(key=locale.strxfrm)
+        files_on_path_tuples = [(f, '#file_list_item') for f in files_on_path]
+
+        self.current_file_list = directories_on_path_tuples + files_on_path_tuples
 
     def _validate_file_path(self, path_to_validate: Path) -> bool:
         if self.allow_existing_files_only:
@@ -331,10 +330,7 @@ class UIFileDialog(UIWindow):
                 self.ok_button.enable()
             else:
                 self.current_directory_path = str(entered_file_path)
-                self.current_file_path = None
-                self.delete_button.disable()
-                self.ok_button.disable()
-
+                self._set_no_file_selected_state()
             if event.type == UI_TEXT_ENTRY_FINISHED:
                 if len(entered_file_path.name) > 0 and entered_file_path.is_dir():
                     self.current_directory_path = str(entered_file_path)
@@ -353,9 +349,12 @@ class UIFileDialog(UIWindow):
                     self.file_path_text_line.set_text(self.current_directory_path)
         else:
             self.current_directory_path = self.last_valid_directory_path
-            self.current_file_path = None
-            self.delete_button.disable()
-            self.ok_button.disable()
+            self._set_no_file_selected_state()
+
+    def _set_no_file_selected_state(self):
+        self.current_file_path = None
+        self.delete_button.disable()
+        self.ok_button.disable()
 
     def _process_file_list_events(self, event):
         """
@@ -374,14 +373,7 @@ class UIFileDialog(UIWindow):
             if self._validate_path_exists_and_of_allowed_type(new_selection_file_path,
                                                               self.allow_picking_directories):
                 self.current_file_path = new_selection_file_path
-                self.file_path_text_line.set_text(str(self.current_file_path))
-                self._highlight_file_name_for_editing()
-                self.ok_button.enable()
-                if self._validate_path_exists_and_of_allowed_type(self.current_file_path,
-                                                                  allow_directories=False):
-                    self.delete_button.enable()
-                else:
-                    self.delete_button.disable()
+                self._prepare_valid_file_path_for_interaction()
             else:
                 self.ok_button.disable()
                 self.delete_button.disable()
@@ -407,19 +399,23 @@ class UIFileDialog(UIWindow):
             if self.current_file_path != new_directory_path:
                 self.current_file_path = (new_directory_path /
                                           self.current_file_path.name).resolve()
-            self.file_path_text_line.set_text(str(self.current_file_path))
-            self._highlight_file_name_for_editing()
-            self.ok_button.enable()
-            if self._validate_path_exists_and_of_allowed_type(self.current_file_path,
-                                                              allow_directories=False):
-                self.delete_button.enable()
-            else:
-                self.delete_button.disable()
+            self._prepare_valid_file_path_for_interaction()
         else:
             self.current_file_path = None
             self.file_path_text_line.set_text(self.current_directory_path)
             self.delete_button.disable()
             self.ok_button.disable()
+
+    def _prepare_valid_file_path_for_interaction(self):
+        self.file_path_text_line.set_text(str(self.current_file_path))
+        self._highlight_file_name_for_editing()
+        self.ok_button.enable()
+        if self._validate_path_exists_and_of_allowed_type(
+            self.current_file_path, allow_directories=False
+        ):
+            self.delete_button.enable()
+        else:
+            self.delete_button.disable()
 
     def _process_confirmation_dialog_events(self, event):
         """
@@ -436,9 +432,7 @@ class UIFileDialog(UIWindow):
         except (PermissionError, FileNotFoundError):
             pass
         else:
-            self.current_file_path = None
-            self.delete_button.disable()
-            self.ok_button.disable()
+            self._set_no_file_selected_state()
 
             self.update_current_file_list()
             self.file_path_text_line.set_text(self.current_directory_path)

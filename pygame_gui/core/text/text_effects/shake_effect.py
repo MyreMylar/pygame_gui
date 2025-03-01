@@ -31,43 +31,40 @@ class ShakeEffect(TextEffect):
         sample_count = int(self.duration * self.frequency)
 
         self.x_samples = []
-        for _ in range(0, sample_count):
-            self.x_samples.append(random.uniform(-1.0, 1.0))
-
+        self.x_samples.extend(
+            random.uniform(-1.0, 1.0) for _ in range(sample_count)
+        )
         self.y_samples = []
-        for _ in range(0, sample_count):
-            self.y_samples.append(random.uniform(-1.0, 1.0))
-
+        self.y_samples.extend(
+            random.uniform(-1.0, 1.0) for _ in range(sample_count)
+        )
         self.shake = (0, 0)
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
-        if params is not None:
-            if 'loop' in params:
-                if isinstance(params['loop'], bool):
-                    self.loop = params['loop']
-                elif isinstance(params['loop'], str):
-                    self.loop = bool(int(params['loop']))
-                else:
-                    self.loop = bool(params['loop'])
-            if 'frequency' in params:
-                self.frequency = int(params['frequency'])
-            if 'amplitude' in params:
-                self.amplitude = int(params['amplitude'])
-            if 'duration' in params:
-                self.duration = float(params['duration'])
+        if params is None:
+            return
+        if 'loop' in params:
+            if isinstance(params['loop'], bool):
+                self.loop = params['loop']
+            elif isinstance(params['loop'], str):
+                self.loop = bool(int(params['loop']))
+            else:
+                self.loop = bool(params['loop'])
+        if 'frequency' in params:
+            self.frequency = int(params['frequency'])
+        if 'amplitude' in params:
+            self.amplitude = int(params['amplitude'])
+        if 'duration' in params:
+            self.duration = float(params['duration'])
 
     def _decay(self, time_passed: float):
         return min(1.0, max((self.duration - time_passed) / self.duration, 0.0))
 
     def _x_noise(self, index):
-        if index >= len(self.x_samples):
-            return 0
-        return self.x_samples[index]
+        return 0 if index >= len(self.x_samples) else self.x_samples[index]
 
     def _y_noise(self, index):
-        if index >= len(self.y_samples):
-            return 0
-        return self.y_samples[index]
+        return 0 if index >= len(self.y_samples) else self.y_samples[index]
 
     def _x_amplitude(self, time_passed: float):
 
@@ -119,7 +116,7 @@ class ShakeEffect(TextEffect):
         """
         Lets us know when the effect has changed enough to warrant us redrawing the text.
 
-        :return: True if it is is time to redraw our text.
+        :return: True if it is time to redraw our text.
         """
         if self.text_changed:
             self.text_changed = False

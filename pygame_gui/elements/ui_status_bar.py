@@ -27,8 +27,9 @@ class UIStatusBar(UIElement):
     :param relative_rect: The rectangle that defines the size of the health bar.
     :param sprite: Optional sprite to monitor for status info, and for drawing the bar with the sprite.
     :param follow_sprite: If there's a sprite, this indicates whether the bar should be drawn at the sprite's location.
-    :param percent_method: Optional method signature to call to get the percent complete. (To provide a method signature,
-                           simply reference the method without parenthesis, such as self.health_percent.)
+    :param percent_method: Optional method signature to call to get the percent complete. 
+                           (To provide a method signature, simply reference the method without parenthesis, 
+                           such as self.health_percent.)
     :param manager: The UIManager that manages this element. If not provided or set to None,
                     it will try to use the first UIManager that was created by your application.
     :param container: The container that this element is within. If set to None will be the root window's container.
@@ -115,12 +116,11 @@ class UIStatusBar(UIElement):
 
     @property
     def position(self):
-        if self.sprite and self.follow_sprite:
-            offset_x = self.sprite.rect.x + self.follow_sprite_offset[0]
-            offset_y = self.sprite.rect.y + self.follow_sprite_offset[1] - self.hover_height
-            return offset_x, offset_y
-        else:
+        if not self.sprite or not self.follow_sprite:
             return self.relative_rect.x, self.relative_rect.y
+        offset_x = self.sprite.rect.x + self.follow_sprite_offset[0]
+        offset_y = self.sprite.rect.y + self.follow_sprite_offset[1] - self.hover_height
+        return offset_x, offset_y
 
     def rebuild(self):
         """
@@ -184,8 +184,7 @@ class UIStatusBar(UIElement):
                               'follow_sprite_offset': self.follow_sprite_offset,
                               'border_overlap': self.border_overlap}
 
-        text = self.status_text()
-        if text:
+        if text := self.status_text():
             text_parameters = {'font': self.font,
                                'text': text,
                                'normal_text': self.text_colour,
@@ -200,7 +199,7 @@ class UIStatusBar(UIElement):
                                'text_horiz_alignment_padding': self.text_horiz_alignment_padding,
                                'text_vert_alignment_padding': self.text_vert_alignment_padding,
                                }
-            theming_parameters.update(text_parameters)
+            theming_parameters |= text_parameters
 
         if self.shape == 'rectangle':
             self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,

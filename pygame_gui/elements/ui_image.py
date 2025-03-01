@@ -50,8 +50,8 @@ class UIImage(UIElement):
                          element_id=['image'])
 
         self.original_image = None
-
-        self.set_image(image_surface, image_is_alpha_premultiplied, scale_func)
+        self.scale_func = scale_func
+        self.set_image(image_surface, image_is_alpha_premultiplied, self.scale_func)
         self.rebuild_from_changed_theme_data()
 
     def rebuild_from_changed_theme_data(self):
@@ -76,12 +76,12 @@ class UIImage(UIElement):
                     self.original_image = self._pre_clipped_image
                 else:
                     self.original_image = self.image
-            self._set_image(pygame.transform.smoothscale(self.original_image, self.rect.size))
+            self._set_image(self.scale_func(self.original_image, self.rect.size))
 
     def set_image(self,
                   new_image: Union[pygame.surface.Surface, None],
                   image_is_alpha_premultiplied: bool = False,
-                  scale_func = pygame.transform.smoothscale) -> None:
+                  scale_func=pygame.transform.smoothscale) -> None:
         """
         Allows users to change the image displayed on a UIImage element during run time, without recreating
         the element.
@@ -92,13 +92,15 @@ class UIImage(UIElement):
 
         :param new_image: the new image surface to use in the UIImage element.
         :param image_is_alpha_premultiplied: set to True if the image is already in alpha multiplied colour format.
+        :param scale_func: the function used for scaling the image, defaults to smoothscale.
         """
+        self.scale_func = scale_func
         image_surface = new_image.convert_alpha()
         if not image_is_alpha_premultiplied:
             image_surface = image_surface.premul_alpha()
         if (image_surface.get_width() != self.rect.width or
                 image_surface.get_height() != self.rect.height):
             self.original_image = image_surface
-            self._set_image(scale_func(self.original_image, self.rect.size))
+            self._set_image(self.scale_func(self.original_image, self.rect.size))
         else:
             self._set_image(image_surface)

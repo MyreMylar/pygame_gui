@@ -138,21 +138,25 @@ class UISelectionList(UIElement):
         :return: A single item name as a string or None.
 
         """
-        if not self.allow_multi_select:
-            if include_object_id:
-                selected_list = [(item['text'], item['object_id']) for item in self.item_list if item['selected']]
-            else:
-                selected_list = [item['text'] for item in self.item_list if item['selected']]
-            if len(selected_list) == 1:
-                return selected_list[0]
-            elif len(selected_list) == 0:
-                return None
-            else:
-                raise RuntimeError('More than one item selected in single-selection,'
-                                   ' selection list')
-        else:
+        if self.allow_multi_select:
             raise RuntimeError('Requesting single selection,'
                                ' from multi-selection list')
+        selected_list = (
+            [
+                (item['text'], item['object_id'])
+                for item in self.item_list
+                if item['selected']
+            ]
+            if include_object_id
+            else [item['text'] for item in self.item_list if item['selected']]
+        )
+        if len(selected_list) == 1:
+            return selected_list[0]
+        elif not selected_list:
+            return None
+        else:
+            raise RuntimeError('More than one item selected in single-selection,'
+                               ' selection list')
 
     def get_multi_selection(self, include_object_id: bool = False) -> Union[List[str], List[Tuple[str, str]]]:
         """
@@ -194,9 +198,7 @@ class UISelectionList(UIElement):
                 if (-self.list_item_height
                         <= new_height <=
                         self.item_list_container.relative_rect.height):
-                    if item['button_element'] is not None:
-                        item['button_element'].set_relative_position((0, new_height))
-                    else:
+                    if item['button_element'] is None:
                         button_rect = pygame.Rect(0,
                                                   new_height,
                                                   self.item_list_container.relative_rect.width,
@@ -217,17 +219,19 @@ class UISelectionList(UIElement):
                         item['button_element'] = button
                         if item['selected']:
                             item['button_element'].select()
-                else:
-                    if item['button_element'] is not None:
-                        item['button_element'].kill()
-                        item['button_element'] = None
+                    else:
+                        item['button_element'].set_relative_position((0, new_height))
+                elif item['button_element'] is not None:
+                    item['button_element'].kill()
+                    item['button_element'] = None
 
     def get_single_selection_start_percentage(self):
         """
         The percentage through the height of the list where the top of the first selected option is.
         """
-        selected_item_heights = [item['height'] for item in self.item_list if item['selected']]
-        if len(selected_item_heights) > 0:
+        if selected_item_heights := [
+            item['height'] for item in self.item_list if item['selected']
+        ]:
             return float(selected_item_heights[0] / self.total_height_of_list)
         return 0.0
 
@@ -248,8 +252,7 @@ class UISelectionList(UIElement):
         """
         self._raw_item_list = new_item_list
         self.item_list = []  # type: List[Dict]
-        index = 0
-        for new_item in new_item_list:
+        for index, new_item in enumerate(new_item_list):
             if isinstance(new_item, str):
                 new_item_list_item = {'text': new_item,
                                       'button_element': None,
@@ -266,8 +269,6 @@ class UISelectionList(UIElement):
                 raise ValueError('Invalid item list')
 
             self.item_list.append(new_item_list_item)
-            index += 1
-
         self.total_height_of_list = self.list_item_height * len(self.item_list)
         self.lowest_list_pos = (self.total_height_of_list -
                                 self.list_and_scroll_bar_container.relative_rect.height)
@@ -436,42 +437,41 @@ class UISelectionList(UIElement):
                         pygame.event.post(
                             pygame.event.Event(UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION,
                                                event_data))
+                    elif item['selected']:
+                        item['selected'] = False
+                        event.ui_element.unselect()
+
+                        # old event - to be removed in 0.8.0
+                        event_data = {'user_type': OldType(UI_SELECTION_LIST_DROPPED_SELECTION),
+                                      'text': event.ui_element.text,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+                        # new event
+                        event_data = {'text': event.ui_element.text,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(
+                            pygame.event.Event(UI_SELECTION_LIST_DROPPED_SELECTION, event_data))
+
                     else:
-                        if item['selected']:
-                            item['selected'] = False
-                            event.ui_element.unselect()
+                        item['selected'] = True
+                        event.ui_element.select()
 
-                            # old event - to be removed in 0.8.0
-                            event_data = {'user_type': OldType(UI_SELECTION_LIST_DROPPED_SELECTION),
-                                          'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-                            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+                        # old event - to be removed in 0.8.0
+                        event_data = {'user_type': OldType(UI_SELECTION_LIST_NEW_SELECTION),
+                                      'text': event.ui_element.text,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
 
-                            # new event
-                            event_data = {'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-                            pygame.event.post(
-                                pygame.event.Event(UI_SELECTION_LIST_DROPPED_SELECTION, event_data))
-
-                        else:
-                            item['selected'] = True
-                            event.ui_element.select()
-
-                            # old event - to be removed in 0.8.0
-                            event_data = {'user_type': OldType(UI_SELECTION_LIST_NEW_SELECTION),
-                                          'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-                            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
-
-                            # new event
-                            event_data = {'text': event.ui_element.text,
-                                          'ui_element': self,
-                                          'ui_object_id': self.most_specific_combined_id}
-                            pygame.event.post(pygame.event.Event(UI_SELECTION_LIST_NEW_SELECTION,
-                                                                 event_data))
+                        # new event
+                        event_data = {'text': event.ui_element.text,
+                                      'ui_element': self,
+                                      'ui_object_id': self.most_specific_combined_id}
+                        pygame.event.post(pygame.event.Event(UI_SELECTION_LIST_NEW_SELECTION,
+                                                             event_data))
 
                 elif not self.allow_multi_select:
                     if item['selected']:

@@ -63,15 +63,8 @@ class TextBoxLayout:
             for rect in self.input_data_rect_queue:
                 self.layout_rect.width += rect.width
 
-        if self.view_rect.width == -1:
-            self.dynamic_width = True
-        else:
-            self.dynamic_width = False
-        if self.view_rect.height == -1:
-            self.dynamic_height = True
-        else:
-            self.dynamic_height = False
-
+        self.dynamic_width = self.view_rect.width == -1
+        self.dynamic_height = self.view_rect.height == -1
         self.layout_rect_queue = None
         self.finalised_surface = None
         self.floating_rects: List[TextLayoutRect] = []
@@ -122,11 +115,19 @@ class TextBoxLayout:
         plain_text = ""
         for row in self.layout_rows:
             for item in row.items:
-                if isinstance(item, TextLineChunkFTFont) or isinstance(item, HyperlinkTextChunk):
+                if isinstance(item, (TextLineChunkFTFont, HyperlinkTextChunk)):
                     plain_text += item.text
                 if isinstance(item, LineBreakLayoutRect):
                     plain_text += "\n"
         self.plain_text = plain_text
+
+    def _reprocess_layout_rows(self, from_index, row_to_process_from):
+        temp_layout_queue = deque([])
+        for row in reversed(self.layout_rows[from_index:]):
+            row.rewind_row(temp_layout_queue)
+        self.layout_rows = self.layout_rows[:from_index]
+        self._merge_adjacent_compatible_chunks(temp_layout_queue)
+        self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
     def reprocess_layout_queue(self, layout_rect):
         """
@@ -228,8 +229,7 @@ class TextBoxLayout:
             if isinstance(text_layout_rect, HyperlinkTextChunk):
                 self.link_chunks.append(text_layout_rect)
             if self.expand_width:
-                if self.layout_rect.width < current_row.width:
-                    self.layout_rect.width = current_row.width
+                self.layout_rect.width = max(self.layout_rect.width, current_row.width)
         return current_row
 
     def _handle_float_rect(self, current_row, test_layout_rect, input_queue):
@@ -240,8 +240,7 @@ class TextBoxLayout:
                 if (floater.vertical_overlap(test_layout_rect)
                         and floater.float_pos() == TextFloatPosition.LEFT):
                     test_layout_rect.left = floater.right
-                    if max_floater_line_height < floater.height:
-                        max_floater_line_height = floater.height
+                    max_floater_line_height = max(max_floater_line_height, floater.height)
             if not self.expand_width and test_layout_rect.right > self.layout_rect.width:
                 # If this rectangle doesn't fit, we see if we can split it
                 current_row = self._split_rect_and_move_to_next_line(
@@ -265,8 +264,7 @@ class TextBoxLayout:
                         and floater.float_pos() == TextFloatPosition.RIGHT
                         and floater.left < rhs_limit):
                     rhs_limit = floater.left
-                    if max_floater_line_height < floater.height:
-                        max_floater_line_height = floater.height
+                    max_floater_line_height = max(max_floater_line_height, floater.height)
             test_layout_rect.right = rhs_limit
             if test_layout_rect.left < 0:
                 # If this rectangle doesn't fit, we see if we can split it
@@ -440,12 +438,12 @@ class TextBoxLayout:
 
         :param new_end_pos: The new ending index for the text string.
         """
-        cumulative_row_letter_count = 0
         found_chunk_to_update = False
         self.current_end_pos = new_end_pos
 
         row, index_in_row = self._find_row_from_text_box_index(new_end_pos)
         if row is not None:
+            cumulative_row_letter_count = 0
             for rect in row.items:
                 if not found_chunk_to_update:
                     if cumulative_row_letter_count + rect.letter_count < index_in_row:
@@ -473,9 +471,8 @@ class TextBoxLayout:
 
         :param alpha: integer from 0 to 255.
         """
-        if self.alpha == 255 and alpha != 255:
-            if self.finalised_surface is not None:
-                self.pre_alpha_final_surf = self.finalised_surface.copy()
+        if self.alpha == 255 and alpha != 255 and self.finalised_surface is not None:
+            self.pre_alpha_final_surf = self.finalised_surface.copy()
 
         self.alpha = alpha
 
@@ -493,8 +490,7 @@ class TextBoxLayout:
 
         :param link_hover_chunks:
         """
-        for chunk in self.link_chunks:
-            link_hover_chunks.append(chunk)
+        link_hover_chunks.extend(iter(self.link_chunks))
 
     def insert_layout_rects(self, layout_rects: Deque[TextLayoutRect],
                             row_index: int, item_index: int, chunk_index: int):
@@ -517,13 +513,7 @@ class TextBoxLayout:
                 if isinstance(input_rect, TextLineChunkFTFont) and item.style_match(input_rect):
                     item.insert_text(input_rect.text, chunk_index)
 
-        temp_layout_queue = deque([])
-        for row in reversed(self.layout_rows[row_index:]):
-            row.rewind_row(temp_layout_queue)
-
-        self.layout_rows = self.layout_rows[:row_index]
-        self._merge_adjacent_compatible_chunks(temp_layout_queue)
-        self._process_layout_queue(temp_layout_queue, row)
+        self._reprocess_layout_rows(row_index, row)
 
         if self.finalised_surface is not None:
             if ((self.layout_rect.width + self.edit_buffer,
@@ -679,8 +669,8 @@ class TextBoxLayout:
                     elif (len(self.layout_rows) > 1 and
                           isinstance(last_chunk, LineBreakLayoutRect) and
                           row.row_index != (len(self.layout_rows) - 1)):
-                        # if the last chunk in a row is a line break, and we have more than one row and this isn't the last row
-                        # we want to jump to the start of the next row
+                        # if the last chunk in a row is a line break, and we have more than one row and this isn't
+                        # the last row we want to jump to the start of the next row
                         edit_pos_accumulator += row.letter_count
                     else:
                         row.set_cursor_position(cursor_pos - edit_pos_accumulator)
@@ -701,9 +691,8 @@ class TextBoxLayout:
             if count < len(self.layout_rows) - 1:
                 if cursor_click_pos[1] < row.top or cursor_click_pos[1] >= self.layout_rows[count + 1].top:
                     continue
-            else:
-                if cursor_click_pos[1] < row.top or cursor_click_pos[1] > row.bottom:
-                    continue
+            elif cursor_click_pos[1] < row.top or cursor_click_pos[1] > row.bottom:
+                continue
             found_row = row
 
         if found_row is None and len(self.layout_rows) > 0:
@@ -844,69 +833,58 @@ class TextBoxLayout:
                 self.selected_rows.append(row)
                 rows_to_finalise.add(row)
                 for chunk in row.items:
-                    if chunk is not None:
-                        if isinstance(chunk, TextLineChunkFTFont):
-                            if chunk == start_chunk and chunk == end_chunk:
-                                start_selection = True
-                                end_selection = True
-                                chunk.selected_text = chunk.text[
-                                                      start_letter_index:end_letter_index]  # should probably check for text rect here
-                                chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
-                                                                   (end_chunk_x_pos - start_chunk_x_pos, chunk.height))
-                                chunk.selection_colour = self.selection_colour
-                                chunk.selection_text_colour = self.selection_text_colour
-                                chunk.selection_start_index = start_letter_index
-                                chunk.is_selected = True
-                                self.selected_chunks.append(chunk)
-                            elif chunk == start_chunk:
-                                start_selection = True
-                                chunk.selected_text = chunk.text[
-                                                      start_letter_index:]  # should probably check for text rect here
-                                chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
-                                                                   (chunk.width - start_chunk_x_pos, chunk.height))
-                                chunk.selection_colour = self.selection_colour
-                                chunk.selection_text_colour = self.selection_text_colour
-                                chunk.selection_start_index = start_letter_index
-                                chunk.is_selected = True
-                                self.selected_chunks.append(chunk)
-                            elif chunk == end_chunk:
-                                end_selection = True
-                                if end_letter_index == 0:
-                                    pass
-                                else:
-                                    chunk.selected_text = chunk.text[
-                                                          :end_letter_index]  # should probably check for text rect here
-                                    chunk.selection_rect = pygame.Rect((0, 0),
-                                                                       (end_chunk_x_pos, chunk.height))
-                                    chunk.selection_colour = self.selection_colour
-                                    chunk.selection_text_colour = self.selection_text_colour
-                                    chunk.is_selected = True
-                                    self.selected_chunks.append(chunk)
-
-                            if start_selection and not end_selection and not chunk == start_chunk:
-                                # middle text chunks
-                                chunk.selected_text = chunk.text[:]
-                                chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
-                                chunk.selection_colour = self.selection_colour
-                                chunk.selection_text_colour = self.selection_text_colour
-                                chunk.is_selected = True
-                                self.selected_chunks.append(chunk)
-                        elif isinstance(chunk, LineBreakLayoutRect) or isinstance(chunk, ImageLayoutRect):
-                            if chunk == start_chunk:
-                                start_selection = True
-                            if start_selection and not end_selection:
-                                if chunk == end_chunk and end_letter_index == 0:
-                                    pass
-                                else:
-                                    chunk.is_selected = True
-                                    chunk.selection_colour = self.selection_colour
-                                    chunk.selection_text_colour = self.selection_text_colour
-                                    self.selected_chunks.append(chunk)
-                            if chunk == end_chunk:
-                                end_selection = True
-                    else:
+                    if chunk is None:
                         print("found None chunk in row: ", row.row_index, " with items: ", row.items)
 
+                    elif isinstance(chunk, TextLineChunkFTFont):
+                        if chunk == start_chunk and chunk == end_chunk:
+                            start_selection = True
+                            end_selection = True
+                            # should probably check for text rect here
+                            chunk.selected_text = chunk.text[
+                                                  start_letter_index:end_letter_index]
+                            chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
+                                                               (end_chunk_x_pos - start_chunk_x_pos, chunk.height))
+                            self._set_chunk_selection_data(chunk, start_letter_index)
+                        elif chunk == start_chunk:
+                            start_selection = True
+                            chunk.selected_text = chunk.text[
+                                                  start_letter_index:]  # should probably check for text rect here
+                            chunk.selection_rect = pygame.Rect((start_chunk_x_pos, 0),
+                                                               (chunk.width - start_chunk_x_pos, chunk.height))
+                            self._set_chunk_selection_data(chunk, start_letter_index)
+                        elif chunk == end_chunk:
+                            end_selection = True
+                            if end_letter_index != 0:
+                                chunk.selected_text = chunk.text[
+                                                      :end_letter_index]  # should probably check for text rect here
+                                chunk.selection_rect = pygame.Rect((0, 0),
+                                                                   (end_chunk_x_pos, chunk.height))
+                                chunk.is_selected = self._set_selection_colours(chunk, True)
+                                self.selected_chunks.append(chunk)
+
+                        if (
+                                start_selection
+                                and not end_selection
+                                and chunk != start_chunk
+                        ):
+                            # middle text chunks
+                            chunk.selected_text = chunk.text[:]
+                            chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
+                            chunk.is_selected = self._set_selection_colours(chunk, True)
+                            self.selected_chunks.append(chunk)
+                    elif isinstance(
+                            chunk, (LineBreakLayoutRect, ImageLayoutRect)
+                    ):
+                        if chunk == start_chunk:
+                            start_selection = True
+                        if start_selection and not end_selection and (chunk != end_chunk or end_letter_index != 0):
+                            chunk.is_selected = True
+                            chunk.selection_colour = self.selection_colour
+                            chunk.selection_text_colour = self.selection_text_colour
+                            self.selected_chunks.append(chunk)
+                        if chunk == end_chunk:
+                            end_selection = True
         if self.finalised_surface is not None:
             for row in rows_to_finalise:
                 row.finalise(self.finalised_surface)
@@ -914,16 +892,26 @@ class TextBoxLayout:
                 floating_rect.finalise(self.finalised_surface,
                                        self.view_rect, 0, 0, 0, 0)
 
+    def _set_selection_colours(self, chunk, is_selected):
+        chunk.selection_colour = self.selection_colour
+        chunk.selection_text_colour = self.selection_text_colour
+        return is_selected
+
+    def _set_chunk_selection_data(self, chunk, start_letter_index):
+        chunk.selection_start_index = start_letter_index
+        chunk.is_selected = True
+        self.selected_chunks.append(chunk)
+
     def _find_chunk_and_chunk_x(self, index: int):
         found_chunk = None
         letter_index = 0
         letter_accumulator = 0
-        chunk_in_row_index = 0
         row_index = 0
         x_pos_in_chunk = 0
         chunk_row, index_in_row = self._find_row_from_text_box_index(index)
         if chunk_row is not None:
             row_index = chunk_row.row_index
+            chunk_in_row_index = 0
             for chunk in chunk_row.items:
                 if isinstance(chunk, TextLineChunkFTFont) and found_chunk is None:
                     if index_in_row < letter_accumulator + chunk.letter_count:
@@ -937,21 +925,17 @@ class TextBoxLayout:
                         letter_index = index_in_row - letter_accumulator
                         found_chunk = chunk
                         break
-            if found_chunk is None:
-                # couldn't find it on this row so use the first chunk of row below
-                if row_index + 1 < len(self.layout_rows):
-                    chunk_row = self.layout_rows[row_index + 1]
-                    row_index = chunk_row.row_index
-                    letter_index = 0
+            if found_chunk is None and row_index + 1 < len(self.layout_rows):
+                chunk_row = self.layout_rows[row_index + 1]
+                row_index = chunk_row.row_index
+                letter_index = 0
 
-                    for chunk in chunk_row.items:
-                        if isinstance(chunk, TextLineChunkFTFont):
-                            found_chunk = chunk
-                            break
-                        elif isinstance(chunk, LineBreakLayoutRect):
-                            found_chunk = chunk
-                            break
-
+                for chunk in chunk_row.items:
+                    if isinstance(
+                            chunk, (TextLineChunkFTFont, LineBreakLayoutRect)
+                    ):
+                        found_chunk = chunk
+                        break
         if found_chunk is not None and isinstance(found_chunk, TextLineChunkFTFont):
             x_pos_in_chunk = found_chunk.font.size(found_chunk.text[:letter_index])[0]
         return found_chunk, x_pos_in_chunk, letter_index, row_index
@@ -987,13 +971,11 @@ class TextBoxLayout:
                     letter_index = 0
 
                     for chunk in chunk_row.items:
-                        if isinstance(chunk, TextLineChunkFTFont):
+                        if isinstance(
+                                chunk, (TextLineChunkFTFont, LineBreakLayoutRect)
+                        ):
                             found_chunk = chunk
                             break
-                        elif isinstance(chunk, LineBreakLayoutRect):
-                            found_chunk = chunk
-                            break
-
         if found_chunk is not None and found_chunk.can_split():
             # split the chunk
 
@@ -1042,34 +1024,33 @@ class TextBoxLayout:
         :param parser: An optional HTML parser for text styling data
         """
         current_row, index_in_row = self._find_row_from_text_box_index(layout_index)
-        if current_row is not None:
-            if (index_in_row == current_row.letter_count and
-                    current_row.row_index < (len(self.layout_rows) - 1) and
-                    current_row.last_chunk_is_line_break()):
-                current_row = self.layout_rows[current_row.row_index + 1]
-                index_in_row = 0
-
-            current_row.insert_text(text, index_in_row, parser)
-
-            row_to_process_from = current_row
-            row_to_process_from_index = current_row.row_index
-            if current_row.row_index > 0:
-                row_to_process_from = self.layout_rows[current_row.row_index - 1]
-                row_to_process_from_index = row_to_process_from.row_index
-
-            temp_layout_queue = deque([])
-            for row in reversed(self.layout_rows[row_to_process_from_index:]):
-                row.rewind_row(temp_layout_queue)
-
-            self.layout_rows = self.layout_rows[:row_to_process_from_index]
-            self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, row_to_process_from)
-
-            if self.finalised_surface is not None:
-                for row in self.layout_rows[row_to_process_from_index:]:
-                    row.finalise(self.finalised_surface)
-        else:
+        if current_row is None:
             raise RuntimeError("no rows in text box layout")
+        if (index_in_row == current_row.letter_count and
+                current_row.row_index < (len(self.layout_rows) - 1) and
+                current_row.last_chunk_is_line_break()):
+            current_row = self.layout_rows[current_row.row_index + 1]
+            index_in_row = 0
+
+        current_row.insert_text(text, index_in_row, parser)
+
+        row_to_process_from = current_row
+        row_to_process_from_index = current_row.row_index
+        if current_row.row_index > 0:
+            row_to_process_from = self.layout_rows[current_row.row_index - 1]
+            row_to_process_from_index = row_to_process_from.row_index
+
+        temp_layout_queue = deque([])
+        for row in reversed(self.layout_rows[row_to_process_from_index:]):
+            row.rewind_row(temp_layout_queue)
+
+        self.layout_rows = self.layout_rows[:row_to_process_from_index]
+        self._merge_adjacent_compatible_chunks(temp_layout_queue)
+        self._process_layout_queue(temp_layout_queue, row_to_process_from)
+
+        if self.finalised_surface is not None:
+            for row in self.layout_rows[row_to_process_from_index:]:
+                row.finalise(self.finalised_surface)
 
     def insert_line_break(self, layout_index: int, parser: Optional[HTMLParser]):
         """
@@ -1081,20 +1062,7 @@ class TextBoxLayout:
         found_chunk, index_in_row, row_index = self._find_and_split_chunk(layout_index)
 
         if len(self.layout_rows) > 0 and found_chunk is not None:
-            current_row = self.layout_rows[row_index]
-            current_row.insert_linebreak_after_chunk(found_chunk, parser)
-
-            temp_layout_queue = deque([])
-            for row in reversed(self.layout_rows[row_index:]):
-                row.rewind_row(temp_layout_queue)
-
-            self.layout_rows = self.layout_rows[:row_index]
-            self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, current_row)
-
-            if self.finalised_surface is not None:
-                for row in self.layout_rows[current_row.row_index:]:
-                    row.finalise(self.finalised_surface)
+            self._insert_line_break_into_row_by_index(row_index, found_chunk, parser)
         if found_chunk is None:
             if layout_index == self.letter_count:
                 if len(self.layout_rows) > 0:
@@ -1108,14 +1076,28 @@ class TextBoxLayout:
                             row.rewind_row(temp_layout_queue)
 
                         self.layout_rows = self.layout_rows[:last_row.row_index]
-                        self._merge_adjacent_compatible_chunks(temp_layout_queue)
-                        self._process_layout_queue(temp_layout_queue, last_row)
-
-                        if self.finalised_surface is not None:
-                            for row in self.layout_rows[last_row.row_index:]:
-                                row.finalise(self.finalised_surface)
+                        self._finish_new_row_after_line_break(temp_layout_queue, last_row)
             else:
                 print("couldn't find chunk to split at layout index: ", layout_index)
+
+    def _finish_new_row_after_line_break(self, temp_layout_queue, arg1):
+        self._merge_adjacent_compatible_chunks(temp_layout_queue)
+        self._process_layout_queue(temp_layout_queue, arg1)
+
+        if self.finalised_surface is not None:
+            for row in self.layout_rows[arg1.row_index:]:
+                row.finalise(self.finalised_surface)
+
+    def _insert_line_break_into_row_by_index(self, row_index, found_chunk, parser):
+        current_row = self.layout_rows[row_index]
+        current_row.insert_linebreak_after_chunk(found_chunk, parser)
+
+        temp_layout_queue = deque([])
+        for row in reversed(self.layout_rows[row_index:]):
+            row.rewind_row(temp_layout_queue)
+
+        self.layout_rows = self.layout_rows[:row_index]
+        self._finish_new_row_after_line_break(temp_layout_queue, current_row)
 
     def delete_selected_text(self):
         """
@@ -1150,17 +1132,16 @@ class TextBoxLayout:
                     if chunk is not None:
                         if chunk == start_chunk:
                             start_selection = True
-                        if start_selection and not end_selection:
-                            if chunk == end_chunk and end_letter_index == 0:
-                                pass
-                            else:
-                                if isinstance(chunk, TextLineChunkFTFont):
-                                    chunk.selected_text = chunk.text[:]
-                                    chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
-                                    chunk.is_selected = True
-                                elif isinstance(chunk, ImageLayoutRect) or isinstance(chunk, LineBreakLayoutRect):
-                                    chunk.is_selected = True
-                                self.selected_chunks.append(chunk)
+                        if start_selection and not end_selection and (chunk != end_chunk or end_letter_index != 0):
+                            if isinstance(chunk, TextLineChunkFTFont):
+                                chunk.selected_text = chunk.text[:]
+                                chunk.selection_rect = pygame.Rect((0, 0), chunk.size)
+                                chunk.is_selected = True
+                            elif isinstance(
+                                    chunk, (ImageLayoutRect, LineBreakLayoutRect)
+                            ):
+                                chunk.is_selected = True
+                            self.selected_chunks.append(chunk)
 
                         if chunk == end_chunk:
                             end_selection = True
@@ -1208,16 +1189,9 @@ class TextBoxLayout:
         self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
         if len(current_row.items) == 0:
-            current_row_starting_chunk.text = ''
-            current_row_starting_chunk.width = 0
-            current_row_starting_chunk.letter_count = 0
-            current_row_starting_chunk.split_points = []
-            current_row_starting_chunk.selection_rect = None
-            current_row_starting_chunk.selected_text = None
-            current_row_starting_chunk.selection_start_index = 0
-            current_row_starting_chunk.is_selected = False
-            current_row.add_item(current_row_starting_chunk)
-
+            self._setup_and_add_empty_chunk(
+                current_row_starting_chunk, current_row
+            )
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
                 row.finalise(self.finalised_surface)
@@ -1225,114 +1199,113 @@ class TextBoxLayout:
         self.selected_rows = []
         self.selected_chunks = []
 
+    @staticmethod
+    def _setup_and_add_empty_chunk(current_row_starting_chunk, current_row):
+        current_row_starting_chunk.text = ''
+        current_row_starting_chunk.width = 0
+        current_row_starting_chunk.letter_count = 0
+        current_row_starting_chunk.split_points = []
+        current_row_starting_chunk.selection_rect = None
+        current_row_starting_chunk.selected_text = None
+        current_row_starting_chunk.selection_start_index = 0
+        current_row_starting_chunk.is_selected = False
+        current_row.add_item(current_row_starting_chunk)
+
     def delete_at_cursor(self):
         """
         Deletes a single character in front of the edit cursor. Mimics a standard word
         processor 'delete' operation.
         """
-        if self.cursor_text_row is not None:
-            current_row = self.cursor_text_row
-            current_row_index = current_row.row_index
-            cursor_pos = self.cursor_text_row.cursor_index
-            letter_acc = 0
-            deleted_character = False
-            chunk_to_remove = None
-            for chunk in self.cursor_text_row.items:
+        if self.cursor_text_row is None:
+            return
+        current_row = self.cursor_text_row
+        current_row_index = current_row.row_index
+        cursor_pos = self.cursor_text_row.cursor_index
+        letter_acc = 0
+        deleted_character = False
+        chunk_to_remove = None
+        for chunk in self.cursor_text_row.items:
+            if isinstance(chunk, TextLineChunkFTFont):
+                if cursor_pos <= letter_acc + (chunk.letter_count - 1):
+                    chunk_letter_pos = cursor_pos - letter_acc
+                    chunk.delete_letter_at_index(chunk_letter_pos)
+                    deleted_character = True
+                    break
+            elif isinstance(chunk, LineBreakLayoutRect):
+                # delete this chunk
+                if cursor_pos <= letter_acc + (chunk.letter_count - 1):
+                    chunk_to_remove = chunk
+                    deleted_character = True
+                    break
+
+            letter_acc += chunk.letter_count
+        if chunk_to_remove is not None:
+            current_row.items.remove(chunk_to_remove)
+        if not deleted_character and current_row_index + 1 < len(self.layout_rows):
+            row_below = self.layout_rows[current_row_index + 1]
+            for chunk in row_below.items:
                 if isinstance(chunk, TextLineChunkFTFont):
-                    if cursor_pos <= letter_acc + (chunk.letter_count - 1):
-                        chunk_letter_pos = cursor_pos - letter_acc
-                        chunk.delete_letter_at_index(chunk_letter_pos)
-                        deleted_character = True
-                        break
-                elif isinstance(chunk, LineBreakLayoutRect):
-                    # delete this chunk
-                    if cursor_pos <= letter_acc + (chunk.letter_count - 1):
-                        chunk_to_remove = chunk
-                        deleted_character = True
-                        break
+                    chunk.delete_letter_at_index(0)
 
-                letter_acc += chunk.letter_count
-            if chunk_to_remove is not None:
-                current_row.items.remove(chunk_to_remove)
-            if not deleted_character:
-                # failed to delete character, must be at end of row - see if we have a row below
-                # if so delete the first character of that row
-                if current_row_index + 1 < len(self.layout_rows):
-                    row_below = self.layout_rows[current_row_index + 1]
-                    for chunk in row_below.items:
-                        if isinstance(chunk, TextLineChunkFTFont):
-                            chunk.delete_letter_at_index(0)
+        row_to_process_from = current_row
+        row_to_process_from_index = current_row.row_index
+        if current_row.row_index > 0:
+            row_to_process_from = self.layout_rows[current_row.row_index - 1]
+            row_to_process_from_index = row_to_process_from.row_index
 
-            row_to_process_from = current_row
-            row_to_process_from_index = current_row.row_index
-            if current_row.row_index > 0:
-                row_to_process_from = self.layout_rows[current_row.row_index - 1]
-                row_to_process_from_index = row_to_process_from.row_index
+        self._reprocess_layout_rows(row_to_process_from_index, row_to_process_from)
 
-            temp_layout_queue = deque([])
-            for row in reversed(self.layout_rows[row_to_process_from_index:]):
-                row.rewind_row(temp_layout_queue)
-
-            self.layout_rows = self.layout_rows[:row_to_process_from_index]
-            self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, row_to_process_from)
-
-            if self.finalised_surface is not None:
-                for row in self.layout_rows[row_to_process_from_index:]:
-                    row.finalise(self.finalised_surface)
+        if self.finalised_surface is not None:
+            for row in self.layout_rows[row_to_process_from_index:]:
+                row.finalise(self.finalised_surface)
 
     def backspace_at_cursor(self):
         """
         Deletes a single character behind the edit cursor. Mimics a standard word
         processor 'backspace' operation.
         """
-        if self.cursor_text_row is not None:
-            current_row = self.cursor_text_row
-            current_row_index = current_row.row_index
-            cursor_pos = self.cursor_text_row.cursor_index
-            letter_acc = 0
-            if current_row_index > 0 and cursor_pos == 0:
-                # at start of row with rows above
-                # need to delete from end of row above
-                current_row_index = current_row_index - 1
-                current_row = self.layout_rows[current_row_index]
-                cursor_pos = current_row.letter_count
+        if self.cursor_text_row is None:
+            return
+        current_row = self.cursor_text_row
+        current_row_index = current_row.row_index
+        cursor_pos = self.cursor_text_row.cursor_index
+        letter_acc = 0
+        if current_row_index > 0 and cursor_pos == 0:
+            # at start of row with rows above
+            # need to delete from end of row above
+            current_row_index = current_row_index - 1
+            current_row = self.layout_rows[current_row_index]
+            cursor_pos = current_row.letter_count
 
-            chunk_to_remove = None
-            for chunk in current_row.items:
-                if isinstance(chunk, TextLineChunkFTFont):
-                    if cursor_pos <= letter_acc + chunk.letter_count:
-                        chunk_letter_pos = cursor_pos - letter_acc
-                        chunk.backspace_letter_at_index(chunk_letter_pos)
-                        break
-                elif isinstance(chunk, LineBreakLayoutRect):
-                    # delete this chunk, line break has an edit pos length of 1
-                    if cursor_pos <= letter_acc + chunk.letter_count:
-                        chunk_to_remove = chunk
-                        break
+        chunk_to_remove = None
+        for chunk in current_row.items:
+            if isinstance(chunk, TextLineChunkFTFont):
+                if cursor_pos <= letter_acc + chunk.letter_count:
+                    chunk_letter_pos = cursor_pos - letter_acc
+                    chunk.backspace_letter_at_index(chunk_letter_pos)
+                    break
+            elif isinstance(chunk, LineBreakLayoutRect):
+                # delete this chunk, line break has an edit pos length of 1
+                if cursor_pos <= letter_acc + chunk.letter_count:
+                    chunk_to_remove = chunk
+                    break
 
-                letter_acc += chunk.letter_count
-            if chunk_to_remove is not None:
-                current_row.items.remove(chunk_to_remove)
-            current_row.set_cursor_position(cursor_pos - 1)
+            letter_acc += chunk.letter_count
+        if chunk_to_remove is not None:
+            current_row.items.remove(chunk_to_remove)
+        current_row.set_cursor_position(cursor_pos - 1)
 
-            row_to_process_from = current_row
-            row_to_process_from_index = current_row.row_index
-            if current_row.row_index > 0:
-                row_to_process_from = self.layout_rows[current_row.row_index - 1]
-                row_to_process_from_index = row_to_process_from.row_index
+        row_to_process_from = current_row
+        row_to_process_from_index = current_row.row_index
+        if current_row.row_index > 0:
+            row_to_process_from = self.layout_rows[current_row.row_index - 1]
+            row_to_process_from_index = row_to_process_from.row_index
 
-            temp_layout_queue = deque([])
-            for row in reversed(self.layout_rows[row_to_process_from_index:]):
-                row.rewind_row(temp_layout_queue)
+        self._reprocess_layout_rows(row_to_process_from_index, row_to_process_from)
 
-            self.layout_rows = self.layout_rows[:row_to_process_from_index]
-            self._merge_adjacent_compatible_chunks(temp_layout_queue)
-            self._process_layout_queue(temp_layout_queue, row_to_process_from)
-
-            if self.finalised_surface is not None:
-                for row in self.layout_rows[row_to_process_from_index:]:
-                    row.finalise(self.finalised_surface)
+        if self.finalised_surface is not None:
+            for row in self.layout_rows[row_to_process_from_index:]:
+                row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
         if len(self.layout_rows) != 0:
@@ -1367,14 +1340,12 @@ class TextBoxLayout:
         last_row = self.layout_rows[-1]
         self._process_layout_queue(new_queue, last_row)
         if self.finalised_surface is not None:
-            if self.finalised_surface is not None:
-
-                if ((self.layout_rect.width + self.edit_buffer,
-                     self.layout_rect.height) != self.finalised_surface.get_size()):
-                    self.finalise_to_new()
-                else:
-                    for row in self.layout_rows[last_row.row_index:]:
-                        row.finalise(self.finalised_surface)
+            if ((self.layout_rect.width + self.edit_buffer,
+                 self.layout_rect.height) != self.finalised_surface.get_size()):
+                self.finalise_to_new()
+            else:
+                for row in self.layout_rows[last_row.row_index:]:
+                    row.finalise(self.finalised_surface)
 
     def redraw_other_chunks(self, not_these_chunks):
         """
@@ -1442,55 +1413,51 @@ class TextBoxLayout:
         Returns a cursor character position in the row directly above the last horizontal cursor position
         if possible.
         """
-        if self.cursor_text_row is not None:
-            cursor_index = 0
-            if self.cursor_text_row is not None:
-                for i in range(0, len(self.layout_rows)):
-                    row = self.layout_rows[i]
-                    if row == self.cursor_text_row:
-                        if (i - 1) >= 0:
-                            row_above = self.layout_rows[i - 1]
-                            cursor_index -= row_above.letter_count
-                            row_above_end = row_above.letter_count
-                            if (row_above.row_text_ends_with_a_single_space() or
-                                    (len(row_above.items) > 0 and
-                                     isinstance(row_above.items[-1], LineBreakLayoutRect))):
-                                row_above_end = row_above.letter_count - 1
-                            cursor_index += min(last_cursor_horiz_index, row_above_end)
-                            break
-                        else:
-                            cursor_index += last_cursor_horiz_index
-                            break
-                    else:
-                        cursor_index += row.letter_count
-            return cursor_index
-        return 0
+        if self.cursor_text_row is None:
+            return 0
+        cursor_index = 0
+        for i in range(len(self.layout_rows)):
+            row = self.layout_rows[i]
+            if row == self.cursor_text_row:
+                if i >= 1:
+                    row_above = self.layout_rows[i - 1]
+                    cursor_index -= row_above.letter_count
+                    row_above_end = row_above.letter_count
+                    if (row_above.row_text_ends_with_a_single_space() or
+                            (len(row_above.items) > 0 and
+                             isinstance(row_above.items[-1], LineBreakLayoutRect))):
+                        row_above_end = row_above.letter_count - 1
+                    cursor_index += min(last_cursor_horiz_index, row_above_end)
+                else:
+                    cursor_index += last_cursor_horiz_index
+                break
+            else:
+                cursor_index += row.letter_count
+        return cursor_index
 
     def get_cursor_pos_move_down_one_row(self, last_cursor_horiz_index):
         """
         Returns a cursor character position in the row directly above the current cursor position
         if possible.
         """
-        if self.cursor_text_row is not None:
-            cursor_index = 0
-            if self.cursor_text_row is not None:
-                for i in range(0, len(self.layout_rows)):
-                    row = self.layout_rows[i]
-                    if row == self.cursor_text_row:
-                        if (i + 1) < len(self.layout_rows):
-                            row_below = self.layout_rows[i + 1]
-                            cursor_index += row.letter_count
-                            row_below_end = row_below.letter_count
-                            if (row_below.row_text_ends_with_a_single_space() or
-                                    (len(row_below.items) > 0 and
-                                     isinstance(row_below.items[-1], LineBreakLayoutRect))):
-                                row_below_end = row_below.letter_count - 1
-                            cursor_index += min(last_cursor_horiz_index, row_below_end)
-                            break
-                        else:
-                            cursor_index += last_cursor_horiz_index
-                            break
-                    else:
-                        cursor_index += row.letter_count
-            return min(cursor_index, self.letter_count)
-        return 0
+        if self.cursor_text_row is None:
+            return 0
+        cursor_index = 0
+        for i in range(len(self.layout_rows)):
+            row = self.layout_rows[i]
+            if row == self.cursor_text_row:
+                if (i + 1) < len(self.layout_rows):
+                    row_below = self.layout_rows[i + 1]
+                    cursor_index += row.letter_count
+                    row_below_end = row_below.letter_count
+                    if (row_below.row_text_ends_with_a_single_space() or
+                            (len(row_below.items) > 0 and
+                             isinstance(row_below.items[-1], LineBreakLayoutRect))):
+                        row_below_end = row_below.letter_count - 1
+                    cursor_index += min(last_cursor_horiz_index, row_below_end)
+                else:
+                    cursor_index += last_cursor_horiz_index
+                break
+            else:
+                cursor_index += row.letter_count
+        return min(cursor_index, self.letter_count)

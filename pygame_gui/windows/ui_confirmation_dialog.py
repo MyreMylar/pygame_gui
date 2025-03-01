@@ -57,8 +57,8 @@ class UIConfirmationDialog(UIWindow):
 
         minimum_dimensions = (260, 200)
         if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(self.relative_rect.size) +
-                           " is less than minimum dimensions: " + str(minimum_dimensions))
+            warn_string = (f"Initial size: {self.relative_rect.size} "
+                           f"is less than minimum dimensions: {minimum_dimensions}")
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 

@@ -18,10 +18,12 @@ class TextEffect:
 
         :param time_delta: time in seconds since last frame.
         """
+        pass
+
     # pylint: disable=unused-argument,no-self-use
     def get_final_alpha(self) -> int:
         """
-        The alpha value to draw the text box with. By default it is 255.
+        The alpha value to draw the text box with. By default, it is 255.
 
         :return: The default alpha value for a text box.
         """
@@ -31,3 +33,4 @@ class TextEffect:
         """
         Apply the effect to the text
         """
+        pass

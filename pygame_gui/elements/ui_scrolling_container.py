@@ -117,7 +117,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                                                                 'top': 'top',
                                                                 'bottom': 'bottom'})
 
-            self.vert_scroll_bar.set_dimensions((0, self.relative_rect.height))  # TODO: Remove these when anchoring is fixed
+            # TODO: Remove these when anchoring is fixed
+            self.vert_scroll_bar.set_dimensions((0, self.relative_rect.height))  
             self.vert_scroll_bar.set_relative_position((0, 0))  # Without this, they look off-centered
             self.join_focus_sets(self.vert_scroll_bar)
 
@@ -366,10 +367,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
                        self.scrollable_container.relative_rect.y)
             self.scrollable_container.set_relative_position(new_pos)
 
-        if isinstance(self.scrollable_container, UIAutoResizingContainer):
-            if self.scrollable_container.has_recently_updated_dimensions:
-                self._calculate_scrolling_dimensions()
-                self._sort_out_element_container_scroll_bars()
+        if (isinstance(self.scrollable_container, UIAutoResizingContainer) and
+                self.scrollable_container.has_recently_updated_dimensions):
+            self._calculate_scrolling_dimensions()
+            self._sort_out_element_container_scroll_bars()
 
     def _calculate_scrolling_dimensions(self):
         """

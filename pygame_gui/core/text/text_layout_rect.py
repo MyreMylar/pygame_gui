@@ -90,7 +90,7 @@ class TextLayoutRect(pygame.rect.Rect):
         Return True if this rectangle should be expanded/shrunk to fit the available
         width in a layout.
 
-        :return: True if should span the width, False otherwise.
+        :return: True if the rect should span the width, False otherwise.
         """
         return self._should_span
 
@@ -116,7 +116,7 @@ class TextLayoutRect(pygame.rect.Rect):
         nearest point that is still less than the request (i.e. to the left of the request in
         the common left-to-right text layout case) .
 
-        :param requested_x: the requested place to split this rectangle along it's width.
+        :param requested_x: the requested place to split this rectangle along its width.
         :param line_width: the width of the current line.
         :param row_start_x: the x start position of the row.
         :param allow_split_dashes: whether we allow text to be split with dashes either side.
@@ -135,7 +135,7 @@ class TextLayoutRect(pygame.rect.Rect):
 
     def vertical_overlap(self, other_rect: pygame.Rect) -> bool:
         """
-        Test if two rectangles overlap one another in the y axis.
+        Test if two rectangles overlap one another in the y-axis.
 
         :param other_rect:
         :return: True if they overlap.

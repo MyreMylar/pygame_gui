@@ -87,7 +87,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
 
     def add_element(self, element: IUIElementInterface):
         """
-        Add a UIElement to the container. The UI's relative_rect parameter will be relative to
+        Add a UIElement to the container. The element's relative_rect parameter will be relative to
         this container.
 
         :param element: A UIElement to add to this container.
@@ -98,9 +98,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         self.calc_add_element_changes_thickness(element)
         if not self.is_enabled:
             element.disable()
-        if not self.visible:
-            if hasattr(element, 'hide'):
-                element.hide()
+        if not self.visible and hasattr(element, 'hide'):
+            element.hide()
 
     def remove_element(self, element: IUIElementInterface):
         """
@@ -326,9 +325,8 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
                     self.hovered = True
                 hovered_higher_element = True
 
-            else:
-                if self.hovered:
-                    self.hovered = False
+            elif self.hovered:
+                self.hovered = False
 
         elif self.hovered:
             self.hovered = False

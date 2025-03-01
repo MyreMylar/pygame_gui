@@ -1,3 +1,4 @@
+import contextlib
 import os
 import io
 from typing import Tuple, List, Dict, Union, Set, Optional
@@ -75,11 +76,13 @@ class UIManager(IUIManagerInterface):
         self.ui_group = LayeredGUIGroup()
 
         self.focused_set = None
-        self.root_container = None
+        self.root_container = None  # declaration required as it is used in creation of container
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
                                           self, starting_height=1,
                                           container=None, parent_element=None,
                                           object_id='#root_container')
+        # Below we remove the root container from its own focus set.
+        # This ensures you can't get focus on the root container itself.
         self.root_container.set_focus_set(None)
 
         self.ui_window_stack = UIWindowStack(self.window_resolution, self.root_container)
@@ -109,7 +112,11 @@ class UIManager(IUIManagerInterface):
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
         
-    def create_new_theme(self, theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict] = None) -> UIAppearanceTheme:
+    def create_new_theme(self,
+                         theme_path: Union[str, os.PathLike,
+                                           io.StringIO,
+                                           PackageResource,
+                                           dict] = None) -> UIAppearanceTheme:
         """
         Create a new theme using self information.
         :param theme_path: relative file path to theme or theme dictionary.
@@ -196,8 +203,6 @@ class UIManager(IUIManagerInterface):
         elements. We then recreate the UIWindowStack and the root container.
         """
         self.root_container.kill()
-        # need to reset to None before recreating otherwise the old container will linger around.
-        self.root_container = None
         self.root_container = UIContainer(pygame.Rect((0, 0), self.window_resolution),
                                           self, starting_height=1,
                                           container=None, parent_element=None,
@@ -225,7 +230,7 @@ class UIManager(IUIManagerInterface):
             sprites_in_layer.reverse()
             if not sorting_consumed_event:
                 windows_in_layer = [window for window in sprites_in_layer
-                                    if 'window' in window.element_ids[-1]]
+                                    if getattr(window, 'is_window', False)]
                 for window in windows_in_layer:
                     if not sorting_consumed_event:
                         sorting_consumed_event = window.check_clicked_inside_or_blocking(event)
@@ -307,11 +312,8 @@ class UIManager(IUIManagerInterface):
             new_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_IBEAM)
             if new_cursor != self._active_cursor:
                 self._active_cursor = new_cursor
-                try:
+                with contextlib.suppress(pygame.error):
                     pygame.mouse.set_cursor(self._active_cursor)
-                except pygame.error:
-                    pass
-
         any_window_edge_hovered = False
         for window in self.ui_window_stack.stack:
             if window.should_use_window_edge_resize_cursor():
@@ -320,35 +322,29 @@ class UIManager(IUIManagerInterface):
 
                 if new_cursor != self._active_cursor:
                     self._active_cursor = new_cursor
-                    try:
+                    with contextlib.suppress(pygame.error):
                         pygame.mouse.set_cursor(self._active_cursor)
-                    except pygame.error:
-                        pass
-
         if (not any_window_edge_hovered and not self.text_hovered and
                 self._active_cursor != self.active_user_cursor):
             self._active_cursor = self.active_user_cursor
-            try:
+            with contextlib.suppress(pygame.error):
                 pygame.mouse.set_cursor(self._active_cursor)
-            except pygame.error:
-                pass
 
-    def _handle_hovering(self, time_delta):
+    def _handle_hovering(self, time_delta: float):
         hover_handled = False
         sorted_layers = sorted(self.ui_group.layers(), reverse=True)
         for layer in sorted_layers:
             layer_elements = self.ui_group.get_sprites_from_layer(layer)
             layer_elements.reverse()
             for ui_element in layer_elements:
-                if ui_element.visible:
-                    # Only check hover for visible elements - ignore hidden elements
-                    # we need to check hover even after already found what we are hovering,
-                    # so, we can unhover previously hovered stuff
-                    element_is_hovered = ui_element.check_hover(time_delta, hover_handled)
-                    if element_is_hovered and ui_element != self.root_container:
+                # Only check hover for visible elements - ignore hidden elements
+                # we need to check hover even after already found what we are hovering,
+                # so, we can unhover previously hovered stuff
+                if ui_element.visible and ui_element.check_hover(time_delta, hover_handled):
+                    if ui_element != self.root_container:
                         hover_handled = True
                         self.hovering_any_ui_element = True
-                    elif element_is_hovered and ui_element == self.root_container:
+                    else:
                         # if we are just hovering over the root container
                         # set 'hovering any' to False
                         self.hovering_any_ui_element = False
@@ -456,7 +452,7 @@ class UIManager(IUIManagerInterface):
             if 'script' in font:
                 script = font['script']
             if 'direction' in font:
-                if 'ltr' == font['direction'].lower():
+                if font['direction'].lower() == 'ltr':
                     direction = pygame.DIRECTION_LTR
                 if 'rtl' in font['direction'].lower():
                     direction = pygame.DIRECTION_RTL
@@ -487,35 +483,33 @@ class UIManager(IUIManagerInterface):
 
     def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
         """
-        Set a set of element as the focused set.
+        Set a set of elements, or a single element, as the focused set.
 
-        :param focus: The set of element to focus on.
+        :param focus: The set of elements, or single element, to focus on.
         """
         if focus is self.focused_set:
             return
         if self.focused_set is not None:
             for item in self.focused_set:
-                if isinstance(focus, set):
-                    if item not in focus:
-                        item.unfocus()
-                    # do nothing if the item is also in new focus set
-                else:
+                if (
+                    isinstance(focus, set)
+                    and item not in focus
+                    or not isinstance(focus, set)
+                ):
                     item.unfocus()
             self.focused_set = None
 
-        if self.focused_set is None:
-            if focus is not None:
-                if isinstance(focus, IUIElementInterface):
-                    self.focused_set = focus.get_focus_set()
-                elif isinstance(focus, set):
-                    self.focused_set = focus
-            else:
-                self.focused_set = None
+        if focus is None:
+            pass
 
-            if self.focused_set is not None:
-                for item in self.focused_set:
-                    if not item.is_focused:
-                        item.focus()
+        elif isinstance(focus, IUIElementInterface):
+            self.focused_set = focus.get_focus_set()
+        elif isinstance(focus, set):
+            self.focused_set = focus
+        if self.focused_set is not None:
+            for item in self.focused_set:
+                if not item.is_focused:
+                    item.focus()
 
     def set_visual_debug_mode(self, is_active: bool):
         """
@@ -548,14 +542,14 @@ class UIManager(IUIManagerInterface):
         Handy for debugging layer problems.
         """
         for layer in self.ui_group.layers():
-            print("Layer: " + str(layer))
+            print(f"Layer: {str(layer)}")
             print("-----------------------")
             for element in self.ui_group.get_sprites_from_layer(layer):
                 if element.element_ids[-1] == 'container':
                     print(str(element.most_specific_combined_id) +
                           ': thickness - ' + str(element.layer_thickness))
                 else:
-                    print(str(element.most_specific_combined_id))
+                    print(element.most_specific_combined_id)
             print(' ')
 
     def set_active_cursor(self, cursor: pygame.cursors.Cursor):

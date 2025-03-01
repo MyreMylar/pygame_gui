@@ -9,7 +9,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 class HyperlinkTextChunk(TextLineChunkFTFont):
     """
-    Represents a hyperlink to the layout system..
+    Represents a hyperlink to the layout system.
 
     """
     def __init__(self,

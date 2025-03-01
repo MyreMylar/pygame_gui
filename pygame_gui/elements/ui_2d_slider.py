@@ -71,11 +71,10 @@ class UI2DSlider(UIElement):
 
         self.invert_y = invert_y
 
-        if all([isinstance(n, int) for n in [start_value_x, *value_range_x, start_value_y, *value_range_y]]):
-            self.use_integers_for_value = True
-        else:
-            self.use_integers_for_value = False
-
+        self.use_integers_for_value = all(
+            isinstance(n, int)
+            for n in [start_value_x, *value_range_x, start_value_y, *value_range_y]
+        )
         self.value_range_x = value_range_x
         value_range_x_length = self.value_range_x[1] - self.value_range_x[0]
         self.current_x_value = self.value_range_x[0] + (self.current_x_percentage * value_range_x_length)
@@ -216,54 +215,60 @@ class UI2DSlider(UIElement):
 
         mouse_pos = pygame.Vector2(self.ui_manager.get_mouse_position())
         if self.sliding_button.held and self.sliding_button.in_hold_range(mouse_pos):
-            if not self.grabbed_slider:
-                self.grabbed_slider = True
-                real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
-                self.starting_grab_difference = mouse_pos - real_scroll_pos
-
-            real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
-            current_grab_difference = mouse_pos - real_scroll_pos
-            adjustment_required = current_grab_difference - self.starting_grab_difference
-            self.scroll_position = self.scroll_position + adjustment_required
-
-            self.scroll_position = pygame.Vector2(min(max(self.scroll_position.x, self.left_limit_position),
-                                                      self.right_limit_position),
-                                                  min(max(self.scroll_position.y, self.top_limit_position),
-                                                      self.bottom_limit_position))
-
-            self.sliding_button.set_relative_position(self.scroll_position)
-
-            moved_this_frame = True
+            moved_this_frame = self._move_slider_with_mouse(mouse_pos)
         elif not self.sliding_button.held:
             self.grabbed_slider = False
 
         if moved_this_frame:
-            self.current_x_percentage = self.scroll_position.x / self.scrollable_width
-            self.current_x_value = self.value_range_x[0] + (self.current_x_percentage *
-                                                            (self.value_range_x[1] - self.value_range_x[0]))
+            self._set_slider_values_after_move()
 
-            if self.invert_y:
-                # Scroll position is inverted, so invert it again to get actual percentage
-                self.current_y_percentage = (self.scrollable_height - self.scroll_position.y) / self.scrollable_height
-            else:
-                self.current_y_percentage = self.scroll_position.y / self.scrollable_height
-            self.current_y_value = self.value_range_y[0] + (self.current_y_percentage *
-                                                            (self.value_range_y[1] - self.value_range_y[0]))
-            if self.use_integers_for_value:
-                self.current_x_value = int(self.current_x_value)
-                self.current_y_value = int(self.current_y_value)
+    def _move_slider_with_mouse(self, mouse_pos):
+        if not self.grabbed_slider:
+            self.grabbed_slider = True
+            real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
+            self.starting_grab_difference = mouse_pos - real_scroll_pos
 
-            if not self.has_moved_recently:
-                self.has_moved_recently = True
+        real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
+        current_grab_difference = mouse_pos - real_scroll_pos
+        adjustment_required = current_grab_difference - self.starting_grab_difference
+        self.scroll_position = self.scroll_position + adjustment_required
 
-            if not self.has_been_moved_by_user_recently:
-                self.has_been_moved_by_user_recently = True
+        self.scroll_position = pygame.Vector2(min(max(self.scroll_position.x, self.left_limit_position),
+                                                  self.right_limit_position),
+                                              min(max(self.scroll_position.y, self.top_limit_position),
+                                                  self.bottom_limit_position))
 
-            # new event
-            event_data = {"value": (self.current_x_value, self.current_y_value),
-                          "ui_element": self,
-                          "ui_object_id": self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
+        self.sliding_button.set_relative_position(self.scroll_position)
+
+        return True
+
+    def _set_slider_values_after_move(self):
+        self.current_x_percentage = self.scroll_position.x / self.scrollable_width
+        self.current_x_value = self.value_range_x[0] + (self.current_x_percentage *
+                                                        (self.value_range_x[1] - self.value_range_x[0]))
+
+        if self.invert_y:
+            # Scroll position is inverted, so invert it again to get actual percentage
+            self.current_y_percentage = (self.scrollable_height - self.scroll_position.y) / self.scrollable_height
+        else:
+            self.current_y_percentage = self.scroll_position.y / self.scrollable_height
+        self.current_y_value = self.value_range_y[0] + (self.current_y_percentage *
+                                                        (self.value_range_y[1] - self.value_range_y[0]))
+        if self.use_integers_for_value:
+            self.current_x_value = int(self.current_x_value)
+            self.current_y_value = int(self.current_y_value)
+
+        if not self.has_moved_recently:
+            self.has_moved_recently = True
+
+        if not self.has_been_moved_by_user_recently:
+            self.has_been_moved_by_user_recently = True
+
+        # new event
+        event_data = {"value": (self.current_x_value, self.current_y_value),
+                      "ui_element": self,
+                      "ui_object_id": self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
 
     def get_current_value(self) -> Tuple[Union[float, float], Union[int, int]]:
         """
@@ -278,8 +283,10 @@ class UI2DSlider(UIElement):
 
     def set_current_value(self, value_x: Union[float, int], value_y: Union[float, int], warn: bool = True) -> None:
         """
-        Sets the value of the slider, which will move the position of the slider to match. Will
-        issue a warning if the value set is not in the value range.
+        Sets the value of the slider, which will move the position of the slider to match. 
+        If warn is True, this function will issue a warning and return without setting the 
+        value when the value set is not in the value range. If warn is false the value will
+        instead be clamped to the minimum & maximum value range and set.
 
         :param value_x: The x value to set.
         :param value_y: The y value to set.
@@ -320,22 +327,27 @@ class UI2DSlider(UIElement):
         value_y_range_size = (self.value_range_y[1] - self.value_range_y[0])
 
         if value_x_range_size != 0 and value_y_range_size != 0:
-            self.current_x_percentage = (float(self.current_x_value) -
-                                         self.value_range_x[0]) / value_x_range_size
-            self.current_y_percentage = (float(self.current_y_value) -
-                                         self.value_range_y[0]) / value_y_range_size
+            self._set_percentages_and_scroll_pos_after_change(
+                value_x_range_size, value_y_range_size
+            )
 
-            # Invert the position at which the slider should be
-            if self.invert_y:
-                height = self.scrollable_height * (1 - self.current_y_percentage)
-            else:
-                height = self.scrollable_height * self.current_y_percentage
+    def _set_percentages_and_scroll_pos_after_change(self, value_x_range_size, value_y_range_size):
+        self.current_x_percentage = (float(self.current_x_value) -
+                                     self.value_range_x[0]) / value_x_range_size
+        self.current_y_percentage = (float(self.current_y_value) -
+                                     self.value_range_y[0]) / value_y_range_size
 
-            self.scroll_position = (self.scrollable_width * self.current_x_percentage,
-                                    height)
+        # Invert the position at which the slider should be
+        height = (
+            self.scrollable_height * (1 - self.current_y_percentage)
+            if self.invert_y
+            else self.scrollable_height * self.current_y_percentage
+        )
+        self.scroll_position = (self.scrollable_width * self.current_x_percentage,
+                                height)
 
-            self.sliding_button.set_relative_position(self.scroll_position)
-            self.has_moved_recently = True
+        self.sliding_button.set_relative_position(self.scroll_position)
+        self.has_moved_recently = True
 
     def rebuild_from_changed_theme_data(self) -> None:
         """

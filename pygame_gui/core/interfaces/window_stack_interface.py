@@ -30,7 +30,7 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
     def remove_window(self, window_to_remove: IWindowInterface):
         """
         Removes a window from the stack and resorts the remaining windows to adjust for
-        it's absence.
+        its absence.
 
         :param window_to_remove: the window to remove.
 

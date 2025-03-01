@@ -105,7 +105,7 @@ class UIElement(GUISprite, IUIElementInterface):
                                    element_id=element_id,
                                    element_base_id=base_id)
 
-        if isinstance(relative_rect, pygame.Rect) or isinstance(relative_rect, pygame.FRect):
+        if isinstance(relative_rect, (pygame.Rect, pygame.FRect)):
             self.relative_rect = relative_rect.copy()
         else:
             self.relative_rect = pygame.Rect(relative_rect)
@@ -118,14 +118,14 @@ class UIElement(GUISprite, IUIElementInterface):
                                                         'shape_corner_radius': [2, 2, 2, 2]})
             self.relative_rect.width += self.shadow_width * 2
             self.relative_rect.height += self.shadow_width * 2
-            self.relative_rect.top -= self.shadow_width  # This will need to be changed when we can adjust the anchor source
-            self.relative_rect.left -= self.shadow_width  # This will need to be changed when we can adjust the anchor source
+            self.relative_rect.top -= self.shadow_width  # will need to be changed when we can adjust the anchor source
+            self.relative_rect.left -= self.shadow_width  # will need to be changed when we can adjust the anchor source
 
         self.relative_rect.size = self._get_clamped_to_minimum_dimensions(self.relative_rect.size)
         self.rect = self.relative_rect.copy()
 
-        self.dynamic_width = True if self.relative_rect.width == -1 else False
-        self.dynamic_height = True if self.relative_rect.height == -1 else False
+        self.dynamic_width = self.relative_rect.width == -1
+        self.dynamic_height = self.relative_rect.height == -1
 
         self.anchors = {}
         self.set_anchors(anchors)
@@ -133,11 +133,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.drawable_shape: Optional[DrawableShape] = None
         self.image = None
 
-        if visible:
-            self.visible = True
-        else:
-            self.visible = False
-
+        self.visible = bool(visible)
         self.blendmode = pygame.BLEND_PREMULTIPLIED
         # self.source_rect = None
 
@@ -169,6 +165,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._update_container_clip()
 
         self._focus_set = {self}
+        self.is_window = False
 
     @property
     def hovered(self) -> bool:
@@ -214,11 +211,11 @@ class UIElement(GUISprite, IUIElementInterface):
         horizontal_anchors = {}
 
         if 'left' in anchors:
-            horizontal_anchors.update({'left': anchors['left']})
+            horizontal_anchors['left'] = anchors['left']
         if 'right' in anchors:
-            horizontal_anchors.update({'right': anchors['right']})
+            horizontal_anchors['right'] = anchors['right']
         if 'centerx' in anchors:
-            horizontal_anchors.update({'centerx': anchors['centerx']})
+            horizontal_anchors['centerx'] = anchors['centerx']
 
         valid_anchor_set = [{'left': 'left', 'right': 'left'},
                             {'left': 'right', 'right': 'right'},
@@ -232,7 +229,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if horizontal_anchors in valid_anchor_set:
             return True
-        elif len(horizontal_anchors) == 0:
+        elif not horizontal_anchors:
             return False  # no horizontal anchors so just use defaults
         else:
             warnings.warn("Supplied horizontal anchors are invalid, defaulting to left", category=UserWarning)
@@ -244,11 +241,11 @@ class UIElement(GUISprite, IUIElementInterface):
         vertical_anchors = {}
 
         if 'top' in anchors:
-            vertical_anchors.update({'top': anchors['top']})
+            vertical_anchors['top'] = anchors['top']
         if 'bottom' in anchors:
-            vertical_anchors.update({'bottom': anchors['bottom']})
+            vertical_anchors['bottom'] = anchors['bottom']
         if 'centery' in anchors:
-            vertical_anchors.update({'centery': anchors['centery']})
+            vertical_anchors['centery'] = anchors['centery']
 
         valid_anchor_set = [{'top': 'top', 'bottom': 'top'},
                             {'top': 'bottom', 'bottom': 'bottom'},
@@ -262,7 +259,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if vertical_anchors in valid_anchor_set:
             return True
-        elif len(vertical_anchors) == 0:
+        elif not vertical_anchors:
             return False  # no vertical anchors so just use defaults
         else:
             warnings.warn("Supplied vertical anchors are invalid, defaulting to top", category=UserWarning)
@@ -395,46 +392,43 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if anchors is not None:
             if 'center' in anchors and anchors['center'] == 'center':
-                self.anchors.update({'center': 'center'})
+                self.anchors['center'] = 'center'
             else:
                 if self._validate_horizontal_anchors(anchors):
-                    if 'left' in anchors:
-                        self.anchors['left'] = anchors['left']
-                    if 'right' in anchors:
-                        self.anchors['right'] = anchors['right']
-                    if 'centerx' in anchors:
-                        self.anchors['centerx'] = anchors['centerx']
+                    self._extracted_from_set_anchors_16('left', anchors, 'right', 'centerx')
                 else:
-                    self.anchors.update({'left': 'left'})
+                    self.anchors['left'] = 'left'
 
                 if self._validate_vertical_anchors(anchors):
-                    if 'top' in anchors:
-                        self.anchors['top'] = anchors['top']
-                    if 'bottom' in anchors:
-                        self.anchors['bottom'] = anchors['bottom']
-                    if 'centery' in anchors:
-                        self.anchors['centery'] = anchors['centery']
+                    self._extracted_from_set_anchors_16('top', anchors, 'bottom', 'centery')
                 else:
-                    self.anchors.update({'top': 'top'})
+                    self.anchors['top'] = 'top'
 
-            if 'left_target' in anchors:
-                self.anchors['left_target'] = anchors['left_target']
-            if 'right_target' in anchors:
-                self.anchors['right_target'] = anchors['right_target']
-            if 'top_target' in anchors:
-                self.anchors['top_target'] = anchors['top_target']
-            if 'bottom_target' in anchors:
-                self.anchors['bottom_target'] = anchors['bottom_target']
-            if 'centerx_target' in anchors:
-                self.anchors['centerx_target'] = anchors['centerx_target']
-            if 'centery_target' in anchors:
-                self.anchors['centery_target'] = anchors['centery_target']
+            self._extracted_from_set_anchors_16(
+                'left_target', anchors, 'right_target', 'top_target'
+            )
+            self._extracted_from_set_anchors_41(
+                'bottom_target', anchors, 'centerx_target', 'centery_target'
+            )
         else:
             self.anchors = {'left': 'left',
                             'top': 'top'}
 
         if self.anchors != old_anchors and self.ui_container is not None:
             self.ui_container.get_container().on_contained_elements_changed(self)
+
+    # TODO Rename this here and in `set_anchors`
+    def _extracted_from_set_anchors_16(self, arg0, anchors, arg2, arg3):
+        self._extracted_from_set_anchors_41(arg0, anchors, arg2, arg3)
+
+    # TODO Rename this here and in `set_anchors`
+    def _extracted_from_set_anchors_41(self, arg0, anchors, arg2, arg3):
+        if arg0 in anchors:
+            self.anchors[arg0] = anchors[arg0]
+        if arg2 in anchors:
+            self.anchors[arg2] = anchors[arg2]
+        if arg3 in anchors:
+            self.anchors[arg3] = anchors[arg3]
 
     def _create_valid_ids(self,
                           container: Union[IContainerLikeInterface, None],
@@ -464,7 +458,9 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if isinstance(object_id, str):
             if object_id is not None and ('.' in object_id or ' ' in object_id):
-                raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
+                raise ValueError(
+                    f'Object ID cannot contain fullstops or spaces: {str(object_id)}'
+                )
             obj_id = object_id
             class_id = None
         elif isinstance(object_id, ObjectID):
@@ -584,12 +580,7 @@ class UIElement(GUISprite, IUIElementInterface):
         new_bottom = 0
         top_offset = UIElement._calc_top_offset(container, anchors)
         bottom_offset = UIElement._calc_bottom_offset(container, anchors)
-        center_x_and_y = False
-
-        if 'center' in anchors:
-            if anchors['center'] == 'center':
-                center_x_and_y = True
-
+        center_x_and_y = 'center' in anchors and anchors['center'] == 'center'
         if ('centery' in anchors and anchors['centery'] == 'centery') or center_x_and_y:
             centery_offset = UIElement._calc_centery_offset(container, anchors)
             new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
@@ -611,7 +602,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 new_top = relative_rect.top + top_offset
                 new_bottom = relative_rect.bottom + top_offset
             elif anchors['bottom'] == 'bottom':
-                if not ('top' in anchors and anchors['top'] == 'top'):
+                if 'top' not in anchors or anchors['top'] != 'top':
                     new_top = relative_rect.top + bottom_offset
 
                 if relative_bottom_margin is None:
@@ -644,7 +635,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 new_left = relative_rect.left + left_offset
                 new_right = relative_rect.right + left_offset
             elif anchors['right'] == 'right':
-                if not ('left' in anchors and anchors['left'] == 'left'):
+                if 'left' not in anchors or anchors['left'] != 'left':
                     new_left = relative_rect.left + right_offset
 
                 if relative_right_margin is None:
@@ -708,11 +699,9 @@ class UIElement(GUISprite, IUIElementInterface):
         top_offset = self._calc_top_offset(self.ui_container, self.anchors)
         bottom_offset = self._calc_bottom_offset(self.ui_container, self.anchors)
 
-        center_x_and_y = False
-        if 'center' in self.anchors:
-            if self.anchors['center'] == 'center':
-                center_x_and_y = True
-
+        center_x_and_y = (
+            'center' in self.anchors and self.anchors['center'] == 'center'
+        )
         if ('centery' in self.anchors and self.anchors['centery'] == 'centery') or center_x_and_y:
             centery_offset = self._calc_centery_offset(self.ui_container, self.anchors)
             new_top = self.rect.top + self.relative_rect.height // 2 - centery_offset
@@ -733,7 +722,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 new_top = self.rect.top - top_offset
                 new_bottom = self.rect.bottom - top_offset
             elif self.anchors['bottom'] == 'bottom':
-                if not ('top' in self.anchors and self.anchors['top'] == 'top'):
+                if 'top' not in self.anchors or self.anchors['top'] != 'top':
                     new_top = self.rect.top - bottom_offset
                 if self.relative_bottom_margin is None or recalculate_margins:
                     self.relative_bottom_margin = bottom_offset - self.rect.bottom
@@ -764,7 +753,7 @@ class UIElement(GUISprite, IUIElementInterface):
                 new_left = self.rect.left - left_offset
                 new_right = self.rect.right - left_offset
             elif self.anchors['right'] == 'right':
-                if not ('left' in self.anchors and self.anchors['left'] == 'left'):
+                if 'left' not in self.anchors or self.anchors['left'] != 'left':
                     new_left = self.rect.left - right_offset
                 if self.relative_right_margin is None or recalculate_margins:
                     self.relative_right_margin = right_offset - self.rect.right
@@ -793,36 +782,28 @@ class UIElement(GUISprite, IUIElementInterface):
             container_clip_rect.left += self.ui_container.get_container().get_rect().left
             container_clip_rect.top += self.ui_container.get_container().get_rect().top
             if not container_clip_rect.contains(self.rect):
-                left = max(0, container_clip_rect.left - self.rect.left)
-                right = max(0, self.rect.width - max(0,
-                                                     self.rect.right -
-                                                     container_clip_rect.right))
-                top = max(0, container_clip_rect.top - self.rect.top)
-                bottom = max(0, self.rect.height - max(0,
-                                                       self.rect.bottom -
-                                                       container_clip_rect.bottom))
-                clip_rect = pygame.Rect(left, top,
-                                        max(0, right - left),
-                                        max(0, bottom - top))
-                self._clip_images_for_container(clip_rect)
+                self._calculate_image_clip_rect(container_clip_rect)
             else:
                 self._restore_container_clipped_images()
 
         elif not self.ui_container.get_container().get_rect().contains(self.rect):
-            left = max(0, self.ui_container.get_container().get_rect().left - self.rect.left)
-            right = max(0, self.rect.width - max(0,
-                                                 self.rect.right -
-                                                 self.ui_container.get_container().get_rect().right))
-            top = max(0, self.ui_container.get_container().get_rect().top - self.rect.top)
-            bottom = max(0, self.rect.height - max(0,
-                                                   self.rect.bottom -
-                                                   self.ui_container.get_container().get_rect().bottom))
-            clip_rect = pygame.Rect(left, top,
-                                    max(0, right - left),
-                                    max(0, bottom - top))
-            self._clip_images_for_container(clip_rect)
+            self._calculate_image_clip_rect(self.ui_container.get_container().get_rect())
         else:
             self._restore_container_clipped_images()
+
+    def _calculate_image_clip_rect(self, container_clip_rect):
+        left = max(0, container_clip_rect.left - self.rect.left)
+        right = max(0, self.rect.width - max(0,
+                                             self.rect.right -
+                                             container_clip_rect.right))
+        top = max(0, container_clip_rect.top - self.rect.top)
+        bottom = max(0, self.rect.height - max(0,
+                                               self.rect.bottom -
+                                               container_clip_rect.bottom))
+        clip_rect = pygame.Rect(left, top,
+                                max(0, right - left),
+                                max(0, bottom - top))
+        self._clip_images_for_container(clip_rect)
 
     def update_containing_rect_position(self):
         """
@@ -935,10 +916,8 @@ class UIElement(GUISprite, IUIElementInterface):
         if self.relative_rect.width >= 0 and self.relative_rect.height >= 0:
             self._update_absolute_rect_position_from_anchors(recalculate_margins=True)
 
-            if self.drawable_shape is not None:
-                if self.drawable_shape.set_dimensions(self.relative_rect.size):
-                    # needed to stop resizing 'lag'
-                    self._set_image(self.drawable_shape.get_fresh_surface())
+            if self.drawable_shape is not None and self.drawable_shape.set_dimensions(self.relative_rect.size):
+                self._set_image(self.drawable_shape.get_fresh_surface())
 
             self._update_container_clip()
             self.ui_container.get_container().on_contained_elements_changed(self)
@@ -1004,14 +983,12 @@ class UIElement(GUISprite, IUIElementInterface):
                         self.on_hovered()
 
                     self.while_hovering(time_delta, mouse_pos)
-                else:
-                    if self.hovered:
-                        self.hovered = False
-                        self.on_unhovered()
-            else:
-                if self.hovered:
+                elif self.hovered:
                     self.hovered = False
                     self.on_unhovered()
+            elif self.hovered:
+                self.hovered = False
+                self.on_unhovered()
         elif self.hovered:
             self.hovered = False
         return should_block_hover
@@ -1146,36 +1123,40 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         if activate_mode:
             default_font = self.ui_manager.get_theme().get_font_dictionary().get_default_font()
-            layer_text_render = render_white_text_alpha_black_bg(default_font,
-                                                                 "UI Layer: " + str(self._layer))
+            layer_text_render = render_white_text_alpha_black_bg(
+                default_font, f"UI Layer: {self._layer}"
+            )
 
             if self.image is not None:
-                self.pre_debug_image = self.image.copy()
-                # check if our surface is big enough to hold the debug info,
-                # if not make a new, bigger copy
-                make_new_larger_surface = False
-                surf_width = self.image.get_width()
-                surf_height = self.image.get_height()
-                if self.image.get_width() < layer_text_render.get_width():
-                    make_new_larger_surface = True
-                    surf_width = layer_text_render.get_width()
-                if self.image.get_height() < layer_text_render.get_height():
-                    make_new_larger_surface = True
-                    surf_height = layer_text_render.get_height()
-
-                if make_new_larger_surface:
-                    new_surface = pygame.surface.Surface((surf_width, surf_height),
-                                                         flags=pygame.SRCALPHA,
-                                                         depth=32)
-                    basic_blit(new_surface, self.image, (0, 0))
-                    self._set_image(new_surface)
-                basic_blit(self.image, layer_text_render, (0, 0))
+                self._put_visual_debug_text_onto_element(layer_text_render)
             else:
                 self._set_image(layer_text_render)
             self._visual_debug_mode = True
         else:
             self.rebuild()
             self._visual_debug_mode = False
+
+    def _put_visual_debug_text_onto_element(self, layer_text_render):
+        self.pre_debug_image = self.image.copy()
+        # check if our surface is big enough to hold the debug info,
+        # if not make a new, bigger copy
+        make_new_larger_surface = False
+        surf_width = self.image.get_width()
+        surf_height = self.image.get_height()
+        if self.image.get_width() < layer_text_render.get_width():
+            make_new_larger_surface = True
+            surf_width = layer_text_render.get_width()
+        if self.image.get_height() < layer_text_render.get_height():
+            make_new_larger_surface = True
+            surf_height = layer_text_render.get_height()
+
+        if make_new_larger_surface:
+            new_surface = pygame.surface.Surface((surf_width, surf_height),
+                                                 flags=pygame.SRCALPHA,
+                                                 depth=32)
+            basic_blit(new_surface, self.image, (0, 0))
+            self._set_image(new_surface)
+        basic_blit(self.image, layer_text_render, (0, 0))
 
     def _clip_images_for_container(self, clip_rect: Union[pygame.Rect, None]):
         """
@@ -1410,9 +1391,7 @@ class UIElement(GUISprite, IUIElementInterface):
         Currently only returns either 'normal' or 'disabled' based on is_enabled.
         """
 
-        if self.is_enabled:
-            return "normal"
-        return "disabled"
+        return "normal" if self.is_enabled else "disabled"
 
     def on_locale_changed(self):
         pass

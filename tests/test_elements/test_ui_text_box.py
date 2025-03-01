@@ -171,17 +171,18 @@ class TestUITextBox:
                                                 default_ui_manager: UIManager,
                                                 _display_surface_return_none):
         with pytest.warns(UserWarning, match="Unable to split word into chunks because text box is too narrow"):
-            text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                           'LLALAALALA ALALA ALAL ALA'
-                                           'LAALA ALALA ALALA AAaal aa'
-                                           'ALALAa laalal alalal alala'
-                                           '<a>alalalala</a> alalalalalal alal'
-                                           'alalalala alala alalala ala'
-                                           'alalalalal lalal alalalal al',
-                                 relative_rect=pygame.Rect(100, 100, 5, 50),
-                                 manager=default_ui_manager)
+            with pytest.raises(RuntimeError, match="Row longer than layout"):
+                text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                               'LLALAALALA ALALA ALAL ALA'
+                                               'LAALA ALALA ALALA AAaal aa'
+                                               'ALALAa laalal alalal alala'
+                                               '<a>alalalala</a> alalalalalal alal'
+                                               'alalalala alala alalala ala'
+                                               'alalalalal lalal alalalal al',
+                                     relative_rect=pygame.Rect(100, 100, 5, 50),
+                                     manager=default_ui_manager)
 
-        assert text_box.image is not None
+                assert text_box.image is not None
 
     def test_kill(self, _init_pygame: None, default_ui_manager: UIManager,
                   _display_surface_return_none):

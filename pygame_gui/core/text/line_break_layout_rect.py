@@ -25,7 +25,7 @@ class LineBreakLayoutRect(TextLayoutRect):
         self.font = font
 
     def __repr__(self):
-        return "<LineBreakLayoutRect " + super().__repr__() + " >"
+        return f"<LineBreakLayoutRect {super().__repr__()} >"
 
     def finalise(self,
                  target_surface: Surface,
@@ -42,4 +42,3 @@ class LineBreakLayoutRect(TextLayoutRect):
             self.select_surf.fill(self.selection_colour)
             target_surface.blit(self.select_surf, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED)
         # should be cleared by row
-

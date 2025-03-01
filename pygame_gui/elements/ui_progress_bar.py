@@ -64,7 +64,8 @@ class UIProgressBar(UIStatusBar):
 
         :param progress: a float from 0.0 to 100.0
         """
-        # Now that we subclass UIStatusBar, set_current_progress() and self.current_progress are mostly here for backward compatibility.
+        # Now that we subclass UIStatusBar, set_current_progress()
+        # and self.current_progress are mostly here for backward compatibility.
         self.current_progress = progress
 
         # Setting this triggers updating if necessary.

@@ -31,7 +31,7 @@ class DefaultFontData:
         self.style = style
         self.script = script
         self.direction = direction
-        self.idx = (self.name + '_' + self.style + '_' + 'aa_' + str(self.size))
+        self.idx = f'{self.name}_{self.style}_aa_{self.size}'
 
         self.regular_file_name = regular_file_name
         self.bold_file_name = bold_file_name
@@ -299,19 +299,20 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             elif italic:
                 style_string = "italic"
 
-            font_aliasing = "0"
-            if antialiased:
-                font_aliasing = "1"
-
-            warning_string = ('Finding font with id: ' +
-                              font_id +
-                              " that is not already loaded.\n"
-                              "Preload this font with {'name': "
-                              "'" + font_name + "',"
-                                                " 'point_size': " + str(font_size) + ","
-                                                                                     " 'style': '" + style_string + "'," +
-                              " 'antialiased': '" + font_aliasing +
-                              "'}")
+            font_aliasing = "1" if antialiased else "0"
+            warning_string = (
+                f'Finding font with id: {font_id}'
+                + " that is not already loaded.\n"
+                "Preload this font with {'name': "
+                "'" + font_name + "',"
+                " 'point_size': " + str(font_size) + ","
+                " 'style': '"
+                + style_string
+                + "',"
+                + " 'antialiased': '"
+                + font_aliasing
+                + "'}"
+            )
             warnings.warn(warning_string, UserWarning)
             self.preload_font(font_size, font_name, bold, italic, force_immediate_load=True, antialiased=antialiased,
                               script=script, direction=direction)
@@ -324,7 +325,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             else:
                 return self.loaded_fonts[self.default_font.idx]
 
-    def _load_system_font(self, font_id: str,font_size: int, font_name: str,
+    def _load_system_font(self, font_id: str, font_size: int, font_name: str,
                           bold: bool = False, italic: bool = False, antialiased: bool = True,
                           script: str = 'Latn', direction: int = pygame.DIRECTION_LTR,
                           force_immediate_load: bool = False) -> bool:
@@ -335,13 +336,13 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             found_system_font_path = found_system_no_style_font_path
         if found_system_no_style_font_path is not None and found_system_font_path is not None:
-            if bold and italic and found_system_font_path is not None:
+            if bold and italic:
                 self.add_font_path(font_name, font_path=found_system_no_style_font_path,
                                    bold_italic_path=found_system_font_path)
-            elif bold and not italic and found_system_font_path is not None:
+            elif bold:
                 self.add_font_path(font_name, font_path=found_system_no_style_font_path,
                                    bold_path=found_system_font_path)
-            elif not bold and italic and found_system_font_path is not None:
+            elif italic:
                 self.add_font_path(font_name, font_path=found_system_no_style_font_path,
                                    italic_path=found_system_font_path)
             else:
@@ -396,11 +397,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         else:
             font_style_string = "regular"
 
-        font_aliasing = "non_aa"
-        if antialiased:
-            font_aliasing = "aa"
-
-        return font_name + "_" + font_style_string + "_" + font_aliasing + "_" + str(font_size)
+        font_aliasing = "aa" if antialiased else "non_aa"
+        return f"{font_name}_{font_style_string}_{font_aliasing}_{font_size}"
 
     def preload_font(self, font_size: int, font_name: str,
                      bold: bool = False, italic: bool = False,
@@ -428,12 +426,10 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                           font_id +
                           ' that is already loaded', UserWarning)
         elif font_name in self.known_font_paths:
-            # we know paths to this font, just haven't loaded current size/style
-            regular_path = self.known_font_paths[font_name][0]
             bold_path = self.known_font_paths[font_name][1]
             italic_path = self.known_font_paths[font_name][2]
-            bold_italic_path = self.known_font_paths[font_name][3]
             if bold and italic:
+                bold_italic_path = self.known_font_paths[font_name][3]
                 self._load_single_font_style(bold_italic_path,
                                              font_id,
                                              font_size,
@@ -465,6 +461,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                                          'direction': direction},
                                              force_immediate_load=force_immediate_load)
             else:
+                # we know paths to this font, just haven't loaded current size/style
+                regular_path = self.known_font_paths[font_name][0]
                 self._load_single_font_style(regular_path,
                                              font_id,
                                              font_size,
@@ -474,10 +472,11 @@ class UIFontDictionary(IUIFontDictionaryInterface):
                                                          'script': script,
                                                          'direction': direction},
                                              force_immediate_load=force_immediate_load)
-        else:
-            if not self._load_system_font(font_id, font_size, font_name, bold,
-                                          italic, antialiased, script, direction, force_immediate_load):
-                warnings.warn('Trying to pre-load font id:' + font_id + ' with no paths set & its not a system font')
+        elif not self._load_system_font(font_id, font_size, font_name, bold,
+                                        italic, antialiased, script, direction, force_immediate_load):
+            warnings.warn(
+                f'Trying to pre-load font id:{font_id} with no paths set & its not a system font'
+            )
 
     def _load_single_font_style(self,
                                 font_loc: Tuple[Union[str, PackageResource, bytes], bool],
@@ -548,13 +547,14 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         This is not a foolproof check because this function could easily be called before we have
         explored all the code paths in a project that may use fonts.
         """
-        unused_font_ids = [key for key in self.loaded_fonts if key not in self.used_font_ids]
-        if unused_font_ids:
+        if unused_font_ids := [
+            key for key in self.loaded_fonts if key not in self.used_font_ids
+        ]:
             print('Unused font ids:')
             for font_id in unused_font_ids:
                 point_size = int(font_id.split('_')[-1])
                 html_size = UIFontDictionary._html_font_sizes_reverse_lookup[point_size]
-                print(font_id + '(HTML size: ' + str(html_size) + ')')
+                print(f'{font_id}(HTML size: {str(html_size)})')
 
     def convert_html_to_point_size(self, html_size: float) -> int:
         """
@@ -587,8 +587,8 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         a debugging mode.
 
         """
-        if not self.check_font_preloaded(self.default_font.name + '_'
-                                         + self.default_font.style +
-                                         '_' + str(self.debug_font_size)):
+        if not self.check_font_preloaded(
+            f'{self.default_font.name}_{self.default_font.style}_{str(self.debug_font_size)}'
+        ):
             self.preload_font(self.debug_font_size, self.default_font.name,
                               force_immediate_load=True)

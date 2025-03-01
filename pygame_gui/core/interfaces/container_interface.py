@@ -26,7 +26,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
     @abstractmethod
     def add_element(self, element: IUIElementInterface):
         """
-        Add a UIElement to the container. The UI's relative_rect parameter will be relative to
+        Add a UIElement to the container. The element's relative_rect parameter will be relative to
         this container.
 
         :param element: A UIElement to add to this container.

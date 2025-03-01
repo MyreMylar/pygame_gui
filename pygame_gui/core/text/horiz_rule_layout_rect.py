@@ -37,18 +37,18 @@ class HorizRuleLayoutRect(TextLayoutRect):
         self.rule_dimensions = list(rule_dimensions)
         self.shade = has_shade
         self.alignment = alignment
+        self.med_shade_colour = Color('#00000000')
+        self.light_shade_colour = Color('#00000000')
 
         if self.shade and isinstance(self.colour_or_gradient, Color):
-            self.med_shade_colour = Color('#00000000')
-            self.light_shade_colour = Color('#00000000')
             self.med_shade_colour.hsla = (self.colour_or_gradient.hsla[0],
                                           self.colour_or_gradient.hsla[1],
                                           self.colour_or_gradient.hsla[2],
-                                          self.colour_or_gradient.hsla[3] * 0.5)
+                                          round(self.colour_or_gradient.hsla[3] * 0.5))
             self.light_shade_colour.hsla = (self.colour_or_gradient.hsla[0],
                                             self.colour_or_gradient.hsla[1],
                                             self.colour_or_gradient.hsla[2],
-                                            self.colour_or_gradient.hsla[3] * 0.25)
+                                            round(self.colour_or_gradient.hsla[3] * 0.25))
 
     def finalise(self, target_surface: Surface,
                  target_area: Rect,
@@ -61,26 +61,26 @@ class HorizRuleLayoutRect(TextLayoutRect):
 
         x_start = self.left
         y_start = self.centery - int(self.rule_dimensions[1] / 2)
-
+        draw_width = self.rule_dimensions[0]
         # figure out alignment and the actual width of the rule.
-        if self.rule_dimensions[0] != -1 and self.rule_dimensions[0] < self.width:
+        if draw_width != -1 and draw_width < self.width:
             if self.alignment == HorizRuleLayoutRect.ALIGN_CENTER:
-                x_start = int((self.width - self.rule_dimensions[0]) / 2)
+                x_start = int((self.width - draw_width) / 2)
             elif self.alignment == HorizRuleLayoutRect.ALIGN_RIGHT:
-                x_start = self.width - self.rule_dimensions[0]
+                x_start = self.width - draw_width
         else:
-            self.rule_dimensions[0] = self.width
+            draw_width = self.width
 
         # draw the rule to our target surface
         if self.shade:
-            self._draw_shaded_rule(x_start, y_start, target_surface)
+            self._draw_shaded_rule(x_start, y_start, target_surface, draw_width)
         else:  # no shade
             pygame.draw.rect(target_surface,
                              color=self.colour_or_gradient,
                              rect=Rect((x_start, y_start),
-                                       (self.rule_dimensions[0], self.rule_dimensions[1])))
+                                       (draw_width, self.rule_dimensions[1])))
 
-    def _draw_shaded_rule(self, x_start, y_start, target_surface):
+    def _draw_shaded_rule(self, x_start, y_start, target_surface, draw_width):
         """
          # TODO: need to draw this better at some point
 
@@ -89,9 +89,9 @@ class HorizRuleLayoutRect(TextLayoutRect):
         :param target_surface:
         """
         top_left = (x_start, y_start)
-        top_right = (x_start + self.rule_dimensions[0], y_start)
+        top_right = (x_start + draw_width, y_start)
         bottom_left = (x_start, y_start + self.rule_dimensions[1])
-        bottom_right = (x_start + self.rule_dimensions[0], y_start + self.rule_dimensions[1])
+        bottom_right = (x_start + draw_width, y_start + self.rule_dimensions[1])
 
         pygame.draw.line(target_surface, color=self.colour_or_gradient,
                          start_pos=top_left,

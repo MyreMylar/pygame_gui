@@ -68,12 +68,11 @@ class UIHorizontalSlider(UIElement):
         self.left_arrow_text = '◀'
         self.right_arrow_text = '▶'
 
-        if (isinstance(start_value, int) and
-                isinstance(value_range[0], int) and
-                isinstance(value_range[1], int)):
-            self.use_integers_for_value = True
-        else:
-            self.use_integers_for_value = False
+        self.use_integers_for_value = (
+            isinstance(start_value, int)
+            and isinstance(value_range[0], int)
+            and isinstance(value_range[1], int)
+        )
         self.value_range = value_range
         value_range_length = self.value_range[1] - self.value_range[0]
 
@@ -261,50 +260,55 @@ class UIHorizontalSlider(UIElement):
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
         if self.sliding_button.held and self.sliding_button.in_hold_range((mouse_x, mouse_y)):
-            if not self.grabbed_slider:
-                self.grabbed_slider = True
-                real_scroll_pos = self.sliding_button.rect.left
-                self.starting_grab_x_difference = mouse_x - real_scroll_pos
-
-            real_scroll_pos = self.sliding_button.rect.left
-            current_grab_difference = mouse_x - real_scroll_pos
-            adjustment_required = current_grab_difference - self.starting_grab_x_difference
-            self.scroll_position = self.scroll_position + adjustment_required
-
-            self.scroll_position = min(max(self.scroll_position, self.left_limit_position),
-                                       self.right_limit_position)
-            x_pos = (self.scroll_position + self.arrow_button_width)
-            y_pos = 0
-            self.sliding_button.set_relative_position((x_pos, y_pos))
-
-            moved_this_frame = True
+            moved_this_frame = self._update_grabbed_slider(mouse_x)
         elif not self.sliding_button.held:
             self.grabbed_slider = False
 
         if moved_this_frame:
-            self.current_percentage = self.scroll_position / self.scrollable_width
-            self.current_value = self.value_range[0] + (self.current_percentage *
-                                                        (self.value_range[1] - self.value_range[0]))
-            if self.use_integers_for_value:
-                self.current_value = int(self.current_value)
-            if not self.has_moved_recently:
-                self.has_moved_recently = True
+            self._update_data_and_fire_events_when_moved()
 
-            if not self.has_been_moved_by_user_recently:
-                self.has_been_moved_by_user_recently = True
+    def _update_grabbed_slider(self, mouse_x):
+        if not self.grabbed_slider:
+            self.grabbed_slider = True
+            real_scroll_pos = self.sliding_button.rect.left
+            self.starting_grab_x_difference = mouse_x - real_scroll_pos
 
-            # old event - to be removed in 0.8.0
-            event_data = {'user_type': OldType(UI_HORIZONTAL_SLIDER_MOVED),
-                          'value': self.current_value,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+        real_scroll_pos = self.sliding_button.rect.left
+        current_grab_difference = mouse_x - real_scroll_pos
+        adjustment_required = current_grab_difference - self.starting_grab_x_difference
+        self.scroll_position = self.scroll_position + adjustment_required
 
-            # new event
-            event_data = {'value': self.current_value,
-                          'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
+        self.scroll_position = min(max(self.scroll_position, self.left_limit_position),
+                                   self.right_limit_position)
+        x_pos = (self.scroll_position + self.arrow_button_width)
+        self.sliding_button.set_relative_position((x_pos, 0))
+
+        return True
+
+    def _update_data_and_fire_events_when_moved(self):
+        self.current_percentage = self.scroll_position / self.scrollable_width
+        self.current_value = self.value_range[0] + (self.current_percentage *
+                                                    (self.value_range[1] - self.value_range[0]))
+        if self.use_integers_for_value:
+            self.current_value = int(self.current_value)
+        if not self.has_moved_recently:
+            self.has_moved_recently = True
+
+        if not self.has_been_moved_by_user_recently:
+            self.has_been_moved_by_user_recently = True
+
+        # old event - to be removed in 0.8.0
+        event_data = {'user_type': OldType(UI_HORIZONTAL_SLIDER_MOVED),
+                      'value': self.current_value,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, event_data))
+
+        # new event
+        event_data = {'value': self.current_value,
+                      'ui_element': self,
+                      'ui_object_id': self.most_specific_combined_id}
+        pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
 
     def _update_arrow_buttons(self, moved_this_frame, time_delta):
         if self.left_button is not None and (self.left_button.held and
@@ -314,41 +318,43 @@ class UIHorizontalSlider(UIElement):
                 self.scroll_position -= (250.0 * time_delta)
                 self.scroll_position = max(self.scroll_position, self.left_limit_position)
                 x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
+                self.sliding_button.set_relative_position((x_pos, 0))
                 moved_this_frame = True
             else:
                 self.button_held_repeat_acc += time_delta
         elif self.right_button is not None and (self.right_button.held and
                                                 self.scroll_position < self.right_limit_position):
             if self.button_held_repeat_acc > self.button_held_repeat_time:
-                self.scroll_position += (250.0 * time_delta)
-                self.scroll_position = min(self.scroll_position, self.right_limit_position)
-                x_pos = (self.scroll_position + self.arrow_button_width)
-                y_pos = 0
-                self.sliding_button.set_relative_position((x_pos, y_pos))
-                moved_this_frame = True
+                moved_this_frame = self._move_slider_right_from_button(time_delta)
             else:
                 self.button_held_repeat_acc += time_delta
         else:
             self.button_held_repeat_acc = 0.0
         return moved_this_frame
 
+    def _move_slider_right_from_button(self, time_delta):
+        self.scroll_position += (250.0 * time_delta)
+        self.scroll_position = min(self.scroll_position, self.right_limit_position)
+        x_pos = (self.scroll_position + self.arrow_button_width)
+        y_pos = 0
+        self.sliding_button.set_relative_position((x_pos, y_pos))
+        return True
+
     def process_event(self, event: pygame.event.Event) -> bool:
         processed_event = False
-        if event.type == UI_BUTTON_PRESSED:
-            if (event.ui_element in [self.left_button, self.right_button] and
-                    self.button_held_repeat_acc < self.button_held_repeat_time and
-                    (self.value_range[0] <= self.get_current_value() <= self.value_range[1])):
-                old_value = self.get_current_value()
-                new_value = (old_value - self.increment if event.ui_element == self.left_button
-                             else old_value + self.increment)
-                self.set_current_value(new_value, False)
-                processed_event = True
-                event_data = {'value': self.current_value,
-                              'ui_element': self,
-                              'ui_object_id': self.most_specific_combined_id}
-                pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
+        if (event.type == UI_BUTTON_PRESSED and 
+                (event.ui_element in [self.left_button, self.right_button] and
+                 self.button_held_repeat_acc < self.button_held_repeat_time and
+                 (self.value_range[0] <= self.get_current_value() <= self.value_range[1]))):
+            old_value = self.get_current_value()
+            new_value = (old_value - self.increment if event.ui_element == self.left_button
+                         else old_value + self.increment)
+            self.set_current_value(new_value, False)
+            processed_event = True
+            event_data = {'value': self.current_value,
+                          'ui_element': self,
+                          'ui_object_id': self.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(UI_HORIZONTAL_SLIDER_MOVED, event_data))
 
         return processed_event
 
@@ -389,14 +395,17 @@ class UIHorizontalSlider(UIElement):
 
         value_range_size = (self.value_range[1] - self.value_range[0])
         if value_range_size != 0:
-            self.current_percentage = (float(self.current_value) -
-                                       self.value_range[0]) / value_range_size
-            self.scroll_position = self.scrollable_width * self.current_percentage
+            self._update_slider_date_on_value_set(value_range_size)
 
-            x_pos = (self.scroll_position + self.arrow_button_width)
-            y_pos = 0
-            self.sliding_button.set_relative_position((x_pos, y_pos))
-            self.has_moved_recently = True
+    def _update_slider_date_on_value_set(self, value_range_size):
+        self.current_percentage = (float(self.current_value) -
+                                   self.value_range[0]) / value_range_size
+        self.scroll_position = self.scrollable_width * self.current_percentage
+
+        x_pos = (self.scroll_position + self.arrow_button_width)
+        y_pos = 0
+        self.sliding_button.set_relative_position((x_pos, y_pos))
+        self.has_moved_recently = True
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -530,31 +539,33 @@ class UIHorizontalSlider(UIElement):
         """
         Disable the slider. It should not be interactive and will use the disabled theme colours.
         """
-        if self.is_enabled:
-            self.is_enabled = False
-            if self.sliding_button is not None:
-                self.sliding_button.disable()
-            if self.left_button:
-                self.left_button.disable()
-            if self.right_button:
-                self.right_button.disable()
-            if self.drawable_shape is not None:
-                self.drawable_shape.set_active_state('disabled')
+        if not self.is_enabled:
+            return
+        self.is_enabled = False
+        if self.sliding_button is not None:
+            self.sliding_button.disable()
+        if self.left_button:
+            self.left_button.disable()
+        if self.right_button:
+            self.right_button.disable()
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state('disabled')
 
     def enable(self):
         """
         Enable the slider. It should become interactive and will use the normal theme colours.
         """
-        if not self.is_enabled:
-            self.is_enabled = True
-            if self.sliding_button is not None:
-                self.sliding_button.enable()
-            if self.left_button:
-                self.left_button.enable()
-            if self.right_button:
-                self.right_button.enable()
-            if self.drawable_shape is not None:
-                self.drawable_shape.set_active_state('normal')
+        if self.is_enabled:
+            return
+        self.is_enabled = True
+        if self.sliding_button is not None:
+            self.sliding_button.enable()
+        if self.left_button:
+            self.left_button.enable()
+        if self.right_button:
+            self.right_button.enable()
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state('normal')
 
     def show(self):
         """

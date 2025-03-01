@@ -12,7 +12,7 @@ from pygame_gui.core.text.text_layout_rect import TextLayoutRect, TextFloatPosit
 class SimpleTestLayoutRect(TextLayoutRect):
     """
     Useful class for testing layout generation. Multi coloured boxes make it easy to distinguish
-    different layout Rects from one another and it's possible to set all the layout options in the
+    different layout Rects from one another, and it's possible to set all the layout options in the
     constructor/initializer to represent different types of layout rect.
     """
 
@@ -62,16 +62,16 @@ class SimpleTestLayoutRect(TextLayoutRect):
         if line_width < self.smallest_split_size:
             raise ValueError('Line width is too narrow')
 
-        # find closest split point less than the request
+        # find the closest split point less than the request
         current_split_point = 0
         found_any_split_point = False
         for point in self.split_points:
-            if requested_x > point > self.left + current_split_point:
+            if requested_x >= point >= self.left + current_split_point:
                 current_split_point = point
                 found_any_split_point = True
 
         if self.x == row_start_x and not found_any_split_point:
-            # no nice split point and we are at start of a line so force a split.
+            # no nice split point, and we are at start of a line so force a split.
             current_split_point = requested_x
 
         if current_split_point != 0:

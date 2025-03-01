@@ -352,8 +352,8 @@ class TestTextBoxLayoutRow:
                              "bg_colour": pygame.Color("#00000000")
                              }
         text_box_layout = TextBoxLayout(input_data_queue=input_data,
-                                        layout_rect=pygame.Rect(0, 0, 200, 300),
-                                        view_rect=pygame.Rect(0, 0, 200, 150),
+                                        layout_rect=pygame.Rect(0, 0, 250, 300),
+                                        view_rect=pygame.Rect(0, 0, 250, 150),
                                         line_spacing=line_spacing,
                                         default_font_data=default_font_data)
         layout_row = TextBoxLayoutRow(row_start_x=0,

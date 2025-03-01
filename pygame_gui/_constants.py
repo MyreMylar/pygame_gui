@@ -40,8 +40,7 @@ class OldType(int):
     all the old events.
     """
     def __new__(cls, x,  *args, **kwargs):
-        instance = int.__new__(cls, x, *args, **kwargs)
-        return instance
+        return int.__new__(cls, x, *args, **kwargs)
 
     def __eq__(self, other):
         warn("Pygame GUI event types can now "

@@ -67,7 +67,7 @@ class GUIFontPygame(IGUIFontInterface):
 
     def get_rect(self, text: str) -> Rect:
         # only way to get accurate font layout data with kerning is to render it ourselves it seems
-        if len(text) > 0:
+        if text != "":
             text_surface = self.__internal_font.render(text, self.antialiased, pygame.Color("white"))
             ascent = self.__internal_font.get_ascent()
             return pygame.Rect((0, ascent), text_surface.get_size())
@@ -102,7 +102,7 @@ class GUIFontPygame(IGUIFontInterface):
         # font.pad adds to the top of text excluding
         # any padding added to make glyphs even - this is useful
         # for 'base-line centering' when we want to center text
-        # that doesn't drop below the base line (no y's, g's, p's etc)
+        # that doesn't drop below the baseline (no y's, g's, p's etc.)
         # but also don't want it to flicker on and off. Base-line
         # centering is the default for chunks on a single style row.
 
@@ -115,5 +115,3 @@ class GUIFontPygame(IGUIFontInterface):
         :return:
         """
         return self.direction
-
-

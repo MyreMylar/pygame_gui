@@ -67,7 +67,7 @@ if PLATFORM == 'WINDOWS':
                 break
             time.sleep(0.01)
         if not success:
-            raise Exception
+            raise RuntimeError
 
         try:
             yield
@@ -80,9 +80,7 @@ if PLATFORM == 'WINDOWS':
         with __windows_clipboard(None):
             cf_unicode_text = 13
             handle = ctypes.windll.user32.GetClipboardData(cf_unicode_text)
-            if not handle:
-                return ""
-            return ctypes.c_wchar_p(handle).value
+            return ctypes.c_wchar_p(handle).value if handle else ""
 
     # noinspection PyUnresolvedReferences
     # pylint: disable=no-member
@@ -145,8 +143,7 @@ if PLATFORM == 'WINDOWS':
         with __windows_clipboard(hwnd):
             safe_empty()
 
-            data = str(data)
-            if data:
+            if data := data:
                 count = wcslen(data) + 1
                 handle = safe_alloc(0x0002, count * ctypes.sizeof(ctypes.c_wchar))
 
@@ -225,16 +222,15 @@ def clipboard_paste():
     """
     if (pygame.vernum.major == 2 and pygame.vernum.minor >= 2) or pygame.vernum.major > 2:
         return pygame.scrap.get_text()
+    current_platform = platform.system().upper()
+    if current_platform == 'WINDOWS':
+        return __windows_paste()
+    elif current_platform == 'LINUX':
+        return __linux_paste()
+    elif current_platform == 'DARWIN':
+        return __mac_paste()
     else:
-        current_platform = platform.system().upper()
-        if current_platform == 'WINDOWS':
-            return __windows_paste()
-        elif current_platform == 'LINUX':
-            return __linux_paste()
-        elif current_platform == 'DARWIN':
-            return __mac_paste()
-        else:
-            return __unknown_paste()
+        return __unknown_paste()
 
 
 def create_resource_path(relative_path: Union[str, Path]):
@@ -285,8 +281,7 @@ def render_white_text_alpha_black_bg(font: IGUIFontInterface,
     Render text with a zero alpha background with 0 in the other colour channels. Appropriate for
     use with BLEND_PREMULTIPLIED and for colour/gradient multiplication.
     """
-    text_surface = font.render_premul(text, pygame.Color("white"))
-    return text_surface
+    return font.render_premul(text, pygame.Color("white"))
 
 
 def basic_blit(destination: pygame.surface.Surface,
@@ -294,7 +289,7 @@ def basic_blit(destination: pygame.surface.Surface,
                pos: Union[Tuple[int, int], pygame.Rect],
                area: Union[pygame.Rect, None] = None):
     """
-    The basic blitting function to use. WE need to wrap this so we can support pre-multiplied alpha
+    The basic blitting function to use. WE need to wrap this, so we can support pre-multiplied alpha
     on post 2.0.0.dev10 versions of pygame and regular blitting on earlier versions.
 
     :param destination: Destination surface to blit on to.
@@ -315,7 +310,7 @@ def apply_colour_to_surface(colour: pygame.Color,
 
     :param colour: The colour to apply.
     :param shape_surface: The shape surface to apply the colour to.
-    :param rect: A rectangle to apply the colour inside of.
+    :param rect: A rectangle to apply the colour inside.
 
     """
     if rect is not None:
@@ -341,7 +336,7 @@ class PackageResource:
         self.resource = resource
 
     def __repr__(self):
-        return self.package + '.' + self.resource
+        return f'{self.package}.{self.resource}'
 
     def to_path(self) -> str:
         """
@@ -363,7 +358,7 @@ class FontResource:
     A resource class to handle all the data we need to load a python font object from a
     file.
 
-    :param font_id: A string ID for the font so we can find it again.
+    :param font_id: A string ID for the font, so we can find it again.
     :param size: The font size.
     :param style: A Style dictionary for bold and italic styling.
     :param location: A location for the font file - a PackageResource, or a file path.
@@ -403,9 +398,10 @@ class FontResource:
                         io.BytesIO((resources.files(self.location.package) /
                                     self.location.resource).read_bytes()),
                         self.size, self.force_style, self.style)
-            except (pygame.error, FileNotFoundError, OSError):
-                error = FileNotFoundError('Unable to load resource with path: ' +
-                                          str(self.location))
+            except (pygame.error, OSError):
+                error = FileNotFoundError(
+                    f'Unable to load resource with path: {str(self.location)}'
+                )
 
         elif isinstance(self.location, str):
             try:
@@ -413,9 +409,10 @@ class FontResource:
                     self.loaded_font = GUIFontFreetype(self.location, self.size, self.force_style, self.style)
                 elif self.font_type_to_use == "pygame":
                     self.loaded_font = GUIFontPygame(self.location, self.size, self.force_style, self.style)
-            except (pygame.error, FileNotFoundError, OSError):
-                error = FileNotFoundError('Unable to load resource with path: ' +
-                                          str(self.location))
+            except (pygame.error, OSError):
+                error = FileNotFoundError(
+                    f'Unable to load resource with path: {str(self.location)}'
+                )
 
         elif isinstance(self.location, bytes):
             try:
@@ -424,9 +421,10 @@ class FontResource:
                     self.loaded_font = GUIFontFreetype(file_obj, self.size, self.force_style, self.style)
                 elif self.font_type_to_use == "pygame":
                     self.loaded_font = GUIFontPygame(file_obj, self.size, self.force_style, self.style)
-            except (pygame.error, FileNotFoundError, OSError):
-                error = FileNotFoundError('Unable to load resource with path: ' +
-                                          str(self.location))
+            except (pygame.error, OSError):
+                error = FileNotFoundError(
+                    f'Unable to load resource with path: {str(self.location)}'
+                )
 
         return error
 
@@ -463,16 +461,18 @@ class ImageResource:
                 with (resources.files(self.location.package) /
                       self.location.resource).open('rb') as open_resource:
                     self.loaded_surface = pygame.image.load(open_resource).convert_alpha()
-            except (pygame.error, FileNotFoundError, OSError):
-                error = FileNotFoundError('Unable to load resource with path: ' +
-                                          str(self.location))
+            except (pygame.error, OSError):
+                error = FileNotFoundError(
+                    f'Unable to load resource with path: {str(self.location)}'
+                )
 
         elif isinstance(self.location, str):
             try:
                 self.loaded_surface = pygame.image.load(self.location).convert_alpha()
-            except (pygame.error, FileNotFoundError, OSError):
-                error = FileNotFoundError('Unable to load resource with path: ' +
-                                          str(self.location))
+            except (pygame.error, OSError):
+                error = FileNotFoundError(
+                    f'Unable to load resource with path: {str(self.location)}'
+                )
 
         # perform pre-multiply alpha operation
         if error is None and self.loaded_surface is not None and not self.is_file_premultiplied:
@@ -542,7 +542,7 @@ class ClosableQueue(Queue):
     """
     A synchronised Queue for loading resources in (sort-of) parallel.
 
-    The idea is that there is some time spent waiting for OS's to respond to file loading requests
+    The idea is that there is some time spent waiting for OS's to respond to file loading requests,
     and it is worth firing off a bunch of them in different threads to improve loading performance.
 
     It seems to work OK.

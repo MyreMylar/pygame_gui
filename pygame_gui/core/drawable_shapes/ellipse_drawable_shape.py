@@ -107,13 +107,9 @@ class EllipseDrawableShape(DrawableShape):
         :return: True if the point is inside the shape.
 
         """
-        collided = False
         x_val = ((point[0] - self.ellipse_center[0]) ** 2) / (self.ellipse_half_diameters[0] ** 2)
         y_val = ((point[1] - self.ellipse_center[1]) ** 2) / (self.ellipse_half_diameters[1] ** 2)
-        if (x_val + y_val) < 1:
-            collided = True
-
-        return collided
+        return x_val + y_val < 1
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2,
                                                Tuple[int, int],
@@ -167,11 +163,11 @@ class EllipseDrawableShape(DrawableShape):
             self.states[state_str].surface = self.ui_manager.get_universal_empty_surface()
         else:
 
-            border_colour_state_str = state_str + '_border'
-            bg_colour_state_str = state_str + '_bg'
-            text_colour_state_str = state_str + '_text'
-            text_shadow_colour_state_str = state_str + '_text_shadow'
-            image_state_str = state_str + '_image'
+            border_colour_state_str = f'{state_str}_border'
+            bg_colour_state_str = f'{state_str}_bg'
+            text_colour_state_str = f'{state_str}_text'
+            text_shadow_colour_state_str = f'{state_str}_text_shadow'
+            image_state_str = f'{state_str}_image'
             border_overlap = 0
             if 'border_overlap' in self.theming:
                 border_overlap = self.theming['border_overlap']

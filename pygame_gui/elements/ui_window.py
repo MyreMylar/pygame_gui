@@ -101,6 +101,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.window_stack = self.ui_manager.get_window_stack()
         self.window_stack.add_new_window(self)
+        self.is_window = True
 
     @property
     def always_on_top(self) -> bool:

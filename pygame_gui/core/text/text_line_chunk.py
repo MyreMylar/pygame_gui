@@ -102,23 +102,22 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.transform_effect_rect = Rect(self.topleft, self.size)
 
     def can_split(self):
-        if len(self.text) > 0:
-            return super().can_split()
-        else:
-            return False
+        return super().can_split() if len(self.text) > 0 else False
 
     def __repr__(self):
-        return "< '" + self.text + "' " + super().__repr__() + " >"
+        return f"< '{self.text}' {super().__repr__()} >"
 
     def __str__(self):
-        return "< '" + self.text + "' " + super().__str__() + " >"
+        return f"< '{self.text}' {super().__str__()} >"
 
     def _clamp_dimensions_to_maximums(self, text_width, text_height):
-        if self.max_dimensions is not None:
-            if not (self.max_dimensions[0] == -1 or self.max_dimensions[1] == -1):
-                # we don't have dynamic maximum dimensions so use maximum dimensions for both
-                text_width = min(self.max_dimensions[0], text_width)
-                text_height = min(self.max_dimensions[1], text_height)
+        if (
+            self.max_dimensions is not None
+            and self.max_dimensions[0] != -1
+            and self.max_dimensions[1] != -1
+        ):
+            text_width = min(self.max_dimensions[0], text_width)
+            text_height = min(self.max_dimensions[1], text_height)
 
         return text_width, text_height
 
@@ -143,7 +142,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         # font.pad adds to the top of text excluding
         # any padding added to make glyphs even - this is useful
         # for 'base-line centering' when we want to center text
-        # that doesn't drop below the base line (no y's, g's, p's etc)
+        # that doesn't drop below the baseline (no y's, g's, p's etc.)
         # but also don't want it to flicker on and off. Base-line
         # centering is the default for chunks on a single style row.
 
@@ -412,18 +411,15 @@ class TextLineChunkFTFont(TextLayoutRect):
             # optimum_split_point = max(1, int(percentage_split * len(self.text)) - 1)
             optimum_split_point = max(1, self.x_pos_to_letter_index(requested_x) - 1)
             if allow_split_dashes:
-                if optimum_split_point != 1:
-                    # have to be at least wide enough to fit in a dash and another character
-                    left_side = self.text[:optimum_split_point] + '-'
-                    right_side = '-' + self.text[optimum_split_point:]
-                    split_text_ok = True
-                else:
+                if optimum_split_point == 1:
                     raise ValueError('Line width is too narrow')
+                    # have to be at least wide enough to fit in a dash and another character
+                left_side = f'{self.text[:optimum_split_point]}-'
+                right_side = f'-{self.text[optimum_split_point:]}'
             else:
                 left_side = self.text[:optimum_split_point]
                 right_side = self.text[optimum_split_point:]
-                split_text_ok = True
-
+            split_text_ok = True
         if split_text_ok:
             # update the data for this chunk
             self.text = left_side
@@ -453,7 +449,7 @@ class TextLineChunkFTFont(TextLayoutRect):
             optimum_split_point = self.split_points[current_split_point_index]
 
             if optimum_split_point in tested_points:
-                # already tested this one so we must have changed direction after crossing the
+                # already tested this one, so we must have changed direction after crossing the
                 # requested_x line. the last valid point must be the optimum split point.
                 if not valid_points:
                     raise RuntimeError('Unable to find valid split point for text layout')
@@ -482,21 +478,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         Try to perform a split operation on this chunk at the requested character index.
 
-        :param index: the requested index at which to split this rectangle along it's width.
+        :param index: the requested index at which to split this rectangle along its width.
         """
         if 0 <= index < len(self.text):
-            left_side = self.text[:index]
-            right_side = self.text[index:]
-
-            self.text = left_side
-            self.letter_count = len(self.text)
-            self.size = ( # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                self._text_render_width(self.text, self.font), self.height)
-
-            self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
-
-            return self._split_at(right_side, self.topright, self.target_surface,
-                                  self.target_surface_area, self.should_centre_from_baseline)
+            return self._perform_normal_split(index)
         elif index == 0 and len(self.text) == 0:
             # special case
             return self._split_at("", self.topright, self.target_surface,
@@ -504,6 +489,20 @@ class TextLineChunkFTFont(TextLayoutRect):
         else:
             print("index is bad at: ", index, "len(self.text): ", len(self.text))
             return None
+
+    def _perform_normal_split(self, index):
+        left_side = self.text[:index]
+        right_side = self.text[index:]
+
+        self.text = left_side
+        self.letter_count = len(self.text)
+        self.size = ( # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self._text_render_width(self.text, self.font), self.height)
+
+        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
+
+        return self._split_at(right_side, self.topright, self.target_surface,
+                              self.target_surface_area, self.should_centre_from_baseline)
 
     def _split_at(self, right_side, split_pos, target_surface,
                   target_surface_area, baseline_centred):
@@ -524,10 +523,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         Clear the finalised/rendered text in this chunk to an invisible/empty surface.
         """
         if self.target_surface is not None:
-            if optional_rect is not None:
-                clear_rect = optional_rect
-            else:
-                clear_rect = self
+            clear_rect = optional_rect if optional_rect is not None else self
             self.target_surface.fill(Color('#00000000'), clear_rect)
 
     def add_text(self, input_text: str):
@@ -551,19 +547,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         :param index: the index we are sticking the new text at.
         """
         self.text = self.text[:index] + input_text + self.text[index:]
-        # we split text strings based on spaces
-        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
-        self.letter_count = len(self.text)
-
-        if len(self.text) == 0:
-            text_rect = self.font.get_rect('A')
-        else:
-            text_rect = self.font.get_rect(self.text)
-        text_width = self._text_render_width(self.text, self.font)
-        text_height = text_rect.height
-        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
-
-        self.size = (text_width, text_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                
+        self._update_chunk_count_splits_and_size()
 
     def delete_letter_at_index(self, index):
         """
@@ -573,18 +558,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         self.text = self.text[:index] + self.text[min(len(self.text), index+1):]
 
-        self.letter_count = len(self.text)
-        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
-
-        if len(self.text) == 0:
-            text_rect = self.font.get_rect('A')
-        else:
-            text_rect = self.font.get_rect(self.text)
-        text_width = self._text_render_width(self.text, self.font)
-        text_height = text_rect.height
-        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
-
-        self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+        self._update_chunk_count_splits_and_size()
 
     def backspace_letter_at_index(self, index):
         """
@@ -594,18 +568,27 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         self.text = self.text[:max(0, index-1)] + self.text[index:]
 
-        self.letter_count = len(self.text)
-        self.split_points = [pos + 1 for pos, char in enumerate(self.text) if char == ' ']
+        self._update_chunk_count_splits_and_size()
 
+    def _update_chunk_size(self):
         if len(self.text) == 0:
             text_rect = self.font.get_rect('A')
         else:
             text_rect = self.font.get_rect(self.text)
         text_width = self._text_render_width(self.text, self.font)
         text_height = text_rect.height
-        text_width, text_height = self._clamp_dimensions_to_maximums(text_width, text_height)
+        text_width, text_height = self._clamp_dimensions_to_maximums(
+            text_width, text_height
+        )
+        self.size = text_width, text_height
 
-        self.size = (text_width, text_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+    def _update_chunk_count_splits_and_size(self):
+        self.letter_count = len(self.text)
+        # we split text strings based on spaces
+        self.split_points = [
+            pos + 1 for pos, char in enumerate(self.text) if char == ' '
+        ]
+        self._update_chunk_size()
 
     def x_pos_to_letter_index(self, x_pos: int):
         """
@@ -646,30 +629,31 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         Redraw a surface that has already been finalised once before.
         """
-        if self.target_surface is not None:
-            if self.pre_effect_target_surface is not None:
-                self.clear(self.transform_effect_rect)
-            else:
+        if self.target_surface is None:
+            return
+        if self.pre_effect_target_surface is not None:
+            self.clear(self.transform_effect_rect)
+        else:
+            self.clear()
+        self.finalise(self.target_surface,
+                      self.target_surface_area,
+                      self.row_chunk_origin,
+                      self.row_chunk_height,
+                      self.row_bg_height,
+                      self.row_line_spacing_height,
+                      self.layout_x_offset,
+                      self.letter_end)
+        if self.pre_effect_target_surface is not None:
+            # refresh the pre-target surface
+            self.pre_effect_target_surface = self.target_surface.copy()
+            if self.effects_rotation != 0 or self.effects_offset_pos != (0, 0):
                 self.clear()
-            self.finalise(self.target_surface,
-                          self.target_surface_area,
-                          self.row_chunk_origin,
-                          self.row_chunk_height,
-                          self.row_bg_height,
-                          self.row_line_spacing_height,
-                          self.layout_x_offset,
-                          self.letter_end)
-            if self.pre_effect_target_surface is not None:
-                # refresh the pre-target surface
-                self.pre_effect_target_surface = self.target_surface.copy()
-                if self.effects_rotation != 0 or self.effects_offset_pos != (0, 0):
-                    self.clear()
-                if self.effects_rotation != 0:
-                    self.set_rotation(self.effects_rotation)
-                if self.effects_offset_pos != (0, 0):
-                    self.set_offset_pos(self.effects_offset_pos)
-                if self.alpha != 255:
-                    self.set_alpha(self.alpha)
+            if self.effects_rotation != 0:
+                self.set_rotation(self.effects_rotation)
+            if self.effects_offset_pos != (0, 0):
+                self.set_offset_pos(self.effects_offset_pos)
+            if self.alpha != 255:
+                self.set_alpha(self.alpha)
 
     @staticmethod
     def _text_render_width(text: str, font):
@@ -685,14 +669,13 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.alpha != 255 and alpha == 255:
             self.alpha = alpha
             self.redraw()
-        else:
-            if self.pre_effect_target_surface is not None:
-                self.alpha = alpha
-                self.target_surface.blit(self.pre_effect_target_surface, self, self)
-                pre_mul_alpha_colour = Color(self.alpha, self.alpha, self.alpha, self.alpha)
-                self.target_surface.fill(pre_mul_alpha_colour,
-                                         rect=self,
-                                         special_flags=BLEND_RGBA_MULT)
+        elif self.pre_effect_target_surface is not None:
+            self.alpha = alpha
+            self.target_surface.blit(self.pre_effect_target_surface, self, self)
+            pre_mul_alpha_colour = Color(self.alpha, self.alpha, self.alpha, self.alpha)
+            self.target_surface.fill(pre_mul_alpha_colour,
+                                     rect=self,
+                                     special_flags=BLEND_RGBA_MULT)
 
     def set_offset_pos(self, offset_pos: Tuple[int, int]):
         """
@@ -705,15 +688,14 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.effects_offset_pos = offset_pos
             self.transform_effect_rect = Rect(self.topleft, self.size)
             self.redraw()
-        else:
-            if self.pre_effect_target_surface is not None:
-                self.effects_offset_pos = offset_pos
-                self.transform_effect_rect = Rect(self.left + self.effects_offset_pos[0],
-                                                  self.top + self.effects_offset_pos[1],
-                                                  self.width, self.height)
+        elif self.pre_effect_target_surface is not None:
+            self.effects_offset_pos = offset_pos
+            self.transform_effect_rect = Rect(self.left + self.effects_offset_pos[0],
+                                              self.top + self.effects_offset_pos[1],
+                                              self.width, self.height)
 
-                self.target_surface.blit(self.pre_effect_target_surface,
-                                         self.transform_effect_rect, self)
+            self.target_surface.blit(self.pre_effect_target_surface,
+                                     self.transform_effect_rect, self)
 
     def set_rotation(self, rotation: int):
         """
@@ -726,20 +708,22 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.effects_rotation = rotation
             self.transform_effect_rect = Rect(self.topleft, self.size)
             self.redraw()
-        else:
-            if self.pre_effect_target_surface is not None:
-                # setup 'background' for effect by clearing any existing effect and redrawing
-                # other chunks
-                self.effects_rotation = rotation
+        elif self.pre_effect_target_surface is not None:
+            self._perform_rotation(rotation)
 
-                temp_surf = Surface(self.size, flags=SRCALPHA)
-                temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
-                rotated_surf = rotate(temp_surf, rotation)
+    def _perform_rotation(self, rotation):
+        # setup 'background' for effect by clearing any existing effect and redrawing
+        # other chunks
+        self.effects_rotation = rotation
 
-                self.transform_effect_rect = Rect(self.topleft, rotated_surf.get_size())
-                self.transform_effect_rect.center = self.center
+        temp_surf = Surface(self.size, flags=SRCALPHA)
+        temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
+        rotated_surf = rotate(temp_surf, rotation)
 
-                self.target_surface.blit(rotated_surf, self.transform_effect_rect)
+        self.transform_effect_rect = Rect(self.topleft, rotated_surf.get_size())
+        self.transform_effect_rect.center = self.center
+
+        self.target_surface.blit(rotated_surf, self.transform_effect_rect)
 
     def set_scale(self, scale: float):
         """
@@ -752,20 +736,22 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.effects_scale = scale
             self.transform_effect_rect = Rect(self.topleft, self.size)
             self.redraw()
-        else:
-            if self.pre_effect_target_surface is not None:
-                # setup 'background' for effect by clearing any existing effect and redrawing
-                # other chunks
-                self.effects_scale = scale
+        elif self.pre_effect_target_surface is not None:
+            self._perform_scale(scale)
 
-                temp_surf = Surface(self.size, flags=SRCALPHA)
-                temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
-                scaled_surf = rotozoom(temp_surf, 0, self.effects_scale)
+    def _perform_scale(self, scale):
+        # setup 'background' for effect by clearing any existing effect and redrawing
+        # other chunks
+        self.effects_scale = scale
 
-                self.transform_effect_rect = Rect(self.topleft, scaled_surf.get_size())
-                self.transform_effect_rect.center = self.center
+        temp_surf = Surface(self.size, flags=SRCALPHA)
+        temp_surf.blit(self.pre_effect_target_surface, (0, 0), self)
+        scaled_surf = rotozoom(temp_surf, 0, self.effects_scale)
 
-                self.target_surface.blit(scaled_surf, self.transform_effect_rect)
+        self.transform_effect_rect = Rect(self.topleft, scaled_surf.get_size())
+        self.transform_effect_rect.center = self.center
+
+        self.target_surface.blit(scaled_surf, self.transform_effect_rect)
 
     def clear_effects(self):
         """

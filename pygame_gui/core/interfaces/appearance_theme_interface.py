@@ -14,7 +14,7 @@ from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
     """
-    A meta class that defines the interface that a UI Appearance Theme uses.
+    A metaclass that defines the interface that a UI Appearance Theme uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
@@ -89,7 +89,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
         Uses some data about a UIElement to get font data as dictionary
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return dictionary: Data about the font requested
@@ -100,7 +100,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
         Uses some data about a UIElement to get a font object.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
@@ -113,7 +113,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         theming data. Raises an exception if it can't find the data requested, UI elements
         requesting optional data will need to handle this exception.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
 

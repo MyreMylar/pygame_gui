@@ -51,12 +51,14 @@ class TypingAppearEffect(TextEffect):
         """
         if self.text_progress < self.text_owner.get_text_letter_count(self.text_sub_chunk):
             self.time_per_letter_acc += time_delta
-            if self.time_per_letter_acc >= self.current_time_per_letter:
-                self.time_per_letter_acc = 0.0
+            while (self.time_per_letter_acc >= self.current_time_per_letter and
+                   self.text_progress < self.text_owner.get_text_letter_count(self.text_sub_chunk)):
+                self.time_per_letter_acc -= self.current_time_per_letter
                 self.text_progress += 1
                 self.text_changed = True
                 self.current_time_per_letter = max(
-                    0.00001, random.gauss(self.time_per_letter, self.time_average_deviation ** 0.5))
+                    0.00001,
+                    random.gauss(self.time_per_letter, self.time_average_deviation ** 0.5))
         else:
             # finished effect
             self.text_owner.stop_finished_effect(self.text_sub_chunk)

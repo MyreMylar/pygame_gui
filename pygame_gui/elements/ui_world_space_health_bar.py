@@ -85,4 +85,4 @@ class UIWorldSpaceHealthBar(UIStatusBar):
         return self.sprite_to_monitor.health_capacity
 
     def health_percent(self):
-        return self.current_health / self.health_capacity
+        return self.current_health / max(self.health_capacity, 1)
