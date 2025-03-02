@@ -298,7 +298,7 @@ class UIStatusBar(UIElement):
             self.bar_filled_colour = bar_filled_colour
             has_any_changed = True
 
-        if self.status_text:
+        if self.status_text():
             font = self.ui_theme.get_font(self.combined_element_ids)
             if font != self.font:
                 self.font = font

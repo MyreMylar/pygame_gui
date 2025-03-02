@@ -10,7 +10,8 @@ from pygame_gui.core.interfaces import (
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
-from pygame_gui.elements import UIButton, UIPanel
+from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_panel import UIPanel
 
 
 class UITabContainer(UIElement):
@@ -77,9 +78,20 @@ class UITabContainer(UIElement):
 
     @property
     def tab_count(self) -> int:
+        """
+        Returns the current number of tabs.
+
+        :return:
+        """
         return len(self.tabs)
 
     def switch_current_container(self, index: int):
+        """
+        Switch the currently active container. Hides the old active container and shows the new one.
+
+        :param index: the index of the newly active container.
+
+        """
         current_container = self.get_tab_container()
         if current_container is not None:
             current_container.hide()
@@ -125,6 +137,13 @@ class UITabContainer(UIElement):
         return tab_id
 
     def get_tab(self, tab_id: Optional[int] = None) -> Optional[Dict]:
+        """
+        Returns the tab data by passed in ID, or if no ID is passed in, returns the currently active container.
+
+        :param tab_id: an optional integer representing the ID of the tab we want to get.
+
+        :return: A dictionary containing the data (button, container) for a tab.
+        """
         if tab_id is None:
             if self.current_container_index is None:
                 return None
@@ -133,22 +152,49 @@ class UITabContainer(UIElement):
 
         return self.tabs[tab_id]
 
-    def get_title_text(self, tab_id: Optional[int] = None):
+    def get_title_text(self, tab_id: Optional[int] = None) -> Optional[str]:
+        """
+        Get the title string for the tab with the provided tab id.
+
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
+
+        :return: An optional string representing the title for the tab
+        """
         tab = self.get_tab(tab_id)
         return None if tab is None else tab["text"]
 
-    def get_title_button(self, tab_id: Optional[int] = None):
+    def get_title_button(self, tab_id: Optional[int] = None) -> Optional[str]:
+        """
+        Get the UIButton for the tab with the provided tab id.
+
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
+
+        :return: An optional UIButton representing the button for the tab
+        """
         tab = self.get_tab(tab_id)
         return None if tab is None else tab["button"]
 
-    def get_tab_container(self, tab_id=None) -> Optional[UIPanel]:
+    def get_tab_container(self, tab_id: Optional[int] = None) -> Optional[UIPanel]:
+        """
+        Get the Container for the tab with the provided tab id.
+
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
+
+        :return: An optional UIPanel representing the container for the tab
+        """
         tab = self.get_tab(tab_id)
         return None if tab is None else tab["container"]
 
-    def delete_tab(self, tab_id):
+    def delete_tab(self, tab_id: int):
+        """
+        Removes a tab by passed in tab id.
+
+        :param tab_id: the id if the tab to remove.
+
+        """
         self.tabs[tab_id]["button"].kill()
         self.tabs[tab_id]["container"].kill()
-        del self.tabs[tab_id]
+        self.tabs.remove(self.tabs[tab_id])
         self.rebuild()
 
     def _calculate_max_button_width(self, count: Optional[int] = None):

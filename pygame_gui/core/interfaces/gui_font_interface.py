@@ -56,11 +56,13 @@ class IGUIFontInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_point_size(self):
-        """ """
+    def get_point_size(self) -> int:
+        """
+        Get the point size of the font
+        """
 
     @abstractmethod
-    def get_padding_height(self):
+    def get_padding_height(self) -> int:
         """
 
         :return:

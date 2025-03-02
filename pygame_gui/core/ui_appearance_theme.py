@@ -106,6 +106,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         return self.font_dict
 
     def check_need_to_rebuild_data_manually_changed(self) -> bool:
+        """
+        Checks and resets a flag for whether we need to trigger a rebuild of all the UI elements after a manual
+        change in the data.
+
+        :return: A boolean that indicates whether we should rebuild or not.
+        """
         if self.need_to_rebuild_data_manually_changed:
             self.need_to_rebuild_data_manually_changed = False
             return True
@@ -859,7 +865,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def _load_theme_by_path(
         self, file_path: Union[str, os.PathLike, io.StringIO, PackageResource]
-    ) -> dict:
+    ) -> Optional[dict]:
         """
         Loads a theme file, and currently, all associated data like fonts and images required
         by the theme.
@@ -889,6 +895,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             used_file_path = file_path
 
         with self._opened_w_error(used_file_path) as (theme_file, error):
+            theme_dict = None
             if error:
                 warnings.warn(f"Failed to open theme file at path:{str(file_path)}")
                 load_success = False
@@ -905,6 +912,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
             if load_success:
                 return theme_dict
+
+        return None
 
     def _parse_theme_data_from_json_dict(self, theme_dict):
         for element_name in theme_dict.keys():

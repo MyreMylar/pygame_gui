@@ -1,9 +1,8 @@
 from typing import Optional, Tuple
 
-from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame.color import Color
 
-
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 
 

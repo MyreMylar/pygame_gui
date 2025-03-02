@@ -1,13 +1,14 @@
+import warnings
+from typing import Union, Tuple, Optional, Dict
+
 import pygame
+
 from pygame_gui._constants import UI_2D_SLIDER_MOVED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.elements import UIButton
-
-import warnings
-from typing import *
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UI2DSlider(UIElement):

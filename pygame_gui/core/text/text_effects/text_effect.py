@@ -3,7 +3,7 @@ class TextEffect:
     Base class for text effects
     """
 
-    # pylint: disable=unused-argument,no-self-use
+    # pylint: disable=unused-argument
     def has_text_changed(self) -> bool:
         """
         Stub that returns False
@@ -18,9 +18,8 @@ class TextEffect:
 
         :param time_delta: time in seconds since last frame.
         """
-        pass
 
-    # pylint: disable=unused-argument,no-self-use
+    # pylint: disable=unused-argument
     def get_final_alpha(self) -> int:
         """
         The alpha value to draw the text box with. By default, it is 255.
@@ -33,4 +32,3 @@ class TextEffect:
         """
         Apply the effect to the text
         """
-        pass

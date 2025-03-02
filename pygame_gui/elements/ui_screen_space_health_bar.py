@@ -60,21 +60,46 @@ class UIScreenSpaceHealthBar(UIStatusBar):
 
     @property
     def current_health(self):
+        """
+        Returns the current health of the monitored sprite
+
+        :return: an integer representing current health
+        """
         return self.sprite.current_health if self.sprite else 50
 
     @property
     def health_capacity(self):
+        """
+        Returns the current health capacity of the monitored sprite
+
+        :return: an integer representing current health capacity
+        """
         return self.sprite.health_capacity if self.sprite else 100
 
     def health_percent(self):
+        """
+        Returns the current health percentage of the monitored sprite
+
+        :return: a float representing current health capacity
+        """
         return self.current_health / max(self.health_capacity, 1)
 
     @property
     def health_percentage(self):
+        """
+        Returns the current health percentage of the monitored sprite
+
+        :return: a float representing current health capacity
+        """
         # Now that we subclass UIStatusBar, this is here for backward compatibility.
         return self.health_percent()
 
     def set_sprite_to_monitor(self, sprite_to_monitor: SpriteWithHealth):
+        """
+        Set the sprite which this health bar will display the health values of
+
+        :param sprite_to_monitor: the sprite to monitor the health values of
+        """
         if sprite_to_monitor:
             if not hasattr(sprite_to_monitor, "health_capacity"):
                 raise AttributeError("Sprite does not have health_capacity attribute")

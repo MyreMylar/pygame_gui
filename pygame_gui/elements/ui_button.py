@@ -222,13 +222,6 @@ class UIButton(UIElement):
 
         return changed
 
-    def kill(self):
-        """
-        Overrides the standard sprite kill method to also kill any tooltips belonging to
-        this button.
-        """
-        super().kill()
-
     def hover_point(self, hover_x: int, hover_y: int) -> bool:
         """
         Tests if a position should be considered 'hovering' the button. Normally this just means

@@ -509,7 +509,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         )
         self.join_focus_sets(self.scroll_bar)
 
-    def get_text_layout_top_left(self):
+    def get_text_layout_top_left(self) -> Tuple[int, int]:
+        """
+        Get the top left of where the text layout should begin. Allows us to position the text as a block taking
+        into account the position of the element, its borders, shadows, padding and any rounded corners.
+
+        :return: a tuple of the top left position where we should start the text layout.
+        """
         return (
             self.rect.left
             + self.padding[0]
@@ -1766,6 +1772,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self.most_specific_combined_id
 
     def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
+        """
+        Set the text in the text box.
+
+        :param html_text: The html formatted text to set.
+        :param text_kwargs: any key word arguments to be replaced in the text.
+        """
         if self.should_html_unescape_input_text:
             self.html_text = html.unescape(html_text)
         else:
@@ -1846,39 +1858,35 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             consumed_event = True
         elif event.key == K_RIGHT:
             if event.mod & KMOD_CTRL or event.mod & KMOD_META:
-                self._jump_edit_pos_to_end_of_word(
-                    should_select=event.mod & KMOD_SHIFT
-                )
+                self._jump_edit_pos_to_end_of_word(should_select=event.mod & KMOD_SHIFT)
             else:
                 self._jump_edit_pos_one_character_right(
                     should_select=event.mod & KMOD_SHIFT
                 )
             consumed_event = True
         elif event.key == K_UP:
-            self._jump_edit_pos_one_row_up(should_select=(event.mod & KMOD_SHIFT))
+            self._jump_edit_pos_one_row_up(should_select=event.mod & KMOD_SHIFT)
             consumed_event = True
         elif event.key == K_DOWN:
-            self._jump_edit_pos_one_row_down(should_select=(event.mod & KMOD_SHIFT))
+            self._jump_edit_pos_one_row_down(should_select=event.mod & KMOD_SHIFT)
             consumed_event = True
         elif event.key == K_HOME:
             if event.mod & KMOD_CTRL or event.mod & KMOD_META:
                 self._jump_edit_pos_to_start_of_all_text(
-                    should_select=(event.mod & KMOD_SHIFT)
+                    should_select=event.mod & KMOD_SHIFT
                 )
             else:
                 self._jump_edit_pos_to_start_of_line(
-                    should_select=(event.mod & KMOD_SHIFT)
+                    should_select=event.mod & KMOD_SHIFT
                 )
             consumed_event = True
         elif event.key == K_END:
             if event.mod & KMOD_CTRL or event.mod & KMOD_META:
                 self._jump_edit_pos_to_end_of_all_text(
-                    should_select=(event.mod & KMOD_SHIFT)
+                    should_select=event.mod & KMOD_SHIFT
                 )
             else:
-                self._jump_edit_pos_to_end_of_line(
-                    should_select=(event.mod & KMOD_SHIFT)
-                )
+                self._jump_edit_pos_to_end_of_line(should_select=event.mod & KMOD_SHIFT)
             consumed_event = True
         return consumed_event
 

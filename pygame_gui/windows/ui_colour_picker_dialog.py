@@ -707,7 +707,7 @@ class UIColourPickerDialog(UIWindow):
             (64, 64), flags=pygame.SRCALPHA, depth=32
         )
         current_colour_surface.fill(self.current_colour)
-        self.current_colour_image._set_image(current_colour_surface)
+        self.current_colour_image.set_image(current_colour_surface, True)
 
     def update_saturation_value_square(self):
         """
@@ -730,8 +730,8 @@ class UIColourPickerDialog(UIWindow):
         hue_colour = pygame.Color(255, 255, 255, 255)
         hue_colour.hsva = (int(self.hue_channel.current_value), 100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
-        self.sat_value_square._set_image(
-            pygame.transform.smoothscale(mini_colour_surf, (200, 200))
+        self.sat_value_square.set_image(
+            pygame.transform.smoothscale(mini_colour_surf, (200, 200)), True
         )
 
     def update_colour_2d_slider(self):

@@ -27,17 +27,26 @@ from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 from pygame_gui.core.gui_font_pygame import GUIFontPygame
 
 
-__default_manager = None  # type: Optional[IUIManagerInterface]
-
-
-def get_default_manager():
-    global __default_manager
-    return __default_manager
+__default_manager: Optional[IUIManagerInterface] = None  # pylint: disable=invalid-name
 
 
 def set_default_manager(manager: Optional[IUIManagerInterface] = None):
-    global __default_manager
+    """
+    Set the cached default UI Manager. In many UI designs there will be only a single UI Manager, so we can
+    cache the first one created and then re-use it whenever the user doesn't specify one.
+    """
+    global __default_manager  # pylint: disable=global-statement
     __default_manager = manager
+
+
+def get_default_manager():
+    """
+    Returns the cached default UI Manager. In many UI designs there will be only a single UI Manager, so we can
+    cache the first one created and then re-use it whenever the user doesn't specify one.
+
+    :return: the cached default UIManager, normally the first one created.
+    """
+    return __default_manager
 
 
 if sys.version_info < (3, 9):
@@ -203,7 +212,7 @@ elif PLATFORM == "DARWIN":
 
 else:
 
-    def __unknown_copy(data: str):
+    def __unknown_copy(_: str):
         # copy not supported on this platform
         pass
 

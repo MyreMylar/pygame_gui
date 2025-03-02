@@ -72,12 +72,19 @@ class UIWindowStack(IUIWindowStackInterface):
             increased_height = window.get_layer_thickness()
 
             # need to bump up the layers of everything in the top stack as the main stack just got bigger
-            for window in self.top_stack:
-                window.change_layer(window.layer + increased_height)
+            for top_stack_window in self.top_stack:
+                top_stack_window.change_layer(top_stack_window.layer + increased_height)
 
     def refresh_window_stack_from_window(
         self, window_to_refresh_from: IWindowInterface
     ):
+        """
+        Refresh the window stacks above a specific window. To do this we remove all of these windows from the stack
+        and then re-add them back one-at-a-time as if they were new windows
+
+        :param window_to_refresh_from: The window to start the refresh from
+
+        """
         if window_to_refresh_from in self.stack:
             popped_windows_to_add_back = []
 

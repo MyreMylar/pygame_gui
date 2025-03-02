@@ -332,7 +332,7 @@ class UIElement(GUISprite, IUIElementInterface):
         elif not isinstance(container, IContainerLikeInterface):
             # oops, passed in something that wasn't a container so bail
             raise ValueError(
-                "container parameter must be of type " "IContainerLikeInterface."
+                "container parameter must be of type IContainerLikeInterface."
             )
 
         # by this point container should be a valid container
@@ -1056,6 +1056,7 @@ class UIElement(GUISprite, IUIElementInterface):
     def kill(self):
         """
         Overriding regular sprite kill() method to remove the element from its container.
+        Will also kill any tooltips belonging to this element.
         """
         if self.tool_tip is not None:
             self.tool_tip.kill()
@@ -1359,7 +1360,7 @@ class UIElement(GUISprite, IUIElementInterface):
         :return:
         """
         warnings.warn(
-            "This method will be removed for " "most elements from version 0.8.0",
+            "This method will be removed for most elements from version 0.8.0",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -1561,7 +1562,14 @@ class UIElement(GUISprite, IUIElementInterface):
 
     @staticmethod
     def tuple_extract(str_data: str) -> Tuple[int, int]:
-        # Used for parsing coordinate tuples in themes.
+        """
+        Used for parsing pairs of coordinates in themes from string data into numerical tuples.
+        e.g. 5,10
+
+        :param str_data: the comma separated string of two numbers to parse.
+
+        :return: a tuple of two ints
+        """
         x, y = str_data.split(",")
         return int(x), int(y)
 
@@ -1587,6 +1595,16 @@ class UIElement(GUISprite, IUIElementInterface):
         delay: Optional[float] = None,
         wrap_width: Optional[int] = None,
     ):
+        """
+        Setup floating tool tip data for this UI element.
+
+        :param text: the text for the tool tip.
+        :param object_id: an object ID for the tooltip - useful for theming
+        :param text_kwargs: key word arguments for the tool tip text
+        :param delay: how long it takes the tooltip to appear when statically hovering the UI element
+        :param wrap_width: how wide the tooltip will grow before wrapping.
+        :return:
+        """
         self.tool_tip_text = text
         self.tool_tip_text_kwargs = {}
         if text_kwargs is not None:

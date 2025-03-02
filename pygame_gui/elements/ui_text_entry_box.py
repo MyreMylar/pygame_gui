@@ -4,9 +4,9 @@ from pygame import KEYDOWN, TEXTINPUT
 from pygame import KMOD_META, KMOD_CTRL, KMOD_ALT, K_x, K_v
 from pygame import K_BACKSPACE, K_DELETE, K_RETURN
 from pygame import key
+from pygame.event import Event, post
 
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy
-from pygame.event import Event, post
 from pygame_gui._constants import UI_TEXT_ENTRY_CHANGED
 from pygame_gui.core import ObjectID
 from pygame_gui.core.ui_element import UIElement

@@ -484,6 +484,11 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         return self.find_font(self.default_font.size, self.default_font.name)
 
     def get_default_symbol_font(self) -> IGUIFontInterface:
+        """
+        Gets the default font used for rendering non-language specific symbols
+
+        :return: the symbol font.
+        """
         return self.find_font(self._symbols_font.size, self._symbols_font.name)
 
     def create_font_id(

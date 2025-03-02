@@ -310,6 +310,11 @@ class UIManager(IUIManagerInterface):
     def rebuild_all_from_changed_theme_data(
         self, theme: IUIAppearanceThemeInterface = None
     ):
+        """
+        Rebuild the entire UI after a change in the theming.
+
+        :param theme: the theme that has changed.
+        """
         for sprite in self.ui_group.sprites():
             if theme is not None and sprite.ui_theme is not theme:
                 continue
@@ -724,8 +729,8 @@ class UIManager(IUIManagerInterface):
     def get_locale(self):
         return self._locale
 
-    def set_text_hovered(self, hovering_text: bool):
-        self.text_hovered = hovering_text
+    def set_text_hovered(self, hovering_text_input: bool):
+        self.text_hovered = hovering_text_input
 
     def get_hovering_any_element(self) -> bool:
         return self.hovering_any_ui_element

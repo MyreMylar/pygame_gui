@@ -229,11 +229,11 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self.join_focus_sets(self.scrollable_container)
 
         if self.vert_scroll_bar is not None:
-            self.vert_scroll_bar.set_container_this_will_scroll(
+            self.vert_scroll_bar.set_container_to_check_hover_for_mousewheel_events(
                 self.scrollable_container
             )
         if self.horiz_scroll_bar is not None:
-            self.horiz_scroll_bar.set_container_this_will_scroll(
+            self.horiz_scroll_bar.set_container_to_check_hover_for_mousewheel_events(
                 self.scrollable_container
             )
 

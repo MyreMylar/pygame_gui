@@ -1,4 +1,4 @@
-from typing import Deque, List, Optional, Dict, Any
+from typing import Deque, List, Optional, Dict, Any, Tuple
 from collections import deque
 from bisect import bisect_left
 
@@ -215,8 +215,9 @@ class TextBoxLayout:
             )
         if current_row not in self.layout_rows:
             self.layout_rows.append(current_row)
-        if current_row.bottom - self.layout_rect.y > self.layout_rect.height:
-            self.layout_rect.height = current_row.bottom - self.layout_rect.y
+        self.layout_rect.height = max(
+            self.layout_rect.height, current_row.bottom - self.layout_rect.y
+        )
         self._refresh_row_letter_counts()
         if len(current_row.items) != 0:
             self.last_row_height = current_row.items[-1].height
@@ -238,8 +239,7 @@ class TextBoxLayout:
                     text_layout_rect.left = floater.right
                     current_row.left = floater.right
                 elif floater.float_pos() == TextFloatPosition.RIGHT:
-                    if floater.left < rhs_limit:
-                        rhs_limit = floater.left
+                    rhs_limit = min(rhs_limit, floater.left)
         # See if this rectangle will fit on the current line
         # also check whether this layout rect is a final unsplittable rectangle that is wider than the layout.
         if (
@@ -291,13 +291,10 @@ class TextBoxLayout:
             else:
                 self.floating_rects.append(test_layout_rect)
                 # expand overall rect bottom to fit if needed
-                if (
-                    test_layout_rect.bottom - self.layout_rect.y
-                    > self.layout_rect.height
-                ):
-                    self.layout_rect.height = (
-                        test_layout_rect.bottom - self.layout_rect.y
-                    )
+                self.layout_rect.height = max(
+                    self.layout_rect.height,
+                    test_layout_rect.bottom - self.layout_rect.y,
+                )
                 # rewind current text row, so we can account for new floating rect
                 current_row.rewind_row(input_queue)
 
@@ -330,8 +327,9 @@ class TextBoxLayout:
     def _add_floating_rect(self, current_row, test_layout_rect, input_queue):
         self.floating_rects.append(test_layout_rect)
         # expand overall rect bottom to fit if needed
-        if test_layout_rect.bottom - self.layout_rect.y > self.layout_rect.height:
-            self.layout_rect.height = test_layout_rect.bottom - self.layout_rect.y
+        self.layout_rect.height = max(
+            self.layout_rect.height, test_layout_rect.bottom - self.layout_rect.y
+        )
         # rewind current text row, so we can account for new floating rect
         current_row.rewind_row(input_queue)
 
@@ -739,7 +737,7 @@ class TextBoxLayout:
                 row.set_cursor_position(cursor_pos - edit_pos_accumulator)
                 self.cursor_text_row = row
                 break
-            elif cursor_pos == edit_pos_accumulator + row.letter_count:
+            if cursor_pos == edit_pos_accumulator + row.letter_count:
                 # if the last character in a row is a space, we have more than one row and this isn't the last row
                 # we want to jump to the start of the next row
                 if len(row.items) > 0:
@@ -844,8 +842,7 @@ class TextBoxLayout:
                         final_click_pos, len(self.layout_rows)
                     )[0]
                     break
-                else:
-                    cursor_index += row.letter_count
+                cursor_index += row.letter_count
             return cursor_index
 
         return 0
@@ -863,8 +860,7 @@ class TextBoxLayout:
                 if row == self.cursor_text_row:
                     cursor_index += self.cursor_text_row.get_cursor_index()
                     break
-                else:
-                    cursor_index += row.letter_count
+                cursor_index += row.letter_count
         return cursor_index
 
     def toggle_cursor(self):
@@ -1182,7 +1178,7 @@ class TextBoxLayout:
         :param layout_index: the character index at which to insert the line break.
         :param parser: An optional HTML parser for text styling data
         """
-        found_chunk, index_in_row, row_index = self._find_and_split_chunk(layout_index)
+        found_chunk, _, row_index = self._find_and_split_chunk(layout_index)
 
         if len(self.layout_rows) > 0 and found_chunk is not None:
             self._insert_line_break_into_row_by_index(row_index, found_chunk, parser)
@@ -1241,8 +1237,8 @@ class TextBoxLayout:
 
         if self.selection_start_index != self.selection_end_index:
             # step 1: find the start chunk
-            start_chunk, start_letter_index, start_row_index = (
-                self._find_and_split_chunk(self.selection_start_index, return_rhs=True)
+            start_chunk, _, start_row_index = self._find_and_split_chunk(
+                self.selection_start_index, return_rhs=True
             )
 
             # step 2: find the end chunk
@@ -1302,8 +1298,7 @@ class TextBoxLayout:
         current_row_starting_chunk = self.selected_rows[0].items[0]
         for row in reversed(self.selected_rows):
             row.items = [chunk for chunk in row.items if not chunk.is_selected]
-            if row.row_index > max_row_index:
-                max_row_index = row.row_index
+            max_row_index = max(max_row_index, row.row_index)
 
         row_to_process_from = current_row
         row_to_process_from_index = current_row.row_index
@@ -1542,13 +1537,22 @@ class TextBoxLayout:
                 index += 1
 
     def fit_layout_rect_height_to_rows(self):
+        """
+        Fit the layout rect height to the height of all the current layout rows.
+
+        """
         if len(self.layout_rows) > 0:
             self.layout_rect.height = max(
                 self.layout_rows[-1].bottom - self.layout_rect.top,
                 self.view_rect.height,
             )
 
-    def get_cursor_y_pos(self):
+    def get_cursor_y_pos(self) -> Tuple[int, int]:
+        """
+        Get the top and bottom position of the edit cursor.
+
+        :return: a tuple of two integers representing the current top and bottom y positions of the edit cursor
+        """
         if self.cursor_text_row is not None:
             return self.cursor_text_row.top, self.cursor_text_row.bottom
         else:
@@ -1562,8 +1566,7 @@ class TextBoxLayout:
         if self.cursor_text_row is None:
             return 0
         cursor_index = 0
-        for i in range(len(self.layout_rows)):
-            row = self.layout_rows[i]
+        for i, row in enumerate(self.layout_rows):
             if row == self.cursor_text_row:
                 if i >= 1:
                     row_above = self.layout_rows[i - 1]
@@ -1578,8 +1581,7 @@ class TextBoxLayout:
                 else:
                     cursor_index += last_cursor_horiz_index
                 break
-            else:
-                cursor_index += row.letter_count
+            cursor_index += row.letter_count
         return cursor_index
 
     def get_cursor_pos_move_down_one_row(self, last_cursor_horiz_index):
@@ -1590,8 +1592,7 @@ class TextBoxLayout:
         if self.cursor_text_row is None:
             return 0
         cursor_index = 0
-        for i in range(len(self.layout_rows)):
-            row = self.layout_rows[i]
+        for i, row in enumerate(self.layout_rows):
             if row == self.cursor_text_row:
                 if (i + 1) < len(self.layout_rows):
                     row_below = self.layout_rows[i + 1]
@@ -1606,6 +1607,5 @@ class TextBoxLayout:
                 else:
                     cursor_index += last_cursor_horiz_index
                 break
-            else:
-                cursor_index += row.letter_count
+            cursor_index += row.letter_count
         return min(cursor_index, self.letter_count)

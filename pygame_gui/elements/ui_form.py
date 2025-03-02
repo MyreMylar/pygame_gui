@@ -1,3 +1,5 @@
+import re
+from ast import literal_eval
 from typing import NamedTuple, Union, Mapping, Optional, Dict, Callable, Tuple, Any
 
 import pygame
@@ -10,18 +12,14 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
 )
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.elements import UIAutoResizingContainer, UIScrollingContainer
-from pygame_gui.elements import (
-    UITextEntryLine,
-    UITextEntryBox,
-    UISelectionList,
-    UIDropDownMenu,
-    UILabel,
-    UIButton,
-)
-
-import re
-from ast import literal_eval
+from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
+from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
+from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
+from pygame_gui.elements.ui_text_entry_box import UITextEntryBox
+from pygame_gui.elements.ui_selection_list import UISelectionList
+from pygame_gui.elements.ui_drop_down_menu import UIDropDownMenu
+from pygame_gui.elements.ui_label import UILabel
+from pygame_gui.elements.ui_button import UIButton
 
 
 class InputField(NamedTuple):
@@ -995,7 +993,7 @@ class UIForm(UIScrollingContainer):
             width = element.relative_rect.width - 2 * element.padding[0]
         relative_rect = pygame.Rect(*element.padding, width, field_height)
 
-        for key, value in questionnaire.items():
+        for _, value in questionnaire.items():
             rel_rect = relative_rect.copy()
 
             if isinstance(value, UISection):
@@ -1405,8 +1403,7 @@ class UIForm(UIScrollingContainer):
                 raise TypeError(
                     f"Expected type 'Mapping' (Dict) for questionnaire, found type '{type(questionnaire)}'"
                 )
-            else:
-                return False
+            return False
 
         for key, value in questionnaire.items():
             if not isinstance(key, str):
@@ -1414,8 +1411,7 @@ class UIForm(UIScrollingContainer):
                     raise TypeError(
                         f"Expected type 'str' for key in questionnaire, found type '{type(key)}'"
                     )
-                else:
-                    return False
+                return False
 
             # Sub-questionnaire
             if isinstance(value, Mapping):
@@ -1437,12 +1433,10 @@ class UIForm(UIScrollingContainer):
             elif not value:
                 if raise_error:
                     raise ValueError(f"Question type cannot be {value}")
-                else:
-                    return False
+                return False
 
             elif raise_error:
                 raise ValueError(f"Questions of type {type(value)} are not supported")
-            else:
-                return False
+            return False
 
         return True

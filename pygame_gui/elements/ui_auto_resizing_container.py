@@ -1,4 +1,7 @@
+from typing import Optional, Union, Dict, List
+
 import pygame
+
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.interfaces import (
     IUIElementInterface,
@@ -6,8 +9,6 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
 )
 from pygame_gui.core.gui_type_hints import RectLike
-
-from typing import *
 
 
 class UIAutoResizingContainer(UIContainer):

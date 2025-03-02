@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
-from pygame_gui.core.gui_type_hints import Coordinate
-
 import pygame
+
+from pygame_gui.core.gui_type_hints import Coordinate
 
 
 class IWindowInterface(metaclass=ABCMeta):

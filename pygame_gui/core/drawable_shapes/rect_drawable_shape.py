@@ -65,26 +65,18 @@ class RectDrawableShape(DrawableShape):
 
         self.base_surface = None
 
-        if self.shadow_width > min(
+        self.shadow_width = min(
+            self.shadow_width,
             math.floor(self.containing_rect.width / 2),
             math.floor(self.containing_rect.height / 2),
-        ):
-            self.shadow_width = min(
-                math.floor(self.containing_rect.width / 2),
-                math.floor(self.containing_rect.height / 2),
-            )
-
+        )
         self.shadow_width = max(self.shadow_width, 0)
 
-        if self.border_width > min(
-            math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
-            math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
-        ):
-            self.border_width = min(
-                math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
-                math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
-            )
-
+        self.border_width = min(
+            self.border_width,
+            math.floor((self.containing_rect.width - self.shadow_width * 2) / 2),
+            math.floor((self.containing_rect.height - self.shadow_width * 2) / 2),
+        )
         self.border_width = max(self.border_width, 0)
 
         if self.shadow_width > 0:

@@ -1,16 +1,31 @@
-import pygame
-
-from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
-from pygame.font import Font
 from typing import Union, IO, Optional, Dict, Tuple
 from os import PathLike
+
+import pygame
+from pygame.font import Font
 from pygame import Color, Surface, Rect
+
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+
 
 AnyPath = Union[str, bytes, PathLike]
 FileArg = Union[AnyPath, IO]
 
 
 class GUIFontPygame(IGUIFontInterface):
+    """
+    A GUI Font wrapping the Font class from pygame-ce to a common interface with the 'freetype' based Font class
+    also from pygame-ce. This was to facilitate easy switching between the two when testing features.
+
+    NB: At this point the SDL based Font class seems clearly superior so the freetype implementation will be removed
+        in a future version
+
+    :param file: the font file
+    :param size: the font point size
+    :param force_style: whether we force the styling when the available font does not support it.
+    :param style: a style dictionary to set styling parameters like bold and italic
+    """
+
     def __init__(
         self,
         file: Optional[FileArg],
@@ -25,7 +40,7 @@ class GUIFontPygame(IGUIFontInterface):
         self.__internal_font.set_point_size(size)
         self.pad = True
         self.origin = True
-        self.__underline = False
+        self.__underline = False  # pylint: disable=unused-private-member
         self.__underline_adjustment = 0.0
 
         self.point_size = size
@@ -68,7 +83,7 @@ class GUIFontPygame(IGUIFontInterface):
     def underline_adjustment(self, value: float):
         self.__underline_adjustment = value
 
-    def get_point_size(self):
+    def get_point_size(self) -> int:
         return self.point_size
 
     def get_rect(self, text: str) -> Rect:
@@ -116,7 +131,7 @@ class GUIFontPygame(IGUIFontInterface):
             )
         return text_surface
 
-    def get_padding_height(self):
+    def get_padding_height(self) -> int:
         # 'font padding' this determines the amount of padding that
         # font.pad adds to the top of text excluding
         # any padding added to make glyphs even - this is useful

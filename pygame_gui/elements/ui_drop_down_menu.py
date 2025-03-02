@@ -148,8 +148,6 @@ class UIExpandedDropDownState:
         self.drop_down_menu_ui.join_focus_sets(self.selected_option_button)
         self.active_buttons.append(self.selected_option_button)
 
-        expand_button_symbol = "▼"
-
         list_object_id = "#drop_down_options_list"
         list_object_ids = self.drop_down_menu_ui.object_ids[:]
         list_object_ids.append(list_object_id)
@@ -165,42 +163,7 @@ class UIExpandedDropDownState:
         )
 
         self._calculate_options_list_sizes(final_ids)
-        if self.expand_direction is not None:
-            if self.expand_direction == "up":
-                expand_button_symbol = "▲"
-
-                if self.drop_down_menu_ui.expansion_height_limit is None:
-                    self.drop_down_menu_ui.expansion_height_limit = (
-                        self.base_position_rect.top
-                    )
-
-                self.options_list_height = min(
-                    self.options_list_height,
-                    self.drop_down_menu_ui.expansion_height_limit,
-                )
-
-                self.option_list_y_pos = (
-                    self.base_position_rect.top - self.options_list_height
-                )
-
-            elif self.expand_direction == "down":
-                expand_button_symbol = "▼"
-
-                if self.drop_down_menu_ui.expansion_height_limit is None:
-                    height_limit = (
-                        self.drop_down_menu_ui.ui_container.get_container()
-                        .get_relative_rect()
-                        .height
-                        - self.base_position_rect.bottom
-                    )
-                    self.drop_down_menu_ui.expansion_height_limit = height_limit
-
-                self.options_list_height = min(
-                    self.options_list_height,
-                    self.drop_down_menu_ui.expansion_height_limit,
-                )
-
-                self.option_list_y_pos = self.base_position_rect.bottom
+        expand_button_symbol = self._setup_expansion_params_based_on_direction()
 
         if self.close_button_width > 0:
             close_button_x = (
@@ -255,6 +218,46 @@ class UIExpandedDropDownState:
 
         if should_rebuild:
             self.rebuild()
+
+    def _setup_expansion_params_based_on_direction(self):
+        expand_button_symbol = "▼"
+        if self.expand_direction is not None:
+            if self.expand_direction == "up":
+                expand_button_symbol = "▲"
+
+                if self.drop_down_menu_ui.expansion_height_limit is None:
+                    self.drop_down_menu_ui.expansion_height_limit = (
+                        self.base_position_rect.top
+                    )
+
+                self.options_list_height = min(
+                    self.options_list_height,
+                    self.drop_down_menu_ui.expansion_height_limit,
+                )
+
+                self.option_list_y_pos = (
+                    self.base_position_rect.top - self.options_list_height
+                )
+
+            elif self.expand_direction == "down":
+                expand_button_symbol = "▼"
+
+                if self.drop_down_menu_ui.expansion_height_limit is None:
+                    height_limit = (
+                        self.drop_down_menu_ui.ui_container.get_container()
+                        .get_relative_rect()
+                        .height
+                        - self.base_position_rect.bottom
+                    )
+                    self.drop_down_menu_ui.expansion_height_limit = height_limit
+
+                self.options_list_height = min(
+                    self.options_list_height,
+                    self.drop_down_menu_ui.expansion_height_limit,
+                )
+
+                self.option_list_y_pos = self.base_position_rect.bottom
+        return expand_button_symbol
 
     def _calculate_options_list_sizes(self, final_ids):
         try:
@@ -881,6 +884,11 @@ class UIDropDownMenu(UIContainer):
 
     @property
     def layer_thickness(self):
+        """
+        The layer thickness of the drop-down in the UI. This helps us get the correct draw order.
+
+        :return: an integer representing the number of drawing layers used by the drop-down menu.
+        """
         return self.__layer_thickness_including_expansion
 
     @layer_thickness.setter

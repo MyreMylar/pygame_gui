@@ -61,12 +61,11 @@ class UIMessageWindow(UIWindow):
         self.dismiss_button = None
         self.text_block = None
 
-        button_size = (-1, 24)
+        dismiss_button_rect = pygame.Rect((0, 0), (-1, 24))
         button_spacing = 10
-        button_vertical_space = (button_spacing * 2) + button_size[1]
-
-        dismiss_button_rect = pygame.Rect((0, 0), button_size)
         dismiss_button_rect.bottomright = (-button_spacing, -button_spacing)
+        button_vertical_space = (button_spacing * 2) + dismiss_button_rect.height
+
         self.dismiss_button = UIButton(
             relative_rect=dismiss_button_rect,
             text="pygame-gui.Dismiss",

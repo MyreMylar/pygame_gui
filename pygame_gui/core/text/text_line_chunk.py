@@ -15,12 +15,10 @@ chunk onto it's final destination.
 from typing import Optional, Union, Tuple, List
 
 import pygame
-
-from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
-
 from pygame import Color, Surface, Rect, BLEND_PREMULTIPLIED, BLEND_RGBA_MULT, SRCALPHA
 from pygame.transform import rotozoom, rotate
 
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.colour_gradient import ColourGradient
 

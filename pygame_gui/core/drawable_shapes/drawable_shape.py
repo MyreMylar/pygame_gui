@@ -804,7 +804,7 @@ class DrawableShape:
 
         """
         if self.text_box_layout is not None:
-            for state_id, state in self.states.items():
+            for _, state in self.states.items():
                 if (
                     state.pre_text_surface is not None
                     and state.text_surface is not None

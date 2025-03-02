@@ -27,11 +27,10 @@ representations can be easily added without much bloat or *magic*
         of any additions to this parser TL,DR: Dev life will be easier if it is ensured that commas in colour schemas
         are inside of parentheses, brackets, or curly braces (like "rgb(20, 20, 20)")"""
 
-import pygame
+import enum
 from typing import (
     Callable,
     Union,
-    Iterable,
     TypeVar,
     Optional,
     List,
@@ -41,7 +40,8 @@ from typing import (
     TypedDict,
 )
 
-import enum
+import pygame
+
 from pygame_gui.core.colour_gradient import ColourGradient
 from pygame_gui.core.utility import premul_col
 from pygame_gui._constants import _namedColours
@@ -61,6 +61,13 @@ T = TypeVar("T")
 
 
 def is_num_str(string: str) -> bool:
+    """
+    Check if a string converts to a number.
+
+    :param string: the string to check
+
+    :return: A boolean, True if the string converts to a number, False otherwise
+    """
     try:
         float(string)
         return True
@@ -69,14 +76,36 @@ def is_num_str(string: str) -> bool:
 
 
 def is_int_str(string: str) -> bool:
+    """
+    Check if a string converts to a round number.
+
+    :param string: the string to check
+
+    :return: A boolean, True if the string converts to a non-fractional number, False otherwise
+    """
     return is_num_str(string) and "." not in string
 
 
 def is_float_str(string: str):
+    """
+    Check if a string converts to a fractional number.
+
+    :param string: the string to check
+
+    :return: A boolean, True if the string converts to a fractional number, False otherwise
+    """
     return is_num_str(string) and "." in string
 
 
 def is_degree_string(strdata: str) -> bool:
+    """
+    Check if a string converts to a degree. This means that it either ends 'deg' and the rest is an integer number
+    between -360 and 360; or it is just an integer number between -360 and 360.
+
+    :param strdata: the string to check
+
+    :return: A boolean, True if the string converts to a degree, False otherwise
+    """
     if strdata != "":
         if strdata.endswith("deg") and len(strdata) > 3:
             if is_int_str(strdata[:-3]):
@@ -89,30 +118,73 @@ def is_degree_string(strdata: str) -> bool:
 
 
 def parse_degree_string(strdata: str) -> int:
+    """
+    Converts a string to a degree integer. This means that it either ends 'deg' and the rest is an integer number
+    between -360 and 360; or it is just an integer number between -360 and 360.
+
+    Should be used with 'is_degree_string()' to check for validity.
+
+    :param strdata: the string to parse.
+
+    :return: an integer between -360 and 360
+    """
     if strdata != "":
         return int(strdata[:-3]) if strdata.endswith("deg") else int(strdata)
+    return 0
 
 
 def is_percentage_string(strdata: str) -> bool:
+    """
+    Check if a string converts to a percentage. This means that it either ends '%' and the rest is an integer number;
+    or it is a float number between 0.0 and 1.0.
+
+    :param strdata: the string to check
+
+    :return: A boolean, True if the string converts to a percentage, False otherwise
+    """
     if strdata != "":
         if strdata[-1] == "%" and is_int_str(strdata[:-1]):
             return True
 
         if is_float_str(strdata):
             float_value = float(strdata)
-            return 0 <= float_value <= 1
+            return 0.0 <= float_value <= 1.0
     return False
 
 
 def parse_percentage_string(strdata: str) -> float:
+    """
+    returns a percentage float value between 0.0 and 1.0 parsed from the input string.
+
+    Should be used in conjunction with is_percentage_string()
+
+    :param strdata: the string to parse
+
+    :return: a float between 0.0 and 1.0
+    """
     return float(strdata) if is_float_str(strdata) else float(strdata[:-1]) / 100
 
 
 def is_u8_string(strdata: str) -> bool:
+    """
+    Checks if the string can be converted to an integer between 0 and 255.
+
+    :param strdata: the string to parse
+    :return: a boolean - True if the string can convert to an integer between 0 and 255
+    """
     return is_int_str(strdata) and 0 <= int(strdata) <= 255
 
 
 def parse_u8_string(strdata: str) -> int:
+    """
+    Parse the input string to an integer (between 0 and 255).
+
+    Should be used in conjunction with is_u8_string()
+
+    :param strdata: the string to parse
+
+    :return: an integer between 0 and 255
+    """
     return int(strdata)
 
 
@@ -121,6 +193,11 @@ ColourValueParser = Callable[[str], T]
 
 
 class ColourValueParserData(TypedDict):
+    """
+    A class that groups together parsers and validators for turning strings into numerical values for colours.
+
+    """
+
     validator: ColourValueValidator
     parser: ColourValueParser
 
@@ -137,9 +214,9 @@ _valueParsers: Dict[NumParserType, ColourValueParserData] = {
     },
     NumParserType.FLOAT: {
         "validator": is_float_str,
-        "parser": lambda string: float(string),
+        "parser": float,
     },
-    NumParserType.INT: {"validator": is_int_str, "parser": lambda string: int(string)},
+    NumParserType.INT: {"validator": is_int_str, "parser": int},
 }
 """A mapping for each NumParserType to its corresponding validator and parser for strings of that type's 
 specification"""
@@ -669,8 +746,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> List[int]:
     opening_stack = []
     comma_indices_outside_parentheses: List[int] = []
 
-    for i in range(len(strdata)):
-        ch = strdata[i]
+    for i, ch in enumerate(strdata):
         if ch == "," and not opening_stack:
             comma_indices_outside_parentheses.append(i)
         if ch in glyphs.values():
@@ -720,9 +796,9 @@ def split_string_at_indices(
 
     splits = []
     last = 0
-    for i in range(len(indices)):
-        splits.append(strdata[last : indices[i]])
-        last = indices[i] + 1
+    for index in indices:
+        splits.append(strdata[last:index])
+        last = index + 1
         if last >= len(strdata):
             return splits
     splits.append(strdata[last:])

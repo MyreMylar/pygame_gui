@@ -60,26 +60,18 @@ class EllipseDrawableShape(DrawableShape):
         """
         super().full_rebuild_on_size_change()
         # clamping border and shadow widths so we can't form impossible negative sized surfaces
-        if self.shadow_width > min(
+        self.shadow_width = min(
+            self.shadow_width,
             math.floor(self.containing_rect.width / 2),
             math.floor(self.containing_rect.height / 2),
-        ):
-            self.shadow_width = min(
-                math.floor(self.containing_rect.width / 2),
-                math.floor(self.containing_rect.height / 2),
-            )
-
+        )
         self.shadow_width = max(self.shadow_width, 0)
 
-        if self.border_width > min(
-            math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
-            math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
-        ):
-            self.border_width = min(
-                math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
-                math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
-            )
-
+        self.border_width = min(
+            self.border_width,
+            math.floor((self.containing_rect.width - self.shadow_width * 2) / 2),
+            math.floor((self.containing_rect.height - self.shadow_width * 2) / 2),
+        )
         self.border_width = max(self.border_width, 0)
 
         if self.shadow_width > 0:
@@ -202,9 +194,6 @@ class EllipseDrawableShape(DrawableShape):
         else:
             border_colour_state_str = f"{state_str}_border"
             bg_colour_state_str = f"{state_str}_bg"
-            text_colour_state_str = f"{state_str}_text"
-            text_shadow_colour_state_str = f"{state_str}_text_shadow"
-            image_state_str = f"{state_str}_image"
             border_overlap = 0
             if "border_overlap" in self.theming:
                 border_overlap = self.theming["border_overlap"]
@@ -354,10 +343,10 @@ class EllipseDrawableShape(DrawableShape):
                     )
 
             self.finalise_images_and_text(
-                image_state_str,
+                f"{state_str}_image",
                 state_str,
-                text_colour_state_str,
-                text_shadow_colour_state_str,
+                f"{state_str}_text",
+                f"{state_str}_text_shadow",
                 add_text,
             )
 

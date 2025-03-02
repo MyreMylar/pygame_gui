@@ -731,7 +731,15 @@ class UITextEntryLine(UIElement):
             self.edit_position = len(self.text)
             self.cursor_has_moved_recently = True
             consumed_event = True
-        elif event.key == pygame.K_LEFT and event.mod & pygame.KMOD_SHIFT:
+        elif self._check_single_character_edit_pos_select_move_keys(event):
+            consumed_event = True
+        elif self._check_single_character_edit_pos_move_keys(event):
+            consumed_event = True
+        return consumed_event
+
+    def _check_single_character_edit_pos_select_move_keys(self, event) -> bool:
+        consumed_event = False
+        if event.key == pygame.K_LEFT and event.mod & pygame.KMOD_SHIFT:
             # keyboard-based selection
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 # existing selection, so edit_position should correspond to one
@@ -778,7 +786,11 @@ class UITextEntryLine(UIElement):
                 self.edit_position += 1
                 self.cursor_has_moved_recently = True
             consumed_event = True
-        elif event.key == pygame.K_LEFT:
+        return consumed_event
+
+    def _check_single_character_edit_pos_move_keys(self, event) -> bool:
+        consumed_event = False
+        if event.key == pygame.K_LEFT:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.edit_position = min(self.select_range[0], self.select_range[1])
                 self.select_range = [0, 0]
@@ -1414,4 +1426,8 @@ class UITextEntryLine(UIElement):
                 )
 
     def clear(self):
+        """
+        Clear all the text in the text entry line
+
+        """
         self.set_text("")

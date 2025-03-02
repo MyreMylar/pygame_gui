@@ -75,7 +75,7 @@ class TextBoxLayoutRow(pygame.Rect):
         if item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = item.row_chunk_height
             if not self.layout.dynamic_height:
-                self.height = min(
+                self.height = min(  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                     self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                     item.row_chunk_height,
                 )
@@ -93,8 +93,7 @@ class TextBoxLayoutRow(pygame.Rect):
             )
 
         if isinstance(item, TextLineChunkFTFont):
-            if item.y_origin > self.y_origin:
-                self.y_origin = item.y_origin
+            self.y_origin = max(self.y_origin, item.y_origin)
 
             for origin_item in self.items:
                 if isinstance(origin_item, TextLineChunkFTFont):
@@ -127,7 +126,7 @@ class TextBoxLayoutRow(pygame.Rect):
         if new_item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = new_item.row_chunk_height
             if not self.layout.dynamic_height:
-                self.height = min(
+                self.height = min(  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                     self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                     new_item.row_chunk_height,
                 )
@@ -136,17 +135,16 @@ class TextBoxLayoutRow(pygame.Rect):
                     int(round(new_item.row_chunk_height * self.line_spacing)),
                 )
             else:
-                self.height = int(item.row_chunk_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.height = int(new_item.row_chunk_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                 self.line_spacing_height = int(
-                    round(item.row_chunk_height * self.line_spacing)
+                    round(new_item.row_chunk_height * self.line_spacing)
                 )  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
             self.cursor_rect = pygame.Rect(
                 self.x, self.y, self.layout.edit_cursor_width, self.height - 2
             )
 
         if isinstance(new_item, TextLineChunkFTFont):
-            if new_item.y_origin > self.y_origin:
-                self.y_origin = new_item.y_origin
+            self.y_origin = max(self.y_origin, new_item.y_origin)
 
             for origin_item in self.items:
                 if isinstance(origin_item, TextLineChunkFTFont):
@@ -207,7 +205,7 @@ class TextBoxLayoutRow(pygame.Rect):
                     floater_adjustment -= floater.width * 0.5
 
         if method == "rect":
-            self.centerx = (
+            self.centerx = (  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                 self.layout.layout_rect.centerx  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
                 + floater_adjustment
             )
@@ -551,6 +549,11 @@ class TextBoxLayoutRow(pygame.Rect):
         return cursor_index, cursor_draw_width
 
     def get_last_text_chunk(self):
+        """
+        Gets the last text chunk in the row.
+
+        :return: returns the last TextLineChunkFTFont in the row
+        """
         return next(
             (
                 item
@@ -584,7 +587,13 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self._setup_offset_position_from_edit_cursor()
 
-    def set_cursor_to_end(self, is_last_row):
+    def set_cursor_to_end(self, is_last_row: bool):
+        """
+        Set the edit cursor to the end of the row.
+
+        :param is_last_row: A boolean indicating if this is the last row in a text layout
+
+        """
         end_pos = self.letter_count
         # we need to ignore the trailing space on line-wrapped rows,
         # or we will spill over to the row below
@@ -600,6 +609,10 @@ class TextBoxLayoutRow(pygame.Rect):
         self.set_cursor_position(end_pos)
 
     def set_cursor_to_start(self):
+        """
+        Set the edit cursor to the start of the row.
+
+        """
         self.set_cursor_position(0)
 
     def get_cursor_index(self) -> int:
@@ -633,7 +646,7 @@ class TextBoxLayoutRow(pygame.Rect):
                     break
 
                 letter_acc += chunk.letter_count
-        if parser is None and not len(self.items):
+        if parser is None and not self.items:
             raise AttributeError(
                 "Trying to insert into empty text row with no Parser"
                 " for style data - fix this later?"
@@ -652,6 +665,13 @@ class TextBoxLayoutRow(pygame.Rect):
         chunk_to_insert_after: Union[TextLineChunkFTFont, LineBreakLayoutRect],
         parser: HTMLParser,
     ):
+        """
+        Insert a line break into the row after a specified chunk.
+
+        :param chunk_to_insert_after: The text chunk or line break chunk to insert a new line break after.
+        :param parser: the html parser we are using for this text row.
+
+        """
         if len(self.items) <= 0:
             return
         chunk_insert_index = next(
@@ -676,21 +696,40 @@ class TextBoxLayoutRow(pygame.Rect):
 
     @staticmethod
     def string_ends_with_a_single_space(string_to_check: str) -> bool:
+        """
+        returns true if the string passed in ends with a space character.
+
+        :param string_to_check: the string to check for a final space
+
+        :return: a boolean, True if the string ends with a space, False otherwise
+        """
         return string_to_check[-1] == " " and (
             len(string_to_check) == 1 or string_to_check[-2] != " "
         )
 
-    def row_text_ends_with_a_single_space(self):
-        return any(
-            isinstance(item, TextLineChunkFTFont)
-            and (
-                len(item.text) > 0
-                and TextBoxLayoutRow.string_ends_with_a_single_space(item.text)
-            )
-            for item in reversed(self.items)
-        )
+    def row_text_ends_with_a_single_space(self) -> bool:
+        """
+        Returns true if the last text chunk in a row ends with a single space.
 
-    def get_last_text_or_line_break_chunk(self):
+        :return: a boolean that is true if the last
+        """
+        last_chunk = self.get_last_text_chunk()
+        if (
+            last_chunk
+            and len(last_chunk.text) > 0
+            and TextBoxLayoutRow.string_ends_with_a_single_space(last_chunk.text)
+        ):
+            return True
+        return False
+
+    def get_last_text_or_line_break_chunk(
+        self,
+    ) -> Optional[Union[TextLineChunkFTFont, LineBreakLayoutRect]]:
+        """
+        Return the last text or line break chunk in a row.
+
+        :return: a text chunk or a line break at the end of the row, returns None if there isn't one.
+        """
         return next(
             (
                 item
@@ -700,5 +739,10 @@ class TextBoxLayoutRow(pygame.Rect):
             None,
         )
 
-    def last_chunk_is_line_break(self):
+    def last_chunk_is_line_break(self) -> bool:
+        """
+        Returns true if the last chunk in the row is a line break chunk.
+
+        :return: A boolean that is true if the last chunk in the row is a line break.
+        """
         return len(self.items) > 0 and isinstance(self.items[-1], LineBreakLayoutRect)

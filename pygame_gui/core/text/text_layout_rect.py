@@ -117,7 +117,7 @@ class TextLayoutRect(pygame.rect.Rect):
         requested_x: int,
         line_width: int,
         row_start_x: int,
-        allow_split_dashes: bool = True,
+        allow_split_dashes: bool = True,  # pylint: disable=unused-argument
     ) -> Union["TextLayoutRect", None]:  # noqa
         """
         Try to perform a split operation on this rectangle. Often rectangles will be split at the

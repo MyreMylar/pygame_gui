@@ -131,7 +131,18 @@ class UIHorizontalScrollBar(UIElement):
 
         self._container_to_scroll = None
 
-    def set_container_this_will_scroll(self, container: IUIContainerInterface):
+    def set_container_to_check_hover_for_mousewheel_events(
+        self, container: IUIContainerInterface
+    ):
+        """
+        The container related to this scrollbar to check for hovering when we are rolling the mousewheel.
+        This allows us to move the scroll bar when the mousewheel is rolled while the mouse pointer is hovering
+        over a scrollable container.
+
+        NB: this function on its own will not set up a container to be scrolled by this scrollbar
+
+        :param container: the container to set as attached/related to this scrollbar for the mousewheel events
+        """
         self._container_to_scroll = container
 
     @property

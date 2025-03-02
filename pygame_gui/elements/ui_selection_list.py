@@ -152,9 +152,7 @@ class UISelectionList(UIElement):
 
         """
         if self.allow_multi_select:
-            raise RuntimeError(
-                "Requesting single selection, from multi-selection list"
-            )
+            raise RuntimeError("Requesting single selection, from multi-selection list")
         selected_list = (
             [
                 (item["text"], item["object_id"])
