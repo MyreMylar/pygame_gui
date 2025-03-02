@@ -14,6 +14,7 @@ import base64
 
 from pathlib import Path
 from typing import Union, Dict, Tuple, Optional
+from importlib import resources
 
 from threading import Thread
 from queue import Queue
@@ -48,11 +49,6 @@ def get_default_manager():
     """
     return __default_manager
 
-
-if sys.version_info < (3, 9):
-    import importlib_resources as resources
-else:
-    from importlib import resources
 
 PLATFORM = platform.system().upper()
 if PLATFORM == "WINDOWS":
