@@ -4,6 +4,7 @@ import os
 import warnings
 
 from contextlib import contextmanager
+from importlib.resources import files, as_file
 from typing import Union, List, Dict, Any, Optional
 
 import pygame
@@ -18,8 +19,9 @@ from pygame_gui.core.interfaces.colour_gradient_interface import (
 from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
 )
-from pygame_gui.core.utility import create_resource_path, PackageResource
+from pygame_gui.core.utility import create_resource_path
 from pygame_gui.core.utility import ImageResource, SurfaceResource
+from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
 from pygame_gui.core.surface_cache import SurfaceCache
@@ -29,16 +31,6 @@ from pygame_gui.core.colour_parser import (
     parse_colour_or_gradient_string,
     get_commas_outside_enclosing_glyphs,
 )
-
-# First try importlib
-# Then importlib_resources
-try:
-    from importlib.resources import files, as_file
-except ImportError:
-    try:
-        from importlib_resources import files, as_file
-    except ImportError as no_import_lib:
-        raise ImportError from no_import_lib
 
 
 class UIAppearanceTheme(IUIAppearanceThemeInterface):

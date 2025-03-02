@@ -10,7 +10,7 @@ from pygame_gui.core.interfaces.font_dictionary_interface import (
     IUIFontDictionaryInterface,
 )
 from pygame_gui.core.resource_loaders import IResourceLoader
-from pygame_gui.core.utility import PackageResource
+from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.utility import FontResource
 
 

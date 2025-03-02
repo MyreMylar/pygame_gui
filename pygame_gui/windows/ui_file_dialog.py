@@ -115,7 +115,7 @@ class UIFileDialog(UIWindow):
 
         self.last_valid_directory_path = self.current_directory_path
 
-        self.current_file_list = None  # type: Union[List[str], None]
+        self.current_file_list: Optional[List[str]] = None
         self.update_current_file_list()
 
         self._setup_ui_elements()

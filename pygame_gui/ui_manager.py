@@ -22,10 +22,10 @@ from pygame_gui.core.resource_loaders import (
     BlockingThreadedResourceLoader,
 )
 from pygame_gui.core.utility import (
-    PackageResource,
     get_default_manager,
     set_default_manager,
 )
+from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.layered_gui_group import LayeredGUIGroup
 from pygame_gui.core import ObjectID
 

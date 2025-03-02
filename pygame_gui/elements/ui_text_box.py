@@ -168,7 +168,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self.link_hover_chunks = []  # container for any link chunks we have
 
-        self.active_text_effect = None  # type: Optional[TextEffect]
+        self.active_text_effect: Optional[TextEffect] = None
         self.active_text_chunk_effects = []
 
         self.scroll_bar_width = 20

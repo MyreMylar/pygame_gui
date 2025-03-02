@@ -360,7 +360,7 @@ class ShadowGenerator:
         """
         lowest_diff = 1000000000000
         closest_key = None
-        if shape == "rectangle":
+        if shape == "rectangle" and corner_radius is not None:
             return self.create_new_rectangle_shadow(
                 size[0], size[1], shadow_width, corner_radius
             )

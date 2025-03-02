@@ -218,9 +218,11 @@ _valueParsers: Dict[NumParserType, ColourValueParserData] = {
     },
     NumParserType.INT: {"validator": is_int_str, "parser": int},
 }
-"""A mapping for each NumParserType to its corresponding validator and parser for strings of that type's 
-specification"""
 
+"""
+A mapping for each NumParserType to its corresponding validator and parser for strings of that type's
+specification
+"""
 _colourModelSchemas: Dict[str, List[NumParserType]] = {
     "hsl": [NumParserType.DEGREE, NumParserType.PERCENTAGE, NumParserType.PERCENTAGE],
     "hsla": [
@@ -659,11 +661,13 @@ _colourParsers: List[Tuple[ColourStringValidator, ColourStringParser]] = [
     (is_valid_hsv_string, parse_hsv_string),
     (is_valid_hsva_string, parse_hsva_string),
 ]
-"""The list of validator and parser function pairs that will be used by is_valid_colour_string and 
-parse_colour_string The functions have no requirement other than the validator confirming a schema and the parser 
-returning a pygame.Color value from the string data if it is valid Note that if new validator and parsing formulas 
-are added, these validators should not overlap if it can be helped, as there's no way to determine whether one colour 
-could be more "valid" than another in that case"""
+"""
+The list of validator and parser function pairs that will be used by is_valid_colour_string and
+parse_colour_string The functions have no requirement other than the validator confirming a schema and the parser
+returning a pygame.Color value from the string data if it is valid Note that if new validator and parsing formulas
+are added, these validators should not overlap if it can be helped, as there's no way to determine whether one colour
+could be more "valid" than another in that case
+"""
 
 
 def is_valid_colour_string(strdata: str) -> bool:

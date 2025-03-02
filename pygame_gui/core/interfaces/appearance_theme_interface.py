@@ -14,6 +14,7 @@ from pygame_gui.core.interfaces.colour_gradient_interface import (
     IColourGradientInterface,
 )
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+from pygame_gui.core.package_resource import PackageResource
 
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
@@ -161,7 +162,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def load_theme(
-        self, file_path: Union[str, PathLike, io.StringIO, "PackageResource", dict]
+        self, file_path: Union[str, PathLike, io.StringIO, PackageResource, dict]
     ):
         """
         Loads a theme, and currently, all associated data like fonts and images required

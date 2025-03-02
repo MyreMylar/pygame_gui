@@ -26,7 +26,7 @@ import pygame
 from pygame_gui.core.interfaces import IUIManagerInterface, IGUIFontInterface
 from pygame_gui.core.gui_font_freetype import GUIFontFreetype
 from pygame_gui.core.gui_font_pygame import GUIFontPygame
-
+from pygame_gui.core.package_resource import PackageResource
 
 __default_manager: Optional[IUIManagerInterface] = None  # pylint: disable=invalid-name
 
@@ -363,38 +363,6 @@ def apply_colour_to_surface(
         )
         colour_surface.fill(colour)
         shape_surface.blit(colour_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-
-
-class PackageResource:
-    """
-    A data class to handle input for importlib.resources as single parameter.
-
-    :param package: The python package our resource is located in (e.g. 'pygame_gui.data')
-    :param resource: The name of the resource (e.g. 'default_theme.json')
-    """
-
-    def __init__(self, package: str, resource: str):
-        self.package = package
-        self.resource = resource
-
-    def __repr__(self):
-        return f"{self.package}.{self.resource}"
-
-    def to_path(self) -> str:
-        """
-        If we don't have any importlib module to use, we can try to turn the resource into a file
-        path.
-
-        :return: A string path.
-        """
-        root_path = ""
-        relative_path = self.package.replace(".", "/") + "/" + self.resource
-        if self.package.find("pygame_gui") == 0:
-            # This is default data from pygame_gui so relative to pygame_gui rather than app
-            root_path = os.path.abspath(
-                os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            )
-        return create_resource_path(os.path.join(root_path, relative_path))
 
 
 class FontResource:
