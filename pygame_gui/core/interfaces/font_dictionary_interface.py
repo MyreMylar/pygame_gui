@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 from pygame import DIRECTION_LTR
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 
@@ -108,9 +109,9 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         self,
         font_name: str,
         font_path: str,
-        bold_path: str = None,
-        italic_path: str = None,
-        bold_italic_path: str = None,
+        bold_path: Optional[str] = None,
+        italic_path: Optional[str] = None,
+        bold_italic_path: Optional[str] = None,
     ):
         """
         Adds paths to different font files for a font name.

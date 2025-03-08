@@ -41,8 +41,8 @@ class UIAutoResizingContainer(UIContainer):
     def __init__(
         self,
         relative_rect: RectLike,
-        min_edges_rect: pygame.Rect = None,
-        max_edges_rect: pygame.Rect = None,
+        min_edges_rect: Optional[pygame.Rect] = None,
+        max_edges_rect: Optional[pygame.Rect] = None,
         resize_left: bool = True,
         resize_right: bool = True,
         resize_top: bool = True,

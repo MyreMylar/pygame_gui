@@ -57,6 +57,7 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
 
         """
 
+    @abstractmethod
     def is_window_at_top_of_top(self, window: IWindowInterface) -> bool:
         """
         Checks if a window is at the top of the top window stack or not.

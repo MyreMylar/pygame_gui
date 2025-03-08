@@ -15,7 +15,14 @@ class TextBoxLayoutRow(pygame.Rect):
     A single line of text-like stuff to be used in a text box type layout.
     """
 
-    def __init__(self, row_start_x, row_start_y, row_index, line_spacing, layout):
+    def __init__(
+        self,
+        row_start_x: int,
+        row_start_y: int,
+        row_index: int,
+        line_spacing: float,
+        layout,
+    ):
         super().__init__(row_start_x, row_start_y, 0, 0)
         self.row_start_x = row_start_x
         self.line_spacing = line_spacing
@@ -29,7 +36,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.y_origin = 0
         self.text_chunk_height = 0
 
-        self.target_surface = None
+        self.target_surface: Optional[pygame.Surface] = None
         self.cursor_rect = pygame.Rect(
             self.x, row_start_y, self.layout.edit_cursor_width, self.height - 2
         )
@@ -67,7 +74,8 @@ class TextBoxLayoutRow(pygame.Rect):
 
         :param item: The new item to add to the text row
         """
-        item.pre_row_rect = pygame.Rect(item.topleft, item.size)
+        if isinstance(item, TextLineChunkFTFont):
+            item.pre_row_rect = pygame.Rect(item.topleft, item.size)
         item.left = self.right
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
@@ -275,7 +283,7 @@ class TextBoxLayoutRow(pygame.Rect):
         current_start_x = self.right
         direction_list = self.items
         if self.layout.text_direction == pygame.DIRECTION_LTR:
-            direction_list = reversed(self.items)
+            direction_list = self.items[::-1]
         for item in direction_list:
             item.right = current_start_x
             current_start_x -= item.width
@@ -651,7 +659,7 @@ class TextBoxLayoutRow(pygame.Rect):
                 "Trying to insert into empty text row with no Parser"
                 " for style data - fix this later?"
             )
-        if not inserted_text and letter_row_index == 0:
+        if not inserted_text and letter_row_index == 0 and parser is not None:
             # have not managed to insert text into existing text chunk, create a new one.
             text_chunk = parser.create_styled_text_chunk(text)
             self.insert_new_item_at_start(text_chunk)

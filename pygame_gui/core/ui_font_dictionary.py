@@ -201,7 +201,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         try:
             self.default_font: DefaultFontData = self.default_font_dictionary[locale]
         except KeyError:
-            self.default_font: DefaultFontData = self._latin_font
+            self.default_font = self._latin_font
 
         self._default_symbols_font: DefaultFontData = self._symbols_font
 
@@ -313,7 +313,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         :return IGUIFontInterface: Returns either the font we asked for, or the default font.
 
         """
-        return self.find_font_resource(
+        found_font = self.find_font_resource(
             font_size,
             font_name,
             bold,
@@ -322,6 +322,10 @@ class UIFontDictionary(IUIFontDictionaryInterface):
             script=script,
             direction=direction,
         ).loaded_font
+
+        if found_font is None:
+            raise RuntimeError(f"Font named: {font_name} not loaded")
+        return found_font
 
     def find_font_resource(
         self,
@@ -642,7 +646,7 @@ class UIFontDictionary(IUIFontDictionaryInterface):
         font_loc: Tuple[Union[str, PackageResource, bytes], bool],
         font_id: str,
         font_size: int,
-        font_style: Dict[str, bool],
+        font_style: Dict[str, str | int | bool],
         force_immediate_load: bool = False,
     ):
         """

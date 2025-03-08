@@ -11,7 +11,10 @@ from pygame_gui._constants import (
 from pygame_gui._constants import OldType
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IContainerAndContainerLike,
+)
 from pygame_gui.core.interfaces import (
     IWindowInterface,
     IUIManagerInterface,
@@ -414,7 +417,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.set_position((x_pos, y_pos))
         self.set_dimensions((x_dimension, y_dimension))
 
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> IContainerAndContainerLike:
         """
         Returns the container that should contain all the UI elements in this window.
 

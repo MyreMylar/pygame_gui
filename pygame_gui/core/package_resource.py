@@ -14,7 +14,7 @@ def _create_resource_path(relative_path: Union[str, Path]):
 
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base_path = sys._MEIPASS  # type: ignore # pylint: disable=no-member,protected-access
         else:
             base_path = os.path.abspath(".")

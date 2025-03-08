@@ -1,7 +1,7 @@
 import warnings
 import html.parser
 from collections import deque
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Deque
 from pathlib import Path
 
 # noinspection PyPackageRequirements
@@ -11,6 +11,7 @@ import pygame
 
 from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
 
+from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
@@ -62,10 +63,10 @@ class HTMLParser(html.parser.HTMLParser):
         self.line_spacing = line_spacing
 
         self.link_style = link_style
-        self.element_stack = []
+        self.element_stack: List[str] = []
 
-        self.style_stack = []
-        self.current_style = {}
+        self.style_stack: List[Tuple[str, Dict[str, Any]]] = []
+        self.current_style: Dict[str, Any] = {}
 
         font_info = self.ui_theme.get_font_info(combined_ids)
 
@@ -91,7 +92,7 @@ class HTMLParser(html.parser.HTMLParser):
         # this is the style used before any html is loaded
         self.push_style("default_style", self.default_style)
 
-        self.layout_rect_queue = deque([])
+        self.layout_rect_queue: Deque[TextLayoutRect] = deque([])
 
         self.in_paragraph_block = False
 
@@ -101,7 +102,7 @@ class HTMLParser(html.parser.HTMLParser):
         """
         self.layout_rect_queue.clear()
 
-    def handle_starttag(self, tag: str, attrs: List[Tuple[str, str]]):
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, str | None]]):
         """
         Process an HTML 'start tag' (e.g. 'b' - tags are stripped of their angle brackets)
         where we have a start and an end tag enclosing a range of text this is the first
@@ -118,8 +119,8 @@ class HTMLParser(html.parser.HTMLParser):
             # don't add self-closing tags to the element stack
             self.element_stack.append(element)
 
-        attributes = {key.lower(): value for key, value in attrs}
-        style = {}
+        attributes: Dict[str, str | None] = {key.lower(): value for key, value in attrs}
+        style: Dict[str, Any] = {}
         if element in {"b", "strong"}:
             style["bold"] = True
         elif element in {"i", "em", "var"}:

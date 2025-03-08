@@ -10,6 +10,7 @@ from pygame_gui.core.interfaces.appearance_theme_interface import (
 from pygame_gui.core.interfaces.element_interface import IUIElementInterface
 from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
 from pygame_gui.core.interfaces.container_interface import IContainerLikeInterface
+from pygame_gui.core.interfaces.container_interface import IContainerAndContainerLike
 from pygame_gui.core.interfaces.window_interface import IWindowInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
@@ -26,6 +27,7 @@ __all__ = [
     "IUIElementInterface",
     "IUIContainerInterface",
     "IContainerLikeInterface",
+    "IContainerAndContainerLike",
     "IWindowInterface",
     "IUIWindowStackInterface",
     "IUITooltipInterface",

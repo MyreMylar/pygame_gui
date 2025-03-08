@@ -1,5 +1,4 @@
 from typing import Tuple, Union, Optional
-from abc import abstractmethod
 from enum import Enum
 from collections import namedtuple
 
@@ -51,7 +50,6 @@ class TextLayoutRect(pygame.rect.Rect):
         self.smallest_split_size = 1
         self.row_chunk_height: int = int(self.height)
 
-    @abstractmethod
     def finalise(
         self,
         target_surface: Surface,
@@ -75,6 +73,7 @@ class TextLayoutRect(pygame.rect.Rect):
         :param x_scroll_offset:
         :param letter_end:
         """
+        raise RuntimeWarning("Trying to finalise TextLayoutRect base class")
 
     def clear(self, optional_rect: Optional[pygame.Rect] = None):
         """

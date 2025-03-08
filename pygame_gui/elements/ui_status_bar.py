@@ -51,9 +51,9 @@ class UIStatusBar(UIElement):
         follow_sprite: bool = True,
         percent_method: Union[Callable[[], float], None] = None,
         container: Union[IContainerLikeInterface, None] = None,
-        parent_element: UIElement = None,
+        parent_element: Optional[UIElement] = None,
         object_id: Union[ObjectID, str, None] = None,
-        anchors: Dict[str, Union[str, UIElement]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
         visible: int = 1,
     ):
         super().__init__(

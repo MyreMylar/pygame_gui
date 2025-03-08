@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Union, List, Set, Any, Dict
+from typing import Union, List, Set, Dict, Optional
 
 import pygame
 
@@ -14,6 +14,25 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     before the UIElement has itself been defined.
 
     """
+
+    @property
+    @abstractmethod
+    def is_focused(self) -> bool:
+        """
+        Returns True if we are focusing this element.
+
+        :return: True if focused.
+        """
+
+    @is_focused.setter
+    @abstractmethod
+    def is_focused(self, value: bool):
+        """
+        Setter for if we are focusing this element.
+
+        :param value: the focus value to set.
+        :return:
+        """
 
     @property
     @abstractmethod
@@ -35,7 +54,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_relative_rect(self) -> pygame.Rect:
+    def get_relative_rect(self) -> pygame.Rect | pygame.FRect:
         """
         The relative positioning rect.
 
@@ -44,7 +63,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_abs_rect(self) -> pygame.Rect:
+    def get_abs_rect(self) -> pygame.Rect | pygame.FRect:
         """
         The absolute positioning rect.
 
@@ -53,7 +72,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_element_base_ids(self) -> List[str]:
+    def get_element_base_ids(self) -> List[str | None]:
         """
         A list of all the element base IDs in this element's theming/event hierarchy.
 
@@ -69,7 +88,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_class_ids(self) -> List[str]:
+    def get_class_ids(self) -> List[str | None]:
         """
         A list of all the class IDs in this element's theming/event hierarchy.
 
@@ -77,7 +96,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_object_ids(self) -> List[str]:
+    def get_object_ids(self) -> List[str | None]:
         """
         A list of all the object IDs in this element's theming/event hierarchy.
 
@@ -85,7 +104,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_anchors(self) -> Dict[str, Union[str, "IUIElementInterface"]]:
+    def get_anchors(self) -> Optional[Dict[str, Union[str, "IUIElementInterface"]]]:
         """
         A dictionary containing all the anchors defining what the relative rect is relative to
 
@@ -94,7 +113,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
 
     @abstractmethod
     def set_anchors(
-        self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]
+        self, anchors: Optional[Dict[str, Union[str, "IUIElementInterface"]]]
     ) -> None:
         """
         Wraps the setting of the anchors with some validation
@@ -342,13 +361,13 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_focus_set(self) -> Set[Any]:
+    def get_focus_set(self) -> Optional[Set["IUIElementInterface"]]:
         """
         Return the set of elements to focus when we focus this element.
         """
 
     @abstractmethod
-    def set_focus_set(self, focus_set: Set[Any]):
+    def set_focus_set(self, focus_set: Optional[Set["IUIElementInterface"]]):
         """
         Set the focus set to a specific set of elements.
 

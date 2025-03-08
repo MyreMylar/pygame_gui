@@ -89,7 +89,7 @@ class UIManager(IUIManagerInterface):
         )
         self.ui_group = LayeredGUIGroup()
 
-        self.focused_set = None
+        self.focused_set: Optional[set[IUIElementInterface]] = None
         self.root_container = (
             None  # declaration required as it is used in creation of container
         )
@@ -136,7 +136,9 @@ class UIManager(IUIManagerInterface):
 
     def create_new_theme(
         self,
-        theme_path: Union[str, os.PathLike, io.StringIO, PackageResource, dict] = None,
+        theme_path: Optional[
+            Union[str, os.PathLike, io.StringIO, PackageResource, dict]
+        ] = None,
     ) -> UIAppearanceTheme:
         """
         Create a new theme using self information.
@@ -308,7 +310,7 @@ class UIManager(IUIManagerInterface):
         self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
     def rebuild_all_from_changed_theme_data(
-        self, theme: IUIAppearanceThemeInterface = None
+        self, theme: Optional[IUIAppearanceThemeInterface] = None
     ):
         """
         Rebuild the entire UI after a change in the theming.
@@ -430,9 +432,9 @@ class UIManager(IUIManagerInterface):
         self,
         font_name: str,
         regular_path: str,
-        bold_path: str = None,
-        italic_path: str = None,
-        bold_italic_path: str = None,
+        bold_path: Optional[str] = None,
+        italic_path: Optional[str] = None,
+        bold_italic_path: Optional[str] = None,
     ):
         """
         Add file paths for custom fonts you want to use in the UI. For each font name you add you
@@ -649,7 +651,7 @@ class UIManager(IUIManagerInterface):
         position: Tuple[int, int],
         hover_distance: Tuple[int, int],
         parent_element: IUIElementInterface,
-        object_id: ObjectID,
+        object_id: Optional[ObjectID],
         *,
         wrap_width: Optional[int] = None,
         text_kwargs: Optional[Dict[str, str]] = None,

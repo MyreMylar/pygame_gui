@@ -1,5 +1,5 @@
 import contextlib
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from pygame_gui.core.interfaces import IWindowInterface, IUIContainerInterface
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
@@ -90,7 +90,7 @@ class UIWindowStack(IUIWindowStackInterface):
 
             # first clear out the top stack
             with contextlib.suppress(IndexError):
-                top_window = self.top_stack.pop()
+                top_window: Optional[IWindowInterface] = self.top_stack.pop()
                 while top_window is not None:
                     popped_windows_to_add_back.append(top_window)
                     try:

@@ -756,7 +756,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         )
 
     def get_colour(
-        self, colour_id: str, combined_element_ids: List[str] = None
+        self, colour_id: str, combined_element_ids: Optional[List[str]] = None
     ) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
@@ -778,7 +778,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             return pygame.Color("#000000")
 
     def get_colour_or_gradient(
-        self, colour_id: str, combined_ids: List[str] = None
+        self, colour_id: str, combined_ids: Optional[List[str]] = None
     ) -> Union[pygame.Color, IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,

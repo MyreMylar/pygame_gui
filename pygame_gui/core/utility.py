@@ -19,7 +19,7 @@ from importlib import resources
 from threading import Thread
 from queue import Queue
 
-import i18n
+import i18n  # type: ignore
 
 import pygame
 
@@ -272,24 +272,23 @@ def create_resource_path(relative_path: Union[str, Path]):
 
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS  # pylint: disable=no-member,protected-access
+        base_path = sys._MEIPASS  # type: ignore # pylint: disable=no-member,protected-access
     except AttributeError:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
 
 
-def premul_col(original_colour: pygame.Color) -> pygame.Color:
+def premul_col(original_colour: Optional[pygame.Color]) -> pygame.Color:
     """
     Perform a pre-multiply alpha operation on a pygame colour
     """
-    alpha_mul = original_colour.a / 255
-    return pygame.Color(
-        int(original_colour.r * alpha_mul),
-        int(original_colour.g * alpha_mul),
-        int(original_colour.b * alpha_mul),
-        original_colour.a,
-    )
+    returned_colour = pygame.Color(0, 0, 0, 0)
+
+    if original_colour is not None:
+        returned_colour = original_colour.premul_alpha()
+
+    return returned_colour
 
 
 def restore_premul_col(premul_colour: pygame.Color) -> pygame.Color:
@@ -380,7 +379,7 @@ class FontResource:
         self,
         font_id: str,
         size: int,
-        style: Dict[str, bool],
+        style: Dict[str, str | int | bool],
         location: Tuple[Union[str, PackageResource, bytes], bool],
     ):
         self.font_id = font_id
@@ -388,7 +387,7 @@ class FontResource:
         self.style = style
         self.location = location[0]
         self.force_style = location[1]
-        self.loaded_font = None  # type: Union[IGUIFontInterface, None]
+        self.loaded_font: Optional[IGUIFontInterface] = None
 
         self.font_type_to_use = "pygame"
 
@@ -536,7 +535,9 @@ class SurfaceResource:
     """
 
     def __init__(
-        self, image_resource: ImageResource, sub_surface_rect: pygame.Rect = None
+        self,
+        image_resource: ImageResource,
+        sub_surface_rect: Optional[pygame.Rect] = None,
     ):
         self.image_resource = image_resource
         self.sub_surface_rect = sub_surface_rect

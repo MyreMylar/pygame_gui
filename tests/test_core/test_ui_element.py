@@ -679,7 +679,7 @@ class TestUIElement:
                             starting_height=0,
                             layer_thickness=1)
 
-        assert element.get_element_ids() is None
+        assert element.get_element_ids() == []
 
     def test_invalid_container(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         bad_container = UIElement(relative_rect=pygame.Rect(0, 0, 50, 50),

@@ -51,7 +51,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
         *,
         wrap_width: Optional[int] = None,
-        text_kwargs: Dict[str, str] = None,
+        text_kwargs: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
             relative_rect=pygame.Rect((0, 0), (-1, -1)),

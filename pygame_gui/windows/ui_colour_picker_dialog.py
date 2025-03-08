@@ -435,13 +435,13 @@ class UIColourPickerDialog(UIWindow):
             container=self,
         )
 
-        self.hue_channel = None
-        self.sat_channel = None
-        self.value_channel = None
+        self.hue_channel: Optional[UIColourChannelEditor] = None
+        self.sat_channel: Optional[UIColourChannelEditor] = None
+        self.value_channel: Optional[UIColourChannelEditor] = None
 
-        self.red_channel = None
-        self.green_channel = None
-        self.blue_channel = None
+        self.red_channel: Optional[UIColourChannelEditor] = None
+        self.green_channel: Optional[UIColourChannelEditor] = None
+        self.blue_channel: Optional[UIColourChannelEditor] = None
 
         self._setup_channels(default_sizes)
 

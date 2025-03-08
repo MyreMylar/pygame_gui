@@ -38,6 +38,7 @@ from typing import (
     Set,
     Dict,
     TypedDict,
+    Any,
 )
 
 import pygame
@@ -478,7 +479,16 @@ def parse_cmy_string(strdata: str) -> pygame.Color:
     """
 
     colour = pygame.Color(0, 0, 0)
-    colour.cmy = parse_colour_model(strdata, "cmy", _colourModelSchemas["cmy"])
+    cmy_output: List[Any] = parse_colour_model(
+        strdata, "cmy", _colourModelSchemas["cmy"]
+    )
+    if (
+        len(cmy_output) == 3
+        and isinstance(cmy_output[0], float)
+        and isinstance(cmy_output[1], float)
+        and isinstance(cmy_output[2], float)
+    ):
+        colour.cmy = tuple(cmy_output)
     return colour
 
 
@@ -510,7 +520,7 @@ def parse_hsl_string(strdata: str) -> pygame.Color:
     """
 
     colour = pygame.Color(0, 0, 0)
-    hsl = parse_colour_model(strdata, "hsl", _colourModelSchemas["hsl"])
+    hsl: List[float] = parse_colour_model(strdata, "hsl", _colourModelSchemas["hsl"])
     colour.hsla = (hsl[0], int(hsl[1] * 100), int(hsl[2] * 100), 100)
     return colour
 
@@ -544,7 +554,7 @@ def parse_hsla_string(strdata: str) -> pygame.Color:
     """
 
     colour = pygame.Color(0, 0, 0)
-    hsla = parse_colour_model(strdata, "hsla", _colourModelSchemas["hsla"])
+    hsla: List[float] = parse_colour_model(strdata, "hsla", _colourModelSchemas["hsla"])
     colour.hsla = (hsla[0], int(hsla[1] * 100), int(hsla[2] * 100), int(hsla[3] * 100))
     return colour
 
@@ -578,7 +588,7 @@ def parse_hsv_string(strdata: str) -> pygame.Color:
     """
 
     colour = pygame.Color(0, 0, 0)
-    hsv = parse_colour_model(strdata, "hsv", _colourModelSchemas["hsv"])
+    hsv: List[float] = parse_colour_model(strdata, "hsv", _colourModelSchemas["hsv"])
     colour.hsva = (hsv[0], int(hsv[1] * 100), int(hsv[2] * 100), 100)
     return colour
 
@@ -597,7 +607,7 @@ def parse_hsva_string(strdata: str) -> pygame.Color:
     """
 
     colour = pygame.Color(0, 0, 0)
-    hsva = parse_colour_model(strdata, "hsva", _colourModelSchemas["hsva"])
+    hsva: List[float] = parse_colour_model(strdata, "hsva", _colourModelSchemas["hsva"])
     colour.hsva = (hsva[0], int(hsva[1] * 100), int(hsva[2] * 100), int(hsva[3] * 100))
     return colour
 
@@ -747,7 +757,7 @@ def get_commas_outside_enclosing_glyphs(strdata: str) -> List[int]:
 
     glyphs: Dict[str, str] = {")": "(", "]": "[", "}": "{"}
 
-    opening_stack = []
+    opening_stack: List[str] = []
     comma_indices_outside_parentheses: List[int] = []
 
     for i, ch in enumerate(strdata):

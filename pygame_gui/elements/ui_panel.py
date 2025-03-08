@@ -4,7 +4,10 @@ import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IContainerAndContainerLike,
+)
 
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -150,7 +153,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         return consumed_event
 
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> IContainerAndContainerLike:
         """
         Returns the container that should contain all the UI elements in this panel.
 

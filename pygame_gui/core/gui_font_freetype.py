@@ -69,7 +69,7 @@ class GUIFontFreetype(IGUIFontInterface):
         self.__internal_font.underline_adjustment = value
 
     def get_point_size(self) -> int:
-        return self.point_size
+        return int(self.point_size)
 
     def get_rect(self, text: str) -> Rect:
         supposed_rect = self.__internal_font.get_rect(text)

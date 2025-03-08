@@ -1,5 +1,5 @@
 import random
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import pygame
 
@@ -34,9 +34,9 @@ class ShakeEffect(TextEffect):
 
         sample_count = int(self.duration * self.frequency)
 
-        self.x_samples = []
+        self.x_samples: List[float] = []
         self.x_samples.extend(random.uniform(-1.0, 1.0) for _ in range(sample_count))
-        self.y_samples = []
+        self.y_samples: List[float] = []
         self.y_samples.extend(random.uniform(-1.0, 1.0) for _ in range(sample_count))
         self.shake = (0, 0)
 

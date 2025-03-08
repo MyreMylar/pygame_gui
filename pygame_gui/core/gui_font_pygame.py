@@ -33,17 +33,17 @@ class GUIFontPygame(IGUIFontInterface):
         force_style: bool = False,
         style: Optional[Dict[str, Any]] = None,
     ):
+        self.point_size = int(size)
         self.__internal_font: Font = Font(
-            file, int(size)
+            file, self.point_size
         )  # no resolution option for pygame font?
 
-        self.__internal_font.set_point_size(int(size))
+        self.__internal_font.set_point_size(self.point_size)
         self.pad = True
         self.origin = True
         self.__underline = False  # pylint: disable=unused-private-member
         self.__underline_adjustment = 0.0
 
-        self.point_size = size
         self.antialiased = True
         self.direction = pygame.DIRECTION_LTR
 

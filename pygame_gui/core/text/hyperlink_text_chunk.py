@@ -23,7 +23,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         hover_colour: Color,
         active_colour: Color,
         hover_underline: bool,
-        text_shadow_data: Optional[Tuple[int, int, int]] = None,
+        text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
         effect_id: Optional[str] = None,
     ):
         super().__init__(

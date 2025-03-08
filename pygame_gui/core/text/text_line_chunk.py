@@ -72,15 +72,15 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.letter_count = len(self.text)
 
         self.target_surface: Optional[Surface] = None
-        self.target_surface_area = None
+        self.target_surface_area: Optional[Rect] = None
         self.row_chunk_origin = 0
         self.row_chunk_height = text_height
         self.row_bg_height = 0
         self.row_line_spacing_height = 0
         self.layout_x_offset = 0
 
-        self.selection_rect = None
-        self.selected_text = None
+        self.selection_rect: Optional[Rect] = None
+        self.selected_text: Optional[str] = None
         self.selection_start_index = 0
         self.is_selected = (
             False  # True when the whole chunk is selected - or part of it.
@@ -98,9 +98,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         self.origin_row_y_adjust = 0
 
         # effects stuff that should be reset
-        self.letter_end = None
+        self.letter_end: Optional[int] = None
         self.alpha = 255
-        self.pre_effect_target_surface = None
+        self.pre_effect_target_surface: Optional[Surface] = None
 
         self.effects_scale = 1.0
         self.effects_rotation = 0
@@ -499,7 +499,7 @@ class TextLineChunkFTFont(TextLayoutRect):
                                    allowing this makes direct text editing more annoying.
         """
         # starting heuristic: find the percentage through the chunk width of this split request
-        percentage_split = 0
+        percentage_split = 0.0
         if self.width != 0:
             percentage_split = float(requested_x) / float(self.width)
 
@@ -821,7 +821,10 @@ class TextLineChunkFTFont(TextLayoutRect):
         if self.alpha != 255 and alpha == 255:
             self.alpha = alpha
             self.redraw()
-        elif self.pre_effect_target_surface is not None:
+        elif (
+            self.pre_effect_target_surface is not None
+            and self.target_surface is not None
+        ):
             self.alpha = alpha
             self.target_surface.blit(self.pre_effect_target_surface, self, self)
             pre_mul_alpha_colour = Color(self.alpha, self.alpha, self.alpha, self.alpha)
@@ -840,7 +843,10 @@ class TextLineChunkFTFont(TextLayoutRect):
             self.effects_offset_pos = offset_pos
             self.transform_effect_rect = Rect(self.topleft, self.size)
             self.redraw()
-        elif self.pre_effect_target_surface is not None:
+        elif (
+            self.pre_effect_target_surface is not None
+            and self.target_surface is not None
+        ):
             self.effects_offset_pos = offset_pos
             self.transform_effect_rect = Rect(
                 self.left + self.effects_offset_pos[0],

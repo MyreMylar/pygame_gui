@@ -211,6 +211,7 @@ class IWindowInterface(metaclass=ABCMeta):
         :param new_title: The title to set.
         """
 
+    @abstractmethod
     def get_layer_thickness(self) -> int:
         """
         The layer 'thickness' of this window/

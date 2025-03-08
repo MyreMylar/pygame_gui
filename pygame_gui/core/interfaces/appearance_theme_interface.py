@@ -1,7 +1,7 @@
 import io
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Union, Dict, Any
+from typing import Optional, List, Union, Dict, Any
 from os import PathLike
 
 
@@ -134,7 +134,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_colour(
-        self, colour_id: str, combined_element_ids: List[str] = None
+        self, colour_id: str, combined_element_ids: Optional[List[str]] = None
     ) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
@@ -147,7 +147,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def get_colour_or_gradient(
-        self, colour_id: str, combined_ids: List[str] = None
+        self, colour_id: str, combined_ids: Optional[List[str]] = None
     ) -> Union[pygame.Color, IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,

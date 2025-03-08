@@ -4,12 +4,12 @@ import pygame
 
 from pygame_gui.core.ui_element import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.interfaces import IUIContainerInterface, IUIElementInterface
+from pygame_gui.core.interfaces import IContainerAndContainerLike, IUIElementInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.gui_type_hints import RectLike, Coordinate
 
 
-class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
+class UIContainer(UIElement, IContainerAndContainerLike):
     """
     A UI Container holds any number of other UI elements inside a rectangle. When we move the
     UIContainer all the UI elements contained within it can be moved as well.
@@ -81,7 +81,7 @@ class UIContainer(UIElement, IUIContainerInterface, IContainerLikeInterface):
         """
         return self.rect
 
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> IContainerAndContainerLike:
         """
         Implements the container interface. In this case we just return this since it is a
         container.

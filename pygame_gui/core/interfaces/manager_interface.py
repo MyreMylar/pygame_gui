@@ -7,7 +7,7 @@ from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
 )
 from pygame_gui.core.interfaces.element_interface import IUIElementInterface
-from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
+from pygame_gui.core.interfaces.container_interface import IContainerAndContainerLike
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 from pygame_gui.core.object_id import ObjectID
@@ -34,7 +34,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_root_container(self) -> IUIContainerInterface:
+    def get_root_container(self) -> IContainerAndContainerLike:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -148,9 +148,9 @@ class IUIManagerInterface(metaclass=ABCMeta):
         self,
         font_name: str,
         regular_path: str,
-        bold_path: str = None,
-        italic_path: str = None,
-        bold_italic_path: str = None,
+        bold_path: Optional[str] = None,
+        italic_path: Optional[str] = None,
+        bold_italic_path: Optional[str] = None,
     ):
         """
         Add file paths for custom fonts you want to use in the UI.
@@ -218,12 +218,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_active_cursor(
-        self,
-        cursor: Tuple[
-            Tuple[int, int], Tuple[int, int], Tuple[int, ...], Tuple[int, ...]
-        ],
-    ):
+    def set_active_cursor(self, cursor: pygame.cursors.Cursor):
         """
         This is for users of the library to set the currently active cursor, it will be currently
         only be overridden by the resizing cursors.

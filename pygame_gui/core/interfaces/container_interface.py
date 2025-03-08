@@ -206,7 +206,7 @@ class IContainerLikeInterface(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> "IContainerAndContainerLike":
         """
         Gets an actual container from this container-like UI element.
         """
@@ -241,9 +241,18 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         :return bool: Return True if the element is found, False otherwise.
         """
 
+    @abstractmethod
     def are_contents_hovered(self) -> bool:
         """
         Are any of the elements in the container hovered? Used for handling mousewheel events.
 
         :return: True if one of the elements is hovered, False otherwise.
         """
+
+
+class IContainerAndContainerLike(
+    IUIContainerInterface, IContainerLikeInterface, metaclass=ABCMeta
+):
+    """
+    Combination of IUIContainerInterface and IContainerLikeInterface mostly for type checking
+    """

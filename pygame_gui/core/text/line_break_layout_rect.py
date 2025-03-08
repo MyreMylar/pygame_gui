@@ -22,7 +22,7 @@ class LineBreakLayoutRect(TextLayoutRect):
         self.is_selected = False
         self.selection_colour = Color(128, 128, 128, 255)
         self.selection_chunk_width = 4
-        self.select_surf = None
+        self.select_surf: Optional[Surface] = None
         self.font = font
 
     def __repr__(self):

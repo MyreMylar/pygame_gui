@@ -61,14 +61,14 @@ class UIButton(UIElement):
         container: Optional[IContainerLikeInterface] = None,
         tool_tip_text: Union[str, None] = None,
         starting_height: int = 1,
-        parent_element: UIElement = None,
+        parent_element: Optional[UIElement] = None,
         object_id: Union[ObjectID, str, None] = None,
-        anchors: Dict[str, Union[str, UIElement]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
         allow_double_clicks: bool = False,
         generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
         visible: int = 1,
         *,
-        command: Union[Callable, Dict[int, Callable]] = None,
+        command: Optional[Union[Callable, Dict[int, Callable]]] = None,
         tool_tip_object_id: Optional[ObjectID] = None,
         text_kwargs: Optional[Dict[str, str]] = None,
         tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
@@ -401,7 +401,7 @@ class UIButton(UIElement):
         self.on_unhovered()
         self._set_active()
 
-    def bind(self, event: int, function: Callable = None):
+    def bind(self, event: int, function: Optional[Callable] = None):
         """
         Bind a function to an element event.
 
@@ -429,7 +429,7 @@ class UIButton(UIElement):
         else:
             raise TypeError("Command function must be callable")
 
-    def on_self_event(self, event: int, data: Dict[str, Any] = None):
+    def on_self_event(self, event: int, data: Optional[Dict[str, Any]] = None):
         """
         Called when an event is triggered by this element. Handles these events either by posting the event back
         to the event queue, or by running a function supplied by the user.
