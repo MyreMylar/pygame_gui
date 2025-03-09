@@ -8,7 +8,11 @@ from pygame_gui._constants import UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DROPPED_SELECTION
 from pygame_gui._constants import UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION
 
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 
@@ -60,7 +64,7 @@ class UISelectionList(UIElement):
         starting_height: int = 1,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         default_selection: Optional[
             Union[

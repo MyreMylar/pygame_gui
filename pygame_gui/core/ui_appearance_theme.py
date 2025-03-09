@@ -60,7 +60,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         self.ui_element_colours = {}
         self.font_dict = UIFontDictionary(self._resource_loader, locale)
         self.shadow_generator = ShadowGenerator()
-        self.shape_cache = SurfaceCache()
+        self._shape_cache = SurfaceCache()
 
         self.unique_theming_ids = {}
 
@@ -171,7 +171,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         else:
             self.st_cache_clear_timer += time_delta
 
-        self.shape_cache.update()
+        self._shape_cache.update()
 
     def reload_theming(self):
         """
@@ -469,7 +469,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def _get_next_id_node(
         self,
-        current_node: Union[Dict[str, Union[str, Dict]], None],
+        current_node: Optional[Dict[str, Union[str, Dict]]],
         element_base_ids: List[Union[str, None]],
         element_ids: List[str],
         class_ids: List[Union[str, None]],
@@ -1287,3 +1287,14 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param locale: a two-letter ISO country code.
         """
         self._locale = locale
+
+    @property
+    def shape_cache(self) -> SurfaceCache:
+        return self._shape_cache
+
+    @shape_cache.setter
+    def shape_cache(self, new_cache: SurfaceCache):
+        self._shape_cache = new_cache
+
+    def get_shadow_generator(self) -> ShadowGenerator:
+        return self.shadow_generator

@@ -3,7 +3,11 @@ from typing import Union, Dict, Callable, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.core.gui_type_hints import RectLike, SpriteWithHealth
@@ -53,7 +57,7 @@ class UIStatusBar(UIElement):
         container: Union[IContainerLikeInterface, None] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Union[ObjectID, str, None] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         super().__init__(
@@ -69,7 +73,7 @@ class UIStatusBar(UIElement):
             element_id=[self.element_id],
         )
 
-        self.sprite: SpriteWithHealth = sprite
+        self.sprite: Optional[SpriteWithHealth] = sprite
         self.follow_sprite = follow_sprite
         self.follow_sprite_offset = (0, 0)
 

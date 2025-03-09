@@ -1,7 +1,7 @@
 import math
 
 from collections import deque
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional, Deque
 
 import pygame
 
@@ -247,7 +247,7 @@ class DrawableShape:
         self.ui_manager = manager
         self.shape_cache = self.ui_manager.get_theme().shape_cache
 
-        self.states_to_redraw_queue = deque([])
+        self.states_to_redraw_queue: Deque[str] = deque([])
         self.need_to_clean_up = True
 
         self.should_trigger_full_rebuild = True
@@ -772,28 +772,26 @@ class DrawableShape:
                 flags=pygame.SRCALPHA,
                 depth=32,
             )
-            self.states[state_str].text_surface.fill("#00000000")
+            text_surface = self.states[state_str].text_surface
+            if text_surface is not None:
+                text_surface.fill("#00000000")
 
-            if only_text_changed:
-                self.text_box_layout.blit_finalised_text_to_surf(
-                    self.states[state_str].text_surface
-                )
-            else:
-                self.text_box_layout.set_default_text_colour(
-                    self.theming[text_colour_state_str]
-                )
-                self.text_box_layout.set_default_text_shadow_colour(
-                    self.theming[text_shadow_colour_state_str]
-                )
-                self.text_box_layout.finalise_to_surf(
-                    self.states[state_str].text_surface
-                )
+                if only_text_changed:
+                    self.text_box_layout.blit_finalised_text_to_surf(text_surface)
+                else:
+                    self.text_box_layout.set_default_text_colour(
+                        self.theming[text_colour_state_str]
+                    )
+                    self.text_box_layout.set_default_text_shadow_colour(
+                        self.theming[text_shadow_colour_state_str]
+                    )
+                    self.text_box_layout.finalise_to_surf(text_surface)
 
-            basic_blit(
-                self.states[state_str].surface,
-                self.states[state_str].text_surface,
-                (0, 0),
-            )
+                basic_blit(
+                    self.states[state_str].surface,
+                    text_surface,
+                    (0, 0),
+                )
 
     def apply_active_text_changes(self):
         """
@@ -832,14 +830,15 @@ class DrawableShape:
 
         :param alpha: the alpha to set.
         """
-        self.text_box_layout.set_alpha(alpha)
-        self.redraw_state(self.active_state.state_id, add_text=False)
-        self.finalise_text(
-            self.active_state.state_id,
-            f"{self.active_state.state_id}_text",
-            f"{self.active_state.state_id}_text_shadow",
-            only_text_changed=False,
-        )
+        if self.text_box_layout is not None:
+            self.text_box_layout.set_alpha(alpha)
+            self.redraw_state(self.active_state.state_id, add_text=False)
+            self.finalise_text(
+                self.active_state.state_id,
+                f"{self.active_state.state_id}_text",
+                f"{self.active_state.state_id}_text_shadow",
+                only_text_changed=False,
+            )
 
     def redraw_active_state_no_text(self):
         """
@@ -877,7 +876,8 @@ class DrawableShape:
             + text
             + self.theming["text"][layout_index:]
         )
-        self.text_box_layout.insert_text(text, layout_index, parser)
+        if self.text_box_layout is not None:
+            self.text_box_layout.insert_text(text, layout_index, parser)
 
     def toggle_text_cursor(self):
         """

@@ -1,3 +1,6 @@
+from collections.abc import Iterable
+from typing import Optional, Union
+
 import pytest
 import pygame
 
@@ -5,8 +8,8 @@ from pygame_gui.core.layered_gui_group import GUISprite, LayeredGUIGroup
 
 
 class MyProperSprite(GUISprite):
-    def __init__(self, *groups):
-        super().__init__(*groups)
+    def __init__(self, groups: Optional[Union[Iterable[LayeredGUIGroup], LayeredGUIGroup]] = None):
+        super().__init__(groups)
         self.blendmode = 0
         self.visible = True
 
@@ -27,7 +30,7 @@ class MyDodgySprite1:
         for group in groups:
             if hasattr(group, '_spritegroup'):
                 if not has(group):
-                    group.add_internal(self)
+                    group._add_internal(self)
             else:
                 self.add(*group)
 
@@ -48,7 +51,7 @@ class MyDodgySprite2:
         for group in groups:
             if hasattr(group, '_spritegroup'):
                 if not has(group):
-                    group.add_internal(self)
+                    group._add_internal(self)
             else:
                 self.add(*group)
 

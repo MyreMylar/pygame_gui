@@ -48,16 +48,19 @@ class UITooltip(UIElement, IUITooltipInterface):
         manager: Optional[IUIManagerInterface] = None,
         parent_element: Optional[IUIElementInterface] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         *,
         wrap_width: Optional[int] = None,
         text_kwargs: Optional[Dict[str, str]] = None,
     ):
+        start_height = 0
+        if manager is not None:
+            start_height = manager.get_sprite_group().get_top_layer() + 1
         super().__init__(
             relative_rect=pygame.Rect((0, 0), (-1, -1)),
             manager=manager,
             container=None,
-            starting_height=manager.get_sprite_group().get_top_layer() + 1,
+            starting_height=start_height,
             layer_thickness=1,
             anchors=anchors,
             parent_element=parent_element,
@@ -66,23 +69,24 @@ class UITooltip(UIElement, IUITooltipInterface):
         )
 
         self.text_block = None
-        self.rect_width = None  # type: Optional[int]
+        self.rect_width: Optional[int] = None
         self.hover_distance_from_target = hover_distance
 
         self.overwrite_theme_wrap_width = wrap_width
         self.rebuild_from_changed_theme_data()
 
-        self.text_block = UITextBox(
-            html_text,
-            pygame.Rect(0, 0, self.rect_width, -1),
-            manager=self.ui_manager,
-            starting_height=self._layer,
-            parent_element=self,
-            text_kwargs=text_kwargs,
-        )
+        if self.rect_width is not None:
+            self.text_block = UITextBox(
+                html_text,
+                pygame.Rect(0, 0, self.rect_width, -1),
+                manager=self.ui_manager,
+                starting_height=self._layer,
+                parent_element=self,
+                text_kwargs=text_kwargs,
+            )
 
-        self.rect_width = self.text_block.rect.size[0]
-        super().set_dimensions(self.text_block.rect.size)
+            self.rect_width = self.text_block.rect.size[0]
+            super().set_dimensions(self.text_block.rect.size)
 
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
@@ -127,7 +131,10 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         """
 
-        window_rect = self.ui_manager.get_root_container().get_rect()
+        window_rect = pygame.Rect(0, 0, 0, 0)
+        root_container = self.ui_manager.get_root_container()
+        if root_container is not None:
+            window_rect = root_container.get_rect()
 
         if not window_rect.contains(
             pygame.Rect(int(position[0]), int(position[1]), 1, 1)
@@ -190,7 +197,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         """
         super().set_position(position)
-        self.text_block.set_position(position)
+        if self.text_block is not None:
+            self.text_block.set_position(position)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -201,7 +209,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
         """
         super().set_relative_position(position)
-        self.text_block.set_relative_position(position)
+        if self.text_block is not None:
+            self.text_block.set_relative_position(position)
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -212,10 +221,11 @@ class UITooltip(UIElement, IUITooltipInterface):
                                    dimensions of the container or not.
 
         """
-        self.rect_width = dimensions[0]
+        self.rect_width = int(dimensions[0])
 
         super().set_dimensions(dimensions)
-        self.text_block.set_dimensions(dimensions)
+        if self.text_block is not None:
+            self.text_block.set_dimensions(dimensions)
 
     def show(self):
         """

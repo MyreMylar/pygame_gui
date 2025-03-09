@@ -6,7 +6,12 @@ Coordinate = Union[Vector2, Tuple[float, float]]
 RectLike = Union[Rect, FRect, Tuple[float, float, float, float]]
 
 
-class SpriteWithHealth(Protocol):
+class WithHealth(Protocol):
+    current_health: int
+    health_capacity: int
+
+
+class SpriteWithHealth(WithHealth):
     """
     A protocol for sprites that have health. This protocol defines the required attributes for
     sprites that have health, including current health, health capacity, rect, and image.

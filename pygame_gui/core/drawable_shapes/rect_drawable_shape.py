@@ -222,7 +222,8 @@ class RectDrawableShape(DrawableShape):
             if found_shape is not None:
                 self.states[state_str].surface = found_shape.copy()
             else:
-                self.states[state_str].surface = self.base_surface.copy()
+                if self.base_surface is not None:
+                    self.states[state_str].surface = self.base_surface.copy()
 
                 if self.border_width > 0:
                     if isinstance(
@@ -308,10 +309,9 @@ class RectDrawableShape(DrawableShape):
                             self.theming["filled_bar"], bar_rect
                         )
 
-                if self.states[state_str].cached_background_id is not None:
-                    self.shape_cache.remove_user_from_cache_item(
-                        self.states[state_str].cached_background_id
-                    )
+                cached_id = self.states[state_str].cached_background_id
+                if cached_id is not None:
+                    self.shape_cache.remove_user_from_cache_item(cached_id)
                 if (
                     not self.has_been_resized
                     and (

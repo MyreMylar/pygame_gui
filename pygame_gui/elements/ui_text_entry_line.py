@@ -12,7 +12,11 @@ from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core import ObjectID
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core.utility import clipboard_paste, clipboard_copy, translate
 
 from pygame_gui.core import UIElement
@@ -106,7 +110,7 @@ class UITextEntryLine(UIElement):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         *,
         initial_text: Optional[str] = None,
@@ -330,7 +334,7 @@ class UITextEntryLine(UIElement):
         """
         return self.text
 
-    def set_text(self, text: str):
+    def set_text(self, text: Optional[str]):
         """
         Allows the text displayed in the text entry element to be set via code. Useful for
         setting an initial or existing value that can be edited.
@@ -340,14 +344,29 @@ class UITextEntryLine(UIElement):
         :param text: The text string to set.
 
         """
-        if self.validate_text_string(text):
+        if text is None:
+            self.text = ""
+            self.edit_position = 0
+            if (
+                self.drawable_shape is not None
+                and self.drawable_shape.text_box_layout is not None
+            ):
+                self.drawable_shape.set_text(translate(self.placeholder_text))
+                self.drawable_shape.text_box_layout.set_cursor_position(
+                    self.edit_position
+                )
+                self.drawable_shape.apply_active_text_changes()
+        elif self.validate_text_string(text):
             within_length_limit = (
                 self.length_limit is None or len(text) <= self.length_limit
             )
             if within_length_limit:
                 self.text = text
                 self.edit_position = len(self.text)
-                if self.drawable_shape is not None:
+                if (
+                    self.drawable_shape is not None
+                    and self.drawable_shape.text_box_layout is not None
+                ):
                     display_text = (
                         self.hidden_text_char * len(self.text)
                         if self.is_text_hidden
@@ -404,7 +423,10 @@ class UITextEntryLine(UIElement):
             self.cursor_has_moved_recently = False
             self.cursor_blink_delay_after_moving_acc = 0.0
             self.cursor_on = True
-            if self.drawable_shape is not None:
+            if (
+                self.drawable_shape is not None
+                and self.drawable_shape.text_box_layout is not None
+            ):
                 self.drawable_shape.text_box_layout.set_cursor_position(
                     self.edit_position
                 )
@@ -619,7 +641,10 @@ class UITextEntryLine(UIElement):
                 )
                 self.edit_position -= 1
                 self.cursor_has_moved_recently = True
-                if self.drawable_shape is not None:
+                if (
+                    self.drawable_shape is not None
+                    and self.drawable_shape.text_box_layout is not None
+                ):
                     self.drawable_shape.text_box_layout.backspace_at_cursor()
                     self.drawable_shape.text_box_layout.set_cursor_position(
                         self.edit_position
@@ -638,7 +663,10 @@ class UITextEntryLine(UIElement):
                 )
                 self.edit_position = self.edit_position
                 self.cursor_has_moved_recently = True
-                if self.drawable_shape is not None:
+                if (
+                    self.drawable_shape is not None
+                    and self.drawable_shape.text_box_layout is not None
+                ):
                     self.drawable_shape.text_box_layout.delete_at_cursor()
                     self.drawable_shape.apply_active_text_changes()
             consumed_event = True
@@ -1019,7 +1047,10 @@ class UITextEntryLine(UIElement):
             )
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 if self.is_enabled:
-                    if self.drawable_shape is not None:
+                    if (
+                        self.drawable_shape is not None
+                        and self.drawable_shape.text_box_layout is not None
+                    ):
                         drawable_shape_space_click = (
                             scaled_mouse_pos[0] - self.rect.left,
                             scaled_mouse_pos[1] - self.rect.top,

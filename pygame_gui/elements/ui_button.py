@@ -13,7 +13,11 @@ from pygame_gui._constants import (
 from pygame_gui.core import ObjectID
 from pygame_gui.core.drawable_shapes import EllipseDrawableShape, RoundedRectangleShape
 from pygame_gui.core.drawable_shapes import RectDrawableShape
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
@@ -63,7 +67,7 @@ class UIButton(UIElement):
         starting_height: int = 1,
         parent_element: Optional[UIElement] = None,
         object_id: Union[ObjectID, str, None] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         allow_double_clicks: bool = False,
         generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
         visible: int = 1,

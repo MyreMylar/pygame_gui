@@ -95,8 +95,12 @@ class UITabContainer(UIElement):
         current_container = self.get_tab_container()
         if current_container is not None:
             current_container.hide()
+
         self.current_container_index = index
-        self.get_tab_container().show()
+
+        new_container = self.get_tab_container()
+        if new_container is not None:
+            new_container.show()
 
     def add_tab(self, title_text: str, title_object_id: str) -> int:
         """
@@ -198,7 +202,9 @@ class UITabContainer(UIElement):
         self.rebuild()
 
     def _calculate_max_button_width(self, count: Optional[int] = None):
-        width = self._root_container.rect.width
+        width = 0
+        if self._root_container is not None:
+            width = self._root_container.rect.width
         if count is None:
             count = self.tab_count
 
@@ -211,10 +217,13 @@ class UITabContainer(UIElement):
         return button_width
 
     def _calculate_container_rect_by_layout(self) -> pygame.Rect:
+        root_width = 0
+        if self._root_container is not None:
+            root_width = self._root_container.rect.width
         return pygame.Rect(
             0,
             self.button_height,
-            self._root_container.rect.width,
+            root_width,
             self.rect.height - self.button_height,
         )
 
@@ -233,7 +242,7 @@ class UITabContainer(UIElement):
         """
         was_enabled = self.is_enabled
         super().enable()
-        if not was_enabled:
+        if not was_enabled and self._root_container is not None:
             self._root_container.enable()
 
     def show(self, show_contents: bool = True):
@@ -245,7 +254,8 @@ class UITabContainer(UIElement):
 
         """
         super().show()
-        self._root_container.show(show_contents)
+        if self._root_container is not None:
+            self._root_container.show(show_contents)
 
     def hide(self, hide_contents: bool = True):
         """
@@ -271,7 +281,8 @@ class UITabContainer(UIElement):
 
         """
         super().set_dimensions(dimensions)
-        self._root_container.set_dimensions(dimensions)
+        if self._root_container is not None:
+            self._root_container.set_dimensions(dimensions)
         self.rebuild()
 
     def rebuild(self, count: Optional[int] = None):

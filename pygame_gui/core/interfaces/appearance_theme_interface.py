@@ -15,6 +15,8 @@ from pygame_gui.core.interfaces.colour_gradient_interface import (
 )
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.package_resource import PackageResource
+from pygame_gui.core.surface_cache import SurfaceCache
+from pygame_gui.core.ui_shadow import ShadowGenerator
 
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
@@ -188,5 +190,46 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         Update theming data, via string - for a single element.
         :param element_name:
         :param new_theming_data:
+        :return:
+        """
+
+    @property
+    @abstractmethod
+    def shape_cache(self) -> SurfaceCache:
+        """
+
+        :return:
+        """
+
+    @shape_cache.setter
+    @abstractmethod
+    def shape_cache(self, new_cache: SurfaceCache):
+        """
+
+        :param new_cache:
+        :return:
+        """
+
+    @abstractmethod
+    def check_need_to_rebuild_data_manually_changed(self) -> bool:
+        """
+        Checks and resets a flag for whether we need to trigger a rebuild of all the UI elements after a manual
+        change in the data.
+
+        :return: A boolean that indicates whether we should rebuild or not.
+        """
+
+    @abstractmethod
+    def set_locale(self, locale: str):
+        """
+        Set the locale used in the appearance theme.
+
+        :param locale: a two-letter ISO country code.
+        """
+
+    @abstractmethod
+    def get_shadow_generator(self) -> ShadowGenerator:
+        """
+
         :return:
         """

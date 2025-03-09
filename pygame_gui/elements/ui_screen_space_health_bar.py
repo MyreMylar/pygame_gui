@@ -2,7 +2,11 @@ from typing import Union, Dict, Optional
 
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
 from pygame_gui.core.gui_type_hints import RectLike, SpriteWithHealth
@@ -36,7 +40,7 @@ class UIScreenSpaceHealthBar(UIStatusBar):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         # Setting this here because UIProgressBar doesn't accept a percent_method in __init__.
@@ -94,7 +98,7 @@ class UIScreenSpaceHealthBar(UIStatusBar):
         # Now that we subclass UIStatusBar, this is here for backward compatibility.
         return self.health_percent()
 
-    def set_sprite_to_monitor(self, sprite_to_monitor: SpriteWithHealth):
+    def set_sprite_to_monitor(self, sprite_to_monitor: Optional[SpriteWithHealth]):
         """
         Set the sprite which this health bar will display the health values of
 

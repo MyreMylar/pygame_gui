@@ -3,10 +3,14 @@ from typing import Union, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
-from pygame_gui.core.gui_type_hints import RectLike
+from pygame_gui.core.gui_type_hints import RectLike, WithHealth, SpriteWithHealth
 
 
 class UIWorldSpaceHealthBar(UIStatusBar):
@@ -30,7 +34,7 @@ class UIWorldSpaceHealthBar(UIStatusBar):
                     may override this.
     """
 
-    class ExampleHealthSprite(pygame.sprite.Sprite):
+    class ExampleHealthSprite(pygame.sprite.Sprite, WithHealth):
         """
         An example sprite with health instance attributes.
 
@@ -49,12 +53,12 @@ class UIWorldSpaceHealthBar(UIStatusBar):
     def __init__(
         self,
         relative_rect: RectLike,
-        sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
+        sprite_to_monitor: SpriteWithHealth,
         manager: Optional[IUIManagerInterface] = None,
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         if sprite_to_monitor is not None:

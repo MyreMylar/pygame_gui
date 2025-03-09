@@ -3,7 +3,11 @@ from typing import Union, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
@@ -36,7 +40,7 @@ class UIImage(UIElement):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         *,
         starting_height: int = 1,
@@ -55,7 +59,7 @@ class UIImage(UIElement):
             element_id=["image"],
         )
 
-        self.original_image = None
+        self.original_image: Optional[pygame.Surface] = None
         self.scale_func = scale_func
         self.set_image(image_surface, image_is_alpha_premultiplied, self.scale_func)
         self.rebuild_from_changed_theme_data()
@@ -103,14 +107,15 @@ class UIImage(UIElement):
         :param scale_func: the function used for scaling the image, defaults to smoothscale.
         """
         self.scale_func = scale_func
-        image_surface = new_image.convert_alpha()
-        if not image_is_alpha_premultiplied:
-            image_surface = image_surface.premul_alpha()
-        if (
-            image_surface.get_width() != self.rect.width
-            or image_surface.get_height() != self.rect.height
-        ):
-            self.original_image = image_surface
-            self._set_image(self.scale_func(self.original_image, self.rect.size))
-        else:
-            self._set_image(image_surface)
+        if new_image is not None:
+            image_surface = new_image.convert_alpha()
+            if not image_is_alpha_premultiplied:
+                image_surface = image_surface.premul_alpha()
+            if (
+                image_surface.get_width() != self.rect.width
+                or image_surface.get_height() != self.rect.height
+            ):
+                self.original_image = image_surface
+                self._set_image(self.scale_func(self.original_image, self.rect.size))
+            else:
+                self._set_image(image_surface)

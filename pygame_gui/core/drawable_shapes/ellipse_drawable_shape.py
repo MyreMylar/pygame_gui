@@ -217,7 +217,8 @@ class EllipseDrawableShape(DrawableShape):
             if found_shape is not None:
                 self.states[state_str].surface = found_shape.copy()
             else:
-                self.states[state_str].surface = self.base_surface.copy()
+                if self.base_surface is not None:
+                    self.states[state_str].surface = self.base_surface.copy()
 
                 # Try one AA call method
                 aa_amount = 4

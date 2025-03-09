@@ -54,6 +54,15 @@ class IUIFontDictionaryInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_default_symbol_font(self) -> IGUIFontInterface:
+        """
+        Grab the default symbol font.
+
+        :return: The default symbol font.
+
+        """
+
+    @abstractmethod
     def create_font_id(
         self,
         font_size: int,

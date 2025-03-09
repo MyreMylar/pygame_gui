@@ -34,7 +34,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_root_container(self) -> IContainerAndContainerLike:
+    def get_root_container(self) -> Optional[IContainerAndContainerLike]:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -248,7 +248,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         position: Tuple[int, int],
         hover_distance: Tuple[int, int],
         parent_element: IUIElementInterface,
-        object_id: ObjectID,
+        object_id: Optional[ObjectID],
         *,
         wrap_width: Optional[int] = None,
         text_kwargs: Optional[Dict[str, str]] = None,

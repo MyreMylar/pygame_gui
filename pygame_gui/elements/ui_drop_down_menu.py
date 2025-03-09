@@ -5,7 +5,11 @@ import pygame
 from pygame_gui._constants import UI_BUTTON_PRESSED, UI_SELECTION_LIST_NEW_SELECTION
 from pygame_gui._constants import UI_DROP_DOWN_MENU_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement, ObjectID
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.core.ui_container import UIContainer
@@ -797,7 +801,7 @@ class UIDropDownMenu(UIContainer):
         parent_element: Optional[UIElement] = None,
         object_id: Union[ObjectID, str, None] = None,
         expansion_height_limit: Union[int, None] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         *,
         expand_on_option_click: bool = True,

@@ -11,7 +11,11 @@ from pygame_gui._constants import (
 )
 from pygame_gui._constants import UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED, OldType
 
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.interfaces import (
+    IUIManagerInterface,
+    IContainerLikeInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 
@@ -57,7 +61,7 @@ class UIColourChannelEditor(UIElement):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
@@ -263,7 +267,8 @@ class UIColourChannelEditor(UIElement):
 
         """
         super().set_position(position)
-        self.element_container.set_relative_position(self.relative_rect.topleft)
+        if self.element_container is not None:
+            self.element_container.set_relative_position(self.relative_rect.topleft)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -274,7 +279,8 @@ class UIColourChannelEditor(UIElement):
 
         """
         super().set_relative_position(position)
-        self.element_container.set_relative_position(self.relative_rect.topleft)
+        if self.element_container is not None:
+            self.element_container.set_relative_position(self.relative_rect.topleft)
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -286,7 +292,8 @@ class UIColourChannelEditor(UIElement):
 
         """
         super().set_dimensions(dimensions)
-        self.element_container.set_dimensions(self.relative_rect.size)
+        if self.element_container is not None:
+            self.element_container.set_dimensions(self.relative_rect.size)
 
     def show(self):
         """
@@ -629,11 +636,17 @@ class UIColourPickerDialog(UIWindow):
             self.kill()
 
         if event.type == UI_COLOUR_PICKER_COLOUR_CHANNEL_CHANGED:
-            if event.ui_element in [
-                self.hue_channel,
-                self.sat_channel,
-                self.value_channel,
-            ]:
+            if (
+                event.ui_element
+                in [
+                    self.hue_channel,
+                    self.sat_channel,
+                    self.value_channel,
+                ]
+                and self.hue_channel is not None
+                and self.sat_channel is not None
+                and self.value_channel is not None
+            ):
                 self.current_colour.hsva = (
                     self.hue_channel.current_value,
                     self.sat_channel.current_value,

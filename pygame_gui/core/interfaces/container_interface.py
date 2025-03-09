@@ -120,7 +120,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_size(self) -> Tuple[int, int]:
+    def get_size(self) -> Tuple[int, int] | Tuple[float, float]:
         """
         Get the container's pixel size.
 

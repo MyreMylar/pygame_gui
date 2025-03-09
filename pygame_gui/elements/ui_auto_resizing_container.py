@@ -76,8 +76,8 @@ class UIAutoResizingContainer(UIContainer):
 
         self.max_edges_rect = max_edges_rect
 
-        self.abs_min_edges_rect = None
-        self.abs_max_edges_rect = None
+        self.abs_min_edges_rect: Optional[pygame.Rect] = None
+        self.abs_max_edges_rect: Optional[pygame.Rect] = None
         self.recalculate_abs_edges_rect()
 
         self.resize_left = resize_left
@@ -151,48 +151,59 @@ class UIAutoResizingContainer(UIContainer):
         Gets the minimum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        left = self.abs_min_edges_rect.left
-        if self.left_element:
-            left = min(left, self.left_element.get_abs_rect().left)
-        if self.abs_max_edges_rect is not None:
-            left = max(left, self.abs_max_edges_rect.left)
-        return left
+        if self.abs_max_edges_rect is not None and self.abs_max_edges_rect is not None:
+            left = self.abs_min_edges_rect.left
+            if self.left_element:
+                left = min(left, self.left_element.get_abs_rect().left)
+            if self.abs_max_edges_rect is not None:
+                left = max(left, self.abs_max_edges_rect.left)
+            return left
+        return 0
 
     def _get_right_most_point(self) -> int:
         """
         Gets the maximum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        right = self.abs_min_edges_rect.right
-        if self.right_element:
-            right = max(right, self.right_element.get_abs_rect().right)
-        if self.abs_max_edges_rect is not None:
-            right = min(right, self.abs_max_edges_rect.right)
-        return right
+        if self.abs_max_edges_rect is not None and self.abs_max_edges_rect is not None:
+            right = self.abs_min_edges_rect.right
+            if self.right_element:
+                right = max(right, self.right_element.get_abs_rect().right)
+            if self.abs_max_edges_rect is not None:
+                right = min(right, self.abs_max_edges_rect.right)
+            return right
+        else:
+            return 0
 
     def _get_top_most_point(self) -> int:
         """
         Gets the minimum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        top = self.abs_min_edges_rect.top
-        if self.top_element:
-            top = min(top, self.top_element.get_abs_rect().top)
-        if self.abs_max_edges_rect is not None:
-            top = max(top, self.abs_max_edges_rect.top)
-        return top
+        if self.abs_max_edges_rect is not None and self.abs_max_edges_rect is not None:
+            top = self.abs_min_edges_rect.top
+            if self.top_element:
+                top = min(top, self.top_element.get_abs_rect().top)
+            if self.abs_max_edges_rect is not None:
+                top = max(top, self.abs_max_edges_rect.top)
+            return top
+        else:
+            return 0
 
     def _get_bottom_most_point(self) -> int:
         """
         Gets the maximum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        bottom = self.abs_min_edges_rect.bottom
-        if self.bottom_element:
-            bottom = max(bottom, self.bottom_element.get_abs_rect().bottom)
-        if self.abs_max_edges_rect is not None:
-            bottom = min(bottom, self.abs_max_edges_rect.bottom)
-        return bottom
+        if self.abs_max_edges_rect is not None and self.abs_max_edges_rect is not None:
+            bottom = self.abs_min_edges_rect.bottom
+            if self.bottom_element:
+                bottom = max(bottom, self.bottom_element.get_abs_rect().bottom)
+            if self.abs_max_edges_rect is not None:
+                bottom = min(bottom, self.abs_max_edges_rect.bottom)
+            return bottom
+        else:
+            return 0
 
     def recalculate_abs_edges_rect(self) -> None:
         """

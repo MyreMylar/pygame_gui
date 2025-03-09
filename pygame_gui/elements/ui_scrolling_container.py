@@ -48,7 +48,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
         element_id: Union[List[str], None] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         should_grow_automatically: bool = False,
         allow_scroll_x: bool = True,

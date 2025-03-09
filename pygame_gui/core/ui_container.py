@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple, Dict, Iterator
+from typing import List, Union, Tuple, Dict, Iterator, Optional
 
 import pygame
 
@@ -34,7 +34,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
     def __init__(
         self,
         relative_rect: RectLike,
-        manager: IUIManagerInterface,
+        manager: Optional[IUIManagerInterface],
         *,
         starting_height: int = 1,
         is_window_root_container: bool = False,
@@ -42,10 +42,9 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         parent_element: Union[UIElement, None] = None,
         object_id: Union[ObjectID, str, None] = None,
         element_id: Union[List[str], None] = None,
-        anchors: Union[Dict[str, str], None] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
-        self.ui_manager = manager
         self.is_window_root_container = is_window_root_container
         self.elements = []  # type: List[IUIElementInterface]
 
@@ -249,11 +248,15 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         # Moving the elements anchored to the top to make it seem like the container just increased its top edge
         for element in self.elements:
             anchors = element.get_anchors()
-            if "left" in anchors.values() and "left_target" not in anchors:
-                pos = pygame.Vector2(
-                    element.get_relative_rect().topleft
-                ) + pygame.Vector2(width_increase, 0)
-                element.set_relative_position(pos)
+            if (
+                anchors is not None
+                and "left" in anchors.values()
+                and "left_target" not in anchors
+            ):
+                element.set_relative_position(
+                    pygame.Vector2(element.get_relative_rect().topleft)
+                    + pygame.Vector2(width_increase, 0)
+                )
 
     def expand_top(self, height_increase: int) -> None:
         """
@@ -276,11 +279,15 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         # Moving the elements anchored to the top to make it seem like the container just increased its top edge
         for element in self.elements:
             anchors = element.get_anchors()
-            if "top" in anchors.values() and "top_target" not in anchors:
-                pos = pygame.Vector2(
-                    element.get_relative_rect().topleft
-                ) + pygame.Vector2(0, height_increase)
-                element.set_relative_position(pos)
+            if (
+                anchors is not None
+                and "top" in anchors.values()
+                and "top_target" not in anchors
+            ):
+                element.set_relative_position(
+                    pygame.Vector2(element.get_relative_rect().topleft)
+                    + pygame.Vector2(0, height_increase)
+                )
 
     def get_top_layer(self) -> int:
         """
@@ -299,7 +306,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         """
         return self.layer_thickness
 
-    def get_size(self) -> Tuple[int, int]:
+    def get_size(self) -> Tuple[int, int] | Tuple[float, float]:
         """
         Get the container's pixel size.
 
@@ -437,7 +444,10 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         """
         any_hovered = False
         for element in self:
-            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+            focus_set = element.get_focus_set()
+            if focus_set is not None and any(
+                sub_element.hovered for sub_element in focus_set
+            ):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()

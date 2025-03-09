@@ -2,7 +2,11 @@ from typing import Union, Dict, Optional
 
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
 from pygame_gui.core.gui_type_hints import RectLike
@@ -38,7 +42,7 @@ class UIProgressBar(UIStatusBar):
                 str,
             ]
         ] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         self.current_progress = 0.0

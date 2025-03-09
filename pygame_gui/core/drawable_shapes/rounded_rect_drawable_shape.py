@@ -514,8 +514,8 @@ class RoundedRectangleShape(DrawableShape):
 
                 basic_blit(self.states[state_str].surface, bab_surface, (0, 0))
 
-                if self.states[state_str].cached_background_id is not None:
-                    cached_id = self.states[state_str].cached_background_id
+                cached_id = self.states[state_str].cached_background_id
+                if cached_id is not None:
                     self.shape_cache.remove_user_from_cache_item(cached_id)
                 if (
                     not self.has_been_resized

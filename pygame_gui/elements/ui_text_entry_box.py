@@ -10,7 +10,11 @@ from pygame_gui.core.utility import clipboard_paste, clipboard_copy
 from pygame_gui._constants import UI_TEXT_ENTRY_CHANGED
 from pygame_gui.core import ObjectID
 from pygame_gui.core.ui_element import UIElement
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.core.gui_type_hints import RectLike
 
@@ -42,7 +46,7 @@ class UITextEntryBox(UITextBox):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         *,
         placeholder_text: Optional[str] = None,

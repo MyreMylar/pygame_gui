@@ -24,7 +24,11 @@ from pygame_gui._constants import (
 from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT, TEXT_EFFECT_SHAKE
 
 from pygame_gui.core.utility import translate
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core.interfaces import IUITextOwnerInterface
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -120,7 +124,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
         *,
         pre_parsing_enabled: bool = True,

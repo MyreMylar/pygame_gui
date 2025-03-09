@@ -4,13 +4,13 @@ import io
 from typing import Tuple, List, Dict, Union, Set, Optional
 
 import pygame
-import i18n
+import i18n  # type: ignore
 
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
 )
-from pygame_gui.core.interfaces import IUIElementInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import IUIElementInterface, IContainerAndContainerLike
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
@@ -76,13 +76,13 @@ class UIManager(IUIManagerInterface):
         # Threaded loading
         if resource_loader is None:
             auto_load = True
-            self.resource_loader = BlockingThreadedResourceLoader()
+            self.resource_loader: IResourceLoader = BlockingThreadedResourceLoader()
         else:
             auto_load = False
             self.resource_loader = resource_loader
 
         self.window_resolution = window_resolution
-        self.ui_theme = self.create_new_theme(theme_path)
+        self.ui_theme: IUIAppearanceThemeInterface = self.create_new_theme(theme_path)
 
         self.universal_empty_surface = pygame.surface.Surface(
             (0, 0), flags=pygame.SRCALPHA, depth=32
@@ -157,7 +157,7 @@ class UIManager(IUIManagerInterface):
         """
         return self.mouse_double_click_time
 
-    def get_root_container(self) -> IUIContainerInterface:
+    def get_root_container(self) -> Optional[IContainerAndContainerLike]:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -210,9 +210,13 @@ class UIManager(IUIManagerInterface):
         """
         if corner_radius is None:
             corner_radius = [2, 2, 2, 2]
-        return self.ui_theme.shadow_generator.find_closest_shadow_scale_to_size(
+
+        shadow_surf = self.ui_theme.get_shadow_generator().find_closest_shadow_scale_to_size(
             size, shadow_width, shape, corner_radius
         )
+        if shadow_surf is not None:
+            return shadow_surf
+        return self.get_universal_empty_surface()
 
     def set_window_resolution(self, window_resolution: Tuple[int, int]):
         """
@@ -222,7 +226,8 @@ class UIManager(IUIManagerInterface):
         """
         self.window_resolution = window_resolution
         self.ui_window_stack.window_resolution = window_resolution
-        self.root_container.set_dimensions(window_resolution)
+        if self.root_container is not None:
+            self.root_container.set_dimensions(window_resolution)
 
     def clear_and_reset(self):
         """
@@ -365,7 +370,10 @@ class UIManager(IUIManagerInterface):
                     pygame.mouse.set_cursor(self._active_cursor)
         any_window_edge_hovered = False
         for window in self.ui_window_stack.stack:
-            if window.should_use_window_edge_resize_cursor():
+            if (
+                window.should_use_window_edge_resize_cursor()
+                and self.resizing_window_cursors is not None
+            ):
                 any_window_edge_hovered = True
                 new_cursor = self.resizing_window_cursors[window.get_hovering_edge_id()]
 
@@ -499,26 +507,28 @@ class UIManager(IUIManagerInterface):
             script = "Latn"
             direction = pygame.DIRECTION_LTR
             if "name" in font:
-                name = font["name"]
+                name = str(font["name"])
             if "style" in font:
-                if "bold" in font["style"]:
+                font_style = str(font["style"])
+                if "bold" in font_style:
                     bold = True
-                if "italic" in font["style"]:
+                if "italic" in font_style:
                     italic = True
             if "antialiased" in font:
                 antialiased = bool(int(font["antialiased"]))
             if "script" in font:
-                script = font["script"]
+                script = str(font["script"])
             if "direction" in font:
-                if font["direction"].lower() == "ltr":
+                font_direction = str(font["direction"])
+                if font_direction.lower() == "ltr":
                     direction = pygame.DIRECTION_LTR
-                if "rtl" in font["direction"].lower():
+                if font_direction.lower() == "rtl":
                     direction = pygame.DIRECTION_RTL
             if "html_size" in font:
                 font_dict = self.ui_theme.get_font_dictionary()
-                size = font_dict.convert_html_to_point_size(font["html_size"])
+                size = font_dict.convert_html_to_point_size(float(font["html_size"]))
             elif "point_size" in font:
-                size = font["point_size"]
+                size = int(font["point_size"])
 
             self.ui_theme.get_font_dictionary().preload_font(
                 size,
