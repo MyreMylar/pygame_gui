@@ -14,6 +14,7 @@ the code below. You can just copy and paste it into an empty python script file.
    :linenos:
 
     import pygame
+    import sys
 
 
     pygame.init()
@@ -24,13 +25,12 @@ the code below. You can just copy and paste it into an empty python script file.
     background = pygame.Surface((800, 600))
     background.fill(pygame.Color('#000000'))
 
-    is_running = True
-
-    while is_running:
+    while True:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
+                pygame.quit()
+                sys.exit()
 
         window_surface.blit(background, (0, 0))
 
@@ -55,6 +55,7 @@ and create a UIManager:
 
     import pygame
     import pygame_gui
+    import sys
 
 
     pygame.init()
@@ -67,13 +68,12 @@ and create a UIManager:
 
     manager = pygame_gui.UIManager((800, 600))
 
-    is_running = True
-
-    while is_running:
+    while True:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
+                pygame.quit()
+                sys.exit()
 
         window_surface.blit(background, (0, 0))
 
@@ -91,6 +91,7 @@ assign to it. To make it do this we need to call these functions on the UIManage
 
     import pygame
     import pygame_gui
+    import sys
 
 
     pygame.init()
@@ -104,13 +105,13 @@ assign to it. To make it do this we need to call these functions on the UIManage
     manager = pygame_gui.UIManager((800, 600))
 
     clock = pygame.time.Clock()
-    is_running = True
 
-    while is_running:
+    while True:
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
+                pygame.quit()
+                sys.exit()
 
             manager.process_events(event)
 
@@ -139,6 +140,7 @@ To start lets make the button.
 
     import pygame
     import pygame_gui
+    import sys
 
 
     pygame.init()
@@ -156,13 +158,13 @@ To start lets make the button.
                                                 manager=manager)
 
     clock = pygame.time.Clock()
-    is_running = True
 
-    while is_running:
+    while True:
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
+                pygame.quit()
+                sys.exit()
 
             manager.process_events(event)
 
@@ -204,13 +206,13 @@ When we click on it. To do that we need to check the pygame event queue:
                                                 manager=manager)
 
     clock = pygame.time.Clock()
-    is_running = True
 
-    while is_running:
+    while True:
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
+                pygame.quit()
+                sys.exit()
 
              if event.type == pygame_gui.UI_BUTTON_PRESSED:
                  if event.ui_element == hello_button:
