@@ -101,17 +101,14 @@ class UIHorizontalSlider(UIElement):
         self.disabled_border_colour = None
         self.disabled_background_colour = None
 
-        self.border_width = None
-        self.shadow_width = None
-
         self.drawable_shape = None
         self.shape = "rectangle"
 
-        self.background_rect = None  # type: Optional[pygame.Rect]
+        self.background_rect = pygame.Rect(0.0, 0.0, 0.0, 0.0)
 
-        self.scrollable_width = None
-        self.right_limit_position = None
-        self.scroll_position = None
+        self.scrollable_width = 0
+        self.right_limit_position = 0
+        self.scroll_position = 0
 
         self.left_button = None
         self.right_button = None

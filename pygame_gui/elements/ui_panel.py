@@ -57,12 +57,21 @@ class UIPanel(UIElement, IContainerLikeInterface):
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
     ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
-        # constructor
-        self.panel_container = None
+        # constructor - set the container size later
+        self.panel_container = UIContainer(
+            pygame.Rect(0, 0, 0, 0),
+            manager,
+            starting_height=starting_height,
+            container=container,
+            parent_element=None,
+            object_id=ObjectID(object_id="#panel_container", class_id=None),
+            anchors=anchors,
+            visible=visible,
+        )
         super().__init__(
             relative_rect,
             manager,
@@ -75,6 +84,14 @@ class UIPanel(UIElement, IContainerLikeInterface):
             object_id=object_id,
             element_id=[element_id],
         )
+
+        # need to reset ids after building panel to include panel as parent element
+        # shouldn't affect theming as this container has no theming
+        self.panel_container.parent_element = self
+        self.panel_container._create_valid_ids(container,
+                                               self,
+                                               ObjectID(object_id="#panel_container", class_id=None),
+                                               "container")
 
         self.background_colour = None
         self.border_colour = None
@@ -104,16 +121,8 @@ class UIPanel(UIElement, IContainerLikeInterface):
             - (self.container_margins["top"] + self.container_margins["bottom"]),
         )
 
-        self.panel_container = UIContainer(
-            container_rect,
-            manager,
-            starting_height=starting_height,
-            container=container,
-            parent_element=self,
-            object_id=ObjectID(object_id="#panel_container", class_id=None),
-            anchors=anchors,
-            visible=self.visible,
-        )
+        self.panel_container.set_dimensions(container_rect.size)
+        self.panel_container.set_relative_position(container_rect.topleft)
 
     def update(self, time_delta: float):
         """
@@ -160,6 +169,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :return UIContainer: The panel's container.
 
         """
+
         return self.panel_container
 
     def kill(self):
@@ -365,7 +375,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         any_hovered = False
         for element in self:
-            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+            element_focus_set = element.get_focus_set()
+            if (element_focus_set is not None and
+                    any(sub_element.hovered for sub_element in element_focus_set)):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()

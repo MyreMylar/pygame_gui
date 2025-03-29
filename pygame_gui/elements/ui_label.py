@@ -13,6 +13,7 @@ from pygame_gui.core.drawable_shapes import RectDrawableShape
 from pygame_gui._constants import UITextEffectType, TEXT_EFFECT_TYPING_APPEAR
 from pygame_gui._constants import TEXT_EFFECT_FADE_IN, TEXT_EFFECT_FADE_OUT
 from pygame_gui.core.text.text_effects import (
+    TextEffect,
     TypingAppearEffect,
     FadeInEffect,
     FadeOutEffect,
@@ -58,9 +59,11 @@ class UILabel(UIElement, IUITextOwnerInterface):
         *,
         text_kwargs: Optional[Dict[str, str]] = None,
     ):
-        rel_rect = (
+        rel_rect: RectLike = (
             relative_rect
-            if len(relative_rect) == 4
+            if (isinstance(relative_rect, pygame.Rect) or
+                isinstance(relative_rect, pygame.FRect) or
+                (isinstance(relative_rect, tuple) and len(relative_rect) == 4))
             else pygame.Rect(relative_rect, (-1, -1))
         )
 
@@ -77,7 +80,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             element_id=["label"],
         )
 
-        self.dynamic_dimensions_orig_top_left = rel_rect.topleft
+        self.dynamic_dimensions_orig_top_left = (rel_rect[0], rel_rect[1])
 
         self.text = text
         self.text_kwargs = {}
@@ -100,7 +103,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.text_horiz_alignment_padding = 0
         self.text_vert_alignment_padding = 0
 
-        self.active_text_effect = None
+        self.active_text_effect: Optional[TextEffect] = None
 
         self.rebuild_from_changed_theme_data()
 
@@ -128,7 +131,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
         if any_changed:
             if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
-            else:
+            elif self.drawable_shape is not None:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def rebuild(self):
@@ -375,7 +378,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
     def set_text_alpha(
         self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
-        self.drawable_shape.set_text_alpha(alpha)
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_text_alpha(alpha)
 
     def set_text_offset_pos(
         self, offset: Tuple[int, int], sub_chunk: Optional[TextLineChunkFTFont] = None
@@ -388,26 +392,31 @@ class UILabel(UIElement, IUITextOwnerInterface):
         pass
 
     def set_text_scale(
-        self, scale: int, sub_chunk: Optional[TextLineChunkFTFont] = None
+        self, scale: float, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
         pass
 
     def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
-        self.drawable_shape.text_box_layout.clear_final_surface()
-        self.drawable_shape.text_box_layout.finalise_to_new()
-        self.drawable_shape.redraw_active_state_no_text()
+        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+            self.drawable_shape.text_box_layout.clear_final_surface()
+            self.drawable_shape.text_box_layout.finalise_to_new()
+            self.drawable_shape.redraw_active_state_no_text()
 
     def get_text_letter_count(
         self, sub_chunk: Optional[TextLineChunkFTFont] = None
     ) -> int:
-        return self.drawable_shape.text_box_layout.letter_count
+        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+            return self.drawable_shape.text_box_layout.letter_count
+        else:
+            return 0
 
     def update_text_end_position(
         self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
-        self.drawable_shape.text_box_layout.current_end_pos = end_pos
-        self.drawable_shape.text_box_layout.finalise_to_new()
-        self.drawable_shape.finalise_text_onto_active_state()
+        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+            self.drawable_shape.text_box_layout.current_end_pos = end_pos
+            self.drawable_shape.text_box_layout.finalise_to_new()
+            self.drawable_shape.finalise_text_onto_active_state()
 
     def set_active_effect(
         self,
@@ -424,14 +433,11 @@ class UILabel(UIElement, IUITextOwnerInterface):
             self.active_text_effect = None
         elif isinstance(effect_type, UITextEffectType):
             if effect_type == TEXT_EFFECT_TYPING_APPEAR:
-                effect = TypingAppearEffect(self, params)
-                self.active_text_effect = effect
+                self.active_text_effect = TypingAppearEffect(self, params)
             elif effect_type == TEXT_EFFECT_FADE_IN:
-                effect = FadeInEffect(self, params)
-                self.active_text_effect = effect
+                self.active_text_effect = FadeInEffect(self, params)
             elif effect_type == TEXT_EFFECT_FADE_OUT:
-                effect = FadeOutEffect(self, params)
-                self.active_text_effect = effect
+                self.active_text_effect = FadeOutEffect(self, params)
             else:
                 warnings.warn(
                     f"Unsupported effect name: {str(effect_type)} for label",
@@ -451,7 +457,8 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.active_text_effect = None
 
     def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
-        self.drawable_shape.text_box_layout.clear_effects()
+        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+            self.drawable_shape.text_box_layout.clear_effects()
         self.active_text_effect = None
         self.rebuild()
 

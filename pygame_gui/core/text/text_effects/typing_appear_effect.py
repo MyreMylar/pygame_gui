@@ -29,7 +29,6 @@ class TypingAppearEffect(TextEffect):
         self.time_per_letter = 0.05
         self.time_average_deviation = 0.0
         self.time_per_letter_acc = 0.0
-        self.text_changed = False
         self.text_owner.clear_text_surface(self.text_sub_chunk)
         self.text_owner.update_text_end_position(
             self.text_progress, self.text_sub_chunk
@@ -86,18 +85,6 @@ class TypingAppearEffect(TextEffect):
             if self.text_sub_chunk is not None:
                 event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
-
-    def has_text_changed(self) -> bool:
-        """
-        Test if we should redraw the text.
-
-        :return: True if we should redraw, False otherwise.
-        """
-        if self.text_changed:
-            self.text_changed = False
-            return True
-        else:
-            return False
 
     def apply_effect(self):
         """

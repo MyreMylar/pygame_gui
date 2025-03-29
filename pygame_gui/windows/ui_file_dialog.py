@@ -262,7 +262,7 @@ class UIFileDialog(UIWindow):
         if not self.file_path_text_line.is_focused:
             self.file_path_text_line.focus()
 
-    def update_current_file_list(self, should_try_again=True):
+    def update_current_file_list(self, should_try_again: bool = True):
         """
         Updates the currently displayed list of files and directories. Usually called when the
         directory path has changed.
@@ -359,7 +359,7 @@ class UIFileDialog(UIWindow):
 
         return handled
 
-    def _process_file_path_entry_events(self, event):
+    def _process_file_path_entry_events(self, event: pygame.event.Event):
         """
         Handle events coming from text entry element which displays the current file path.
 
@@ -420,7 +420,7 @@ class UIFileDialog(UIWindow):
         self.delete_button.disable()
         self.ok_button.disable()
 
-    def _process_file_list_events(self, event):
+    def _process_file_list_events(self, event: pygame.event.Event):
         """
         Handle events coming from the file/folder list.
 
@@ -487,7 +487,7 @@ class UIFileDialog(UIWindow):
         else:
             self.delete_button.disable()
 
-    def _process_confirmation_dialog_events(self, event):
+    def _process_confirmation_dialog_events(self, event: pygame.event.Event):
         """
         Handle any events coming from the confirmation dialog if that's up.
 
@@ -500,7 +500,8 @@ class UIFileDialog(UIWindow):
         ):
             return
         try:
-            self.current_file_path.unlink()
+            if self.current_file_path is not None:
+                self.current_file_path.unlink()
         except (PermissionError, FileNotFoundError):
             pass
         else:
@@ -510,17 +511,17 @@ class UIFileDialog(UIWindow):
             self.file_path_text_line.set_text(self.current_directory_path)
             self.file_selection_list.set_item_list(self.current_file_list)
 
-    def _process_mini_file_operation_button_events(self, event):
+    def _process_mini_file_operation_button_events(self, event: pygame.event.Event):
         """
         Handle what happens when you press one of the tiny file/folder operation buttons.
 
         :param event: event to check.
 
         """
-        if event.type == UI_BUTTON_PRESSED and event.ui_element == self.delete_button:
+        if (event.type == UI_BUTTON_PRESSED and
+                event.ui_element == self.delete_button and self.current_file_path is not None):
             confirmation_rect = pygame.Rect(0, 0, 300, 200)
             confirmation_rect.center = self.rect.center
-
             selected_file_name = self.current_file_path.name
             long_desc = translate(
                 "pygame-gui.Delete_filename", file_name=str(selected_file_name)
@@ -542,7 +543,7 @@ class UIFileDialog(UIWindow):
         if event.type == UI_BUTTON_PRESSED and event.ui_element == self.home_button:
             self._change_directory_path(Path.home())
 
-    def _process_ok_cancel_events(self, event):
+    def _process_ok_cancel_events(self, event: pygame.event.Event):
         """
         Handle what happens when you press OK and Cancel.
 
@@ -554,6 +555,7 @@ class UIFileDialog(UIWindow):
         if (
             event.type == UI_BUTTON_PRESSED
             and event.ui_element == self.ok_button
+            and self.current_file_path is not None
             and self._validate_file_path(self.current_file_path)
         ):
             # old event - to be removed in 0.8.0

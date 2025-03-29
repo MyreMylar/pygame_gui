@@ -75,3 +75,23 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
 
         :return: a list of Windows
         """
+
+    @abstractmethod
+    def any_windows_in_top_stack(self) -> bool:
+        """
+        Returns true if there are any windows in the 'top' stack
+        :return:
+        """
+
+    @abstractmethod
+    def refresh_window_stack_from_window(
+            self, window_to_refresh_from: IWindowInterface
+    ):
+        """
+        Refresh the window stacks above a specific window. To do this we remove all of these windows from the stack
+        and then re-add them back one-at-a-time as if they were new windows
+
+        :param window_to_refresh_from: The window to start the refresh from
+
+        """
+

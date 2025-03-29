@@ -85,8 +85,7 @@ class UIStatusBar(UIElement):
         self.bar_filled_colour = None
         self.bar_unfilled_colour = None
         self.hover_height = None
-        self.border_width = None
-        self.shadow_width = None
+
         self.border_rect = None
         self.capacity_width = None
         self.capacity_height = None

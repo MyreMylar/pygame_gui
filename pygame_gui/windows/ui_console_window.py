@@ -1,5 +1,5 @@
 import html
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 import pygame
 
@@ -56,9 +56,9 @@ class UIConsoleWindow(UIWindow):
 
         self.should_logged_commands_escape_html = True
 
-        self.logged_commands_above = []
-        self.current_logged_command = None
-        self.logged_commands_below = []
+        self.logged_commands_above: List[str] = []
+        self.current_logged_command: Optional[str] = None
+        self.logged_commands_below: List[str] = []
 
         self.command_entry = UITextEntryLine(
             relative_rect=pygame.rect.Rect(

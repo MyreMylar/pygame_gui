@@ -86,17 +86,14 @@ class UIVerticalScrollBar(UIElement):
         self.disabled_border_colour = None
         self.disabled_background_colour = None
 
-        self.border_width = None
-        self.shadow_width = None
-
         self.drawable_shape = None
         self.shape = "rectangle"
 
-        self.background_rect = None  # type: Union[None, pygame.Rect]
+        self.background_rect = pygame.Rect(0.0, 0.0, 0.0, 0.0)
 
-        self.scrollable_height = None  # type: Union[None, int, float]
-        self.bottom_limit = None
-        self.sliding_rect_position = None  # type: Union[None, pygame.math.Vector2]
+        self.scrollable_height = 0
+        self.bottom_limit = 0
+        self.sliding_rect_position = pygame.math.Vector2(0.0, 0.0)
 
         self.top_button = None
         self.bottom_button = None
@@ -129,10 +126,10 @@ class UIVerticalScrollBar(UIElement):
         self.join_focus_sets(self.sliding_button)
         self.sliding_button.set_hold_range((100, self.background_rect.height))
 
-        self._container_to_scroll = None
+        self._container_to_scroll: Optional[IContainerLikeInterface] = None
 
     def set_container_to_check_hover_for_mousewheel_events(
-        self, container: IUIContainerInterface
+        self, container: IContainerLikeInterface
     ):
         """
         The container related to this scrollbar to check for hovering when we are rolling the mousewheel.
@@ -343,7 +340,11 @@ class UIVerticalScrollBar(UIElement):
         :return: True if it was.
 
         """
-        return any(element.hovered for element in self.get_focus_set())
+        focus_set_hovered = False
+        focus_set = self.get_focus_set()
+        if focus_set is not None:
+            focus_set_hovered = any(element.hovered for element in focus_set)
+        return focus_set_hovered
 
     def _check_should_handle_mousewheel_event(self) -> bool:
         should_handle = False
@@ -443,7 +444,7 @@ class UIVerticalScrollBar(UIElement):
             moved_this_frame = self._update_scroll_position_from_target(time_delta)
 
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            if self.sliding_button.held and self.sliding_button.in_hold_range(
+            if self.sliding_button is not None and self.sliding_button.held and self.sliding_button.in_hold_range(
                 (mouse_x, mouse_y)
             ):
                 if not self.grabbed_slider:
@@ -469,7 +470,7 @@ class UIVerticalScrollBar(UIElement):
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
 
-            elif not self.sliding_button.held:
+            elif self.sliding_button is not None and not self.sliding_button.held:
                 self.grabbed_slider = False
 
             if moved_this_frame:
@@ -491,16 +492,17 @@ class UIVerticalScrollBar(UIElement):
 
         new_scroll_position = new_start_percentage * self.scrollable_height
 
-        self.scroll_position = min(
-            max(new_scroll_position, self.top_limit),
-            self.bottom_limit - self.sliding_button.rect.height,
-        )
-        self.target_scroll_position = self.scroll_position
-        self.start_percentage = self.scroll_position / self.scrollable_height
+        if self.sliding_button is not None:
+            self.scroll_position = min(
+                max(new_scroll_position, self.top_limit),
+                self.bottom_limit - self.sliding_button.rect.height,
+            )
+            self.target_scroll_position = self.scroll_position
+            self.start_percentage = self.scroll_position / self.scrollable_height
 
-        x_pos = 0
-        y_pos = self.scroll_position + self.arrow_button_height
-        self.sliding_button.set_relative_position((x_pos, y_pos))
+            x_pos = 0
+            y_pos = self.scroll_position + self.arrow_button_height
+            self.sliding_button.set_relative_position((x_pos, y_pos))
         self.has_moved_recently = True
 
     def redraw_scrollbar(self):
@@ -633,10 +635,11 @@ class UIVerticalScrollBar(UIElement):
         super().set_position(position)
 
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -649,10 +652,11 @@ class UIVerticalScrollBar(UIElement):
         super().set_relative_position(position)
 
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def _update_sliding_button_data(self, scroll_bar_height):
         self.sliding_button.set_relative_position(self.sliding_rect_position)
@@ -673,12 +677,13 @@ class UIVerticalScrollBar(UIElement):
         super().set_dimensions(dimensions)
 
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
-        self.background_rect.height = self.relative_rect.height - (
+        self.background_rect.width = int(self.relative_rect.width - (2 * border_and_shadow))
+        self.background_rect.height = int(self.relative_rect.height - (
             2 * border_and_shadow
-        )
+        ))
 
-        self.button_container.set_dimensions(self.background_rect.size)
+        if self.button_container is not None:
+            self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out scroll bar parameters
         self.scrollable_height = self.background_rect.height - (
@@ -706,10 +711,11 @@ class UIVerticalScrollBar(UIElement):
         self.scroll_position = self.sliding_rect_position.y - base_scroll_bar_y
         self.target_scroll_position = self.scroll_position
 
-        self.sliding_button.set_dimensions(
-            (self.background_rect.width, scroll_bar_height)
-        )
-        self.sliding_button.set_relative_position(self.sliding_rect_position)
+        if self.sliding_button is not None:
+            self.sliding_button.set_dimensions(
+                (self.background_rect.width, scroll_bar_height)
+            )
+            self.sliding_button.set_relative_position(self.sliding_rect_position)
 
     def disable(self):
         """

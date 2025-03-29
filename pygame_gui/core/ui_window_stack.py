@@ -159,8 +159,7 @@ class UIWindowStack(IUIWindowStackInterface):
             for old_window in popped_windows_to_add_back:
                 self.add_new_window(old_window)
 
-    # TODO Rename this here and in `refresh_window_stack_from_window`, `remove_window` and `move_window_to_front`
-    def _extracted_from_move_window_to_front_18(
+    def _restore_unstacked_windows_and_add_chosen_window_to_front(
         self, popped_windows_to_add_back, window_to_front
     ):
         popped_windows_to_add_back.reverse()
@@ -170,7 +169,6 @@ class UIWindowStack(IUIWindowStackInterface):
         self.add_new_window(window_to_front)
         window_to_front.on_moved_to_front()
 
-    # TODO Rename this here and in `refresh_window_stack_from_window`, `remove_window` and `move_window_to_front`
     def move_window_to_front(self, window_to_front: IWindowInterface):
         """
         Moves the passed in window to the top of its stack and resorts the other windows
@@ -182,24 +180,28 @@ class UIWindowStack(IUIWindowStackInterface):
         if window_to_front in self.top_stack:
             if window_to_front == self.top_stack[-1]:
                 return  # already at top of top stack
+
+            # unstack the windows in the top stack until we reach the chosen window
             popped_windows_to_add_back = []
             window = self.top_stack.pop()
             while window != window_to_front:
                 popped_windows_to_add_back.append(window)
                 window = self.top_stack.pop()
 
-            self._extracted_from_move_window_to_front_18(
+            self._restore_unstacked_windows_and_add_chosen_window_to_front(
                 popped_windows_to_add_back, window_to_front
             )
         if window_to_front not in self.stack or window_to_front == self.stack[-1]:
             return
+
+        # unstack the windows in the regular stack until we reach the chosen window
         popped_windows_to_add_back = []
         window = self.stack.pop()
         while window != window_to_front:
             popped_windows_to_add_back.append(window)
             window = self.stack.pop()
 
-        self._extracted_from_move_window_to_front_18(
+        self._restore_unstacked_windows_and_add_chosen_window_to_front(
             popped_windows_to_add_back, window_to_front
         )
 
@@ -232,3 +234,10 @@ class UIWindowStack(IUIWindowStackInterface):
         :return: a list of Windows
         """
         return self.stack + self.top_stack
+
+    def any_windows_in_top_stack(self) -> bool:
+        """
+        Returns true if there are any windows in the 'top' stack
+        :return:
+        """
+        return len(self.top_stack) > 0

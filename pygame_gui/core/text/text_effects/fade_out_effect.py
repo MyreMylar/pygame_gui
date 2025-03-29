@@ -27,7 +27,6 @@ class FadeOutEffect(TextEffect):
         self.alpha_value = 255
         self.time_per_alpha_change = 0.01
         self.time_per_alpha_change_acc = 0.0
-        self.text_changed = False
         self.text_owner.set_text_alpha(255, self.text_sub_chunk)
         self._load_params(params)
         self.finished = False
@@ -66,19 +65,6 @@ class FadeOutEffect(TextEffect):
             if self.text_sub_chunk is not None:
                 event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
-
-    def has_text_changed(self) -> bool:
-        """
-        Lets us know when the fade alpha has changed enough (i.e. by a whole int) to warrant us
-        redrawing the text box with the new alpha value.
-
-        :return: True if it is time to redraw our text.
-        """
-        if self.text_changed:
-            self.text_changed = False
-            return True
-        else:
-            return False
 
     def get_final_alpha(self) -> int:
         """

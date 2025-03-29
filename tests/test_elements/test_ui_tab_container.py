@@ -80,8 +80,8 @@ class TestUITabContainer:
                  tab_container,
                  tab_container._root_container,
                  tab_1_title_button,
-                 tab_1_container,
                  tab_1_container.get_container(),
+                 tab_1_container,
                  button])
         tab_container.kill()
         assert len(default_ui_manager.get_root_container().elements) == 0

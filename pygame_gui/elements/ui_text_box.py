@@ -177,8 +177,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self.scroll_bar_width = 20
 
-        self.border_width = None
-        self.shadow_width = None
         self.padding = (5, 5)
         self.background_colour = None
         self.border_colour = None

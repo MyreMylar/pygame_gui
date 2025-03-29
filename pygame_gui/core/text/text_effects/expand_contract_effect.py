@@ -27,7 +27,6 @@ class ExpandContractEffect(TextEffect):
         self.time_to_complete_expand_contract = 2.0
         self.time_acc = 0.0
         self.current_scale = 1.0
-        self.text_changed = False
         self.text_owner.set_text_scale(self.current_scale, self.text_sub_chunk)
         self._load_params(params)
 
@@ -85,18 +84,6 @@ class ExpandContractEffect(TextEffect):
             if self.text_sub_chunk is not None:
                 event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
-
-    def has_text_changed(self) -> bool:
-        """
-        Lets us know when the effect has changed enough  to warrant us redrawing the text.
-
-        :return: True if it is time to redraw our text.
-        """
-        if self.text_changed:
-            self.text_changed = False
-            return True
-        else:
-            return False
 
     def apply_effect(self):
         """

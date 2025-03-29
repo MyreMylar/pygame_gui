@@ -2,15 +2,8 @@ class TextEffect:
     """
     Base class for text effects
     """
-
-    # pylint: disable=unused-argument
-    def has_text_changed(self) -> bool:
-        """
-        Stub that returns False
-
-        :return: False
-        """
-        return False
+    def __init__(self):
+        self._text_changed = False
 
     def update(self, time_delta: float):
         """
@@ -32,3 +25,23 @@ class TextEffect:
         """
         Apply the effect to the text
         """
+
+    @property
+    def text_changed(self):
+        return self._text_changed
+
+    @text_changed.setter
+    def text_changed(self, value: bool):
+        self._text_changed = value
+
+    def has_text_changed(self) -> bool:
+        """
+        Test if we should redraw the text.
+
+        :return: True if we should redraw, False otherwise.
+        """
+        if self.text_changed:
+            self.text_changed = False
+            return True
+        else:
+            return False

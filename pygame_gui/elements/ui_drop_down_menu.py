@@ -838,9 +838,6 @@ class UIDropDownMenu(UIContainer):
         self.expansion_height_limit = expansion_height_limit
         self.expand_on_option_click = expand_on_option_click
 
-        self.border_width = None
-        self.shadow_width = None
-
         self.background_colour = None
         self.border_colour = None
         self.disabled_background_colour = None

@@ -144,8 +144,6 @@ class UITextEntryLine(UIElement):
             self.ui_theme.get_font_dictionary().get_default_symbol_font()
         )
 
-        self.shadow_width = None
-        self.border_width = None
         self.padding = None
         self.text_surface = None
         self.cursor = None

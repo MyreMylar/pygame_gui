@@ -86,9 +86,6 @@ class UIHorizontalScrollBar(UIElement):
         self.disabled_border_colour = None
         self.disabled_background_colour = None
 
-        self.border_width = None
-        self.shadow_width = None
-
         self.drawable_shape = None
         self.shape = "rectangle"
         self.left_arrow_text = "◀"

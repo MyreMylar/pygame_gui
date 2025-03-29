@@ -146,7 +146,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         """
         if state:
-            if len(self.window_stack.top_stack) > 0:
+            if self.window_stack.any_windows_in_top_stack():
                 if not self.always_on_top:
                     self._blocking_always_on_top = True
                 self.always_on_top = True
@@ -187,13 +187,16 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     self.relative_rect.y + self.shadow_width,
                 )
                 self._window_root_container.set_relative_position(container_pos)
+                internal_size = (0.0, 0.0)
+                if self.window_element_container is not None:
+                    internal_size = self.window_element_container.get_size()
                 window_resize_event = pygame.event.Event(
                     UI_WINDOW_RESIZED,
                     {
                         "ui_element": self,
                         "ui_object_id": self.most_specific_combined_id,
                         "external_size": self.rect.size,
-                        "internal_size": self.window_element_container.get_size(),
+                        "internal_size": internal_size,
                     },
                 )
                 pygame.event.post(window_resize_event)
@@ -329,7 +332,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         super().update(time_delta)
 
         # This is needed to keep the window in sync with the container after adding elements to it
-        if self._window_root_container.layer_thickness != self.layer_thickness:
+        if (self._window_root_container is not None and
+                self._window_root_container.layer_thickness != self.layer_thickness):
             self.layer_thickness = self._window_root_container.layer_thickness
             self.window_stack.refresh_window_stack_from_window(self)
         if self.title_bar is not None:
@@ -424,6 +428,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :return UIContainer: The window's container.
 
         """
+        if self.window_element_container is None:
+            raise RuntimeError
         return self.window_element_container
 
     def can_hover(self) -> bool:
@@ -456,28 +462,29 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
 
             # Build a temporary rect just a little bit larger than our container rect.
-            resize_rect = pygame.Rect(
-                self._window_root_container.rect.left - 4,
-                self._window_root_container.rect.top - 4,
-                self._window_root_container.rect.width + 8,
-                self._window_root_container.rect.height + 8,
-            )
-            if resize_rect.collidepoint(mouse_x, mouse_y):
-                if resize_rect.right > mouse_x > resize_rect.right - 6:
-                    self.edge_hovering[2] = True
-                    hovered = True
+            if self._window_root_container is not None:
+                resize_rect = pygame.Rect(
+                    self._window_root_container.rect.left - 4,
+                    self._window_root_container.rect.top - 4,
+                    self._window_root_container.rect.width + 8,
+                    self._window_root_container.rect.height + 8,
+                )
+                if resize_rect.collidepoint(mouse_x, mouse_y):
+                    if resize_rect.right > mouse_x > resize_rect.right - 6:
+                        self.edge_hovering[2] = True
+                        hovered = True
 
-                if resize_rect.left + 6 > mouse_x > resize_rect.left:
-                    self.edge_hovering[0] = True
-                    hovered = True
+                    if resize_rect.left + 6 > mouse_x > resize_rect.left:
+                        self.edge_hovering[0] = True
+                        hovered = True
 
-                if resize_rect.bottom > mouse_y > resize_rect.bottom - 6:
-                    self.edge_hovering[3] = True
-                    hovered = True
+                    if resize_rect.bottom > mouse_y > resize_rect.bottom - 6:
+                        self.edge_hovering[3] = True
+                        hovered = True
 
-                if resize_rect.top + 6 > mouse_y > resize_rect.top:
-                    self.edge_hovering[1] = True
-                    hovered = True
+                    if resize_rect.top + 6 > mouse_y > resize_rect.top:
+                        self.edge_hovering[1] = True
+                        hovered = True
         elif self.resizing_mode_active:
             hovered = True
 
@@ -866,7 +873,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param new_title: The title to set.
         """
         self.window_display_title = new_title
-        self.title_bar.set_text(self.window_display_title)
+        if self.title_bar is not None:
+            self.title_bar.set_text(self.window_display_title)
 
     def disable(self):
         """
@@ -894,7 +902,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         :param show_contents: whether to also show the contents of the window. Defaults to True.
         """
         super().show()
-        self._window_root_container.show(show_contents=False)
+        if self._window_root_container is not None:
+            self._window_root_container.show(show_contents=False)
         if self.title_bar is not None:
             self.title_bar.show()
         if self.close_window_button is not None:
@@ -913,7 +922,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             return
 
         super().hide()
-        self._window_root_container.hide(hide_contents=False)
+        if self._window_root_container is not None:
+            self._window_root_container.hide(hide_contents=False)
         if self.title_bar is not None:
             self.title_bar.hide()
         if self.close_window_button is not None:
@@ -964,7 +974,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         """
         any_hovered = False
         for element in self:
-            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+            element_focus_set = element.get_focus_set()
+            if element_focus_set is not None and any(sub_element.hovered for sub_element in element_focus_set):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()

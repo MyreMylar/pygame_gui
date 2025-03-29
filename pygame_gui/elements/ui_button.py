@@ -17,6 +17,7 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
     IUIElementInterface,
+    IColourGradientInterface,
 )
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
@@ -78,9 +79,11 @@ class UIButton(UIElement):
         tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
         max_dynamic_width: Optional[int] = None,
     ):
-        rel_rect = (
+        rel_rect: RectLike = (
             relative_rect
-            if len(relative_rect) == 4
+            if (isinstance(relative_rect, pygame.Rect) or
+                isinstance(relative_rect, pygame.FRect) or
+                (isinstance(relative_rect, tuple) and len(relative_rect) == 4))
             else pygame.Rect(relative_rect, (-1, -1))
         )
         super().__init__(
@@ -101,7 +104,7 @@ class UIButton(UIElement):
         if text_kwargs is not None:
             self.text_kwargs = text_kwargs
 
-        self.dynamic_dimensions_orig_top_left = rel_rect.topleft
+        self.dynamic_dimensions_orig_top_left = (rel_rect[0], rel_rect[1])
         # support for an optional 'tool tip' element attached to this button
         self.set_tooltip(tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs)
         self.ui_root_container = self.ui_manager.get_root_container()
@@ -130,14 +133,14 @@ class UIButton(UIElement):
         self.hold_range = (0, 0)
 
         # initialise theme parameters
-        self.colours = {}
+        self.colours: Dict[str, Union[pygame.Color, IColourGradientInterface]] = {}
 
         self.font = None
 
-        self.normal_image = None
-        self.hovered_image = None
-        self.selected_image = None
-        self.disabled_image = None
+        self.normal_image: Optional[pygame.Surface] = None
+        self.hovered_image: Optional[pygame.Surface] = None
+        self.selected_image: Optional[pygame.Surface] = None
+        self.disabled_image: Optional[pygame.Surface] = None
 
         self.text_horiz_alignment = "center"
         self.text_vert_alignment = "center"
@@ -149,9 +152,9 @@ class UIButton(UIElement):
         self.text_shadow_offset = (0, 0)
         self.max_dynamic_width = max_dynamic_width
 
-        self.state_transitions = {}
+        self.state_transitions: Dict[Tuple[str, str], float] = {}
 
-        self._handler = {}
+        self._handler: Dict[int, Callable] = {}
         if command is not None:
             if callable(command):
                 self.bind(UI_BUTTON_PRESSED, command)
@@ -226,7 +229,7 @@ class UIButton(UIElement):
 
         return changed
 
-    def hover_point(self, hover_x: int, hover_y: int) -> bool:
+    def hover_point(self, hover_x: float, hover_y: float) -> bool:
         """
         Tests if a position should be considered 'hovering' the button. Normally this just means
         our mouse pointer is inside the buttons rectangle, however if we are holding onto the
@@ -380,6 +383,7 @@ class UIButton(UIElement):
             )
             if (
                 self.is_enabled
+                and self.drawable_shape is not None
                 and self.drawable_shape.collide_point(scaled_mouse_pos)
                 and self.held
             ):
@@ -553,7 +557,7 @@ class UIButton(UIElement):
         if any_changed:
             if self.dynamic_width or self.dynamic_height:
                 self.rebuild()
-            else:
+            elif self.drawable_shape is not None:
                 self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
@@ -581,7 +585,7 @@ class UIButton(UIElement):
         :return bool: Returns True if our position is inside the hold range.
 
         """
-        if self.drawable_shape.collide_point(position):
+        if self.drawable_shape is not None and self.drawable_shape.collide_point(position):
             return True
         elif self.hold_range[0] > 0 or self.hold_range[1] > 0:
             hold_rect = pygame.Rect(

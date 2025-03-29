@@ -87,8 +87,8 @@ class UIElement(GUISprite, IUIElementInterface):
         self.most_specific_combined_id = "no_id"
 
         # Themed parameters
-        self.shadow_width: Optional[int] = None
-        self.border_width: Optional[int] = None
+        self.shadow_width: int = 2
+        self.border_width: int = 1
         self.border_overlap: Optional[int] = None
         self.shape_corner_radius: Optional[List[int]] = None
 
@@ -141,15 +141,15 @@ class UIElement(GUISprite, IUIElementInterface):
                     "shape_corner_radius": [2, 2, 2, 2],
                 }
             )
-            if self.shadow_width is not None:
-                self.relative_rect.width += self.shadow_width * 2
-                self.relative_rect.height += self.shadow_width * 2
-                self.relative_rect.top -= (
-                    self.shadow_width
-                )  # will need to be changed when we can adjust the anchor source
-                self.relative_rect.left -= (
-                    self.shadow_width
-                )  # will need to be changed when we can adjust the anchor source
+
+            self.relative_rect.width += self.shadow_width * 2
+            self.relative_rect.height += self.shadow_width * 2
+            self.relative_rect.top -= (
+                self.shadow_width
+            )  # will need to be changed when we can adjust the anchor source
+            self.relative_rect.left -= (
+                self.shadow_width
+            )  # will need to be changed when we can adjust the anchor source
 
         self.relative_rect.size = self._get_clamped_to_minimum_dimensions(
             self.relative_rect.size
