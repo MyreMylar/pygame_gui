@@ -296,12 +296,13 @@ class UIHorizontalSlider(UIElement):
         moved_this_frame = self._update_arrow_buttons(moved_this_frame, time_delta)
 
         mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-        if self.sliding_button.held and self.sliding_button.in_hold_range(
-            (mouse_x, mouse_y)
-        ):
-            moved_this_frame = self._update_grabbed_slider(mouse_x)
-        elif not self.sliding_button.held:
-            self.grabbed_slider = False
+        if self.sliding_button is not None:
+            if self.sliding_button.held and self.sliding_button.in_hold_range(
+                (mouse_x, mouse_y)
+            ):
+                moved_this_frame = self._update_grabbed_slider(mouse_x)
+            elif not self.sliding_button.held:
+                self.grabbed_slider = False
 
         if moved_this_frame:
             self._update_data_and_fire_events_when_moved()
@@ -554,11 +555,12 @@ class UIHorizontalSlider(UIElement):
         """
         super().set_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -570,11 +572,12 @@ class UIHorizontalSlider(UIElement):
         """
         super().set_relative_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -588,12 +591,13 @@ class UIHorizontalSlider(UIElement):
         super().set_dimensions(dimensions)
 
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
-        self.background_rect.height = self.relative_rect.height - (
+        self.background_rect.width = int(self.relative_rect.width - (2 * border_and_shadow))
+        self.background_rect.height = int(self.relative_rect.height - (
             2 * border_and_shadow
-        )
+        ))
 
-        self.button_container.set_dimensions(self.background_rect.size)
+        if self.button_container is not None:
+            self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out sliding button parameters
         self.scrollable_width = (
@@ -602,15 +606,16 @@ class UIHorizontalSlider(UIElement):
             - (2 * self.arrow_button_width)
         )
         self.right_limit_position = self.scrollable_width
-        self.scroll_position = self.scrollable_width * self.current_percentage
+        self.scroll_position = int(self.scrollable_width * self.current_percentage)
 
         slider_x_pos = self.scroll_position + self.arrow_button_width
         slider_y_pos = 0
 
-        self.sliding_button.set_dimensions(
-            (self.sliding_button_width, self.background_rect.height)
-        )
-        self.sliding_button.set_relative_position((slider_x_pos, slider_y_pos))
+        if self.sliding_button is not None:
+            self.sliding_button.set_dimensions(
+                (self.sliding_button_width, self.background_rect.height)
+            )
+            self.sliding_button.set_relative_position((slider_x_pos, slider_y_pos))
 
     def disable(self):
         """

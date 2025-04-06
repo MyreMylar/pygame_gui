@@ -583,7 +583,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if self.double_click_timer < self.ui_manager.get_double_click_time():
             self.double_click_timer += time_delta
 
-        if self.selection_in_progress:
+        if self.selection_in_progress and self.text_box_layout is not None:
             scaled_mouse_pos = self.ui_manager.get_mouse_position()
             text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
             select_end_pos = self.text_box_layout.find_cursor_position_from_click_pos(
@@ -1044,6 +1044,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             )
 
             if (
+                self.text_box_layout is not None and
                 self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1])
                 and self.is_enabled
             ):

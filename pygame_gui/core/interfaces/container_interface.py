@@ -182,6 +182,14 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def are_contents_hovered(self) -> bool:
+        """
+        Are any of the elements in the container hovered? Used for handling mousewheel events.
+
+        :return: True if one of the elements is hovered, False otherwise.
+        """
+
+    @abstractmethod
     def __iter__(self) -> typing.Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container-like interface.

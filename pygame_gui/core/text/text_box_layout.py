@@ -67,18 +67,18 @@ class TextBoxLayout:
 
         self.dynamic_width = self.view_rect.width == -1
         self.dynamic_height = self.view_rect.height == -1
-        self.layout_rect_queue = None
-        self.finalised_surface = None
+
+        self.finalised_surface: Optional[pygame.Surface] = None
         self.floating_rects: List[TextLayoutRect] = []
         self.layout_rows: List[TextBoxLayoutRow] = []
-        self.row_lengths = []
-        self.row_lengths_no_end_spaces = []
-        self.link_chunks = []
+        self.row_lengths: List[int] = []
+        self.row_lengths_no_end_spaces: List[int] = []
+        self.link_chunks: List[HyperlinkTextChunk] = []
         self.letter_count = 0
         self.current_end_pos = 0
 
         self.alpha = 255
-        self.pre_alpha_final_surf = None  # only need this if we apply non-255 alpha
+        self.pre_alpha_final_surf: Optional[pygame.Surface] = None  # only need this if we apply non-255 alpha
 
         self.plain_text = ""
 
@@ -110,8 +110,8 @@ class TextBoxLayout:
 
         self.selection_colour = pygame.Color(128, 128, 200, 255)
         self.selection_text_colour = pygame.Color(255, 255, 255, 255)
-        self.selected_chunks = []
-        self.selected_rows = []
+        self.selected_chunks: List[TextLayoutRect] = []
+        self.selected_rows: List[TextBoxLayoutRow] = []
         self.selection_start_index = 0
         self.selection_end_index = 0
 
@@ -1020,7 +1020,7 @@ class TextBoxLayout:
         self.selected_chunks.append(chunk)
 
     def _find_chunk_and_chunk_x(self, index: int):
-        found_chunk = None
+        found_chunk: Optional[LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk] = None
         letter_index = 0
         letter_accumulator = 0
         row_index = 0
@@ -1056,7 +1056,7 @@ class TextBoxLayout:
         return found_chunk, x_pos_in_chunk, letter_index, row_index
 
     def _find_and_split_chunk(self, index: int, return_rhs: bool = False):
-        found_chunk = None
+        found_chunk:  Optional[LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk] = None
         letter_index = 0
         letter_accumulator = 0
         chunk_in_row_index = 0
@@ -1091,7 +1091,7 @@ class TextBoxLayout:
                         ):
                             found_chunk = chunk
                             break
-        if found_chunk is not None and found_chunk.can_split():
+        if found_chunk is not None and isinstance(found_chunk, TextLineChunkFTFont) and found_chunk.can_split():
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
@@ -1159,7 +1159,7 @@ class TextBoxLayout:
             row_to_process_from = self.layout_rows[current_row.row_index - 1]
             row_to_process_from_index = row_to_process_from.row_index
 
-        temp_layout_queue = deque([])
+        temp_layout_queue: Deque[TextLayoutRect] = deque([])
         for row in reversed(self.layout_rows[row_to_process_from_index:]):
             row.rewind_row(temp_layout_queue)
 
@@ -1187,10 +1187,10 @@ class TextBoxLayout:
                 if len(self.layout_rows) > 0:
                     last_row = self.layout_rows[-1]
                     last_chunk = last_row.get_last_text_or_line_break_chunk()
-                    if last_chunk is not None:
+                    if last_chunk is not None and parser is not None:
                         last_row.insert_linebreak_after_chunk(last_chunk, parser)
 
-                        temp_layout_queue = deque([])
+                        temp_layout_queue : Deque[TextLayoutRect] = deque([])
                         for row in reversed(self.layout_rows[last_row.row_index :]):
                             row.rewind_row(temp_layout_queue)
 

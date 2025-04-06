@@ -20,7 +20,7 @@ from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
 )
 from pygame_gui.core.utility import create_resource_path
-from pygame_gui.core.utility import ImageResource, SurfaceResource
+from pygame_gui.core.utility import ImageResource, SurfaceResource, FontResource
 from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 from pygame_gui.core.ui_shadow import ShadowGenerator
@@ -54,26 +54,26 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         self._locale = locale
         # the base colours are the default colours all UI elements use if they
         # don't have a more specific colour defined for their element
-        self.base_colours = {}
+        self.base_colours: Dict[str, Union[pygame.Color, ColourGradient]] = {}
 
         # colours for specific elements stored by element id then colour id
-        self.ui_element_colours = {}
+        self.ui_element_colours: Dict[str, Dict[str, Union[pygame.Color, ColourGradient]]] = {}
         self.font_dict = UIFontDictionary(self._resource_loader, locale)
         self.shadow_generator = ShadowGenerator()
         self._shape_cache = SurfaceCache()
 
-        self.unique_theming_ids = {}
+        self.unique_theming_ids: Dict[str, List[str]] = {}
 
-        self.ui_element_fonts_info = {}
-        self.ui_element_image_locs = {}
-        self.ele_font_res = {}
-        self.ui_element_image_surfaces = {}
-        self.ui_element_misc_data = {}
-        self.image_resources = {}  # type: Dict[str,ImageResource]
-        self.surface_resources = {}  # type: Dict[str,SurfaceResource]
+        self.ui_element_fonts_info: Dict[str, Dict[str, Dict[str, str | int | bool | Dict[str, str]]]] = {}
+        self.ui_element_image_locs: Dict[str, Dict[str, Dict[str, str | bool | pygame.Rect]]] = {}
+        self.ele_font_res: Dict[str, Dict[str, FontResource]] = {}
+        self.ui_element_image_surfaces: Dict[str, Dict[str, SurfaceResource]] = {}
+        self.ui_element_misc_data: Dict[str, Dict[str, Any]] = {}
+        self.image_resources: Dict[str, ImageResource] = {}
+        self.surface_resources: Dict[str, SurfaceResource] = {}
 
-        self._theme_file_last_modified = None
-        self._theme_file_path = None
+        self._theme_file_last_modified: float = 0.0
+        self._theme_file_path: Optional[str | PackageResource] = None
 
         self._load_default_theme_file()
 
@@ -469,7 +469,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def _get_next_id_node(
         self,
-        current_node: Optional[Dict[str, Union[str, Dict]]],
+        current_node: Optional[Dict],
         element_base_ids: List[Union[str, None]],
         element_ids: List[str],
         class_ids: List[Union[str, None]],
@@ -604,7 +604,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if combined_id in self.unique_theming_ids:
             return self.unique_theming_ids[combined_id]
 
-        combined_ids = []
+        combined_ids: List[str] = []
         if (
             object_ids is not None
             and element_ids is not None
@@ -849,9 +849,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if isinstance(file_path, dict):
             theme_dict = file_path
         else:
-            theme_dict = self._load_theme_by_path(file_path)
-            if theme_dict is None:
+            loaded_theme_dict = self._load_theme_by_path(file_path)
+            if loaded_theme_dict is None:
                 return
+
+            theme_dict = loaded_theme_dict
 
         self._parse_theme_data_from_json_dict(theme_dict)
 
@@ -869,7 +871,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             with (files(file_path.package) / file_path.resource).open(
                 "r", encoding="utf-8", errors="strict"
             ) as fp:
-                used_file_path = io.StringIO(fp.read())
+                used_file_path: str | io.StringIO = io.StringIO(fp.read())
                 self._theme_file_path = file_path
                 with as_file(
                     files(file_path.package) / file_path.resource
@@ -877,12 +879,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     self._theme_file_last_modified = os.stat(package_file_path).st_mtime
 
         elif not isinstance(file_path, io.StringIO):
-            self._theme_file_path = create_resource_path(file_path)
+            stringy_path: str = create_resource_path(file_path)
             try:
-                self._theme_file_last_modified = os.stat(self._theme_file_path).st_mtime
+                self._theme_file_last_modified = os.stat(stringy_path).st_mtime
             except (pygame.error, OSError):
                 self._theme_file_last_modified = 0
-            used_file_path = self._theme_file_path
+            used_file_path = stringy_path
+            self._theme_file_path = used_file_path
         else:
             used_file_path = file_path
 
@@ -960,7 +963,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             return
         prototype_id = theme_dict[element_name]["prototype"]
 
-        found_prototypes = []
+        found_prototypes: List[Any] = []
 
         if prototype_id in self.ui_element_fonts_info:
             prototype_font = self.ui_element_fonts_info[prototype_id]
@@ -1125,7 +1128,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             colour = self._load_colour_or_gradient_from_theme(colours_dict, colour_key)
             self.ui_element_colours[element_name][colour_key] = colour
 
-    def _load_element_font_data_from_theme(self, file_dict, element_name: str):
+    def _load_element_font_data_from_theme(self, file_dict: Dict[str, str | Dict[str, str]], element_name: str):
         """
         Load font theming data direct from the theme file's data dictionary into our font
         data dictionary. Data is stored by its combined element ID and an ID specific to the
@@ -1138,17 +1141,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
 
-        locale = file_dict["locale"] if "locale" in file_dict else "en"
+        locale = file_dict["locale"] if "locale" in file_dict and isinstance(file_dict["locale"], str) else "en"
         if locale not in self.ui_element_fonts_info[element_name]:
             self.ui_element_fonts_info[element_name][locale] = {}
 
         font_info_dict = self.ui_element_fonts_info[element_name][locale]
-        if "name" in file_dict:
+        if "name" in file_dict and isinstance(file_dict["name"], str):
             font_info_dict["name"] = file_dict["name"]
         if "name" not in font_info_dict:
             font_info_dict["name"] = self.font_dict.default_font.name
 
-        if "size" in file_dict:
+        if "size" in file_dict and isinstance(file_dict["size"], str):
             try:
                 font_info_dict["size"] = int(file_dict["size"])
             except ValueError:
@@ -1157,7 +1160,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if "size" not in font_info_dict:
             font_info_dict["size"] = self.font_dict.default_font.size
 
-        if "bold" in file_dict:
+        if "bold" in file_dict and isinstance(file_dict["bold"], str):
             try:
                 font_info_dict["bold"] = bool(int(file_dict["bold"]))
             except ValueError:
@@ -1165,7 +1168,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if "bold" not in font_info_dict:
             font_info_dict["bold"] = False
 
-        if "italic" in file_dict:
+        if "italic" in file_dict and isinstance(file_dict["italic"], str):
             try:
                 font_info_dict["italic"] = bool(int(file_dict["italic"]))
             except ValueError:
@@ -1173,7 +1176,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if "italic" not in font_info_dict:
             font_info_dict["italic"] = False
 
-        if "antialiased" in file_dict:
+        if "antialiased" in file_dict and isinstance(file_dict["antialiased"], str):
             try:
                 font_info_dict["antialiased"] = bool(int(file_dict["antialiased"]))
             except ValueError:
@@ -1181,48 +1184,49 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if "antialiased" not in font_info_dict:
             font_info_dict["antialiased"] = True
 
-        if "script" in file_dict:
+        if "script" in file_dict and isinstance(file_dict["script"], str):
             font_info_dict["script"] = file_dict["script"]
         if "script" not in font_info_dict:
             font_info_dict["script"] = self.font_dict.default_font.script
 
-        if "direction" in file_dict:
-            if file_dict["direction"].lower() == "ltr":
+        if "direction" in file_dict and isinstance(file_dict["direction"], str):
+            font_direction: str = str(file_dict["direction"])
+            if font_direction.lower() == "ltr":
                 font_info_dict["direction"] = pygame.DIRECTION_LTR
-            elif file_dict["direction"].lower() == "rtl":
+            elif font_direction.lower() == "rtl":
                 font_info_dict["direction"] = pygame.DIRECTION_RTL
         else:
             font_info_dict["direction"] = pygame.DIRECTION_LTR
 
-        if "regular_path" in file_dict:
+        if "regular_path" in file_dict and isinstance(file_dict["regular_path"], str):
             font_info_dict["regular_path"] = file_dict["regular_path"]
-        if "bold_path" in file_dict:
+        if "bold_path" in file_dict and isinstance(file_dict["bold_path"], str):
             font_info_dict["bold_path"] = file_dict["bold_path"]
-        if "italic_path" in file_dict:
+        if "italic_path" in file_dict and isinstance(file_dict["italic_path"], str):
             font_info_dict["italic_path"] = file_dict["italic_path"]
-        if "bold_italic_path" in file_dict:
+        if "bold_italic_path" in file_dict and isinstance(file_dict["bold_italic_path"], str):
             bold_italic_path = file_dict["bold_italic_path"]
             font_info_dict["bold_italic_path"] = bold_italic_path
 
-        if "regular_resource" in file_dict:
+        if "regular_resource" in file_dict and isinstance(file_dict["regular_resource"], dict):
             resource_data = {
                 "package": file_dict["regular_resource"]["package"],
                 "resource": file_dict["regular_resource"]["resource"],
             }
             font_info_dict["regular_resource"] = resource_data
-        if "bold_resource" in file_dict:
+        if "bold_resource" in file_dict and isinstance(file_dict["bold_resource"], dict):
             resource_data = {
                 "package": file_dict["bold_resource"]["package"],
                 "resource": file_dict["bold_resource"]["resource"],
             }
             font_info_dict["bold_resource"] = resource_data
-        if "italic_resource" in file_dict:
+        if "italic_resource" in file_dict and isinstance(file_dict["italic_resource"], dict):
             resource_data = {
                 "package": file_dict["italic_resource"]["package"],
                 "resource": file_dict["italic_resource"]["resource"],
             }
             font_info_dict["italic_resource"] = resource_data
-        if "bold_italic_resource" in file_dict:
+        if "bold_italic_resource" in file_dict and isinstance(file_dict["bold_italic_resource"], dict):
             resource_data = {
                 "package": file_dict["bold_italic_resource"]["package"],
                 "resource": file_dict["bold_italic_resource"]["resource"],

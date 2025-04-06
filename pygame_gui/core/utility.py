@@ -12,7 +12,6 @@ import sys
 import io
 import base64
 
-from pathlib import Path
 from typing import Union, Dict, Tuple, Optional
 from importlib import resources
 
@@ -262,7 +261,7 @@ def clipboard_paste():
         return __unknown_paste()
 
 
-def create_resource_path(relative_path: Union[str, Path]):
+def create_resource_path(relative_path: Union[str, os.PathLike]):
     """
     Get absolute path to resource, works for dev and for PyInstaller's 'onefile' mode
 

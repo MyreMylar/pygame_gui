@@ -91,11 +91,11 @@ class UIHorizontalScrollBar(UIElement):
         self.left_arrow_text = "◀"
         self.right_arrow_text = "▶"
 
-        self.background_rect = None  # type: Union[None, pygame.Rect]
+        self.background_rect = pygame.Rect(0, 0, 0, 0)
 
-        self.scrollable_width = None  # type: Union[None, int, float]
-        self.right_limit = None
-        self.sliding_rect_position = None  # type: Union[None, pygame.math.Vector2]
+        self.scrollable_width: int = 0
+        self.right_limit: int = 0
+        self.sliding_rect_position = pygame.math.Vector2(0.0, 0.0)
 
         self.left_button = None
         self.right_button = None
@@ -127,7 +127,7 @@ class UIHorizontalScrollBar(UIElement):
 
         self.sliding_button.set_hold_range((self.background_rect.width, 100))
 
-        self._container_to_scroll = None
+        self._container_to_scroll: Optional[IUIContainerInterface] = None
 
     def set_container_to_check_hover_for_mousewheel_events(
         self, container: IUIContainerInterface
@@ -338,7 +338,11 @@ class UIHorizontalScrollBar(UIElement):
         :return: True if it was.
 
         """
-        return any(element.hovered for element in self.get_focus_set())
+        is_focus_set_hovered = False
+        focus_set = self.get_focus_set()
+        if focus_set is not None:
+            is_focus_set_hovered = any(element.hovered for element in focus_set)
+        return is_focus_set_hovered
 
     def _check_should_handle_mousewheel_event(self) -> bool:
         should_handle = False
@@ -433,7 +437,7 @@ class UIHorizontalScrollBar(UIElement):
             moved_this_frame = self._update_scroll_position_from_target(time_delta)
 
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            if self.sliding_button.held and self.sliding_button.in_hold_range(
+            if self.sliding_button is not None and self.sliding_button.held and self.sliding_button.in_hold_range(
                 (mouse_x, mouse_y)
             ):
                 if not self.grabbed_slider:
@@ -460,7 +464,7 @@ class UIHorizontalScrollBar(UIElement):
                 self.sliding_button.set_relative_position((x_pos, y_pos))
                 moved_this_frame = True
 
-            elif not self.sliding_button.held:
+            elif self.sliding_button is not None and not self.sliding_button.held:
                 self.grabbed_slider = False
 
             if moved_this_frame:
@@ -479,16 +483,18 @@ class UIHorizontalScrollBar(UIElement):
 
         new_scroll_position = new_start_percentage * self.scrollable_width
 
-        self.scroll_position = min(
-            max(new_scroll_position, self.left_limit),
-            self.right_limit - self.sliding_button.rect.width,
-        )
+        if self.sliding_button is not None:
+            self.scroll_position = min(
+                max(new_scroll_position, self.left_limit),
+                self.right_limit - self.sliding_button.rect.width,
+            )
         self.target_scroll_position = self.scroll_position
         self.start_percentage = self.scroll_position / self.scrollable_width
 
         x_pos = self.scroll_position + self.arrow_button_width
         y_pos = 0
-        self.sliding_button.set_relative_position((x_pos, y_pos))
+        if self.sliding_button is not None:
+            self.sliding_button.set_relative_position((x_pos, y_pos))
         self.has_moved_recently = True
 
     def redraw_scrollbar(self):
@@ -619,11 +625,12 @@ class UIHorizontalScrollBar(UIElement):
         """
         super().set_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -635,11 +642,12 @@ class UIHorizontalScrollBar(UIElement):
         """
         super().set_relative_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def _set_sliding_button_data(self, scroll_bar_width):
         self.sliding_button.set_relative_position(self.sliding_rect_position)
@@ -659,13 +667,14 @@ class UIHorizontalScrollBar(UIElement):
         """
         super().set_dimensions(dimensions)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
-        self.background_rect.height = self.relative_rect.height - (
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.width = int(self.relative_rect.width - (2 * border_and_shadow))
+        self.background_rect.height = int(self.relative_rect.height - (
             2 * border_and_shadow
-        )
+        ))
 
-        self.button_container.set_dimensions(self.background_rect.size)
+        if self.button_container is not None:
+            self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out scroll bar parameters
         self.scrollable_width = self.background_rect.width - (
@@ -691,10 +700,11 @@ class UIHorizontalScrollBar(UIElement):
         self.scroll_position = self.sliding_rect_position.x - base_scroll_bar_x
         self.target_scroll_position = self.scroll_position
 
-        self.sliding_button.set_dimensions(
-            (scroll_bar_width, self.background_rect.height)
-        )
-        self.sliding_button.set_relative_position(self.sliding_rect_position)
+        if self.sliding_button is not None:
+            self.sliding_button.set_dimensions(
+                (scroll_bar_width, self.background_rect.height)
+            )
+            self.sliding_button.set_relative_position(self.sliding_rect_position)
 
     def disable(self):
         """

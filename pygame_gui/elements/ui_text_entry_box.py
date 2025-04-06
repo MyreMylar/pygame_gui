@@ -138,7 +138,7 @@ class UITextEntryBox(UITextBox):
         if not self.alive():
             return
 
-        if self.text_box_rows != len(self.text_box_layout.layout_rows):
+        if self.text_box_layout is not None and self.text_box_rows != len(self.text_box_layout.layout_rows):
             self.text_box_rows = len(self.text_box_layout.layout_rows)
             self._align_all_text_rows()
             self.redraw_from_chunks()
@@ -164,7 +164,8 @@ class UITextEntryBox(UITextBox):
 
     def _change_cursor_state(self, cursor_on: bool):
         self.cursor_on = cursor_on
-        self.text_box_layout.toggle_cursor()
+        if self.text_box_layout is not None:
+            self.text_box_layout.toggle_cursor()
         self.redraw_from_text_block()
 
     def _handle_cursor_visibility(self):
@@ -249,7 +250,8 @@ class UITextEntryBox(UITextBox):
                 self.edit_position = self.edit_position
                 self.cursor_has_moved_recently = True
 
-                self.text_box_layout.delete_at_cursor()
+                if self.text_box_layout is not None:
+                    self.text_box_layout.delete_at_cursor()
                 self.redraw_from_text_block()
             consumed_event = True
         elif self._process_edit_pos_move_key(event):
@@ -324,9 +326,10 @@ class UITextEntryBox(UITextBox):
                     self._replace_selected_text_with_character(character)
                 else:
                     self._insert_text_into_html_string(character)
-                    self.text_box_layout.insert_text(
-                        character, self.edit_position, self.parser
-                    )
+                    if self.text_box_layout is not None:
+                        self.text_box_layout.insert_text(
+                            character, self.edit_position, self.parser
+                        )
                     self.edit_position += 1
                 self.redraw_from_text_block()
                 self.cursor_has_moved_recently = True
