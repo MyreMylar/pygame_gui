@@ -57,15 +57,21 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         self.base_colours: Dict[str, Union[pygame.Color, ColourGradient]] = {}
 
         # colours for specific elements stored by element id then colour id
-        self.ui_element_colours: Dict[str, Dict[str, Union[pygame.Color, ColourGradient]]] = {}
+        self.ui_element_colours: Dict[
+            str, Dict[str, Union[pygame.Color, ColourGradient]]
+        ] = {}
         self.font_dict = UIFontDictionary(self._resource_loader, locale)
         self.shadow_generator = ShadowGenerator()
         self._shape_cache = SurfaceCache()
 
         self.unique_theming_ids: Dict[str, List[str]] = {}
 
-        self.ui_element_fonts_info: Dict[str, Dict[str, Dict[str, str | int | bool | Dict[str, str]]]] = {}
-        self.ui_element_image_locs: Dict[str, Dict[str, Dict[str, str | bool | pygame.Rect]]] = {}
+        self.ui_element_fonts_info: Dict[
+            str, Dict[str, Dict[str, str | int | bool | Dict[str, str]]]
+        ] = {}
+        self.ui_element_image_locs: Dict[
+            str, Dict[str, Dict[str, str | bool | pygame.Rect]]
+        ] = {}
         self.ele_font_res: Dict[str, Dict[str, FontResource]] = {}
         self.ui_element_image_surfaces: Dict[str, Dict[str, SurfaceResource]] = {}
         self.ui_element_misc_data: Dict[str, Dict[str, Any]] = {}
@@ -1128,7 +1134,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             colour = self._load_colour_or_gradient_from_theme(colours_dict, colour_key)
             self.ui_element_colours[element_name][colour_key] = colour
 
-    def _load_element_font_data_from_theme(self, file_dict: Dict[str, str | Dict[str, str]], element_name: str):
+    def _load_element_font_data_from_theme(
+        self, file_dict: Dict[str, str | Dict[str, str]], element_name: str
+    ):
         """
         Load font theming data direct from the theme file's data dictionary into our font
         data dictionary. Data is stored by its combined element ID and an ID specific to the
@@ -1141,7 +1149,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
 
-        locale = file_dict["locale"] if "locale" in file_dict and isinstance(file_dict["locale"], str) else "en"
+        locale = (
+            file_dict["locale"]
+            if "locale" in file_dict and isinstance(file_dict["locale"], str)
+            else "en"
+        )
         if locale not in self.ui_element_fonts_info[element_name]:
             self.ui_element_fonts_info[element_name][locale] = {}
 
@@ -1204,29 +1216,39 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             font_info_dict["bold_path"] = file_dict["bold_path"]
         if "italic_path" in file_dict and isinstance(file_dict["italic_path"], str):
             font_info_dict["italic_path"] = file_dict["italic_path"]
-        if "bold_italic_path" in file_dict and isinstance(file_dict["bold_italic_path"], str):
+        if "bold_italic_path" in file_dict and isinstance(
+            file_dict["bold_italic_path"], str
+        ):
             bold_italic_path = file_dict["bold_italic_path"]
             font_info_dict["bold_italic_path"] = bold_italic_path
 
-        if "regular_resource" in file_dict and isinstance(file_dict["regular_resource"], dict):
+        if "regular_resource" in file_dict and isinstance(
+            file_dict["regular_resource"], dict
+        ):
             resource_data = {
                 "package": file_dict["regular_resource"]["package"],
                 "resource": file_dict["regular_resource"]["resource"],
             }
             font_info_dict["regular_resource"] = resource_data
-        if "bold_resource" in file_dict and isinstance(file_dict["bold_resource"], dict):
+        if "bold_resource" in file_dict and isinstance(
+            file_dict["bold_resource"], dict
+        ):
             resource_data = {
                 "package": file_dict["bold_resource"]["package"],
                 "resource": file_dict["bold_resource"]["resource"],
             }
             font_info_dict["bold_resource"] = resource_data
-        if "italic_resource" in file_dict and isinstance(file_dict["italic_resource"], dict):
+        if "italic_resource" in file_dict and isinstance(
+            file_dict["italic_resource"], dict
+        ):
             resource_data = {
                 "package": file_dict["italic_resource"]["package"],
                 "resource": file_dict["italic_resource"]["resource"],
             }
             font_info_dict["italic_resource"] = resource_data
-        if "bold_italic_resource" in file_dict and isinstance(file_dict["bold_italic_resource"], dict):
+        if "bold_italic_resource" in file_dict and isinstance(
+            file_dict["bold_italic_resource"], dict
+        ):
             resource_data = {
                 "package": file_dict["bold_italic_resource"]["package"],
                 "resource": file_dict["bold_italic_resource"]["resource"],

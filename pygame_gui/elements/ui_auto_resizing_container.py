@@ -321,11 +321,15 @@ class UIAutoResizingContainer(UIContainer):
         """
         rect = self.get_abs_rect()
 
-        left_ext: int = int(rect.left - self._get_left_most_point()) if self.resize_left else 0
+        left_ext: int = (
+            int(rect.left - self._get_left_most_point()) if self.resize_left else 0
+        )
         right_ext: int = int(
             self._get_right_most_point() - rect.right if self.resize_right else 0
         )
-        top_ext: int = int(rect.top - self._get_top_most_point()) if self.resize_top else 0
+        top_ext: int = (
+            int(rect.top - self._get_top_most_point()) if self.resize_top else 0
+        )
         bottom_ext: int = int(
             self._get_bottom_most_point() - rect.bottom if self.resize_bottom else 0
         )

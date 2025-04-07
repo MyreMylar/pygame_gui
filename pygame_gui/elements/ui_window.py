@@ -332,8 +332,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         super().update(time_delta)
 
         # This is needed to keep the window in sync with the container after adding elements to it
-        if (self._window_root_container is not None and
-                self._window_root_container.layer_thickness != self.layer_thickness):
+        if (
+            self._window_root_container is not None
+            and self._window_root_container.layer_thickness != self.layer_thickness
+        ):
             self.layer_thickness = self._window_root_container.layer_thickness
             self.window_stack.refresh_window_stack_from_window(self)
         if self.title_bar is not None:
@@ -975,7 +977,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         any_hovered = False
         for element in self:
             element_focus_set = element.get_focus_set()
-            if element_focus_set is not None and any(sub_element.hovered for sub_element in element_focus_set):
+            if element_focus_set is not None and any(
+                sub_element.hovered for sub_element in element_focus_set
+            ):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()

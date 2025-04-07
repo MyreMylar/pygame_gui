@@ -7,6 +7,10 @@ RectLike = Union[Rect, FRect, Tuple[float, float, float, float]]
 
 
 class WithHealth(Protocol):
+    """
+    A protocol for an object that has health.
+    """
+
     current_health: int
     health_capacity: int
 

@@ -138,7 +138,9 @@ class UITextEntryBox(UITextBox):
         if not self.alive():
             return
 
-        if self.text_box_layout is not None and self.text_box_rows != len(self.text_box_layout.layout_rows):
+        if self.text_box_layout is not None and self.text_box_rows != len(
+            self.text_box_layout.layout_rows
+        ):
             self.text_box_rows = len(self.text_box_layout.layout_rows)
             self._align_all_text_rows()
             self.redraw_from_chunks()

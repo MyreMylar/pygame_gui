@@ -6,7 +6,6 @@ from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
-    IUIContainerInterface,
     IUIElementInterface,
 )
 from pygame_gui.core import UIElement, UIContainer
@@ -444,8 +443,10 @@ class UIVerticalScrollBar(UIElement):
             moved_this_frame = self._update_scroll_position_from_target(time_delta)
 
             mouse_x, mouse_y = self.ui_manager.get_mouse_position()
-            if self.sliding_button is not None and self.sliding_button.held and self.sliding_button.in_hold_range(
-                (mouse_x, mouse_y)
+            if (
+                self.sliding_button is not None
+                and self.sliding_button.held
+                and self.sliding_button.in_hold_range((mouse_x, mouse_y))
             ):
                 if not self.grabbed_slider:
                     self.grabbed_slider = True
@@ -677,10 +678,12 @@ class UIVerticalScrollBar(UIElement):
         super().set_dimensions(dimensions)
 
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.width = int(self.relative_rect.width - (2 * border_and_shadow))
-        self.background_rect.height = int(self.relative_rect.height - (
-            2 * border_and_shadow
-        ))
+        self.background_rect.width = int(
+            self.relative_rect.width - (2 * border_and_shadow)
+        )
+        self.background_rect.height = int(
+            self.relative_rect.height - (2 * border_and_shadow)
+        )
 
         if self.button_container is not None:
             self.button_container.set_dimensions(self.background_rect.size)

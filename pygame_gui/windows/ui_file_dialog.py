@@ -518,8 +518,11 @@ class UIFileDialog(UIWindow):
         :param event: event to check.
 
         """
-        if (event.type == UI_BUTTON_PRESSED and
-                event.ui_element == self.delete_button and self.current_file_path is not None):
+        if (
+            event.type == UI_BUTTON_PRESSED
+            and event.ui_element == self.delete_button
+            and self.current_file_path is not None
+        ):
             confirmation_rect = pygame.Rect(0, 0, 300, 200)
             confirmation_rect.center = self.rect.center
             selected_file_name = self.current_file_path.name

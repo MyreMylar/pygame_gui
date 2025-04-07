@@ -88,10 +88,12 @@ class UIPanel(UIElement, IContainerLikeInterface):
         # need to reset ids after building panel to include panel as parent element
         # shouldn't affect theming as this container has no theming
         self.panel_container.parent_element = self
-        self.panel_container._create_valid_ids(container,
-                                               self,
-                                               ObjectID(object_id="#panel_container", class_id=None),
-                                               "container")
+        self.panel_container._create_valid_ids(
+            container,
+            self,
+            ObjectID(object_id="#panel_container", class_id=None),
+            "container",
+        )
 
         self.background_colour = None
         self.border_colour = None
@@ -376,8 +378,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
         any_hovered = False
         for element in self:
             element_focus_set = element.get_focus_set()
-            if (element_focus_set is not None and
-                    any(sub_element.hovered for sub_element in element_focus_set)):
+            if element_focus_set is not None and any(
+                sub_element.hovered for sub_element in element_focus_set
+            ):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()

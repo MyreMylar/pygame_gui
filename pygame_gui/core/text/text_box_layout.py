@@ -78,7 +78,9 @@ class TextBoxLayout:
         self.current_end_pos = 0
 
         self.alpha = 255
-        self.pre_alpha_final_surf: Optional[pygame.Surface] = None  # only need this if we apply non-255 alpha
+        self.pre_alpha_final_surf: Optional[pygame.Surface] = (
+            None  # only need this if we apply non-255 alpha
+        )
 
         self.plain_text = ""
 
@@ -1020,7 +1022,9 @@ class TextBoxLayout:
         self.selected_chunks.append(chunk)
 
     def _find_chunk_and_chunk_x(self, index: int):
-        found_chunk: Optional[LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk] = None
+        found_chunk: Optional[
+            LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk
+        ] = None
         letter_index = 0
         letter_accumulator = 0
         row_index = 0
@@ -1056,7 +1060,9 @@ class TextBoxLayout:
         return found_chunk, x_pos_in_chunk, letter_index, row_index
 
     def _find_and_split_chunk(self, index: int, return_rhs: bool = False):
-        found_chunk:  Optional[LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk] = None
+        found_chunk: Optional[
+            LineBreakLayoutRect | TextLineChunkFTFont | HyperlinkTextChunk
+        ] = None
         letter_index = 0
         letter_accumulator = 0
         chunk_in_row_index = 0
@@ -1091,7 +1097,11 @@ class TextBoxLayout:
                         ):
                             found_chunk = chunk
                             break
-        if found_chunk is not None and isinstance(found_chunk, TextLineChunkFTFont) and found_chunk.can_split():
+        if (
+            found_chunk is not None
+            and isinstance(found_chunk, TextLineChunkFTFont)
+            and found_chunk.can_split()
+        ):
             # split the chunk
 
             # for the start chunk we want the right hand side of the split
@@ -1190,7 +1200,7 @@ class TextBoxLayout:
                     if last_chunk is not None and parser is not None:
                         last_row.insert_linebreak_after_chunk(last_chunk, parser)
 
-                        temp_layout_queue : Deque[TextLayoutRect] = deque([])
+                        temp_layout_queue: Deque[TextLayoutRect] = deque([])
                         for row in reversed(self.layout_rows[last_row.row_index :]):
                             row.rewind_row(temp_layout_queue)
 

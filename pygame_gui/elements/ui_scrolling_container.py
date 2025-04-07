@@ -3,7 +3,10 @@ from typing import Union, Dict, Tuple, Optional, List, Iterator
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IContainerAndContainerLike,
+)
 from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
 from pygame_gui.core.gui_type_hints import Coordinate
 from pygame_gui.core import UIElement, UIContainer
@@ -102,7 +105,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         )
         self.join_focus_sets(self._root_container)
 
-        view_container_anchors = {
+        view_container_anchors: Dict[str, str | IUIElementInterface] = {
             "left": "left",
             "right": "right",
             "top": "top",
@@ -180,7 +183,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         scrollable_rect = pygame.Rect(
             0, 0, self.relative_rect.width, self.relative_rect.height
         )
-        scrollable_anchors = {
+        scrollable_anchors: Dict[str, str | IUIElementInterface] = {
             "left": "left",
             "right": "left",
             "top": "top",
@@ -203,18 +206,22 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             if not self.allow_scroll_y:
                 resize_top = False
                 resize_bottom = False
-            self.scrollable_container = UIAutoResizingContainer(
-                relative_rect=scrollable_rect,
-                manager=manager,
-                resize_left=resize_left,
-                resize_right=resize_right,
-                resize_top=resize_top,
-                resize_bottom=resize_bottom,
-                starting_height=1,
-                container=self._view_container,
-                parent_element=parent_element,
-                object_id=ObjectID(object_id="#scrollable_container", class_id=None),
-                anchors=scrollable_anchors,
+            self.scrollable_container: UIAutoResizingContainer | UIContainer = (
+                UIAutoResizingContainer(
+                    relative_rect=scrollable_rect,
+                    manager=manager,
+                    resize_left=resize_left,
+                    resize_right=resize_right,
+                    resize_top=resize_top,
+                    resize_bottom=resize_bottom,
+                    starting_height=1,
+                    container=self._view_container,
+                    parent_element=parent_element,
+                    object_id=ObjectID(
+                        object_id="#scrollable_container", class_id=None
+                    ),
+                    anchors=scrollable_anchors,
+                )
             )
         else:
             self.scrollable_container = UIContainer(
@@ -248,7 +255,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         self._calculate_scrolling_dimensions()
         self._sort_out_element_container_scroll_bars()
 
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> IContainerAndContainerLike:
         """
         Gets the scrollable container area (the one that moves around with the scrollbars)
         from this container-like UI element.
@@ -275,7 +282,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
 
         super().set_position(position)
-        self._root_container.set_position(position)
+        if self._root_container is not None:
+            self._root_container.set_position(position)
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -285,7 +293,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         """
         super().set_relative_position(position)
-        self._root_container.set_relative_position(position)
+        if self._root_container is not None:
+            self._root_container.set_relative_position(position)
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -300,7 +309,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         """
         super().set_dimensions(dimensions)
-        self._root_container.set_dimensions(dimensions)
+        if self._root_container is not None:
+            self._root_container.set_dimensions(dimensions)
 
         self._calculate_scrolling_dimensions()
         self._sort_out_element_container_scroll_bars()
@@ -312,6 +322,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         :param dimensions: The new dimensions.
         """
+        if self._root_container is None:
+            return
         if not self.allow_scroll_x:
             # There is no horizontal scrollbar so the width is fixed to viewing container's width otherwise some part of
             # the container may not be visible
@@ -351,6 +363,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         if (
             self.vert_scroll_bar is not None
+            and self.vert_scroll_bar.sliding_button is not None
             and self.vert_scroll_bar.check_has_moved_recently()
         ):
             self._calculate_scrolling_dimensions()
@@ -381,6 +394,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         if (
             self.horiz_scroll_bar is not None
+            and self.horiz_scroll_bar.sliding_button is not None
             and self.horiz_scroll_bar.check_has_moved_recently()
         ):
             self._calculate_scrolling_dimensions()
@@ -406,7 +420,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
             else:
                 self._remove_horiz_scrollbar()
 
-            new_pos = (-start_width, self.scrollable_container.relative_rect.y)
+            new_pos = (
+                int(-start_width),
+                int(self.scrollable_container.relative_rect.y),
+            )
             self.scrollable_container.set_relative_position(new_pos)
 
         if (
@@ -585,7 +602,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         super().show()
 
-        self._root_container.show(show_contents=False)
+        if self._root_container is not None:
+            self._root_container.show(show_contents=False)
         if self.vert_scroll_bar is not None:
             self.vert_scroll_bar.show()
         if self.horiz_scroll_bar is not None:
@@ -605,7 +623,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         """
         if not self.visible:
             return
-        self._root_container.hide(hide_contents=False)
+        if self._root_container is not None:
+            self._root_container.hide(hide_contents=False)
         if self.vert_scroll_bar is not None:
             self.vert_scroll_bar.hide()
         if self.horiz_scroll_bar is not None:
@@ -637,14 +656,17 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         :return: True if one of the elements is hovered, False otherwise.
         """
         any_hovered = False
-        for element in self:
-            if any(sub_element.hovered for sub_element in element.get_focus_set()):
-                any_hovered = True
-            elif isinstance(element, IContainerLikeInterface):
-                any_hovered = element.are_contents_hovered()
 
-            if any_hovered:
-                break
+        for element in self:
+            focus_set = element.get_focus_set()
+            if focus_set is not None:
+                if any(sub_element.hovered for sub_element in focus_set):
+                    any_hovered = True
+                elif isinstance(element, IContainerLikeInterface):
+                    any_hovered = element.are_contents_hovered()
+
+                if any_hovered:
+                    break
         return any_hovered
 
     def set_anchors(

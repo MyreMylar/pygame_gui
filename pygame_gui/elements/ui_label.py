@@ -61,9 +61,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
     ):
         rel_rect: RectLike = (
             relative_rect
-            if (isinstance(relative_rect, pygame.Rect) or
-                isinstance(relative_rect, pygame.FRect) or
-                (isinstance(relative_rect, tuple) and len(relative_rect) == 4))
+            if (
+                isinstance(relative_rect, (pygame.Rect, pygame.FRect))
+                or (isinstance(relative_rect, tuple) and len(relative_rect) == 4)
+            )
             else pygame.Rect(relative_rect, (-1, -1))
         )
 
@@ -397,7 +398,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
         pass
 
     def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
-        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+        if (
+            self.drawable_shape is not None
+            and self.drawable_shape.text_box_layout is not None
+        ):
             self.drawable_shape.text_box_layout.clear_final_surface()
             self.drawable_shape.text_box_layout.finalise_to_new()
             self.drawable_shape.redraw_active_state_no_text()
@@ -405,7 +409,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
     def get_text_letter_count(
         self, sub_chunk: Optional[TextLineChunkFTFont] = None
     ) -> int:
-        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+        if (
+            self.drawable_shape is not None
+            and self.drawable_shape.text_box_layout is not None
+        ):
             return self.drawable_shape.text_box_layout.letter_count
         else:
             return 0
@@ -413,7 +420,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
     def update_text_end_position(
         self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
-        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+        if (
+            self.drawable_shape is not None
+            and self.drawable_shape.text_box_layout is not None
+        ):
             self.drawable_shape.text_box_layout.current_end_pos = end_pos
             self.drawable_shape.text_box_layout.finalise_to_new()
             self.drawable_shape.finalise_text_onto_active_state()
@@ -457,7 +467,10 @@ class UILabel(UIElement, IUITextOwnerInterface):
         self.active_text_effect = None
 
     def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
-        if self.drawable_shape is not None and self.drawable_shape.text_box_layout is not None:
+        if (
+            self.drawable_shape is not None
+            and self.drawable_shape.text_box_layout is not None
+        ):
             self.drawable_shape.text_box_layout.clear_effects()
         self.active_text_effect = None
         self.rebuild()

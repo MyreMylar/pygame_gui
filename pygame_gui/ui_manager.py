@@ -211,8 +211,10 @@ class UIManager(IUIManagerInterface):
         if corner_radius is None:
             corner_radius = [2, 2, 2, 2]
 
-        shadow_surf = self.ui_theme.get_shadow_generator().find_closest_shadow_scale_to_size(
-            size, shadow_width, shape, corner_radius
+        shadow_surf = (
+            self.ui_theme.get_shadow_generator().find_closest_shadow_scale_to_size(
+                size, shadow_width, shape, corner_radius
+            )
         )
         if shadow_surf is not None:
             return shadow_surf

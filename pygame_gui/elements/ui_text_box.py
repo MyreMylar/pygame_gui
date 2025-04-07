@@ -3,7 +3,7 @@ import math
 import html
 import re
 
-from typing import Union, Tuple, Dict, Optional, Any
+from typing import Union, Tuple, Dict, Optional, Any, List
 
 import pygame
 
@@ -28,6 +28,7 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
     IUIElementInterface,
+    IColourGradientInterface,
 )
 from pygame_gui.core.interfaces import IUITextOwnerInterface
 from pygame_gui.core.ui_element import UIElement
@@ -38,6 +39,7 @@ from pygame_gui.elements.ui_vertical_scroll_bar import UIVerticalScrollBar
 
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.text_box_layout import TextBoxLayout
+from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_effects import (
     TextEffect,
@@ -137,9 +139,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self.scroll_bar = None
-        relative_rect[3] = -1 if wrap_to_height else relative_rect[3]
+        tweaked_rect = pygame.Rect(relative_rect)
+        tweaked_rect[3] = -1 if wrap_to_height else tweaked_rect[3]
         super().__init__(
-            relative_rect,
+            tweaked_rect,
             manager,
             container,
             starting_height=starting_height,
@@ -170,10 +173,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self._pre_parsing_enabled = pre_parsing_enabled
 
-        self.link_hover_chunks = []  # container for any link chunks we have
+        self.link_hover_chunks: List[
+            HyperlinkTextChunk
+        ] = []  # container for any link chunks we have
 
         self.active_text_effect: Optional[TextEffect] = None
-        self.active_text_chunk_effects = []
+        self.active_text_chunk_effects: List[
+            Dict[str, TextLineChunkFTFont | TextEffect]
+        ] = []
 
         self.scroll_bar_width = 20
 
@@ -185,18 +192,30 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.selected_bg_colour = pygame.Color(128, 128, 200, 255)
         self.selected_text_colour = pygame.Color(255, 255, 255, 255)
 
-        self.link_normal_colour = None
-        self.link_hover_colour = None
-        self.link_selected_colour = None
-        self.link_normal_underline = False
-        self.link_hover_underline = True
-        self.link_style = None
+        self.link_normal_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.link_hover_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.link_selected_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.link_normal_underline: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.link_hover_underline: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.link_style: Optional[
+            Dict[str, pygame.Color | IColourGradientInterface]
+        ] = None
 
         self.rounded_corner_width_offsets = [0, 0]
         self.rounded_corner_height_offsets = [0, 0]
-        self.text_box_layout = None  # type: Optional[TextBoxLayout]
-        self.text_wrap_rect = None  # type: Optional[pygame.Rect]
-        self.background_surf = None
+        self.text_box_layout: Optional[TextBoxLayout] = None
+        self.text_wrap_rect: Optional[pygame.Rect] = None
+        self.background_surf: Optional[pygame.Surface] = None
 
         self.shape = "rectangle"
 
@@ -209,7 +228,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.time_until_full_rebuild_after_changing_size = 0.2
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-        self.parser = None  # type: Optional[HTMLParser]
+        self.parser: Optional[HTMLParser] = None
 
         self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
 
@@ -1044,8 +1063,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             )
 
             if (
-                self.text_box_layout is not None and
-                self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1])
+                self.text_box_layout is not None
+                and self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1])
                 and self.is_enabled
             ):
                 consumed_event = True
@@ -1530,6 +1549,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         :param new_html_str: The, potentially HTML tag, containing string of text to append.
         """
+        if self.parser is None or self.text_box_layout is None:
+            return
         if self.should_html_unescape_input_text:
             feed_input = html.unescape(new_html_str)
         else:
@@ -1547,21 +1568,23 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.text_box_layout.append_layout_rects(self.parser.layout_rect_queue)
         self.parser.empty_layout_queue()
 
-        if self.scroll_bar is None and (
-            self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]
-        ):
-            self.rebuild()
-        else:
-            if self.scroll_bar is not None:
-                # set the scroll bar to the bottom
-                percentage_visible = (
-                    self.text_wrap_rect[3] / self.text_box_layout.layout_rect.height
-                )
-                self.scroll_bar.start_percentage = 1.0 - percentage_visible
-                self.scroll_bar.scroll_position = (
-                    self.scroll_bar.start_percentage * self.scroll_bar.scrollable_height
-                )
-            self._redraw_from_text_block_and_finalise_hyperlinks()
+        if self.text_wrap_rect is not None:
+            if self.scroll_bar is None and (
+                self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]
+            ):
+                self.rebuild()
+            else:
+                if self.scroll_bar is not None:
+                    # set the scroll bar to the bottom
+                    percentage_visible = (
+                        self.text_wrap_rect[3] / self.text_box_layout.layout_rect.height
+                    )
+                    self.scroll_bar.start_percentage = 1.0 - percentage_visible
+                    self.scroll_bar.scroll_position = (
+                        self.scroll_bar.start_percentage
+                        * self.scroll_bar.scrollable_height
+                    )
+                self._redraw_from_text_block_and_finalise_hyperlinks()
 
     def _redraw_from_text_block_and_finalise_hyperlinks(self):
         self.redraw_from_text_block()
@@ -1577,6 +1600,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def set_text_alpha(
         self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        if self.text_box_layout is None:
+            return
         if sub_chunk is None:
             self.text_box_layout.set_alpha(alpha)
         else:
@@ -1601,6 +1626,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             sub_chunk.set_scale(scale)
 
     def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        if self.text_box_layout is None:
+            return
         if sub_chunk is None:
             self.text_box_layout.clear_final_surface()
         else:
@@ -1609,6 +1636,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def get_text_letter_count(
         self, sub_chunk: Optional[TextLineChunkFTFont] = None
     ) -> int:
+        if self.text_box_layout is None:
+            return 0
         if sub_chunk is None:
             return self.text_box_layout.letter_count
         else:
@@ -1617,6 +1646,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def update_text_end_position(
         self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        if self.text_box_layout is None:
+            return
+
         if sub_chunk is None:
             self.text_box_layout.update_text_with_new_text_end_pos(end_pos)
         else:
@@ -1629,7 +1661,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         params: Optional[Dict[str, Any]] = None,
         effect_tag: Optional[str] = None,
     ):
-        if effect_tag is not None:
+        if effect_tag is not None and self.text_box_layout is not None:
             redrew_all_chunks = False
             if self.active_text_effect is not None:
                 # don't allow mixing of full text box effects and chunk effects
@@ -1646,7 +1678,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     ):
                         if not redrew_all_chunks:
                             self.clear_all_active_effects(chunk)
-                        effect = None
+                        effect: Optional[TextEffect] = None
                         if effect_type == TEXT_EFFECT_TYPING_APPEAR:
                             effect = TypingAppearEffect(self, params, chunk)
                         elif effect_type == TEXT_EFFECT_FADE_IN:
@@ -1715,11 +1747,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             ]
 
     def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        if self.text_box_layout is None:
+            return
         if sub_chunk is None:
             self.active_text_effect = None
             self.text_box_layout.clear_effects()
             for effect_chunk in self.active_text_chunk_effects:
-                effect_chunk["chunk"].clear_effects()
+                if isinstance(effect_chunk["chunk"], TextLineChunkFTFont):
+                    effect_chunk["chunk"].clear_effects()
             self.active_text_chunk_effects = []
             self.text_box_layout.finalise_to_new()
         else:
@@ -1752,23 +1787,27 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if len(self.active_text_chunk_effects) > 0:
             any_text_changed = False
             for affected_chunk in self.active_text_chunk_effects:
-                affected_chunk["effect"].update(time_delta)
-                if (
-                    affected_chunk["effect"] is not None
-                    and affected_chunk["effect"].has_text_changed()
-                ):
-                    any_text_changed = True
+                if isinstance(affected_chunk["effect"], TextEffect):
+                    affected_chunk["effect"].update(time_delta)
+                    if (
+                        affected_chunk["effect"] is not None
+                        and affected_chunk["effect"].has_text_changed()
+                    ):
+                        any_text_changed = True
             if any_text_changed:
                 effect_chunks = []
                 for affected_chunk in self.active_text_chunk_effects:
                     chunk = affected_chunk["chunk"]
-                    chunk.clear(chunk.transform_effect_rect)
-                    effect_chunks.append(chunk)
+                    if isinstance(chunk, TextLineChunkFTFont):
+                        chunk.clear(chunk.transform_effect_rect)
+                        effect_chunks.append(chunk)
 
-                self.text_box_layout.redraw_other_chunks(effect_chunks)
+                if self.text_box_layout is not None:
+                    self.text_box_layout.redraw_other_chunks(effect_chunks)
 
                 for affected_chunk in self.active_text_chunk_effects:
-                    affected_chunk["effect"].apply_effect()
+                    if isinstance(affected_chunk["effect"], TextEffect):
+                        affected_chunk["effect"].apply_effect()
                 self.redraw_from_text_block()
 
     def get_object_id(self) -> str:

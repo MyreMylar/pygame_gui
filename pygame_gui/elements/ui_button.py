@@ -81,9 +81,10 @@ class UIButton(UIElement):
     ):
         rel_rect: RectLike = (
             relative_rect
-            if (isinstance(relative_rect, pygame.Rect) or
-                isinstance(relative_rect, pygame.FRect) or
-                (isinstance(relative_rect, tuple) and len(relative_rect) == 4))
+            if (
+                isinstance(relative_rect, (pygame.Rect, pygame.FRect))
+                or (isinstance(relative_rect, tuple) and len(relative_rect) == 4)
+            )
             else pygame.Rect(relative_rect, (-1, -1))
         )
         super().__init__(
@@ -585,7 +586,9 @@ class UIButton(UIElement):
         :return bool: Returns True if our position is inside the hold range.
 
         """
-        if self.drawable_shape is not None and self.drawable_shape.collide_point(position):
+        if self.drawable_shape is not None and self.drawable_shape.collide_point(
+            position
+        ):
             return True
         elif self.hold_range[0] > 0 or self.hold_range[1] > 0:
             hold_rect = pygame.Rect(

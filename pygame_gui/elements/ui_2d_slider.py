@@ -5,7 +5,12 @@ import pygame
 
 from pygame_gui._constants import UI_2D_SLIDER_MOVED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface, IUIElementInterface, IColourGradientInterface
+from pygame_gui.core.interfaces import (
+    IUIManagerInterface,
+    IContainerLikeInterface,
+    IUIElementInterface,
+    IColourGradientInterface,
+)
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.elements.ui_button import UIButton
@@ -100,10 +105,18 @@ class UI2DSlider(UIElement):
         self.has_moved_recently = False
         self.has_been_moved_by_user_recently = False
 
-        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(0, 0, 0)
-        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(0, 0, 0)
-        self.disabled_border_colour: pygame.Color | IColourGradientInterface = pygame.Color(0, 0, 0)
-        self.disabled_background_colour: pygame.Color | IColourGradientInterface = pygame.Color(0, 0, 0)
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.disabled_border_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.disabled_background_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
 
         self.drawable_shape = None
         self.shape = "rectangle"
@@ -243,7 +256,9 @@ class UI2DSlider(UIElement):
 
         mouse_pos = pygame.Vector2(self.ui_manager.get_mouse_position())
         if self.sliding_button is not None:
-            if self.sliding_button.held and self.sliding_button.in_hold_range(mouse_pos):
+            if self.sliding_button.held and self.sliding_button.in_hold_range(
+                mouse_pos
+            ):
                 moved_this_frame = self._move_slider_with_mouse(mouse_pos)
             elif not self.sliding_button.held:
                 self.grabbed_slider = False
@@ -426,29 +441,35 @@ class UI2DSlider(UIElement):
         ):
             has_any_changed = True
 
-        background_colour: pygame.Color | IColourGradientInterface = self.ui_theme.get_colour_or_gradient(
-            "dark_bg", self.combined_element_ids
+        background_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient("dark_bg", self.combined_element_ids)
         )
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour: pygame.Color | IColourGradientInterface = self.ui_theme.get_colour_or_gradient(
-            "normal_border", self.combined_element_ids
+        border_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "normal_border", self.combined_element_ids
+            )
         )
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        disabled_background_colour: pygame.Color | IColourGradientInterface = self.ui_theme.get_colour_or_gradient(
-            "disabled_dark_bg", self.combined_element_ids
+        disabled_background_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "disabled_dark_bg", self.combined_element_ids
+            )
         )
         if disabled_background_colour != self.disabled_background_colour:
             self.disabled_background_colour = disabled_background_colour
             has_any_changed = True
 
-        disabled_border_colour: pygame.Color | IColourGradientInterface = self.ui_theme.get_colour_or_gradient(
-            "disabled_border", self.combined_element_ids
+        disabled_border_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "disabled_border", self.combined_element_ids
+            )
         )
         if disabled_border_colour != self.disabled_border_colour:
             self.disabled_border_colour = disabled_border_colour
@@ -509,10 +530,12 @@ class UI2DSlider(UIElement):
         super().set_dimensions(dimensions, clamp_to_container)
 
         border_and_shadow = int(self.border_width + self.shadow_width)
-        self.background_rect.width = int(self.relative_rect.width - (2 * border_and_shadow))
-        self.background_rect.height = int(self.relative_rect.height - (
-            2 * border_and_shadow
-        ))
+        self.background_rect.width = int(
+            self.relative_rect.width - (2 * border_and_shadow)
+        )
+        self.background_rect.height = int(
+            self.relative_rect.height - (2 * border_and_shadow)
+        )
 
         if self.button_container is not None:
             self.button_container.set_dimensions(self.background_rect.size)

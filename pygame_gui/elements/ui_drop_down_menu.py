@@ -41,19 +41,19 @@ class UIExpandedDropDownState:
     def __init__(
         self,
         drop_down_menu_ui: "UIDropDownMenu",
-        options_list: List[Tuple[str, str]],
+        options_list: List[str | Tuple[str, str]],
         selected_option: Tuple[str, str],
-        base_position_rect: Union[pygame.Rect, None],
+        base_position_rect: pygame.Rect,
         close_button_width: int,
         expand_direction: Union[str, None],
         manager: IUIManagerInterface,
         container: IContainerLikeInterface,
-        object_ids: Union[List[Union[str, None]], None],
-        element_ids: Union[List[str], None],
+        object_ids: List[str | None],
+        element_ids: List[str],
         expand_on_option_click,
     ):
         self.drop_down_menu_ui = drop_down_menu_ui
-        self.options_list: List[Tuple[str, str]] = options_list
+        self.options_list: List[str | Tuple[str, str]] = options_list
         self.selected_option: Tuple[str, str] = selected_option
         self.base_position_rect = base_position_rect
 
@@ -70,15 +70,15 @@ class UIExpandedDropDownState:
         self.close_button_width = close_button_width
 
         # UI elements
-        self.selected_option_button = None
-        self.close_button = None
-        self.options_selection_list = None
+        self.selected_option_button: Optional[UIButton] = None
+        self.close_button: Optional[UIButton] = None
+        self.options_selection_list: Optional[UISelectionList] = None
 
         # state transitioning
         self.should_transition = False
         self.target_state = "closed"
 
-        self.active_buttons = []
+        self.active_buttons: List[UIButton] = []
 
     def rebuild(self):
         """
@@ -128,7 +128,7 @@ class UIExpandedDropDownState:
         border_and_shadow = (
             self.drop_down_menu_ui.shadow_width + self.drop_down_menu_ui.border_width
         )
-        self.active_buttons = []
+        self.active_buttons[:] = []
 
         if self.selected_option[0] == self.selected_option[1]:
             object_id = ObjectID("#selected_option", "@selected_option")
@@ -382,7 +382,7 @@ class UIExpandedDropDownState:
                 + self.base_position_rect.width
                 - self.close_button_width
             )
-            self.close_button.set_relative_position([close_button_x, border_and_shadow])
+            self.close_button.set_relative_position((close_button_x, border_and_shadow))
 
     def update_dimensions(self):
         """
@@ -476,19 +476,19 @@ class UIClosedDropDownState:
         self,
         drop_down_menu_ui: "UIDropDownMenu",
         selected_option: Tuple[str, str],
-        base_position_rect: Union[pygame.Rect, None],
+        base_position_rect: pygame.Rect,
         open_button_width: int,
-        expand_direction: Union[str, None],
+        expand_direction: str | None,
         manager: IUIManagerInterface,
         container: IContainerLikeInterface,
-        object_ids: Union[List[Union[str, None]], None],
-        element_ids: Union[List[str], None],
+        object_ids: List[str | None],
+        element_ids: List[str],
         visible: int = 1,
         expand_on_option_click=True,
     ):
         self.drop_down_menu_ui = drop_down_menu_ui
-        self.selected_option_button = None
-        self.open_button = None
+        self.selected_option_button: Optional[UIButton] = None
+        self.open_button: Optional[UIButton] = None
         self.selected_option = selected_option
         self.base_position_rect = base_position_rect
         self.expand_direction = expand_direction
@@ -505,7 +505,7 @@ class UIClosedDropDownState:
         self.target_state = "expanded"
         self.visible = visible
 
-        self.active_buttons = []
+        self.active_buttons: List[UIButton] = []
 
     def disable(self):
         """
@@ -793,7 +793,7 @@ class UIDropDownMenu(UIContainer):
 
     def __init__(
         self,
-        options_list: Union[List[str], List[Tuple[str, str]]],
+        options_list: List[str | Tuple[str, str]],
         starting_option: Union[str, Tuple[str, str]],
         relative_rect: RectLike,
         manager: Optional[IUIManagerInterface] = None,
@@ -808,8 +808,12 @@ class UIDropDownMenu(UIContainer):
     ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
-        self.menu_states = None
-        self.current_state = None
+        self.menu_states: Dict[
+            str, UIExpandedDropDownState | UIClosedDropDownState
+        ] = {}
+        self.current_state: Optional[
+            UIExpandedDropDownState | UIClosedDropDownState
+        ] = None
         super().__init__(
             relative_rect,
             manager,
@@ -823,7 +827,7 @@ class UIDropDownMenu(UIContainer):
         )
 
         self.__layer_thickness_including_expansion = 4
-        self.options_list = []
+        self.options_list: List[str | Tuple[str, str]] = []
         for option in options_list:
             if isinstance(option, str):
                 self.options_list.append((option, option))
@@ -838,19 +842,17 @@ class UIDropDownMenu(UIContainer):
         self.expansion_height_limit = expansion_height_limit
         self.expand_on_option_click = expand_on_option_click
 
-        self.background_colour = None
-        self.border_colour = None
-        self.disabled_background_colour = None
-        self.disabled_border_colour = None
+        self.background_colour = pygame.Color(0, 0, 0, 0)
+        self.border_colour = pygame.Color(0, 0, 0, 0)
+        self.disabled_background_colour = pygame.Color(0, 0, 0, 0)
+        self.disabled_border_colour = pygame.Color(0, 0, 0, 0)
 
         self.shape = "rectangle"
         self.shape_corner_radius = [2, 2, 2, 2]
 
-        self.current_state = None
-        self.background_rect = None
-        self.expand_direction = None
+        self.background_rect = pygame.Rect(0, 0, 0, 0)
+        self.expand_direction: str = "down"
 
-        self.menu_states = {}
         self.rebuild_from_changed_theme_data()
         self.menu_states = {
             "closed": UIClosedDropDownState(
@@ -861,8 +863,8 @@ class UIDropDownMenu(UIContainer):
                 self.expand_direction,
                 self.ui_manager,
                 self,
-                self.element_ids,
                 self.object_ids,
+                self.element_ids,
                 self.visible,
                 self.expand_on_option_click,
             ),
@@ -875,8 +877,8 @@ class UIDropDownMenu(UIContainer):
                 self.expand_direction,
                 self.ui_manager,
                 self,
-                self.element_ids,
                 self.object_ids,
+                self.element_ids,
                 self.expand_on_option_click,
             ),
         }
@@ -911,7 +913,9 @@ class UIDropDownMenu(UIContainer):
             else:
                 self.options_list.append(option)
 
-        self.menu_states["expanded"].options_list = self.options_list
+        expanded_state = self.menu_states["expanded"]
+        if isinstance(expanded_state, UIExpandedDropDownState):
+            expanded_state.options_list = self.options_list
 
         # if we have the dropdown open - close it, so it can be reopened with the new options in place
         self._close_dropdown_if_open()
@@ -935,7 +939,9 @@ class UIDropDownMenu(UIContainer):
             for option in self.options_list
             if option not in real_options_to_remove
         ]
-        self.menu_states["expanded"].options_list = self.options_list
+        expanded_state = self.menu_states["expanded"]
+        if isinstance(expanded_state, UIExpandedDropDownState):
+            expanded_state.options_list = self.options_list
 
         # if we have the dropdown open - close it, so it can be reopened with the new options in place
         self._close_dropdown_if_open()
@@ -967,7 +973,11 @@ class UIDropDownMenu(UIContainer):
 
         """
         super().update(time_delta)
-        if self.alive() and self.current_state.should_transition:
+        if (
+            self.alive()
+            and self.current_state is not None
+            and self.current_state.should_transition
+        ):
             self.current_state.finish()
             self.current_state = self.menu_states[self.current_state.target_state]
             self.current_state.selected_option = self.selected_option
@@ -984,7 +994,11 @@ class UIDropDownMenu(UIContainer):
                  rest of the UI.
 
         """
-        return self.current_state.process_event(event) if self.is_enabled else False
+        return (
+            self.current_state.process_event(event)
+            if self.is_enabled and self.current_state is not None
+            else False
+        )
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -1090,7 +1104,8 @@ class UIDropDownMenu(UIContainer):
 
         """
         super().set_position(position)
-        self.current_state.update_position()
+        if self.current_state is not None:
+            self.current_state.update_position()
 
     def set_relative_position(self, position: Coordinate):
         """
@@ -1101,7 +1116,8 @@ class UIDropDownMenu(UIContainer):
 
         """
         super().set_relative_position(position)
-        self.current_state.update_position()
+        if self.current_state is not None:
+            self.current_state.update_position()
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -1114,7 +1130,8 @@ class UIDropDownMenu(UIContainer):
 
         """
         super().set_dimensions(dimensions)
-        self.current_state.update_dimensions()
+        if self.current_state is not None:
+            self.current_state.update_dimensions()
 
     def on_fresh_drawable_shape_ready(self):
         """
@@ -1157,7 +1174,9 @@ class UIDropDownMenu(UIContainer):
         """
         super().show(show_contents)
         if self.current_state is not None and self.menu_states is not None:
-            self.menu_states["closed"].show()
+            closed_state = self.menu_states["closed"]
+            if isinstance(closed_state, UIClosedDropDownState):
+                closed_state.show()
 
     def hide(self, hide_contents: bool = True):
         """

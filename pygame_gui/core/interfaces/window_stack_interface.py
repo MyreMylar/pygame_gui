@@ -85,7 +85,7 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
 
     @abstractmethod
     def refresh_window_stack_from_window(
-            self, window_to_refresh_from: IWindowInterface
+        self, window_to_refresh_from: IWindowInterface
     ):
         """
         Refresh the window stacks above a specific window. To do this we remove all of these windows from the stack
@@ -94,4 +94,3 @@ class IUIWindowStackInterface(metaclass=ABCMeta):
         :param window_to_refresh_from: The window to start the refresh from
 
         """
-
