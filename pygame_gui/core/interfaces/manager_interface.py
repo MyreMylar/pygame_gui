@@ -25,6 +25,42 @@ class IUIManagerInterface(metaclass=ABCMeta):
     def __init__(self):
         self.window_resolution = None
 
+    @property
+    @abstractmethod
+    def copy_text_enabled(self) -> bool:
+        """
+        Get whether we can copy any text.
+
+        :return: True if we can Copy text
+        """
+
+    @copy_text_enabled.setter
+    @abstractmethod
+    def copy_text_enabled(self, value: bool):
+        """
+        Set whether we can copy any text.
+
+        :param value:
+        """
+
+    @property
+    @abstractmethod
+    def paste_text_enabled(self) -> bool:
+        """
+        Get whether we can paste any text.
+
+        :return: True if we can Paste text
+        """
+
+    @paste_text_enabled.setter
+    @abstractmethod
+    def paste_text_enabled(self, value: bool):
+        """
+        Set whether we can paste any text.
+
+        :param value:
+        """
+
     @abstractmethod
     def get_double_click_time(self) -> float:
         """

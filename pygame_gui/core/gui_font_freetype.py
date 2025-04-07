@@ -1,4 +1,4 @@
-from typing import Union, IO, Optional, Dict, Tuple
+from typing import Union, IO, Optional, Dict, Tuple, Any
 from os import PathLike
 
 import pygame
@@ -30,7 +30,7 @@ class GUIFontFreetype(IGUIFontInterface):
         file: Optional[FileArg],
         size: Union[int, float],
         force_style: bool = False,
-        style: Optional[Dict[str, bool]] = None,
+        style: Optional[Dict[str, Any]] = None,
     ):
         self.__internal_font: Font = Font(file, size, resolution=72)
         self.__internal_font.pad = True

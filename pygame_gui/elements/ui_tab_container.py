@@ -233,7 +233,7 @@ class UITabContainer(UIElement):
         """
         was_enabled = self.is_enabled
         super().disable()
-        if was_enabled:
+        if was_enabled and self._root_container is not None:
             self._root_container.disable()
 
     def enable(self):
@@ -341,7 +341,8 @@ class UITabContainer(UIElement):
         elements in this panel.
 
         """
-        self._root_container.kill()
+        if self._root_container is not None:
+            self._root_container.kill()
         super().kill()
 
     def set_anchors(

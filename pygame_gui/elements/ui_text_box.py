@@ -185,12 +185,22 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.scroll_bar_width = 20
 
         self.padding = (5, 5)
-        self.background_colour = None
-        self.border_colour = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
         self.line_spacing = 1.25
-        self.text_cursor_colour = pygame.Color("white")
-        self.selected_bg_colour = pygame.Color(128, 128, 200, 255)
-        self.selected_text_colour = pygame.Color(255, 255, 255, 255)
+        self.text_cursor_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            "white"
+        )
+        self.selected_bg_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            128, 128, 200, 255
+        )
+        self.selected_text_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(255, 255, 255, 255)
+        )
 
         self.link_normal_colour: pygame.Color | IColourGradientInterface = pygame.Color(
             0, 0, 0

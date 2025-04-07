@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, Any
 import math
 import pygame
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
@@ -51,8 +51,11 @@ class TextBoxLayoutRow(pygame.Rect):
         self.surf_row_dirty = False
         self.line_spacing_height = 0
 
-    def __hash__(self):
+    def __hash__(self) -> Any:  # type: ignore
         return self.row_index
+
+    def __eq__(self, value):
+        return self.row_index == value.row_index
 
     def __repr__(self):
         return f"[{list(self.items)}]"

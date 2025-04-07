@@ -144,11 +144,9 @@ class UITextEntryLine(UIElement):
             self.ui_theme.get_font_dictionary().get_default_symbol_font()
         )
 
-        self.padding = None
-        self.text_surface = None
-        self.cursor = None
+        self.text_surface: pygame.Surface | None = None
         self.background_and_border = None
-        self.text_image_rect = None
+        self.text_image_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
         # colours from theme
         self.background_colour = None

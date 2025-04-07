@@ -128,7 +128,7 @@ class UIWindowStack(IUIWindowStackInterface):
             window = self.stack.pop()
 
         with contextlib.suppress(IndexError):
-            top_window = self.top_stack.pop()
+            top_window: Optional[IWindowInterface] = self.top_stack.pop()
             while top_window is not None:
                 popped_windows_to_add_back.append(top_window)
                 try:

@@ -1,7 +1,7 @@
 import warnings
 import locale
 
-from typing import Union, List, Optional, Set
+from typing import Union, List, Optional, Set, Tuple
 from pathlib import Path
 
 import pygame
@@ -115,7 +115,7 @@ class UIFileDialog(UIWindow):
 
         self.last_valid_directory_path = self.current_directory_path
 
-        self.current_file_list: Optional[List[str]] = None
+        self.current_file_list: List[str | Tuple[str, str]] = []
         self.update_current_file_list()
 
         self._setup_ui_elements()
@@ -148,7 +148,9 @@ class UIFileDialog(UIWindow):
                 "right_target": self.cancel_button,
             },
         )
-        if not self._validate_file_path(self.current_file_path):
+        if self.current_file_path is not None and not self._validate_file_path(
+            self.current_file_path
+        ):
             self.ok_button.disable()
         self.home_button = UIButton(
             relative_rect=pygame.Rect(10, 10, 20, 20),
@@ -168,8 +170,11 @@ class UIFileDialog(UIWindow):
             object_id="#delete_icon_button",
             anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
         )
-        if not self._validate_path_exists_and_of_allowed_type(
-            self.current_file_path, allow_directories=False
+        if self.current_file_path is None or (
+            self.current_file_path is not None
+            and not self._validate_path_exists_and_of_allowed_type(
+                self.current_file_path, allow_directories=False
+            )
         ):
             self.delete_button.disable()
         self.parent_directory_button = UIButton(
@@ -253,9 +258,11 @@ class UIFileDialog(UIWindow):
             - (self.file_path_text_line.shadow_width * 2)
         )
 
-        text_width = self.file_path_text_line.font.get_rect(
-            self.file_path_text_line.get_text()
-        ).width
+        text_width = 0
+        if self.file_path_text_line.font is not None:
+            text_width = self.file_path_text_line.font.get_rect(
+                self.file_path_text_line.get_text()
+            ).width
         self.file_path_text_line.start_text_offset = max(
             0, text_width - text_clip_width
         )
@@ -283,7 +290,7 @@ class UIFileDialog(UIWindow):
             if not f.is_file()
         ]
         directories_on_path.sort(key=locale.strxfrm)
-        directories_on_path_tuples = [
+        directories_on_path_tuples: List[str | Tuple[str, str]] = [
             (f, "#directory_list_item") for f in directories_on_path
         ]
 
@@ -293,7 +300,9 @@ class UIFileDialog(UIWindow):
             if f.is_file() and any(f.name.endswith(x) for x in self.allowed_suffixes)
         ]
         files_on_path.sort(key=locale.strxfrm)
-        files_on_path_tuples = [(f, "#file_list_item") for f in files_on_path]
+        files_on_path_tuples: List[str | Tuple[str, str]] = [
+            (f, "#file_list_item") for f in files_on_path
+        ]
 
         self.current_file_list = directories_on_path_tuples + files_on_path_tuples
 
@@ -480,8 +489,11 @@ class UIFileDialog(UIWindow):
         self.file_path_text_line.set_text(str(self.current_file_path))
         self._highlight_file_name_for_editing()
         self.ok_button.enable()
-        if self._validate_path_exists_and_of_allowed_type(
-            self.current_file_path, allow_directories=False
+        if (
+            self.current_file_path is not None
+            and self._validate_path_exists_and_of_allowed_type(
+                self.current_file_path, allow_directories=False
+            )
         ):
             self.delete_button.enable()
         else:

@@ -1,10 +1,38 @@
 import warnings
 
-from typing import List, Union, Tuple, Optional
+from typing import List, Tuple, Optional, TypedDict, Dict
 
 import pygame
 
 from pygame_gui.core.colour_gradient import ColourGradient
+
+
+class ShortTermCacheUsageData(TypedDict):
+    """
+    Short term cache usage data
+    """
+
+    surface: pygame.Surface
+    uses: int
+
+
+class LongTermCacheUsageData(TypedDict):
+    """
+    Long term cache usage data
+    """
+
+    surface: pygame.Surface
+    current_uses: int
+    total_uses: int
+
+
+class CacheSurfaceDate(TypedDict):
+    """
+    Cache Surface data
+    """
+
+    surface: pygame.Surface
+    free_space_rectangles: List[pygame.Rect]
 
 
 class SurfaceCache:
@@ -16,7 +44,7 @@ class SurfaceCache:
 
     def __init__(self):
         self.cache_surface_size = (1024, 1024)
-        self.cache_surfaces = []
+        self.cache_surfaces: List[CacheSurfaceDate] = []
         starting_surface = pygame.surface.Surface(
             self.cache_surface_size, flags=pygame.SRCALPHA, depth=32
         )
@@ -28,10 +56,10 @@ class SurfaceCache:
             }
         )
 
-        self.cache_long_term_lookup = {}
-        self.cache_short_term_lookup = {}
+        self.cache_long_term_lookup: Dict[str, LongTermCacheUsageData] = {}
+        self.cache_short_term_lookup: Dict[str, ShortTermCacheUsageData] = {}
 
-        self.consider_purging_list = []
+        self.consider_purging_list: List[str] = []
 
         self.low_on_space = False
 
@@ -43,7 +71,7 @@ class SurfaceCache:
         :param surface: The surface to add to the cache.
         :param string_id: An ID to store the surface under to make it easy to recall later.
         """
-        self.cache_short_term_lookup[string_id] = [surface.copy(), 1]
+        self.cache_short_term_lookup[string_id] = {"surface": surface.copy(), "uses": 1}
 
     def update(self):
         """
@@ -53,20 +81,23 @@ class SurfaceCache:
         We also purge some lesser used surfaces from the long term cache when we run out of space.
         """
         if any(self.cache_short_term_lookup):
-            string_id, cached_item = self.cache_short_term_lookup.popitem()
-            self.add_surface_to_long_term_cache(cached_item, string_id)
+            string_id, st_cached_item = self.cache_short_term_lookup.popitem()
+            self.add_surface_to_long_term_cache(st_cached_item, string_id)
 
         if self.low_on_space:
             self.low_on_space = False
             for cache_id in self.consider_purging_list:
-                cached_item = self.cache_long_term_lookup[cache_id]
-                if cached_item["current_uses"] == 0 and cached_item["total_uses"] == 1:
+                lt_cached_item = self.cache_long_term_lookup[cache_id]
+                if (
+                    lt_cached_item["current_uses"] == 0
+                    and lt_cached_item["total_uses"] == 1
+                ):
                     self._free_cached_surface(cache_id)
 
             self.consider_purging_list.clear()
 
     def add_surface_to_long_term_cache(
-        self, cached_item: List[Union[pygame.surface.Surface, int]], string_id: str
+        self, cached_item: ShortTermCacheUsageData, string_id: str
     ):
         """
         Move a surface from the short term cache into the long term one.
@@ -76,8 +107,8 @@ class SurfaceCache:
         """
 
         if (
-            isinstance(cached_item[0], pygame.Surface)
-            and cached_item[0].get_size() > self.cache_surface_size
+            isinstance(cached_item["surface"], pygame.Surface)
+            and cached_item["surface"].get_size() > self.cache_surface_size
         ):
             warnings.warn(
                 f"Unable to cache surfaces larger than {self.cache_surface_size}"
@@ -106,7 +137,10 @@ class SurfaceCache:
             return True
 
     def _divide_lt_cache(
-        self, cache_surface, found_rectangle_cache, found_rectangle_to_split
+        self,
+        cache_surface: CacheSurfaceDate,
+        found_rectangle_cache: pygame.Rect | None,
+        found_rectangle_to_split: pygame.Rect | None,
     ):
         """
         Having reserved a spot in one of our long term cache surfaces, divide up the rest of
@@ -138,7 +172,9 @@ class SurfaceCache:
             self._clean_up_lt_cache(cache_surface, free_space_rectangles)
 
     @staticmethod
-    def _clean_up_lt_cache(cache_surface, free_space_rectangles):
+    def _clean_up_lt_cache(
+        cache_surface: CacheSurfaceDate, free_space_rectangles: List[pygame.Rect]
+    ):
         """
         Clean up rectangles entirely inside other rectangles.
 
@@ -146,7 +182,7 @@ class SurfaceCache:
         :param free_space_rectangles:
 
         """
-        rects_to_remove = []
+        rects_to_remove: List[pygame.Rect] = []
         rectangles_to_check = free_space_rectangles[:]
         for free_rectangle in free_space_rectangles:
             rects_to_remove.extend(
@@ -160,7 +196,12 @@ class SurfaceCache:
             rect for rect in free_space_rectangles if rect not in rects_to_remove
         ]
 
-    def _find_spot_in_lt_cache(self, cache_surface, new_item, string_id):
+    def _find_spot_in_lt_cache(
+        self,
+        cache_surface: CacheSurfaceDate,
+        new_item: ShortTermCacheUsageData,
+        string_id: str,
+    ) -> Tuple[pygame.Rect | None, pygame.Rect | None]:
         """
         Find a place in a long term cache surface for our new item from the short term cache.
 
@@ -172,7 +213,7 @@ class SurfaceCache:
         found_rectangle_cache = None
         found_rectangle_to_split = None
         current_surface = cache_surface["surface"]
-        surface_size = new_item[0].get_size()
+        surface_size = new_item["surface"].get_size()
         for free_rectangle in cache_surface["free_space_rectangles"]:
             if (
                 free_rectangle.width >= surface_size[0]
@@ -184,14 +225,14 @@ class SurfaceCache:
                     free_rectangle.topleft, surface_size
                 )
                 current_surface.blit(
-                    new_item[0],
+                    new_item["surface"],
                     free_rectangle.topleft,
                     special_flags=pygame.BLEND_PREMULTIPLIED,
                 )
                 self.cache_long_term_lookup[string_id] = {
                     "surface": current_surface.subsurface(found_rectangle_cache),
-                    "current_uses": new_item[1],
-                    "total_uses": new_item[1],
+                    "current_uses": new_item["uses"],
+                    "total_uses": new_item["uses"],
                 }
                 break
         return found_rectangle_cache, found_rectangle_to_split
@@ -267,9 +308,7 @@ class SurfaceCache:
             )
             free_space_rectangles.append(rect_4)
 
-    def find_surface_in_cache(
-        self, lookup_id: str
-    ) -> Union[pygame.surface.Surface, None]:
+    def find_surface_in_cache(self, lookup_id: str) -> pygame.surface.Surface | None:
         """
         Looks for a surface in the cache by an ID and returns it if found.
 
@@ -281,8 +320,8 @@ class SurfaceCache:
         # check short term
         if lookup_id in self.cache_short_term_lookup:
             cached_item = self.cache_short_term_lookup[lookup_id]
-            cached_item[1] += 1
-            return cached_item[0]
+            cached_item["uses"] += 1
+            return cached_item["surface"]
         # check long term
         if lookup_id in self.cache_long_term_lookup:
             self.cache_long_term_lookup[lookup_id]["current_uses"] += 1
@@ -376,7 +415,8 @@ class SurfaceCache:
         id_string = f"{shape}_{size[0]}_{size[1]}_{shadow_width}_{border_width}"
 
         if corner_radius is not None:
-            id_string += f"_{corner_radius}"
+            for radius in corner_radius:
+                id_string += f"_{radius}"
 
         if isinstance(border_colour, ColourGradient):
             id_string += f"_{str(border_colour)}"

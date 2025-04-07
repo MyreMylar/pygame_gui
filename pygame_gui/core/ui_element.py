@@ -11,6 +11,7 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
     IContainerAndContainerLike,
+    IUIAppearanceThemeInterface,
 )
 from pygame_gui.core.utility import render_white_text_alpha_black_bg
 from pygame_gui.core.utility import basic_blit
@@ -75,7 +76,7 @@ class UIElement(GUISprite, IUIElementInterface):
         super().__init__(self.ui_manager.get_sprite_group())
 
         self.ui_group = self.ui_manager.get_sprite_group()
-        self.ui_theme = self.ui_manager.get_theme()
+        self._ui_theme = self.ui_manager.get_theme()
 
         self.minimum_dimensions = (-1, -1)
 
@@ -90,7 +91,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.shadow_width: int = 2
         self.border_width: int = 1
         self.border_overlap: Optional[int] = None
-        self.shape_corner_radius: Optional[List[int]] = None
+        self.shape_corner_radius: List[int] = [0, 0, 0, 0]
 
         self.tool_tip_text: Optional[str] = None
         self.tool_tip_text_kwargs: Dict[str, str] = {}
@@ -190,6 +191,14 @@ class UIElement(GUISprite, IUIElementInterface):
 
         self._focus_set: Optional[set[IUIElementInterface]] = {self}
         self.is_window = False
+
+    @property
+    def ui_theme(self) -> IUIAppearanceThemeInterface:
+        return self._ui_theme
+
+    @ui_theme.setter
+    def ui_theme(self, value: IUIAppearanceThemeInterface):
+        self._ui_theme = value
 
     @property
     def is_focused(self) -> bool:
@@ -1269,8 +1278,6 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         A stub to override when we want to rebuild from theme data.
         """
-        # self.combined_element_ids = self.ui_theme.build_all_combined_ids(self.element_ids,
-        #                                                                  self.object_ids)
 
     def rebuild(self):
         """

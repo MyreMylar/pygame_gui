@@ -33,9 +33,9 @@ class TextLineChunkFTFont(TextLayoutRect):
         text: str,
         font: IGUIFontInterface,
         underlined: bool,
-        colour: Union[Color, ColourGradient],
+        colour: Color | ColourGradient,
         using_default_text_colour: bool,
-        bg_colour: Union[Color, ColourGradient],
+        bg_colour: Color | ColourGradient,
         text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
         max_dimensions: Optional[List[int]] = None,
         effect_id: Optional[str] = None,
@@ -66,7 +66,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         # we split text strings based on spaces,
         # these variables need recalculating when splitting or merging chunks
-        self.split_points = [
+        self.split_points: List[int] = [
             pos + 1 for pos, char in enumerate(self.text) if char == " "
         ]
         self.letter_count = len(self.text)
@@ -562,8 +562,8 @@ class TextLineChunkFTFont(TextLayoutRect):
         current_split_point_index = int(
             percentage_split * len(self.split_points)
         )  # start with approximate position
-        tested_points = []
-        valid_points = []
+        tested_points: List[int] = []
+        valid_points: List[int] = []
         found_optimum = False
         max_split_point_index = len(self.split_points) - 1
         while not found_optimum and len(self.split_points) > 0:
@@ -779,7 +779,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         """
         Redraw a surface that has already been finalised once before.
         """
-        if self.target_surface is None:
+        if self.target_surface is None or self.target_surface_area is None:
             return
         if self.pre_effect_target_surface is not None:
             self.clear(self.transform_effect_rect)
@@ -876,6 +876,8 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _perform_rotation(self, rotation):
         # setup 'background' for effect by clearing any existing effect and redrawing
         # other chunks
+        if self.pre_effect_target_surface is None or self.target_surface is None:
+            return
         self.effects_rotation = rotation
 
         temp_surf = Surface(self.size, flags=SRCALPHA)
@@ -904,6 +906,8 @@ class TextLineChunkFTFont(TextLayoutRect):
     def _perform_scale(self, scale):
         # setup 'background' for effect by clearing any existing effect and redrawing
         # other chunks
+        if self.pre_effect_target_surface is None or self.target_surface is None:
+            return
         self.effects_scale = scale
 
         temp_surf = Surface(self.size, flags=SRCALPHA)

@@ -4,6 +4,7 @@ from pygame.color import Color
 
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class HyperlinkTextChunk(TextLineChunkFTFont):
@@ -18,10 +19,10 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         text: str,
         font: IGUIFontInterface,
         underlined: bool,
-        colour: Color,
-        bg_colour: Color,
-        hover_colour: Color,
-        active_colour: Color,
+        colour: Color | ColourGradient,
+        bg_colour: Color | ColourGradient,
+        hover_colour: Color | ColourGradient,
+        active_colour: Color | ColourGradient,
         hover_underline: bool,
         text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
         effect_id: Optional[str] = None,

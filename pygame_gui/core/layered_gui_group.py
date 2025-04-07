@@ -1,7 +1,7 @@
 from operator import truth
 from abc import abstractmethod
 from collections.abc import Iterable
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, List
 
 
 import pygame
@@ -250,7 +250,7 @@ class LayeredGUIGroup:
     def __init__(self, *sprites):
         """initialize group."""
         self._spritelayers = {}
-        self._spritelist = []
+        self._spritelist: List[GUISprite] = []
         self.spritedict = {}
         self.lostsprites = []
         self._default_layer = 0
@@ -390,7 +390,7 @@ class LayeredGUIGroup:
             if spr.image is not None and spr.visible
         ]
 
-    def sprites(self):
+    def sprites(self) -> List[GUISprite]:
         """return an ordered list of sprites (first back, last top)."""
         return self._spritelist.copy()
 
@@ -408,7 +408,7 @@ class LayeredGUIGroup:
         layer).
 
         """
-        sprites = []
+        sprites: List[GUISprite] = []
         sprites_append = sprites.append
         sprite_layers = self._spritelayers
         for spr in self._spritelist:

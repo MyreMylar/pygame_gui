@@ -3,6 +3,9 @@ from typing import Union, List, Set, Dict, Optional
 
 import pygame
 
+from pygame_gui.core.interfaces.appearance_theme_interface import (
+    IUIAppearanceThemeInterface,
+)
 from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
 from pygame_gui.core.gui_type_hints import Coordinate
@@ -14,6 +17,21 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
     before the UIElement has itself been defined.
 
     """
+
+    @property
+    @abstractmethod
+    def ui_theme(self) -> IUIAppearanceThemeInterface:
+        """
+        Get the element's ui theme
+        :return: The UI Theme
+        """
+
+    @ui_theme.setter
+    @abstractmethod
+    def ui_theme(self, value: IUIAppearanceThemeInterface):
+        """
+        Set the element's ui theme
+        """
 
     @property
     @abstractmethod

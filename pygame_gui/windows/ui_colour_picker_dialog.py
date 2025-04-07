@@ -301,8 +301,8 @@ class UIColourChannelEditor(UIElement):
         - which will propagate to the sub-elements - label, entry and slider.
         """
         super().show()
-
-        self.element_container.show()
+        if self.element_container is not None:
+            self.element_container.show()
 
     def hide(self):
         """
@@ -676,7 +676,7 @@ class UIColourPickerDialog(UIWindow):
             and event.ui_element == self.colour_2d_slider
         ):
             v, s = self.colour_2d_slider.get_current_value()
-            self._set_colours_from_value_sat(v, s)
+            self._set_colours_from_value_sat(int(v), int(s))
         return consumed_event
 
     def _update_colour_image_sv_square_and_2d_slider(self):
@@ -684,17 +684,22 @@ class UIColourPickerDialog(UIWindow):
         self.update_saturation_value_square()
         self.update_colour_2d_slider()
 
-    def _set_colours_from_value_sat(self, value, saturation):
-        self.sat_channel.set_value(saturation)
-        self.value_channel.set_value(value)
-        self.current_colour.hsva = (
-            self.hue_channel.current_value,
-            self.sat_channel.current_value,
-            self.value_channel.current_value,
-            100,
-        )
-        self.changed_hsv_update_rgb()
-        self.update_current_colour_image()
+    def _set_colours_from_value_sat(self, value: int, saturation: int):
+        if (
+            self.hue_channel is not None
+            and self.sat_channel is not None
+            and self.value_channel is not None
+        ):
+            self.sat_channel.set_value(saturation)
+            self.value_channel.set_value(value)
+            self.current_colour.hsva = (
+                self.hue_channel.current_value,
+                self.sat_channel.current_value,
+                self.value_channel.current_value,
+                100,
+            )
+            self.changed_hsv_update_rgb()
+            self.update_current_colour_image()
 
     def _set_colours_from_mouse_pos(self, scaled_mouse_pos):
         relative_click_pos = [
@@ -741,7 +746,8 @@ class UIColourPickerDialog(UIWindow):
         mini_colour_surf.fill(pygame.Color(255, 255, 255, 255), pygame.Rect(1, 1, 1, 1))
 
         hue_colour = pygame.Color(255, 255, 255, 255)
-        hue_colour.hsva = (int(self.hue_channel.current_value), 100, 100, 100)
+        if self.hue_channel is not None:
+            hue_colour.hsva = (int(self.hue_channel.current_value), 100, 100, 100)
         mini_colour_surf.fill(hue_colour, pygame.Rect(1, 0, 1, 1))
         self.sat_value_square.set_image(
             pygame.transform.smoothscale(mini_colour_surf, (200, 200)), True
@@ -752,23 +758,34 @@ class UIColourPickerDialog(UIWindow):
         This is used to update the 2D slider from the sliders
         :return: None
         """
-        s, v = self.sat_channel.current_value, self.value_channel.current_value
-        self.colour_2d_slider.set_current_value(v, s)
+        if self.sat_channel is not None and self.value_channel is not None:
+            s, v = self.sat_channel.current_value, self.value_channel.current_value
+            self.colour_2d_slider.set_current_value(v, s)
 
     def changed_hsv_update_rgb(self):
         """
         Updates the RGB channels when we've altered the HSV ones.
 
         """
-        self.red_channel.set_value(self.current_colour.r)
-        self.green_channel.set_value(self.current_colour.g)
-        self.blue_channel.set_value(self.current_colour.b)
+        if (
+            self.red_channel is not None
+            and self.green_channel is not None
+            and self.blue_channel is not None
+        ):
+            self.red_channel.set_value(self.current_colour.r)
+            self.green_channel.set_value(self.current_colour.g)
+            self.blue_channel.set_value(self.current_colour.b)
 
     def changed_rgb_update_hsv(self):
         """
         Updates the HSV channels when we've altered the RGB ones.
 
         """
-        self.hue_channel.set_value(int(self.current_colour.hsva[0]))
-        self.sat_channel.set_value(int(self.current_colour.hsva[1]))
-        self.value_channel.set_value(int(self.current_colour.hsva[2]))
+        if (
+            self.hue_channel is not None
+            and self.sat_channel is not None
+            and self.value_channel is not None
+        ):
+            self.hue_channel.set_value(int(self.current_colour.hsva[0]))
+            self.sat_channel.set_value(int(self.current_colour.hsva[1]))
+            self.value_channel.set_value(int(self.current_colour.hsva[2]))

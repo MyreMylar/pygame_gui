@@ -7,6 +7,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
 from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IContainerAndContainerLike,
+    IColourGradientInterface,
 )
 
 from pygame_gui.core import UIElement, UIContainer
@@ -95,9 +96,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
             "container",
         )
 
-        self.background_colour = None
-        self.border_colour = None
-        self.background_image = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.background_image: pygame.Surface | None = None
         self.border_width = 1
         self.shadow_width = 2
         self.shape = "rectangle"

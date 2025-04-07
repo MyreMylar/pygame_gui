@@ -12,7 +12,7 @@ import sys
 import io
 import base64
 
-from typing import Union, Dict, Tuple, Optional
+from typing import Union, Dict, Tuple, Optional, Callable, List, Any
 from importlib import resources
 
 from threading import Thread
@@ -95,16 +95,17 @@ if PLATFORM == "WINDOWS":
         Wrapper for platform functions.
         """
 
-        def __init__(self, func):
-            super().__setattr__("func", func)
-            self.argtypes = []
-            self.restype = None
+        def __init__(self, func: Callable):
+            # super().__setattr__("func", func)
+            self.func = func
+            self.argtypes: List[Any] = []
+            self.restype: Any | None = None
 
         def __call__(self, *args):
             return self.func(*args)
 
-        def __setattr__(self, key, value):
-            setattr(self.func, key, value)
+        # def __setattr__(self, key, value):
+        #     setattr(self.func, key, value)
 
     def __windows_copy(data: str):
         msvcrt = ctypes.CDLL("msvcrt")

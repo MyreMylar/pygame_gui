@@ -172,7 +172,7 @@ class DrawableShape:
         self.containing_rect = containing_rect.copy()
         self.dynamic_width = self.containing_rect.width == -1
         self.dynamic_height = self.containing_rect.height == -1
-        self.text_view_rect: Optional[pygame.Rect] = None
+        self.text_view_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
         self.allow_text_outside_width_border = allow_text_outside_width_border
         self.allow_text_outside_height_border = allow_text_outside_height_border
         self.text_x_scroll_enabled = text_x_scroll_enabled
@@ -459,6 +459,8 @@ class DrawableShape:
         Aligns the text drawing position correctly according to our theming options.
 
         """
+        if self.text_box_layout is None:
+            return
         # Horizontal alignment
         if "text_horiz_alignment" in self.theming:
             if self.theming["text_horiz_alignment"] == "center" or self.theming[

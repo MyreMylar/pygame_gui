@@ -309,25 +309,25 @@ class HTMLParser(html.parser.HTMLParser):
             for index, padding in enumerate(paddings):
                 paddings[index] = int(padding.strip("px"))
             if len(paddings) == 4:
-                padding_top = paddings[0]
-                padding_right = paddings[1]
-                padding_bottom = paddings[2]
-                padding_left = paddings[3]
+                padding_top = int(paddings[0])
+                padding_right = int(paddings[1])
+                padding_bottom = int(paddings[2])
+                padding_left = int(paddings[3])
             elif len(paddings) == 3:
-                padding_top = paddings[0]
-                padding_right = paddings[1]
-                padding_left = paddings[1]
-                padding_bottom = paddings[2]
+                padding_top = int(paddings[0])
+                padding_right = int(paddings[1])
+                padding_left = int(paddings[1])
+                padding_bottom = int(paddings[2])
             elif len(paddings) == 2:
-                padding_top = paddings[0]
-                padding_right = paddings[1]
-                padding_left = paddings[1]
-                padding_bottom = paddings[0]
+                padding_top = int(paddings[0])
+                padding_right = int(paddings[1])
+                padding_left = int(paddings[1])
+                padding_bottom = int(paddings[0])
             elif len(paddings) == 1:
-                padding_top = paddings[0]
-                padding_right = paddings[0]
-                padding_left = paddings[0]
-                padding_bottom = paddings[0]
+                padding_top = int(paddings[0])
+                padding_right = int(paddings[0])
+                padding_left = int(paddings[0])
+                padding_bottom = int(paddings[0])
             else:
                 padding_top = 0
                 padding_right = 0

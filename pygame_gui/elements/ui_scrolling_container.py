@@ -270,7 +270,8 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         elements in this panel.
 
         """
-        self._root_container.kill()
+        if self._root_container is not None:
+            self._root_container.kill()
         super().kill()
 
     def set_position(self, position: Coordinate):
@@ -469,7 +470,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
 
         need_horiz_scroll_bar, need_vert_scroll_bar = self._check_scroll_bars()
 
-        if need_vert_scroll_bar:
+        if need_vert_scroll_bar and self.vert_scroll_bar is not None:
             self.vert_scroll_bar.enable()
             # It is important to subtract scroll_bar_height as horiz scroll bar's dimensions are evaluated after.
             # If horizontal scrollbar is not needed, then scroll bar height is 0.
@@ -488,7 +489,7 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         else:
             self._remove_vert_scrollbar()
 
-        if need_horiz_scroll_bar:
+        if need_horiz_scroll_bar and self.horiz_scroll_bar is not None:
             self.horiz_scroll_bar.enable()
             vis_percent = self._view_container.rect.width / self.scrolling_width
             start_percent = (

@@ -1,7 +1,7 @@
 import warnings
 
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Any, Union
+from typing import Tuple, Any, Union, Deque
 from collections import deque
 
 import pygame
@@ -65,8 +65,12 @@ class ThreadedLoader:
         self._threaded_loading_done_queue = ClosableQueue()
         self._threading_error_queue = ClosableQueue()
 
-        self._sequential_loading_queue = deque()
-        self._sequential_loading_done_queue = deque()
+        self._sequential_loading_queue: Deque[
+            FontResource | ImageResource | SurfaceResource
+        ] = deque()
+        self._sequential_loading_done_queue: Deque[
+            FontResource | ImageResource | SurfaceResource
+        ] = deque()
 
         self._load_threads = None
         self._threaded_loading_finished = False
@@ -159,14 +163,15 @@ class ThreadedLoader:
             thread.start()
 
     def _stop_threaded_loading(self):
-        for _ in self._load_threads:
-            self._threaded_loading_queue.close()
+        if self._load_threads is not None:
+            for _ in self._load_threads:
+                self._threaded_loading_queue.close()
 
-        # This blocks, waiting for all load threads to be finished.
-        self._threaded_loading_queue.join()
+            # This blocks, waiting for all load threads to be finished.
+            self._threaded_loading_queue.join()
 
-        for thread in self._load_threads:
-            thread.join()
+            for thread in self._load_threads:
+                thread.join()
 
         self._threads_running = False
 

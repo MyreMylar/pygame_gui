@@ -126,13 +126,29 @@ class UIManager(IUIManagerInterface):
         self.text_hovered = False
         self.hovering_any_ui_element = False
 
-        self.copy_text_enabled = True
-        self.paste_text_enabled = True
+        self._copy_text_enabled = True
+        self._paste_text_enabled = True
 
         if auto_load:
             self.resource_loader.start()
             # If we are using a blocking loader this will only return when loading is complete
             self.resource_loader.update()
+
+    @property
+    def copy_text_enabled(self) -> bool:
+        return self._copy_text_enabled
+
+    @copy_text_enabled.setter
+    def copy_text_enabled(self, value: bool):
+        self._copy_text_enabled = value
+
+    @property
+    def paste_text_enabled(self) -> bool:
+        return self._paste_text_enabled
+
+    @paste_text_enabled.setter
+    def paste_text_enabled(self, value: bool):
+        self._paste_text_enabled = value
 
     def create_new_theme(
         self,
@@ -311,9 +327,10 @@ class UIManager(IUIManagerInterface):
         :param update_all_sprites:
         """
         for sprite in self.ui_group.sprites():
-            if not update_all_sprites and sprite.ui_theme is not self.ui_theme:
-                continue
-            sprite.ui_theme = theme
+            if isinstance(sprite, IUIElementInterface):
+                if not update_all_sprites and sprite.ui_theme is not self.ui_theme:
+                    continue
+                sprite.ui_theme = theme
         self.ui_theme = theme
         self.rebuild_all_from_changed_theme_data(self.ui_theme)
 
@@ -326,9 +343,10 @@ class UIManager(IUIManagerInterface):
         :param theme: the theme that has changed.
         """
         for sprite in self.ui_group.sprites():
-            if theme is not None and sprite.ui_theme is not theme:
-                continue
-            sprite.rebuild_from_changed_theme_data()
+            if isinstance(sprite, IUIElementInterface):
+                if theme is not None and sprite.ui_theme is not theme:
+                    continue
+                sprite.rebuild_from_changed_theme_data()
 
     def update(self, time_delta: float):
         """
