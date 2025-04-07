@@ -12,6 +12,7 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
     IUIElementInterface,
+    IColourGradientInterface,
 )
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -66,14 +67,10 @@ class UISelectionList(UIElement):
         object_id: Optional[ObjectID | str] = None,
         anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
-        default_selection: Optional[
-            Union[
-                str,
-                Tuple[str, str],  # Single-selection lists
-                List[str],
-                List[Tuple[str, str]],  # Multi-selection lists
-            ]
-        ] = None,
+        default_selection: str
+        | Tuple[str, str]
+        | List[str | Tuple[str, str]]
+        | None = None,
     ):
         super().__init__(
             relative_rect,
@@ -107,8 +104,12 @@ class UISelectionList(UIElement):
         self.allow_multi_select = allow_multi_select
         self.allow_double_clicks = allow_double_clicks
 
-        self.background_colour = pygame.Color(0, 0, 0)
-        self.border_colour = pygame.Color(0, 0, 0)
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
         self.background_image: Optional[pygame.Surface] = None
         self.border_width = 1
         self.shadow_width = 2
@@ -462,12 +463,14 @@ class UISelectionList(UIElement):
 
         """
         default = self._default_selection
+        if default is None:
+            return
 
         if isinstance(default, list) and self.allow_multi_select is not True:
             raise ValueError(
                 "Multiple default values specified for single-selection list."
             )
-        if not isinstance(default, list):
+        if not isinstance(default, list) and default is not None:
             default = [default]
 
         # Sanity check: return if any values - even not requested defaults - are already selected.
@@ -741,7 +744,8 @@ class UISelectionList(UIElement):
         elements in this panel.
 
         """
-        self.list_and_scroll_bar_container.kill()
+        if self.list_and_scroll_bar_container is not None:
+            self.list_and_scroll_bar_container.kill()
         super().kill()
 
     def rebuild_from_changed_theme_data(self):

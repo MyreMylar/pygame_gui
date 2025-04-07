@@ -81,7 +81,7 @@ class UIManager(IUIManagerInterface):
             auto_load = False
             self.resource_loader = resource_loader
 
-        self.window_resolution = window_resolution
+        self.window_resolution: Tuple[int, int] = window_resolution
         self.ui_theme: IUIAppearanceThemeInterface = self.create_new_theme(theme_path)
 
         self.universal_empty_surface = pygame.surface.Surface(
@@ -90,7 +90,7 @@ class UIManager(IUIManagerInterface):
         self.ui_group = LayeredGUIGroup()
 
         self.focused_set: Optional[set[IUIElementInterface]] = None
-        self.root_container = (
+        self.root_container: Optional[UIContainer] = (
             None  # declaration required as it is used in creation of container
         )
         self.root_container = UIContainer(
@@ -119,7 +119,7 @@ class UIManager(IUIManagerInterface):
 
         self.visual_debug_active = False
 
-        self.resizing_window_cursors = None
+        self.resizing_window_cursors: Dict[str, pygame.Cursor] | None = None
         self._load_default_cursors()
         self.active_user_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
         self._active_cursor = self.active_user_cursor
@@ -236,7 +236,8 @@ class UIManager(IUIManagerInterface):
         Clear all existing windows and the root container, which should get rid of all created UI
         elements. We then recreate the UIWindowStack and the root container.
         """
-        self.root_container.kill()
+        if self.root_container is not None:
+            self.root_container.kill()
         self.root_container = UIContainer(
             pygame.Rect((0, 0), self.window_resolution),
             self,

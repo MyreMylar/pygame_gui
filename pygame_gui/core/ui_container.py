@@ -39,7 +39,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         starting_height: int = 1,
         is_window_root_container: bool = False,
         container: Union[IContainerLikeInterface, None] = None,
-        parent_element: Union[UIElement, None] = None,
+        parent_element: Union[IUIElementInterface, None] = None,
         object_id: Union[ObjectID, str, None] = None,
         element_id: Union[List[str], None] = None,
         anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,

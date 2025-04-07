@@ -68,7 +68,7 @@ class UITooltip(UIElement, IUITooltipInterface):
             element_id=["tool_tip"],
         )
 
-        self.text_block = None
+        self.text_block: Optional[UITextBox] = None
         self.rect_width: Optional[int] = None
         self.hover_distance_from_target = hover_distance
 
@@ -97,7 +97,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         """
         self._set_image(self.ui_manager.get_universal_empty_surface())
 
-        if self.text_block is not None:
+        if self.text_block is not None and self.rect_width is not None:
             self.text_block.set_dimensions((self.rect_width, -1))
 
             self.relative_rect.height = self.text_block.rect.height
@@ -110,7 +110,8 @@ class UITooltip(UIElement, IUITooltipInterface):
         Overrides the UIElement's default kill method to also kill the text block element that
         helps make up the complete tool tip.
         """
-        self.text_block.kill()
+        if self.text_block is not None:
+            self.text_block.kill()
         super().kill()
 
     def find_valid_position(self, position: Coordinate) -> bool:
@@ -163,7 +164,8 @@ class UITooltip(UIElement, IUITooltipInterface):
 
     def _copy_rect_to_rel_and_set_text_pos(self):
         self.relative_rect = self.rect.copy()
-        self.text_block.set_position(self.rect.topleft)
+        if self.text_block is not None:
+            self.text_block.set_position(self.rect.topleft)
         return True
 
     def _copy_rect_to_rel_and_warn(self, arg0):
