@@ -1,6 +1,16 @@
 import re
 from ast import literal_eval
-from typing import NamedTuple, Union, Mapping, Optional, Dict, Callable, Tuple, Any
+from typing import (
+    NamedTuple,
+    Union,
+    Mapping,
+    Optional,
+    Dict,
+    Tuple,
+    Any,
+    TypedDict,
+    List,
+)
 
 import pygame
 
@@ -10,6 +20,7 @@ from pygame_gui.core.interfaces import (
     IUIElementInterface,
     IUIManagerInterface,
     IContainerLikeInterface,
+    IColourGradientInterface,
 )
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 from pygame_gui.elements.ui_auto_resizing_container import UIAutoResizingContainer
@@ -63,13 +74,13 @@ class UISection(UIAutoResizingContainer):
         form: "UIForm",
         name: str,
         questionnaire: Mapping[str, Union[str, Mapping]],
-        manager: Optional[IUIManagerInterface] = None,
+        manager: IUIManagerInterface | None = None,
         *,
         starting_height: int = 1,
-        container: Optional[IContainerLikeInterface] = None,
-        parent_element: Optional[UIElement] = None,
-        object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        container: IContainerLikeInterface | None = None,
+        parent_element: UIElement | None = None,
+        object_id: ObjectID | str | None = None,
+        anchors: Dict[str, str | IUIElementInterface] | None = None,
         visible: int = 1,
     ):
         super().__init__(
@@ -96,9 +107,13 @@ class UISection(UIAutoResizingContainer):
         self.form = form
         self.name = name
 
-        self.background_colour = None
-        self.border_colour = None
-        self.background_image = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.background_image: pygame.Surface | None = None
         self.border_width = 1
         self.shadow_width = 2
         self.padding = (5, 5)
@@ -116,7 +131,7 @@ class UISection(UIAutoResizingContainer):
         self.rebuild_sub_elements = False
 
         self.shape = "rectangle"
-        self.shape_corner_radius = 0
+        self.shape_corner_radius = [0, 0, 0, 0]
 
         anchors = {"left": "left", "right": "right", "top": "top"}
 
@@ -148,7 +163,9 @@ class UISection(UIAutoResizingContainer):
             anchors=anchors.copy(),
         )
         self.questionnaire = questionnaire
-        self.parsed_questionnaire = {}
+        self.parsed_questionnaire: Dict[
+            str, UISection | InputField | IUIElementInterface
+        ] = {}
         self.parse_section()
 
         self.rebuild_from_changed_theme_data()
@@ -170,7 +187,11 @@ class UISection(UIAutoResizingContainer):
         self.main_expand_button.set_dimensions(size)
         self.main_expand_button.set_relative_position((self.padding[0], 0))
 
-        anchors = {"left": "left", "right": "right", "top": "top"}
+        anchors: Dict[str, str | IUIElementInterface] = {
+            "left": "left",
+            "right": "right",
+            "top": "top",
+        }
 
         self.parsed_questionnaire = self.form.get_parsed_questionnaire(
             self,
@@ -473,16 +494,14 @@ class UIForm(UIScrollingContainer):
     def __init__(
         self,
         relative_rect: pygame.Rect,
-        questionnaire: Optional[
-            Mapping[str, Union[str, Mapping, IUIElementInterface]]
-        ] = None,
+        questionnaire: Mapping[str, str | Mapping] | None = None,
         manager: Optional[IUIManagerInterface] = None,
         *,
         starting_height: int = 1,
         container: Optional[IContainerLikeInterface] = None,
         parent_element: Optional[UIElement] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
-        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        anchors: Dict[str, str | IUIElementInterface] | None = None,
         visible: int = 1,
     ):
         super().__init__(
@@ -505,9 +524,13 @@ class UIForm(UIScrollingContainer):
             element_id="form",
         )
 
-        self.background_colour = None
-        self.border_colour = None
-        self.background_image = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.background_image: pygame.Surface | None = None
         self.border_width = 1
         self.shadow_width = 2
         self.padding = (5, 5)  # TODO: Implement vertical padding from the bottom
@@ -524,14 +547,16 @@ class UIForm(UIScrollingContainer):
         self.rebuild_sub_elements = False
 
         self.shape = "rectangle"
-        self.shape_corner_radius = 0
+        self.shape_corner_radius = [0, 0, 0, 0]
 
         self.submit_button_horiz_alignment = "right"
 
         self.questionnaire = (
             questionnaire or {}
         )  # If None is passed, use an empty dictionary instead
-        self.parsed_questionnaire = {}
+        self.parsed_questionnaire: Dict[
+            str, UISection | InputField | IUIElementInterface
+        ] = {}
 
         self.submit_button = UIButton(
             pygame.Rect(0, 0, -1, self.field_height),
@@ -547,7 +572,7 @@ class UIForm(UIScrollingContainer):
         self.rebuild_from_changed_theme_data()
 
     def _get_current_values(
-        self, dic: Mapping[str, Union[IUIElementInterface, Mapping]]
+        self, dic: Dict[str, UISection | InputField | IUIElementInterface]
     ) -> Dict:
         """
         This function is used by get_current_values to recursively replace the nested dictionary's copy's keys with the
@@ -556,7 +581,7 @@ class UIForm(UIScrollingContainer):
         :param dic: The nested dictionary
         :return: The copy of the nested mapping with values reflecting the values input by the user
         """
-        value_dic = {}
+        value_dic: Dict[str, Any] = {}
         for key, value in dic.items():
             # Used for re-casting values from str to int/decimal/boolean
             type_name = ""
@@ -569,29 +594,31 @@ class UIForm(UIScrollingContainer):
 
             elif isinstance(value, IUIElementInterface):
                 if isinstance(value, UITextEntryLine):
-                    text = value.get_text()
-                    zero_text = False
-
+                    raw_text = value.get_text()
+                    parsed_result: int | float = 0
                     if type_name in ["integer", "decimal"]:
-                        if text:
+                        zero_text = False
+                        if raw_text:
                             try:
                                 if type_name == "integer":
-                                    text = int(text)
+                                    parsed_result = int(raw_text)
                                 else:
-                                    text = float(text)
+                                    parsed_result = float(raw_text)
                             except ValueError:
                                 zero_text = True
                         else:
                             zero_text = True
 
-                    # If no text was entered or value could not be converted to integer or float then default to 0.
-                    if zero_text:
-                        if type_name == "integer":
-                            text = 0
-                        elif type_name == "decimal":
-                            text = 0.0
+                        # If no text was entered or value could not be converted to integer or float then default to 0.
+                        if zero_text:
+                            if type_name == "integer":
+                                parsed_result = 0
+                            elif type_name == "decimal":
+                                parsed_result = 0.0
 
-                    value_dic[key] = text
+                        value_dic[key] = parsed_result
+                    else:
+                        value_dic[key] = raw_text
 
                 elif isinstance(value, UITextEntryBox):
                     value_dic[key] = value.get_text()
@@ -608,8 +635,8 @@ class UIForm(UIScrollingContainer):
                         selected_option = literal_eval(selected_option)
                     value_dic[key] = selected_option
 
-                elif hasattr(value, "get_current_input") and isinstance(
-                    value.get_current_input, Callable
+                elif hasattr(value, "get_current_input") and callable(
+                    value.get_current_input
                 ):
                     value_dic[key] = value.get_current_input()
 
@@ -633,12 +660,12 @@ class UIForm(UIScrollingContainer):
     @staticmethod
     def get_parsed_questionnaire(
         element: Union["UIForm", UISection],
-        questionnaire: Mapping[str, Union[str, Mapping]],
+        questionnaire: Mapping[str, str | Mapping],
         manager: IUIManagerInterface,
         container: IContainerLikeInterface,
         parent_element: UIElement,
-        anchors: Dict[str, Union[str, UIElement]],
-    ) -> Dict[str, Union[UISection, InputField, IUIElementInterface]]:
+        anchors: Dict[str, Union[str, IUIElementInterface]],
+    ) -> Dict[str, UISection | InputField | IUIElementInterface]:
         """
         This function is used by UIForm.parse_form to recursively create the ui elements to gather input based
         on the questionnaire passed. This prevents duplication of code as UISection elements created also call this
@@ -652,7 +679,9 @@ class UIForm(UIScrollingContainer):
         :param anchors: The starting anchors of the elements
         :return: The parsed questionnaire
         """
-        parsed_questionnaire = {}
+        parsed_questionnaire: Dict[
+            str, UISection | InputField | IUIElementInterface
+        ] = {}
 
         form = element if isinstance(element, UIForm) else element.form
         label_height = element.label_height
@@ -672,13 +701,25 @@ class UIForm(UIScrollingContainer):
             width = element.relative_rect.width - 2 * element.padding[0]
         rel_rect = pygame.Rect(*element.padding, width, field_height)
 
+        class UIElementParamDict(TypedDict):
+            """
+            Parameter Dictionary for UI Elements
+            """
+            relative_rect: pygame.Rect
+            manager: IUIManagerInterface | None
+            container: IContainerLikeInterface | None
+            parent_element: UIElement | None
+            anchors: Dict[str, str | IUIElementInterface] | None
+            object_id: ObjectID | str | None
+
         for key, value in questionnaire.items():
-            param_dict = {
+            param_dict: UIElementParamDict = {
                 "relative_rect": rel_rect.copy(),
                 "manager": manager,
                 "container": container,
                 "parent_element": parent_element,
                 "anchors": anchors.copy(),
+                "object_id": None,
             }
 
             if isinstance(value, Mapping):
@@ -686,11 +727,11 @@ class UIForm(UIScrollingContainer):
 
                 param_dict["relative_rect"].width -= section_indent
                 param_dict["relative_rect"].x += section_indent
+                param_dict["object_id"] = ObjectID(f"#{key.lower()}", None)
                 parsed_questionnaire[key] = UISection(
                     form=form,
                     name=key,
                     questionnaire=value,
-                    object_id=ObjectID(f"#{key.lower()}", None),
                     **param_dict,
                 )
                 rel_rect.y = section_gap
@@ -714,68 +755,79 @@ class UIForm(UIScrollingContainer):
                 param_dict["relative_rect"].height = label_height
 
                 # This is to prevent labels from resizing and becoming too small to hold their text
-                right = param_dict["anchors"].pop("right", None)
+                temp_anchors = param_dict["anchors"]
+                right = None
+                if temp_anchors is not None:
+                    right = temp_anchors.pop("right", None)
 
+                param_dict["object_id"] = ObjectID(f"#{key.lower()}", "@form_label")
                 label = UILabel(
                     text=key,
-                    object_id=ObjectID(f"#{key.lower()}", "@form_label"),
                     **param_dict,
                 )
-
-                param_dict["anchors"]["top_target"] = label
-                if right:
-                    param_dict["anchors"]["right"] = right
+                if param_dict["anchors"] is not None:
+                    param_dict["anchors"]["top_target"] = label
+                    if right:
+                        param_dict["anchors"]["right"] = right
                 param_dict["relative_rect"] = rel_rect.copy()
                 param_dict["relative_rect"].y = label_gap
                 param_dict["relative_rect"].height = field_height
                 param_dict["object_id"] = ObjectID(f"#{key.lower()}", "@form_field")
 
-                element = None
-
                 if type_name == "character":
-                    element = UITextEntryLine(
+                    text_line = UITextEntryLine(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
-                    element.set_text_length_limit(1)
+                    text_line.set_text_length_limit(1)
+                    ui_element: UITextEntryLine | UITextEntryBox | UIDropDownMenu = (
+                        text_line
+                    )
 
                 elif type_name == "short_text":
-                    element = UITextEntryLine(
+                    ui_element = UITextEntryLine(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
 
                 elif type_name == "long_text":
                     param_dict["relative_rect"].height = large_field_height
-                    element = UITextEntryBox(
+                    ui_element = UITextEntryBox(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
 
                 elif type_name == "password":
-                    element = UITextEntryLine(
+                    text_line = UITextEntryLine(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
-                    element.set_text_hidden(True)
+                    text_line.set_text_hidden(True)
+                    ui_element = text_line
 
                 elif type_name == "integer":
-                    element = UITextEntryLine(
+                    text_line = UITextEntryLine(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
-                    element.set_allowed_characters("numbers")
+                    text_line.set_allowed_characters("numbers")
+                    ui_element = text_line
 
                 elif type_name == "decimal":
-                    element = UITextEntryLine(
+                    text_line = UITextEntryLine(
                         initial_text=str(args.get("default", "")), **param_dict
                     )
-                    element.set_allowed_characters([".", *list("0123456789")])
+                    text_line.set_allowed_characters([".", *list("0123456789")])
+                    ui_element = text_line
 
                 elif type_name == "boolean":
-                    element = UIDropDownMenu(
+                    ui_element = UIDropDownMenu(
                         options_list=["True", "False"],
                         starting_option=str(args.get("default", "True")),
                         **param_dict,
                     )
+                else:
+                    ui_element = UITextEntryLine(
+                        initial_text=str(args.get("default", "")), **param_dict
+                    )
                 rel_rect.y = gap
-                parsed_questionnaire[key] = InputField(type_name, label, element)
-                anchors["top_target"] = element
+                parsed_questionnaire[key] = InputField(type_name, label, ui_element)
+                anchors["top_target"] = ui_element
                 continue
 
             elif isinstance(value, IUIElementInterface):
@@ -817,7 +869,9 @@ class UIForm(UIScrollingContainer):
                 rel_rect.y = gap
                 parsed_questionnaire[key] = value
 
-            anchors["top_target"] = parsed_questionnaire[key]
+            ui_element_interface = parsed_questionnaire[key]
+            if isinstance(ui_element_interface, IUIElementInterface):
+                anchors["top_target"] = ui_element_interface
 
         return parsed_questionnaire
 
@@ -831,7 +885,11 @@ class UIForm(UIScrollingContainer):
 
         self.validate_questionnaire(self.questionnaire, raise_error=True)
 
-        anchors = {"left": "left", "right": "right", "top": "top"}
+        anchors: Dict[str, str | IUIElementInterface] = {
+            "left": "left",
+            "right": "right",
+            "top": "top",
+        }
 
         self.parsed_questionnaire = self.get_parsed_questionnaire(
             self,
@@ -845,7 +903,8 @@ class UIForm(UIScrollingContainer):
         # Submit Button
 
         if "top_target" in anchors:
-            self.submit_button.anchors["top_target"] = anchors["top_target"]
+            if self.submit_button.anchors is not None:
+                self.submit_button.anchors["top_target"] = anchors["top_target"]
             self.submit_button.relative_rect.y = self.gap
         self.rebuild_submit_button()
 
@@ -964,7 +1023,7 @@ class UIForm(UIScrollingContainer):
     @staticmethod
     def rebuild_parsed_questionnaire(
         element: Union["UIForm", UISection],
-        questionnaire: Mapping[str, Union[str, Mapping]],
+        questionnaire: Dict[str, UISection | InputField | IUIElementInterface],
     ) -> None:
         """
         Called by UIForm.rebuild() to rebuild the elements of the form when theming elements like gaps between elements,
@@ -1023,7 +1082,7 @@ class UIForm(UIScrollingContainer):
                 # Two elements are updated, a label and the actual UIElement needed for input
 
                 label = value.label
-                rel_rect.width = label.relative_rect.width
+                rel_rect.width = int(label.relative_rect.width)
                 rel_rect.height = label_height
 
                 label.set_dimensions((rel_rect.width, rel_rect.height))
@@ -1034,25 +1093,35 @@ class UIForm(UIScrollingContainer):
                 rel_rect.height = field_height
 
                 type_name = value.question_type
-                element = value.element
+                input_field_element = value.element
 
-                if type_name == "character":
-                    element.set_text_length_limit(1)
+                if type_name == "character" and isinstance(
+                    input_field_element, UITextEntryLine
+                ):
+                    input_field_element.set_text_length_limit(1)
 
                 elif type_name == "long_text":
                     rel_rect.height = large_field_height
 
-                elif type_name == "password":
-                    element.set_text_hidden(True)
+                elif type_name == "password" and isinstance(
+                    input_field_element, UITextEntryLine
+                ):
+                    input_field_element.set_text_hidden(True)
 
-                elif type_name == "integer":
-                    element.set_allowed_characters("numbers")
+                elif type_name == "integer" and isinstance(
+                    input_field_element, UITextEntryLine
+                ):
+                    input_field_element.set_allowed_characters("numbers")
 
-                elif type_name == "decimal":
-                    element.set_allowed_characters([".", *list("0123456789")])
+                elif type_name == "decimal" and isinstance(
+                    input_field_element, UITextEntryLine
+                ):
+                    input_field_element.set_allowed_characters(
+                        [".", *list("0123456789")]
+                    )
 
-                element.set_dimensions((rel_rect.width, rel_rect.height))
-                element.set_relative_position(rel_rect.topleft)
+                input_field_element.set_dimensions((rel_rect.width, rel_rect.height))
+                input_field_element.set_relative_position(rel_rect.topleft)
 
                 relative_rect.y = gap
 
@@ -1071,8 +1140,10 @@ class UIForm(UIScrollingContainer):
 
                 # TODO: Remove when UIDropDownMenu does this automatically eventually?
                 if isinstance(value, UIDropDownMenu):
-                    value.current_state.update_position()
-                    value.current_state.update_dimensions()
+                    current_drop_down_state = value.current_state
+                    if current_drop_down_state is not None:
+                        current_drop_down_state.update_position()
+                        current_drop_down_state.update_dimensions()
 
                 relative_rect.y = gap
 
@@ -1083,8 +1154,11 @@ class UIForm(UIScrollingContainer):
         :return: None
         """
 
-        anchors = {"top": "top"}
-        if "top_target" in self.submit_button.anchors:
+        anchors: Dict[str, str | IUIElementInterface] = {"top": "top"}
+        if (
+            self.submit_button.anchors is not None
+            and "top_target" in self.submit_button.anchors
+        ):
             anchors["top_target"] = self.submit_button.anchors["top_target"]
 
         x_padding = self.padding[0]
@@ -1125,7 +1199,10 @@ class UIForm(UIScrollingContainer):
             - (2 * self.border_width),
         )
 
-        if self._root_container.relative_rect != root_rect:
+        if (
+            self._root_container is not None
+            and self._root_container.relative_rect != root_rect
+        ):
             self._root_container.set_relative_position(root_rect.topleft)
             self._root_container.set_dimensions(root_rect.size)
             self._calculate_scrolling_dimensions()
@@ -1158,9 +1235,9 @@ class UIForm(UIScrollingContainer):
         self.on_fresh_drawable_shape_ready()
 
         # TODO: Remove when resizing bugs are fixed
-        self.scrollable_container.update_min_edges_rect(
-            self.scrollable_container.relative_rect
-        )
+        if isinstance(self.scrollable_container, UIAutoResizingContainer):
+            min_edges_rect = pygame.Rect(self.scrollable_container.relative_rect)
+            self.scrollable_container.update_min_edges_rect(min_edges_rect)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -1239,14 +1316,14 @@ class UIForm(UIScrollingContainer):
         # are both even on each side because some ' might be contained within "" (for example in use of apostrophes) and
         # some " might be contained within ''.
 
-        args = []
+        args: List[Tuple[str, Any]] = []
         in_quotes = False
         # Used to raise more informative errors when quotes are used in keywords and
         # also for allowing whitespace between quotes in the same argument values, for e.g. "short_text('abc' 'def')"
         was_in_quotes = False
         arg_start_i = 0
         keyword_present = False
-        keyword = None
+        keyword = ""
         arg_value_start_i = 0
 
         if arg_group[-1] != ",":
@@ -1333,7 +1410,7 @@ class UIForm(UIScrollingContainer):
                     args.append((keyword, value))
                     arg_start_i = i + 1
                     keyword_present = False
-                    keyword = None
+                    keyword = ""
                     arg_value_start_i = i + 1
                     was_in_quotes = False
 
@@ -1387,7 +1464,8 @@ class UIForm(UIScrollingContainer):
 
     @staticmethod
     def validate_questionnaire(
-        questionnaire: Mapping[str, Union[str, Mapping]], raise_error: bool = False
+        questionnaire: Mapping[str, str | Mapping[Any, Any] | IUIElementInterface],
+        raise_error: bool = False,
     ) -> Optional[bool]:
         """
         Use this to validate if a questionnaire can be passed to the __init__ function. The format of the questionnaire
@@ -1414,7 +1492,7 @@ class UIForm(UIScrollingContainer):
                 return False
 
             # Sub-questionnaire
-            if isinstance(value, Mapping):
+            if isinstance(value, Dict):
                 if not UIForm.validate_questionnaire(value, raise_error):
                     return False
 
