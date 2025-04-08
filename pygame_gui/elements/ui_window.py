@@ -1,4 +1,4 @@
-from typing import Union, Optional, List, Iterator
+from typing import List, Iterator
 
 import pygame
 
@@ -19,6 +19,7 @@ from pygame_gui.core.interfaces import (
     IWindowInterface,
     IUIManagerInterface,
     IUIElementInterface,
+    IColourGradientInterface,
 )
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
@@ -49,10 +50,10 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
     def __init__(
         self,
         rect: RectLike,
-        manager: Optional[IUIManagerInterface] = None,
+        manager: IUIManagerInterface | None = None,
         window_display_title: str = "",
-        element_id: Union[List[str], str, None] = None,
-        object_id: Optional[Union[ObjectID, str]] = None,
+        element_id: List[str] | str | None = None,
+        object_id: ObjectID | str | None = None,
         resizable: bool = False,
         visible: int = 1,
         draggable: bool = True,
@@ -61,7 +62,7 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         always_on_top: bool = False,
     ):
         self.window_display_title = window_display_title
-        self._window_root_container = None  # type: Optional[UIContainer]
+        self._window_root_container: UIContainer | None = None
         self.resizable = resizable
         self.draggable = draggable
         self._always_on_top = always_on_top
@@ -98,13 +99,17 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         self.resizing_mode_active = False
         self.start_resize_point = (0, 0)
-        self.start_resize_rect = None  # type: Optional[pygame.Rect]
+        self.start_resize_rect = pygame.Rect(0, 0, 0, 0)
 
         self.grabbed_window = False
         self.starting_grab_difference = (0, 0)
 
-        self.background_colour = None
-        self.border_colour = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
         self.shape = "rectangle"
         self.enable_title_bar = True
         self.enable_close_button = True
@@ -112,9 +117,9 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         self.title_bar_close_button_width = self.title_bar_height
 
         # UI elements
-        self.window_element_container = None  # type: Optional[UIContainer]
-        self.title_bar = None  # type: Optional[UIButton]
-        self.close_window_button = None  # type: Optional[UIButton]
+        self.window_element_container: UIContainer | None = None
+        self.title_bar: UIButton | None = None
+        self.close_window_button: UIButton | None = None
 
         self.rebuild_from_changed_theme_data()
 
@@ -412,13 +417,21 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                     x_pos = self.rect.right - self.minimum_dimensions[0]
                 else:
                     x_pos = self.rect.left
+
+        container_width = 0
+        container_height = 0
+
+        if self.ui_container is not None:
+            container_width = self.ui_container.get_container().get_rect().width
+            container_height = self.ui_container.get_container().get_rect().height
+
         x_dimension = max(
             self.minimum_dimensions[0],
-            min(self.ui_container.get_container().get_rect().width, x_dimension),
+            min(container_width, x_dimension),
         )
         y_dimension = max(
             self.minimum_dimensions[1],
-            min(self.ui_container.get_container().get_rect().height, y_dimension),
+            min(container_height, y_dimension),
         )
         self.set_position((x_pos, y_pos))
         self.set_dimensions((x_dimension, y_dimension))
@@ -557,7 +570,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         pygame.event.post(window_close_event)
 
         self.window_stack.remove_window(self)
-        self._window_root_container.kill()
+        if self._window_root_container is not None:
+            self._window_root_container.kill()
         super().kill()
 
     def rebuild(self):
@@ -627,7 +641,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
                 self.rect, theming_parameters, ["normal"], self.ui_manager
             )
 
-        self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            self._set_image(self.drawable_shape.get_fresh_surface())
 
         self.set_dimensions(self.relative_rect.size)
 

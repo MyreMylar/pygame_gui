@@ -1,7 +1,7 @@
 import warnings
 import html.parser
 from collections import deque
-from typing import List, Dict, Any, Tuple, Deque
+from typing import List, Dict, Any, Tuple, Deque, TypedDict
 from pathlib import Path
 
 # noinspection PyPackageRequirements
@@ -20,6 +20,29 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
 from pygame_gui.core.text.text_layout_rect import TextFloatPosition, Padding
 from pygame_gui.core.text.image_layout_rect import ImageLayoutRect
+
+
+class TextStyle(TypedDict):
+    """
+    Style dictionary for text
+    """
+
+    font_name: str
+    font_size: int
+    font_colour: pygame.Color | IColourGradientInterface
+    bg_colour: pygame.Color | IColourGradientInterface
+    shadow_data: (
+        Tuple[int, int, int, pygame.Color | IColourGradientInterface, bool] | None
+    )
+    bold: bool
+    italic: bool
+    underline: bool
+    link: bool
+    link_href: str | None
+    effect_id: str | None
+    antialiased: bool
+    script: str
+    direction: int
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -73,7 +96,7 @@ class HTMLParser(html.parser.HTMLParser):
 
         font_info = self.ui_theme.get_font_info(combined_ids)
 
-        self.default_style = {
+        self.default_style: TextStyle = {
             "font_name": font_info["name"],
             "font_size": int(font_info["size"]),
             "font_colour": self.ui_theme.get_colour_or_gradient(
@@ -381,7 +404,7 @@ class HTMLParser(html.parser.HTMLParser):
         """
         warnings.warn(message, UserWarning)
 
-    def push_style(self, key: str, styles: Dict[str, Any]):
+    def push_style(self, key: str, styles: TextStyle | Dict[str, Any]):
         """
         Add a new styling element onto the style stack. These are single styles generally (i.e. a
         font size change, or a bolding of text) rather than a load of different styles all at once.

@@ -56,8 +56,8 @@ class UI2DSlider(UIElement):
     ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
-        self.sliding_button = None
-        self.button_container = None
+        self.sliding_button: UIButton | None = None
+        self.button_container: UIContainer | None = None
         super().__init__(
             relative_rect,
             manager,
@@ -118,7 +118,6 @@ class UI2DSlider(UIElement):
             pygame.Color(0, 0, 0)
         )
 
-        self.drawable_shape = None
         self.shape = "rectangle"
 
         self.background_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
@@ -128,10 +127,6 @@ class UI2DSlider(UIElement):
         self.right_limit_position = 0
         self.bottom_limit_position = 0
         self.scroll_position: pygame.Vector2 = pygame.Vector2(0.0, 0.0)
-
-        self.sliding_button = None
-
-        self.button_container = None
 
         self.rebuild_from_changed_theme_data()
 
@@ -199,7 +194,8 @@ class UI2DSlider(UIElement):
                 self.rect, theming_parameters, ["normal", "disabled"], self.ui_manager
             )
 
-        self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            self._set_image(self.drawable_shape.get_fresh_surface())
 
         if self.button_container is None:
             self.button_container = UIContainer(
@@ -237,7 +233,8 @@ class UI2DSlider(UIElement):
         up the slider.
 
         """
-        self.button_container.kill()
+        if self.button_container:
+            self.button_container.kill()
         super().kill()
 
     def update(self, time_delta: float):
@@ -267,6 +264,8 @@ class UI2DSlider(UIElement):
             self._set_slider_values_after_move()
 
     def _move_slider_with_mouse(self, mouse_pos):
+        if self.sliding_button is None:
+            return False
         if not self.grabbed_slider:
             self.grabbed_slider = True
             real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
@@ -405,12 +404,12 @@ class UI2DSlider(UIElement):
             if self.invert_y
             else self.scrollable_height * self.current_y_percentage
         )
-        self.scroll_position = (
+        self.scroll_position = pygame.Vector2(
             self.scrollable_width * self.current_x_percentage,
             height,
         )
-
-        self.sliding_button.set_relative_position(self.scroll_position)
+        if self.sliding_button is not None:
+            self.sliding_button.set_relative_position(self.scroll_position)
         self.has_moved_recently = True
 
     def rebuild_from_changed_theme_data(self) -> None:
@@ -562,8 +561,10 @@ class UI2DSlider(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.sliding_button.disable()
-            self.drawable_shape.set_active_state("disabled")
+            if self.sliding_button is not None:
+                self.sliding_button.disable()
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state("disabled")
 
     def enable(self):
         """
@@ -571,8 +572,10 @@ class UI2DSlider(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.sliding_button.enable()
-            self.drawable_shape.set_active_state("normal")
+            if self.sliding_button is not None:
+                self.sliding_button.enable()
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state("normal")
 
     def show(self):
         """

@@ -367,21 +367,47 @@ class TextBoxLayout:
         current_row.fall_back_font = prev_row_font
         return current_row
 
-    def _handle_line_break_rect(self, current_row, test_layout_rect):
-        # line break, so first end current row...
-        current_row.add_item(test_layout_rect)
-        prev_row_font = current_row.fall_back_font
-        self._add_row_to_layout(current_row)
+    def _handle_line_break_rect(self, current_row, line_break_layout_rect):
+        rhs_limit = self.layout_rect.right
+        if line_break_layout_rect.right > rhs_limit:
+            # can't split a line break so, two new rows
+            prev_row_font = current_row.fall_back_font
+            self._add_row_to_layout(current_row)
+            first_empty_row = TextBoxLayoutRow(
+                row_start_x=self.layout_rect.x,
+                row_start_y=current_row.top + current_row.line_spacing_height,
+                row_index=len(self.layout_rows),
+                layout=self,
+                line_spacing=self.line_spacing,
+            )
+            first_empty_row.fall_back_font = prev_row_font
+            first_empty_row.add_item(line_break_layout_rect)
+            self._add_row_to_layout(first_empty_row)
 
-        # ...then start a new row
-        new_row = TextBoxLayoutRow(
-            row_start_x=self.layout_rect.x,
-            row_start_y=current_row.top + current_row.line_spacing_height,
-            row_index=len(self.layout_rows),
-            layout=self,
-            line_spacing=self.line_spacing,
-        )
-        new_row.fall_back_font = prev_row_font
+            # ...then start a second new row
+            new_row = TextBoxLayoutRow(
+                row_start_x=self.layout_rect.x,
+                row_start_y=first_empty_row.top + first_empty_row.line_spacing_height,
+                row_index=len(self.layout_rows),
+                layout=self,
+                line_spacing=self.line_spacing,
+            )
+            new_row.fall_back_font = prev_row_font
+        else:
+            # line break, so first end current row...
+            current_row.add_item(line_break_layout_rect)
+            prev_row_font = current_row.fall_back_font
+            self._add_row_to_layout(current_row)
+
+            # ...then start a new row
+            new_row = TextBoxLayoutRow(
+                row_start_x=self.layout_rect.x,
+                row_start_y=current_row.top + current_row.line_spacing_height,
+                row_index=len(self.layout_rows),
+                layout=self,
+                line_spacing=self.line_spacing,
+            )
+            new_row.fall_back_font = prev_row_font
         return new_row
 
     def _split_rect_and_move_to_next_line(

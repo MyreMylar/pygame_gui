@@ -9,6 +9,8 @@ from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.interfaces.font_dictionary_interface import (
     IUIFontDictionaryInterface,
 )
+from pygame_gui.core.interfaces.appearance_theme_interface import FontThemeInfo
+
 from pygame_gui.core.resource_loaders import IResourceLoader
 from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.utility import FontResource
@@ -44,11 +46,22 @@ class DefaultFontData:
         self.italic_file_name = italic_file_name
         self.bold_italic_file_name = bold_italic_file_name
 
-        self.info = {
+        self.info: FontThemeInfo = {
             "name": self.name,
             "size": self.size,
             "bold": False,
             "italic": False,
+            "antialiased": True,
+            "script": "Latn",
+            "direction": pygame.DIRECTION_LTR,
+            "regular_path": None,
+            "bold_path": None,
+            "italic_path": None,
+            "bold_italic_path": None,
+            "regular_resource": None,
+            "bold_resource": None,
+            "italic_resource": None,
+            "bold_italic_resource": None,
         }
 
 

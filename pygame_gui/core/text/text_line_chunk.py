@@ -525,6 +525,8 @@ class TextLineChunkFTFont(TextLayoutRect):
                 if optimum_split_point == 1:
                     raise ValueError("Line width is too narrow")
                     # have to be at least wide enough to fit in a dash and another character
+                # as split dash adds one more character we need to move the split point back by 1
+                optimum_split_point -= 1
                 left_side = f"{self.text[:optimum_split_point]}-"
                 right_side = f"-{self.text[optimum_split_point:]}"
             else:

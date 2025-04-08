@@ -1,7 +1,7 @@
 import io
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List, Union, Dict, Any
+from typing import Optional, List, Union, Dict, TypedDict
 from os import PathLike
 
 
@@ -17,6 +17,39 @@ from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.package_resource import PackageResource
 from pygame_gui.core.surface_cache import SurfaceCache
 from pygame_gui.core.ui_shadow import ShadowGenerator
+
+
+class PackageResourceInfo(TypedDict):
+    """
+    PackageResource info loaded from the font theme
+    """
+
+    package: str
+    resource: str
+
+
+class FontThemeInfo(TypedDict):
+    """
+    Font info loaded from the font theme
+    """
+
+    name: str
+    size: int
+    bold: bool
+    italic: bool
+    antialiased: bool
+    script: str
+    direction: int  # direction: int = pygame.DIRECTION_LTR
+
+    regular_path: str | None
+    bold_path: str | None
+    italic_path: str | None
+    bold_italic_path: str | None
+
+    regular_resource: PackageResourceInfo | None
+    bold_resource: PackageResourceInfo | None
+    italic_resource: PackageResourceInfo | None
+    bold_italic_resource: PackageResourceInfo | None
 
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
@@ -97,7 +130,7 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
+    def get_font_info(self, combined_element_ids: List[str]) -> FontThemeInfo:
         """
         Uses some data about a UIElement to get font data as dictionary
 

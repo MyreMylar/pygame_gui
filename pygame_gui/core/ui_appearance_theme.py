@@ -18,6 +18,8 @@ from pygame_gui.core.interfaces.colour_gradient_interface import (
 )
 from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
+    FontThemeInfo,
+    PackageResourceInfo,
 )
 from pygame_gui.core.utility import create_resource_path
 from pygame_gui.core.utility import ImageResource, SurfaceResource, FontResource
@@ -66,9 +68,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         self.unique_theming_ids: Dict[str, List[str]] = {}
 
-        self.ui_element_fonts_info: Dict[
-            str, Dict[str, Dict[str, str | int | bool | Dict[str, str]]]
-        ] = {}
+        self.ui_element_fonts_info: Dict[str, Dict[str, FontThemeInfo]] = {}
         self.ui_element_image_locs: Dict[
             str, Dict[str, Dict[str, str | bool | pygame.Rect]]
         ] = {}
@@ -184,6 +184,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         We need to load our theme file to see if anything expensive has changed, if so trigger
         it to reload/rebuild.
         """
+        if self._theme_file_path is None:
+            return
         self.load_theme(self._theme_file_path)
 
     def _load_fonts(self):
@@ -192,7 +194,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         """
         for element_key, locale_font_info in self.ui_element_fonts_info.items():
             for locale_key, font_info in locale_font_info.items():
-                if "regular_path" in font_info:
+                if (
+                    "regular_path" in font_info
+                    and font_info["regular_path"] is not None
+                ):
                     regular_path = font_info["regular_path"]
                     self.font_dict.add_font_path(
                         font_info["name"],
@@ -201,7 +206,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         font_info.get("italic_path", None),
                         font_info.get("bold_italic_path", None),
                     )
-                elif "regular_resource" in font_info:
+                elif (
+                    "regular_resource" in font_info
+                    and font_info["regular_resource"] is not None
+                ):
                     bold_resource = None
                     italic_resource = None
                     bld_it_resource = None
@@ -211,19 +219,28 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         resource=reg_res_data["resource"],
                     )
 
-                    if "bold_resource" in font_info:
+                    if (
+                        "bold_resource" in font_info
+                        and font_info["bold_resource"] is not None
+                    ):
                         bold_res_data = font_info["bold_resource"]
                         bold_resource = PackageResource(
                             package=bold_res_data["package"],
                             resource=bold_res_data["resource"],
                         )
-                    if "italic_resource" in font_info:
+                    if (
+                        "italic_resource" in font_info
+                        and font_info["italic_resource"] is not None
+                    ):
                         italic_res_data = font_info["italic_resource"]
                         italic_resource = PackageResource(
                             package=italic_res_data["package"],
                             resource=italic_res_data["resource"],
                         )
-                    if "bold_italic_resource" in font_info:
+                    if (
+                        "bold_italic_resource" in font_info
+                        and font_info["bold_italic_resource"] is not None
+                    ):
                         bld_it_res_data = font_info["bold_italic_resource"]
                         bld_it_resource = PackageResource(
                             package=bld_it_res_data["package"],
@@ -301,12 +318,20 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             if surface_id in self.surface_resources:
                                 surf_resource = self.surface_resources[surface_id]
                             else:
-                                surf_resource = SurfaceResource(
-                                    image_resource=image_resource,
-                                    sub_surface_rect=image_resource_data[
-                                        "sub_surface_rect"
-                                    ],
-                                )
+                                if isinstance(
+                                    image_resource_data["sub_surface_rect"], pygame.Rect
+                                ):
+                                    surf_resource = SurfaceResource(
+                                        image_resource=image_resource,
+                                        sub_surface_rect=image_resource_data[
+                                            "sub_surface_rect"
+                                        ],
+                                    )
+                                else:
+                                    surf_resource = SurfaceResource(
+                                        image_resource=image_resource,
+                                        sub_surface_rect=None,
+                                    )
                                 self.surface_resources[surface_id] = surf_resource
                                 if self._resource_loader.started():
                                     error = surf_resource.load()
@@ -323,9 +348,13 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                     image_resource=image_resource
                                 )
                                 self.surface_resources[surface_id] = surf_resource
-                                surf_resource.surface = (
+                                if (
                                     surf_resource.image_resource.loaded_surface
-                                )
+                                    is not None
+                                ):
+                                    surf_resource.surface = (
+                                        surf_resource.image_resource.loaded_surface
+                                    )
 
                         self.ui_element_image_surfaces[element_key][image_id] = (
                             surf_resource
@@ -687,7 +716,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             f"Unable to find any image with id: {image_id} with combined_element_ids: {combined_element_ids}"
         )
 
-    def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
+    def get_font_info(self, combined_element_ids: List[str]) -> FontThemeInfo:
         """
         Uses some data about a UIElement to get font data as dictionary
 
@@ -978,12 +1007,99 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
             for locale_key in prototype_font:
                 if locale_key not in self.ui_element_fonts_info:
-                    self.ui_element_fonts_info[element_name][locale_key] = {}
+                    self.ui_element_fonts_info[element_name][locale_key] = {
+                        "name": "",
+                        "size": 0,
+                        "bold": False,
+                        "italic": False,
+                        "antialiased": True,
+                        "script": "Latn",
+                        "direction": pygame.DIRECTION_LTR,
+                        "regular_path": None,
+                        "bold_path": None,
+                        "italic_path": None,
+                        "bold_italic_path": None,
+                        "regular_resource": None,
+                        "bold_resource": None,
+                        "italic_resource": None,
+                        "bold_italic_resource": None,
+                    }
 
-                for data_key in prototype_font[locale_key]:
-                    self.ui_element_fonts_info[element_name][locale_key][data_key] = (
-                        prototype_font[locale_key][data_key]
+                if "name" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key]["name"] = (
+                        prototype_font[locale_key]["name"]
                     )
+
+                if "size" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key]["size"] = (
+                        prototype_font[locale_key]["size"]
+                    )
+
+                if "bold" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key]["bold"] = (
+                        prototype_font[locale_key]["bold"]
+                    )
+
+                if "italic" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key]["italic"] = (
+                        prototype_font[locale_key]["italic"]
+                    )
+
+                if "antialiased" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "antialiased"
+                    ] = prototype_font[locale_key]["antialiased"]
+
+                if "script" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key]["script"] = (
+                        prototype_font[locale_key]["script"]
+                    )
+
+                if "direction" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "direction"
+                    ] = prototype_font[locale_key]["direction"]
+
+                if "regular_path" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "regular_path"
+                    ] = prototype_font[locale_key]["regular_path"]
+
+                if "bold_path" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "bold_path"
+                    ] = prototype_font[locale_key]["bold_path"]
+
+                if "italic_path" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "italic_path"
+                    ] = prototype_font[locale_key]["italic_path"]
+
+                if "bold_italic_path" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "bold_italic_path"
+                    ] = prototype_font[locale_key]["bold_italic_path"]
+
+                if "regular_resource" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "regular_resource"
+                    ] = prototype_font[locale_key]["regular_resource"]
+
+                if "bold_resource" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "bold_resource"
+                    ] = prototype_font[locale_key]["bold_resource"]
+
+                if "italic_resource" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "italic_resource"
+                    ] = prototype_font[locale_key]["italic_resource"]
+
+                if "bold_italic_resource" in prototype_font[locale_key]:
+                    self.ui_element_fonts_info[element_name][locale_key][
+                        "bold_italic_resource"
+                    ] = prototype_font[locale_key]["bold_italic_resource"]
+
             found_prototypes.append(prototype_font)
 
         if prototype_id in self.ui_element_colours:
@@ -1155,7 +1271,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             else "en"
         )
         if locale not in self.ui_element_fonts_info[element_name]:
-            self.ui_element_fonts_info[element_name][locale] = {}
+            self.ui_element_fonts_info[element_name][locale] = {
+                "name": "",
+                "size": 0,
+                "bold": False,
+                "italic": False,
+                "antialiased": True,
+                "script": "Latn",
+                "direction": pygame.DIRECTION_LTR,
+                "regular_path": None,
+                "bold_path": None,
+                "italic_path": None,
+                "bold_italic_path": None,
+                "regular_resource": None,
+                "bold_resource": None,
+                "italic_resource": None,
+                "bold_italic_resource": None,
+            }
 
         font_info_dict = self.ui_element_fonts_info[element_name][locale]
         if "name" in file_dict and isinstance(file_dict["name"], str):
@@ -1225,7 +1357,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if "regular_resource" in file_dict and isinstance(
             file_dict["regular_resource"], dict
         ):
-            resource_data = {
+            resource_data: PackageResourceInfo = {
                 "package": file_dict["regular_resource"]["package"],
                 "resource": file_dict["regular_resource"]["resource"],
             }
