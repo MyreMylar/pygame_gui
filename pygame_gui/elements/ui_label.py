@@ -6,7 +6,12 @@ from pygame_gui.core.utility import translate
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.core.interfaces import IUITextOwnerInterface, IUIElementInterface
+from pygame_gui.core.interfaces import (
+    IUITextOwnerInterface,
+    IUIElementInterface,
+    IGUIFontInterface,
+    IColourGradientInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape
 
@@ -89,12 +94,20 @@ class UILabel(UIElement, IUITextOwnerInterface):
             self.text_kwargs = text_kwargs
 
         # initialise theme params
-        self.font = None
+        self.font: Optional[IGUIFontInterface] = None
 
-        self.bg_colour = None
-        self.text_colour = None
-        self.disabled_text_colour = None
-        self.text_shadow_colour = None
+        self.bg_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.text_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.disabled_text_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0, 0)
+        )
+        self.text_shadow_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
 
         self.text_shadow_size = 0
         self.text_shadow_offset = (0, 0)
@@ -141,7 +154,11 @@ class UILabel(UIElement, IUITextOwnerInterface):
         the displayed text is or remake it with different theming (if the theming has changed).
         """
 
-        text_size = self.font.get_rect(translate(self.text, **self.text_kwargs)).size
+        text_size = (0, 0)
+        if self.font is not None:
+            text_size = self.font.get_rect(
+                translate(self.text, **self.text_kwargs)
+            ).size
         if (
             not self.dynamic_height
             and not self.dynamic_width
@@ -240,7 +257,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
         super().rebuild_from_changed_theme_data()
         any_changed = False
 
-        font = self.ui_theme.get_font(self.combined_element_ids)
+        font: IGUIFontInterface = self.ui_theme.get_font(self.combined_element_ids)
         if font != self.font:
             self.font = font
             any_changed = True
@@ -360,7 +377,7 @@ class UILabel(UIElement, IUITextOwnerInterface):
             self.rebuild()
         elif self.dynamic_width or self.dynamic_height:
             self.rebuild()
-        else:
+        elif self.drawable_shape is not None:
             self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
 
     def update(self, time_delta: float):

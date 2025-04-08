@@ -7,6 +7,8 @@ from pygame_gui.core.interfaces import (
     IContainerLikeInterface,
     IUIManagerInterface,
     IUIElementInterface,
+    IColourGradientInterface,
+    IGUIFontInterface,
 )
 from pygame_gui.core import UIElement
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -81,29 +83,36 @@ class UIStatusBar(UIElement):
         self._percent_full = 0
         self.status_changed = False
 
-        self.border_colour = None
-        self.bar_filled_colour = None
-        self.bar_unfilled_colour = None
-        self.hover_height = None
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.bar_filled_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.bar_unfilled_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.hover_height = 0
 
-        self.border_rect = None
-        self.capacity_width = None
-        self.capacity_height = None
-        self.capacity_rect = None
-        self.current_status_rect = None
+        self.border_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
+        self.capacity_width = 0
+        self.capacity_height = 0
+        self.capacity_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
+        self.current_status_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
-        self.drawable_shape = None
         self.shape = "rectangle"
 
-        self.font = None
-        self.text_shadow_colour = None
-        self.text_colour = None
+        self.font: Optional[IGUIFontInterface] = None
+        self.text_shadow_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.text_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
         self.text_horiz_alignment = "center"
         self.text_vert_alignment = "center"
         self.text_horiz_alignment_padding = 1
         self.text_vert_alignment_padding = 1
-        self.background_text = None
-        self.foreground_text = None
 
         self._set_image(None)
 
@@ -235,7 +244,8 @@ class UIStatusBar(UIElement):
                 self.rect, theming_parameters, ["normal"], self.ui_manager
             )
 
-        self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            self._set_image(self.drawable_shape.get_fresh_surface())
 
     def rebuild_from_changed_theme_data(self):
         """

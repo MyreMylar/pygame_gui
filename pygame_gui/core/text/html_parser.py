@@ -9,7 +9,10 @@ from _markupbase import ParserBase
 
 import pygame
 
-from pygame_gui.core.interfaces import IUIAppearanceThemeInterface
+from pygame_gui.core.interfaces import (
+    IUIAppearanceThemeInterface,
+    IColourGradientInterface,
+)
 
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
@@ -162,7 +165,9 @@ class HTMLParser(html.parser.HTMLParser):
     def _handle_shadow_tag(self, attributes, style):
         shadow_size = 0
         shadow_offset = [0, 0]
-        shadow_colour = [50, 50, 50]
+        shadow_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            50, 50, 50
+        )
         if "size" in attributes and (
             attributes["size"] is not None and len(attributes["size"]) > 0
         ):
@@ -190,7 +195,7 @@ class HTMLParser(html.parser.HTMLParser):
                         attributes["color"], self.combined_ids
                     )
             except (ValueError, AttributeError):
-                shadow_colour = [50, 50, 50]
+                shadow_colour = pygame.Color(50, 50, 50)
 
         style["shadow_data"] = (
             shadow_size,
@@ -305,9 +310,9 @@ class HTMLParser(html.parser.HTMLParser):
             else:
                 image_float = TextFloatPosition.NONE
         if "padding" in attributes and isinstance(attributes["padding"], str):
-            paddings = attributes["padding"].split(" ")
+            paddings: List[str] = attributes["padding"].split(" ")
             for index, padding in enumerate(paddings):
-                paddings[index] = int(padding.strip("px"))
+                paddings[index] = padding.strip("px")
             if len(paddings) == 4:
                 padding_top = int(paddings[0])
                 padding_right = int(paddings[1])

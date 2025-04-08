@@ -132,7 +132,7 @@ class TextBoxLayout:
         self.plain_text = plain_text
 
     def _reprocess_layout_rows(self, from_index, row_to_process_from):
-        temp_layout_queue = deque([])
+        temp_layout_queue: Deque[TextLayoutRect] = deque([])
         for row in reversed(self.layout_rows[from_index:]):
             row.rewind_row(temp_layout_queue)
         self.layout_rows = self.layout_rows[:from_index]
@@ -147,7 +147,6 @@ class TextBoxLayout:
         :param layout_rect: The new layout rectangle.
         """
         self.layout_rect = layout_rect
-        self.layout_rect_queue = None
         self.finalised_surface = None
         self.floating_rects = []
         self.layout_rows = []
@@ -900,10 +899,14 @@ class TextBoxLayout:
 
         # first clear the current selection
         for chunk in self.selected_chunks:
-            chunk.selection_rect = None
-            chunk.selected_text = None
-            chunk.is_selected = False
-            chunk.selection_start_index = 0
+            if isinstance(chunk, TextLineChunkFTFont):
+                chunk.selection_rect = None
+                chunk.selected_text = None
+                chunk.selection_start_index = 0
+            if isinstance(
+                chunk, (TextLineChunkFTFont, LineBreakLayoutRect, ImageLayoutRect)
+            ):
+                chunk.is_selected = False
         self.selected_chunks.clear()
         for row in self.selected_rows:
             row.clear()
@@ -998,8 +1001,8 @@ class TextBoxLayout:
                             and (chunk != end_chunk or end_letter_index != 0)
                         ):
                             chunk.is_selected = True
-                            chunk.selection_colour = self.selection_colour
-                            chunk.selection_text_colour = self.selection_text_colour
+                            if isinstance(chunk, LineBreakLayoutRect):
+                                chunk.selection_colour = self.selection_colour
                             self.selected_chunks.append(chunk)
                         if chunk == end_chunk:
                             end_selection = True
@@ -1223,7 +1226,7 @@ class TextBoxLayout:
         current_row = self.layout_rows[row_index]
         current_row.insert_linebreak_after_chunk(found_chunk, parser)
 
-        temp_layout_queue = deque([])
+        temp_layout_queue: Deque[TextLayoutRect] = deque([])
         for row in reversed(self.layout_rows[row_index:]):
             row.rewind_row(temp_layout_queue)
 
@@ -1236,10 +1239,14 @@ class TextBoxLayout:
         """
         # clear out current selection ready for split selection
         for chunk in self.selected_chunks:
-            chunk.selection_rect = None
-            chunk.selected_text = None
-            chunk.is_selected = False
-            chunk.selection_start_index = 0
+            if isinstance(chunk, TextLineChunkFTFont):
+                chunk.selection_rect = None
+                chunk.selected_text = None
+                chunk.selection_start_index = 0
+            if isinstance(
+                chunk, (TextLineChunkFTFont, LineBreakLayoutRect, ImageLayoutRect)
+            ):
+                chunk.is_selected = False
         self.selected_chunks.clear()
         for row in self.selected_rows:
             row.clear()
@@ -1299,7 +1306,10 @@ class TextBoxLayout:
         self.cursor_text_row = current_row
         letter_acc = 0
         for chunk in current_row.items:
-            if chunk.selection_rect is not None:
+            if (
+                isinstance(chunk, TextLineChunkFTFont)
+                and chunk.selection_rect is not None
+            ):
                 current_row.set_cursor_position(letter_acc)
                 break
 
@@ -1307,7 +1317,17 @@ class TextBoxLayout:
 
         current_row_starting_chunk = self.selected_rows[0].items[0]
         for row in reversed(self.selected_rows):
-            row.items = [chunk for chunk in row.items if not chunk.is_selected]
+            row.items = [
+                chunk
+                for chunk in row.items
+                if not (
+                    isinstance(
+                        chunk,
+                        (TextLineChunkFTFont, ImageLayoutRect, LineBreakLayoutRect),
+                    )
+                    and chunk.is_selected
+                )
+            ]
             max_row_index = max(max_row_index, row.row_index)
 
         row_to_process_from = current_row
@@ -1316,7 +1336,7 @@ class TextBoxLayout:
             row_to_process_from = self.layout_rows[current_row.row_index - 1]
             row_to_process_from_index = row_to_process_from.row_index
 
-        temp_layout_queue = deque([])
+        temp_layout_queue: Deque[TextLayoutRect] = deque([])
         for row in reversed(self.layout_rows[row_to_process_from_index:]):
             row.rewind_row(temp_layout_queue)
 
@@ -1340,15 +1360,25 @@ class TextBoxLayout:
         self.selected_chunks = []
 
     @staticmethod
-    def _setup_and_add_empty_chunk(current_row_starting_chunk, current_row):
-        current_row_starting_chunk.text = ""
+    def _setup_and_add_empty_chunk(
+        current_row_starting_chunk: TextLayoutRect, current_row: TextBoxLayoutRow
+    ):
         current_row_starting_chunk.width = 0
-        current_row_starting_chunk.letter_count = 0
-        current_row_starting_chunk.split_points = []
-        current_row_starting_chunk.selection_rect = None
-        current_row_starting_chunk.selected_text = None
-        current_row_starting_chunk.selection_start_index = 0
-        current_row_starting_chunk.is_selected = False
+
+        if isinstance(
+            current_row_starting_chunk,
+            (TextLineChunkFTFont, LineBreakLayoutRect, ImageLayoutRect),
+        ):
+            current_row_starting_chunk.is_selected = False
+
+        if isinstance(current_row_starting_chunk, TextLineChunkFTFont):
+            current_row_starting_chunk.text = ""
+            current_row_starting_chunk.letter_count = 0
+            current_row_starting_chunk.split_points = []
+            current_row_starting_chunk.selection_rect = None
+            current_row_starting_chunk.selected_text = None
+            current_row_starting_chunk.selection_start_index = 0
+
         current_row.add_item(current_row_starting_chunk)
 
     def delete_at_cursor(self):

@@ -48,16 +48,16 @@ class UIElement(GUISprite, IUIElementInterface):
     def __init__(
         self,
         relative_rect: RectLike,
-        manager: Optional[IUIManagerInterface],
-        container: Optional[IContainerLikeInterface],
+        manager: IUIManagerInterface | None,
+        container: IContainerLikeInterface | None,
         *,
         starting_height: int,
         layer_thickness: int,
-        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        anchors: Dict[str, str | IUIElementInterface] | None = None,
         visible: int = 1,
-        parent_element: Optional[IUIElementInterface] = None,
-        object_id: Union[ObjectID, str, None] = None,
-        element_id: Optional[List[str]] = None,
+        parent_element: IUIElementInterface | None = None,
+        object_id: ObjectID | str | None = None,
+        element_id: List[str] | None = None,
         ignore_shadow_for_initial_size_and_pos: bool = False,
     ):
         self._layer = 0
@@ -160,7 +160,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self.dynamic_width = self.relative_rect.width == -1
         self.dynamic_height = self.relative_rect.height == -1
 
-        self.anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = {}
+        self.anchors: Dict[str, str | IUIElementInterface] = {}
         self.set_anchors(anchors)
 
         self.image = None
@@ -168,8 +168,8 @@ class UIElement(GUISprite, IUIElementInterface):
         self.visible = bool(visible)
         self.blendmode = pygame.BLEND_PREMULTIPLIED
 
-        self.relative_bottom_margin = None
-        self.relative_right_margin = None
+        self.relative_bottom_margin: int | None = None
+        self.relative_right_margin: int | None = None
 
         self._hovered = False
         self._is_focused = False
@@ -254,10 +254,10 @@ class UIElement(GUISprite, IUIElementInterface):
 
     @staticmethod
     def _validate_horizontal_anchors(
-        anchors: Dict[str, Union[str, IUIElementInterface]],
+        anchors: Dict[str, str | IUIElementInterface],
     ):
         # first make a dictionary of just the horizontal anchors
-        horizontal_anchors = {}
+        horizontal_anchors: Dict[str, str | IUIElementInterface] = {}
 
         if "left" in anchors:
             horizontal_anchors["left"] = anchors["left"]
@@ -289,9 +289,9 @@ class UIElement(GUISprite, IUIElementInterface):
             return False
 
     @staticmethod
-    def _validate_vertical_anchors(anchors: Dict[str, Union[str, IUIElementInterface]]):
+    def _validate_vertical_anchors(anchors: Dict[str, str | IUIElementInterface]):
         # first make a dictionary of just the vertical anchors
-        vertical_anchors = {}
+        vertical_anchors: Dict[str, str | IUIElementInterface] = {}
 
         if "top" in anchors:
             vertical_anchors["top"] = anchors["top"]
@@ -440,7 +440,7 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         return self.object_ids
 
-    def get_anchors(self) -> Optional[Dict[str, Union[str, IUIElementInterface]]]:
+    def get_anchors(self) -> Dict[str, str | IUIElementInterface]:
         """
         A dictionary containing all the anchors defining what the relative rect is relative to
 
@@ -448,20 +448,15 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         return self.anchors
 
-    def set_anchors(
-        self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]
-    ) -> None:
+    def set_anchors(self, anchors: Dict[str, str | IUIElementInterface] | None) -> None:
         """
         Wraps the setting of the anchors with some validation
 
         :param anchors: A dictionary of anchors defining what the relative rect is relative to
         :return: None
         """
-        old_anchors = None
-        if self.anchors is not None:
-            old_anchors = self.anchors.copy()
-
-        self.anchors = {}
+        old_anchors = self.anchors.copy()
+        self.anchors.clear()
 
         if anchors is not None:
             if "center" in anchors and anchors["center"] == "center":
@@ -489,7 +484,13 @@ class UIElement(GUISprite, IUIElementInterface):
         if self.anchors != old_anchors and self.ui_container is not None:
             self.ui_container.get_container().on_contained_elements_changed(self)
 
-    def _set_three_anchors(self, anchors, anchor_1_name, anchor_2_name, anchor_3_name):
+    def _set_three_anchors(
+        self,
+        anchors: Dict[str, str | IUIElementInterface],
+        anchor_1_name: str,
+        anchor_2_name: str,
+        anchor_3_name: str,
+    ):
         if anchor_1_name in anchors:
             self.anchors[anchor_1_name] = anchors[anchor_1_name]
         if anchor_2_name in anchors:
@@ -671,7 +672,7 @@ class UIElement(GUISprite, IUIElementInterface):
 
     @staticmethod
     def _calc_abs_rect_pos_from_rel_rect(
-        relative_rect: pygame.Rect,
+        relative_rect: pygame.Rect | pygame.FRect,
         container: IContainerLikeInterface,
         anchors: Dict[str, Union[str, IUIElementInterface]],
         relative_right_margin: Optional[int] = None,
@@ -702,37 +703,39 @@ class UIElement(GUISprite, IUIElementInterface):
         center_x_and_y = "center" in anchors and anchors["center"] == "center"
         if ("centery" in anchors and anchors["centery"] == "centery") or center_x_and_y:
             centery_offset = UIElement._calc_centery_offset(container, anchors)
-            new_top = relative_rect.top - relative_rect.height // 2 + centery_offset
-            new_bottom = (
+            new_top = int(
+                relative_rect.top - relative_rect.height // 2 + centery_offset
+            )
+            new_bottom = int(
                 relative_rect.bottom - relative_rect.height // 2 + centery_offset
             )
 
         if "top" in anchors:
             if anchors["top"] == "top":
-                new_top = relative_rect.top + top_offset
-                new_bottom = relative_rect.bottom + top_offset
+                new_top = int(relative_rect.top + top_offset)
+                new_bottom = int(relative_rect.bottom + top_offset)
             elif anchors["top"] == "bottom":
-                new_top = relative_rect.top + bottom_offset
+                new_top = int(relative_rect.top + bottom_offset)
 
                 if relative_bottom_margin is None:
-                    relative_bottom_margin = bottom_offset - (
-                        new_top + relative_rect.height
+                    relative_bottom_margin = int(
+                        bottom_offset - (new_top + relative_rect.height)
                     )
-                new_bottom = bottom_offset - relative_bottom_margin
+                new_bottom = int(bottom_offset - relative_bottom_margin)
 
         if "bottom" in anchors:
             if anchors["bottom"] == "top":
-                new_top = relative_rect.top + top_offset
-                new_bottom = relative_rect.bottom + top_offset
+                new_top = int(relative_rect.top + top_offset)
+                new_bottom = int(relative_rect.bottom + top_offset)
             elif anchors["bottom"] == "bottom":
                 if "top" not in anchors or anchors["top"] != "top":
-                    new_top = relative_rect.top + bottom_offset
+                    new_top = int(relative_rect.top + bottom_offset)
 
                 if relative_bottom_margin is None:
-                    relative_bottom_margin = bottom_offset - (
-                        new_top + relative_rect.height
+                    relative_bottom_margin = int(
+                        bottom_offset - (new_top + relative_rect.height)
                     )
-                new_bottom = bottom_offset - relative_bottom_margin
+                new_bottom = int(bottom_offset - relative_bottom_margin)
 
         new_left = 0
         new_right = 0
@@ -741,35 +744,39 @@ class UIElement(GUISprite, IUIElementInterface):
 
         if ("centerx" in anchors and anchors["centerx"] == "centerx") or center_x_and_y:
             centerx_offset = UIElement._calc_centerx_offset(container, anchors)
-            new_left = relative_rect.left - relative_rect.width // 2 + centerx_offset
-            new_right = relative_rect.right - relative_rect.width // 2 + centerx_offset
+            new_left = int(
+                relative_rect.left - relative_rect.width // 2 + centerx_offset
+            )
+            new_right = int(
+                relative_rect.right - relative_rect.width // 2 + centerx_offset
+            )
 
         if "left" in anchors:
             if anchors["left"] == "left":
-                new_left = relative_rect.left + left_offset
-                new_right = relative_rect.right + left_offset
+                new_left = int(relative_rect.left + left_offset)
+                new_right = int(relative_rect.right + left_offset)
             elif anchors["left"] == "right":
-                new_left = relative_rect.left + right_offset
+                new_left = int(relative_rect.left + right_offset)
 
                 if relative_right_margin is None:
-                    relative_right_margin = right_offset - (
-                        new_left + relative_rect.width
+                    relative_right_margin = int(
+                        right_offset - (new_left + relative_rect.width)
                     )
-                new_right = right_offset - relative_right_margin
+                new_right = int(right_offset - relative_right_margin)
 
         if "right" in anchors:
             if anchors["right"] == "left":
-                new_left = relative_rect.left + left_offset
-                new_right = relative_rect.right + left_offset
+                new_left = int(relative_rect.left + left_offset)
+                new_right = int(relative_rect.right + left_offset)
             elif anchors["right"] == "right":
                 if "left" not in anchors or anchors["left"] != "left":
-                    new_left = relative_rect.left + right_offset
+                    new_left = int(relative_rect.left + right_offset)
 
                 if relative_right_margin is None:
-                    relative_right_margin = right_offset - (
-                        new_left + relative_rect.width
+                    relative_right_margin = int(
+                        right_offset - (new_left + relative_rect.width)
                     )
-                new_right = right_offset - relative_right_margin
+                new_right = int(right_offset - relative_right_margin)
 
         if dynamic_height:
             new_height = new_bottom - new_top
@@ -788,6 +795,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         Called when our element's relative position has changed.
         """
+        if self.ui_container is None:
+            return
         relative_right_margin = (
             None if recalculate_margins else self.relative_right_margin
         )
@@ -825,6 +834,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         Called when our element's absolute position has been forcibly changed.
         """
+        if self.ui_container is None:
+            return
 
         # This is a bit easier to calculate than getting the absolute position from the
         # relative one, because the absolute position rectangle is always relative to the top
@@ -921,10 +932,13 @@ class UIElement(GUISprite, IUIElementInterface):
         element is inside its container, part-way in it, or all the way out of it.
 
         """
-        if self.ui_container.get_container().get_image_clipping_rect() is not None:
-            container_clip_rect = (
-                self.ui_container.get_container().get_image_clipping_rect().copy()
-            )
+        if self.ui_container is None:
+            return
+        image_clipping_rect = (
+            self.ui_container.get_container().get_image_clipping_rect()
+        )
+        if image_clipping_rect is not None:
+            container_clip_rect = image_clipping_rect.copy()
             container_clip_rect.left += (
                 self.ui_container.get_container().get_rect().left
             )
@@ -1117,7 +1131,8 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         if self.tool_tip is not None:
             self.tool_tip.kill()
-        self.ui_container.get_container().remove_element(self)
+        if self.ui_container is not None:
+            self.ui_container.get_container().remove_element(self)
         self.remove_element_from_focus_set(self)
         super().kill()
 
@@ -1163,7 +1178,8 @@ class UIElement(GUISprite, IUIElementInterface):
         Called when our drawable shape has finished rebuilding the active surface. This is needed
         because sometimes we defer rebuilding until a more advantageous (read quieter) moment.
         """
-        self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            self._set_image(self.drawable_shape.get_fresh_surface())
 
     def on_hovered(self):
         """

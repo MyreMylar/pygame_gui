@@ -18,6 +18,7 @@ from pygame_gui.core.interfaces import (
     IUIManagerInterface,
     IUIElementInterface,
     IColourGradientInterface,
+    IGUIFontInterface,
 )
 from pygame_gui.core.ui_element import UIElement
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
@@ -136,7 +137,7 @@ class UIButton(UIElement):
         # initialise theme parameters
         self.colours: Dict[str, Union[pygame.Color, IColourGradientInterface]] = {}
 
-        self.font = None
+        self.font: Optional[IGUIFontInterface] = None
 
         self.normal_image: Optional[pygame.Surface] = None
         self.hovered_image: Optional[pygame.Surface] = None
@@ -264,7 +265,8 @@ class UIButton(UIElement):
         to the appropriate values and redraws it.
         """
         super().on_hovered()
-        self.drawable_shape.set_active_state("hovered")
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state("hovered")
 
         # old event to remove in 0.8.0
         event_data = {
@@ -507,14 +509,16 @@ class UIButton(UIElement):
         Called when we are actively clicking on the button. Changes the colours to the appropriate
         ones for the new state then redraws the button.
         """
-        self.drawable_shape.set_active_state("active")
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state("active")
 
     def _set_inactive(self):
         """
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
         """
-        self.drawable_shape.set_active_state("normal")
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state("normal")
 
     def select(self):
         """
@@ -522,7 +526,8 @@ class UIButton(UIElement):
         ones for the new state then redraws the button.
         """
         self.is_selected = True
-        self.drawable_shape.set_active_state("selected")
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state("selected")
 
     def unselect(self):
         """
@@ -530,7 +535,8 @@ class UIButton(UIElement):
         to the default state then redraws the button.
         """
         self.is_selected = False
-        self.drawable_shape.set_active_state("normal")
+        if self.drawable_shape is not None:
+            self.drawable_shape.set_active_state("normal")
 
     def set_text(self, text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
         """
@@ -928,5 +934,5 @@ class UIButton(UIElement):
             self.rebuild()
         elif self.dynamic_width or self.dynamic_height:
             self.rebuild()
-        else:
+        elif self.drawable_shape is not None:
             self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
