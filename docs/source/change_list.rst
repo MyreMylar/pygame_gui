@@ -7,6 +7,26 @@ A record of changes between versions of Pygame GUI.
 
 --------
 
+Version 0.6.14
+--------------------------------------------------
+See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0614>`_.
+
+
+Version 0.6.13
+--------------------------------------------------
+See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0613>`_.
+
+
+Version 0.6.12
+--------------------------------------------------
+See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0612>`_.
+
+
+Version 0.6.11
+--------------------------------------------------
+See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0611>`_.
+
+
 Version 0.6.10
 --------------------------------------------------
 See the `github release notes here <https://github.com/MyreMylar/pygame_gui/releases/tag/v_0610>`_.
