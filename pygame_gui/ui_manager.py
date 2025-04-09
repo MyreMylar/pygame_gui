@@ -254,6 +254,7 @@ class UIManager(IUIManagerInterface):
         """
         if self.root_container is not None:
             self.root_container.kill()
+            self.root_container = None  # need to reset to None to make construction of Root Container work
         self.root_container = UIContainer(
             pygame.Rect((0, 0), self.window_resolution),
             self,
