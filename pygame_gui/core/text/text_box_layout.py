@@ -1047,7 +1047,7 @@ class TextBoxLayout:
 
     def _set_chunk_selection_data(self, chunk, start_letter_index):
         chunk.selection_start_index = start_letter_index
-        chunk.is_selected = True
+        chunk.is_selected = self._set_selection_colours(chunk, True)
         self.selected_chunks.append(chunk)
 
     def _find_chunk_and_chunk_x(self, index: int):
