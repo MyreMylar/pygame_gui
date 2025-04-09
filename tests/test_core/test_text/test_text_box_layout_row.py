@@ -282,7 +282,7 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(text_chunk_2)
         layout_row.add_item(text_chunk_3)
 
-        # not sure this is right, need to do some more visual testing of vertical
+        # not sure if this is right, need to do some more visual testing of vertical
         # alignment of text rects with different height text on a single row.
         assert layout_row.items[0].y == 0
         assert layout_row.items[1].y == 8

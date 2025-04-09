@@ -55,12 +55,12 @@ class RectDrawableShape(DrawableShape):
 
     def full_rebuild_on_size_change(self):
         """
-        Completely rebuilds the rectangle shape from it's dimensions and parameters.
+        Completely rebuilds the rectangle shape from its dimensions and parameters.
 
         Everything needs rebuilding if we change the size of the containing rectangle.
 
         """
-        # clamping border and shadow widths so we can't form impossible negative sized surfaces
+        # clamping border and shadow widths, so we can't form impossible negative sized surfaces
         super().full_rebuild_on_size_change()
 
         self.base_surface = None

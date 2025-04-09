@@ -746,7 +746,6 @@ class TestUITextEntryLine:
         assert text_entry.select_range == [3, 3]
         assert text_entry.edit_position == 3
 
-
     def test_process_event_text_right_select_range(self, _init_pygame: None,
                                                    default_ui_manager: UIManager,
                                                    _display_surface_return_none: None):

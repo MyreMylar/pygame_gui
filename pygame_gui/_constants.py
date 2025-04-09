@@ -92,6 +92,7 @@ TEXT_EFFECT_BOUNCE = UITextEffectType("bounce")
 TEXT_EFFECT_EXPAND_CONTRACT = UITextEffectType("expand_contract")
 TEXT_EFFECT_SHAKE = UITextEffectType("shake")
 
+# noinspection SpellCheckingInspection
 _namedColours = {
     "aliceblue": "#f0f8ff",
     "antiquewhite": "#faebd7",

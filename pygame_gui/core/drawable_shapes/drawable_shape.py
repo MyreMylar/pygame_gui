@@ -147,7 +147,7 @@ class DrawableShape:
     rectangles as their visual shape while having the same non-shape related functionality.
 
     :param containing_rect: The rectangle which this shape is entirely contained within (including
-                            shadows, borders etc)
+                            shadows, borders etc.)
     :param theming_parameters: A dictionary of user supplied data that alters the appearance of
                                the shape.
     :param states: Names for the different states the shape can be in, each may have different
@@ -884,7 +884,7 @@ class DrawableShape:
     def toggle_text_cursor(self):
         """
         Toggle the edit text cursor/carat between visible and invisible. Usually this is run to
-        make the cursor appear to flash so it catches user attention.
+        make the cursor appear to flash, so it catches user attention.
         """
         if self.text_box_layout is not None:
             self.text_box_layout.toggle_cursor()

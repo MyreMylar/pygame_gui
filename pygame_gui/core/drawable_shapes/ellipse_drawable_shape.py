@@ -59,7 +59,7 @@ class EllipseDrawableShape(DrawableShape):
 
         """
         super().full_rebuild_on_size_change()
-        # clamping border and shadow widths so we can't form impossible negative sized surfaces
+        # clamping border and shadow widths, so we can't form impossible negative sized surfaces
         self.shadow_width = min(
             self.shadow_width,
             math.floor(self.containing_rect.width / 2),

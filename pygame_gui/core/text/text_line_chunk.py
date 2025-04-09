@@ -400,10 +400,12 @@ class TextLineChunkFTFont(TextLayoutRect):
         # center the text in the line
         text_rect = text_surface.get_rect()
         if self.should_centre_from_baseline:
-            padless_origin = self.y_origin - self.font_y_padding
-            half_padless_origin = int(round(0.5 * padless_origin))
+            no_padding_origin = self.y_origin - self.font_y_padding
+            half_no_padding_origin = int(round(0.5 * no_padding_origin))
             text_rect.y = (
-                surface.get_rect().centery - self.font_y_padding - half_padless_origin
+                surface.get_rect().centery
+                - self.font_y_padding
+                - half_no_padding_origin
             )
         else:
             text_rect.centery = surface.get_rect().centery

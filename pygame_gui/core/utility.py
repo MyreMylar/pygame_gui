@@ -262,6 +262,7 @@ def clipboard_paste():
         return __unknown_paste()
 
 
+# noinspection PyProtectedMember
 def create_resource_path(relative_path: Union[str, os.PathLike]):
     """
     Get absolute path to resource, works for dev and for PyInstaller's 'onefile' mode

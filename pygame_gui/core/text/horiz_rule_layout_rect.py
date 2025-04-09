@@ -19,7 +19,7 @@ class HorizRuleLayoutRect(TextLayoutRect):
     :param rule_dimensions: the dimensions of the rule itself, normally it is 1 pixel tall
                             and the width of the text block layout wide.
     :param has_shade: whether the rule has 'shading' which by default is just another
-                      alpha'd line beneath it to add some depth. Doesn't work great if the line has
+                      semi-transparent line beneath it to add some depth. Doesn't work great if the line has
                       more height to it.
     :param alignment: ALIGN_CENTER, ALIGN_LEFT or ALIGN_RIGHT. ALIGN_CENTER is the default.
     """

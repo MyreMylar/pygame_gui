@@ -43,7 +43,7 @@ class TestFontEquivalence:
 
         assert ftfont_font.get_point_size() == pygame_font.get_point_size()
 
-    def get_padding_height(self, _init_pygame):
+    def test_get_padding_height(self, _init_pygame):
         ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
         pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
 

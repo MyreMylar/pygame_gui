@@ -5,7 +5,9 @@ from pygame.surface import Surface
 from pygame.rect import Rect
 from pygame import Color
 
+from pygame_gui.core.interfaces import IColourGradientInterface
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class LineBreakLayoutRect(TextLayoutRect):
@@ -20,7 +22,9 @@ class LineBreakLayoutRect(TextLayoutRect):
         super().__init__(dimensions)
         self.letter_count = 1
         self.is_selected = False
-        self.selection_colour = Color(128, 128, 128, 255)
+        self.selection_colour: pygame.Color | IColourGradientInterface = Color(
+            128, 128, 128, 255
+        )
         self.selection_chunk_width = 4
         self.select_surf: Optional[Surface] = None
         self.font = font
@@ -44,7 +48,11 @@ class LineBreakLayoutRect(TextLayoutRect):
             self.select_surf = Surface(
                 (self.selection_chunk_width, self.height), flags=pygame.SRCALPHA
             )
-            self.select_surf.fill(self.selection_colour)
+            if isinstance(self.selection_colour, ColourGradient):
+                self.select_surf.fill(Color("#FFFFFFFF"))
+                self.selection_colour.apply_gradient_to_surface(self.select_surf)
+            elif isinstance(self.selection_colour, Color):
+                self.select_surf.fill(self.selection_colour)
             target_surface.blit(
                 self.select_surf, self.topleft, special_flags=pygame.BLEND_PREMULTIPLIED
             )

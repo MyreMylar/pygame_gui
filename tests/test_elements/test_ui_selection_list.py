@@ -21,11 +21,11 @@ class TestUISelectionList:
 
     def test_rebuild(self, _init_pygame, default_ui_manager,
                      _display_surface_return_none):
-        list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
-                               item_list=['green', 'eggs', 'and', 'ham'],
-                               manager=default_ui_manager)
+        selection_list = UISelectionList(relative_rect=pygame.Rect(50, 50, 150, 400),
+                                         item_list=['green', 'eggs', 'and', 'ham'],
+                                         manager=default_ui_manager)
 
-        list.rebuild()
+        selection_list.rebuild()
 
     def test_addition(self, _init_pygame, default_ui_manager,
                       _display_surface_return_none):
@@ -597,7 +597,7 @@ class TestUISelectionList:
                                                   'top': 'top',
                                                   'bottom': 'top'})
 
-        # check creating an destroying scrollbar by resizing
+        # check creating and destroying scrollbar by resizing
         assert selection_list.scroll_bar is None
 
         selection_list.set_dimensions((100, 50))

@@ -7,6 +7,8 @@ import pygame
 
 from pygame.surface import Surface
 
+from pygame_gui.core.interfaces import IColourGradientInterface
+
 from pygame_gui.core.text.text_layout_rect import TextLayoutRect, TextFloatPosition
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
 from pygame_gui.core.text.hyperlink_text_chunk import HyperlinkTextChunk
@@ -110,8 +112,12 @@ class TextBoxLayout:
         self.cursor_text_row: Optional[TextBoxLayoutRow] = None
         self.last_horiz_cursor_row_pos = 0
 
-        self.selection_colour = pygame.Color(128, 128, 200, 255)
-        self.selection_text_colour = pygame.Color(255, 255, 255, 255)
+        self.selection_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            128, 128, 200, 255
+        )
+        self.selection_text_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(255, 255, 255, 255)
+        )
         self.selected_chunks: List[TextLayoutRect] = []
         self.selected_rows: List[TextBoxLayoutRow] = []
         self.selection_start_index = 0
@@ -119,7 +125,9 @@ class TextBoxLayout:
 
         self.x_scroll_offset = 0
 
-        self.cursor_colour = pygame.Color("#FFFFFFFF")
+        self.cursor_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            "#FFFFFFFF"
+        )
 
     def _update_plain_text(self):
         plain_text = ""
@@ -581,10 +589,10 @@ class TextBoxLayout:
                 pre_mul_alpha_colour, special_flags=pygame.BLEND_RGBA_MULT
             )
 
-    def add_chunks_to_hover_group(self, link_hover_chunks: List[TextLayoutRect]):
+    def add_chunks_to_hover_group(self, link_hover_chunks: List[HyperlinkTextChunk]):
         """
-        Pass in a list of layout rectangles to add to a hover-able group.
-        Usually used for hyperlinks.
+        Pass in a list of HyperlinkTextChunk chunks to add to a hover-able group.
+        Used for hyperlinks.
 
         :param link_hover_chunks:
         """
@@ -1570,7 +1578,7 @@ class TextBoxLayout:
         self.alpha = 255
         self.current_end_pos = self.letter_count
 
-    def set_cursor_colour(self, colour: pygame.Color):
+    def set_cursor_colour(self, colour: pygame.Color | IColourGradientInterface):
         """
         Set the colour of the editing carat/text cursor for this text layout.
 
@@ -1578,7 +1586,7 @@ class TextBoxLayout:
         """
         self.cursor_colour = colour
 
-    def get_cursor_colour(self) -> pygame.Color:
+    def get_cursor_colour(self) -> pygame.Color | IColourGradientInterface:
         """
         Get the current colour of the editing carat/text cursor.
 

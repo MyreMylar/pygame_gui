@@ -110,7 +110,8 @@ class UITextEntryBox(UITextBox):
         super().unfocus()
         key.set_repeat(0)
         self.cursor_on = False
-        self.text_box_layout.turn_off_cursor()
+        if self.text_box_layout is not None:
+            self.text_box_layout.turn_off_cursor()
         self.cursor_has_moved_recently = False
         self.should_redraw_from_text_block = True
 
@@ -121,8 +122,8 @@ class UITextEntryBox(UITextBox):
         """
         super().focus()
         key.set_repeat(500, 25)
-
-        self.text_box_layout.set_cursor_position(self.edit_position)
+        if self.text_box_layout is not None:
+            self.text_box_layout.set_cursor_position(self.edit_position)
         self.cursor_has_moved_recently = True
 
     def update(self, time_delta: float):
@@ -173,7 +174,8 @@ class UITextEntryBox(UITextBox):
     def _handle_cursor_visibility(self):
         self.cursor_blink_delay_after_moving_acc = 0.0
         self.cursor_on = True
-        self.text_box_layout.turn_on_cursor()
+        if self.text_box_layout is not None:
+            self.text_box_layout.turn_on_cursor()
 
     def process_event(self, event: Event) -> bool:
         """
@@ -263,26 +265,28 @@ class UITextEntryBox(UITextBox):
 
     def _replace_selected_text_with_character(self, character):
         start_of_selection = self._replace_selection_with_text_in_html_string(character)
-        self.text_box_layout.delete_selected_text()
-        self.text_box_layout.insert_text(character, start_of_selection, self.parser)
+        if self.text_box_layout is not None:
+            self.text_box_layout.delete_selected_text()
+            self.text_box_layout.insert_text(character, start_of_selection, self.parser)
         self.edit_position = start_of_selection + 1
         self.select_range = [0, 0]
 
     def _delete_selected_text(self):
-        self.text_box_layout.delete_selected_text()
-        low_end = min(self.select_range[0], self.select_range[1])
-        high_end = max(self.select_range[0], self.select_range[1])
-        self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
-        self.edit_position = low_end
-        self.select_range = [0, 0]
-        self.cursor_has_moved_recently = True
-
-        self.text_box_layout.set_cursor_position(self.edit_position)
+        if self.text_box_layout is not None:
+            self.text_box_layout.delete_selected_text()
+            low_end = min(self.select_range[0], self.select_range[1])
+            high_end = max(self.select_range[0], self.select_range[1])
+            self.html_text = self.html_text[:low_end] + self.html_text[high_end:]
+            self.edit_position = low_end
+            self.select_range = [0, 0]
+            self.cursor_has_moved_recently = True
+            self.text_box_layout.set_cursor_position(self.edit_position)
         self.redraw_from_text_block()
 
     def _insert_line_break_at_edit_cursor(self):
         self._insert_text_into_html_string("\n")
-        self.text_box_layout.insert_line_break(self.edit_position, self.parser)
+        if self.text_box_layout is not None:
+            self.text_box_layout.insert_line_break(self.edit_position, self.parser)
         self.edit_position += 1
         self.redraw_from_text_block()
         self.cursor_has_moved_recently = True
@@ -296,8 +300,9 @@ class UITextEntryBox(UITextBox):
         self.edit_position -= 1
         self.cursor_has_moved_recently = True
 
-        self.text_box_layout.backspace_at_cursor()
-        self.text_box_layout.set_cursor_position(self.edit_position)
+        if self.text_box_layout is not None:
+            self.text_box_layout.backspace_at_cursor()
+            self.text_box_layout.set_cursor_position(self.edit_position)
         self.redraw_from_text_block()
 
     def _process_text_entry_key(self, event: Event) -> bool:
@@ -380,7 +385,8 @@ class UITextEntryBox(UITextBox):
 
     def _do_cut(self):
         if (
-            self.ui_manager.copy_text_enabled
+            self.text_box_layout is not None
+            and self.ui_manager.copy_text_enabled
             and self.copy_text_enabled
             and abs(self.select_range[0] - self.select_range[1]) > 0
         ):
@@ -439,7 +445,8 @@ class UITextEntryBox(UITextBox):
     def _set_text_and_adjust_edit_pos_after_paste(self, starting_paste_pos, new_text):
         self.set_text(self.html_text)
         self.edit_position = starting_paste_pos + len(new_text)
-        self.text_box_layout.set_cursor_position(self.edit_position)
+        if self.text_box_layout is not None:
+            self.text_box_layout.set_cursor_position(self.edit_position)
         self.redraw_from_text_block()
 
     def _replace_selection_with_new_pasted_text(self, new_text):
@@ -455,7 +462,8 @@ class UITextEntryBox(UITextBox):
         return low_end
 
     def redraw_from_text_block(self):
-        self.text_box_layout.fit_layout_rect_height_to_rows()
+        if self.text_box_layout is not None:
+            self.text_box_layout.fit_layout_rect_height_to_rows()
         super().redraw_from_text_block()
 
     @staticmethod

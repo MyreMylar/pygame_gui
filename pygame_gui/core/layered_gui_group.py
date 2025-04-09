@@ -398,10 +398,10 @@ class LayeredGUIGroup:
         """return a list of unique defined layers defined."""
         return sorted(set(self._spritelayers.values()))
 
-    def get_sprites_from_layer(self, layer):
+    def get_sprites_from_layer(self, layer) -> List[GUISprite]:
         """return all sprites from a layer ordered as they were added
 
-        : return sprites
+        :return: sprites
 
         Returns all sprites from a layer. The sprites are ordered in the
         sequence that they were added. (The sprites are not removed from the

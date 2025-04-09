@@ -216,6 +216,12 @@ class UIElement(GUISprite, IUIElementInterface):
     def hovered(self, value: bool):
         self._hovered = value
 
+    def get_most_specific_combined_id(self) -> str:
+        return self.most_specific_combined_id
+
+    def get_layer_thickness(self) -> int:
+        return self.layer_thickness
+
     def _get_clamped_to_minimum_dimensions(self, dimensions, clamp_to_container=False):
         if self.ui_container is not None and clamp_to_container:
             dimensions = (

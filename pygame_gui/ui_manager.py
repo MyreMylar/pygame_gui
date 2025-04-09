@@ -10,7 +10,11 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.interfaces.appearance_theme_interface import (
     IUIAppearanceThemeInterface,
 )
-from pygame_gui.core.interfaces import IUIElementInterface, IContainerAndContainerLike
+from pygame_gui.core.interfaces import (
+    IUIElementInterface,
+    IContainerAndContainerLike,
+    IWindowInterface,
+)
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 
@@ -293,13 +297,18 @@ class UIManager(IUIManagerInterface):
                     if getattr(window, "is_window", False)
                 ]
                 for window in windows_in_layer:
-                    if not sorting_consumed_event:
+                    if (
+                        isinstance(window, IWindowInterface)
+                        and not sorting_consumed_event
+                    ):
                         sorting_consumed_event = (
                             window.check_clicked_inside_or_blocking(event)
                         )
             if not consumed_event:
                 for ui_element in sprites_in_layer:
-                    if ui_element.visible:
+                    if ui_element.visible and isinstance(
+                        ui_element, IUIElementInterface
+                    ):
                         # Only process events for visible elements - ignore hidden elements
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                             mouse_x, mouse_y = self.calculate_scaled_mouse_position(
@@ -422,8 +431,10 @@ class UIManager(IUIManagerInterface):
                 # Only check hover for visible elements - ignore hidden elements
                 # we need to check hover even after already found what we are hovering,
                 # so, we can unhover previously hovered stuff
-                if ui_element.visible and ui_element.check_hover(
-                    time_delta, hover_handled
+                if (
+                    isinstance(ui_element, IUIElementInterface)
+                    and ui_element.visible
+                    and ui_element.check_hover(time_delta, hover_handled)
                 ):
                     if ui_element != self.root_container:
                         hover_handled = True
@@ -622,7 +633,8 @@ class UIManager(IUIManagerInterface):
             self.visual_debug_active = False
             for layer in self.ui_group.layers():
                 for element in self.ui_group.get_sprites_from_layer(layer):
-                    element.set_visual_debug_mode(self.visual_debug_active)
+                    if isinstance(element, IUIElementInterface):
+                        element.set_visual_debug_mode(self.visual_debug_active)
         elif not self.visual_debug_active and is_active:
             self.visual_debug_active = True
             # preload the debug font if it's not already loaded
@@ -630,7 +642,8 @@ class UIManager(IUIManagerInterface):
 
             for layer in self.ui_group.layers():
                 for element in self.ui_group.get_sprites_from_layer(layer):
-                    element.set_visual_debug_mode(self.visual_debug_active)
+                    if isinstance(element, IUIElementInterface):
+                        element.set_visual_debug_mode(self.visual_debug_active)
 
             # Finally print a version of the current layers to the console:
             self.print_layer_debug()
@@ -645,14 +658,15 @@ class UIManager(IUIManagerInterface):
             print(f"Layer: {str(layer)}")
             print("-----------------------")
             for element in self.ui_group.get_sprites_from_layer(layer):
-                if element.element_ids[-1] == "container":
-                    print(
-                        str(element.most_specific_combined_id)
-                        + ": thickness - "
-                        + str(element.layer_thickness)
-                    )
-                else:
-                    print(element.most_specific_combined_id)
+                if isinstance(element, IUIElementInterface):
+                    if element.get_element_ids()[-1] == "container":
+                        print(
+                            str(element.get_most_specific_combined_id())
+                            + ": thickness - "
+                            + str(element.get_layer_thickness())
+                        )
+                    else:
+                        print(element.get_most_specific_combined_id())
             print(" ")
 
     def set_active_cursor(self, cursor: pygame.cursors.Cursor):

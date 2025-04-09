@@ -8,6 +8,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_layout_rect import TextFloatPosition
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -397,6 +398,12 @@ class TextBoxLayoutRow(pygame.Rect):
                     self.cursor_rect.size, flags=pygame.SRCALPHA, depth=32
                 )
 
+                cursor_colour = self.layout.get_cursor_colour()
+                if isinstance(cursor_colour, ColourGradient):
+                    cursor_surface.fill(pygame.Color("#FFFFFFFF"))
+                    cursor_colour.apply_gradient_to_surface(cursor_surface)
+                elif isinstance(cursor_colour, pygame.Color):
+                    cursor_surface.fill(cursor_colour)
                 cursor_surface.fill(self.layout.get_cursor_colour())
                 self.cursor_rect = pygame.Rect(
                     (self.x + self.cursor_draw_width - self.layout.x_scroll_offset),

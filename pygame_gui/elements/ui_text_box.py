@@ -138,7 +138,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
-        self.scroll_bar = None
+        self.scroll_bar: UIVerticalScrollBar | None = None
         tweaked_rect = pygame.Rect(relative_rect)
         tweaked_rect[3] = -1 if wrap_to_height else tweaked_rect[3]
         super().__init__(
@@ -217,14 +217,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.link_hover_underline: pygame.Color | IColourGradientInterface = (
             pygame.Color(0, 0, 0)
         )
-        self.link_style: Optional[
-            Dict[str, pygame.Color | IColourGradientInterface]
-        ] = None
 
         self.rounded_corner_width_offsets = [0, 0]
         self.rounded_corner_height_offsets = [0, 0]
         self.text_box_layout: Optional[TextBoxLayout] = None
-        self.text_wrap_rect: Optional[pygame.Rect] = None
+        self.text_wrap_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
         self.background_surf: Optional[pygame.Surface] = None
 
         self.shape = "rectangle"
@@ -238,7 +235,20 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.time_until_full_rebuild_after_changing_size = 0.2
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-        self.parser: Optional[HTMLParser] = None
+        self.link_style: Dict[str, Any] = {
+            "link_text": self.link_normal_colour,
+            "link_hover": self.link_hover_colour,
+            "link_selected": self.link_selected_colour,
+            "link_normal_underline": self.link_normal_underline,
+            "link_hover_underline": self.link_hover_underline,
+        }
+        self.parser: HTMLParser = HTMLParser(
+            self.ui_theme,
+            self.combined_element_ids,
+            self.link_style,
+            line_spacing=self.line_spacing,
+            text_direction=self.font_dict.get_default_font().get_direction(),
+        )
 
         self.double_click_timer = self.ui_manager.get_double_click_time() + 1.0
 
@@ -274,7 +284,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         start_select = min(self._select_range[0], self._select_range[1])
         end_select = max(self._select_range[0], self._select_range[1])
 
-        self.text_box_layout.set_text_selection(start_select, end_select)
+        if self.text_box_layout is not None:
+            self.text_box_layout.set_text_selection(start_select, end_select)
         self.redraw_from_text_block()
 
     def kill(self):
@@ -420,11 +431,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     ),
                 )
 
-        elif self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]:
-            if self.text_box_layout is not None:
-                self._build_scrollbar_for_oversized_text(
-                    total_corner_width_offsets, total_corner_height_offsets
-                )
+        elif (
+            self.text_box_layout is not None
+            and self.text_box_layout.layout_rect.height > self.text_wrap_rect[3]
+        ):
+            self._build_scrollbar_for_oversized_text(
+                total_corner_width_offsets, total_corner_height_offsets
+            )
         elif self.text_box_layout is not None:
             # we don't need a scroll bar, make sure our text box is aligned to the top
             new_dimensions = (self.rect[2], self.rect[3])
@@ -449,9 +462,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.rect, theming_parameters, ["normal"], self.ui_manager
             )
 
-        self.background_surf = self.drawable_shape.get_fresh_surface()
+        if self.drawable_shape is not None:
+            self.background_surf = self.drawable_shape.get_fresh_surface()
 
-        if self.scroll_bar is not None:
+        if self.scroll_bar is not None and self.text_box_layout is not None:
             height_adjustment = int(
                 self.scroll_bar.start_percentage
                 * self.text_box_layout.layout_rect.height
@@ -465,7 +479,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         drawable_area = pygame.Rect((0, height_adjustment), drawable_area_size)
         self._setup_final_text_box_image(drawable_area)
         self.link_hover_chunks = []
-        self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
+        if self.text_box_layout is not None:
+            self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
         self.should_trigger_full_rebuild = False
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
@@ -511,9 +526,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             ),
         )
         self.parse_html_into_style_data()
-        percentage_visible = (
-            self.text_wrap_rect[3] / self.text_box_layout.layout_rect.height
-        )
+        percentage_visible = 1.0
+        if self.text_box_layout is not None:
+            percentage_visible = (
+                self.text_wrap_rect[3] / self.text_box_layout.layout_rect.height
+            )
         scroll_bar_position = (
             self.relative_rect.right
             - self.border_width
@@ -565,6 +582,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Aligns the text drawing position correctly according to our theming options.
 
         """
+        if self.text_box_layout is None:
+            return
         # Horizontal alignment
         if self.text_horiz_alignment == "default":
             locale = self.ui_manager.get_locale()
@@ -606,7 +625,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         """
         super().update(time_delta)
-        if not self.alive():
+        if not self.alive() or self.text_box_layout is None:
             return
 
         if self.double_click_timer < self.ui_manager.get_double_click_time():
@@ -714,6 +733,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.full_rebuild_countdown -= time_delta
 
     def _update_after_edit_cursor_move(self):
+        if self.text_box_layout is None:
+            return
+
         self.cursor_has_moved_recently = False
 
         self.text_box_layout.set_cursor_position(self.edit_position)
@@ -760,7 +782,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Called by an element's drawable shape when it has a new image surface ready for use,
         normally after a rebuilding/redrawing of some kind.
         """
-        self.background_surf = self.drawable_shape.get_fresh_surface()
+        if self.drawable_shape is not None:
+            self.background_surf = self.drawable_shape.get_fresh_surface()
         self.redraw_from_text_block()
 
     def set_relative_position(self, position: Coordinate):
@@ -816,7 +839,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.relative_rect.height = int(dimensions[1])
         self.rect.size = self.relative_rect.size
 
-        if dimensions[0] >= 0 and dimensions[1] >= 0:
+        if dimensions[0] >= 0 and dimensions[1] >= 0 and self.ui_container is not None:
             if self.relative_right_margin is not None:
                 self.relative_right_margin = (
                     self.ui_container.get_container().get_rect().right - self.rect.right
@@ -887,7 +910,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         feed_input = self._pre_parse_text(
             translate(feed_input, **self.text_kwargs) + self.appended_text
         )
-        self.parser.feed(feed_input)
+        if self.parser is not None:
+            self.parser.feed(feed_input)
 
         default_font = self.ui_theme.get_font_dictionary().find_font(
             font_name=self.parser.default_style["font_name"],
@@ -931,7 +955,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         text. Useful if we've just moved the position of the text (say, with a scroll bar)
         without actually changing the text itself.
         """
-        if self.rect.width <= 0 or self.rect.height <= 0:
+        if (
+            self.text_box_layout is None
+            or self.rect.width <= 0
+            or self.rect.height <= 0
+        ):
             return
         if (
             self.scroll_bar is None
@@ -959,30 +987,35 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             drawable_area = self._calculate_drawable_area(height_adjustment)
             self._setup_final_text_box_image(drawable_area)
 
-    def _setup_final_text_box_image(self, drawable_area):
-        new_image = pygame.surface.Surface(
-            self.rect.size, flags=pygame.SRCALPHA, depth=32
-        )
-        new_image.fill(pygame.Color(0, 0, 0, 0))
-        basic_blit(new_image, self.background_surf, (0, 0))
-        basic_blit(
-            new_image,
-            self.text_box_layout.finalised_surface,
-            (
+    def _setup_final_text_box_image(self, drawable_area: pygame.Rect):
+        if (
+            self.text_box_layout is not None
+            and self.text_box_layout.finalised_surface is not None
+            and self.background_surf is not None
+        ):
+            new_image = pygame.surface.Surface(
+                self.rect.size, flags=pygame.SRCALPHA, depth=32
+            )
+            new_image.fill(pygame.Color(0, 0, 0, 0))
+            basic_blit(new_image, self.background_surf, (0, 0))
+            basic_blit(
+                new_image,
+                self.text_box_layout.finalised_surface,
                 (
-                    (self.padding[0] + self.border_width + self.shadow_width)
-                    + self.rounded_corner_width_offsets[0]
+                    (
+                        (self.padding[0] + self.border_width + self.shadow_width)
+                        + self.rounded_corner_width_offsets[0]
+                    ),
+                    (
+                        (self.padding[1] + self.border_width + self.shadow_width)
+                        + self.rounded_corner_height_offsets[0]
+                    ),
                 ),
-                (
-                    (self.padding[1] + self.border_width + self.shadow_width)
-                    + self.rounded_corner_height_offsets[0]
-                ),
-            ),
-            drawable_area,
-        )
-        self._set_image(new_image)
+                drawable_area,
+            )
+            self._set_image(new_image)
 
-    def _calculate_drawable_area(self, height_adjustment):
+    def _calculate_drawable_area(self, height_adjustment) -> pygame.Rect:
         total_corner_width_offsets = (
             self.rounded_corner_width_offsets[0] + self.rounded_corner_width_offsets[1]
         )
@@ -1023,7 +1056,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         This won't work very well if redrawing a chunk changed its dimensions.
         """
-        self.text_box_layout.finalise_to_new()
+        if self.text_box_layout is not None:
+            self.text_box_layout.finalise_to_new()
         self.redraw_from_text_block()
 
     def full_redraw(self):
@@ -1036,11 +1070,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         new text box.
 
         """
-        self.text_box_layout.reprocess_layout_queue(
-            pygame.Rect((0, 0), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
-        )
-        self.text_box_layout.finalise_to_new()
-        self._redraw_from_text_block_and_finalise_hyperlinks()
+        if self.text_box_layout is not None:
+            self.text_box_layout.reprocess_layout_queue(
+                pygame.Rect((0, 0), (self.text_wrap_rect[2], self.text_wrap_rect[3]))
+            )
+            self.text_box_layout.finalise_to_new()
+            self._redraw_from_text_block_and_finalise_hyperlinks()
 
     def _process_mouse_button_event(self, event: Event) -> bool:
         """
@@ -1103,6 +1138,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return consumed_event
 
     def _handle_mouse_click_on_normal_text(self, scaled_mouse_pos):
+        if self.text_box_layout is None:
+            return
         text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
         self.text_box_layout.set_cursor_from_click_pos(text_layout_space_pos)
         self.edit_position = self.text_box_layout.get_cursor_index()
@@ -1214,6 +1251,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self._select_nearest_word_from_index(index) if index >= 0 else False
 
     def _select_nearest_word_from_index(self, index):
+        if self.text_box_layout is None:
+            return False
         char = self.text_box_layout.plain_text[index]
         # Check we clicked in the same place on our second click.
         pattern = re.compile(r"[\w']+")
@@ -1246,7 +1285,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _calculate_text_space_pos(self, scaled_mouse_pos):
         height_adjustment = 0
-        if self.scroll_bar is not None:
+        if self.scroll_bar is not None and self.text_box_layout is not None:
             height_adjustment = (
                 self.scroll_bar.start_percentage
                 * self.text_box_layout.layout_rect.height
@@ -1260,7 +1299,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _calculate_hyperlinks_offsets(self):
         height_adjustment = 0
-        if self.scroll_bar is not None:
+        if self.scroll_bar is not None and self.text_box_layout is not None:
             height_adjustment = (
                 self.scroll_bar.start_percentage
                 * self.text_box_layout.layout_rect.height
@@ -1599,7 +1638,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def _redraw_from_text_block_and_finalise_hyperlinks(self):
         self.redraw_from_text_block()
         self.link_hover_chunks = []
-        self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
+        if self.text_box_layout is not None:
+            self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
     def on_locale_changed(self):
         self._reparse_and_rebuild()
@@ -2055,6 +2095,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.vertical_cursor_movement = True
 
     def _jump_edit_pos_one_row_up(self, should_select=False):
+        if self.text_box_layout is None:
+            return
+
         if should_select:
             new_pos = self.text_box_layout.get_cursor_pos_move_up_one_row(
                 self.last_horiz_cursor_index
@@ -2155,6 +2198,8 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_start_of_line(self, should_select=False):
+        if self.text_box_layout is None:
+            return
         try:
             next_pos = self.text_box_layout.set_cursor_to_start_of_current_row()
         except ValueError:

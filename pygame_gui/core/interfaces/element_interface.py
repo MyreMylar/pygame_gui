@@ -450,3 +450,24 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         Get any anchor targets this element has, so we can update them when their targets change
         :return: the list of anchor targets.
         """
+
+    @abstractmethod
+    def get_most_specific_combined_id(self) -> str:
+        """
+        The most specific combined ID for this element. There is a hierarchy of IDs an element can belong to
+        e.g. an OK button might have IDs of '#ok_button.message_box', '@confirmation_dialog_buttons.message_box'
+        and 'button'. the most specific one would be the available one that most uniquely identifies this
+        specific button rather than a group of buttons or all buttons (assuming those are IDs that are set and
+        available for this button)
+
+        :return: The most specific combined ID
+        """
+
+    @abstractmethod
+    def get_layer_thickness(self) -> int:
+        """
+        The GUI drawing layer 'thickness' of this element (i.e. how many layers does it take to finish drawing
+        this element).
+
+        :return: The thickness.
+        """
