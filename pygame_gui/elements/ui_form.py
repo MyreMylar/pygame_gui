@@ -141,7 +141,7 @@ class UISection(UIAutoResizingContainer):
             text=f"{self.name} ▼",
             manager=manager,
             container=self,
-            parent_element=parent_element,
+            parent_element=self,
             object_id=ObjectID("#expand_section_button", None),
             anchors=anchors.copy(),
         )
@@ -158,7 +158,7 @@ class UISection(UIAutoResizingContainer):
             # resize_bottom=True,
             manager=manager,
             container=self,
-            parent_element=parent_element,
+            parent_element=self,
             object_id=ObjectID("#inner_section_container", None),
             anchors=anchors.copy(),
         )
