@@ -38,13 +38,11 @@ class TypingAppearEffect(TextEffect):
 
         self.current_time_per_letter = max(
             0.00001,
-            max(
-                min(
-                    random.gauss(self.time_per_letter, self.time_average_deviation / 3),
-                    self.time_per_letter + self.time_average_deviation,
-                ),
-                self.time_per_letter - self.time_average_deviation,
+            min(
+                random.gauss(self.time_per_letter, self.time_average_deviation / 3),
+                self.time_per_letter + self.time_average_deviation,
             ),
+            self.time_per_letter - self.time_average_deviation,
         )
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
@@ -71,15 +69,13 @@ class TypingAppearEffect(TextEffect):
                 self.text_changed = True
                 self.current_time_per_letter = max(
                     0.00001,
-                    max(
-                        min(
-                            random.gauss(
-                                self.time_per_letter, self.time_average_deviation / 3
-                            ),
-                            self.time_per_letter + self.time_average_deviation,
+                    min(
+                        random.gauss(
+                            self.time_per_letter, self.time_average_deviation / 3
                         ),
-                        self.time_per_letter - self.time_average_deviation,
+                        self.time_per_letter + self.time_average_deviation,
                     ),
+                    self.time_per_letter - self.time_average_deviation,
                 )
         else:
             # finished effect
