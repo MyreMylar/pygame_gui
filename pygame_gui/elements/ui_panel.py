@@ -219,7 +219,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         super().set_relative_position(position)
-        self.get_container().set_relative_position(self.relative_rect.topleft)
+
+        container_top_left = (
+            self.relative_rect.left + self.container_margins["left"],
+            self.relative_rect.top + self.container_margins["top"],
+        )
+
+        self.get_container().set_relative_position(container_top_left)
 
     def set_position(self, position: Coordinate):
         """
@@ -229,7 +235,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         super().set_position(position)
-        self.get_container().set_relative_position(self.relative_rect.topleft)
+
+        container_top_left = (
+            self.relative_rect.left + self.container_margins["left"],
+            self.relative_rect.top + self.container_margins["top"],
+        )
+
+        self.get_container().set_relative_position(container_top_left)
 
     def rebuild_from_changed_theme_data(self):
         """
