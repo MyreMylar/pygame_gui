@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from pygame.color import Color
 
@@ -25,7 +25,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         active_colour: Color | ColourGradient,
         hover_underline: bool,
         text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
-        effect_id: Optional[str] = None,
+        effect_ids: Optional[List[str]] = None,
     ):
         super().__init__(
             text,
@@ -35,7 +35,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
             False,
             bg_colour,
             text_shadow_data,
-            effect_id=effect_id,
+            effect_ids=effect_ids,
         )
 
         self.href = href
@@ -110,7 +110,7 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
             self.active_colour,
             self.hover_underline,
             self.text_shadow_data,
-            self.effect_id,
+            self.effect_ids,
         )
 
         right_side_chunk.topleft = split_pos  # pylint: disable=attribute-defined-outside-init

@@ -179,7 +179,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         self.active_text_effect: Optional[TextEffect] = None
         self.active_text_chunk_effects: List[
-            Dict[str, TextLineChunkFTFont | TextEffect]
+            Dict[str, List[TextLineChunkFTFont] | TextEffect]
         ] = []
 
         self.scroll_bar_width = 20
@@ -1720,40 +1720,45 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 redrew_all_chunks = True
             # we have a tag so only want to apply our effect to tagged chunks
             # first see if we have any tagged chunks in the layout
+            chunks_with_tag = []
             for row in self.text_box_layout.layout_rows:
                 for chunk in row.items:
                     if (
                         isinstance(chunk, TextLineChunkFTFont)
-                        and chunk.effect_id == effect_tag
+                        and chunk.effect_ids is not None
+                        and effect_tag in chunk.effect_ids
                     ):
                         if not redrew_all_chunks:
-                            self.clear_all_active_effects(chunk)
-                        effect: Optional[TextEffect] = None
-                        if effect_type == TEXT_EFFECT_TYPING_APPEAR:
-                            effect = TypingAppearEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_FADE_IN:
-                            effect = FadeInEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_FADE_OUT:
-                            effect = FadeOutEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_BOUNCE:
-                            effect = BounceEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_TILT:
-                            effect = TiltEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_EXPAND_CONTRACT:
-                            effect = ExpandContractEffect(self, params, chunk)
-                        elif effect_type == TEXT_EFFECT_SHAKE:
-                            effect = ShakeEffect(self, params, chunk)
-                        else:
-                            warnings.warn(
-                                f"Unsupported effect name: {str(effect_type)} for text chunk"
-                            )
-                        if effect is not None:
-                            chunk.grab_pre_effect_surface()
-                            self.active_text_chunk_effects.append(
-                                {"chunk": chunk, "effect": effect}
-                            )
-                            effect.text_changed = True
-                            self.update_text_effect(0.0)
+                            self.clear_all_active_effects([chunk])
+                        chunks_with_tag.append(chunk)
+
+            effect: Optional[TextEffect] = None
+            if effect_type == TEXT_EFFECT_TYPING_APPEAR:
+                effect = TypingAppearEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_FADE_IN:
+                effect = FadeInEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_FADE_OUT:
+                effect = FadeOutEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_BOUNCE:
+                effect = BounceEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_TILT:
+                effect = TiltEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_EXPAND_CONTRACT:
+                effect = ExpandContractEffect(self, params, chunks_with_tag, effect_tag)
+            elif effect_type == TEXT_EFFECT_SHAKE:
+                effect = ShakeEffect(self, params, chunks_with_tag, effect_tag)
+            else:
+                warnings.warn(
+                    f"Unsupported effect name: {str(effect_type)} for text chunk"
+                )
+            if effect is not None:
+                for chunk in chunks_with_tag:
+                    chunk.grab_pre_effect_surface()
+                self.active_text_chunk_effects.append(
+                    {"chunks": chunks_with_tag, "effect": effect}
+                )
+                effect.text_changed = True
+                self.update_text_effect(0.0)
         else:
             if (
                 self.active_text_effect is not None
@@ -1786,42 +1791,51 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.active_text_effect.text_changed = True
                 self.update_text_effect(0.0)
 
-    def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
-        if sub_chunk is None:
+    def stop_finished_effect(
+        self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
+    ):
+        if sub_chunks is None:
             self.active_text_effect = None
         else:
-            self.active_text_chunk_effects = [
-                effect_chunk
-                for effect_chunk in self.active_text_chunk_effects
-                if effect_chunk["chunk"] != sub_chunk
-            ]
+            self._remove_chunks_from_active_effects(sub_chunks)
 
-    def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+    def _remove_chunks_from_active_effects(self, sub_chunks):
+        self.active_text_chunk_effects = [
+            effect_chunk
+            for effect_chunk in self.active_text_chunk_effects
+            if sub_chunks != effect_chunk["chunks"]
+        ]
+
+    def clear_all_active_effects(
+        self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
+    ):
         if self.text_box_layout is None:
             return
-        if sub_chunk is None:
+        if sub_chunks is None:
             self.active_text_effect = None
             self.text_box_layout.clear_effects()
             for effect_chunk in self.active_text_chunk_effects:
-                if isinstance(effect_chunk["chunk"], TextLineChunkFTFont):
-                    effect_chunk["chunk"].clear_effects()
+                chunk_list = effect_chunk["chunks"]
+                if isinstance(chunk_list, list):
+                    for chunk in chunk_list:
+                        if isinstance(chunk, TextLineChunkFTFont):
+                            chunk.clear_effects()
             self.active_text_chunk_effects = []
             self.text_box_layout.finalise_to_new()
         else:
-            self.active_text_chunk_effects = [
-                effect_chunk
-                for effect_chunk in self.active_text_chunk_effects
-                if effect_chunk["chunk"] != sub_chunk
-            ]
-            sub_chunk.clear_effects()
+            self._remove_chunks_from_active_effects(sub_chunks)
 
-            effect_chunks = [
-                affected_chunk["chunk"]
-                for affected_chunk in self.active_text_chunk_effects
-            ]
-            self.text_box_layout.redraw_other_chunks(effect_chunks)
+            chunks_to_redraw = []
+            for affected_chunk in self.active_text_chunk_effects:
+                chunk_list = affected_chunk["chunks"]
+                if isinstance(chunk_list, list):
+                    for chunk in chunk_list:
+                        chunks_to_redraw.append(chunk)
+            self.text_box_layout.redraw_other_chunks(chunks_to_redraw)
 
-            sub_chunk.redraw()
+            for sub_chunk in sub_chunks:
+                sub_chunk.clear_effects()
+                sub_chunk.redraw()
 
     def update_text_effect(self, time_delta: float):
         if self.active_text_effect is not None:
@@ -1845,15 +1859,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     ):
                         any_text_changed = True
             if any_text_changed:
-                effect_chunks = []
-                for affected_chunk in self.active_text_chunk_effects:
-                    chunk = affected_chunk["chunk"]
-                    if isinstance(chunk, TextLineChunkFTFont):
-                        chunk.clear(chunk.transform_effect_rect)
-                        effect_chunks.append(chunk)
+                chunks_to_redraw = []
+                for effect_chunks in self.active_text_chunk_effects:
+                    chunk_list = effect_chunks["chunks"]
+                    if isinstance(chunk_list, list):
+                        for chunk in chunk_list:
+                            if isinstance(chunk, TextLineChunkFTFont):
+                                chunk.clear(chunk.transform_effect_rect)
+                                chunks_to_redraw.append(chunk)
 
                 if self.text_box_layout is not None:
-                    self.text_box_layout.redraw_other_chunks(effect_chunks)
+                    self.text_box_layout.redraw_other_chunks(chunks_to_redraw)
 
                 for affected_chunk in self.active_text_chunk_effects:
                     if isinstance(affected_chunk["effect"], TextEffect):

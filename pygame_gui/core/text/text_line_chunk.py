@@ -38,7 +38,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         bg_colour: Color | ColourGradient,
         text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
         max_dimensions: Optional[List[int]] = None,
-        effect_id: Optional[str] = None,
+        effect_ids: Optional[List[str]] = None,
     ):
         self.text_shadow_data = text_shadow_data
         self.max_dimensions = max_dimensions
@@ -91,7 +91,7 @@ class TextLineChunkFTFont(TextLayoutRect):
 
         self.should_centre_from_baseline = False
 
-        self.effect_id = effect_id
+        self.effect_ids = effect_ids
 
         # this is the rect before we add it to a row and start moving the origin
         self.pre_row_rect = Rect(self.topleft, self.size)
@@ -166,7 +166,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         match_bg_color = self.bg_colour == other_text_chunk.bg_colour
         match_shadow_data = self.text_shadow_data == other_text_chunk.text_shadow_data
         match_active = self.is_active == other_text_chunk.is_active
-        match_effect_id = self.effect_id == other_text_chunk.effect_id
+        match_effect_id = self.effect_ids == other_text_chunk.effect_ids
 
         return (
             match_fonts
@@ -669,7 +669,7 @@ class TextLineChunkFTFont(TextLayoutRect):
         right_side_chunk.target_surface = target_surface
         right_side_chunk.target_surface_area = target_surface_area
         right_side_chunk.should_centre_from_baseline = baseline_centred
-        right_side_chunk.effect_id = self.effect_id
+        right_side_chunk.effect_ids = self.effect_ids
         return right_side_chunk
 
     def clear(self, optional_rect: Optional[Rect] = None):

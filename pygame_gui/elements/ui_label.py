@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, Tuple, Dict, Optional, Any
+from typing import Union, Tuple, Dict, Optional, Any, List
 
 import pygame
 from pygame_gui.core.utility import translate
@@ -480,10 +480,14 @@ class UILabel(UIElement, IUITextOwnerInterface):
             self.active_text_effect.text_changed = True
             self.update_text_effect(0.0)
 
-    def stop_finished_effect(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+    def stop_finished_effect(
+        self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
+    ):
         self.active_text_effect = None
 
-    def clear_all_active_effects(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+    def clear_all_active_effects(
+        self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
+    ):
         if (
             self.drawable_shape is not None
             and self.drawable_shape.text_box_layout is not None

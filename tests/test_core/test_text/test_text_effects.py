@@ -481,7 +481,7 @@ class TestBounceEffect:
 
         text_box.set_active_effect(TEXT_EFFECT_BOUNCE, effect_tag='test')
         effect = text_box.active_text_chunk_effects[0]['effect']
-        chunk = text_box.active_text_chunk_effects[0]['chunk']
+        chunk = text_box.active_text_chunk_effects[0]['chunks'][0]
 
         assert chunk.effects_offset_pos == (0, 0)
 
@@ -599,7 +599,7 @@ class TestTiltEffect:
 
         text_box.set_active_effect(TEXT_EFFECT_TILT, effect_tag='test')
         effect: TiltEffect = text_box.active_text_chunk_effects[0]['effect']
-        chunk: TextLineChunkFTFont = text_box.active_text_chunk_effects[0]['chunk']
+        chunk: TextLineChunkFTFont = text_box.active_text_chunk_effects[0]['chunks'][0]
 
         assert chunk.effects_rotation == 0
 
@@ -706,7 +706,7 @@ class TestExpandContractEffect:
 
         text_box.set_active_effect(TEXT_EFFECT_EXPAND_CONTRACT, effect_tag='test')
         effect: ExpandContractEffect = text_box.active_text_chunk_effects[0]['effect']
-        chunk: TextLineChunkFTFont = text_box.active_text_chunk_effects[0]['chunk']
+        chunk: TextLineChunkFTFont = text_box.active_text_chunk_effects[0]['chunks'][0]
 
         assert chunk.effects_scale == 1.0
 
@@ -840,15 +840,15 @@ class TestShakeEffect:
 
         text_box.set_active_effect(TEXT_EFFECT_SHAKE, effect_tag='test')
         effect = text_box.active_text_chunk_effects[0]['effect']
-        chunk = text_box.active_text_chunk_effects[0]['chunk']
+        chunks = text_box.active_text_chunk_effects[0]['chunks']
 
-        assert chunk.effects_offset_pos == effect.shake
+        assert chunks[0].effects_offset_pos == effect.shake
 
         effect.update(time_delta=0.06)
         effect.update(time_delta=0.06)
         effect.apply_effect()
 
-        assert chunk.effects_offset_pos == effect.shake
+        assert chunks[0].effects_offset_pos == effect.shake
 
     def test_params(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',
