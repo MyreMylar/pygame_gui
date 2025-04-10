@@ -197,6 +197,42 @@ class TestUIPanel:
         assert element_5.relative_right_margin == 230
         assert element_5.relative_bottom_margin == 230
 
+        # test with margins
+        element_6 = UIPanel(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=test_container,
+                            starting_height=5,
+                            margins={'left': 10,
+                                     'right': 10,
+                                     'top': 5,
+                                     'bottom': 5},
+                            anchors={'left': 'left',
+                                     'right': 'right',
+                                     'top': 'top',
+                                     'bottom': 'bottom'})
+
+        assert element_6.rect.topleft == (100, 100)
+        assert element_6.rect.size == (50, 50)
+        assert element_6.rect.bottomright == (150, 150)
+        assert element_6.relative_right_margin == 250
+        assert element_6.relative_bottom_margin == 250
+
+        assert element_6.get_container().rect.topleft == (110, 105)
+        assert element_6.get_container().rect.size == (30, 40)
+        assert element_6.get_container().rect.bottomright == (140, 145)
+
+        element_6.set_relative_position((20, 20))
+
+        assert element_6.rect.topleft == (120, 120)
+        assert element_6.rect.size == (50, 50)
+        assert element_6.rect.bottomright == (170, 170)
+        assert element_6.relative_right_margin == 230
+        assert element_6.relative_bottom_margin == 230
+
+        assert element_6.get_container().rect.topleft == (130, 125)
+        assert element_6.get_container().rect.size == (30, 40)
+        assert element_6.get_container().rect.bottomright == (160, 165)
+
     def test_set_position(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
                                      manager=default_ui_manager)
@@ -283,6 +319,42 @@ class TestUIPanel:
         assert element_5.relative_rect.bottomright == (60, 60)
         assert element_5.relative_right_margin == 240
         assert element_5.relative_bottom_margin == 240
+
+        # test with margins
+        element_6 = UIPanel(relative_rect=pygame.Rect(0, 0, 50, 50),
+                            manager=default_ui_manager,
+                            container=test_container,
+                            starting_height=5,
+                            margins={'left': 10,
+                                     'right': 10,
+                                     'top': 5,
+                                     'bottom': 5},
+                            anchors={'left': 'left',
+                                     'right': 'right',
+                                     'top': 'top',
+                                     'bottom': 'bottom'})
+
+        assert element_6.relative_rect.topleft == (0, 0)
+        assert element_6.relative_rect.size == (50, 50)
+        assert element_6.relative_rect.bottomright == (50, 50)
+        assert element_6.relative_right_margin == 250
+        assert element_6.relative_bottom_margin == 250
+
+        assert element_6.get_container().get_relative_rect().topleft == (10, 5)
+        assert element_6.get_container().get_relative_rect().size == (30, 40)
+        assert element_6.get_container().get_relative_rect().bottomright == (40, 45)
+
+        element_6.set_position((20, 20))
+
+        assert element_6.relative_rect.topleft == (10, 10)
+        assert element_6.relative_rect.size == (50, 50)
+        assert element_6.relative_rect.bottomright == (60, 60)
+        assert element_6.relative_right_margin == 240
+        assert element_6.relative_bottom_margin == 240
+
+        assert element_6.get_container().get_relative_rect().topleft == (20, 15)
+        assert element_6.get_container().get_relative_rect().size == (30, 40)
+        assert element_6.get_container().get_relative_rect().bottomright == (50, 55)
 
     def test_set_dimensions(self, _init_pygame, _display_surface_return_none, default_ui_manager):
         test_container = UIContainer(relative_rect=pygame.Rect(10, 10, 300, 300),
