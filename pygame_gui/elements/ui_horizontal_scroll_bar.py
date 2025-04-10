@@ -367,13 +367,16 @@ class UIHorizontalScrollBar(UIElement):
         distance = self.target_scroll_position - self.scroll_position
 
         return (
-            (self._set_scroll_position_from_distance_and_time(distance, time_delta))
+            (self._update_scroll_position_from_distance_and_time(distance, time_delta))
             if distance != 0.0
-            and (self.left_limit <= self.target_scroll_position <= self.right_limit)
+            and (
+                self.scroll_position != self.left_limit
+                or self.scroll_position != self.right_limit
+            )
             else False
         )
 
-    def _set_scroll_position_from_distance_and_time(self, distance, time_delta):
+    def _update_scroll_position_from_distance_and_time(self, distance, time_delta):
         direction = distance / abs(distance)
         self.scroll_position = self.scroll_position + (
             direction
