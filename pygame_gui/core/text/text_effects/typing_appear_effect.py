@@ -38,7 +38,13 @@ class TypingAppearEffect(TextEffect):
 
         self.current_time_per_letter = max(
             0.00001,
-            random.gauss(self.time_per_letter, self.time_average_deviation**0.5),
+            max(
+                min(
+                    random.gauss(self.time_per_letter, self.time_average_deviation / 3),
+                    self.time_per_letter + self.time_average_deviation,
+                ),
+                self.time_per_letter - self.time_average_deviation,
+            ),
         )
 
     def _load_params(self, params: Optional[Dict[str, Any]]):
@@ -59,18 +65,20 @@ class TypingAppearEffect(TextEffect):
             self.text_sub_chunk
         ):
             self.time_per_letter_acc += time_delta
-            while (
-                self.time_per_letter_acc >= self.current_time_per_letter
-                and self.text_progress
-                < self.text_owner.get_text_letter_count(self.text_sub_chunk)
-            ):
+            if self.time_per_letter_acc >= self.current_time_per_letter:
                 self.time_per_letter_acc -= self.current_time_per_letter
                 self.text_progress += 1
                 self.text_changed = True
                 self.current_time_per_letter = max(
                     0.00001,
-                    random.gauss(
-                        self.time_per_letter, self.time_average_deviation**0.5
+                    max(
+                        min(
+                            random.gauss(
+                                self.time_per_letter, self.time_average_deviation / 3
+                            ),
+                            self.time_per_letter + self.time_average_deviation,
+                        ),
+                        self.time_per_letter - self.time_average_deviation,
                     ),
                 )
         else:
