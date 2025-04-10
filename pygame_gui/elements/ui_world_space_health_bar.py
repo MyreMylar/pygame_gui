@@ -3,10 +3,14 @@ from typing import Union, Dict, Optional
 import pygame
 
 from pygame_gui.core import ObjectID
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui.core import UIElement
 from pygame_gui.elements.ui_status_bar import UIStatusBar
-from pygame_gui.core.gui_type_hints import RectLike
+from pygame_gui.core.gui_type_hints import RectLike, WithHealth, SpriteWithHealth
 
 
 class UIWorldSpaceHealthBar(UIStatusBar):
@@ -30,59 +34,78 @@ class UIWorldSpaceHealthBar(UIStatusBar):
                     may override this.
     """
 
-    class ExampleHealthSprite(pygame.sprite.Sprite):
+    class ExampleHealthSprite(pygame.sprite.Sprite, WithHealth):
         """
         An example sprite with health instance attributes.
 
         :param groups: Sprite groups to put the sprite in.
 
         """
+
         def __init__(self, *groups):
             super().__init__(*groups)
             self.current_health = 50
             self.health_capacity = 100
             self.rect = pygame.Rect(0, 0, 32, 64)
 
-    element_id = 'world_space_health_bar'
+    element_id = "world_space_health_bar"
 
-    def __init__(self,
-                 relative_rect: RectLike,
-                 sprite_to_monitor: Union[pygame.sprite.Sprite, ExampleHealthSprite],
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1):
-
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        sprite_to_monitor: SpriteWithHealth,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        visible: int = 1,
+    ):
         if sprite_to_monitor is not None:
-            if not hasattr(sprite_to_monitor, 'health_capacity'):
-                raise AttributeError('Sprite does not have health_capacity attribute')
-            if not hasattr(sprite_to_monitor, 'current_health'):
-                raise AttributeError('Sprite does not have current_health attribute')
+            if not hasattr(sprite_to_monitor, "health_capacity"):
+                raise AttributeError("Sprite does not have health_capacity attribute")
+            if not hasattr(sprite_to_monitor, "current_health"):
+                raise AttributeError("Sprite does not have current_health attribute")
             self.sprite_to_monitor = sprite_to_monitor
         else:
             self.sprite_to_monitor = None
             if self.__class__ == UIWorldSpaceHealthBar:
-                raise AssertionError('Need sprite to monitor')
+                raise AssertionError("Need sprite to monitor")
 
-        super().__init__(relative_rect=relative_rect,
-                         manager=manager,
-                         sprite=sprite_to_monitor,
-                         percent_method=self.health_percent,
-                         container=container,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         anchors=anchors,
-                         visible=visible)
+        super().__init__(
+            relative_rect=relative_rect,
+            manager=manager,
+            sprite=sprite_to_monitor,
+            percent_method=self.health_percent,
+            container=container,
+            parent_element=parent_element,
+            object_id=object_id,
+            anchors=anchors,
+            visible=visible,
+        )
 
     @property
     def current_health(self):
+        """
+        Returns the current health of the monitored sprite
+
+        :return: an integer representing current health
+        """
         return self.sprite_to_monitor.current_health
 
     @property
     def health_capacity(self):
+        """
+        Returns the current health capacity of the monitored sprite
+
+        :return: an integer representing current health capacity
+        """
         return self.sprite_to_monitor.health_capacity
 
     def health_percent(self):
-        return self.current_health / self.health_capacity
+        """
+        Returns the current health percentage of the monitored sprite
+
+        :return: a float representing current health capacity
+        """
+        return self.current_health / max(self.health_capacity, 1)

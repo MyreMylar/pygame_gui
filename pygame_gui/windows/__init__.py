@@ -5,8 +5,10 @@ from pygame_gui.windows.ui_colour_picker_dialog import UIColourPickerDialog
 from pygame_gui.windows.ui_console_window import UIConsoleWindow
 
 
-__all__ = ['UIMessageWindow',
-           'UIConfirmationDialog',
-           'UIFileDialog',
-           'UIColourPickerDialog',
-           'UIConsoleWindow']
+__all__ = [
+    "UIMessageWindow",
+    "UIConfirmationDialog",
+    "UIFileDialog",
+    "UIColourPickerDialog",
+    "UIConsoleWindow",
+]

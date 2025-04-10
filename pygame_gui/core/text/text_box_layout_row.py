@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, Any
 import math
 import pygame
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
@@ -8,6 +8,7 @@ from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
 from pygame_gui.core.text.text_layout_rect import TextFloatPosition
 from pygame_gui.core.text.html_parser import HTMLParser
 from pygame_gui.core.text.line_break_layout_rect import LineBreakLayoutRect
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class TextBoxLayoutRow(pygame.Rect):
@@ -15,7 +16,14 @@ class TextBoxLayoutRow(pygame.Rect):
     A single line of text-like stuff to be used in a text box type layout.
     """
 
-    def __init__(self, row_start_x, row_start_y, row_index, line_spacing, layout):
+    def __init__(
+        self,
+        row_start_x: int,
+        row_start_y: int,
+        row_index: int,
+        line_spacing: float,
+        layout,
+    ):
         super().__init__(row_start_x, row_start_y, 0, 0)
         self.row_start_x = row_start_x
         self.line_spacing = line_spacing
@@ -29,8 +37,10 @@ class TextBoxLayoutRow(pygame.Rect):
         self.y_origin = 0
         self.text_chunk_height = 0
 
-        self.target_surface = None
-        self.cursor_rect = pygame.Rect(self.x, row_start_y, self.layout.edit_cursor_width, self.height - 2)
+        self.target_surface: Optional[pygame.Surface] = None
+        self.cursor_rect = pygame.Rect(
+            self.x, row_start_y, self.layout.edit_cursor_width, self.height - 2
+        )
         self.edit_cursor_active = False
         self.edit_cursor_left_margin = 2
         self.edit_right_margin = 2
@@ -42,11 +52,14 @@ class TextBoxLayoutRow(pygame.Rect):
         self.surf_row_dirty = False
         self.line_spacing_height = 0
 
-    def __hash__(self):
+    def __hash__(self) -> Any:  # type: ignore
         return self.row_index
 
+    def __eq__(self, value):
+        return self.row_index == value.row_index
+
     def __repr__(self):
-        return "[" + str([item for item in self.items]) + "]"
+        return f"[{list(self.items)}]"
 
     def at_start(self):
         """
@@ -65,7 +78,8 @@ class TextBoxLayoutRow(pygame.Rect):
 
         :param item: The new item to add to the text row
         """
-        item.pre_row_rect = pygame.Rect(item.topleft, item.size)
+        if isinstance(item, TextLineChunkFTFont):
+            item.pre_row_rect = pygame.Rect(item.topleft, item.size)
         item.left = self.right
         self.items.append(item)
         self.width += item.width  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
@@ -73,23 +87,34 @@ class TextBoxLayoutRow(pygame.Rect):
         if item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = item.row_chunk_height
             if not self.layout.dynamic_height:
-                self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  item.row_chunk_height)
-                self.line_spacing_height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  int(round(item.row_chunk_height * self.line_spacing)))
+                self.height = min(  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    item.row_chunk_height,
+                )
+                self.line_spacing_height = min(
+                    self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    int(round(item.row_chunk_height * self.line_spacing)),
+                )
             else:
-                self.height = int(item.row_chunk_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                self.line_spacing_height = int(round(item.row_chunk_height * self.line_spacing)) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-            self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
+                self.height = int(item.row_chunk_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.line_spacing_height = int(
+                    round(item.row_chunk_height * self.line_spacing)
+                )  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.cursor_rect = pygame.Rect(
+                self.x, self.y, self.layout.edit_cursor_width, self.height - 2
+            )
 
         if isinstance(item, TextLineChunkFTFont):
-            if item.y_origin > self.y_origin:
-                self.y_origin = item.y_origin
+            self.y_origin = max(self.y_origin, item.y_origin)
 
             for origin_item in self.items:
                 if isinstance(origin_item, TextLineChunkFTFont):
-                    origin_item.origin_row_y_adjust = self.y_origin - origin_item.y_origin
-                    origin_item.top = origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
+                    origin_item.origin_row_y_adjust = (
+                        self.y_origin - origin_item.y_origin
+                    )
+                    origin_item.top = (
+                        origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
+                    )
 
             self.fall_back_font = item.font
 
@@ -113,23 +138,34 @@ class TextBoxLayoutRow(pygame.Rect):
         if new_item.row_chunk_height > self.text_chunk_height:
             self.text_chunk_height = new_item.row_chunk_height
             if not self.layout.dynamic_height:
-                self.height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  new_item.row_chunk_height)
-                self.line_spacing_height = min(self.layout.layout_rect.height, # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                                  int(round(new_item.row_chunk_height * self.line_spacing)))
+                self.height = min(  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    new_item.row_chunk_height,
+                )
+                self.line_spacing_height = min(
+                    self.layout.layout_rect.height,  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                    int(round(new_item.row_chunk_height * self.line_spacing)),
+                )
             else:
-                self.height = int(item.row_chunk_height) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                self.line_spacing_height = int(round(item.row_chunk_height * self.line_spacing)) # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-            self.cursor_rect = pygame.Rect(self.x, self.y, self.layout.edit_cursor_width, self.height - 2)
+                self.height = int(new_item.row_chunk_height)  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.line_spacing_height = int(
+                    round(new_item.row_chunk_height * self.line_spacing)
+                )  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+            self.cursor_rect = pygame.Rect(
+                self.x, self.y, self.layout.edit_cursor_width, self.height - 2
+            )
 
         if isinstance(new_item, TextLineChunkFTFont):
-            if new_item.y_origin > self.y_origin:
-                self.y_origin = new_item.y_origin
+            self.y_origin = max(self.y_origin, new_item.y_origin)
 
             for origin_item in self.items:
                 if isinstance(origin_item, TextLineChunkFTFont):
-                    origin_item.origin_row_y_adjust = self.y_origin - origin_item.y_origin
-                    origin_item.top = origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
+                    origin_item.origin_row_y_adjust = (
+                        self.y_origin - origin_item.y_origin
+                    )
+                    origin_item.top = (
+                        origin_item.pre_row_rect.top + origin_item.origin_row_y_adjust
+                    )
 
             self.fall_back_font = new_item.font
 
@@ -154,7 +190,7 @@ class TextBoxLayoutRow(pygame.Rect):
         self.letter_count = 0
         self.y_origin = 0
 
-    def horiz_center_row(self, floating_rects, method='rect'):
+    def horiz_center_row(self, floating_rects, method="rect"):
         """
         Horizontally center this row of text.
 
@@ -176,40 +212,39 @@ class TextBoxLayoutRow(pygame.Rect):
         for floater in floating_rects:
             if floater.vertical_overlap(self):
                 if floater.float_pos() == TextFloatPosition.LEFT:
-                    floater_adjustment += (floater.width * 0.5)
+                    floater_adjustment += floater.width * 0.5
                 elif floater.float_pos() == TextFloatPosition.RIGHT:
-                    floater_adjustment -= (floater.width * 0.5)
+                    floater_adjustment -= floater.width * 0.5
 
-        if method == 'rect':
-            self.centerx = (self.layout.layout_rect.centerx +  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
-                            floater_adjustment)
-        elif method == 'right_triangle':
-            # two lines - from bottom left of triangle at a -60 angle (because y axis is inverted)
-            # then from mid left at 90
-            m_1 = math.tan(math.radians(-60))
-            n_1 = self.centery + int(self.width / 2)
-            n_2 = self.centery
-
-            visual_center_x = (n_2 - n_1) / m_1
-            visual_center_x += floater_adjustment
-
+        if method == "rect":
+            self.centerx = (  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                self.layout.layout_rect.centerx  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
+                + floater_adjustment
+            )
+        elif method == "right_triangle":
+            visual_center_x = self._calc_visual_triangle_center(floater_adjustment)
             self.left = self.layout.layout_rect.centerx - visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
-        elif method == 'left_triangle':
-            # just flip right_triangle method
-            m_1 = math.tan(math.radians(-60))
-            n_1 = self.centery + int(self.width / 2)
-            n_2 = self.centery
-
-            visual_center_x = (n_2 - n_1) / m_1
-            visual_center_x += floater_adjustment
-
+        elif method == "left_triangle":
+            visual_center_x = self._calc_visual_triangle_center(floater_adjustment)
             self.right = self.layout.layout_rect.centerx + visual_center_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
 
         current_start_x = self.x
         for item in self.items:
             item.x = current_start_x
             current_start_x += item.width
+
+    def _calc_visual_triangle_center(self, floater_adjustment):
+        # two lines - from bottom left of triangle at a -60 angle (because y-axis is inverted)
+        # then from mid left at 90
+        m_1 = math.tan(math.radians(-60))
+        n_1 = self.centery + int(self.width / 2)
+        n_2 = self.centery
+
+        result = (n_2 - n_1) / m_1
+        result += floater_adjustment
+
+        return result
 
     def align_left_row(self, start_x: int, floating_rects: List[TextLayoutRect]):
         """
@@ -222,8 +257,10 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         aligned_left_start_x = start_x
         for floater in floating_rects:
-            if (floater.vertical_overlap(self)
-                    and floater.float_pos() == TextFloatPosition.LEFT):
+            if (
+                floater.vertical_overlap(self)
+                and floater.float_pos() == TextFloatPosition.LEFT
+            ):
                 aligned_left_start_x = floater.right
         self.left = aligned_left_start_x  # noqa pylint: disable=attribute-defined-outside-init,invalid-name; pylint getting confused
         current_start_x = self.left
@@ -241,14 +278,16 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         aligned_right_start_x = start_x
         for floater in floating_rects:
-            if (floater.vertical_overlap(self)
-                    and floater.float_pos() == TextFloatPosition.RIGHT):
+            if (
+                floater.vertical_overlap(self)
+                and floater.float_pos() == TextFloatPosition.RIGHT
+            ):
                 aligned_right_start_x = floater.left
         self.right = aligned_right_start_x  # noqa pylint: disable=attribute-defined-outside-init; pylint getting confused
         current_start_x = self.right
         direction_list = self.items
         if self.layout.text_direction == pygame.DIRECTION_LTR:
-            direction_list = reversed(self.items)
+            direction_list = self.items[::-1]
         for item in direction_list:
             item.right = current_start_x
             current_start_x -= item.width
@@ -270,19 +309,25 @@ class TextBoxLayoutRow(pygame.Rect):
         Should leave the minimum possible chunks in a row given the set styles for text.
         """
         index = 0
-        while index < len(self.items)-1:
+        while index < len(self.items) - 1:
             current_item = self.items[index]
-            next_item = self.items[index+1]
-            if (isinstance(current_item, TextLineChunkFTFont) and
-                    isinstance(next_item, TextLineChunkFTFont) and
-                    current_item.style_match(next_item)):
+            next_item = self.items[index + 1]
+            if (
+                isinstance(current_item, TextLineChunkFTFont)
+                and isinstance(next_item, TextLineChunkFTFont)
+                and current_item.style_match(next_item)
+            ):
                 current_item.add_text(next_item.text)
-                self.items.pop(index+1)
+                self.items.pop(index + 1)
             else:
                 index += 1
 
-    def finalise(self, surface: pygame.Surface, current_end_pos: Optional[int] = None,
-                 cumulative_letter_count: Optional[int] = None):
+    def finalise(
+        self,
+        surface: pygame.Surface,
+        current_end_pos: Optional[int] = None,
+        cumulative_letter_count: Optional[int] = None,
+    ):
         """
         Finalise this row, turning it into pixels on a pygame surface. Generally done once we are
         finished applying styles and laying out the text.
@@ -294,51 +339,83 @@ class TextBoxLayoutRow(pygame.Rect):
                                         Also helps with the 'typewriter' effect.
         """
         if self.width > self.layout.layout_rect.width:
-            assert RuntimeError("Row longer than layout")
+            raise RuntimeError("Row longer than layout")
         self.merge_adjacent_compatible_chunks()
         if self.width > self.layout.layout_rect.width:
-            assert RuntimeError("Row longer than layout")
-        if surface == self.layout.finalised_surface and self.layout.layout_rect.height > surface.get_height():
+            raise RuntimeError("Row longer than layout")
+        if (
+            surface == self.layout.finalised_surface
+            and self.layout.layout_rect.height > surface.get_height()
+        ):
             self.layout.finalise_to_new()
         else:
             if self.surf_row_dirty:
                 self.clear()
             for text_chunk in self.items:
                 if text_chunk is not None:
-                    chunk_view_rect = pygame.Rect(self.layout.layout_rect.left,
-                                                  0, self.layout.view_rect.width,
-                                                  self.layout.view_rect.height)
-                    if isinstance(text_chunk, TextLineChunkFTFont):
-                        if current_end_pos is not None and cumulative_letter_count is not None:
-                            if cumulative_letter_count < current_end_pos:
-                                text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                                    self.text_chunk_height, self.height, self.line_spacing_height,
-                                                    self.layout.x_scroll_offset,
-                                                    current_end_pos - cumulative_letter_count)
-                                cumulative_letter_count += text_chunk.letter_count
-                        else:
-                            text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                                self.text_chunk_height, self.height, self.line_spacing_height,
-                                                self.layout.x_scroll_offset)
-                    else:
-                        text_chunk.finalise(surface, chunk_view_rect, self.y_origin,
-                                            self.text_chunk_height, self.height, self.line_spacing_height,
-                                            self.layout.x_scroll_offset)
+                    chunk_view_rect = pygame.Rect(
+                        self.layout.layout_rect.left,
+                        0,
+                        self.layout.view_rect.width,
+                        self.layout.view_rect.height,
+                    )
+                    if (
+                        isinstance(text_chunk, TextLineChunkFTFont)
+                        and current_end_pos is not None
+                        and cumulative_letter_count is not None
+                        and cumulative_letter_count < current_end_pos
+                    ):
+                        text_chunk.finalise(
+                            surface,
+                            chunk_view_rect,
+                            self.y_origin,
+                            self.text_chunk_height,
+                            self.height,
+                            self.line_spacing_height,
+                            self.layout.x_scroll_offset,
+                            current_end_pos - cumulative_letter_count,
+                        )
+                        cumulative_letter_count += text_chunk.letter_count
+                    elif (
+                        not isinstance(text_chunk, TextLineChunkFTFont)
+                        or current_end_pos is None
+                        or cumulative_letter_count is None
+                    ):
+                        text_chunk.finalise(
+                            surface,
+                            chunk_view_rect,
+                            self.y_origin,
+                            self.text_chunk_height,
+                            self.height,
+                            self.line_spacing_height,
+                            self.layout.x_scroll_offset,
+                        )
                 else:
                     print(self.items)
 
             if self.edit_cursor_active:
-                cursor_surface = pygame.surface.Surface(self.cursor_rect.size,
-                                                        flags=pygame.SRCALPHA, depth=32)
+                cursor_surface = pygame.surface.Surface(
+                    self.cursor_rect.size, flags=pygame.SRCALPHA, depth=32
+                )
 
+                cursor_colour = self.layout.get_cursor_colour()
+                if isinstance(cursor_colour, ColourGradient):
+                    cursor_surface.fill(pygame.Color("#FFFFFFFF"))
+                    cursor_colour.apply_gradient_to_surface(cursor_surface)
+                elif isinstance(cursor_colour, pygame.Color):
+                    cursor_surface.fill(cursor_colour)
                 cursor_surface.fill(self.layout.get_cursor_colour())
-                self.cursor_rect = pygame.Rect((self.x +
-                                                self.cursor_draw_width -
-                                                self.layout.x_scroll_offset),
-                                               self.y,
-                                               self.layout.edit_cursor_width,
-                                               max(0, self.height - 2))
-                surface.blit(cursor_surface, self.cursor_rect, special_flags=pygame.BLEND_PREMULTIPLIED)
+                self.cursor_rect = pygame.Rect(
+                    (self.x + self.cursor_draw_width - self.layout.x_scroll_offset),
+                    self.y,
+                    self.layout.edit_cursor_width,
+                    max(0, self.height - 2),
+                )
+                surface.blit(
+                    cursor_surface,
+                    self.cursor_rect,
+                    special_flags=pygame.BLEND_PREMULTIPLIED,
+                )
 
             self.target_surface = surface
 
@@ -354,9 +431,11 @@ class TextBoxLayoutRow(pygame.Rect):
         :param colour: The colour to set.
         """
         for chunk in self.items:
-            if isinstance(chunk, TextLineChunkFTFont):
-                if chunk.using_default_text_colour:
-                    chunk.colour = colour
+            if (
+                isinstance(chunk, TextLineChunkFTFont)
+                and chunk.using_default_text_colour
+            ):
+                chunk.colour = colour
 
     def set_default_text_shadow_colour(self, colour):
         """
@@ -365,9 +444,11 @@ class TextBoxLayoutRow(pygame.Rect):
         :param colour: The colour to set.
         """
         for chunk in self.items:
-            if isinstance(chunk, TextLineChunkFTFont):
-                if chunk.using_default_text_shadow_colour:
-                    chunk.shadow_colour = colour
+            if (
+                isinstance(chunk, TextLineChunkFTFont)
+                and chunk.using_default_text_shadow_colour
+            ):
+                chunk.shadow_colour = colour
 
     def toggle_cursor(self):
         """
@@ -376,11 +457,7 @@ class TextBoxLayoutRow(pygame.Rect):
         Generally used to make it flash on and off to catch the attention of the user.
         """
 
-        if self.edit_cursor_active:
-            self.edit_cursor_active = False
-        else:
-            self.edit_cursor_active = True
-
+        self.edit_cursor_active = not self.edit_cursor_active
         if self.target_surface is not None:
             self.clear()
             self.finalise(self.target_surface)
@@ -411,22 +488,30 @@ class TextBoxLayoutRow(pygame.Rect):
          Hopefully the target surface is supposed to be transparent black when empty.
         """
         if self.target_surface is not None and self.surf_row_dirty:
-            slightly_wider_rect = pygame.Rect(self.x, self.y,
-                                              self.width + + self.layout.edit_cursor_width,
-                                              self.height)
-            self.target_surface.fill(pygame.Color('#00000000'), slightly_wider_rect)
+            slightly_wider_rect = pygame.Rect(
+                self.x, self.y, self.width + +self.layout.edit_cursor_width, self.height
+            )
+            self.target_surface.fill(pygame.Color("#00000000"), slightly_wider_rect)
             self.surf_row_dirty = False
 
     def _setup_offset_position_from_edit_cursor(self):
         if self.text_x_scroll_enabled:
-            if self.cursor_draw_width > (self.layout.x_scroll_offset +
-                                         self.layout.view_rect.width) - self.edit_right_margin:
-                self.layout.x_scroll_offset = (self.cursor_draw_width -
-                                               self.layout.view_rect.width) + self.edit_right_margin
+            if (
+                self.cursor_draw_width
+                > (self.layout.x_scroll_offset + self.layout.view_rect.width)
+                - self.edit_right_margin
+            ):
+                self.layout.x_scroll_offset = (
+                    self.cursor_draw_width - self.layout.view_rect.width
+                ) + self.edit_right_margin
 
-            if self.cursor_draw_width < self.layout.x_scroll_offset + self.edit_cursor_left_margin:
-                self.layout.x_scroll_offset = max(0, self.cursor_draw_width -
-                                                  self.edit_cursor_left_margin)
+            if (
+                self.cursor_draw_width
+                < self.layout.x_scroll_offset + self.edit_cursor_left_margin
+            ):
+                self.layout.x_scroll_offset = max(
+                    0, self.cursor_draw_width - self.edit_cursor_left_margin
+                )
 
     def set_cursor_from_click_pos(self, click_pos: Tuple[int, int], num_rows: int):
         """
@@ -436,7 +521,9 @@ class TextBoxLayoutRow(pygame.Rect):
         :param num_rows:
         :param click_pos: The pixel position to use.
         """
-        self.cursor_index, self.cursor_draw_width = self.find_cursor_pos_from_click_pos(click_pos, num_rows)
+        self.cursor_index, self.cursor_draw_width = self.find_cursor_pos_from_click_pos(
+            click_pos, num_rows
+        )
 
         self._setup_offset_position_from_edit_cursor()
 
@@ -451,41 +538,48 @@ class TextBoxLayoutRow(pygame.Rect):
         letter_acc = 0
         cursor_draw_width = 0
         found_chunk = False
-        scrolled_click_pos = (click_pos[0]+self.layout.x_scroll_offset, click_pos[1])
+        scrolled_click_pos = (click_pos[0] + self.layout.x_scroll_offset, click_pos[1])
         for chunk in self.items:
-            if isinstance(chunk, TextLineChunkFTFont):
-                if not found_chunk:
-                    # we only care about the X position at this point.
-                    if chunk == self.items[0] and scrolled_click_pos[0] < chunk.left:
-                        letter_index = 0
-                        cursor_draw_width = 0
-                        letter_acc += letter_index
-                        found_chunk = True
-                    elif chunk.collidepoint((scrolled_click_pos[0], chunk.centery)):
-                        letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
-                        cursor_draw_width += chunk.font.size(chunk.text[:letter_index])[0]
-                        letter_acc += letter_index
-                        found_chunk = True
-                    else:
-                        cursor_draw_width += chunk.font.size(chunk.text)[0]
-                        letter_acc += chunk.letter_count
-        if (not found_chunk and scrolled_click_pos[0] >= self.right) or (letter_acc == self.letter_count):
-            # if we have more than two rows check if we are on right of whole row and if row has space at the end.
-            # If so stick the edit cursor before the space because this is how it works.
-            if num_rows > 1 and self.row_text_ends_with_a_single_space():
-                letter_acc -= 1
-                last_chunk = self.get_last_text_chunk()
-                if last_chunk is not None:
-                    cursor_draw_width -= last_chunk.font.size(" ")[0]
+            if isinstance(chunk, TextLineChunkFTFont) and not found_chunk:
+                if chunk == self.items[0] and scrolled_click_pos[0] < chunk.left:
+                    letter_index = 0
+                    cursor_draw_width = 0
+                    letter_acc += letter_index
+                    found_chunk = True
+                elif chunk.collidepoint((scrolled_click_pos[0], chunk.centery)):
+                    letter_index = chunk.x_pos_to_letter_index(scrolled_click_pos[0])
+                    cursor_draw_width += chunk.font.size(chunk.text[:letter_index])[0]
+                    letter_acc += letter_index
+                    found_chunk = True
+                else:
+                    cursor_draw_width += chunk.font.size(chunk.text)[0]
+                    letter_acc += chunk.letter_count
+        if (
+            (not found_chunk and scrolled_click_pos[0] >= self.right)
+            or (letter_acc == self.letter_count)
+        ) and (num_rows > 1 and self.row_text_ends_with_a_single_space()):
+            letter_acc -= 1
+            last_chunk = self.get_last_text_chunk()
+            if last_chunk is not None:
+                cursor_draw_width -= last_chunk.font.size(" ")[0]
 
         cursor_index = min(self.letter_count, max(0, letter_acc))
         return cursor_index, cursor_draw_width
 
     def get_last_text_chunk(self):
-        for item in reversed(self.items):
-            if isinstance(item, TextLineChunkFTFont):
-                return item
-        return None
+        """
+        Gets the last text chunk in the row.
+
+        :return: returns the last TextLineChunkFTFont in the row
+        """
+        return next(
+            (
+                item
+                for item in reversed(self.items)
+                if isinstance(item, TextLineChunkFTFont)
+            ),
+            None,
+        )
 
     def set_cursor_position(self, cursor_pos):
         """
@@ -500,26 +594,32 @@ class TextBoxLayoutRow(pygame.Rect):
             if isinstance(chunk, TextLineChunkFTFont):
                 if cursor_pos <= letter_acc + chunk.letter_count:
                     chunk_letter_pos = cursor_pos - letter_acc
-                    cursor_draw_width += chunk.font.size(chunk.text[:chunk_letter_pos])[0]
+                    cursor_draw_width += chunk.font.size(chunk.text[:chunk_letter_pos])[
+                        0
+                    ]
                     break
 
                 letter_acc += chunk.letter_count
                 cursor_draw_width += chunk.font.size(chunk.text)[0]
-            elif isinstance(chunk, LineBreakLayoutRect):
-                pass
-
         self.cursor_draw_width = cursor_draw_width
 
         self._setup_offset_position_from_edit_cursor()
 
-    def set_cursor_to_end(self, is_last_row):
+    def set_cursor_to_end(self, is_last_row: bool):
+        """
+        Set the edit cursor to the end of the row.
+
+        :param is_last_row: A boolean indicating if this is the last row in a text layout
+
+        """
         end_pos = self.letter_count
         # we need to ignore the trailing space on line-wrapped rows,
         # or we will spill over to the row below
         if not is_last_row and len(self.items) > 0:
             last_chunk = self.items[-1]
-            if (isinstance(last_chunk, TextLineChunkFTFont) and
-                    (len(last_chunk.text) > 0 and last_chunk.text[-1] == " ")):
+            if isinstance(last_chunk, TextLineChunkFTFont) and (
+                len(last_chunk.text) > 0 and last_chunk.text[-1] == " "
+            ):
                 end_pos -= 1
             if isinstance(last_chunk, LineBreakLayoutRect):
                 end_pos -= 1
@@ -527,6 +627,10 @@ class TextBoxLayoutRow(pygame.Rect):
         self.set_cursor_position(end_pos)
 
     def set_cursor_to_start(self):
+        """
+        Set the edit cursor to the start of the row.
+
+        """
         self.set_cursor_position(0)
 
     def get_cursor_index(self) -> int:
@@ -537,8 +641,9 @@ class TextBoxLayoutRow(pygame.Rect):
         """
         return self.cursor_index
 
-    def insert_text(self, text: str, letter_row_index: int,
-                    parser: Optional[HTMLParser] = None):
+    def insert_text(
+        self, text: str, letter_row_index: int, parser: Optional[HTMLParser] = None
+    ):
         """
         Insert the provided text into this row at the given location.
 
@@ -546,69 +651,116 @@ class TextBoxLayoutRow(pygame.Rect):
         :param letter_row_index: the index in the row at which to insert this text.
         :param parser: An optional HTML parser for text styling data
         """
-        letter_acc = 0
         inserted_text = False
         if len(self.items) > 0:
+            letter_acc = 0
             for chunk in self.items:
-                if letter_row_index <= letter_acc + chunk.letter_count:
-                    if isinstance(chunk, TextLineChunkFTFont):
-                        chunk_index = letter_row_index - letter_acc
-                        chunk.insert_text(text, chunk_index)
-                        inserted_text = True
-                        break
+                if letter_row_index <= letter_acc + chunk.letter_count and isinstance(
+                    chunk, TextLineChunkFTFont
+                ):
+                    chunk_index = letter_row_index - letter_acc
+                    chunk.insert_text(text, chunk_index)
+                    inserted_text = True
+                    break
 
                 letter_acc += chunk.letter_count
-        if parser is None and not len(self.items):
-            raise AttributeError("Trying to insert into empty text row with no Parser"
-                                 " for style data - fix this later?")
-        if not inserted_text and letter_row_index == 0:
+        if parser is None and not self.items:
+            raise AttributeError(
+                "Trying to insert into empty text row with no Parser"
+                " for style data - fix this later?"
+            )
+        if not inserted_text and letter_row_index == 0 and parser is not None:
             # have not managed to insert text into existing text chunk, create a new one.
             text_chunk = parser.create_styled_text_chunk(text)
             self.insert_new_item_at_start(text_chunk)
             inserted_text = True
 
         if not inserted_text:
-            raise RuntimeError("Failed to insert text at index: %d", letter_row_index)
+            raise RuntimeError(f"Failed to insert text at index: {letter_row_index}")
 
-    def insert_linebreak_after_chunk(self, chunk_to_insert_after: Union[TextLineChunkFTFont, LineBreakLayoutRect], parser: HTMLParser):
-        if len(self.items) > 0:
-            chunk_insert_index = 0
-            for chunk_index, chunk in enumerate(self.items):
-                if chunk == chunk_to_insert_after:
-                    chunk_insert_index = chunk_index + 1
-                    break
-            current_font: IGUIFontInterface = chunk_to_insert_after.font
-            current_font_size = current_font.get_point_size()
-            dimensions = (current_font.get_rect(' ').width,
-                          int(round(current_font_size *
-                                    self.line_spacing)))
-            self.items.insert(chunk_insert_index, LineBreakLayoutRect(dimensions, current_font))
-            empty_text_chunk = parser.create_styled_text_chunk('')
-            self.items.insert(chunk_insert_index + 1, empty_text_chunk)
+    def insert_linebreak_after_chunk(
+        self,
+        chunk_to_insert_after: Union[TextLineChunkFTFont, LineBreakLayoutRect],
+        parser: HTMLParser,
+    ):
+        """
+        Insert a line break into the row after a specified chunk.
+
+        :param chunk_to_insert_after: The text chunk or line break chunk to insert a new line break after.
+        :param parser: the html parser we are using for this text row.
+
+        """
+        if len(self.items) <= 0:
+            return
+        chunk_insert_index = next(
+            (
+                chunk_index + 1
+                for chunk_index, chunk in enumerate(self.items)
+                if chunk == chunk_to_insert_after
+            ),
+            0,
+        )
+        current_font: IGUIFontInterface = chunk_to_insert_after.font
+        current_font_size = current_font.get_point_size()
+        dimensions = (
+            current_font.get_rect(" ").width,
+            int(round(current_font_size * self.line_spacing)),
+        )
+        self.items.insert(
+            chunk_insert_index, LineBreakLayoutRect(dimensions, current_font)
+        )
+        empty_text_chunk = parser.create_styled_text_chunk("")
+        self.items.insert(chunk_insert_index + 1, empty_text_chunk)
 
     @staticmethod
     def string_ends_with_a_single_space(string_to_check: str) -> bool:
-        if string_to_check[-1] == " " and (
-                len(string_to_check) == 1 or string_to_check[-2] != " "
+        """
+        returns true if the string passed in ends with a space character.
+
+        :param string_to_check: the string to check for a final space
+
+        :return: a boolean, True if the string ends with a space, False otherwise
+        """
+        return string_to_check[-1] == " " and (
+            len(string_to_check) == 1 or string_to_check[-2] != " "
+        )
+
+    def row_text_ends_with_a_single_space(self) -> bool:
+        """
+        Returns true if the last text chunk in a row ends with a single space.
+
+        :return: a boolean that is true if the last
+        """
+        last_chunk = self.get_last_text_chunk()
+        if (
+            last_chunk
+            and len(last_chunk.text) > 0
+            and TextBoxLayoutRow.string_ends_with_a_single_space(last_chunk.text)
         ):
             return True
         return False
 
-    def row_text_ends_with_a_single_space(self):
-        for item in reversed(self.items):
-            if isinstance(item, TextLineChunkFTFont):
-                if len(item.text) > 0 and TextBoxLayoutRow.string_ends_with_a_single_space(item.text):
-                    return True
-        return False
+    def get_last_text_or_line_break_chunk(
+        self,
+    ) -> Optional[Union[TextLineChunkFTFont, LineBreakLayoutRect]]:
+        """
+        Return the last text or line break chunk in a row.
 
-    def get_last_text_or_line_break_chunk(self):
-        for item in reversed(self.items):
-            if isinstance(item, TextLineChunkFTFont) or isinstance(item, LineBreakLayoutRect):
-                return item
-        return None
+        :return: a text chunk or a line break at the end of the row, returns None if there isn't one.
+        """
+        return next(
+            (
+                item
+                for item in reversed(self.items)
+                if isinstance(item, (TextLineChunkFTFont, LineBreakLayoutRect))
+            ),
+            None,
+        )
 
-    def last_chunk_is_line_break(self):
-        if len(self.items) > 0:
-            if isinstance(self.items[-1], LineBreakLayoutRect):
-                return True
-        return False
+    def last_chunk_is_line_break(self) -> bool:
+        """
+        Returns true if the last chunk in the row is a line break chunk.
+
+        :return: A boolean that is true if the last chunk in the row is a line break.
+        """
+        return len(self.items) > 0 and isinstance(self.items[-1], LineBreakLayoutRect)

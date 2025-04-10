@@ -121,7 +121,7 @@ class TestColourParsing:
     def test_hsva_string(self, _init_pygame):
         assert is_valid_colour_string("hsva(40, 40%, 20%, 70%)") is True
 
-    def test_hsva_string(self, _init_pygame):
+    def test_hsva_string_2(self, _init_pygame):
         assert is_valid_colour_string("hsla(160deg, 72%, 25%, 32%)") is True
 
     def test_space_separated(self, _init_pygame):
@@ -180,7 +180,6 @@ class TestColourParsing:
 
     def test_gradient_colour_names_three(self, _init_pygame):
         assert is_valid_gradient_string("red,green,blue,60deg") is True
-
 
 
 if __name__ == "__main__":

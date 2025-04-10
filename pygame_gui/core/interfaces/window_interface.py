@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
-from pygame_gui.core.gui_type_hints import Coordinate
-
 import pygame
+
+from pygame_gui.core.gui_type_hints import Coordinate
 
 
 class IWindowInterface(metaclass=ABCMeta):
@@ -211,6 +211,7 @@ class IWindowInterface(metaclass=ABCMeta):
         :param new_title: The title to set.
         """
 
+    @abstractmethod
     def get_layer_thickness(self) -> int:
         """
         The layer 'thickness' of this window/

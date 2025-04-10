@@ -2,12 +2,16 @@ from typing import List, Dict, Optional, Union
 
 import pygame
 
-from pygame_gui.core.interfaces import (IContainerLikeInterface,
-                                        IUIManagerInterface, IUIElementInterface)
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IUIManagerInterface,
+    IUIElementInterface,
+)
 from pygame_gui._constants import UI_BUTTON_PRESSED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
-from pygame_gui.elements import UIButton, UIPanel
+from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_panel import UIPanel
 
 
 class UITabContainer(UIElement):
@@ -31,31 +35,40 @@ class UITabContainer(UIElement):
                     override this.
     """
 
-    def __init__(self, relative_rect: RectLike,
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 *,
-                 starting_height: int = 1,
-                 parent_element: Optional[IUIElementInterface] = None,
-                 object_id: Union[ObjectID, str, None] = None,
-                 anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
-                 visible: int = 1):
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        *,
+        starting_height: int = 1,
+        parent_element: Optional[IUIElementInterface] = None,
+        object_id: Union[ObjectID, str, None] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        visible: int = 1,
+    ):
         self._root_container = None
-        super().__init__(relative_rect, manager, container,
-                         starting_height=starting_height,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=['tab_container'])
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            starting_height=starting_height,
+            layer_thickness=1,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=["tab_container"],
+        )
 
-        self._root_container = UIContainer(relative_rect=relative_rect,
-                                           manager=manager,
-                                           starting_height=starting_height,
-                                           container=container,
-                                           anchors=anchors,
-                                           visible=self.visible)
+        self._root_container = UIContainer(
+            relative_rect=relative_rect,
+            manager=manager,
+            starting_height=starting_height,
+            container=container,
+            anchors=anchors,
+            visible=self.visible,
+        )
 
         self.tabs: List[Dict] = []
         self.current_container_index: Optional[int] = None
@@ -65,14 +78,29 @@ class UITabContainer(UIElement):
 
     @property
     def tab_count(self) -> int:
+        """
+        Returns the current number of tabs.
+
+        :return:
+        """
         return len(self.tabs)
 
     def switch_current_container(self, index: int):
+        """
+        Switch the currently active container. Hides the old active container and shows the new one.
+
+        :param index: the index of the newly active container.
+
+        """
         current_container = self.get_tab_container()
         if current_container is not None:
             current_container.hide()
+
         self.current_container_index = index
-        self.get_tab_container().show()
+
+        new_container = self.get_tab_container()
+        if new_container is not None:
+            new_container.show()
 
     def add_tab(self, title_text: str, title_object_id: str) -> int:
         """
@@ -87,11 +115,22 @@ class UITabContainer(UIElement):
             for tab in self.tabs:
                 furthest_right += tab["button"].rect.width
         button_rect = pygame.Rect(furthest_right, 0, -1, self.button_height)
-        button = UIButton(button_rect, title_text, manager=self.ui_manager, container=self._root_container,
-                          parent_element=self, object_id=ObjectID(title_object_id, '@tab_title_button'),
-                          max_dynamic_width=max_button_width)
+        button = UIButton(
+            button_rect,
+            title_text,
+            manager=self.ui_manager,
+            container=self._root_container,
+            parent_element=self,
+            object_id=ObjectID(title_object_id, "@tab_title_button"),
+            max_dynamic_width=max_button_width,
+        )
         container_rect = self._calculate_container_rect_by_layout()
-        container = UIPanel(container_rect, manager=self.ui_manager, container=self._root_container, parent_element=self)
+        container = UIPanel(
+            container_rect,
+            manager=self.ui_manager,
+            container=self._root_container,
+            parent_element=self,
+        )
         self.tabs.append({"text": title_text, "button": button, "container": container})
         tab_id = self.tab_count - 1
         if self.current_container_index is None:
@@ -102,6 +141,13 @@ class UITabContainer(UIElement):
         return tab_id
 
     def get_tab(self, tab_id: Optional[int] = None) -> Optional[Dict]:
+        """
+        Returns the tab data by passed in ID, or if no ID is passed in, returns the currently active container.
+
+        :param tab_id: an optional integer representing the ID of the tab we want to get.
+
+        :return: A dictionary containing the data (button, container) for a tab.
+        """
         if tab_id is None:
             if self.current_container_index is None:
                 return None
@@ -110,35 +156,55 @@ class UITabContainer(UIElement):
 
         return self.tabs[tab_id]
 
-    def get_title_text(self, tab_id: Optional[int] = None):
-        tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["text"]
+    def get_title_text(self, tab_id: Optional[int] = None) -> Optional[str]:
+        """
+        Get the title string for the tab with the provided tab id.
 
-    def get_title_button(self, tab_id: Optional[int] = None):
-        tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["button"]
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
 
-    def get_tab_container(self, tab_id=None) -> Optional[UIPanel]:
+        :return: An optional string representing the title for the tab
+        """
         tab = self.get_tab(tab_id)
-        if tab is None:
-            return None
-        else:
-            return tab["container"]
+        return None if tab is None else tab["text"]
 
-    def delete_tab(self, tab_id):
+    def get_title_button(self, tab_id: Optional[int] = None) -> Optional[str]:
+        """
+        Get the UIButton for the tab with the provided tab id.
+
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
+
+        :return: An optional UIButton representing the button for the tab
+        """
+        tab = self.get_tab(tab_id)
+        return None if tab is None else tab["button"]
+
+    def get_tab_container(self, tab_id: Optional[int] = None) -> Optional[UIPanel]:
+        """
+        Get the Container for the tab with the provided tab id.
+
+        :param tab_id: An optional tab_id. If non specified will default to the current tab.
+
+        :return: An optional UIPanel representing the container for the tab
+        """
+        tab = self.get_tab(tab_id)
+        return None if tab is None else tab["container"]
+
+    def delete_tab(self, tab_id: int):
+        """
+        Removes a tab by passed in tab id.
+
+        :param tab_id: the id if the tab to remove.
+
+        """
         self.tabs[tab_id]["button"].kill()
         self.tabs[tab_id]["container"].kill()
-        del self.tabs[tab_id]
+        self.tabs.remove(self.tabs[tab_id])
         self.rebuild()
 
     def _calculate_max_button_width(self, count: Optional[int] = None):
-        width = self._root_container.rect.width
+        width = 0
+        if self._root_container is not None:
+            width = self._root_container.rect.width
         if count is None:
             count = self.tab_count
 
@@ -151,23 +217,32 @@ class UITabContainer(UIElement):
         return button_width
 
     def _calculate_container_rect_by_layout(self) -> pygame.Rect:
-        return pygame.Rect(0, self.button_height, self._root_container.rect.width,
-                           self.rect.height - self.button_height)
+        root_width = 0
+        if self._root_container is not None:
+            root_width = self._root_container.rect.width
+        return pygame.Rect(
+            0,
+            self.button_height,
+            root_width,
+            self.rect.height - self.button_height,
+        )
 
     def disable(self):
         """
         Disables the window and it's contents so it is no longer interactive.
         """
+        was_enabled = self.is_enabled
         super().disable()
-        if self.is_enabled:
+        if was_enabled and self._root_container is not None:
             self._root_container.disable()
 
     def enable(self):
         """
         Enables the window and it's contents so it is interactive again.
         """
+        was_enabled = self.is_enabled
         super().enable()
-        if not self.is_enabled:
+        if not was_enabled and self._root_container is not None:
             self._root_container.enable()
 
     def show(self, show_contents: bool = True):
@@ -179,7 +254,8 @@ class UITabContainer(UIElement):
 
         """
         super().show()
-        self._root_container.show(show_contents)
+        if self._root_container is not None:
+            self._root_container.show(show_contents)
 
     def hide(self, hide_contents: bool = True):
         """
@@ -205,7 +281,8 @@ class UITabContainer(UIElement):
 
         """
         super().set_dimensions(dimensions)
-        self._root_container.set_dimensions(dimensions)
+        if self._root_container is not None:
+            self._root_container.set_dimensions(dimensions)
         self.rebuild()
 
     def rebuild(self, count: Optional[int] = None):
@@ -264,10 +341,13 @@ class UITabContainer(UIElement):
         elements in this panel.
 
         """
-        self._root_container.kill()
+        if self._root_container is not None:
+            self._root_container.kill()
         super().kill()
 
-    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+    def set_anchors(
+        self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]
+    ) -> None:
         super().set_anchors(anchors)
         if self._root_container is not None:
             self._root_container.set_anchors(anchors)

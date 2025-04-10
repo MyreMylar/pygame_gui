@@ -465,7 +465,7 @@
         "misc":
         {
             "text_horiz_alignment": "left",
-            "text_horiz_alignment_padding": "6"
+            "text_horiz_alignment_padding": "3"
         }
     },
     "file_dialog.#delete_icon_button":
@@ -474,6 +474,7 @@
         "misc":
         {
             "text_horiz_alignment": "left",
+            "text_vert_alignment_padding": "1",
             "text_horiz_alignment_padding": "4"
         }
     },
@@ -483,6 +484,7 @@
         "misc":
         {
             "text_horiz_alignment": "left",
+            "text_vert_alignment_padding": "1",
             "text_horiz_alignment_padding": "5"
         }
     },
@@ -492,6 +494,7 @@
         "misc":
         {
             "text_horiz_alignment": "left",
+            "text_vert_alignment_padding": "2",
             "text_horiz_alignment_padding": "6"
         }
     },

@@ -282,7 +282,7 @@ class TestTextBoxLayoutRow:
         layout_row.add_item(text_chunk_2)
         layout_row.add_item(text_chunk_3)
 
-        # not sure this is right, need to do some more visual testing of vertical
+        # not sure if this is right, need to do some more visual testing of vertical
         # alignment of text rects with different height text on a single row.
         assert layout_row.items[0].y == 0
         assert layout_row.items[1].y == 8
@@ -352,8 +352,8 @@ class TestTextBoxLayoutRow:
                              "bg_colour": pygame.Color("#00000000")
                              }
         text_box_layout = TextBoxLayout(input_data_queue=input_data,
-                                        layout_rect=pygame.Rect(0, 0, 200, 300),
-                                        view_rect=pygame.Rect(0, 0, 200, 150),
+                                        layout_rect=pygame.Rect(0, 0, 250, 300),
+                                        view_rect=pygame.Rect(0, 0, 250, 150),
                                         line_spacing=line_spacing,
                                         default_font_data=default_font_data)
         layout_row = TextBoxLayoutRow(row_start_x=0,

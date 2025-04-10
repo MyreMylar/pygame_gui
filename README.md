@@ -8,19 +8,19 @@ A GUI system for pygame CE.
  - [Examples](https://github.com/MyreMylar/pygame_gui_examples)
  - [PyPi](https://pypi.org/project/pygame-gui/)
 
-[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/release/python-380/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/MyreMylar/pygame_gui/branch/main/graph/badge.svg?token=zZhkvhgTki)](https://codecov.io/gh/MyreMylar/pygame_gui) [![Downloads](https://pepy.tech/badge/pygame-gui)](https://pepy.tech/project/pygame-gui)
+[![pypi](https://badge.fury.io/py/pygame-gui.svg)](https://pypi.python.org/pypi/pygame-gui) [![Documentation Status](https://readthedocs.org/projects/pygame-gui/badge/?version=latest)](https://pygame-gui.readthedocs.io/en/latest/?badge=latest) [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-310/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/MyreMylar/pygame_gui/branch/main/graph/badge.svg?token=zZhkvhgTki)](https://codecov.io/gh/MyreMylar/pygame_gui) [![Downloads](https://pepy.tech/badge/pygame-gui)](https://pepy.tech/project/pygame-gui)
 ## Requirements
 
- - Python 3.8+
- - Pygame Community Edition 2.5.2+
+ - Python 3.10+
+ - Pygame Community Edition 2.5.3+
  - python-i18n (does localization to different languages)
 
 ## How to install
 
 1. Run this command in a command prompt:
-```
-pip install pygame_gui
-```
+    ```
+      pip install pygame_gui
+    ```
 2. If all goes well you should see a message about game_gui being installed successfully and will be able to find pygame_gui in the list of installed packages for your python interpreter (PyCharm displays these as a nice list under File->Settings->Project:project_name->Project Interpreter). 
 3. Should you need to delete pygame_gui for any reason then PyCharm will also let you do that from the same Project Interpreter settings window using the red minus symbol button.
 
@@ -32,7 +32,7 @@ Run this command in a command prompt:
 pip install pygame_gui -U
 ```
 
-Or, you may be able to use your IDE to update the library (PyCharm lets you update modules in it's interpreter settings).
+Or, you may be able to use your IDE to update the library (PyCharm lets you update modules in its interpreter settings).
 
 ## Making use of the library
 

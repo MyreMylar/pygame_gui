@@ -3,9 +3,11 @@ from typing import Tuple, List, Union, Dict, Set, Optional
 
 import pygame
 
-from pygame_gui.core.interfaces.appearance_theme_interface import IUIAppearanceThemeInterface
+from pygame_gui.core.interfaces.appearance_theme_interface import (
+    IUIAppearanceThemeInterface,
+)
 from pygame_gui.core.interfaces.element_interface import IUIElementInterface
-from pygame_gui.core.interfaces.container_interface import IUIContainerInterface
+from pygame_gui.core.interfaces.container_interface import IContainerAndContainerLike
 from pygame_gui.core.interfaces.window_stack_interface import IUIWindowStackInterface
 from pygame_gui.core.interfaces.tool_tip_interface import IUITooltipInterface
 from pygame_gui.core.object_id import ObjectID
@@ -23,6 +25,42 @@ class IUIManagerInterface(metaclass=ABCMeta):
     def __init__(self):
         self.window_resolution = None
 
+    @property
+    @abstractmethod
+    def copy_text_enabled(self) -> bool:
+        """
+        Get whether we can copy any text.
+
+        :return: True if we can Copy text
+        """
+
+    @copy_text_enabled.setter
+    @abstractmethod
+    def copy_text_enabled(self, value: bool):
+        """
+        Set whether we can copy any text.
+
+        :param value:
+        """
+
+    @property
+    @abstractmethod
+    def paste_text_enabled(self) -> bool:
+        """
+        Get whether we can paste any text.
+
+        :return: True if we can Paste text
+        """
+
+    @paste_text_enabled.setter
+    @abstractmethod
+    def paste_text_enabled(self, value: bool):
+        """
+        Set whether we can paste any text.
+
+        :param value:
+        """
+
     @abstractmethod
     def get_double_click_time(self) -> float:
         """
@@ -32,7 +70,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_root_container(self) -> IUIContainerInterface:
+    def get_root_container(self) -> Optional[IContainerAndContainerLike]:
         """
         Returns the 'root' container. The one all UI elements are placed in by default if they are
         not placed anywhere else, fills the whole OS/pygame window.
@@ -67,8 +105,13 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2,
-                   shape: str = 'rectangle', corner_radius: Optional[List[int]] = None) -> pygame.surface.Surface:
+    def get_shadow(
+        self,
+        size: Tuple[int, int],
+        shadow_width: int = 2,
+        shape: str = "rectangle",
+        corner_radius: Optional[List[int]] = None,
+    ) -> pygame.surface.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
 
@@ -119,7 +162,9 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def calculate_scaled_mouse_position(self, position: Tuple[int, int]) -> Tuple[int, int]:
+    def calculate_scaled_mouse_position(
+        self, position: Tuple[int, int]
+    ) -> Tuple[int, int]:
         """
         Scaling an input mouse position by a scale factor.
         """
@@ -135,8 +180,14 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add_font_paths(self, font_name: str, regular_path: str, bold_path: str = None,
-                       italic_path: str = None, bold_italic_path: str = None):
+    def add_font_paths(
+        self,
+        font_name: str,
+        regular_path: str,
+        bold_path: Optional[str] = None,
+        italic_path: Optional[str] = None,
+        bold_italic_path: Optional[str] = None,
+    ):
         """
         Add file paths for custom fonts you want to use in the UI.
 
@@ -176,7 +227,9 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_focus_set(self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]):
+    def set_focus_set(
+        self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]
+    ):
         """
         Set a set of element as the focused set.
 
@@ -201,10 +254,7 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_active_cursor(self, cursor: Tuple[Tuple[int, int],
-                                              Tuple[int, int],
-                                              Tuple[int, ...],
-                                              Tuple[int, ...]]):
+    def set_active_cursor(self, cursor: pygame.cursors.Cursor):
         """
         This is for users of the library to set the currently active cursor, it will be currently
         only be overridden by the resizing cursors.
@@ -228,15 +278,17 @@ class IUIManagerInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def create_tool_tip(self,
-                        text: str,
-                        position: Tuple[int, int],
-                        hover_distance: Tuple[int, int],
-                        parent_element: IUIElementInterface,
-                        object_id: ObjectID,
-                        *,
-                        wrap_width: Optional[int] = None,
-                        text_kwargs: Optional[Dict[str, str]] = None) -> IUITooltipInterface:
+    def create_tool_tip(
+        self,
+        text: str,
+        position: Tuple[int, int],
+        hover_distance: Tuple[int, int],
+        parent_element: IUIElementInterface,
+        object_id: Optional[ObjectID],
+        *,
+        wrap_width: Optional[int] = None,
+        text_kwargs: Optional[Dict[str, str]] = None,
+    ) -> IUITooltipInterface:
         """
         Creates a tool tip ands returns it.
 

@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, List, Set, Any, Dict
+from typing import Union, List, Set, Dict, Optional
 
 import pygame
 
+from pygame_gui.core.interfaces.appearance_theme_interface import (
+    IUIAppearanceThemeInterface,
+)
 from pygame_gui.core.interfaces.gui_sprite_interface import IGUISpriteInterface
 
 from pygame_gui.core.gui_type_hints import Coordinate
@@ -17,9 +20,43 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def ui_theme(self) -> IUIAppearanceThemeInterface:
+        """
+        Get the element's ui theme
+        :return: The UI Theme
+        """
+
+    @ui_theme.setter
+    @abstractmethod
+    def ui_theme(self, value: IUIAppearanceThemeInterface):
+        """
+        Set the element's ui theme
+        """
+
+    @property
+    @abstractmethod
+    def is_focused(self) -> bool:
+        """
+        Returns True if we are focusing this element.
+
+        :return: True if focused.
+        """
+
+    @is_focused.setter
+    @abstractmethod
+    def is_focused(self, value: bool):
+        """
+        Setter for if we are focusing this element.
+
+        :param value: the focus value to set.
+        :return:
+        """
+
+    @property
+    @abstractmethod
     def hovered(self) -> bool:
         """
-        Are we hovering over this element with the mouse pointer or other input highlighting method.
+        Returns True if we are hovering over this element with the mouse pointer, or other input highlighting method.
 
         :return: True if hovered.
         """
@@ -35,7 +72,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_relative_rect(self) -> pygame.Rect:
+    def get_relative_rect(self) -> pygame.Rect | pygame.FRect:
         """
         The relative positioning rect.
 
@@ -44,7 +81,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_abs_rect(self) -> pygame.Rect:
+    def get_abs_rect(self) -> pygame.Rect | pygame.FRect:
         """
         The absolute positioning rect.
 
@@ -53,7 +90,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_element_base_ids(self) -> List[str]:
+    def get_element_base_ids(self) -> List[str | None]:
         """
         A list of all the element base IDs in this element's theming/event hierarchy.
 
@@ -69,7 +106,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_class_ids(self) -> List[str]:
+    def get_class_ids(self) -> List[str | None]:
         """
         A list of all the class IDs in this element's theming/event hierarchy.
 
@@ -77,7 +114,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_object_ids(self) -> List[str]:
+    def get_object_ids(self) -> List[str | None]:
         """
         A list of all the object IDs in this element's theming/event hierarchy.
 
@@ -85,7 +122,7 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_anchors(self) -> Dict[str, Union[str, "IUIElementInterface"]]:
+    def get_anchors(self) -> Optional[Dict[str, Union[str, "IUIElementInterface"]]]:
         """
         A dictionary containing all the anchors defining what the relative rect is relative to
 
@@ -93,7 +130,9 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def set_anchors(self, anchors: Union[Dict[str, Union[str, "IUIElementInterface"]], None]) -> None:
+    def set_anchors(
+        self, anchors: Optional[Dict[str, Union[str, "IUIElementInterface"]]]
+    ) -> None:
         """
         Wraps the setting of the anchors with some validation
 
@@ -340,13 +379,13 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_focus_set(self) -> Set[Any]:
+    def get_focus_set(self) -> Optional[Set["IUIElementInterface"]]:
         """
         Return the set of elements to focus when we focus this element.
         """
 
     @abstractmethod
-    def set_focus_set(self, focus_set: Set[Any]):
+    def set_focus_set(self, focus_set: Optional[Set["IUIElementInterface"]]):
         """
         Set the focus set to a specific set of elements.
 
@@ -410,4 +449,25 @@ class IUIElementInterface(IGUISpriteInterface, metaclass=ABCMeta):
         """
         Get any anchor targets this element has, so we can update them when their targets change
         :return: the list of anchor targets.
+        """
+
+    @abstractmethod
+    def get_most_specific_combined_id(self) -> str:
+        """
+        The most specific combined ID for this element. There is a hierarchy of IDs an element can belong to
+        e.g. an OK button might have IDs of '#ok_button.message_box', '@confirmation_dialog_buttons.message_box'
+        and 'button'. the most specific one would be the available one that most uniquely identifies this
+        specific button rather than a group of buttons or all buttons (assuming those are IDs that are set and
+        available for this button)
+
+        :return: The most specific combined ID
+        """
+
+    @abstractmethod
+    def get_layer_thickness(self) -> int:
+        """
+        The GUI drawing layer 'thickness' of this element (i.e. how many layers does it take to finish drawing
+        this element).
+
+        :return: The thickness.
         """

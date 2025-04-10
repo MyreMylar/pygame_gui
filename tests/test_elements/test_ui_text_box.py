@@ -171,17 +171,18 @@ class TestUITextBox:
                                                 default_ui_manager: UIManager,
                                                 _display_surface_return_none):
         with pytest.warns(UserWarning, match="Unable to split word into chunks because text box is too narrow"):
-            text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
-                                           'LLALAALALA ALALA ALAL ALA'
-                                           'LAALA ALALA ALALA AAaal aa'
-                                           'ALALAa laalal alalal alala'
-                                           '<a>alalalala</a> alalalalalal alal'
-                                           'alalalala alala alalala ala'
-                                           'alalalalal lalal alalalal al',
-                                 relative_rect=pygame.Rect(100, 100, 5, 50),
-                                 manager=default_ui_manager)
+            with pytest.raises(RuntimeError, match="Row longer than layout"):
+                text_box = UITextBox(html_text='la la LA LA LAL LAL ALALA'
+                                               'LLALAALALA ALALA ALAL ALA'
+                                               'LAALA ALALA ALALA AAaal aa'
+                                               'ALALAa laalal alalal alala'
+                                               '<a>alalalala</a> alalalalalal alal'
+                                               'alalalala alala alalala ala'
+                                               'alalalalal lalal alalalal al',
+                                     relative_rect=pygame.Rect(100, 100, 5, 50),
+                                     manager=default_ui_manager)
 
-        assert text_box.image is not None
+                assert text_box.image is not None
 
     def test_kill(self, _init_pygame: None, default_ui_manager: UIManager,
                   _display_surface_return_none):
@@ -456,7 +457,7 @@ class TestUITextBox:
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_TYPING_APPEAR)
         text_box.active_text_effect.text_changed = True
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
+        assert isinstance(text_box.active_text_effect, pygame_gui.core.text.TypingAppearEffect)
 
         # try setting a nonsense effect on a chunk
         with pytest.warns(UserWarning, match="Unsupported effect name: blork for text chunk"):
@@ -476,7 +477,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeInEffect
+        assert isinstance(text_box.active_text_effect, pygame_gui.core.text.FadeInEffect)
 
     def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager,
                                         _display_surface_return_none: None):
@@ -492,7 +493,7 @@ class TestUITextBox:
                              manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeOutEffect
+        assert isinstance(text_box.active_text_effect, pygame_gui.core.text.FadeOutEffect)
 
     def test_set_active_effect_invalid(self, _init_pygame: None,
                                        default_ui_manager: UIManager,
@@ -552,7 +553,7 @@ class TestUITextBox:
         htm_text_block_2.active_text_effect.text_changed = True
         htm_text_block_2.update(5.0)
         htm_text_block_2.update(5.0)
-        assert type(htm_text_block_2.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
+        assert isinstance(htm_text_block_2.active_text_effect, pygame_gui.core.text.TypingAppearEffect)
 
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None,
                                                         default_ui_manager: UIManager,

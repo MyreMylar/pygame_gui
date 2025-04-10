@@ -22,62 +22,84 @@ class UIMessageWindow(UIWindow):
     :param object_id: A custom defined ID for fine-tuning of theming. Defaults to '#message_window'.
     :param visible: Whether the element is visible by default.
     """
-    def __init__(self, rect: RectLike,
-                 html_message: str,
-                 manager: Optional[IUIManagerInterface] = None,
-                 *,
-                 window_title: str = 'pygame-gui.message_window_title_bar',
-                 object_id: Union[ObjectID, str] = ObjectID('#message_window', None),
-                 visible: int = 1,
-                 html_message_text_kwargs: Optional[Dict[str, str]] = None,
-                 always_on_top: bool = False):
 
-        super().__init__(rect, manager,
-                         window_display_title=window_title,
-                         element_id=['message_window'],
-                         object_id=object_id,
-                         resizable=True,
-                         visible=visible,
-                         always_on_top=always_on_top)
+    def __init__(
+        self,
+        rect: RectLike,
+        html_message: str,
+        manager: Optional[IUIManagerInterface] = None,
+        *,
+        window_title: str = "pygame-gui.message_window_title_bar",
+        object_id: Union[ObjectID, str] = ObjectID("#message_window", None),
+        visible: int = 1,
+        html_message_text_kwargs: Optional[Dict[str, str]] = None,
+        always_on_top: bool = False,
+    ):
+        super().__init__(
+            rect,
+            manager,
+            window_display_title=window_title,
+            element_id=["message_window"],
+            object_id=object_id,
+            resizable=True,
+            visible=visible,
+            always_on_top=always_on_top,
+        )
 
         minimum_dimensions = (250, 160)
-        if self.relative_rect.width < minimum_dimensions[0] or self.relative_rect.height < minimum_dimensions[1]:
-            warn_string = ("Initial size: " + str(self.relative_rect.size) +
-                           " is less than minimum dimensions: " + str(minimum_dimensions))
+        if (
+            self.relative_rect.width < minimum_dimensions[0]
+            or self.relative_rect.height < minimum_dimensions[1]
+        ):
+            warn_string = (
+                f"Initial size: {self.relative_rect.size} "
+                f"is less than minimum dimensions: {minimum_dimensions}"
+            )
             warnings.warn(warn_string, UserWarning)
         self.set_minimum_dimensions(minimum_dimensions)
 
         self.dismiss_button = None
         self.text_block = None
 
-        button_size = (-1, 24)
+        dismiss_button_rect = pygame.Rect((0, 0), (-1, 24))
         button_spacing = 10
-        button_vertical_space = (button_spacing * 2) + button_size[1]
-
-        dismiss_button_rect = pygame.Rect((0, 0), button_size)
         dismiss_button_rect.bottomright = (-button_spacing, -button_spacing)
-        self.dismiss_button = UIButton(relative_rect=dismiss_button_rect,
-                                       text="pygame-gui.Dismiss",
-                                       manager=manager,
-                                       container=self,
-                                       tool_tip_text="Click to get rid of this message.",
-                                       object_id='#dismiss_button',
-                                       anchors={"left": "right",
-                                                "top": "bottom",
-                                                "right": "right",
-                                                "bottom": "bottom"}
-                                       )
+        button_vertical_space = (button_spacing * 2) + dismiss_button_rect.height
 
-        text_block_rect = pygame.Rect(0, 0,
-                                      self.get_container().get_size()[0],
-                                      self.get_container().get_size()[1] - button_vertical_space)
-        self.text_block = UITextBox(html_message, text_block_rect, manager=manager,
-                                    container=self,
-                                    anchors={"left": "left",
-                                             "top": "top",
-                                             "right": "right",
-                                             "bottom": "bottom"},
-                                    text_kwargs=html_message_text_kwargs)
+        self.dismiss_button = UIButton(
+            relative_rect=dismiss_button_rect,
+            text="pygame-gui.Dismiss",
+            manager=manager,
+            container=self,
+            tool_tip_text="Click to get rid of this message.",
+            object_id="#dismiss_button",
+            anchors={
+                "left": "right",
+                "top": "bottom",
+                "right": "right",
+                "bottom": "bottom",
+            },
+        )
+
+        text_block_rect = pygame.Rect(
+            0,
+            0,
+            self.get_container().get_size()[0],
+            self.get_container().get_size()[1] - button_vertical_space,
+        )
+        self.text_block = UITextBox(
+            html_message,
+            text_block_rect,
+            manager=manager,
+            container=self,
+            anchors={
+                "left": "left",
+                "top": "top",
+                "right": "right",
+                "bottom": "bottom",
+            },
+            text_kwargs=html_message_text_kwargs,
+        )
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

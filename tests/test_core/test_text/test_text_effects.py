@@ -571,10 +571,11 @@ class TestTiltEffect:
 
         assert effect.current_rotation == 0
 
-        effect.update(time_delta=4.0)
-        effect.update(time_delta=4.0)
-
         assert effect.time_acc == 0.0
+        effect.update(time_delta=4.0)
+        assert effect.time_acc == 4.0
+        effect.update(time_delta=4.0)
+        assert effect.time_acc == 3.0
 
     def test_has_text_changed(self, _init_pygame, _display_surface_return_none, default_ui_manager: UIManager):
         text_box = UITextBox('<effect id=test>Hello world</effect>',

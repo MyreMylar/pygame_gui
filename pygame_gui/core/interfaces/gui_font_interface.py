@@ -8,6 +8,7 @@ class IGUIFontInterface(metaclass=ABCMeta):
     A font interface, so we can easily switch between pygame.freetype.Font and pygame.Font.
     """
 
+    @abstractmethod
     def size(self, text: str) -> Tuple[int, int]:
         """
         Return the pixel size of a given text string in this font
@@ -23,7 +24,14 @@ class IGUIFontInterface(metaclass=ABCMeta):
         Draws text to a surface ready for pre-multiplied alpha-blending
         """
 
-    def render_premul_to(self, text: str, text_colour: Color, surf_size: Tuple[int, int], surf_position: Tuple[int, int]):
+    @abstractmethod
+    def render_premul_to(
+        self,
+        text: str,
+        text_colour: Color,
+        surf_size: Tuple[int, int],
+        surf_position: Tuple[int, int],
+    ):
         """
 
 
@@ -50,13 +58,13 @@ class IGUIFontInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_point_size(self):
+    def get_point_size(self) -> int:
         """
-
+        Get the point size of the font
         """
 
     @abstractmethod
-    def get_padding_height(self):
+    def get_padding_height(self) -> int:
         """
 
         :return:
@@ -96,6 +104,7 @@ class IGUIFontInterface(metaclass=ABCMeta):
         :return:
         """
 
+    @abstractmethod
     def get_direction(self) -> int:
         """
 

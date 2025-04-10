@@ -4,7 +4,11 @@ import pygame
 
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface, IUIElementInterface
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIContainerInterface
+from pygame_gui.core.interfaces import (
+    IContainerLikeInterface,
+    IContainerAndContainerLike,
+    IColourGradientInterface,
+)
 
 from pygame_gui.core import UIElement, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
@@ -42,65 +46,90 @@ class UIPanel(UIElement, IContainerLikeInterface):
     :param visible: Whether the element is visible by default. Warning - container visibility
                     may override this.
     """
-    def __init__(self,
-                 relative_rect: RectLike,
-                 starting_height: int = 1,
-                 manager: Optional[IUIManagerInterface] = None,
-                 *,
-                 element_id: str = 'panel',
-                 margins: Optional[Dict[str, int]] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1
-                 ):
-        # Need to move some declarations early as they are indirectly referenced via the ui element
-        # constructor
-        self.panel_container = None
-        super().__init__(relative_rect,
-                         manager,
-                         container,
-                         starting_height=starting_height,
-                         layer_thickness=1,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=[element_id])
 
-        self.background_colour = None
-        self.border_colour = None
-        self.background_image = None
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        starting_height: int = 1,
+        manager: Optional[IUIManagerInterface] = None,
+        *,
+        element_id: str = "panel",
+        margins: Optional[Dict[str, int]] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        visible: int = 1,
+    ):
+        # Need to move some declarations early as they are indirectly referenced via the ui element
+        # constructor - set the container size later
+        self.panel_container = UIContainer(
+            pygame.Rect(0, 0, 0, 0),
+            manager,
+            starting_height=starting_height,
+            container=container,
+            parent_element=None,
+            object_id=ObjectID(object_id="#panel_container", class_id=None),
+            anchors=anchors,
+            visible=visible,
+        )
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            starting_height=starting_height,
+            layer_thickness=1,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=[element_id],
+        )
+
+        # need to reset ids after building panel to include panel as parent element
+        # shouldn't affect theming as this container has no theming
+        self.panel_container.parent_element = self
+        self.panel_container._create_valid_ids(
+            container,
+            self,
+            ObjectID(object_id="#panel_container", class_id=None),
+            "container",
+        )
+
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0, 0
+        )
+        self.background_image: pygame.Surface | None = None
         self.border_width = 1
         self.shadow_width = 2
-        self.shape = 'rectangle'
+        self.shape = "rectangle"
 
         self.rebuild_from_changed_theme_data()
 
         if margins is None:
-            self.container_margins = {'left': self.shadow_width + self.border_width,
-                                      'right': self.shadow_width + self.border_width,
-                                      'top': self.shadow_width + self.border_width,
-                                      'bottom': self.shadow_width + self.border_width}
+            self.container_margins = {
+                "left": self.shadow_width + self.border_width,
+                "right": self.shadow_width + self.border_width,
+                "top": self.shadow_width + self.border_width,
+                "bottom": self.shadow_width + self.border_width,
+            }
         else:
             self.container_margins = margins
 
-        container_rect = pygame.Rect(self.relative_rect.left + self.container_margins['left'],
-                                     self.relative_rect.top + self.container_margins['top'],
-                                     self.relative_rect.width - (self.container_margins['left'] +
-                                                                 self.container_margins['right']),
-                                     self.relative_rect.height - (self.container_margins['top'] +
-                                                                  self.container_margins['bottom']))
+        container_rect = pygame.Rect(
+            self.relative_rect.left + self.container_margins["left"],
+            self.relative_rect.top + self.container_margins["top"],
+            self.relative_rect.width
+            - (self.container_margins["left"] + self.container_margins["right"]),
+            self.relative_rect.height
+            - (self.container_margins["top"] + self.container_margins["bottom"]),
+        )
 
-        self.panel_container = UIContainer(container_rect, manager,
-                                           starting_height=starting_height,
-                                           container=container,
-                                           parent_element=self,
-                                           object_id=ObjectID(object_id='#panel_container',
-                                                              class_id=None),
-                                           anchors=anchors,
-                                           visible=self.visible)
+        self.panel_container.set_dimensions(container_rect.size)
+        self.panel_container.set_relative_position(container_rect.topleft)
 
     def update(self, time_delta: float):
         """
@@ -126,24 +155,28 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         """
         consumed_event = False
-        if (self is not None and
-                event.type == pygame.MOUSEBUTTONDOWN and
-                event.button in [pygame.BUTTON_LEFT,
-                                 pygame.BUTTON_RIGHT,
-                                 pygame.BUTTON_MIDDLE]):
-            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(event.pos)
+        if (
+            self is not None
+            and event.type == pygame.MOUSEBUTTONDOWN
+            and event.button
+            in [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT, pygame.BUTTON_MIDDLE]
+        ):
+            scaled_mouse_pos = self.ui_manager.calculate_scaled_mouse_position(
+                event.pos
+            )
             if self.hover_point(scaled_mouse_pos[0], scaled_mouse_pos[1]):
                 consumed_event = True
 
         return consumed_event
 
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> IContainerAndContainerLike:
         """
         Returns the container that should contain all the UI elements in this panel.
 
         :return UIContainer: The panel's container.
 
         """
+
         return self.panel_container
 
     def kill(self):
@@ -169,10 +202,12 @@ class UIPanel(UIElement, IContainerLikeInterface):
         # different size to the window
         super().set_dimensions(dimensions)
 
-        new_container_dimensions = (self.relative_rect.width - (self.container_margins['left'] +
-                                                                self.container_margins['right']),
-                                    self.relative_rect.height - (self.container_margins['top'] +
-                                                                 self.container_margins['bottom']))
+        new_container_dimensions = (
+            self.relative_rect.width
+            - (self.container_margins["left"] + self.container_margins["right"]),
+            self.relative_rect.height
+            - (self.container_margins["top"] + self.container_margins["bottom"]),
+        )
         if new_container_dimensions != self.get_container().get_size():
             self.get_container().set_dimensions(new_container_dimensions)
 
@@ -204,22 +239,25 @@ class UIPanel(UIElement, IContainerLikeInterface):
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        background_colour = self.ui_theme.get_colour_or_gradient('dark_bg',
-                                                                 self.combined_element_ids)
+        background_colour = self.ui_theme.get_colour_or_gradient(
+            "dark_bg", self.combined_element_ids
+        )
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient('normal_border',
-                                                             self.combined_element_ids)
+        border_colour = self.ui_theme.get_colour_or_gradient(
+            "normal_border", self.combined_element_ids
+        )
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
         background_image = None
         try:
-            background_image = self.ui_theme.get_image('background_image',
-                                                       self.combined_element_ids)
+            background_image = self.ui_theme.get_image(
+                "background_image", self.combined_element_ids
+            )
         except LookupError:
             background_image = None
         finally:
@@ -228,22 +266,27 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 has_any_changed = True
 
         # misc
-        if self._check_misc_theme_data_changed(attribute_name='shape',
-                                               default_value='rectangle',
-                                               casting_func=str,
-                                               allowed_values=['rectangle',
-                                                               'rounded_rectangle']):
+        if self._check_misc_theme_data_changed(
+            attribute_name="shape",
+            default_value="rectangle",
+            casting_func=str,
+            allowed_values=["rectangle", "rounded_rectangle"],
+        ):
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed(attribute_name='tool_tip_delay',
-                                               default_value=1.0,
-                                               casting_func=float):
+        if self._check_misc_theme_data_changed(
+            attribute_name="tool_tip_delay", default_value=1.0, casting_func=float
+        ):
             has_any_changed = True
 
-        if self._check_shape_theming_changed(defaults={'border_width': 1,
-                                                       'shadow_width': 2,
-                                                       'border_overlap': 1,
-                                                       'shape_corner_radius': [2, 2, 2, 2]}):
+        if self._check_shape_theming_changed(
+            defaults={
+                "border_width": 1,
+                "shadow_width": 2,
+                "border_overlap": 1,
+                "shape_corner_radius": [2, 2, 2, 2],
+            }
+        ):
             has_any_changed = True
 
         if has_any_changed:
@@ -254,20 +297,24 @@ class UIPanel(UIElement, IContainerLikeInterface):
         A complete rebuild of the drawable shape used by this button.
 
         """
-        theming_parameters = {'normal_bg': self.background_colour,
-                              'normal_border': self.border_colour,
-                              'normal_image': self.background_image,
-                              'border_width': self.border_width,
-                              'shadow_width': self.shadow_width,
-                              'shape_corner_radius': self.shape_corner_radius,
-                              'border_overlap': self.border_overlap}
+        theming_parameters = {
+            "normal_bg": self.background_colour,
+            "normal_border": self.border_colour,
+            "normal_image": self.background_image,
+            "border_width": self.border_width,
+            "shadow_width": self.shadow_width,
+            "shape_corner_radius": self.shape_corner_radius,
+            "border_overlap": self.border_overlap,
+        }
 
-        if self.shape == 'rectangle':
-            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ['normal'], self.ui_manager)
-        elif self.shape == 'rounded_rectangle':
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ['normal'], self.ui_manager)
+        if self.shape == "rectangle":
+            self.drawable_shape = RectDrawableShape(
+                self.rect, theming_parameters, ["normal"], self.ui_manager
+            )
+        elif self.shape == "rounded_rectangle":
+            self.drawable_shape = RoundedRectangleShape(
+                self.rect, theming_parameters, ["normal"], self.ui_manager
+            )
 
         self.on_fresh_drawable_shape_ready()
 
@@ -335,7 +382,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         any_hovered = False
         for element in self:
-            if any(sub_element.hovered for sub_element in element.get_focus_set()):
+            element_focus_set = element.get_focus_set()
+            if element_focus_set is not None and any(
+                sub_element.hovered for sub_element in element_focus_set
+            ):
                 any_hovered = True
             elif isinstance(element, IContainerLikeInterface):
                 any_hovered = element.are_contents_hovered()
@@ -344,7 +394,9 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 break
         return any_hovered
 
-    def set_anchors(self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]) -> None:
+    def set_anchors(
+        self, anchors: Optional[Dict[str, Union[str, IUIElementInterface]]]
+    ) -> None:
         super().set_anchors(anchors)
         if self.panel_container is not None:
             self.panel_container.set_anchors(anchors)

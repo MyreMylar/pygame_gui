@@ -146,18 +146,18 @@ class TestUITextEntryBox:
                                                 default_ui_manager: UIManager,
                                                 _display_surface_return_none):
         # narrow text boxes are fine with no dashes between split words
+        with pytest.raises(RuntimeError, match="Row longer than layout"):
+            text_box = UITextEntryBox(initial_text='la la LA LA LAL LAL ALALA'
+                                                   'LLALAALALA ALALA ALAL ALA'
+                                                   'LAALA ALALA ALALA AAaal aa'
+                                                   'ALALAa laalal alalal alala'
+                                                   '<a>alalalala</a> alalalalalal alal'
+                                                   'alalalala alala alalala ala'
+                                                   'alalalalal lalal alalalal al',
+                                      relative_rect=pygame.Rect(100, 100, 5, 50),
+                                      manager=default_ui_manager)
 
-        text_box = UITextEntryBox(initial_text='la la LA LA LAL LAL ALALA'
-                                               'LLALAALALA ALALA ALAL ALA'
-                                               'LAALA ALALA ALALA AAaal aa'
-                                               'ALALAa laalal alalal alala'
-                                               '<a>alalalala</a> alalalalalal alal'
-                                               'alalalala alala alalala ala'
-                                               'alalalalal lalal alalalal al',
-                                  relative_rect=pygame.Rect(100, 100, 5, 50),
-                                  manager=default_ui_manager)
-
-        assert text_box.image is not None
+            assert text_box.image is not None
 
     def test_kill(self, _init_pygame: None, default_ui_manager: UIManager,
                   _display_surface_return_none):
@@ -431,7 +431,7 @@ class TestUITextEntryBox:
                                   manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_IN)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeInEffect
+        assert isinstance(text_box.active_text_effect, pygame_gui.core.text.FadeInEffect)
 
     def test_set_active_effect_fade_out(self, _init_pygame: None, default_ui_manager: UIManager,
                                         _display_surface_return_none: None):
@@ -447,7 +447,7 @@ class TestUITextEntryBox:
                                   manager=default_ui_manager)
         text_box.set_active_effect(pygame_gui.TEXT_EFFECT_FADE_OUT)
         text_box.update(5.0)
-        assert type(text_box.active_text_effect) == pygame_gui.core.text.FadeOutEffect
+        assert isinstance(text_box.active_text_effect, pygame_gui.core.text.FadeOutEffect)
 
     def test_set_active_effect_invalid(self, _init_pygame: None,
                                        default_ui_manager: UIManager,
@@ -491,15 +491,15 @@ class TestUITextEntryBox:
                                {"name": "noto_sans", "point_size": 10, "style": "italic"},
                                {"name": "noto_sans", "point_size": 10, "style": "bold_italic"}])
         htm_text_block_2 = UITextEntryBox(initial_text='<font face=noto_sans size=2 color=#000000>'
-                                          '<b>Hey, What the heck!</b>'
-                                          '<br><br>'
-                                          'This is some <a href="test">text</a> in a different box,'
-                                          ' hooray for variety - '
-                                          'if you want then you should put a ring upon it. '
-                                          '<body bgcolor=#990000>What if we do a really long word?'
-                                          '</body> '
-                                          '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp'
-                                          ' gosh</b></i></font>',
+                                                       '<b>Hey, What the heck!</b>'
+                                                       '<br><br>'
+                                                       'This is some <a href="test">text</a> in a different box,'
+                                                       ' hooray for variety - '
+                                                       'if you want then you should put a ring upon it. '
+                                                       '<body bgcolor=#990000>What if we do a really long word?'
+                                                       '</body> '
+                                                       '<b><i>derp FALALALALALALALXALALALXALALALALAAPaaaaarp'
+                                                       ' gosh</b></i></font>',
                                           relative_rect=pygame.Rect((0, 0), (250, 200)),
                                           manager=manager,
                                           object_id="#text_box_2")
@@ -507,7 +507,7 @@ class TestUITextEntryBox:
         htm_text_block_2.active_text_effect.text_changed = True
         htm_text_block_2.update(5.0)
         htm_text_block_2.update(5.0)
-        assert type(htm_text_block_2.active_text_effect) == pygame_gui.core.text.TypingAppearEffect
+        assert isinstance(htm_text_block_2.active_text_effect, pygame_gui.core.text.TypingAppearEffect)
 
     def test_process_event_mouse_buttons_with_scrollbar(self, _init_pygame: None,
                                                         default_ui_manager: UIManager,
@@ -1658,7 +1658,7 @@ class TestUITextEntryBox:
         text_entry.set_text("Yellow su")
         text_entry.select_range = [3, 9]
 
-    def test_update(self,  _init_pygame, _display_surface_return_none):
+    def test_update(self, _init_pygame, _display_surface_return_none):
         pygame.display.init()
 
         class MouselessManager(UIManager):
@@ -1688,7 +1688,7 @@ class TestUITextEntryBox:
 
         assert not text_entry.alive()
 
-    def test_update_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
+    def test_update_after_click(self, _init_pygame, _display_surface_return_none: None, default_ui_manager):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -1704,7 +1704,7 @@ class TestUITextEntryBox:
 
         text_entry.update(0.01)
 
-    def test_update_newline_after_click(self,  _init_pygame, _display_surface_return_none: None, default_ui_manager):
+    def test_update_newline_after_click(self, _init_pygame, _display_surface_return_none: None, default_ui_manager):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))
@@ -1720,7 +1720,7 @@ class TestUITextEntryBox:
 
         text_entry.update(0.01)
 
-    def test_update_after_long_wait(self,  _init_pygame, _display_surface_return_none):
+    def test_update_after_long_wait(self, _init_pygame, _display_surface_return_none):
         pygame.display.init()
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
@@ -1731,7 +1731,7 @@ class TestUITextEntryBox:
         text_entry.update(0.01)
         text_entry.update(5.0)
 
-    def test_update_cursor_blink(self,  _init_pygame, _display_surface_return_none: None):
+    def test_update_cursor_blink(self, _init_pygame, _display_surface_return_none: None):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_non_default.json"))

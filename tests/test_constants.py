@@ -25,18 +25,18 @@ class TestConstants:
             text_effect_type + 5
         
     def test_colours(self):
-        """The only real requirement for a colour name is that it is not case sensitive.
+        """The only real requirement for a colour name is that it is not case-sensitive.
         As convention, the colour name should always be stored as a lower cased string, so that any colour name compared to the string can simply be lowered with .lower() for checking validity
         """
-        errorMessages: list[str] = []
+        error_messages: list[str] = []
         for colourName, colourValue in _namedColours.items():
             if not colourName == colourName.lower():
-                errorMessages.append(f'Found Invalid Colour Name: {colourName} (must be lowercased)')
+                error_messages.append(f'Found Invalid Colour Name: {colourName} (must be lowercased)')
             if not is_valid_colour_string(colourValue):
-                errorMessages.append(f'Found Invalid Colour Name Pair: {colourName}, {colourValue}')
+                error_messages.append(f'Found Invalid Colour Name Pair: {colourName}, {colourValue}')
 
-        if len(errorMessages) > 0:
-            pytest.fail("\n".join(errorMessages))
-        assert len(errorMessages) == 0
+        if len(error_messages) > 0:
+            pytest.fail("\n".join(error_messages))
+        assert len(error_messages) == 0
             
 

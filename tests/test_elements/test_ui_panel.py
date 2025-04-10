@@ -110,8 +110,8 @@ class TestUIPanel:
         assert len(default_ui_manager.get_sprite_group().sprites()) == 4
         assert (default_ui_manager.get_sprite_group().sprites() ==
                 [default_ui_manager.get_root_container(),
-                 panel,
                  panel.get_container(),
+                 panel,
                  button])
         panel.kill()
         assert len(default_ui_manager.get_root_container().elements) == 0

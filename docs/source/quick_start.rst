@@ -37,7 +37,16 @@ the code below. You can just copy and paste it into an empty python script file.
         pygame.display.update()
 
 
-That should open an empty window upon being run. If it doesn't you may need to install pygame CE.
+That should open an empty window upon being run. If it doesn't run you may need to install pygame CE.
+If the program doesn't close when you hit the close window button, then that likely means you are using
+the IDLE editor to run it and you'll need to add a final:
+
+.. code-block:: python
+   :linenos:
+
+    pygame.quit()
+
+...on the last line.
 
 Next, we need to make sure that we've installed the pygame_gui module. If you haven't, then the quickest way is to open
 a terminal or Command Prompt and type:

@@ -1,13 +1,19 @@
+import warnings
+from typing import Union, Tuple, Optional, Dict
+
 import pygame
+
 from pygame_gui._constants import UI_2D_SLIDER_MOVED
 from pygame_gui.core import UIElement, UIContainer, ObjectID
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
+from pygame_gui.core.interfaces import (
+    IUIManagerInterface,
+    IContainerLikeInterface,
+    IUIElementInterface,
+    IColourGradientInterface,
+)
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
-from pygame_gui.elements import UIButton
-
-import warnings
-from typing import *
+from pygame_gui.elements.ui_button import UIButton
 
 
 class UI2DSlider(UIElement):
@@ -32,34 +38,38 @@ class UI2DSlider(UIElement):
                     may override this.
     """
 
-    def __init__(self,
-                 relative_rect: RectLike,
-                 start_value_x: Union[float, int],
-                 value_range_x: Union[Tuple[float, float], Tuple[int, int]],
-                 start_value_y: Union[float, int],
-                 value_range_y: Union[Tuple[float, float], Tuple[int, int]],
-                 invert_y: bool = False,
-                 manager: Optional[IUIManagerInterface] = None,
-                 container: Optional[IContainerLikeInterface] = None,
-                 starting_height: int = 1,
-                 parent_element: Optional[UIElement] = None,
-                 object_id: Optional[Union[ObjectID, str]] = None,
-                 anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
-                 visible: int = 1
-                 ):
-
+    def __init__(
+        self,
+        relative_rect: RectLike,
+        start_value_x: Union[float, int],
+        value_range_x: Union[Tuple[float, float], Tuple[int, int]],
+        start_value_y: Union[float, int],
+        value_range_y: Union[Tuple[float, float], Tuple[int, int]],
+        invert_y: bool = False,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        starting_height: int = 1,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        visible: int = 1,
+    ):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
-        self.sliding_button = None
-        self.button_container = None
-        super().__init__(relative_rect, manager, container,
-                         layer_thickness=2,
-                         starting_height=starting_height,
-                         anchors=anchors,
-                         visible=visible,
-                         parent_element=parent_element,
-                         object_id=object_id,
-                         element_id=["2d_slider"])
+        self.sliding_button: UIButton | None = None
+        self.button_container: UIContainer | None = None
+        super().__init__(
+            relative_rect,
+            manager,
+            container,
+            layer_thickness=2,
+            starting_height=starting_height,
+            anchors=anchors,
+            visible=visible,
+            parent_element=parent_element,
+            object_id=object_id,
+            element_id=["2d_slider"],
+        )
 
         self.default_button_width = 20
         self.sliding_button_width = self.default_button_width
@@ -71,18 +81,21 @@ class UI2DSlider(UIElement):
 
         self.invert_y = invert_y
 
-        if all([isinstance(n, int) for n in [start_value_x, *value_range_x, start_value_y, *value_range_y]]):
-            self.use_integers_for_value = True
-        else:
-            self.use_integers_for_value = False
-
+        self.use_integers_for_value = all(
+            isinstance(n, int)
+            for n in [start_value_x, *value_range_x, start_value_y, *value_range_y]
+        )
         self.value_range_x = value_range_x
         value_range_x_length = self.value_range_x[1] - self.value_range_x[0]
-        self.current_x_value = self.value_range_x[0] + (self.current_x_percentage * value_range_x_length)
+        self.current_x_value = self.value_range_x[0] + (
+            self.current_x_percentage * value_range_x_length
+        )
 
         self.value_range_y = value_range_y
         value_range_y_length = self.value_range_y[1] - self.value_range_y[0]
-        self.current_y_value = self.value_range_y[0] + (self.current_y_percentage * value_range_y_length)
+        self.current_y_value = self.value_range_y[0] + (
+            self.current_y_percentage * value_range_y_length
+        )
 
         if self.use_integers_for_value:
             self.current_x_value = int(self.current_x_value)
@@ -92,50 +105,55 @@ class UI2DSlider(UIElement):
         self.has_moved_recently = False
         self.has_been_moved_by_user_recently = False
 
-        self.background_colour = None
-        self.border_colour = None
-        self.disabled_border_colour = None
-        self.disabled_background_colour = None
+        self.background_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
+            0, 0, 0
+        )
+        self.disabled_border_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
+        self.disabled_background_colour: pygame.Color | IColourGradientInterface = (
+            pygame.Color(0, 0, 0)
+        )
 
-        self.border_width = None
-        self.shadow_width = None
-
-        self.drawable_shape = None
         self.shape = "rectangle"
 
-        self.background_rect: Optional[pygame.Rect] = None
+        self.background_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
-        self.scrollable_width = None
-        self.scrollable_height = None
-        self.right_limit_position = None
-        self.bottom_limit_position = None
-        self.scroll_position: Optional[pygame.Vector2] = None
-
-        self.sliding_button = None
-
-        self.button_container = None
+        self.scrollable_width = 0
+        self.scrollable_height = 0
+        self.right_limit_position = 0
+        self.bottom_limit_position = 0
+        self.scroll_position: pygame.Vector2 = pygame.Vector2(0.0, 0.0)
 
         self.rebuild_from_changed_theme_data()
 
-        sliding_x_pos = int(self.background_rect.width / 2 - self.sliding_button_width / 2)
-        sliding_y_pos = int(self.background_rect.height / 2 - self.sliding_button_width / 2)
-        self.sliding_button = UIButton(pygame.Rect((sliding_x_pos, sliding_y_pos),
-                                                   (self.sliding_button_width,
-                                                    self.sliding_button_width)),
-                                       "", self.ui_manager,
-                                       container=self.button_container,
-                                       starting_height=1,
-                                       parent_element=self,
-                                       object_id=ObjectID(object_id="#sliding_button",
-                                                          class_id=None),
-                                       anchors={"left": "left",
-                                                "right": "left",
-                                                "top": "top",
-                                                "bottom": "top"},
-                                       visible=self.visible
-                                       )
+        sliding_x_pos = int(
+            self.background_rect.width / 2 - self.sliding_button_width / 2
+        )
+        sliding_y_pos = int(
+            self.background_rect.height / 2 - self.sliding_button_width / 2
+        )
+        self.sliding_button = UIButton(
+            pygame.Rect(
+                (sliding_x_pos, sliding_y_pos),
+                (self.sliding_button_width, self.sliding_button_width),
+            ),
+            "",
+            self.ui_manager,
+            container=self.button_container,
+            starting_height=1,
+            parent_element=self,
+            object_id=ObjectID(object_id="#sliding_button", class_id=None),
+            anchors={"left": "left", "right": "left", "top": "top", "bottom": "top"},
+            visible=self.visible,
+        )
 
-        self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
+        self.sliding_button.set_hold_range(
+            (self.background_rect.width, self.background_rect.height)
+        )
 
         self.set_current_value(start_value_x, start_value_y)
 
@@ -145,50 +163,68 @@ class UI2DSlider(UIElement):
 
         """
         border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect = pygame.Rect((border_and_shadow + self.relative_rect.x,
-                                            border_and_shadow + self.relative_rect.y),
-                                           (self.relative_rect.width - (2 * border_and_shadow),
-                                            self.relative_rect.height - (2 * border_and_shadow)))
+        self.background_rect = pygame.Rect(
+            (
+                border_and_shadow + self.relative_rect.x,
+                border_and_shadow + self.relative_rect.y,
+            ),
+            (
+                self.relative_rect.width - (2 * border_and_shadow),
+                self.relative_rect.height - (2 * border_and_shadow),
+            ),
+        )
 
-        theming_parameters = {"normal_bg": self.background_colour,
-                              "normal_border": self.border_colour,
-                              "disabled_bg": self.disabled_background_colour,
-                              "disabled_border": self.disabled_border_colour,
-                              "border_width": self.border_width,
-                              "shadow_width": self.shadow_width,
-                              "shape_corner_radius": self.shape_corner_radius,
-                              'border_overlap': self.border_overlap}
+        theming_parameters = {
+            "normal_bg": self.background_colour,
+            "normal_border": self.border_colour,
+            "disabled_bg": self.disabled_background_colour,
+            "disabled_border": self.disabled_border_colour,
+            "border_width": self.border_width,
+            "shadow_width": self.shadow_width,
+            "shape_corner_radius": self.shape_corner_radius,
+            "border_overlap": self.border_overlap,
+        }
 
         if self.shape == "rectangle":
-            self.drawable_shape = RectDrawableShape(self.rect, theming_parameters,
-                                                    ["normal", "disabled"], self.ui_manager)
+            self.drawable_shape = RectDrawableShape(
+                self.rect, theming_parameters, ["normal", "disabled"], self.ui_manager
+            )
         elif self.shape == "rounded_rectangle":
-            self.drawable_shape = RoundedRectangleShape(self.rect, theming_parameters,
-                                                        ["normal", "disabled"], self.ui_manager)
+            self.drawable_shape = RoundedRectangleShape(
+                self.rect, theming_parameters, ["normal", "disabled"], self.ui_manager
+            )
 
-        self._set_image(self.drawable_shape.get_fresh_surface())
+        if self.drawable_shape is not None:
+            self._set_image(self.drawable_shape.get_fresh_surface())
 
         if self.button_container is None:
-            self.button_container = UIContainer(self.background_rect,
-                                                manager=self.ui_manager,
-                                                container=self.ui_container,
-                                                anchors=self.anchors,
-                                                object_id="#2d_slider_buttons_container",
-                                                visible=self.visible)
+            self.button_container = UIContainer(
+                self.background_rect,
+                manager=self.ui_manager,
+                container=self.ui_container,
+                anchors=self.anchors,
+                object_id="#2d_slider_buttons_container",
+                visible=self.visible,
+            )
         else:
             self.button_container.set_dimensions(self.background_rect.size)
             self.button_container.set_relative_position(self.background_rect.topleft)
 
-        self.scrollable_width = (self.background_rect.width - self.sliding_button_width)
-        self.scrollable_height = (self.background_rect.height - self.sliding_button_width)
+        self.scrollable_width = self.background_rect.width - self.sliding_button_width
+        self.scrollable_height = self.background_rect.height - self.sliding_button_width
         self.right_limit_position = self.scrollable_width
         self.bottom_limit_position = self.scrollable_height
-        self.scroll_position = pygame.Vector2(self.scrollable_width / 2, self.scrollable_height / 2)
+        self.scroll_position = pygame.Vector2(
+            self.scrollable_width / 2, self.scrollable_height / 2
+        )
 
         if self.sliding_button is not None:
-            self.sliding_button.set_dimensions((self.sliding_button_width,
-                                                self.sliding_button_width))
-            self.sliding_button.set_hold_range((self.background_rect.width, self.background_rect.height))
+            self.sliding_button.set_dimensions(
+                (self.sliding_button_width, self.sliding_button_width)
+            )
+            self.sliding_button.set_hold_range(
+                (self.background_rect.width, self.background_rect.height)
+            )
             self.set_current_value(self.current_x_value, self.current_y_value)
 
     def kill(self):
@@ -197,7 +233,8 @@ class UI2DSlider(UIElement):
         up the slider.
 
         """
-        self.button_container.kill()
+        if self.button_container:
+            self.button_container.kill()
         super().kill()
 
     def update(self, time_delta: float):
@@ -215,57 +252,80 @@ class UI2DSlider(UIElement):
         moved_this_frame = False
 
         mouse_pos = pygame.Vector2(self.ui_manager.get_mouse_position())
-        if self.sliding_button.held and self.sliding_button.in_hold_range(mouse_pos):
-            if not self.grabbed_slider:
-                self.grabbed_slider = True
-                real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
-                self.starting_grab_difference = mouse_pos - real_scroll_pos
-
-            real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
-            current_grab_difference = mouse_pos - real_scroll_pos
-            adjustment_required = current_grab_difference - self.starting_grab_difference
-            self.scroll_position = self.scroll_position + adjustment_required
-
-            self.scroll_position = pygame.Vector2(min(max(self.scroll_position.x, self.left_limit_position),
-                                                      self.right_limit_position),
-                                                  min(max(self.scroll_position.y, self.top_limit_position),
-                                                      self.bottom_limit_position))
-
-            self.sliding_button.set_relative_position(self.scroll_position)
-
-            moved_this_frame = True
-        elif not self.sliding_button.held:
-            self.grabbed_slider = False
+        if self.sliding_button is not None:
+            if self.sliding_button.held and self.sliding_button.in_hold_range(
+                mouse_pos
+            ):
+                moved_this_frame = self._move_slider_with_mouse(mouse_pos)
+            elif not self.sliding_button.held:
+                self.grabbed_slider = False
 
         if moved_this_frame:
-            self.current_x_percentage = self.scroll_position.x / self.scrollable_width
-            self.current_x_value = self.value_range_x[0] + (self.current_x_percentage *
-                                                            (self.value_range_x[1] - self.value_range_x[0]))
+            self._set_slider_values_after_move()
 
-            if self.invert_y:
-                # Scroll position is inverted, so invert it again to get actual percentage
-                self.current_y_percentage = (self.scrollable_height - self.scroll_position.y) / self.scrollable_height
-            else:
-                self.current_y_percentage = self.scroll_position.y / self.scrollable_height
-            self.current_y_value = self.value_range_y[0] + (self.current_y_percentage *
-                                                            (self.value_range_y[1] - self.value_range_y[0]))
-            if self.use_integers_for_value:
-                self.current_x_value = int(self.current_x_value)
-                self.current_y_value = int(self.current_y_value)
+    def _move_slider_with_mouse(self, mouse_pos):
+        if self.sliding_button is None:
+            return False
+        if not self.grabbed_slider:
+            self.grabbed_slider = True
+            real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
+            self.starting_grab_difference = mouse_pos - real_scroll_pos
 
-            if not self.has_moved_recently:
-                self.has_moved_recently = True
+        real_scroll_pos = pygame.Vector2(self.sliding_button.rect.topleft)
+        current_grab_difference = mouse_pos - real_scroll_pos
+        adjustment_required = current_grab_difference - self.starting_grab_difference
+        self.scroll_position = self.scroll_position + adjustment_required
 
-            if not self.has_been_moved_by_user_recently:
-                self.has_been_moved_by_user_recently = True
+        self.scroll_position = pygame.Vector2(
+            min(
+                max(self.scroll_position.x, self.left_limit_position),
+                self.right_limit_position,
+            ),
+            min(
+                max(self.scroll_position.y, self.top_limit_position),
+                self.bottom_limit_position,
+            ),
+        )
 
-            # new event
-            event_data = {"value": (self.current_x_value, self.current_y_value),
-                          "ui_element": self,
-                          "ui_object_id": self.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
+        self.sliding_button.set_relative_position(self.scroll_position)
 
-    def get_current_value(self) -> Tuple[Union[float, float], Union[int, int]]:
+        return True
+
+    def _set_slider_values_after_move(self):
+        self.current_x_percentage = self.scroll_position.x / self.scrollable_width
+        self.current_x_value = self.value_range_x[0] + (
+            self.current_x_percentage * (self.value_range_x[1] - self.value_range_x[0])
+        )
+
+        if self.invert_y:
+            # Scroll position is inverted, so invert it again to get actual percentage
+            self.current_y_percentage = (
+                self.scrollable_height - self.scroll_position.y
+            ) / self.scrollable_height
+        else:
+            self.current_y_percentage = self.scroll_position.y / self.scrollable_height
+        self.current_y_value = self.value_range_y[0] + (
+            self.current_y_percentage * (self.value_range_y[1] - self.value_range_y[0])
+        )
+        if self.use_integers_for_value:
+            self.current_x_value = int(self.current_x_value)
+            self.current_y_value = int(self.current_y_value)
+
+        if not self.has_moved_recently:
+            self.has_moved_recently = True
+
+        if not self.has_been_moved_by_user_recently:
+            self.has_been_moved_by_user_recently = True
+
+        # new event
+        event_data = {
+            "value": (self.current_x_value, self.current_y_value),
+            "ui_element": self,
+            "ui_object_id": self.most_specific_combined_id,
+        }
+        pygame.event.post(pygame.event.Event(UI_2D_SLIDER_MOVED, event_data))
+
+    def get_current_value(self) -> Tuple[Union[float, int], Union[float, int]]:
         """
         Gets the current value the slider is set to.
 
@@ -276,10 +336,14 @@ class UI2DSlider(UIElement):
         self.has_been_moved_by_user_recently = False
         return self.current_x_value, self.current_y_value
 
-    def set_current_value(self, value_x: Union[float, int], value_y: Union[float, int], warn: bool = True) -> None:
+    def set_current_value(
+        self, value_x: Union[float, int], value_y: Union[float, int], warn: bool = True
+    ) -> None:
         """
-        Sets the value of the slider, which will move the position of the slider to match. Will
-        issue a warning if the value set is not in the value range.
+        Sets the value of the slider, which will move the position of the slider to match.
+        If warn is True, this function will issue a warning and return without setting the
+        value when the value set is not in the value range. If warn is false the value will
+        instead be clamped to the minimum & maximum value range and set.
 
         :param value_x: The x value to set.
         :param value_y: The y value to set.
@@ -316,26 +380,37 @@ class UI2DSlider(UIElement):
         else:
             self.current_y_value = value_y
 
-        value_x_range_size = (self.value_range_x[1] - self.value_range_x[0])
-        value_y_range_size = (self.value_range_y[1] - self.value_range_y[0])
+        value_x_range_size = self.value_range_x[1] - self.value_range_x[0]
+        value_y_range_size = self.value_range_y[1] - self.value_range_y[0]
 
         if value_x_range_size != 0 and value_y_range_size != 0:
-            self.current_x_percentage = (float(self.current_x_value) -
-                                         self.value_range_x[0]) / value_x_range_size
-            self.current_y_percentage = (float(self.current_y_value) -
-                                         self.value_range_y[0]) / value_y_range_size
+            self._set_percentages_and_scroll_pos_after_change(
+                value_x_range_size, value_y_range_size
+            )
 
-            # Invert the position at which the slider should be
-            if self.invert_y:
-                height = self.scrollable_height * (1 - self.current_y_percentage)
-            else:
-                height = self.scrollable_height * self.current_y_percentage
+    def _set_percentages_and_scroll_pos_after_change(
+        self, value_x_range_size, value_y_range_size
+    ):
+        self.current_x_percentage = (
+            float(self.current_x_value) - self.value_range_x[0]
+        ) / value_x_range_size
+        self.current_y_percentage = (
+            float(self.current_y_value) - self.value_range_y[0]
+        ) / value_y_range_size
 
-            self.scroll_position = (self.scrollable_width * self.current_x_percentage,
-                                    height)
-
+        # Invert the position at which the slider should be
+        height = (
+            self.scrollable_height * (1 - self.current_y_percentage)
+            if self.invert_y
+            else self.scrollable_height * self.current_y_percentage
+        )
+        self.scroll_position = pygame.Vector2(
+            self.scrollable_width * self.current_x_percentage,
+            height,
+        )
+        if self.sliding_button is not None:
             self.sliding_button.set_relative_position(self.scroll_position)
-            self.has_moved_recently = True
+        self.has_moved_recently = True
 
     def rebuild_from_changed_theme_data(self) -> None:
         """
@@ -347,46 +422,63 @@ class UI2DSlider(UIElement):
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
 
-        if self._check_misc_theme_data_changed(attribute_name="shape",
-                                               default_value="rectangle",
-                                               casting_func=str,
-                                               allowed_values=["rectangle",
-                                                               "rounded_rectangle"]):
+        if self._check_misc_theme_data_changed(
+            attribute_name="shape",
+            default_value="rectangle",
+            casting_func=str,
+            allowed_values=["rectangle", "rounded_rectangle"],
+        ):
             has_any_changed = True
 
-        if self._check_shape_theming_changed(defaults={"border_width": 1,
-                                                       "shadow_width": 2,
-                                                       "border_overlap": 1,
-                                                       "shape_corner_radius": [2, 2, 2, 2]}):
+        if self._check_shape_theming_changed(
+            defaults={
+                "border_width": 1,
+                "shadow_width": 2,
+                "border_overlap": 1,
+                "shape_corner_radius": [2, 2, 2, 2],
+            }
+        ):
             has_any_changed = True
 
-        background_colour = self.ui_theme.get_colour_or_gradient("dark_bg",
-                                                                 self.combined_element_ids)
+        background_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient("dark_bg", self.combined_element_ids)
+        )
         if background_colour != self.background_colour:
             self.background_colour = background_colour
             has_any_changed = True
 
-        border_colour = self.ui_theme.get_colour_or_gradient("normal_border",
-                                                             self.combined_element_ids)
+        border_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "normal_border", self.combined_element_ids
+            )
+        )
         if border_colour != self.border_colour:
             self.border_colour = border_colour
             has_any_changed = True
 
-        disabled_background_colour = self.ui_theme.get_colour_or_gradient("disabled_dark_bg",
-                                                                          self.combined_element_ids)
+        disabled_background_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "disabled_dark_bg", self.combined_element_ids
+            )
+        )
         if disabled_background_colour != self.disabled_background_colour:
             self.disabled_background_colour = disabled_background_colour
             has_any_changed = True
 
-        disabled_border_colour = self.ui_theme.get_colour_or_gradient("disabled_border",
-                                                                      self.combined_element_ids)
+        disabled_border_colour: pygame.Color | IColourGradientInterface = (
+            self.ui_theme.get_colour_or_gradient(
+                "disabled_border", self.combined_element_ids
+            )
+        )
         if disabled_border_colour != self.disabled_border_colour:
             self.disabled_border_colour = disabled_border_colour
             has_any_changed = True
 
-        if self._check_misc_theme_data_changed(attribute_name="sliding_button_width",
-                                               default_value=self.default_button_width,
-                                               casting_func=int):
+        if self._check_misc_theme_data_changed(
+            attribute_name="sliding_button_width",
+            default_value=self.default_button_width,
+            casting_func=int,
+        ):
             has_any_changed = True
 
         if has_any_changed:
@@ -402,11 +494,12 @@ class UI2DSlider(UIElement):
         """
         super().set_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
     def set_relative_position(self, position: Coordinate) -> None:
         """
@@ -418,14 +511,14 @@ class UI2DSlider(UIElement):
         """
         super().set_relative_position(position)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.x = border_and_shadow + self.relative_rect.x
-        self.background_rect.y = border_and_shadow + self.relative_rect.y
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
+        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
 
-        self.button_container.set_relative_position(self.background_rect.topleft)
+        if self.button_container is not None:
+            self.button_container.set_relative_position(self.background_rect.topleft)
 
-    def set_dimensions(self, dimensions: Coordinate,
-                       clamp_to_container: bool = False):
+    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
         Method to directly set the dimensions of an element.
 
@@ -435,22 +528,32 @@ class UI2DSlider(UIElement):
         """
         super().set_dimensions(dimensions, clamp_to_container)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        self.background_rect.width = self.relative_rect.width - (2 * border_and_shadow)
-        self.background_rect.height = self.relative_rect.height - (2 * border_and_shadow)
+        border_and_shadow = int(self.border_width + self.shadow_width)
+        self.background_rect.width = int(
+            self.relative_rect.width - (2 * border_and_shadow)
+        )
+        self.background_rect.height = int(
+            self.relative_rect.height - (2 * border_and_shadow)
+        )
 
-        self.button_container.set_dimensions(self.background_rect.size)
+        if self.button_container is not None:
+            self.button_container.set_dimensions(self.background_rect.size)
 
         # sort out sliding button parameters
-        self.scrollable_width = (self.background_rect.width - self.sliding_button_width)
-        self.scrollable_height = (self.background_rect.height - self.sliding_button_width)
+        self.scrollable_width = self.background_rect.width - self.sliding_button_width
+        self.scrollable_height = self.background_rect.height - self.sliding_button_width
         self.right_limit_position = self.scrollable_width
         self.bottom_limit_position = self.scrollable_height
-        self.scroll_position = (self.scrollable_width * self.current_x_percentage,
-                                self.scrollable_height * self.current_y_percentage)
+        self.scroll_position = pygame.Vector2(
+            self.scrollable_width * self.current_x_percentage,
+            self.scrollable_height * self.current_y_percentage,
+        )
 
-        self.sliding_button.set_dimensions((self.sliding_button_width, self.sliding_button_width))
-        self.sliding_button.set_relative_position(self.scroll_position)
+        if self.sliding_button is not None:
+            self.sliding_button.set_dimensions(
+                (self.sliding_button_width, self.sliding_button_width)
+            )
+            self.sliding_button.set_relative_position(self.scroll_position)
 
     def disable(self):
         """
@@ -458,8 +561,10 @@ class UI2DSlider(UIElement):
         """
         if self.is_enabled:
             self.is_enabled = False
-            self.sliding_button.disable()
-            self.drawable_shape.set_active_state("disabled")
+            if self.sliding_button is not None:
+                self.sliding_button.disable()
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state("disabled")
 
     def enable(self):
         """
@@ -467,8 +572,10 @@ class UI2DSlider(UIElement):
         """
         if not self.is_enabled:
             self.is_enabled = True
-            self.sliding_button.enable()
-            self.drawable_shape.set_active_state("normal")
+            if self.sliding_button is not None:
+                self.sliding_button.enable()
+            if self.drawable_shape is not None:
+                self.drawable_shape.set_active_state("normal")
 
     def show(self):
         """

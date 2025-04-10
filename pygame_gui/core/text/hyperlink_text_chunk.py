@@ -1,31 +1,42 @@
 from typing import Optional, Tuple
 
-from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame.color import Color
 
-
+from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
 from pygame_gui.core.text.text_line_chunk import TextLineChunkFTFont
+from pygame_gui.core.colour_gradient import ColourGradient
 
 
 class HyperlinkTextChunk(TextLineChunkFTFont):
     """
-    Represents a hyperlink to the layout system..
+    Represents a hyperlink to the layout system.
 
     """
-    def __init__(self,
-                 href: str,
-                 text: str,
-                 font: IGUIFontInterface,
-                 underlined: bool,
-                 colour: Color,
-                 bg_colour: Color,
-                 hover_colour: Color,
-                 active_colour: Color,
-                 hover_underline: bool,
-                 text_shadow_data: Optional[Tuple[int, int, int]] = None,
-                 effect_id: Optional[str] = None):
-        super().__init__(text, font, underlined, colour, False, bg_colour,
-                         text_shadow_data, effect_id=effect_id)
+
+    def __init__(
+        self,
+        href: str,
+        text: str,
+        font: IGUIFontInterface,
+        underlined: bool,
+        colour: Color | ColourGradient,
+        bg_colour: Color | ColourGradient,
+        hover_colour: Color | ColourGradient,
+        active_colour: Color | ColourGradient,
+        hover_underline: bool,
+        text_shadow_data: Optional[Tuple[int, int, int, Color, bool]] = None,
+        effect_id: Optional[str] = None,
+    ):
+        super().__init__(
+            text,
+            font,
+            underlined,
+            colour,
+            False,
+            bg_colour,
+            text_shadow_data,
+            effect_id=effect_id,
+        )
 
         self.href = href
         self.is_hovered = False
@@ -80,19 +91,27 @@ class HyperlinkTextChunk(TextLineChunkFTFont):
         self.is_active = False
         self.redraw()
 
-    def _split_at(self, right_side, split_pos, target_surface,
-                  target_surface_area, baseline_centred):
-        right_side_chunk = HyperlinkTextChunk(self.href,
-                                              right_side,
-                                              self.font,
-                                              self.underlined,
-                                              self.colour,
-                                              self.bg_colour,
-                                              self.hover_colour,
-                                              self.active_colour,
-                                              self.hover_underline,
-                                              self.text_shadow_data,
-                                              self.effect_id)
+    def _split_at(
+        self,
+        right_side,
+        split_pos,
+        target_surface,
+        target_surface_area,
+        baseline_centred,
+    ):
+        right_side_chunk = HyperlinkTextChunk(
+            self.href,
+            right_side,
+            self.font,
+            self.underlined,
+            self.colour,
+            self.bg_colour,
+            self.hover_colour,
+            self.active_colour,
+            self.hover_underline,
+            self.text_shadow_data,
+            self.effect_id,
+        )
 
         right_side_chunk.topleft = split_pos  # pylint: disable=attribute-defined-outside-init
         right_side_chunk.target_surface = target_surface

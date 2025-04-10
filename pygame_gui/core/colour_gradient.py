@@ -2,7 +2,9 @@ from typing import Union, Any
 
 import pygame
 
-from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
+from pygame_gui.core.interfaces.colour_gradient_interface import (
+    IColourGradientInterface,
+)
 
 
 class ColourGradient(IColourGradientInterface):
@@ -14,11 +16,14 @@ class ColourGradient(IColourGradientInterface):
     :param colour_2: The second colour of the gradient.
     :param colour_3: An optional third colour for the gradient.
     """
-    def __init__(self, angle_direction: int,
-                 colour_1: pygame.Color,
-                 colour_2: pygame.Color,
-                 colour_3: Union[pygame.Color, None] = None):
 
+    def __init__(
+        self,
+        angle_direction: int,
+        colour_1: pygame.Color,
+        colour_2: pygame.Color,
+        colour_3: Union[pygame.Color, None] = None,
+    ):
         self.angle_direction = angle_direction
         self.colour_1 = colour_1
         self.colour_2 = colour_2
@@ -26,14 +31,16 @@ class ColourGradient(IColourGradientInterface):
 
         if self.colour_3 is None:
             pixel_width = 2
-            colour_pixels_surf = pygame.surface.Surface((pixel_width, 1),
-                                                        flags=pygame.SRCALPHA, depth=32)
+            colour_pixels_surf = pygame.surface.Surface(
+                (pixel_width, 1), flags=pygame.SRCALPHA, depth=32
+            )
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
         else:
             pixel_width = 3
-            colour_pixels_surf = pygame.surface.Surface((pixel_width, 1),
-                                                        flags=pygame.SRCALPHA, depth=32)
+            colour_pixels_surf = pygame.surface.Surface(
+                (pixel_width, 1), flags=pygame.SRCALPHA, depth=32
+            )
             colour_pixels_surf.fill(self.colour_1, pygame.Rect((0, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_2, pygame.Rect((1, 0), (1, 1)))
             colour_pixels_surf.fill(self.colour_3, pygame.Rect((2, 0), (1, 1)))
@@ -48,10 +55,12 @@ class ColourGradient(IColourGradientInterface):
         """
         if not isinstance(other, ColourGradient):
             return False
-        return (self.colour_1 == other.colour_1 and
-                self.colour_2 == other.colour_2 and
-                self.colour_3 == other.colour_3 and
-                self.angle_direction == other.angle_direction)
+        return (
+            self.colour_1 == other.colour_1
+            and self.colour_2 == other.colour_2
+            and self.colour_3 == other.colour_3
+            and self.angle_direction == other.angle_direction
+        )
 
     def __str__(self) -> str:
         """
@@ -59,19 +68,33 @@ class ColourGradient(IColourGradientInterface):
 
         :return: The string representation.
         """
-        result = (str(self.angle_direction) + '_' +
-                  str(self.colour_1.r) + '_' + str(self.colour_1.g) + '_' +
-                  str(self.colour_1.b) + '_' + str(self.colour_1.a) + '_' +
-                  str(self.colour_2.r) + '_' + str(self.colour_2.g) + '_' +
-                  str(self.colour_2.b) + '_' + str(self.colour_2.a))
+        result = (
+            f"{str(self.angle_direction)}_"
+            f"{str(self.colour_1.r)}_"
+            f"{str(self.colour_1.g)}_"
+            f"{str(self.colour_1.b)}_"
+            f"{str(self.colour_1.a)}_"
+            f"{str(self.colour_2.r)}_"
+            f"{str(self.colour_2.g)}_"
+            f"{str(self.colour_2.b)}_"
+            f"{str(self.colour_2.a)}"
+        )
+
         if self.colour_3 is not None:
-            result += ('_' + str(self.colour_3.r) + '_' + str(self.colour_3.g) +
-                       '_' + str(self.colour_3.b) + '_' + str(self.colour_3.a))
+            result += (
+                f"_{str(self.colour_3.r)}_"
+                f"{str(self.colour_3.g)}_"
+                f"{str(self.colour_3.b)}_"
+                f"{str(self.colour_3.a)}"
+            )
 
         return result
 
-    def apply_gradient_to_surface(self, input_surface: pygame.surface.Surface,
-                                  rect: Union[pygame.Rect, None] = None):
+    def apply_gradient_to_surface(
+        self,
+        input_surface: pygame.surface.Surface,
+        rect: Union[pygame.Rect, None] = None,
+    ):
         """
         Applies this gradient to a specified input surface using blending multiplication.
         As a result this method works best when the input surface is a mostly white, stencil shape
@@ -88,25 +111,39 @@ class ColourGradient(IColourGradientInterface):
         gradient_size = input_surface_size
         if self.angle_direction != 0:
             if rect is not None:
-                clip_area_surf = pygame.surface.Surface(rect.size, flags=pygame.SRCALPHA, depth=32)
-                inverse_rotated_input = pygame.transform.rotate(clip_area_surf, -self.angle_direction)
+                clip_area_surf = pygame.surface.Surface(
+                    rect.size, flags=pygame.SRCALPHA, depth=32
+                )
+                inverse_rotated_input = pygame.transform.rotate(
+                    clip_area_surf, -self.angle_direction
+                )
             else:
-                inverse_rotated_input = pygame.transform.rotate(input_surface, -self.angle_direction)
+                inverse_rotated_input = pygame.transform.rotate(
+                    input_surface, -self.angle_direction
+                )
             gradient_size = inverse_rotated_input.get_rect().size
-        gradient_surf = pygame.surface.Surface(gradient_size, flags=pygame.SRCALPHA, depth=32)
+        gradient_surf = pygame.surface.Surface(
+            gradient_size, flags=pygame.SRCALPHA, depth=32
+        )
 
         pygame.transform.scale(self.gradient_surface, gradient_size, gradient_surf)
         gradient_surf = pygame.transform.rotate(gradient_surf, self.angle_direction)
 
         if rect is not None:
             input_surface.set_clip(rect)
-            input_surface.blit(gradient_surf, rect, special_flags=pygame.BLEND_RGBA_MULT)
+            input_surface.blit(
+                gradient_surf, rect, special_flags=pygame.BLEND_RGBA_MULT
+            )
             input_surface.set_clip(None)
         else:
             gradient_placement_rect = gradient_surf.get_rect()
-            gradient_placement_rect.center = (int(input_surface_size[0] / 2),
-                                              int(input_surface_size[1] / 2))
+            gradient_placement_rect.center = (
+                int(input_surface_size[0] / 2),
+                int(input_surface_size[1] / 2),
+            )
 
-            input_surface.blit(gradient_surf,
-                               gradient_placement_rect,
-                               special_flags=pygame.BLEND_RGBA_MULT)
+            input_surface.blit(
+                gradient_surf,
+                gradient_placement_rect,
+                special_flags=pygame.BLEND_RGBA_MULT,
+            )

@@ -38,30 +38,30 @@ class TestSurfaceCache:
                                                       _display_surface_return_none):
         cache = SurfaceCache()
         with pytest.warns(UserWarning, match="Unable to cache surfaces larger than"):
-            cache.add_surface_to_long_term_cache([pygame.Surface((2048, 2048)), 1],
+            cache.add_surface_to_long_term_cache({"surface": pygame.Surface((2048, 2048)), "uses": 1},
                                                  string_id="test_surface")
 
     def test_add_surface_to_long_term_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()
-        cache.add_surface_to_long_term_cache([pygame.Surface((256, 256)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((256, 256)), "uses": 1},
                                              string_id="test_surface_1")
-        cache.add_surface_to_long_term_cache([pygame.Surface((512, 256)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((512, 256)), "uses": 1},
                                              string_id="test_surface_2")
-        cache.add_surface_to_long_term_cache([pygame.Surface((256, 512)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((256, 512)), "uses": 1},
                                              string_id="test_surface_3")
-        cache.add_surface_to_long_term_cache([pygame.Surface((256, 128)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((256, 128)), "uses": 1},
                                              string_id="test_surface_4")
-        cache.add_surface_to_long_term_cache([pygame.Surface((128, 256)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((128, 256)), "uses": 1},
                                              string_id="test_surface_5")
-        cache.add_surface_to_long_term_cache([pygame.Surface((256, 256)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((256, 256)), "uses": 1},
                                              string_id="test_surface_6")
-        cache.add_surface_to_long_term_cache([pygame.Surface((128, 128)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((128, 128)), "uses": 1},
                                              string_id="test_surface_7")
-        cache.add_surface_to_long_term_cache([pygame.Surface((640, 64)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((640, 64)), "uses": 1},
                                              string_id="test_surface_8")
-        cache.add_surface_to_long_term_cache([pygame.Surface((640, 32)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((640, 32)), "uses": 1},
                                              string_id="test_surface_9")
-        cache.add_surface_to_long_term_cache([pygame.Surface((784, 784)), 1],
+        cache.add_surface_to_long_term_cache({"surface": pygame.Surface((784, 784)), "uses": 1},
                                              string_id="test_surface_10")
 
         assert type(cache.find_surface_in_cache("test_surface_1")) == pygame.Surface
@@ -113,9 +113,9 @@ class TestSurfaceCache:
                                                border_width=1,
                                                border_colour=pygame.Color(255, 0, 0, 255),
                                                bg_colour=pygame.Color(100, 200, 100, 180),
-                                               corner_radius=5)
+                                               corner_radius=[5, 5, 5, 5])
 
-        assert cache_id == 'rectangle_64_64_1_1_5_255_0_0_255_100_200_100_180'
+        assert cache_id == 'rectangle_64_64_1_1_5_5_5_5_255_0_0_255_100_200_100_180'
 
     def test_expand_lt_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()

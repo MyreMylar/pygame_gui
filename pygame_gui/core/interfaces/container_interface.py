@@ -26,7 +26,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
     @abstractmethod
     def add_element(self, element: IUIElementInterface):
         """
-        Add a UIElement to the container. The UI's relative_rect parameter will be relative to
+        Add a UIElement to the container. The element's relative_rect parameter will be relative to
         this container.
 
         :param element: A UIElement to add to this container.
@@ -120,7 +120,7 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_size(self) -> Tuple[int, int]:
+    def get_size(self) -> Tuple[int, int] | Tuple[float, float]:
         """
         Get the container's pixel size.
 
@@ -182,12 +182,20 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def are_contents_hovered(self) -> bool:
+        """
+        Are any of the elements in the container hovered? Used for handling mousewheel events.
+
+        :return: True if one of the elements is hovered, False otherwise.
+        """
+
+    @abstractmethod
     def __iter__(self) -> typing.Iterator[IUIElementInterface]:
         """
         Iterates over the elements within the container-like interface.
         This method allows iterating over the children elements within the container.
         """
-        
+
     @abstractmethod
     def __contains__(self, item: IUIElementInterface) -> bool:
         """
@@ -198,15 +206,15 @@ class IUIContainerInterface(IUIElementInterface, metaclass=ABCMeta):
 
 class IContainerLikeInterface(metaclass=ABCMeta):
     """
-        A metaclass that defines the interface for containers used by elements.
+    A metaclass that defines the interface for containers used by elements.
 
-        This interface lets us treat classes like UIWindows and UIPanels like containers for
-        elements even though they actually pass this functionality off to the proper UIContainer
-        class.
-        """
+    This interface lets us treat classes like UIWindows and UIPanels like containers for
+    elements even though they actually pass this functionality off to the proper UIContainer
+    class.
+    """
 
     @abstractmethod
-    def get_container(self) -> IUIContainerInterface:
+    def get_container(self) -> "IContainerAndContainerLike":
         """
         Gets an actual container from this container-like UI element.
         """
@@ -226,14 +234,14 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         process events. Should also hide all the children elements.
         If the container was hidden before - ignore.
         """
-        
+
     @abstractmethod
     def __iter__(self) -> typing.Iterator[IUIElementInterface]:
         """
-        Iterates over the elements within the container-like interface. 
+        Iterates over the elements within the container-like interface.
         This method allows iterating over the children elements within the container.
         """
-        
+
     @abstractmethod
     def __contains__(self, item: IUIElementInterface) -> bool:
         """
@@ -241,9 +249,18 @@ class IContainerLikeInterface(metaclass=ABCMeta):
         :return bool: Return True if the element is found, False otherwise.
         """
 
+    @abstractmethod
     def are_contents_hovered(self) -> bool:
         """
         Are any of the elements in the container hovered? Used for handling mousewheel events.
 
         :return: True if one of the elements is hovered, False otherwise.
         """
+
+
+class IContainerAndContainerLike(
+    IUIContainerInterface, IContainerLikeInterface, metaclass=ABCMeta
+):
+    """
+    Combination of IUIContainerInterface and IContainerLikeInterface mostly for type checking
+    """

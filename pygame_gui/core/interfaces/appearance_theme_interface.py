@@ -1,20 +1,60 @@
 import io
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Union, Dict, Any
+from typing import Optional, List, Union, Dict, TypedDict
 from os import PathLike
 
 
 import pygame
 
-from pygame_gui.core.interfaces.font_dictionary_interface import IUIFontDictionaryInterface
-from pygame_gui.core.interfaces.colour_gradient_interface import IColourGradientInterface
+from pygame_gui.core.interfaces.font_dictionary_interface import (
+    IUIFontDictionaryInterface,
+)
+from pygame_gui.core.interfaces.colour_gradient_interface import (
+    IColourGradientInterface,
+)
 from pygame_gui.core.interfaces.gui_font_interface import IGUIFontInterface
+from pygame_gui.core.package_resource import PackageResource
+from pygame_gui.core.surface_cache import SurfaceCache
+from pygame_gui.core.ui_shadow import ShadowGenerator
+
+
+class PackageResourceInfo(TypedDict):
+    """
+    PackageResource info loaded from the font theme
+    """
+
+    package: str
+    resource: str
+
+
+class FontThemeInfo(TypedDict):
+    """
+    Font info loaded from the font theme
+    """
+
+    name: str
+    size: int
+    bold: bool
+    italic: bool
+    antialiased: bool
+    script: str
+    direction: int  # direction: int = pygame.DIRECTION_LTR
+
+    regular_path: str | None
+    bold_path: str | None
+    italic_path: str | None
+    bold_italic_path: str | None
+
+    regular_resource: PackageResourceInfo | None
+    bold_resource: PackageResourceInfo | None
+    italic_resource: PackageResourceInfo | None
+    bold_italic_resource: PackageResourceInfo | None
 
 
 class IUIAppearanceThemeInterface(metaclass=ABCMeta):
     """
-    A meta class that defines the interface that a UI Appearance Theme uses.
+    A metaclass that defines the interface that a UI Appearance Theme uses.
 
     Interfaces like this help us evade cyclical import problems by allowing us to define the
     actual manager class later on and have it make use of the classes that use the interface.
@@ -55,10 +95,13 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def build_all_combined_ids(self, element_base_ids: Union[None, List[Union[str, None]]],
-                               element_ids: Union[None, List[str]],
-                               class_ids: Union[None, List[Union[str, None]]],
-                               object_ids: Union[None, List[Union[str, None]]]) -> List[str]:
+    def build_all_combined_ids(
+        self,
+        element_base_ids: Union[None, List[Union[str, None]]],
+        element_ids: Union[None, List[str]],
+        class_ids: Union[None, List[Union[str, None]]],
+        object_ids: Union[None, List[Union[str, None]]],
+    ) -> List[str]:
         """
         Construct a list of combined element ids from the element's various accumulated ids.
 
@@ -71,7 +114,9 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_image(self, image_id: str, combined_element_ids: List[str]) -> pygame.surface.Surface:
+    def get_image(
+        self, image_id: str, combined_element_ids: List[str]
+    ) -> pygame.surface.Surface:
         """
         Will raise an exception if no image with the ids specified is found. UI elements that have
         an optional image display will need to handle the exception.
@@ -85,11 +130,11 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_font_info(self, combined_element_ids: List[str]) -> Dict[str, Any]:
+    def get_font_info(self, combined_element_ids: List[str]) -> FontThemeInfo:
         """
         Uses some data about a UIElement to get font data as dictionary
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return dictionary: Data about the font requested
@@ -100,20 +145,22 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
         Uses some data about a UIElement to get a font object.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
 
         :return IGUIFontInterface: An interface to a pygame font object wrapper.
         """
 
     @abstractmethod
-    def get_misc_data(self, misc_data_id: str, combined_element_ids: List[str]) -> Union[str, Dict]:
+    def get_misc_data(
+        self, misc_data_id: str, combined_element_ids: List[str]
+    ) -> Union[str, Dict]:
         """
         Uses data about a UI element and a specific ID to try and find a piece of miscellaneous
         theming data. Raises an exception if it can't find the data requested, UI elements
         requesting optional data will need to handle this exception.
 
-        :param combined_element_ids: A list of IDs representing an element's location in a
+        :param combined_element_ids: A list of IDs representing an element's location in an
                                      interleaved hierarchy of elements.
         :param misc_data_id: The id for the specific piece of miscellaneous data we are looking for.
 
@@ -121,7 +168,9 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_colour(self, colour_id: str, combined_element_ids: List[str] = None) -> pygame.Color:
+    def get_colour(
+        self, colour_id: str, combined_element_ids: Optional[List[str]] = None
+    ) -> pygame.Color:
         """
         Uses data about a UI element and a specific ID to find a colour from our theme.
 
@@ -132,9 +181,9 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_colour_or_gradient(self, colour_id: str,
-                               combined_ids: List[str] = None) -> Union[pygame.Color,
-                                                                        IColourGradientInterface]:
+    def get_colour_or_gradient(
+        self, colour_id: str, combined_ids: Optional[List[str]] = None
+    ) -> Union[pygame.Color, IColourGradientInterface]:
         """
         Uses data about a UI element and a specific ID to find a colour, or a gradient,
         from our theme. Use this function if the UIElement can handle either type.
@@ -147,7 +196,9 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def load_theme(self, file_path: Union[str, PathLike, io.StringIO, 'PackageResource', dict]):
+    def load_theme(
+        self, file_path: Union[str, PathLike, io.StringIO, PackageResource, dict]
+    ):
         """
         Loads a theme, and currently, all associated data like fonts and images required
         by the theme.
@@ -172,5 +223,46 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         Update theming data, via string - for a single element.
         :param element_name:
         :param new_theming_data:
+        :return:
+        """
+
+    @property
+    @abstractmethod
+    def shape_cache(self) -> SurfaceCache:
+        """
+
+        :return:
+        """
+
+    @shape_cache.setter
+    @abstractmethod
+    def shape_cache(self, new_cache: SurfaceCache):
+        """
+
+        :param new_cache:
+        :return:
+        """
+
+    @abstractmethod
+    def check_need_to_rebuild_data_manually_changed(self) -> bool:
+        """
+        Checks and resets a flag for whether we need to trigger a rebuild of all the UI elements after a manual
+        change in the data.
+
+        :return: A boolean that indicates whether we should rebuild or not.
+        """
+
+    @abstractmethod
+    def set_locale(self, locale: str):
+        """
+        Set the locale used in the appearance theme.
+
+        :param locale: a two-letter ISO country code.
+        """
+
+    @abstractmethod
+    def get_shadow_generator(self) -> ShadowGenerator:
+        """
+
         :return:
         """
