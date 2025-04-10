@@ -70,13 +70,15 @@ class UIAutoResizingContainer(UIContainer):
 
         # TODO: Add validation for min and max edges rect
         if min_edges_rect is None:
-            self.min_edges_rect = pygame.Rect(self.get_relative_rect().copy())
+            self.min_edges_rect: pygame.Rect = pygame.Rect(
+                self.get_relative_rect().copy()
+            )
         else:
             self.min_edges_rect = min_edges_rect
 
-        self.max_edges_rect = max_edges_rect
+        self.max_edges_rect: pygame.Rect | None = max_edges_rect
 
-        self.abs_min_edges_rect: Optional[pygame.Rect] = None
+        self.abs_min_edges_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
         self.abs_max_edges_rect: Optional[pygame.Rect] = None
         self.recalculate_abs_edges_rect()
 
@@ -151,59 +153,48 @@ class UIAutoResizingContainer(UIContainer):
         Gets the minimum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        if self.abs_min_edges_rect is not None and self.abs_max_edges_rect is not None:
-            left = self.abs_min_edges_rect.left
-            if self.left_element:
-                left = min(left, int(self.left_element.get_abs_rect().left))
-            if self.abs_max_edges_rect is not None:
-                left = max(left, int(self.abs_max_edges_rect.left))
-            return left
-        return 0
+        left = self.abs_min_edges_rect.left
+        if self.left_element:
+            left = min(left, int(self.left_element.get_abs_rect().left))
+        if self.abs_max_edges_rect is not None:
+            left = max(left, int(self.abs_max_edges_rect.left))
+        return left
 
     def _get_right_most_point(self) -> int:
         """
         Gets the maximum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        if self.abs_min_edges_rect is not None and self.abs_max_edges_rect is not None:
-            right = self.abs_min_edges_rect.right
-            if self.right_element:
-                right = max(right, int(self.right_element.get_abs_rect().right))
-            if self.abs_max_edges_rect is not None:
-                right = min(right, int(self.abs_max_edges_rect.right))
-            return right
-        else:
-            return 0
+        right = self.abs_min_edges_rect.right
+        if self.right_element:
+            right = max(right, int(self.right_element.get_abs_rect().right))
+        if self.abs_max_edges_rect is not None:
+            right = min(right, int(self.abs_max_edges_rect.right))
+        return right
 
     def _get_top_most_point(self) -> int:
         """
         Gets the minimum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        if self.abs_min_edges_rect is not None and self.abs_max_edges_rect is not None:
-            top = self.abs_min_edges_rect.top
-            if self.top_element:
-                top = min(top, int(self.top_element.get_abs_rect().top))
-            if self.abs_max_edges_rect is not None:
-                top = max(top, int(self.abs_max_edges_rect.top))
-            return top
-        else:
-            return 0
+        top = self.abs_min_edges_rect.top
+        if self.top_element:
+            top = min(top, int(self.top_element.get_abs_rect().top))
+        if self.abs_max_edges_rect is not None:
+            top = max(top, int(self.abs_max_edges_rect.top))
+        return top
 
     def _get_bottom_most_point(self) -> int:
         """
         Gets the maximum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        if self.abs_min_edges_rect is not None and self.abs_max_edges_rect is not None:
-            bottom = self.abs_min_edges_rect.bottom
-            if self.bottom_element:
-                bottom = max(bottom, int(self.bottom_element.get_abs_rect().bottom))
-            if self.abs_max_edges_rect is not None:
-                bottom = min(bottom, int(self.abs_max_edges_rect.bottom))
-            return bottom
-        else:
-            return 0
+        bottom = self.abs_min_edges_rect.bottom
+        if self.bottom_element:
+            bottom = max(bottom, int(self.bottom_element.get_abs_rect().bottom))
+        if self.abs_max_edges_rect is not None:
+            bottom = min(bottom, int(self.abs_max_edges_rect.bottom))
+        return bottom
 
     def recalculate_abs_edges_rect(self) -> None:
         """
@@ -214,6 +205,8 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         if self.ui_container is not None and self.anchors is not None:
+            old_abs_min_edge_rect = self.abs_min_edges_rect
+            old_abs_max_edges_rect = self.abs_max_edges_rect
             self.abs_min_edges_rect = self._calc_abs_rect_pos_from_rel_rect(
                 relative_rect=self.min_edges_rect,
                 container=self.ui_container,
@@ -227,7 +220,11 @@ class UIAutoResizingContainer(UIContainer):
                     anchors=self.anchors,
                 )[0]
 
-            self.should_update_dimensions = True
+            if (
+                old_abs_min_edge_rect != self.abs_min_edges_rect
+                or old_abs_max_edges_rect != self.abs_max_edges_rect
+            ):
+                self.should_update_dimensions = True
 
     def update_containing_rect_position(self) -> None:
         """
