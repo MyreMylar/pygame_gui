@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import pygame
 
@@ -19,15 +19,21 @@ class FadeInEffect(TextEffect):
         self,
         text_owner: IUITextOwnerInterface,
         params: Optional[Dict[str, Any]] = None,
-        text_sub_chunk: Optional[TextLineChunkFTFont] = None,
+        text_sub_chunks: List[TextLineChunkFTFont] | None = None,
+        effect_id_tag: str | None = None,
     ):
         super().__init__()
         self.text_owner = text_owner
-        self.text_sub_chunk = text_sub_chunk
+        self.text_sub_chunks = text_sub_chunks
+        self.effect_id_tag = effect_id_tag
         self.alpha_value = 0
         self.time_per_alpha_change = 0.01
         self.time_per_alpha_change_acc = 0.0
-        self.text_owner.set_text_alpha(0, self.text_sub_chunk)
+        if self.text_sub_chunks is not None:
+            for chunk in self.text_sub_chunks:
+                self.text_owner.set_text_alpha(0, chunk)
+        else:
+            self.text_owner.set_text_alpha(0)
         self._load_params(params)
         self.finished = False
 
@@ -54,15 +60,15 @@ class FadeInEffect(TextEffect):
         elif not self.finished:
             self.finished = True
             # finished effect
-            self.text_owner.stop_finished_effect(self.text_sub_chunk)
+            self.text_owner.stop_finished_effect(self.text_sub_chunks)
 
             event_data = {
                 "ui_element": self.text_owner,
                 "ui_object_id": self.text_owner.get_object_id(),
                 "effect": TEXT_EFFECT_FADE_IN,
             }
-            if self.text_sub_chunk is not None:
-                event_data["effect_tag_id"] = self.text_sub_chunk.effect_id
+            if self.effect_id_tag is not None:
+                event_data["effect_tag_id"] = self.effect_id_tag
             pygame.event.post(pygame.event.Event(UI_TEXT_EFFECT_FINISHED, event_data))
 
     def get_final_alpha(self) -> int:
@@ -77,4 +83,8 @@ class FadeInEffect(TextEffect):
         """
         Apply the effect to the text
         """
-        self.text_owner.set_text_alpha(self.alpha_value, self.text_sub_chunk)
+        if self.text_sub_chunks is not None:
+            for chunk in self.text_sub_chunks:
+                self.text_owner.set_text_alpha(self.alpha_value, chunk)
+        else:
+            self.text_owner.set_text_alpha(self.alpha_value)

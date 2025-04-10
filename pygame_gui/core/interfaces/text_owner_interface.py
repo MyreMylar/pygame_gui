@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Any, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, Any, Optional, Tuple, List, TYPE_CHECKING
 
 from pygame_gui._constants import UITextEffectType
 
@@ -164,8 +164,8 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
     @abstractmethod
     def stop_finished_effect(
         self,
-        sub_chunk: Optional[
-            "pygame_gui.core.text.text_line_chunk.TextLineChunkFTFont"
+        sub_chunks: Optional[
+            List["pygame_gui.core.text.text_line_chunk.TextLineChunkFTFont"]
         ] = None,
     ):
         """
@@ -173,19 +173,19 @@ class IUITextOwnerInterface(metaclass=ABCMeta):
         ended. Used when an effect reaches a natural end where we might want to keep it in
         the end of effect state (e.g. a fade out)
 
-        :param sub_chunk: An optional chunk so we only clear the effect from this chunk.
+        :param sub_chunks: An optional list of chunks, so we only stop the effect on these chunks.
         """
 
     @abstractmethod
     def clear_all_active_effects(
         self,
-        sub_chunk: Optional[
-            "pygame_gui.core.text.text_line_chunk.TextLineChunkFTFont"
+        sub_chunks: Optional[
+            List["pygame_gui.core.text.text_line_chunk.TextLineChunkFTFont"]
         ] = None,
     ):
         """
         Clears any active effects and redraws the text. A full reset, usually called before
         firing off a new effect if one is already in progress.
 
-        :param sub_chunk: An optional chunk so we only clear the effect from this chunk.
+        :param sub_chunks: An optional list of chunks, so we only clear the effect from these chunks.
         """

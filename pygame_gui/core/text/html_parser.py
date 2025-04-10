@@ -39,7 +39,7 @@ class TextStyle(TypedDict):
     underline: bool
     link: bool
     link_href: str | None
-    effect_id: str | None
+    effect_id: List[str] | None
     antialiased: bool
     script: str
     direction: int
@@ -158,7 +158,7 @@ class HTMLParser(html.parser.HTMLParser):
             if "href" in attributes:
                 style["link_href"] = attributes["href"]
         elif element == "effect":
-            HTMLParser._handle_effect_tag(attributes, style)
+            self._handle_effect_tag(attributes, style)
         elif element == "shadow":
             self._handle_shadow_tag(attributes, style)
         elif element == "font":
@@ -180,10 +180,16 @@ class HTMLParser(html.parser.HTMLParser):
 
         self.push_style(element, style)
 
-    @classmethod
-    def _handle_effect_tag(cls, attributes, style):
+    def _handle_effect_tag(self, attributes, style):
         if "id" in attributes:
-            style["effect_id"] = str(attributes["id"])
+            if (
+                "effect_id" in self.current_style
+                and self.current_style["effect_id"] is not None
+            ):
+                style["effect_id"] = self.current_style["effect_id"].copy()
+                style["effect_id"].append(str(attributes["id"]))
+            else:
+                style["effect_id"] = [str(attributes["id"])]
 
     def _handle_shadow_tag(self, attributes, style):
         shadow_size = 0
@@ -485,7 +491,7 @@ class HTMLParser(html.parser.HTMLParser):
                 active_colour=self.link_style["link_selected"],
                 hover_underline=self.link_style["link_hover_underline"],
                 text_shadow_data=self.current_style["shadow_data"],
-                effect_id=self.current_style["effect_id"],
+                effect_ids=self.current_style["effect_id"],
             )
         else:
             using_default_text_colour = (
@@ -500,7 +506,7 @@ class HTMLParser(html.parser.HTMLParser):
                 using_default_text_colour=using_default_text_colour,
                 bg_colour=self.current_style["bg_colour"],
                 text_shadow_data=self.current_style["shadow_data"],
-                effect_id=self.current_style["effect_id"],
+                effect_ids=self.current_style["effect_id"],
             )
 
     @staticmethod
