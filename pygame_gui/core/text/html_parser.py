@@ -391,8 +391,14 @@ class HTMLParser(html.parser.HTMLParser):
             self._handle_line_break()
 
         result = None
+        elements_to_return_to_stack: List[str] = []
         while result != element:
+            if result is not None:
+                elements_to_return_to_stack.append(result)
             result = self.element_stack.pop()
+
+        while elements_to_return_to_stack:
+            self.element_stack.append(elements_to_return_to_stack.pop())
 
     def handle_data(self, data: str):
         """
@@ -442,11 +448,18 @@ class HTMLParser(html.parser.HTMLParser):
             return
 
         # Remove all innermost elements until key is closed.
+        styles_to_return_to_stack: List[Tuple[str, Dict[str, Any]]] = []
         while True:
             match, old_styles = self.style_stack.pop()
-            self.current_style.update(old_styles)
             if match == key:
+                self.current_style.update(old_styles)
                 break
+
+            styles_to_return_to_stack.append((match, old_styles))
+
+        while styles_to_return_to_stack:
+            key, style = styles_to_return_to_stack.pop()
+            self.style_stack.append((key, style))
 
     def _add_text(self, text: str):
         """
