@@ -1191,6 +1191,25 @@ class TestUITextEntryLine:
 
         assert text_entry.get_text() == "Some basic text"
 
+    def test_internal_replace_selection_with_entered_character(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        resolution = (400, 200)
+        manager = UIManager(resolution)
+        text_entry = UITextEntryLine(
+            relative_rect=pygame.Rect(100, 80, 200, 30), manager=manager
+        )
+
+        text_entry.set_text_hidden(True)
+        text_entry.set_text("password")
+        text_entry.select_range = [0, 2]
+        text_entry._replace_selection_with_entered_character("d")
+
+        assert text_entry.drawable_shape.theming["text"] == (
+            text_entry.hidden_text_char * 7
+        )
+        assert text_entry.text == "dssword"
+
 
 if __name__ == '__main__':
     pytest.console_main()

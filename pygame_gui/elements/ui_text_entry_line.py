@@ -641,7 +641,10 @@ class UITextEntryLine(UIElement):
         self.text = self.text[:low_end] + character + self.text[high_end:]
 
         if self.drawable_shape is not None:
-            self.drawable_shape.set_text(self.text)
+            if not self.is_text_hidden:
+                self.drawable_shape.set_text(self.text)
+            else:
+                self.drawable_shape.set_text(self.hidden_text_char * len(self.text))
         self.edit_position = low_end + 1
         self.select_range = [0, 0]
 
