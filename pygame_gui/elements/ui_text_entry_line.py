@@ -242,6 +242,10 @@ class UITextEntryLine(UIElement):
         characters and also disallow copying the text into the clipboard. It is designed
         for basic 'password box' usage.
 
+        .. Warning:: Prior to version 0.6.14, there is a bug in which replacing highlighted
+                     sections of text would reveal the text that was previously hidden. Use older
+                     versions for security-sensitive applications at your own risk!
+
         :param is_hidden: Can be set to True or False. Defaults to True because
                           if you are calling this you likely want a password box with no fuss.
                           Set it back to False if you want to un-hide the text (e.g.
