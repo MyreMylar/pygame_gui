@@ -715,6 +715,18 @@ class DrawableShape:
             if "text_height" in self.theming:
                 text_actual_area_rect.height = self.theming["text_height"]
 
+            min_text_width = 0
+            if "min_text_width" in self.theming:
+                min_text_width = self.theming["min_text_width"]
+
+            horiz_alignment = "left"
+            if "text_horiz_alignment" in self.theming:
+                horiz_alignment = self.theming["text_horiz_alignment"]
+
+            horiz_alignment_method = "rect"
+            if "text_horiz_alignment_method" in self.theming:
+                horiz_alignment_method = self.theming["text_horiz_alignment_method"]
+
             text_chunk.should_centre_from_baseline = True
             default_font_data = {
                 "font": self.theming["font"],
@@ -733,6 +745,9 @@ class DrawableShape:
                 default_font_data=default_font_data,
                 text_x_scroll_enabled=self.text_x_scroll_enabled,
                 editable=self.editable_text,
+                min_layout_rect_width=min_text_width,
+                horiz_alignment=horiz_alignment,
+                horiz_alignment_method=horiz_alignment_method
             )
             if "selected_bg" in self.theming:
                 self.text_box_layout.selection_colour = self.theming["selected_bg"]
