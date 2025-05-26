@@ -1,5 +1,7 @@
 import re
+import math
 import warnings
+
 
 from typing import Union, List, Dict, Optional
 
@@ -178,6 +180,10 @@ class UITextEntryLine(UIElement):
             0, 0, 0
         )
         self.padding = (0, 0)
+        self.text_horiz_alignment = "default"
+        self.text_vert_alignment = "center"
+        self.text_horiz_alignment_padding = -1
+        self.text_vert_alignment_padding = -1
 
         self.shape = "rectangle"
 
@@ -277,14 +283,57 @@ class UITextEntryLine(UIElement):
             #                              'a different font for this element')
             display_text = self.hidden_text_char * len(self.text)
 
-        text_direction = pygame.DIRECTION_LTR
-        if self.font is not None:
-            text_direction = self.font.get_direction()
-        text_horiz_alignment = "left"
-        if text_direction == pygame.DIRECTION_LTR:
+        if self.text_horiz_alignment == "default":
+            text_direction = pygame.DIRECTION_LTR
+            if self.font is not None:
+                text_direction = self.font.get_direction()
             text_horiz_alignment = "left"
-        elif text_direction == pygame.DIRECTION_RTL:
-            text_horiz_alignment = "right"
+            if text_direction == pygame.DIRECTION_LTR:
+                text_horiz_alignment = "left"
+            elif text_direction == pygame.DIRECTION_RTL:
+                text_horiz_alignment = "right"
+        else:
+            text_horiz_alignment = self.text_horiz_alignment
+
+        if self.text_horiz_alignment_padding != -1:
+            horiz_padding = self.text_horiz_alignment_padding
+        else:
+            horiz_padding = self.padding[0]
+
+        if self.text_vert_alignment_padding != -1:
+            vert_padding = self.text_vert_alignment_padding
+        else:
+            vert_padding = self.padding[1]
+
+        tl_offset = round(
+            self.shape_corner_radius[0]
+            - (math.sin(math.pi / 4) * self.shape_corner_radius[0])
+        )
+        tr_offset = round(
+            self.shape_corner_radius[1]
+            - (math.sin(math.pi / 4) * self.shape_corner_radius[1])
+        )
+        bl_offset = round(
+            self.shape_corner_radius[2]
+            - (math.sin(math.pi / 4) * self.shape_corner_radius[2])
+        )
+        br_offset = round(
+            self.shape_corner_radius[3]
+            - (math.sin(math.pi / 4) * self.shape_corner_radius[3])
+        )
+        rounded_corner_width_offsets = [
+            max(tl_offset, bl_offset),
+            max(tr_offset, br_offset),
+        ]
+
+        total_text_buffer = (
+                (self.shadow_width * 2)
+                + (self.border_width * 2)
+                + rounded_corner_width_offsets[0]
+                + rounded_corner_width_offsets[1]
+        )
+
+        min_text_width = self.rect.width - (total_text_buffer + horiz_padding)
 
         theming_parameters = {
             "normal_bg": self.background_colour,
@@ -306,10 +355,11 @@ class UITextEntryLine(UIElement):
             else translate(self.placeholder_text),
             "text_width": -1,
             "max_text_width": -1,
+            "min_text_width": min_text_width,
             "text_horiz_alignment": text_horiz_alignment,
-            "text_vert_alignment": "centre",
-            "text_horiz_alignment_padding": self.padding[0],
-            "text_vert_alignment_padding": self.padding[1],
+            "text_vert_alignment": self.text_vert_alignment,
+            "text_horiz_alignment_padding": horiz_padding,
+            "text_vert_alignment_padding": vert_padding,
             "shape_corner_radius": self.shape_corner_radius,
             "border_overlap": self.border_overlap,
         }
@@ -1410,8 +1460,50 @@ class UITextEntryLine(UIElement):
         if self._check_theme_colours_changed():
             has_any_changed = True
 
+        if self._check_text_alignment_theming():
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
+
+    def _check_text_alignment_theming(self) -> bool:
+        """
+        Checks for any changes in the theming data related to text alignment.
+
+        :return: True if changes found.
+
+        """
+        has_any_changed = False
+
+        if self._check_misc_theme_data_changed(
+            attribute_name="text_horiz_alignment",
+            default_value="default",
+            casting_func=str,
+        ):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(
+            attribute_name="text_horiz_alignment_padding",
+            default_value=-1,
+            casting_func=int,
+        ):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(
+            attribute_name="text_vert_alignment",
+            default_value="center",
+            casting_func=str,
+        ):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(
+            attribute_name="text_vert_alignment_padding",
+            default_value=-1,
+            casting_func=int,
+        ):
+            has_any_changed = True
+
+        return has_any_changed
 
     def _check_theme_colours_changed(self):
         """

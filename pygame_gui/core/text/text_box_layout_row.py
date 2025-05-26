@@ -171,6 +171,12 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self.letter_count += new_item.letter_count
 
+    def recalculate_width(self):
+        width = 0
+        for item in self.items:
+            width += item.width
+        self.width = width
+
     def rewind_row(self, layout_rect_queue):
         """
         Use this to add items from the row back onto a layout queue, useful if we've added
@@ -496,22 +502,16 @@ class TextBoxLayoutRow(pygame.Rect):
 
     def _setup_offset_position_from_edit_cursor(self):
         if self.text_x_scroll_enabled:
-            if (
-                self.cursor_draw_width
-                > (self.layout.x_scroll_offset + self.layout.view_rect.width)
-                - self.edit_right_margin
-            ):
-                self.layout.x_scroll_offset = (
-                    self.cursor_draw_width - self.layout.view_rect.width
-                ) + self.edit_right_margin
-
-            if (
-                self.cursor_draw_width
-                < self.layout.x_scroll_offset + self.edit_cursor_left_margin
-            ):
+            if self.cursor_draw_width > (self.layout.view_rect.width - self.edit_right_margin):
+                self.layout.x_scroll_offset = (self.cursor_draw_width -
+                                               self.layout.view_rect.width +
+                                               self.edit_right_margin)
+            elif self.cursor_draw_width < self.edit_cursor_left_margin:
                 self.layout.x_scroll_offset = max(
                     0, self.cursor_draw_width - self.edit_cursor_left_margin
                 )
+            else:
+                self.layout.x_scroll_offset = 0
 
     def set_cursor_from_click_pos(self, click_pos: Tuple[int, int], num_rows: int):
         """

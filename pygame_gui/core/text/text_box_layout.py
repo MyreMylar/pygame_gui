@@ -40,6 +40,9 @@ class TextBoxLayout:
         text_direction: int = pygame.DIRECTION_LTR,
         text_x_scroll_enabled: bool = False,
         editable: bool = False,
+        min_layout_rect_width: int = 0,
+        horiz_alignment: str = "left",
+        horiz_alignment_method: str = "rect"
     ):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
@@ -48,6 +51,9 @@ class TextBoxLayout:
         self.text_direction = text_direction
         self.text_x_scroll_enabled = text_x_scroll_enabled
         self.editable = editable
+        self.min_layout_rect_width = min_layout_rect_width
+        self.horiz_alignment = horiz_alignment
+        self.horiz_alignment_method = horiz_alignment_method
 
         self.edit_cursor_width = 1
 
@@ -62,10 +68,12 @@ class TextBoxLayout:
 
         self.expand_width = False
         if self.layout_rect.width == -1:
-            self.layout_rect.width = 0
+            temp_layout_width = 0
             self.expand_width = True
             for rect in self.input_data_rect_queue:
                 self.layout_rect.width += rect.width
+
+            self.layout_rect.width = max(temp_layout_width, self.min_layout_rect_width)
 
         self.dynamic_width = self.view_rect.width == -1
         self.dynamic_height = self.view_rect.height == -1
@@ -140,6 +148,12 @@ class TextBoxLayout:
         self.plain_text = plain_text
 
     def _reprocess_layout_rows(self, from_index, row_to_process_from):
+        if len(self.layout_rows) <= 1:
+            # when reprocessing reset the layout width if we are down to 1 row or fewer
+            min_row_width = 0
+            if len(self.layout_rows) == 1:
+                min_row_width = self.layout_rows[0].width
+            self.layout_rect.width = max(self.view_rect.width, min_row_width)
         temp_layout_queue: Deque[TextLayoutRect] = deque([])
         for row in reversed(self.layout_rows[from_index:]):
             row.rewind_row(temp_layout_queue)
@@ -645,6 +659,21 @@ class TextBoxLayout:
                             row.height,
                             self.x_scroll_offset,
                         )
+
+    def align_row(self, row, x_padding=0):
+        """
+        Aligns the text drawing position correctly according to our theming options.
+
+        """
+        # Horizontal alignment
+        if self.horiz_alignment == "center" or self.horiz_alignment not in ["left", "right"]:
+            row.horiz_center_row(self.floating_rects, self.horiz_alignment_method)
+        elif self.horiz_alignment == "left":
+            start_left = self.layout_rect.left + x_padding
+            row.align_left_row(start_left, self.floating_rects)
+        else:
+            start_right = self.layout_rect.width - x_padding
+            row.align_right_row(start_right, self.floating_rects)
 
     def horiz_center_all_rows(self, method="rect"):
         """
@@ -1216,6 +1245,7 @@ class TextBoxLayout:
 
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
+                self.align_row(row)
                 row.finalise(self.finalised_surface)
 
     def insert_line_break(self, layout_index: int, parser: Optional[HTMLParser]):
@@ -1388,6 +1418,8 @@ class TextBoxLayout:
             self._setup_and_add_empty_chunk(current_row_starting_chunk, current_row)
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
+                row.recalculate_width()
+                self.align_row(row)
                 row.finalise(self.finalised_surface)
 
         self.selected_rows = []
@@ -1451,6 +1483,8 @@ class TextBoxLayout:
                 if isinstance(chunk, TextLineChunkFTFont):
                     chunk.delete_letter_at_index(0)
 
+        current_row.recalculate_width()
+
         row_to_process_from = current_row
         row_to_process_from_index = current_row.row_index
         if current_row.row_index > 0:
@@ -1461,6 +1495,7 @@ class TextBoxLayout:
 
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
+                self.align_row(row)
                 row.finalise(self.finalised_surface)
 
     def backspace_at_cursor(self):
@@ -1498,6 +1533,7 @@ class TextBoxLayout:
         if chunk_to_remove is not None:
             current_row.items.remove(chunk_to_remove)
         current_row.set_cursor_position(cursor_pos - 1)
+        current_row.recalculate_width()
 
         row_to_process_from = current_row
         row_to_process_from_index = current_row.row_index
@@ -1509,6 +1545,7 @@ class TextBoxLayout:
 
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
+                self.align_row(row)
                 row.finalise(self.finalised_surface)
 
     def _find_row_from_text_box_index(self, text_box_index: int):
