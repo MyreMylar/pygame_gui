@@ -125,6 +125,44 @@ Fired when a user stops hovering over a button with the mouse.
              if event.ui_element == test_button:
                  print('Test button unhovered')
 
+:class:`UICheckBox <pygame_gui.elements.UICheckBox>` - UI_CHECK_BOX_CHECKED
+...........................................................................
+
+Fired when a user checks a checkbox by clicking on it with a mouse or pressing space/enter while it has focus.
+
+ - **'type'** : pygame_gui.UI_CHECK_BOX_CHECKED
+ - **'ui_element'** : The :class:`UICheckBox <pygame_gui.elements.UICheckBox>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the checkbox that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+         if event.type == pygame_gui.UI_CHECK_BOX_CHECKED:
+             if event.ui_element == test_checkbox:
+                 print('Checkbox checked')
+
+:class:`UICheckBox <pygame_gui.elements.UICheckBox>` - UI_CHECK_BOX_UNCHECKED
+.............................................................................
+
+Fired when a user unchecks a checkbox by clicking on it with a mouse or pressing space/enter while it has focus.
+
+ - **'type'** : pygame_gui.UI_CHECK_BOX_UNCHECKED
+ - **'ui_element'** : The :class:`UICheckBox <pygame_gui.elements.UICheckBox>` that fired this event.
+ - **'ui_object_id'** : The most unique ID for the checkbox that fired this event.
+
+**Example usage**:
+
+.. code-block:: python
+   :linenos:
+
+    for event in pygame.event.get():
+         if event.type == pygame_gui.UI_CHECK_BOX_UNCHECKED:
+             if event.ui_element == test_checkbox:
+                 print('Checkbox unchecked')
+
 :class:`UITextBox <pygame_gui.elements.UITextBox>` - UI_TEXT_BOX_LINK_CLICKED
 .............................................................................
 

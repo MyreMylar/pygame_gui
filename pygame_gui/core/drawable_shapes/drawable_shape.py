@@ -747,7 +747,7 @@ class DrawableShape:
                 editable=self.editable_text,
                 min_layout_rect_width=min_text_width,
                 horiz_alignment=horiz_alignment,
-                horiz_alignment_method=horiz_alignment_method
+                horiz_alignment_method=horiz_alignment_method,
             )
             if "selected_bg" in self.theming:
                 self.text_box_layout.selection_colour = self.theming["selected_bg"]

@@ -327,10 +327,10 @@ class UITextEntryLine(UIElement):
         ]
 
         total_text_buffer = (
-                (self.shadow_width * 2)
-                + (self.border_width * 2)
-                + rounded_corner_width_offsets[0]
-                + rounded_corner_width_offsets[1]
+            (self.shadow_width * 2)
+            + (self.border_width * 2)
+            + rounded_corner_width_offsets[0]
+            + rounded_corner_width_offsets[1]
         )
 
         min_text_width = self.rect.width - (total_text_buffer + horiz_padding)
