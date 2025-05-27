@@ -18,6 +18,7 @@ from pygame_gui._constants import (
 from pygame_gui._constants import UI_BUTTON_ON_HOVERED, UI_BUTTON_ON_UNHOVERED
 from pygame_gui._constants import UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
 from pygame_gui._constants import UI_TEXT_BOX_LINK_CLICKED
+from pygame_gui._constants import UI_CHECK_BOX_CHECKED, UI_CHECK_BOX_UNCHECKED
 from pygame_gui._constants import (
     UI_DROP_DOWN_MENU_CHANGED,
     UI_HORIZONTAL_SLIDER_MOVED,
@@ -66,6 +67,8 @@ __all__ = [
     "UI_TEXT_BOX_LINK_CLICKED",
     "UI_TEXT_ENTRY_CHANGED",
     "UI_TEXT_ENTRY_FINISHED",
+    "UI_CHECK_BOX_CHECKED",
+    "UI_CHECK_BOX_UNCHECKED",
     "UI_DROP_DOWN_MENU_CHANGED",
     "UI_HORIZONTAL_SLIDER_MOVED",
     "UI_2D_SLIDER_MOVED",
