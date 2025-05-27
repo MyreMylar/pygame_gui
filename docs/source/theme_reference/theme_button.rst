@@ -136,6 +136,7 @@ Misc
  - "**text_vert_alignment_padding**" - If vertical alignment is set to 'top' or 'bottom' this value will control the buffer between the edge of the button and where we start placing the text. Default is "1".
  - "**text_shadow_size**" - The increased size in pixels of the text's shadow/outline. Set to "0", "1" or "2", larger than that the effect breaks down and individual letters merge together. Defaults to "0", no shadow.
  - "**text_shadow_offset**" - Pixel offset in horizontal (x) and vertical (y) dimensions for where the text shadow is drawn. In the format "x,y". Defaults to "0,0".
+ - "**auto_scale_images**" - Set to "1" to automatically scale provided theming images to fit the button size while maintaining aspect ratio. The images will be scaled to the largest size that fits within the button's rectangle. Defaults to "0" (disabled).
  - "**state_transitions**" - A block of parameters that define any fade transitions between button states. Normally buttons states visually change instantly, if you setup values here the button will instead fade from one state to the next. Transition definitions are one way, if you want to go in both directions, use two parameters. Transition parameters have this format:
 
    - "**startstate_targetstate**" - Can be set to any positive floating point value, representing the transition time in seconds.
@@ -235,6 +236,7 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 "text_vert_alignment_padding": "5",
                 "text_shadow_size": "1",
                 "text_shadow_offset": "0,0",
+                "auto_scale_images": "1",
                 "state_transitions":
                 {
                     "normal_hovered": "0.5",
