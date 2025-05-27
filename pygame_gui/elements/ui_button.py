@@ -154,6 +154,9 @@ class UIButton(UIElement):
         self.text_shadow_offset = (0, 0)
         self.max_dynamic_width = max_dynamic_width
 
+        # Auto-scale images theming parameter
+        self.auto_scale_images = False
+
         self.state_transitions: Dict[Tuple[str, str], float] = {}
 
         self._handler: Dict[int, Callable] = {}
@@ -168,6 +171,41 @@ class UIButton(UIElement):
             self.allow_double_clicks = True
 
         self.rebuild_from_changed_theme_data()
+
+    @staticmethod
+    def _scale_image_to_fit(
+        image: pygame.Surface, target_size: Tuple[int, int]
+    ) -> pygame.Surface:
+        """
+        Scale an image to fit within the target size while maintaining aspect ratio.
+        The image will be scaled to the largest size that fits within the target dimensions.
+
+        :param image: The image surface to scale.
+        :param target_size: The target size (width, height) to fit the image within.
+        :return: The scaled image surface.
+        """
+        if image is None:
+            return None
+
+        image_width, image_height = image.get_size()
+        target_width, target_height = target_size
+
+        # Calculate scale factors for both dimensions
+        scale_x = target_width / image_width
+        scale_y = target_height / image_height
+
+        # Use the smaller scale factor to ensure the image fits within the target size
+        scale = min(scale_x, scale_y)
+
+        # Calculate new dimensions
+        new_width = int(image_width * scale)
+        new_height = int(image_height * scale)
+
+        # Scale the image
+        if new_width > 0 and new_height > 0:
+            return pygame.transform.smoothscale(image, (new_width, new_height))
+        else:
+            return image
 
     def _set_any_images_from_theme(self) -> bool:
         """
@@ -186,6 +224,10 @@ class UIButton(UIElement):
         except LookupError:
             normal_image = None
         finally:
+            # Scale image if auto_scale_images is enabled
+            if normal_image is not None and self.auto_scale_images:
+                normal_image = self._scale_image_to_fit(normal_image, self.rect.size)
+
             if normal_image != self.normal_image:
                 self.normal_image = normal_image
                 self.hovered_image = normal_image
@@ -201,6 +243,10 @@ class UIButton(UIElement):
         except LookupError:
             hovered_image = self.normal_image
         finally:
+            # Scale image if auto_scale_images is enabled
+            if hovered_image is not None and self.auto_scale_images:
+                hovered_image = self._scale_image_to_fit(hovered_image, self.rect.size)
+
             if hovered_image != self.hovered_image:
                 self.hovered_image = hovered_image
                 changed = True
@@ -213,6 +259,12 @@ class UIButton(UIElement):
         except LookupError:
             selected_image = self.normal_image
         finally:
+            # Scale image if auto_scale_images is enabled
+            if selected_image is not None and self.auto_scale_images:
+                selected_image = self._scale_image_to_fit(
+                    selected_image, self.rect.size
+                )
+
             if selected_image != self.selected_image:
                 self.selected_image = selected_image
                 changed = True
@@ -225,6 +277,12 @@ class UIButton(UIElement):
         except LookupError:
             disabled_image = self.normal_image
         finally:
+            # Scale image if auto_scale_images is enabled
+            if disabled_image is not None and self.auto_scale_images:
+                disabled_image = self._scale_image_to_fit(
+                    disabled_image, self.rect.size
+                )
+
             if disabled_image != self.disabled_image:
                 self.disabled_image = disabled_image
                 changed = True
@@ -686,6 +744,17 @@ class UIButton(UIElement):
 
         if cols != self.colours:
             self.colours = cols
+            has_any_changed = True
+
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
+        # Load auto_scale_images parameter BEFORE loading images so scaling can be applied
+        if self._check_misc_theme_data_changed(
+            attribute_name="auto_scale_images",
+            default_value=False,
+            casting_func=parse_to_bool,
+        ):
             has_any_changed = True
 
         if self._set_any_images_from_theme():

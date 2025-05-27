@@ -1029,6 +1029,244 @@ class TestUIButton:
         assert button.shadow_width == 4
         assert button.tool_tip_delay == 6.0
 
+    def test_auto_scale_images_functionality(self, _init_pygame, _display_surface_return_none):
+        """Test the auto_scale_images functionality."""
+        # Create a test image
+        test_image = pygame.Surface((64, 64))
+        test_image.fill((255, 0, 0))
+        
+        # Test scaling function directly
+        scaled_down = UIButton._scale_image_to_fit(test_image, (32, 32))
+        assert scaled_down.get_size() == (32, 32)
+        
+        scaled_up = UIButton._scale_image_to_fit(test_image, (128, 128))
+        assert scaled_up.get_size() == (128, 128)
+        
+        # Test aspect ratio preservation with non-square targets
+        scaled_wide = UIButton._scale_image_to_fit(test_image, (100, 50))
+        assert scaled_wide.get_size() == (50, 50)  # Should fit height, maintain square aspect
+        
+        scaled_tall = UIButton._scale_image_to_fit(test_image, (50, 100))
+        assert scaled_tall.get_size() == (50, 50)  # Should fit width, maintain square aspect
+        
+        # Test with None image
+        assert UIButton._scale_image_to_fit(None, (100, 100)) is None
+        
+        # Test with zero dimensions
+        scaled_zero = UIButton._scale_image_to_fit(test_image, (0, 100))
+        assert scaled_zero == test_image  # Should return original when target has zero dimension
+
+    def test_auto_scale_images_theme_parameter(self, _init_pygame, _display_surface_return_none):
+        """Test that auto_scale_images theme parameter is loaded correctly."""
+        # Create theme with auto_scale_images enabled
+        theme_data = {
+            "button": {
+                "misc": {
+                    "auto_scale_images": "1"
+                }
+            }
+        }
+        
+        import tempfile
+        import json
+        import os
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Test Button",
+                            manager=manager)
+            
+            # Check that auto_scale_images is enabled
+            assert button.auto_scale_images is True
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_auto_scale_images_disabled_by_default(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        """Test that auto_scale_images is disabled by default."""
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                         text="Test Button",
+                         manager=default_ui_manager)
+        
+        assert button.auto_scale_images is False
+
+    def test_auto_scale_images_with_rectangular_image(self, _init_pygame, _display_surface_return_none):
+        """Test auto scaling with non-square images."""
+        # Create a rectangular test image (2:1 aspect ratio)
+        test_image = pygame.Surface((100, 50))
+        test_image.fill((0, 255, 0))
+        
+        # Test scaling to square target - should maintain aspect ratio
+        scaled_square = UIButton._scale_image_to_fit(test_image, (60, 60))
+        assert scaled_square.get_size() == (60, 30)  # Maintains 2:1 ratio, fits width
+        
+        # Test scaling to wide target - should fit height
+        scaled_wide = UIButton._scale_image_to_fit(test_image, (200, 40))
+        assert scaled_wide.get_size() == (80, 40)  # Maintains 2:1 ratio, fits height
+        
+        # Test scaling to tall target - should fit width
+        scaled_tall = UIButton._scale_image_to_fit(test_image, (80, 200))
+        assert scaled_tall.get_size() == (80, 40)  # Maintains 2:1 ratio, fits width
+
+    def test_auto_scale_images_aspect_ratio_preservation(self, _init_pygame, _display_surface_return_none):
+        """Test that aspect ratio is preserved during scaling."""
+        # Test with various aspect ratios
+        test_cases = [
+            ((100, 50), 2.0),    # 2:1 ratio
+            ((50, 100), 0.5),    # 1:2 ratio
+            ((120, 80), 1.5),    # 3:2 ratio
+            ((80, 120), 2/3),    # 2:3 ratio
+        ]
+        
+        for image_size, expected_ratio in test_cases:
+            test_image = pygame.Surface(image_size)
+            test_image.fill((255, 255, 0))
+            
+            # Scale to various target sizes
+            target_sizes = [(200, 200), (150, 100), (100, 150), (300, 200)]
+            
+            for target_size in target_sizes:
+                scaled = UIButton._scale_image_to_fit(test_image, target_size)
+                actual_ratio = scaled.get_width() / scaled.get_height()
+                
+                # Allow small floating point differences (due to integer pixel rounding)
+                assert abs(actual_ratio - expected_ratio) < 0.02, \
+                    f"Aspect ratio not preserved: expected {expected_ratio}, got {actual_ratio}"
+                
+                # Ensure scaled image fits within target
+                assert scaled.get_width() <= target_size[0]
+                assert scaled.get_height() <= target_size[1]
+
+    def test_auto_scale_images_integration_with_theming(self, _init_pygame, _display_surface_return_none):
+        """Test that auto_scale_images works with the theming system."""
+        # Create a theme with auto_scale_images and test images
+        theme_data = {
+            "button": {
+                "misc": {
+                    "auto_scale_images": "1"
+                },
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png"
+                    }
+                }
+            }
+        }
+        
+        import tempfile
+        import json
+        import os
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            
+            # Create buttons of different sizes
+            small_button = UIButton(relative_rect=pygame.Rect(100, 100, 50, 50),
+                                  text="Small",
+                                  manager=manager)
+            
+            large_button = UIButton(relative_rect=pygame.Rect(200, 100, 200, 150),
+                                  text="Large", 
+                                  manager=manager)
+            
+            # Both buttons should have auto_scale_images enabled
+            assert small_button.auto_scale_images is True
+            assert large_button.auto_scale_images is True
+            
+            # Images should be loaded and potentially scaled
+            assert small_button.normal_image is not None
+            assert large_button.normal_image is not None
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_auto_scale_images_rebuild_behavior(self, _init_pygame, _display_surface_return_none):
+        """Test that auto_scale_images works correctly during rebuilds."""
+        # Create theme with auto_scale_images
+        theme_data = {
+            "button": {
+                "misc": {
+                    "auto_scale_images": "1"
+                }
+            }
+        }
+        
+        import tempfile
+        import json
+        import os
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Test Button",
+                            manager=manager)
+            
+            # Verify auto_scale_images is loaded
+            assert button.auto_scale_images is True
+            
+            # Trigger a rebuild
+            button.rebuild_from_changed_theme_data()
+            
+            # Should still have auto_scale_images enabled
+            assert button.auto_scale_images is True
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_auto_scale_images_edge_cases(self, _init_pygame, _display_surface_return_none):
+        """Test edge cases for auto_scale_images functionality."""
+        # Test with very small image
+        tiny_image = pygame.Surface((1, 1))
+        tiny_image.fill((255, 0, 255))
+        
+        scaled = UIButton._scale_image_to_fit(tiny_image, (100, 100))
+        assert scaled.get_size() == (100, 100)
+        
+        # Test with very large target
+        normal_image = pygame.Surface((50, 50))
+        normal_image.fill((0, 255, 255))
+        
+        scaled_large = UIButton._scale_image_to_fit(normal_image, (1000, 1000))
+        assert scaled_large.get_size() == (1000, 1000)
+        
+        # Test with target size of (1, 1)
+        scaled_tiny = UIButton._scale_image_to_fit(normal_image, (1, 1))
+        assert scaled_tiny.get_size() == (1, 1)
+
+    def test_auto_scale_images_performance(self, _init_pygame, _display_surface_return_none):
+        """Test that auto_scale_images doesn't cause performance issues."""
+        import time
+        
+        # Create a reasonably sized test image
+        test_image = pygame.Surface((256, 256))
+        test_image.fill((128, 128, 128))
+        
+        # Time multiple scaling operations
+        start_time = time.time()
+        
+        for i in range(100):
+            scaled = UIButton._scale_image_to_fit(test_image, (100 + i, 100 + i))
+            assert scaled is not None
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        # Should complete 100 scaling operations in reasonable time (less than 1 second)
+        assert duration < 1.0, f"Scaling took too long: {duration} seconds"
+
 
 if __name__ == '__main__':
     pytest.console_main()
