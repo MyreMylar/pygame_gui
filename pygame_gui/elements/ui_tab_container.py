@@ -102,7 +102,9 @@ class UITabContainer(UIElement):
         if new_container is not None:
             new_container.show()
 
-    def add_tab(self, title_text: str, title_object_id: str = "#tab_title_button") -> int:
+    def add_tab(
+        self, title_text: str, title_object_id: str = "#tab_title_button"
+    ) -> int:
         """
         Create a new tab.
 

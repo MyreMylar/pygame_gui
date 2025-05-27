@@ -42,7 +42,7 @@ class TextBoxLayout:
         editable: bool = False,
         min_layout_rect_width: int = 0,
         horiz_alignment: str = "left",
-        horiz_alignment_method: str = "rect"
+        horiz_alignment_method: str = "rect",
     ):
         # TODO: supply only a width and create final rect shape or just a final height?
         self.input_data_rect_queue = input_data_queue.copy()
@@ -666,7 +666,10 @@ class TextBoxLayout:
 
         """
         # Horizontal alignment
-        if self.horiz_alignment == "center" or self.horiz_alignment not in ["left", "right"]:
+        if self.horiz_alignment == "center" or self.horiz_alignment not in [
+            "left",
+            "right",
+        ]:
             row.horiz_center_row(self.floating_rects, self.horiz_alignment_method)
         elif self.horiz_alignment == "left":
             start_left = self.layout_rect.left + x_padding
