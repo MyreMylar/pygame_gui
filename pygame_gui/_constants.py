@@ -1,6 +1,5 @@
 """
 Some  constants used across the GUI
-TODO: Using strings for now for compatibility but we could deprecate these to be integers later.
 """
 
 from warnings import warn

@@ -50,6 +50,7 @@ from pygame_gui._constants import TEXT_EFFECT_SHAKE
 from pygame_gui._constants import TEXT_EFFECT_EXPAND_CONTRACT
 from pygame_gui._constants import UITextEffectType
 from pygame_gui.core.package_resource import PackageResource
+from pygame_gui.core.utility import performance_monitor
 
 __all__ = [
     "UIManager",
@@ -92,4 +93,5 @@ __all__ = [
     "TEXT_EFFECT_TILT",
     "TEXT_EFFECT_EXPAND_CONTRACT",
     "TEXT_EFFECT_SHAKE",
+    "performance_monitor",
 ]
