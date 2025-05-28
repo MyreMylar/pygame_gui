@@ -943,7 +943,5 @@ class TextLineChunkFTFont(TextLayoutRect):
         to.
 
         """
-        # TODO: Could be a memory hog on large text surfaces as we are currently holding the whole
-        #       text surface again. Perhaps only hold the chunk's part?
         if self.target_surface is not None:
             self.pre_effect_target_surface = self.target_surface.copy()

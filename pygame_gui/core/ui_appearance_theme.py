@@ -35,6 +35,595 @@ from pygame_gui.core.colour_parser import (
 )
 
 
+class UIThemeValidationError(Exception):
+    """Custom exception for UI theme validation errors."""
+
+    def __init__(self, message: str, element_id: Optional[str] = None):
+        super().__init__(message)
+        self.element_id = element_id
+
+
+class UIThemeValidator:
+    """
+    Enhanced theme validator that provides better error messages
+    and catches more potential issues.
+    """
+
+    @staticmethod
+    def validate_theme_file(theme_data: Dict[str, Any]) -> List[str]:
+        """Comprehensive theme validation with detailed error messages."""
+        errors = []
+
+        for element_type, element_data in theme_data.items():
+            if not isinstance(element_data, dict):
+                errors.append(
+                    f"Element '{element_type}' must be a dictionary, got {type(element_data).__name__}"
+                )
+                continue
+
+            # Validate colors section
+            if "colours" in element_data:
+                color_errors = UIThemeValidator._validate_colors(
+                    element_data["colours"], element_type
+                )
+                errors.extend(color_errors)
+
+            # Also check for 'colors' (American spelling)
+            if "colors" in element_data:
+                color_errors = UIThemeValidator._validate_colors(
+                    element_data["colors"], element_type
+                )
+                errors.extend(color_errors)
+
+            # Validate misc section
+            if "misc" in element_data:
+                misc_errors = UIThemeValidator._validate_misc(
+                    element_data["misc"], element_type
+                )
+                errors.extend(misc_errors)
+
+            # Validate images section
+            if "images" in element_data:
+                image_errors = UIThemeValidator._validate_images(
+                    element_data["images"], element_type
+                )
+                errors.extend(image_errors)
+
+            # Validate fonts section
+            if "font" in element_data:
+                font_errors = UIThemeValidator._validate_font(
+                    element_data["font"], element_type
+                )
+                errors.extend(font_errors)
+
+        return errors
+
+    @staticmethod
+    def _validate_colors(colors: Dict[str, Any], element_type: str) -> List[str]:
+        """Validate color definitions."""
+        errors = []
+
+        for color_name, color_value in colors.items():
+            if isinstance(color_value, str):
+                try:
+                    # Test if it's a valid color string
+                    test_color = parse_colour_or_gradient_string(color_value)
+                    if test_color is None:
+                        errors.append(
+                            f"{element_type}.colours.{color_name}: "
+                            f"Invalid color string '{color_value}'"
+                        )
+                except (ValueError, TypeError, AttributeError) as e:
+                    errors.append(
+                        f"{element_type}.colours.{color_name}: "
+                        f"Error parsing color '{color_value}': {str(e)}"
+                    )
+            elif isinstance(color_value, (list, tuple)):
+                if len(color_value) not in (3, 4):
+                    errors.append(
+                        f"{element_type}.colours.{color_name}: "
+                        f"Color tuple must have 3 or 4 values, got {len(color_value)}"
+                    )
+                elif not all(
+                    isinstance(c, (int, float)) and 0 <= c <= 255 for c in color_value
+                ):
+                    errors.append(
+                        f"{element_type}.colours.{color_name}: "
+                        f"Color values must be numbers between 0-255"
+                    )
+            else:
+                errors.append(
+                    f"{element_type}.colours.{color_name}: "
+                    f"Color must be string or tuple, got {type(color_value).__name__}"
+                )
+
+        return errors
+
+    @staticmethod
+    def _validate_misc(misc: Dict[str, Any], element_type: str) -> List[str]:
+        """Validate miscellaneous settings."""
+        errors = []
+
+        # Validate numeric values
+        numeric_fields = {
+            "border_width": (0, 100),
+            "shadow_width": (0, 50),
+            "tool_tip_delay": (0.0, 10.0),
+            "text_shadow_size": (0, 10),
+            "border_radius": (0, 100),
+        }
+
+        for field, (min_val, max_val) in numeric_fields.items():
+            if field in misc:
+                try:
+                    if isinstance(misc[field], str):
+                        value = float(misc[field])
+                    else:
+                        value = float(misc[field])
+
+                    if not min_val <= value <= max_val:
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Value {value} must be between {min_val} and {max_val}"
+                        )
+                except (ValueError, TypeError):
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Must be a number, got {type(misc[field]).__name__}"
+                    )
+
+        # Validate tuple fields (x, y coordinates)
+        tuple_fields = {
+            "text_shadow_offset": ((-50, 50), (-50, 50)),  # (x_range, y_range)
+        }
+
+        # Validate corner radius fields (single value or 4 values for corners)
+        corner_radius_fields = {
+            "shape_corner_radius": (0, 100),  # (min_val, max_val)
+        }
+
+        for field, ranges in tuple_fields.items():
+            if field in misc:
+                value = misc[field]
+                x_range, y_range = ranges
+
+                # Handle string format "x,y"
+                if isinstance(value, str):
+                    try:
+                        parts = value.strip().split(",")
+                        if len(parts) != 2:
+                            errors.append(
+                                f"{element_type}.misc.{field}: "
+                                f"Must have 2 comma-separated values (x,y), got {len(parts)}"
+                            )
+                            continue
+                        x_val = float(parts[0].strip())
+                        y_val = float(parts[1].strip())
+                    except (ValueError, TypeError):
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Invalid format '{value}', expected 'x,y' with numeric values"
+                        )
+                        continue
+
+                # Handle tuple/list format
+                elif isinstance(value, (list, tuple)):
+                    if len(value) != 2:
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Must have 2 values (x,y), got {len(value)}"
+                        )
+                        continue
+                    try:
+                        x_val = float(value[0])
+                        y_val = float(value[1])
+                    except (ValueError, TypeError):
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Values must be numeric, got {[type(v).__name__ for v in value]}"
+                        )
+                        continue
+
+                else:
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Must be string 'x,y' or tuple/list [x,y], got {type(value).__name__}"
+                    )
+                    continue
+
+                # Validate ranges
+                x_min, x_max = x_range
+                y_min, y_max = y_range
+
+                if not x_min <= x_val <= x_max:
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"X value {x_val} must be between {x_min} and {x_max}"
+                    )
+
+                if not y_min <= y_val <= y_max:
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Y value {y_val} must be between {y_min} and {y_max}"
+                    )
+
+        # Validate corner radius fields (single value or 4 corner values)
+        for field, (min_val, max_val) in corner_radius_fields.items():
+            if field in misc:
+                value = misc[field]
+
+                # Handle string format - can be single value or "tl,tr,br,bl"
+                if isinstance(value, str):
+                    try:
+                        parts = value.strip().split(",")
+                        if len(parts) == 1:
+                            # Single value for all corners
+                            radius_val = float(parts[0].strip())
+                            if not min_val <= radius_val <= max_val:
+                                errors.append(
+                                    f"{element_type}.misc.{field}: "
+                                    f"Value {radius_val} must be between {min_val} and {max_val}"
+                                )
+                        elif len(parts) == 4:
+                            # Four values for individual corners
+                            for i, part in enumerate(parts):
+                                corner_names = [
+                                    "top-left",
+                                    "top-right",
+                                    "bottom-right",
+                                    "bottom-left",
+                                ]
+                                try:
+                                    radius_val = float(part.strip())
+                                    if not min_val <= radius_val <= max_val:
+                                        errors.append(
+                                            f"{element_type}.misc.{field}: "
+                                            f"{corner_names[i]} corner value "
+                                            f"{radius_val} must be between {min_val} and {max_val}"
+                                        )
+                                except (ValueError, TypeError):
+                                    errors.append(
+                                        f"{element_type}.misc.{field}: "
+                                        f"{corner_names[i]} corner value must be numeric, got '{part.strip()}'"
+                                    )
+                        else:
+                            errors.append(
+                                f"{element_type}.misc.{field}: "
+                                f"Must have 1 value (all corners) or 4 comma-separated values "
+                                f"(individual corners), got {len(parts)}"
+                            )
+                    except (ValueError, TypeError):
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Invalid format '{value}', expected single number or 'tl,tr,br,bl' with numeric values"
+                        )
+
+                # Handle numeric value (single value for all corners)
+                elif isinstance(value, (int, float)):
+                    if not min_val <= value <= max_val:
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Value {value} must be between {min_val} and {max_val}"
+                        )
+
+                # Handle tuple/list format (4 corner values)
+                elif isinstance(value, (list, tuple)):
+                    if len(value) == 1:
+                        # Single value in a list/tuple
+                        try:
+                            radius_val = float(value[0])
+                            if not min_val <= radius_val <= max_val:
+                                errors.append(
+                                    f"{element_type}.misc.{field}: "
+                                    f"Value {radius_val} must be between {min_val} and {max_val}"
+                                )
+                        except (ValueError, TypeError):
+                            errors.append(
+                                f"{element_type}.misc.{field}: "
+                                f"Value must be numeric, got {type(value[0]).__name__}"
+                            )
+                    elif len(value) == 4:
+                        # Four corner values
+                        corner_names = [
+                            "top-left",
+                            "top-right",
+                            "bottom-right",
+                            "bottom-left",
+                        ]
+                        for i, corner_val in enumerate(value):
+                            try:
+                                radius_val = float(corner_val)
+                                if not min_val <= radius_val <= max_val:
+                                    errors.append(
+                                        f"{element_type}.misc.{field}: "
+                                        f"{corner_names[i]} corner value {radius_val} must be "
+                                        f"between {min_val} and {max_val}"
+                                    )
+                            except (ValueError, TypeError):
+                                errors.append(
+                                    f"{element_type}.misc.{field}: "
+                                    f"{corner_names[i]} corner value must be numeric, got {type(corner_val).__name__}"
+                                )
+                    else:
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Must have 1 value (all corners) or 4 values "
+                            f"(individual corners), got {len(value)}"
+                        )
+
+                else:
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Must be number, string, or list/tuple, got {type(value).__name__}"
+                    )
+
+        # Validate string choices
+        string_choices = {
+            "shape": ["rectangle", "rounded_rectangle", "ellipse"],
+            "text_horiz_alignment": ["left", "center", "centre", "right"],
+            "text_vert_alignment": ["top", "center", "centre", "bottom"],
+            "text_horiz_alignment_method": [
+                "default",
+                "rect",
+                "right_triangle",
+                "left_triangle",
+            ],
+            "text_vert_alignment_method": ["default", "rect"],
+        }
+
+        for field, choices in string_choices.items():
+            if field in misc:
+                if misc[field] not in choices:
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Must be one of {choices}, got '{misc[field]}'"
+                    )
+
+        # Validate boolean fields
+        boolean_fields = [
+            "enable_arrow_buttons",
+            "expand_to_fit_text",
+            "word_wrap",
+            "allow_double_clicks",
+            "selectable",
+            "link_hover_underline",
+        ]
+
+        for field in boolean_fields:
+            if field in misc:
+                if isinstance(misc[field], str):
+                    if misc[field] not in ["0", "1", "true", "false", "True", "False"]:
+                        errors.append(
+                            f"{element_type}.misc.{field}: "
+                            f"Boolean field must be '0', '1', 'true', or 'false', got '{misc[field]}'"
+                        )
+                elif not isinstance(misc[field], (bool, int)):
+                    errors.append(
+                        f"{element_type}.misc.{field}: "
+                        f"Boolean field must be boolean or string, got {type(misc[field]).__name__}"
+                    )
+
+        return errors
+
+    @staticmethod
+    def _validate_images(images: Dict[str, Any], element_type: str) -> List[str]:
+        """Validate image definitions."""
+        errors = []
+
+        for image_name, image_data in images.items():
+            if not isinstance(image_data, dict):
+                errors.append(
+                    f"{element_type}.images.{image_name}: "
+                    f"Must be a dictionary, got {type(image_data).__name__}"
+                )
+                continue
+
+            # Check for required path or package/resource
+            has_path = "path" in image_data
+            has_package_resource = "package" in image_data and "resource" in image_data
+
+            if not (has_path or has_package_resource):
+                errors.append(
+                    f"{element_type}.images.{image_name}: "
+                    f"Must have either 'path' or both 'package' and 'resource'"
+                )
+
+            # Validate path if present
+            if has_path and not isinstance(image_data["path"], str):
+                errors.append(
+                    f"{element_type}.images.{image_name}.path: "
+                    f"Must be a string, got {type(image_data['path']).__name__}"
+                )
+
+            # Validate package/resource if present
+            if "package" in image_data and not isinstance(image_data["package"], str):
+                errors.append(
+                    f"{element_type}.images.{image_name}.package: "
+                    f"Must be a string, got {type(image_data['package']).__name__}"
+                )
+
+            if "resource" in image_data and not isinstance(image_data["resource"], str):
+                errors.append(
+                    f"{element_type}.images.{image_name}.resource: "
+                    f"Must be a string, got {type(image_data['resource']).__name__}"
+                )
+
+            # Validate sub_surface_rect if present
+            if "sub_surface_rect" in image_data:
+                rect_data = image_data["sub_surface_rect"]
+                if isinstance(rect_data, str):
+                    try:
+                        rect_parts = rect_data.strip().split(",")
+                        if len(rect_parts) != 4:
+                            errors.append(
+                                f"{element_type}.images.{image_name}.sub_surface_rect: "
+                                f"Must have 4 comma-separated values, got {len(rect_parts)}"
+                            )
+                        else:
+                            for part in rect_parts:
+                                int(part.strip())  # Test if it's a valid integer
+                    except ValueError:
+                        errors.append(
+                            f"{element_type}.images.{image_name}.sub_surface_rect: "
+                            f"All values must be integers: '{rect_data}'"
+                        )
+                elif isinstance(rect_data, (list, tuple)):
+                    if len(rect_data) != 4:
+                        errors.append(
+                            f"{element_type}.images.{image_name}.sub_surface_rect: "
+                            f"Must have 4 values, got {len(rect_data)}"
+                        )
+                    elif not all(isinstance(x, (int, float)) for x in rect_data):
+                        errors.append(
+                            f"{element_type}.images.{image_name}.sub_surface_rect: "
+                            f"All values must be numbers"
+                        )
+                else:
+                    errors.append(
+                        f"{element_type}.images.{image_name}.sub_surface_rect: "
+                        f"Must be string or list/tuple, got {type(rect_data).__name__}"
+                    )
+
+        return errors
+
+    @staticmethod
+    def _validate_font(
+        font_data: Union[Dict[str, Any], List[Dict[str, Any]]], element_type: str
+    ) -> List[str]:
+        """Validate font definitions."""
+        errors = []
+
+        # Handle both single font dict and list of font dicts
+        font_list = font_data if isinstance(font_data, list) else [font_data]
+
+        for i, font in enumerate(font_list):
+            prefix = (
+                f"{element_type}.font[{i}]"
+                if isinstance(font_data, list)
+                else f"{element_type}.font"
+            )
+
+            if not isinstance(font, dict):
+                errors.append(
+                    f"{prefix}: Must be a dictionary, got {type(font).__name__}"
+                )
+                continue
+
+            # Check for required fields
+            required_fields = ["name", "size"]
+            for field in required_fields:
+                if field not in font:
+                    errors.append(f"{prefix}: Missing required field '{field}'")
+
+            # Validate size
+            if "size" in font:
+                try:
+                    if isinstance(font["size"], str):
+                        size = int(font["size"])
+                    else:
+                        size = int(font["size"])
+
+                    if size <= 0:
+                        errors.append(f"{prefix}.size: Must be positive, got {size}")
+                    elif size > 200:  # Reasonable upper limit
+                        errors.append(
+                            f"{prefix}.size: Size {size} seems unusually large (max recommended: 200)"
+                        )
+                except (ValueError, TypeError):
+                    errors.append(
+                        f"{prefix}.size: Must be an integer, got {type(font['size']).__name__}"
+                    )
+
+            # Validate name
+            if "name" in font and not isinstance(font["name"], str):
+                errors.append(
+                    f"{prefix}.name: Must be a string, got {type(font['name']).__name__}"
+                )
+
+            # Validate boolean fields
+            boolean_fields = ["bold", "italic", "antialiased"]
+            for field in boolean_fields:
+                if field in font:
+                    if isinstance(font[field], str):
+                        if font[field] not in [
+                            "0",
+                            "1",
+                            "true",
+                            "false",
+                            "True",
+                            "False",
+                        ]:
+                            errors.append(
+                                f"{prefix}.{field}: "
+                                f"Boolean field must be '0', '1', 'true', or 'false', got '{font[field]}'"
+                            )
+                    elif not isinstance(font[field], (bool, int)):
+                        errors.append(
+                            f"{prefix}.{field}: "
+                            f"Must be boolean or string, got {type(font[field]).__name__}"
+                        )
+
+            # Validate locale
+            if "locale" in font and not isinstance(font["locale"], str):
+                errors.append(
+                    f"{prefix}.locale: Must be a string, got {type(font['locale']).__name__}"
+                )
+
+            # Validate direction
+            if "direction" in font:
+                valid_directions = ["ltr", "rtl", "LTR", "RTL"]
+                if font["direction"] not in valid_directions:
+                    errors.append(
+                        f"{prefix}.direction: "
+                        f"Must be one of {valid_directions}, got '{font['direction']}'"
+                    )
+
+            # Validate path fields
+            path_fields = [
+                "regular_path",
+                "bold_path",
+                "italic_path",
+                "bold_italic_path",
+            ]
+            for field in path_fields:
+                if field in font and not isinstance(font[field], str):
+                    errors.append(
+                        f"{prefix}.{field}: Must be a string, got {type(font[field]).__name__}"
+                    )
+
+            # Validate resource fields
+            resource_fields = [
+                "regular_resource",
+                "bold_resource",
+                "italic_resource",
+                "bold_italic_resource",
+            ]
+            for field in resource_fields:
+                if field in font:
+                    if not isinstance(font[field], dict):
+                        errors.append(
+                            f"{prefix}.{field}: Must be a dictionary, got {type(font[field]).__name__}"
+                        )
+                    else:
+                        resource = font[field]
+                        if "package" not in resource or "resource" not in resource:
+                            errors.append(
+                                f"{prefix}.{field}: Must have both 'package' and 'resource' fields"
+                            )
+                        if "package" in resource and not isinstance(
+                            resource["package"], str
+                        ):
+                            errors.append(f"{prefix}.{field}.package: Must be a string")
+                        if "resource" in resource and not isinstance(
+                            resource["resource"], str
+                        ):
+                            errors.append(
+                                f"{prefix}.{field}.resource: Must be a string"
+                            )
+
+        return errors
+
+
 class UIAppearanceTheme(IUIAppearanceThemeInterface):
     """
     The Appearance Theme class handles all the data that styles and generally dictates the
@@ -946,6 +1535,23 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         return None
 
     def _parse_theme_data_from_json_dict(self, theme_dict):
+        # Validate theme data before processing
+        validation_errors = UIThemeValidator.validate_theme_file(theme_dict)
+
+        if validation_errors:
+            # Log all validation errors as warnings
+            warnings.warn(
+                f"Theme validation found {len(validation_errors)} error(s):\n"
+                + "\n".join(f"  - {error}" for error in validation_errors),
+                UserWarning,
+            )
+
+            # Optionally, you could raise an exception instead:
+            # raise UIThemeValidationError(
+            #     f"Theme validation failed with {len(validation_errors)} error(s):\n" +
+            #     "\n".join(f"  - {error}" for error in validation_errors)
+            # )
+
         for element_name in theme_dict.keys():
             if element_name == "defaults":
                 self._load_colour_defaults_from_theme(theme_dict)
@@ -1154,11 +1760,28 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if element_name not in self.ui_element_misc_data:
             self.ui_element_misc_data[element_name] = {}
         misc_dict = element_theming[data_type]
+
+        # Validate misc data for this specific element
+        # pylint: disable=protected-access
+        misc_errors = UIThemeValidator._validate_misc(misc_dict, element_name)
+        if misc_errors:
+            warnings.warn(
+                f"Misc data validation errors for {element_name}:\n"
+                + "\n".join(f"  - {error}" for error in misc_errors),
+                UserWarning,
+            )
+
         for misc_data_key in misc_dict:
-            if isinstance(misc_dict[misc_data_key], (dict, str)):
+            if isinstance(misc_dict[misc_data_key], (dict, str, int, float, bool)):
                 self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[
                     misc_data_key
                 ]
+            else:
+                warnings.warn(
+                    f"Unsupported misc data type for {element_name}.{misc_data_key}: "
+                    f"{type(misc_dict[misc_data_key]).__name__}. Skipping.",
+                    UserWarning,
+                )
 
     def _load_element_image_data_from_theme(
         self, data_type: str, element_name: str, element_theming: Dict[str, Any]
@@ -1176,6 +1799,16 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if element_name not in self.ui_element_image_locs:
             self.ui_element_image_locs[element_name] = {}
         loaded_img_dict = element_theming[data_type]
+
+        # Validate image data for this specific element
+        # pylint: disable=protected-access
+        image_errors = UIThemeValidator._validate_images(loaded_img_dict, element_name)
+        if image_errors:
+            warnings.warn(
+                f"Image data validation errors for {element_name}:\n"
+                + "\n".join(f"  - {error}" for error in image_errors),
+                UserWarning,
+            )
         for image_key in loaded_img_dict:
             if image_key not in self.ui_element_image_locs[element_name]:
                 self.ui_element_image_locs[element_name][image_key] = {"changed": True}
@@ -1261,6 +1894,16 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param element_name: The theming element ID that this data belongs to.
         :param file_dict: The file dictionary from the theming file to load data from.
         """
+
+        # Validate font data for this specific element
+        # pylint: disable=protected-access
+        font_errors = UIThemeValidator._validate_font(file_dict, element_name)
+        if font_errors:
+            warnings.warn(
+                f"Font data validation errors for {element_name}:\n"
+                + "\n".join(f"  - {error}" for error in font_errors),
+                UserWarning,
+            )
 
         if element_name not in self.ui_element_fonts_info:
             self.ui_element_fonts_info[element_name] = {}
@@ -1456,3 +2099,29 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
     def get_shadow_generator(self) -> ShadowGenerator:
         return self.shadow_generator
+
+    def validate_theme_data(self, theme_data: Dict[str, Any]) -> List[str]:
+        """
+        Validate theme data without loading it.
+
+        :param theme_data: The theme data dictionary to validate.
+        :return: List of validation error messages. Empty list means no errors.
+        """
+        return UIThemeValidator.validate_theme_file(theme_data)
+
+    def validate_theme_file_path(
+        self, file_path: Union[str, os.PathLike, PackageResource]
+    ) -> List[str]:
+        """
+        Validate a theme file without loading it into the theme.
+
+        :param file_path: Path to the theme file to validate.
+        :return: List of validation error messages. Empty list means no errors.
+        """
+        try:
+            theme_dict = self._load_theme_by_path(file_path)
+            if theme_dict is None:
+                return ["Failed to load theme file"]
+            return self.validate_theme_data(theme_dict)
+        except (OSError, IOError, ValueError, TypeError) as e:
+            return [f"Error loading theme file: {str(e)}"]
