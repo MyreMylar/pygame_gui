@@ -378,7 +378,7 @@ class RoundedRectangleShape(DrawableShape):
 
             self.states["normal"].surface = quick_surf
             self.finalise_images_and_text(
-                "normal_image", "normal", "normal_text", "normal_text_shadow", True
+                "normal_images", "normal", "normal_text", "normal_text_shadow", True
             )
         self.states["normal"].has_fresh_surface = True
 
@@ -535,7 +535,7 @@ class RoundedRectangleShape(DrawableShape):
                     self.states[state_str].cached_background_id = shape_id
 
             self.finalise_images_and_text(
-                f"{state_str}_image",
+                f"{state_str}_images",
                 state_str,
                 text_colour_state_str,
                 text_shadow_colour_state_str,

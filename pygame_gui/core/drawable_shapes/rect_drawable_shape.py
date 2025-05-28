@@ -201,7 +201,7 @@ class RectDrawableShape(DrawableShape):
             bg_colour_state_str = f"{state_str}_bg"
             text_colour_state_str = f"{state_str}_text"
             text_shadow_colour_state_str = f"{state_str}_text_shadow"
-            image_state_str = f"{state_str}_image"
+            image_state_str = f"{state_str}_images"
 
             found_shape = None
             shape_id = None

@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Set, Any
+from typing import Optional, Union, Dict, Set, Any, List
 
 import pygame
 
@@ -112,10 +112,13 @@ class UICheckBox(UIElement):
         self.check_symbol = "✓"
         self.indeterminate_symbol = "−"  # Symbol for indeterminate state
         self.font: Optional[IGUIFontInterface] = None
-        self.normal_image: Optional[pygame.Surface] = None
-        self.selected_image: Optional[pygame.Surface] = None
-        self.hovered_image: Optional[pygame.Surface] = None
-        self.disabled_image: Optional[pygame.Surface] = None
+
+        # Image support - always use lists internally for consistency
+        # This simplifies the code while maintaining backward compatibility in JSON
+        self.normal_images: List[pygame.Surface] = []
+        self.selected_images: List[pygame.Surface] = []
+        self.hovered_images: List[pygame.Surface] = []
+        self.disabled_images: List[pygame.Surface] = []
 
         # Get text offset from theme
         self.text_offset = 5
@@ -172,10 +175,11 @@ class UICheckBox(UIElement):
             "disabled_text_shadow": self.colours["disabled_text"],
             "selected_text": self.colours["selected_text"],
             "selected_text_shadow": self.colours["selected_text"],
-            "normal_image": self.normal_image,
-            "selected_image": self.selected_image,
-            "hovered_image": self.hovered_image,
-            "disabled_image": self.disabled_image,
+            # Image support - always use lists internally
+            "normal_images": self.normal_images,
+            "selected_images": self.selected_images,
+            "hovered_images": self.hovered_images,
+            "disabled_images": self.disabled_images,
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "shape_corner_radius": self.shape_corner_radius,
@@ -366,37 +370,57 @@ class UICheckBox(UIElement):
         # Load images
         self._load_images_from_theme()
 
-    def _load_images_from_theme(self):
+    def _load_images_from_theme(self) -> bool:
         """
-        Loads checkbox images from the theme.
+        Grabs images for this checkbox from the UI theme if any are set.
+        Supports both single image format and multi-image format from JSON,
+        but internally always uses lists for consistency.
+
+        :return: True if any of the images have changed since last time they were set.
         """
-        try:
-            self.normal_image = self.ui_theme.get_image(
-                "normal_image", self.combined_element_ids
-            )
-        except LookupError:
-            self.normal_image = None
+        changed = False
 
-        try:
-            self.selected_image = self.ui_theme.get_image(
-                "selected_image", self.combined_element_ids
-            )
-        except LookupError:
-            self.selected_image = None
+        # State mappings for loading images
+        state_mappings = [
+            ("normal", "normal_images"),
+            ("hovered", "hovered_images"),
+            ("selected", "selected_images"),
+            ("disabled", "disabled_images"),
+        ]
 
-        try:
-            self.hovered_image = self.ui_theme.get_image(
-                "hovered_image", self.combined_element_ids
-            )
-        except LookupError:
-            self.hovered_image = None
+        for state_name, attr_name in state_mappings:
+            new_images = []
 
-        try:
-            self.disabled_image = self.ui_theme.get_image(
-                "disabled_image", self.combined_element_ids
-            )
-        except LookupError:
-            self.disabled_image = None
+            # First try to load multi-image format (e.g., "normal_images")
+            try:
+                multi_images = self.ui_theme.get_images(
+                    f"{state_name}_images", self.combined_element_ids
+                )
+                new_images = multi_images
+            except LookupError:
+                # Fall back to single image format (e.g., "normal_image")
+                try:
+                    single_image = self.ui_theme.get_image(
+                        f"{state_name}_image", self.combined_element_ids
+                    )
+                    if single_image is not None:
+                        new_images = [single_image]  # Convert to list
+                except LookupError:
+                    # No image found for this state
+                    pass
+
+            # Handle fallbacks for non-normal states
+            if not new_images and state_name != "normal":
+                # Fall back to normal_images
+                new_images = self.normal_images.copy()
+
+            # Check if images have changed
+            current_images = getattr(self, attr_name)
+            if new_images != current_images:
+                setattr(self, attr_name, new_images)
+                changed = True
+
+        return changed
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """
@@ -811,6 +835,10 @@ class UICheckBox(UIElement):
                 self.font = default_font
                 has_any_changed = True
 
+        # Check for image changes
+        if self._load_images_from_theme():
+            has_any_changed = True
+
         if has_any_changed:
             self.rebuild()
 
@@ -961,6 +989,11 @@ class UICheckBox(UIElement):
                     "selected_text", self.combined_element_ids
                 ),
             ),
+            # Image support - always use lists internally
+            "normal_images": self.normal_images,
+            "selected_images": self.selected_images,
+            "hovered_images": self.hovered_images,
+            "disabled_images": self.disabled_images,
             "border_width": getattr(self, "border_width", 1),
             "shadow_width": getattr(self, "shadow_width", 2),
             "shape_corner_radius": getattr(self, "shape_corner_radius", [2, 2, 2, 2]),
@@ -995,3 +1028,56 @@ class UICheckBox(UIElement):
 
         # Update image
         self.on_fresh_drawable_shape_ready()
+
+    def get_current_images(self) -> List[pygame.Surface]:
+        """
+        Get the current images for the checkbox's current state.
+        Returns a list of surfaces.
+
+        :return: List of pygame.Surface objects for the current state
+        """
+        if not self.is_enabled:
+            return self.disabled_images
+        elif self.is_checked or self.is_indeterminate:
+            return self.selected_images
+        elif self.hovered:
+            return self.hovered_images
+        else:
+            return self.normal_images
+
+    def is_multi_image_mode(self) -> bool:
+        """
+        Check if the checkbox is currently using multi-image mode.
+
+        :return: True if using multiple images per state, False if using single images
+        """
+        # Check if any state has more than one image
+        return (
+            len(self.normal_images) > 1
+            or len(self.hovered_images) > 1
+            or len(self.selected_images) > 1
+            or len(self.disabled_images) > 1
+        )
+
+    def get_image_count(self) -> int:
+        """
+        Get the number of images in the current state.
+
+        :return: Number of images for the current checkbox state
+        """
+        return len(self.get_current_images())
+
+    def get_images_by_state(self, state: str) -> List[pygame.Surface]:
+        """
+        Get images for a specific checkbox state.
+
+        :param state: The state to get images for ('normal', 'hovered', 'selected', 'disabled')
+        :return: List of pygame.Surface objects for the specified state
+        """
+        state_mapping = {
+            "normal": self.normal_images,
+            "hovered": self.hovered_images,
+            "selected": self.selected_images,
+            "disabled": self.disabled_images,
+        }
+        return state_mapping.get(state, [])

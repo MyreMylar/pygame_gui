@@ -1,6 +1,8 @@
 import os
 import pytest
 import pygame
+import tempfile
+import json
 
 from tests.shared_comparators import compare_surfaces
 
@@ -741,6 +743,205 @@ class TestUIPanel:
                                    'bottom': 'top'})
         assert panel.get_anchors()["left"] == "right"
         assert panel.get_anchors()["right"] == "right"
+
+    def test_multi_image_mode_detection(self, _init_pygame, _display_surface_return_none):
+        """Test multi-image mode detection for UIPanel."""
+        manager = UIManager((800, 600))
+        
+        # Test single image mode (default)
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+        assert not panel.is_multi_image_mode()
+        assert panel.get_image_count() == 0
+        
+        # Test with single image theme
+        single_image_theme = {
+            "panel": {
+                "images": {
+                    "background_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        manager.ui_theme.load_theme(single_image_theme)
+        panel.rebuild_from_changed_theme_data()
+        
+        assert not panel.is_multi_image_mode()  # Single image = not multi-image mode
+        assert panel.get_image_count() == 1
+        
+        # Test with multi-image theme
+        multi_image_theme = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "overlay", "path": "tests/data/images/test_emoji.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        manager.ui_theme.load_theme(multi_image_theme)
+        panel.rebuild_from_changed_theme_data()
+        
+        assert panel.is_multi_image_mode()
+        assert panel.get_image_count() == 2
+
+    def test_multi_image_loading_and_access(self, _init_pygame, _display_surface_return_none):
+        """Test loading and accessing multi-image data for UIPanel."""
+        manager = UIManager((800, 600))
+        
+        # Create theme with multiple background images
+        multi_image_theme = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {"id": "background", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "border", "path": "tests/data/images/space_1.jpg", "layer": 1},
+                        {"id": "decoration", "path": "tests/data/images/test_emoji.png", "layer": 2}
+                    ]
+                }
+            }
+        }
+        
+        manager.ui_theme.load_theme(multi_image_theme)
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+        
+        # Test image access
+        current_images = panel.get_current_images()
+        assert len(current_images) == 3
+        assert panel.get_image_count() == 3
+        assert panel.is_multi_image_mode()
+        
+        # Verify all images are loaded
+        for image in current_images:
+            assert image is not None
+            assert isinstance(image, pygame.Surface)
+
+    def test_multi_image_backward_compatibility(self, _init_pygame, _display_surface_return_none):
+        """Test that single image themes still work with multi-image system."""
+        manager = UIManager((800, 600))
+        
+        # Test legacy single image format
+        single_image_theme = {
+            "panel": {
+                "images": {
+                    "background_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        manager.ui_theme.load_theme(single_image_theme)
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+        
+        # Should work as single image in list format internally
+        assert not panel.is_multi_image_mode()
+        assert panel.get_image_count() == 1
+        
+        current_images = panel.get_current_images()
+        assert len(current_images) == 1
+        assert current_images[0] is not None
+
+    def test_multi_image_api_methods(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        """Test the multi-image API methods for UIPanel."""
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=default_ui_manager)
+        
+        # Test with no images
+        assert panel.get_current_images() == []
+        assert not panel.is_multi_image_mode()
+        assert panel.get_image_count() == 0
+        
+        # Test with theme that has images
+        multi_image_theme = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "overlay", "path": "tests/data/images/test_emoji.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        default_ui_manager.ui_theme.load_theme(multi_image_theme)
+        panel.rebuild_from_changed_theme_data()
+        
+        # Test API methods
+        current_images = panel.get_current_images()
+        assert len(current_images) == 2
+        assert panel.is_multi_image_mode()
+        assert panel.get_image_count() == 2
+
+    def test_multi_image_theme_switching_cleanup(self, _init_pygame, _display_surface_return_none):
+        """Test that switching from multi-image to single-image themes properly cleans up."""
+        # Start with multi-image theme
+        multi_image_theme = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "overlay", "path": "tests/data/images/test_emoji.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        # Create single image theme
+        single_image_theme = {
+            "panel": {
+                "images": {
+                    "background_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        # Create no image theme
+        no_image_theme = {"panel": {}}
+        
+        # Save theme files
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(multi_image_theme, f)
+            multi_theme_file = f.name
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(single_image_theme, f)
+            single_theme_file = f.name
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(no_image_theme, f)
+            no_image_theme_file = f.name
+        
+        try:
+            # Start with multi-image theme
+            manager = UIManager((800, 600), multi_theme_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # Verify multi-image mode
+            assert panel.is_multi_image_mode()
+            assert panel.get_image_count() == 2
+            
+            # Switch to single image theme
+            manager.ui_theme.load_theme(single_theme_file)
+            panel.rebuild_from_changed_theme_data()
+            
+            # Verify proper cleanup
+            assert not panel.is_multi_image_mode()
+            assert panel.get_image_count() == 1
+            
+            # Switch to no image theme
+            manager.ui_theme.load_theme(no_image_theme_file)
+            panel.rebuild_from_changed_theme_data()
+            
+            # Verify complete cleanup
+            assert not panel.is_multi_image_mode()
+            assert panel.get_image_count() == 0
+            assert panel.get_current_images() == []
+            
+        finally:
+            # Clean up theme files
+            try:
+                os.unlink(multi_theme_file)
+                os.unlink(single_theme_file)
+                os.unlink(no_image_theme_file)
+            except:
+                pass
 
 
 if __name__ == '__main__':

@@ -1851,3 +1851,163 @@ class TestUICheckBox:
         
         # Should still work
         assert check_box.check_symbol == symbols[49 % len(symbols)] 
+
+    def test_multi_image_theme_switching_cleanup(self, _init_pygame, _display_surface_return_none):
+        """Test that multi-image themes are properly cleaned up when switching to single-image themes."""
+        import tempfile
+        import json
+        import os
+        
+        # Create test images
+        test_image1 = pygame.Surface((20, 20))
+        test_image1.fill((255, 0, 0))  # Red
+        test_image2 = pygame.Surface((20, 20))
+        test_image2.fill((0, 255, 0))  # Green
+        test_image3 = pygame.Surface((20, 20))
+        test_image3.fill((0, 0, 255))  # Blue
+        
+        # Save test images to temporary files
+        temp_dir = tempfile.mkdtemp()
+        try:
+            image1_path = os.path.join(temp_dir, "image1.png")
+            image2_path = os.path.join(temp_dir, "image2.png")
+            image3_path = os.path.join(temp_dir, "image3.png")
+            
+            pygame.image.save(test_image1, image1_path)
+            pygame.image.save(test_image2, image2_path)
+            pygame.image.save(test_image3, image3_path)
+            
+            # Create multi-image theme
+            multi_theme_data = {
+                "check_box": {
+                    "images": {
+                        "normal_images": [
+                            {"id": "bg", "path": image1_path, "layer": 0},
+                            {"id": "border", "path": image2_path, "layer": 1}
+                        ],
+                        "hovered_images": [
+                            {"id": "bg", "path": image1_path, "layer": 0},
+                            {"id": "border", "path": image2_path, "layer": 1},
+                            {"id": "highlight", "path": image3_path, "layer": 2}
+                        ],
+                        "selected_images": [
+                            {"id": "bg", "path": image1_path, "layer": 0},
+                            {"id": "border", "path": image2_path, "layer": 1},
+                            {"id": "checkmark", "path": image3_path, "layer": 2}
+                        ],
+                        "disabled_images": [
+                            {"id": "bg", "path": image1_path, "layer": 0},
+                            {"id": "disabled_overlay", "path": image2_path, "layer": 1}
+                        ]
+                    }
+                }
+            }
+            
+            # Create single-image theme
+            single_theme_data = {
+                "check_box": {
+                    "images": {
+                        "normal_image": {"path": image1_path},
+                        "hovered_image": {"path": image2_path},
+                        "selected_image": {"path": image3_path},
+                        "disabled_image": {"path": image1_path}
+                    }
+                }
+            }
+            
+            # Save theme files
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(multi_theme_data, f)
+                multi_theme_file = f.name
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(single_theme_data, f)
+                single_theme_file = f.name
+            
+            try:
+                # Test with multi-image theme
+                manager = pygame_gui.UIManager((800, 600), multi_theme_file)
+                checkbox = UICheckBox(
+                    relative_rect=pygame.Rect(50, 50, 30, 30),
+                    text="Test Checkbox",
+                    manager=manager
+                )
+                
+                # Verify multi-image mode is active
+                assert checkbox.is_multi_image_mode() is True, "Should be in multi-image mode initially"
+                assert len(checkbox.normal_images) == 2, f"Expected 2 normal images, got {len(checkbox.normal_images)}"
+                assert len(checkbox.hovered_images) == 3, f"Expected 3 hovered images, got {len(checkbox.hovered_images)}"
+                assert len(checkbox.selected_images) == 3, f"Expected 3 selected images, got {len(checkbox.selected_images)}"
+                assert len(checkbox.disabled_images) == 2, f"Expected 2 disabled images, got {len(checkbox.disabled_images)}"
+                assert checkbox.get_image_count() == 2, f"Expected 2 current images, got {checkbox.get_image_count()}"
+                
+                # Switch to single-image theme
+                manager.ui_theme.load_theme(single_theme_file)
+                
+                # Force rebuild to apply new theme
+                checkbox.rebuild_from_changed_theme_data()
+                
+                # Verify single-image mode is now active
+                assert checkbox.is_multi_image_mode() is False, "Should be in single-image mode after theme switch"
+                assert len(checkbox.normal_images) == 1, f"Expected 1 normal image after switch, got {len(checkbox.normal_images)}"
+                assert len(checkbox.hovered_images) == 1, f"Expected 1 hovered image after switch, got {len(checkbox.hovered_images)}"
+                assert len(checkbox.selected_images) == 1, f"Expected 1 selected image after switch, got {len(checkbox.selected_images)}"
+                assert len(checkbox.disabled_images) == 1, f"Expected 1 disabled image after switch, got {len(checkbox.disabled_images)}"
+                assert checkbox.get_image_count() == 1, f"Expected 1 current image after switch, got {checkbox.get_image_count()}"
+                
+                # Test state transitions still work correctly
+                checkbox.set_state(True)
+                assert len(checkbox.get_current_images()) == 1, "Selected state should have 1 image"
+                
+                checkbox.disable()
+                assert len(checkbox.get_current_images()) == 1, "Disabled state should have 1 image"
+                
+                checkbox.enable()
+                checkbox.set_state(False)
+                assert len(checkbox.get_current_images()) == 1, "Normal state should have 1 image"
+                
+                # Switch back to multi-image theme
+                manager.ui_theme.load_theme(multi_theme_file)
+                checkbox.rebuild_from_changed_theme_data()
+                
+                # Verify multi-image mode is restored
+                assert checkbox.is_multi_image_mode() is True, "Should be back in multi-image mode"
+                assert len(checkbox.normal_images) == 2, f"Expected 2 normal images after switch back, got {len(checkbox.normal_images)}"
+                assert len(checkbox.hovered_images) == 3, f"Expected 3 hovered images after switch back, got {len(checkbox.hovered_images)}"
+                assert len(checkbox.selected_images) == 3, f"Expected 3 selected images after switch back, got {len(checkbox.selected_images)}"
+                assert len(checkbox.disabled_images) == 2, f"Expected 2 disabled images after switch back, got {len(checkbox.disabled_images)}"
+                assert checkbox.get_image_count() == 2, f"Expected 2 current images after switch back, got {checkbox.get_image_count()}"
+                
+                # Test that all API methods work correctly
+                current_images = checkbox.get_current_images()
+                assert len(current_images) == 2, "get_current_images() should return 2 images"
+                
+                normal_images = checkbox.get_images_by_state("normal")
+                assert len(normal_images) == 2, "get_images_by_state('normal') should return 2 images"
+                
+                hovered_images = checkbox.get_images_by_state("hovered")
+                assert len(hovered_images) == 3, "get_images_by_state('hovered') should return 3 images"
+                
+                selected_images = checkbox.get_images_by_state("selected")
+                assert len(selected_images) == 3, "get_images_by_state('selected') should return 3 images"
+                
+                disabled_images = checkbox.get_images_by_state("disabled")
+                assert len(disabled_images) == 2, "get_images_by_state('disabled') should return 2 images"
+                
+            finally:
+                # Clean up theme files
+                try:
+                    os.unlink(multi_theme_file)
+                    os.unlink(single_theme_file)
+                except:
+                    pass
+                    
+        finally:
+            # Clean up image files and directory
+            try:
+                os.unlink(image1_path)
+                os.unlink(image2_path)
+                os.unlink(image3_path)
+                os.rmdir(temp_dir)
+            except:
+                pass
