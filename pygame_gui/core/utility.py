@@ -369,23 +369,24 @@ def apply_colour_to_surface(
 def performance_monitor(operation_name: str):
     """
     Decorator to monitor performance of operations and identify bottlenecks.
-    
+
     This decorator measures the execution time of functions and logs a warning
     if the operation takes longer than 16.67 milliseconds (60 FPS frame time).
     This helps identify performance issues that could impact UI responsiveness
     in real-time applications.
-    
+
     :param operation_name: A descriptive name for the operation being monitored.
-    
+
     Example usage:
         @performance_monitor("Theme Loading")
         def load_theme_data(self):
             # ... complex theme loading logic ...
             pass
-    
+
     The decorator will automatically log slow operations like:
         "SLOW OPERATION: Theme Loading took 25.43ms"
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -396,12 +397,13 @@ def performance_monitor(operation_name: str):
             finally:
                 end_time = time.perf_counter()
                 duration = (end_time - start_time) * 1000  # Convert to milliseconds
-                
+
                 # Log slow operations (slower than 60 FPS frame time)
                 if duration > 16.67:
                     print(f"SLOW OPERATION: {operation_name} took {duration:.2f}ms")
-        
+
         return wrapper
+
     return decorator
 
 
