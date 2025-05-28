@@ -5,7 +5,7 @@ import warnings
 
 from contextlib import contextmanager
 from importlib.resources import files, as_file
-from typing import Union, List, Dict, Any, Optional, cast
+from typing import Union, List, Dict, Any, Optional, cast, Tuple
 
 import pygame
 
@@ -530,6 +530,56 @@ class UIThemeValidator:
                                 f"Must be string or list/tuple, got {type(rect_data).__name__}"
                             )
 
+                    # Validate position if present (new parameter)
+                    if "position" in img_item:
+                        position_data = img_item["position"]
+                        if isinstance(position_data, str):
+                            try:
+                                pos_parts = position_data.strip().split(",")
+                                if len(pos_parts) != 2:
+                                    errors.append(
+                                        f"{element_type}.images.{image_name}[{i}].position: "
+                                        f"Must have 2 comma-separated values, got {len(pos_parts)}"
+                                    )
+                                else:
+                                    for part in pos_parts:
+                                        val = float(part.strip())
+                                        if not 0.0 <= val <= 1.0:
+                                            errors.append(
+                                                f"{element_type}.images.{image_name}[{i}].position: "
+                                                f"Values must be between 0.0 and 1.0, got {val}"
+                                            )
+                            except ValueError:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].position: "
+                                    f"All values must be floats: '{position_data}'"
+                                )
+                        elif isinstance(position_data, (list, tuple)):
+                            if len(position_data) != 2:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].position: "
+                                    f"Must have 2 values, got {len(position_data)}"
+                                )
+                            elif not all(
+                                isinstance(x, (int, float)) for x in position_data
+                            ):
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].position: "
+                                    f"All values must be numbers"
+                                )
+                            else:
+                                for val in position_data:
+                                    if not 0.0 <= val <= 1.0:
+                                        errors.append(
+                                            f"{element_type}.images.{image_name}[{i}].position: "
+                                            f"Values must be between 0.0 and 1.0, got {val}"
+                                        )
+                        else:
+                            errors.append(
+                                f"{element_type}.images.{image_name}[{i}].position: "
+                                f"Must be string or list/tuple, got {type(position_data).__name__}"
+                            )
+
             # Handle single image format (existing validation)
             elif isinstance(image_data, dict):
                 # Check for required path or package/resource
@@ -602,6 +652,56 @@ class UIThemeValidator:
                         errors.append(
                             f"{element_type}.images.{image_name}.sub_surface_rect: "
                             f"Must be string or list/tuple, got {type(rect_data).__name__}"
+                        )
+
+                # Validate position if present (new parameter)
+                if "position" in image_data:
+                    position_data = image_data["position"]
+                    if isinstance(position_data, str):
+                        try:
+                            pos_parts = position_data.strip().split(",")
+                            if len(pos_parts) != 2:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}.position: "
+                                    f"Must have 2 comma-separated values, got {len(pos_parts)}"
+                                )
+                            else:
+                                for part in pos_parts:
+                                    val = float(part.strip())
+                                    if not 0.0 <= val <= 1.0:
+                                        errors.append(
+                                            f"{element_type}.images.{image_name}.position: "
+                                            f"Values must be between 0.0 and 1.0, got {val}"
+                                        )
+                        except ValueError:
+                            errors.append(
+                                f"{element_type}.images.{image_name}.position: "
+                                f"All values must be floats: '{position_data}'"
+                            )
+                    elif isinstance(position_data, (list, tuple)):
+                        if len(position_data) != 2:
+                            errors.append(
+                                f"{element_type}.images.{image_name}.position: "
+                                f"Must have 2 values, got {len(position_data)}"
+                            )
+                        elif not all(
+                            isinstance(x, (int, float)) for x in position_data
+                        ):
+                            errors.append(
+                                f"{element_type}.images.{image_name}.position: "
+                                f"All values must be numbers"
+                            )
+                        else:
+                            for val in position_data:
+                                if not 0.0 <= val <= 1.0:
+                                    errors.append(
+                                        f"{element_type}.images.{image_name}.position: "
+                                        f"Values must be between 0.0 and 1.0, got {val}"
+                                    )
+                    else:
+                        errors.append(
+                            f"{element_type}.images.{image_name}.position: "
+                            f"Must be string or list/tuple, got {type(position_data).__name__}"
                         )
             else:
                 errors.append(
@@ -784,7 +884,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         self.ui_element_fonts_info: Dict[str, Dict[str, FontThemeInfo]] = {}
         self.ui_element_image_locs: Dict[
-            str, Dict[str, Dict[str, str | bool | pygame.Rect]]
+            str, Dict[str, Dict[str, str | bool | pygame.Rect | Tuple[float, float]]]
         ] = {}
         self.ele_font_res: Dict[str, Dict[str, FontResource]] = {}
         self.ui_element_image_surfaces: Dict[
@@ -1047,9 +1147,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                 if image_resource is not None:
                                     if "sub_surface_rect" in img_data:
                                         surface_id = (
-                                            image_resource.image_id
-                                            + str(img_data["sub_surface_rect"])
-                                            + f"_layer_{img_data['layer']}"
+                                            f"{image_resource.image_id}_{element_key}_"
+                                            f"{image_id}_{img_data['id']}_layer_{img_data['layer']}"
                                         )
                                         if surface_id in self.surface_resources:
                                             surf_resource = self.surface_resources[
@@ -1084,8 +1183,8 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                                 )
                                     else:
                                         surface_id = (
-                                            image_resource.image_id
-                                            + f"_layer_{img_data['layer']}"
+                                            f"{image_resource.image_id}_{element_key}_"
+                                            f"{image_id}_{img_data['id']}_layer_{img_data['layer']}"
                                         )
                                         if surface_id in self.surface_resources:
                                             surf_resource = self.surface_resources[
@@ -1108,6 +1207,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                     # Note: These attributes may need to be added to SurfaceResource class
                                     setattr(surf_resource, "layer", img_data["layer"])
                                     setattr(surf_resource, "image_id", img_data["id"])
+                                    setattr(
+                                        surf_resource,
+                                        "position",
+                                        img_data.get("position", (0.5, 0.5)),
+                                    )
                                     multi_surfaces.append(surf_resource)
 
                         # Store the list of surface resources
@@ -1142,8 +1246,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
                         if image_resource is not None:
                             if "sub_surface_rect" in single_image_data:
-                                surface_id = image_resource.image_id + str(
-                                    single_image_data["sub_surface_rect"]
+                                surface_id = (
+                                    f"{image_resource.image_id}_{element_key}_"
+                                    f"{image_id}_{str(single_image_data['sub_surface_rect'])}"
                                 )
                                 if surface_id in self.surface_resources:
                                     surf_resource = self.surface_resources[surface_id]
@@ -1173,7 +1278,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                             surf_resource
                                         )
                             else:
-                                surface_id = image_resource.image_id
+                                surface_id = f"{image_resource.image_id}_{element_key}_{image_id}"
                                 if surface_id in self.surface_resources:
                                     surf_resource = self.surface_resources[surface_id]
                                 else:
@@ -1189,6 +1294,12 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                             surf_resource.image_resource.loaded_surface
                                         )
 
+                            # Add position information to the surface resource
+                            setattr(
+                                surf_resource,
+                                "position",
+                                single_image_data.get("position", (0.5, 0.5)),
+                            )
                             self.ui_element_image_surfaces[element_key][image_id] = (
                                 surf_resource
                             )
@@ -1634,6 +1745,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         {
                             "id": getattr(surf, "image_id", "unnamed"),
                             "layer": getattr(surf, "layer", 0),
+                            "position": getattr(surf, "position", (0.5, 0.5)),
                             "surface": surf.surface,
                         }
                         for surf in surfaces
@@ -1646,6 +1758,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                         {
                             "id": "single",
                             "layer": 0,
+                            "position": getattr(
+                                surface_resource, "position", (0.5, 0.5)
+                            ),
                             "surface": surface_resource.surface,
                         }
                     ]
@@ -1971,7 +2086,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 if locale_key not in self.ui_element_fonts_info:
                     self.ui_element_fonts_info[element_name][locale_key] = {
                         "name": "",
-                        "size": 0,
+                        "size": self.font_dict.default_font.size,
                         "bold": False,
                         "italic": False,
                         "antialiased": True,
@@ -2270,6 +2385,57 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                                 img_resource_data["changed"] = True
                             img_resource_data["sub_surface_rect"] = rect
 
+                    # Handle position if present (new parameter)
+                    if "position" in img_item:
+                        position_data = img_item["position"]
+                        position = None
+
+                        if isinstance(position_data, str):
+                            try:
+                                pos_parts = position_data.strip().split(",")
+                                if len(pos_parts) == 2:
+                                    position = (
+                                        float(pos_parts[0].strip()),
+                                        float(pos_parts[1].strip()),
+                                    )
+                            except (ValueError, TypeError):
+                                warnings.warn(
+                                    f"Unable to parse position from string: {position_data}"
+                                )
+                        elif (
+                            isinstance(position_data, (list, tuple))
+                            and len(position_data) == 2
+                        ):
+                            try:
+                                position = (
+                                    float(position_data[0]),
+                                    float(position_data[1]),
+                                )
+                            except (ValueError, TypeError):
+                                warnings.warn(
+                                    f"Unable to parse position from list/tuple: {position_data}"
+                                )
+
+                        if position is not None:
+                            # Clamp values to valid range
+                            position = (
+                                max(0.0, min(1.0, position[0])),
+                                max(0.0, min(1.0, position[1])),
+                            )
+
+                            if (
+                                existing_img
+                                and existing_img.get("position") != position
+                            ):
+                                img_resource_data["changed"] = True
+                            img_resource_data["position"] = position
+                        else:
+                            # Default position (center)
+                            img_resource_data["position"] = (0.5, 0.5)
+                    else:
+                        # Default position (center) if not specified
+                        img_resource_data["position"] = (0.5, 0.5)
+
                     # Update or add the image to the multi-image list
                     if existing_img:
                         existing_img.update(img_resource_data)
@@ -2338,6 +2504,57 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                             img_res_dict["changed"] = True
                         img_res_dict["sub_surface_rect"] = rect
 
+                # Handle position if present (new parameter)
+                if "position" in image_data:
+                    position_data = image_data["position"]
+                    position = None
+
+                    if isinstance(position_data, str):
+                        try:
+                            pos_parts = position_data.strip().split(",")
+                            if len(pos_parts) == 2:
+                                position = (
+                                    float(pos_parts[0].strip()),
+                                    float(pos_parts[1].strip()),
+                                )
+                        except (ValueError, TypeError):
+                            warnings.warn(
+                                f"Unable to parse position from string: {position_data}"
+                            )
+                    elif (
+                        isinstance(position_data, (list, tuple))
+                        and len(position_data) == 2
+                    ):
+                        try:
+                            position = (
+                                float(position_data[0]),
+                                float(position_data[1]),
+                            )
+                        except (ValueError, TypeError):
+                            warnings.warn(
+                                f"Unable to parse position from list/tuple: {position_data}"
+                            )
+
+                    if position is not None:
+                        # Clamp values to valid range
+                        position = (
+                            max(0.0, min(1.0, position[0])),
+                            max(0.0, min(1.0, position[1])),
+                        )
+
+                        if (
+                            "position" in img_res_dict
+                            and position != img_res_dict["position"]
+                        ):
+                            img_res_dict["changed"] = True
+                        img_res_dict["position"] = position
+                    else:
+                        # Default position (center)
+                        img_res_dict["position"] = (0.5, 0.5)
+                else:
+                    # Default position (center) if not specified
+                    img_res_dict["position"] = (0.5, 0.5)
+
     def _load_element_colour_data_from_theme(
         self, data_type: str, element_name: str, element_theming: Dict[str, Any]
     ):
@@ -2392,7 +2609,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         if locale not in self.ui_element_fonts_info[element_name]:
             self.ui_element_fonts_info[element_name][locale] = {
                 "name": "",
-                "size": 0,
+                "size": self.font_dict.default_font.size,
                 "bold": False,
                 "italic": False,
                 "antialiased": True,

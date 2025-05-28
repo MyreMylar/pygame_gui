@@ -62,30 +62,28 @@ For simple checkboxes with one image per state, use these parameters:
 
  - "**disabled_image**" - The image displayed in the checkbox's disabled state. Uses the same sub-parameters as normal_image.
 
-**Multi-Image Mode (New)**
+**Multi-Image Mode**
 
-For advanced checkboxes with layered visual effects, use these parameters to specify multiple images per state:
+For more complex checkboxes with multiple images per state and precise positioning control, use these parameters:
 
- - "**normal_images**" - A list of images displayed in the checkbox's default state, rendered in layer order. Each image in the list has these sub-parameters:
+ - "**normal_images**" - A list of images for the normal state. Each image has the following parameters:
 
-    - "**id**" - A unique identifier for this image layer (e.g., "background", "border", "icon").
-    - "**layer**" - The rendering layer order (lower numbers render first/behind, higher numbers render last/on top).
+    - "**id**" - A unique identifier for this image.
     - "**path**" - The string path to the image to be displayed. OR
-    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
-    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified.
-    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**package**" - The name of the python package containing this resource.
+    - "**resource**" - The file name of the resource in the python package.
+    - "**layer**" - The layer number for rendering order (lower numbers render first).
+    - "**position**" - Optional tuple of (x, y) values between 0.0 and 1.0 representing relative position. Defaults to (0.5, 0.5) for center.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha.
 
- - "**hovered_images**" - A list of images displayed in the checkbox's hovered state. Uses the same sub-parameters as normal_images.
+ - "**hovered_images**" - A list of images for the hovered state. Uses the same parameters as normal_images.
+ - "**selected_images**" - A list of images for the checked/indeterminate state. Uses the same parameters as normal_images.
+ - "**disabled_images**" - A list of images for the disabled state. Uses the same parameters as normal_images.
 
- - "**selected_images**" - A list of images displayed in the checkbox's checked/indeterminate state. Uses the same sub-parameters as normal_images.
-
- - "**disabled_images**" - A list of images displayed in the checkbox's disabled state. Uses the same sub-parameters as normal_images.
-
-**Image Mode Notes:**
-
-- The checkbox automatically detects whether to use single-image or multi-image mode based on the parameters provided.
-- Multi-image mode allows for complex visual effects like layered backgrounds, borders, check marks, and decorative elements.
+**Image Positioning Notes**:
+- The "position" parameter accepts values between 0.0 and 1.0 for both x and y coordinates.
+- (0.0, 0.0) represents top-left, (1.0, 1.0) represents bottom-right.
+- If no position is specified, the image will be centered (0.5, 0.5).
 - Images are rendered in layer order (lowest layer number first), allowing precise control over visual composition.
 - If a state doesn't specify images, it will fall back to the normal state images.
 - Both modes work alongside the traditional text-based check symbols.

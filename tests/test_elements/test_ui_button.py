@@ -1891,6 +1891,854 @@ class TestUIButton:
             os.unlink(single_theme_file)
             os.unlink(multi_theme_file)
 
+    def test_image_positioning_single_image_mode(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning in single-image mode."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with positioned single images
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.0, 0.0]  # Top-left
+                    },
+                    "hovered_image": {
+                        "path": "tests/data/images/splat.png", 
+                        "position": [1.0, 1.0]  # Bottom-right
+                    },
+                    "selected_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.5, 0.5]  # Center
+                    },
+                    "disabled_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.2, 0.8]  # Custom position
+                    }
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Position Test",
+                            manager=manager)
+            
+            # Test normal state position
+            assert button.normal_image_positions == [(0.0, 0.0)]
+            assert button.get_current_image_positions() == [(0.0, 0.0)]
+            
+            # Test hovered state position
+            assert button.hovered_image_positions == [(1.0, 1.0)]
+            button.hovered = True
+            assert button.get_current_image_positions() == [(1.0, 1.0)]
+            button.hovered = False
+            
+            # Test selected state position
+            assert button.selected_image_positions == [(0.5, 0.5)]
+            button.select()
+            assert button.get_current_image_positions() == [(0.5, 0.5)]
+            button.unselect()
+            
+            # Test disabled state position
+            assert button.disabled_image_positions == [(0.2, 0.8)]
+            button.disable()
+            assert button.get_current_image_positions() == [(0.2, 0.8)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_multi_image_mode(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning in multi-image mode."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with positioned multi-images
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "background",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, 0.5]  # Center
+                        },
+                        {
+                            "id": "icon",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.1, 0.1]  # Top-left area
+                        },
+                        {
+                            "id": "decoration",
+                            "layer": 2,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.9, 0.9]  # Bottom-right area
+                        }
+                    ],
+                    "hovered_images": [
+                        {
+                            "id": "background_hover",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, 0.5]  # Center
+                        },
+                        {
+                            "id": "glow",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.0, 0.0]  # Top-left corner
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Multi Position Test",
+                            manager=manager)
+            
+            # Test normal state positions
+            expected_normal_positions = [(0.5, 0.5), (0.1, 0.1), (0.9, 0.9)]
+            assert button.normal_image_positions == expected_normal_positions
+            assert button.get_current_image_positions() == expected_normal_positions
+            assert len(button.normal_images) == 3
+            
+            # Test hovered state positions
+            expected_hovered_positions = [(0.5, 0.5), (0.0, 0.0)]
+            assert button.hovered_image_positions == expected_hovered_positions
+            button.hovered = True
+            assert button.get_current_image_positions() == expected_hovered_positions
+            assert len(button.get_current_images()) == 2
+            button.hovered = False
+            
+            # Test fallback to normal positions for states without specific images
+            button.select()
+            assert button.get_current_image_positions() == expected_normal_positions  # Falls back to normal
+            button.unselect()
+            
+            button.disable()
+            assert button.get_current_image_positions() == expected_normal_positions  # Falls back to normal
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_default_values(self, _init_pygame, _display_surface_return_none):
+        """Test that images without position parameters default to center (0.5, 0.5)."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme without position parameters
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "no_position",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png"
+                            # No position parameter - should default to (0.5, 0.5)
+                        },
+                        {
+                            "id": "with_position",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.2, 0.8]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Default Position Test",
+                            manager=manager)
+            
+            # First image should default to center, second should use specified position
+            expected_positions = [(0.5, 0.5), (0.2, 0.8)]
+            assert button.normal_image_positions == expected_positions
+            assert button.get_current_image_positions() == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_validation_valid_values(self, _init_pygame, _display_surface_return_none):
+        """Test that valid position values are accepted."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with various valid position values
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "corner_tl",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.0, 0.0]  # Top-left corner
+                        },
+                        {
+                            "id": "corner_br",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [1.0, 1.0]  # Bottom-right corner
+                        },
+                        {
+                            "id": "center",
+                            "layer": 2,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, 0.5]  # Center
+                        },
+                        {
+                            "id": "custom",
+                            "layer": 3,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.25, 0.75]  # Custom position
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            # Should load without validation errors
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Valid Position Test",
+                            manager=manager)
+            
+            expected_positions = [(0.0, 0.0), (1.0, 1.0), (0.5, 0.5), (0.25, 0.75)]
+            assert button.normal_image_positions == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    @pytest.mark.filterwarnings("ignore:Theme validation found")
+    def test_image_positioning_validation_invalid_values(self, _init_pygame, _display_surface_return_none):
+        """Test that invalid position values are properly validated."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with invalid position values
+        invalid_themes = [
+            # Position values out of range
+            {
+                "button": {
+                    "images": {
+                        "normal_image": {
+                            "path": "tests/data/images/splat.png",
+                            "position": [2.0, 0.5]  # x > 1.0
+                        }
+                    }
+                }
+            },
+            {
+                "button": {
+                    "images": {
+                        "normal_image": {
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, -0.1]  # y < 0.0
+                        }
+                    }
+                }
+            },
+            # Wrong number of values
+            {
+                "button": {
+                    "images": {
+                        "normal_image": {
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5]  # Only one value
+                        }
+                    }
+                }
+            },
+            {
+                "button": {
+                    "images": {
+                        "normal_image": {
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, 0.5, 0.5]  # Three values
+                        }
+                    }
+                }
+            },
+            # Non-numeric values
+            {
+                "button": {
+                    "images": {
+                        "normal_image": {
+                            "path": "tests/data/images/splat.png",
+                            "position": ["left", "top"]  # String values
+                        }
+                    }
+                }
+            }
+        ]
+        
+        for i, theme_data in enumerate(invalid_themes):
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(theme_data, f)
+                theme_file = f.name
+            
+            try:
+                manager = UIManager((800, 600))
+                
+                # Validation should catch the errors
+                errors = manager.get_theme().validate_theme_file_path(theme_file)
+                assert len(errors) > 0, f"Theme {i} should have validation errors"
+                
+                # At least one error should mention position
+                position_errors = [error for error in errors if "position" in error.lower()]
+                assert len(position_errors) > 0, f"Theme {i} should have position-related errors"
+                
+            finally:
+                os.unlink(theme_file)
+
+    def test_image_positioning_state_fallbacks(self, _init_pygame, _display_surface_return_none):
+        """Test that position fallbacks work correctly when states don't have specific images."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with only normal images defined
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.3, 0.3]
+                        },
+                        {
+                            "id": "icon",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.7, 0.7]
+                        }
+                    ]
+                    # No hovered, selected, or disabled images defined
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Fallback Test",
+                            manager=manager)
+            
+            expected_positions = [(0.3, 0.3), (0.7, 0.7)]
+            
+            # Normal state should have the defined positions
+            assert button.normal_image_positions == expected_positions
+            assert button.get_current_image_positions() == expected_positions
+            
+            # Other states should fall back to normal positions
+            assert button.hovered_image_positions == expected_positions
+            assert button.selected_image_positions == expected_positions
+            assert button.disabled_image_positions == expected_positions
+            
+            # Test state changes
+            button.hovered = True
+            assert button.get_current_image_positions() == expected_positions
+            button.hovered = False
+            
+            button.select()
+            assert button.get_current_image_positions() == expected_positions
+            button.unselect()
+            
+            button.disable()
+            assert button.get_current_image_positions() == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_mixed_with_without_positions(self, _init_pygame, _display_surface_return_none):
+        """Test handling of mixed images where some have positions and others don't."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with mixed position specifications
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "positioned",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.1, 0.1]
+                        },
+                        {
+                            "id": "not_positioned",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png"
+                            # No position - should default to (0.5, 0.5)
+                        },
+                        {
+                            "id": "also_positioned",
+                            "layer": 2,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.9, 0.9]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Mixed Position Test",
+                            manager=manager)
+            
+            # Should have positions: specified, default, specified
+            expected_positions = [(0.1, 0.1), (0.5, 0.5), (0.9, 0.9)]
+            assert button.normal_image_positions == expected_positions
+            assert button.get_current_image_positions() == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_api_methods(self, _init_pygame, _display_surface_return_none):
+        """Test the new API methods for accessing image positions."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with different positions for different states
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "normal_bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.2, 0.2]
+                        }
+                    ],
+                    "hovered_images": [
+                        {
+                            "id": "hovered_bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.4, 0.4]
+                        }
+                    ],
+                    "selected_images": [
+                        {
+                            "id": "selected_bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.6, 0.6]
+                        }
+                    ],
+                    "disabled_images": [
+                        {
+                            "id": "disabled_bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.8, 0.8]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="API Test",
+                            manager=manager)
+            
+            # Test get_current_image_positions() for different states
+            
+            # Normal state
+            assert button.get_current_image_positions() == [(0.2, 0.2)]
+            
+            # Hovered state
+            button.hovered = True
+            assert button.get_current_image_positions() == [(0.4, 0.4)]
+            button.hovered = False
+            
+            # Selected state
+            button.select()
+            assert button.get_current_image_positions() == [(0.6, 0.6)]
+            button.unselect()
+            
+            # Disabled state
+            button.disable()
+            assert button.get_current_image_positions() == [(0.8, 0.8)]
+            button.enable()
+            
+            # Test that positions correspond to images
+            assert len(button.get_current_image_positions()) == len(button.get_current_images())
+            
+            # Test state-specific position attributes
+            assert button.normal_image_positions == [(0.2, 0.2)]
+            assert button.hovered_image_positions == [(0.4, 0.4)]
+            assert button.selected_image_positions == [(0.6, 0.6)]
+            assert button.disabled_image_positions == [(0.8, 0.8)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_theme_loading_and_storage(self, _init_pygame, _display_surface_return_none):
+        """Test that position data is correctly loaded and stored from theme files."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with positioned single images
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.0, 0.0]  # Top-left
+                    },
+                    "hovered_image": {
+                        "path": "tests/data/images/splat.png", 
+                        "position": [1.0, 1.0]  # Bottom-right
+                    },
+                    "selected_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.5, 0.5]  # Center
+                    },
+                    "disabled_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.2, 0.8]  # Custom position
+                    }
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            
+            # Test that position data is correctly loaded in theme
+            normal_details = manager.ui_theme.get_image_details("normal_image", ["button"])
+            assert normal_details[0]["position"] == (0.0, 0.0)
+            
+            hovered_details = manager.ui_theme.get_image_details("hovered_image", ["button"])
+            assert hovered_details[0]["position"] == (1.0, 1.0)
+            
+            selected_details = manager.ui_theme.get_image_details("selected_image", ["button"])
+            assert selected_details[0]["position"] == (0.5, 0.5)
+            
+            disabled_details = manager.ui_theme.get_image_details("disabled_image", ["button"])
+            assert disabled_details[0]["position"] == (0.2, 0.8)
+            
+            # Test button creation and position loading
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="Position Test",
+                manager=manager
+            )
+            
+            # Verify positions are correctly loaded into button
+            assert button.normal_image_positions == [(0.0, 0.0)]
+            assert button.hovered_image_positions == [(1.0, 1.0)]
+            assert button.selected_image_positions == [(0.5, 0.5)]
+            assert button.disabled_image_positions == [(0.2, 0.8)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_state_transitions(self, _init_pygame, _display_surface_return_none):
+        """Test that position data changes correctly with button state transitions."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.1, 0.1]
+                    },
+                    "hovered_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.2, 0.2]
+                    },
+                    "selected_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.3, 0.3]
+                    },
+                    "disabled_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.4, 0.4]
+                    }
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="State Test",
+                manager=manager
+            )
+            
+            # Test normal state
+            assert button.get_current_image_positions() == [(0.1, 0.1)]
+            
+            # Test hovered state
+            button.hovered = True
+            assert button.get_current_image_positions() == [(0.2, 0.2)]
+            
+            # Test selected state (takes priority over hovered)
+            button.is_selected = True
+            assert button.get_current_image_positions() == [(0.3, 0.3)]
+            
+            # Test disabled state (takes priority over all)
+            button.is_enabled = False
+            assert button.get_current_image_positions() == [(0.4, 0.4)]
+            
+            # Reset to normal
+            button.is_enabled = True
+            button.is_selected = False
+            button.hovered = False
+            assert button.get_current_image_positions() == [(0.1, 0.1)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_multi_image_format(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning with multi-image format."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {
+                            "id": "bg",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.0, 0.0]
+                        },
+                        {
+                            "id": "icon",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [1.0, 1.0]
+                        }
+                    ]
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="Multi Test",
+                manager=manager
+            )
+            
+            # Test multi-image positions
+            positions = button.get_current_image_positions()
+            assert len(positions) == 2
+            assert positions == [(0.0, 0.0), (1.0, 1.0)]
+            
+            # Test that we have multiple images
+            assert button.is_multi_image_mode() == True
+            assert button.get_image_count() == 2
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_fallback_behavior(self, _init_pygame, _display_surface_return_none):
+        """Test fallback behavior when some states don't have specific images."""
+        import tempfile
+        import json
+        import os
+        
+        # Only define normal image, others should fall back
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.25, 0.75]
+                    }
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="Fallback Test",
+                manager=manager
+            )
+            
+            # All states should fall back to normal image position
+            assert button.normal_image_positions == [(0.25, 0.75)]
+            assert button.hovered_image_positions == [(0.25, 0.75)]
+            assert button.selected_image_positions == [(0.25, 0.75)]
+            assert button.disabled_image_positions == [(0.25, 0.75)]
+            
+            # Current positions should match normal regardless of state
+            assert button.get_current_image_positions() == [(0.25, 0.75)]
+            
+            button.hovered = True
+            assert button.get_current_image_positions() == [(0.25, 0.75)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_default_center_position(self, _init_pygame, _display_surface_return_none):
+        """Test that images without position specified default to center (0.5, 0.5)."""
+        import tempfile
+        import json
+        import os
+        
+        # Image without position specified
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png"
+                        # No position specified
+                    }
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="Default Test",
+                manager=manager
+            )
+            
+            # Should default to center position
+            assert button.normal_image_positions == [(0.5, 0.5)]
+            assert button.get_current_image_positions() == [(0.5, 0.5)]
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_edge_case_values(self, _init_pygame, _display_surface_return_none):
+        """Test edge case position values (0.0, 1.0, boundaries)."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.0, 1.0]  # Top-left x, bottom y
+                    },
+                    "hovered_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [1.0, 0.0]  # Bottom-right x, top y
+                    }
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+
+        try:
+            manager = pygame_gui.UIManager((800, 600), theme_file)
+            button = pygame_gui.elements.UIButton(
+                relative_rect=pygame.Rect(100, 100, 150, 30),
+                text="Edge Test",
+                manager=manager
+            )
+            
+            # Test boundary values
+            assert button.normal_image_positions == [(0.0, 1.0)]
+            assert button.hovered_image_positions == [(1.0, 0.0)]
+            
+            # Test state transitions with edge values
+            assert button.get_current_image_positions() == [(0.0, 1.0)]
+            
+            button.hovered = True
+            assert button.get_current_image_positions() == [(1.0, 0.0)]
+            
+        finally:
+            os.unlink(theme_file)
+
 
 if __name__ == '__main__':
     pytest.console_main()

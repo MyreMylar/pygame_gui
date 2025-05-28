@@ -568,12 +568,36 @@ class DrawableShape:
             images = self.theming[images_key]
             if images:  # Only process if there are actually images
                 state_surface = self.states[state_str].surface
+
+                # Get corresponding position data
+                positions_key = images_key.replace("_images", "_image_positions")
+                positions = self.theming.get(positions_key, [])
+
                 # Draw each image in layer order (they should already be sorted by layer)
-                for image in images:
+                for i, image in enumerate(images):
                     if image is not None:
-                        # Center the image on the surface
+                        # Get position for this image (default to center if not specified)
+                        if i < len(positions):
+                            pos_x, pos_y = positions[i]
+                        else:
+                            pos_x, pos_y = 0.5, 0.5  # Default to center
+
+                        # Calculate actual pixel position
+                        surface_rect = state_surface.get_rect()
                         image_rect = image.get_rect()
-                        image_rect.center = state_surface.get_rect().center
+
+                        # Position represents where to place the image based on relative coordinates
+                        # (1.0, 1.0) should place the bottom-right corner of the image at the
+                        # bottom-right of the element
+                        target_x = surface_rect.width * pos_x - image_rect.width * pos_x
+                        target_y = (
+                            surface_rect.height * pos_y - image_rect.height * pos_y
+                        )
+
+                        # Set the image position
+                        image_rect.x = int(target_x)
+                        image_rect.y = int(target_y)
+
                         state_surface.blit(image, image_rect)
 
         # Handle text

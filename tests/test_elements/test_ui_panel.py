@@ -943,6 +943,322 @@ class TestUIPanel:
             except:
                 pass
 
+    def test_image_positioning_single_image_mode(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning in single-image mode."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with positioned single image
+        theme_data = {
+            "panel": {
+                "images": {
+                    "background_image": {
+                        "path": "tests/data/images/splat.png",
+                        "position": [0.0, 0.0]  # Top-left corner
+                    }
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # Test position
+            assert panel.background_image_positions == [(0.0, 0.0)]
+            assert panel.get_current_image_positions() == [(0.0, 0.0)]
+            
+            # Test API methods
+            assert not panel.is_multi_image_mode()
+            assert panel.get_image_count() == 1
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_multi_image_mode(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning in multi-image mode."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with positioned multi-images
+        theme_data = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {
+                            "id": "background",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.5, 0.5]  # Center
+                        },
+                        {
+                            "id": "top_left",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.0, 0.0]  # Top-left corner
+                        },
+                        {
+                            "id": "bottom_right",
+                            "layer": 2,
+                            "path": "tests/data/images/splat.png",
+                            "position": [1.0, 1.0]  # Bottom-right corner
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # Test positions
+            expected_positions = [(0.5, 0.5), (0.0, 0.0), (1.0, 1.0)]
+            assert panel.background_image_positions == expected_positions
+            assert panel.get_current_image_positions() == expected_positions
+            
+            # Test API methods
+            assert panel.is_multi_image_mode()
+            assert panel.get_image_count() == 3
+            
+            # Test image access
+            current_images = panel.get_current_images()
+            assert len(current_images) == 3
+            for image in current_images:
+                assert isinstance(image, pygame.Surface)
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_default_values(self, _init_pygame, _display_surface_return_none):
+        """Test that images without position parameters default to center (0.5, 0.5)."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme without position parameters
+        theme_data = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {
+                            "id": "no_position",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png"
+                            # No position parameter - should default to (0.5, 0.5)
+                        },
+                        {
+                            "id": "with_position",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.2, 0.8]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # First image should default to center, second should use specified position
+            expected_positions = [(0.5, 0.5), (0.2, 0.8)]
+            assert panel.background_image_positions == expected_positions
+            assert panel.get_current_image_positions() == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_api_methods(self, _init_pygame, _display_surface_return_none):
+        """Test the API methods for image positioning."""
+        manager = UIManager((800, 600))
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+        
+        # Create test images first
+        panel.background_images = [pygame.Surface((10, 10)) for _ in range(2)]
+        
+        # Test setting positions
+        test_positions = [(0.1, 0.1), (0.9, 0.9)]
+        panel.set_image_positions(test_positions)
+        assert panel.background_image_positions == test_positions
+        
+        # Test setting individual position
+        panel.set_image_position(0, (0.3, 0.3))
+        assert panel.background_image_positions[0] == (0.3, 0.3)
+        
+        # Test invalid index
+        assert not panel.set_image_position(99, (0.5, 0.5))
+        
+        # Test auto-extension of positions list
+        panel.background_images = [pygame.Surface((10, 10)) for _ in range(3)]
+        panel.set_image_positions([(0.1, 0.1)])
+        assert len(panel.background_image_positions) == 3
+        assert panel.background_image_positions[0] == (0.1, 0.1)
+        assert panel.background_image_positions[1] == (0.5, 0.5)  # Default center position
+        assert panel.background_image_positions[2] == (0.5, 0.5)  # Default center position
+
+    def test_image_positioning_mixed_with_without_positions(self, _init_pygame, _display_surface_return_none):
+        """Test handling of mixed images where some have positions and others don't."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {
+                            "id": "with_position",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.1, 0.1]
+                        },
+                        {
+                            "id": "no_position",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png"
+                            # No position - should default to center
+                        },
+                        {
+                            "id": "with_position_2",
+                            "layer": 2,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.9, 0.9]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # Should have positions: specified, default, specified
+            expected_positions = [(0.1, 0.1), (0.5, 0.5), (0.9, 0.9)]
+            assert panel.background_image_positions == expected_positions
+            assert panel.get_current_image_positions() == expected_positions
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_image_positioning_theme_loading_and_storage(self, _init_pygame, _display_surface_return_none):
+        """Test that image positions are properly loaded and stored when switching themes."""
+        import tempfile
+        import json
+        import os
+        
+        # First theme with positions
+        theme_1 = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {
+                            "id": "bg1",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.1, 0.1]
+                        },
+                        {
+                            "id": "bg2",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.9, 0.9]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        # Second theme with different positions
+        theme_2 = {
+            "panel": {
+                "images": {
+                    "background_images": [
+                        {
+                            "id": "bg1",
+                            "layer": 0,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.2, 0.2]
+                        },
+                        {
+                            "id": "bg2",
+                            "layer": 1,
+                            "path": "tests/data/images/splat.png",
+                            "position": [0.8, 0.8]
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_1, f)
+            theme_1_file = f.name
+            
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_2, f)
+            theme_2_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_1_file)
+            panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+            
+            # Check first theme positions
+            assert panel.background_image_positions == [(0.1, 0.1), (0.9, 0.9)]
+            
+            # Switch to second theme
+            manager.ui_theme.load_theme(theme_2_file)
+            panel.rebuild_from_changed_theme_data()
+            
+            # Check second theme positions
+            assert panel.background_image_positions == [(0.2, 0.2), (0.8, 0.8)]
+            
+        finally:
+            os.unlink(theme_1_file)
+            os.unlink(theme_2_file)
+
+    def test_image_positioning_edge_case_values(self, _init_pygame, _display_surface_return_none):
+        """Test image positioning with edge case values."""
+        manager = UIManager((800, 600))
+        panel = UIPanel(relative_rect=pygame.Rect(100, 100, 200, 200), manager=manager)
+        
+        # Test with empty positions list
+        panel.set_image_positions([])
+        assert panel.background_image_positions == []
+        
+        # Test with single image but multiple positions
+        panel.background_images = [pygame.Surface((10, 10))]
+        panel.set_image_positions([(0.1, 0.1), (0.2, 0.2)])
+        assert panel.background_image_positions == [(0.1, 0.1)]
+        
+        # Test with multiple images but single position
+        panel.background_images = [pygame.Surface((10, 10)) for _ in range(3)]
+        panel.set_image_positions([(0.3, 0.3)])
+        assert len(panel.background_image_positions) == 3
+        assert panel.background_image_positions[0] == (0.3, 0.3)
+        assert panel.background_image_positions[1] == (0.5, 0.5)  # Default center
+        assert panel.background_image_positions[2] == (0.5, 0.5)  # Default center
+
 
 if __name__ == '__main__':
     pytest.console_main()

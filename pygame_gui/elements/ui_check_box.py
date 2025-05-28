@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Set, Any, List
+from typing import Optional, Union, Dict, Set, Any, List, Tuple
 
 import pygame
 
@@ -120,6 +120,12 @@ class UICheckBox(UIElement):
         self.hovered_images: List[pygame.Surface] = []
         self.disabled_images: List[pygame.Surface] = []
 
+        # Position support for images - tuples of (x, y) where 0.0-1.0 represents relative position
+        self.normal_image_positions: List[Tuple[float, float]] = []
+        self.selected_image_positions: List[Tuple[float, float]] = []
+        self.hovered_image_positions: List[Tuple[float, float]] = []
+        self.disabled_image_positions: List[Tuple[float, float]] = []
+
         # Get text offset from theme
         self.text_offset = 5
         try:
@@ -188,6 +194,11 @@ class UICheckBox(UIElement):
             "text": self._get_display_symbol(),
             "text_horiz_alignment": "center",
             "text_vert_alignment": "center",
+            # Position support for images
+            "normal_image_positions": self.normal_image_positions,
+            "selected_image_positions": self.selected_image_positions,
+            "hovered_image_positions": self.hovered_image_positions,
+            "disabled_image_positions": self.disabled_image_positions,
         }
 
         self.drawable_shape = RectDrawableShape(
@@ -380,44 +391,90 @@ class UICheckBox(UIElement):
         """
         changed = False
 
-        # State mappings for loading images
-        state_mappings = [
-            ("normal", "normal_images"),
-            ("hovered", "hovered_images"),
-            ("selected", "selected_images"),
-            ("disabled", "disabled_images"),
+        # Process normal state first to establish baseline for fallbacks
+        normal_images = []
+        normal_positions = []
+
+        # First try to load multi-image format for normal state
+        try:
+            image_details = self.ui_theme.get_image_details(
+                "normal_images", self.combined_element_ids
+            )
+            normal_images = [detail["surface"] for detail in image_details]
+            normal_positions = [detail["position"] for detail in image_details]
+        except LookupError:
+            # Fall back to single image format for normal state
+            try:
+                image_details = self.ui_theme.get_image_details(
+                    "normal_image", self.combined_element_ids
+                )
+                if image_details:
+                    normal_images = [detail["surface"] for detail in image_details]
+                    normal_positions = [detail["position"] for detail in image_details]
+            except LookupError:
+                # No normal image found
+                pass
+
+        # Ensure we have positions for all normal images (default to center if missing)
+        while len(normal_positions) < len(normal_images):
+            normal_positions.append((0.5, 0.5))
+
+        # Check if normal images have changed
+        if (
+            normal_images != self.normal_images
+            or normal_positions != self.normal_image_positions
+        ):
+            self.normal_images = normal_images
+            self.normal_image_positions = normal_positions
+            changed = True
+
+        # Now process other states with fallback to normal
+        other_state_mappings = [
+            ("hovered", "hovered_images", "hovered_image_positions"),
+            ("selected", "selected_images", "selected_image_positions"),
+            ("disabled", "disabled_images", "disabled_image_positions"),
         ]
 
-        for state_name, attr_name in state_mappings:
+        for state_name, attr_name, position_attr_name in other_state_mappings:
             new_images = []
+            new_positions = []
 
-            # First try to load multi-image format (e.g., "normal_images")
+            # First try to load multi-image format (e.g., "hovered_images")
             try:
-                multi_images = self.ui_theme.get_images(
+                image_details = self.ui_theme.get_image_details(
                     f"{state_name}_images", self.combined_element_ids
                 )
-                new_images = multi_images
+                new_images = [detail["surface"] for detail in image_details]
+                new_positions = [detail["position"] for detail in image_details]
             except LookupError:
-                # Fall back to single image format (e.g., "normal_image")
+                # Fall back to single image format (e.g., "hovered_image")
                 try:
-                    single_image = self.ui_theme.get_image(
+                    image_details = self.ui_theme.get_image_details(
                         f"{state_name}_image", self.combined_element_ids
                     )
-                    if single_image is not None:
-                        new_images = [single_image]  # Convert to list
+                    if image_details:
+                        new_images = [detail["surface"] for detail in image_details]
+                        new_positions = [detail["position"] for detail in image_details]
                 except LookupError:
                     # No image found for this state
                     pass
 
-            # Handle fallbacks for non-normal states
-            if not new_images and state_name != "normal":
-                # Fall back to normal_images
-                new_images = self.normal_images.copy()
+            # Handle fallbacks to normal state
+            if not new_images:
+                # Fall back to normal_images and normal_image_positions
+                new_images = normal_images.copy()
+                new_positions = normal_positions.copy()
+
+            # Ensure we have positions for all images (default to center if missing)
+            while len(new_positions) < len(new_images):
+                new_positions.append((0.5, 0.5))
 
             # Check if images have changed
             current_images = getattr(self, attr_name)
-            if new_images != current_images:
+            current_positions = getattr(self, position_attr_name, [])
+            if new_images != current_images or new_positions != current_positions:
                 setattr(self, attr_name, new_images)
+                setattr(self, position_attr_name, new_positions)
                 changed = True
 
         return changed
@@ -994,6 +1051,11 @@ class UICheckBox(UIElement):
             "selected_images": self.selected_images,
             "hovered_images": self.hovered_images,
             "disabled_images": self.disabled_images,
+            # Position support for images
+            "normal_image_positions": self.normal_image_positions,
+            "selected_image_positions": self.selected_image_positions,
+            "hovered_image_positions": self.hovered_image_positions,
+            "disabled_image_positions": self.disabled_image_positions,
             "border_width": getattr(self, "border_width", 1),
             "shadow_width": getattr(self, "shadow_width", 2),
             "shape_corner_radius": getattr(self, "shape_corner_radius", [2, 2, 2, 2]),

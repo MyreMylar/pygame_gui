@@ -95,32 +95,36 @@ For simple buttons with one image per state, use these parameters:
     - "**path**" - The string path to the image to be displayed. OR
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**sub_surface_rect**" - A rectangle describing a portion of the image to use. Defaults to the whole image.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**position**" - A tuple of two floats (x, y) from 0.0 to 1.0 specifying where to position the image. (0.0, 0.0) places the top-left corner of the image at the top-left of the button, (1.0, 1.0) places the bottom-right corner at the bottom-right, and (0.5, 0.5) centers the image. Defaults to (0.5, 0.5).
 
  - "**hovered_image**" - The image displayed in the buttons hovered state. It has the following block of sub-parameters:
 
     - "**path**" - The string path to the image to be displayed. OR
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**sub_surface_rect**" - A rectangle describing a portion of the image to use. Defaults to the whole image.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**position**" - A tuple of two floats (x, y) from 0.0 to 1.0 specifying where to position the image. (0.0, 0.0) places the top-left corner of the image at the top-left of the button, (1.0, 1.0) places the bottom-right corner at the bottom-right, and (0.5, 0.5) centers the image. Defaults to (0.5, 0.5).
 
  - "**selected_image**" - The image displayed in the buttons select focused state. It has the following block of sub-parameters:
 
     - "**path**" - The string path to the image to be displayed. OR
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**sub_surface_rect**" - A rectangle describing a portion of the image to use. Defaults to the whole image.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**position**" - A tuple of two floats (x, y) from 0.0 to 1.0 specifying where to position the image. (0.0, 0.0) places the top-left corner of the image at the top-left of the button, (1.0, 1.0) places the bottom-right corner at the bottom-right, and (0.5, 0.5) centers the image. Defaults to (0.5, 0.5).
 
  - "**disabled_image**" - The image displayed in the buttons disabled state. It has the following block of sub-parameters:
 
     - "**path**" - The string path to the image to be displayed. OR
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**sub_surface_rect**" - A rectangle describing a portion of the image to use. Defaults to the whole image.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**position**" - A tuple of two floats (x, y) from 0.0 to 1.0 specifying where to position the image. (0.0, 0.0) places the top-left corner of the image at the top-left of the button, (1.0, 1.0) places the bottom-right corner at the bottom-right, and (0.5, 0.5) centers the image. Defaults to (0.5, 0.5).
 
 **Multi-Image Mode (New)**
 
@@ -133,8 +137,9 @@ For advanced buttons with layered visual effects, use these parameters to specif
     - "**path**" - The string path to the image to be displayed. OR
     - "**package** - The name of the python package containing this resource - e.g. 'data.images'
     - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
-    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified.
+    - "**sub_surface_rect**" - A rectangle describing a portion of the image to use. Defaults to the whole image.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+    - "**position**" - A tuple of two floats (x, y) from 0.0 to 1.0 specifying where to position the image. (0.0, 0.0) places the top-left corner of the image at the top-left of the button, (1.0, 1.0) places the bottom-right corner at the bottom-right, and (0.5, 0.5) centers the image. Defaults to (0.5, 0.5).
 
  - "**hovered_images**" - A list of images displayed in the button's hovered state. Uses the same sub-parameters as normal_images.
 
@@ -235,8 +240,9 @@ Here are examples of button blocks in JSON theme files using the parameters desc
             {
                 "normal_image": {
                     "package": "data.images",
-                    "resource": "buttons.png",
-                    "sub_surface_rect": "0,0,32,32"
+                    "resource": "splat.png",
+                    "sub_surface_rect": "0,0,32,32",
+                    "position": [0.8, 0.2]
                 },
                 "hovered_image": {
                     "package": "data.images",
@@ -289,59 +295,51 @@ Here are examples of button blocks in JSON theme files using the parameters desc
         {
             "colours":
             {
-                "normal_text": "#FFFFFF",
-                "hovered_text": "#FFFF00",
-                "selected_text": "#00FF00",
-                "disabled_text": "#808080"
+                "normal_bg": "#25292e",
+                "hovered_bg": "#35393e",
+                "disabled_bg": "#25292e",
+                "selected_bg": "#25292e",
+                "active_bg": "#193784",
+                "normal_text": "#c5cbd8",
+                "hovered_text": "#FFFFFF",
+                "selected_text": "#FFFFFF",
+                "disabled_text": "#6d736f",
+                "active_text": "#FFFFFF"
             },
             "images":
             {
                 "normal_images": [
                     {
                         "id": "background",
-                        "path": "images/button_bg.png",
-                        "layer": 0
+                        "layer": 0,
+                        "path": "data/images/button_bg.png",
+                        "position": [0.5, 0.5]
                     },
                     {
                         "id": "icon",
-                        "path": "images/button_icon.png",
-                        "layer": 1
+                        "layer": 1,
+                        "path": "data/images/button_icon.png",
+                        "position": [0.1, 0.5]
+                    },
+                    {
+                        "id": "decoration",
+                        "layer": 2,
+                        "path": "data/images/button_decoration.png",
+                        "position": [0.9, 0.1]
                     }
                 ],
                 "hovered_images": [
                     {
                         "id": "background",
-                        "path": "images/button_bg.png",
-                        "layer": 0
+                        "layer": 0,
+                        "path": "data/images/button_bg_hover.png",
+                        "position": [0.5, 0.5]
                     },
                     {
                         "id": "icon",
-                        "path": "images/button_icon.png",
-                        "layer": 1
-                    },
-                    {
-                        "id": "glow_effect",
-                        "path": "images/button_glow.png",
-                        "layer": 2
-                    }
-                ],
-                "selected_images": [
-                    {
-                        "id": "background_selected",
-                        "path": "images/button_bg_selected.png",
-                        "layer": 0
-                    },
-                    {
-                        "id": "icon",
-                        "path": "images/button_icon.png",
-                        "layer": 1
-                    }
-                ],
-                "disabled_images": [
-                    {
-                        "id": "background_disabled",
-                        "path": "images/button_bg_disabled.png",
-                        "layer": 0
+                        "layer": 1,
+                        "path": "data/images/button_icon_hover.png",
+                        "position": [0.1, 0.5]
                     }
                 ]
             },
