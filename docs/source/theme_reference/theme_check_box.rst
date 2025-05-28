@@ -37,6 +37,59 @@ Font
  - "**bold**" - Whether the font should be bold.
  - "**italic**" - Whether the font should be italic.
 
+You only need to specify locations if this is the first use of this font name in the GUI.
+
+Images
+-------
+
+:class:`UICheckBox <pygame_gui.elements.UICheckBox>` accepts images specified in the theme via an 'images' block. The checkbox supports both single-image and multi-image modes for enhanced visual effects.
+
+**Single Image Mode (Legacy)**
+
+For simple checkboxes with one image per state, use these parameters:
+
+ - "**normal_image**" - The image displayed in the checkbox's default state. It has the following block of sub-parameters:
+
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
+    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+
+ - "**hovered_image**" - The image displayed in the checkbox's hovered state. Uses the same sub-parameters as normal_image.
+
+ - "**selected_image**" - The image displayed in the checkbox's checked/indeterminate state. Uses the same sub-parameters as normal_image.
+
+ - "**disabled_image**" - The image displayed in the checkbox's disabled state. Uses the same sub-parameters as normal_image.
+
+**Multi-Image Mode (New)**
+
+For advanced checkboxes with layered visual effects, use these parameters to specify multiple images per state:
+
+ - "**normal_images**" - A list of images displayed in the checkbox's default state, rendered in layer order. Each image in the list has these sub-parameters:
+
+    - "**id**" - A unique identifier for this image layer (e.g., "background", "border", "icon").
+    - "**layer**" - The rendering layer order (lower numbers render first/behind, higher numbers render last/on top).
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
+    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+
+ - "**hovered_images**" - A list of images displayed in the checkbox's hovered state. Uses the same sub-parameters as normal_images.
+
+ - "**selected_images**" - A list of images displayed in the checkbox's checked/indeterminate state. Uses the same sub-parameters as normal_images.
+
+ - "**disabled_images**" - A list of images displayed in the checkbox's disabled state. Uses the same sub-parameters as normal_images.
+
+**Image Mode Notes:**
+
+- The checkbox automatically detects whether to use single-image or multi-image mode based on the parameters provided.
+- Multi-image mode allows for complex visual effects like layered backgrounds, borders, check marks, and decorative elements.
+- Images are rendered in layer order (lowest layer number first), allowing precise control over visual composition.
+- If a state doesn't specify images, it will fall back to the normal state images.
+- Both modes work alongside the traditional text-based check symbols.
+
 Miscellaneous
 -------------
 
@@ -61,10 +114,12 @@ There is more information on theming the label at :ref:`theme-label`.
 Example
 -------
 
-Here is an example of a checkbox block in a JSON theme file, using the parameters described above.
+Here are examples of checkbox blocks in JSON theme files using the parameters described above.
+
+**Single Image Mode Example:**
 
 .. code-block:: json
-   :caption: check_box.json
+   :caption: check_box_single_image.json
    :linenos:
 
     {
@@ -118,6 +173,97 @@ Here is an example of a checkbox block in a JSON theme file, using the parameter
                     "resource": "checkbox_states.png",
                     "sub_surface_rect": "48,0,16,16"
                 }
+            },
+            "misc":
+            {
+                "shape": "rounded_rectangle",
+                "shape_corner_radius": "3",
+                "border_width": "2",
+                "shadow_width": "2",
+                "check_symbol": "✓",
+                "indeterminate_symbol": "−",
+                "text_offset": "8",
+                "tool_tip_delay": "1.5"
+            }
+        }
+    }
+
+**Multi-Image Mode Example:**
+
+.. code-block:: json
+   :caption: check_box_multi_image.json
+   :linenos:
+
+    {
+        "check_box":
+        {
+            "colours":
+            {
+                "normal_text": "#c5cbd8",
+                "hovered_text": "#FFFFFF",
+                "disabled_text": "#6d736f",
+                "selected_text": "#FFFFFF"
+            },
+            "font":
+            {
+                "name": "fira_code",
+                "size": "14"
+            },
+            "images":
+            {
+                "normal_images": [
+                    {
+                        "id": "checkbox_base",
+                        "path": "images/checkbox_base.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "checkbox_border",
+                        "path": "images/checkbox_border.png",
+                        "layer": 1
+                    }
+                ],
+                "hovered_images": [
+                    {
+                        "id": "checkbox_base",
+                        "path": "images/checkbox_base.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "checkbox_border",
+                        "path": "images/checkbox_border.png",
+                        "layer": 1
+                    },
+                    {
+                        "id": "hover_glow",
+                        "path": "images/checkbox_glow.png",
+                        "layer": 2
+                    }
+                ],
+                "selected_images": [
+                    {
+                        "id": "checkbox_base_selected",
+                        "path": "images/checkbox_base_selected.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "checkbox_border",
+                        "path": "images/checkbox_border.png",
+                        "layer": 1
+                    },
+                    {
+                        "id": "check_mark",
+                        "path": "images/checkbox_check.png",
+                        "layer": 2
+                    }
+                ],
+                "disabled_images": [
+                    {
+                        "id": "checkbox_base_disabled",
+                        "path": "images/checkbox_base_disabled.png",
+                        "layer": 0
+                    }
+                ]
             },
             "misc":
             {

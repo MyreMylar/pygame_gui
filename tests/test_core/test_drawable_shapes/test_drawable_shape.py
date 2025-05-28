@@ -194,7 +194,7 @@ class TestDrawableShape:
                                                   'shadow_width': 0,
                                                   'border_width': 0,
                                                   'text_height': 30,
-                                                  'normal_image': pygame.image.load('tests/data/images/splat.png'),
+                                                  'normal_images': [pygame.image.load('tests/data/images/splat.png')],
                                                   'text_shadow': (0,
                                                                   0,
                                                                   0,
@@ -207,7 +207,7 @@ class TestDrawableShape:
         shape.theming['text_horiz_alignment_padding'] = 5
         shape.theming['text_vert_alignment_padding'] = 5
 
-        shape.finalise_images_and_text('normal_image', 'normal',
+        shape.finalise_images_and_text('normal_images', 'normal',
                                        'normal_text', 'normal_text_shadow', True)
 
 

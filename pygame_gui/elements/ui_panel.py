@@ -1,4 +1,4 @@
-from typing import Union, Dict, Optional, Iterator
+from typing import Union, Dict, Optional, Iterator, List, Tuple
 
 import pygame
 
@@ -102,10 +102,16 @@ class UIPanel(UIElement, IContainerLikeInterface):
         self.border_colour: pygame.Color | IColourGradientInterface = pygame.Color(
             0, 0, 0, 0
         )
-        self.background_image: pygame.Surface | None = None
+
+        # Enhanced multi-image support - always use lists internally for consistency
+        self.background_images: List[pygame.Surface] = []
+
         self.border_width = 1
         self.shadow_width = 2
         self.shape = "rectangle"
+
+        # Auto-scale images theming parameter
+        self.auto_scale_images = False
 
         self.rebuild_from_changed_theme_data()
 
@@ -130,6 +136,85 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         self.panel_container.set_dimensions(container_rect.size)
         self.panel_container.set_relative_position(container_rect.topleft)
+
+    @staticmethod
+    def _scale_image_to_fit(
+        image: pygame.Surface, target_size: Tuple[int, int]
+    ) -> pygame.Surface:
+        """
+        Scale an image to fit within the target size while maintaining aspect ratio.
+        The image will be scaled to the largest size that fits within the target dimensions.
+
+        :param image: The image surface to scale.
+        :param target_size: The target size (width, height) to fit the image within.
+        :return: The scaled image surface.
+        """
+        if image is None:
+            return None
+
+        image_width, image_height = image.get_size()
+        target_width, target_height = target_size
+
+        # Calculate scale factors for both dimensions
+        scale_x = target_width / image_width
+        scale_y = target_height / image_height
+
+        # Use the smaller scale factor to ensure the image fits within the target size
+        scale = min(scale_x, scale_y)
+
+        # Calculate new dimensions
+        new_width = int(image_width * scale)
+        new_height = int(image_height * scale)
+
+        # Scale the image
+        if new_width > 0 and new_height > 0:
+            return pygame.transform.smoothscale(image, (new_width, new_height))
+        else:
+            return image
+
+    def _set_any_images_from_theme(self) -> bool:
+        """
+        Grabs background images for this panel from the UI theme if any are set.
+        Supports both single image format and multi-image format from JSON,
+        but internally always uses lists for consistency.
+
+        :return: True if any of the images have changed since last time they were set.
+        """
+        changed = False
+        new_images = []
+
+        # First try to load multi-image format (background_images)
+        try:
+            multi_images = self.ui_theme.get_images(
+                "background_images", self.combined_element_ids
+            )
+            new_images = multi_images
+        except LookupError:
+            # Fall back to single image format (background_image)
+            try:
+                single_image = self.ui_theme.get_image(
+                    "background_image", self.combined_element_ids
+                )
+                if single_image is not None:
+                    new_images = [single_image]  # Convert to list
+            except LookupError:
+                # No image found for this state
+                pass
+
+        # Apply auto-scaling if enabled
+        if new_images and self.auto_scale_images:
+            scaled_images = []
+            for img in new_images:
+                scaled_img = self._scale_image_to_fit(img, self.rect.size)
+                scaled_images.append(scaled_img)
+            new_images = scaled_images
+
+        # Check if images have changed
+        if new_images != self.background_images:
+            self.background_images = new_images
+            changed = True
+
+        return changed
 
     def update(self, time_delta: float):
         """
@@ -202,6 +287,15 @@ class UIPanel(UIElement, IContainerLikeInterface):
         # different size to the window
         super().set_dimensions(dimensions)
 
+        # Handle auto-scaling of background images when panel size changes
+        if self.auto_scale_images and self.background_images:
+            scaled_images = []
+            for img in self.background_images:
+                scaled_img = self._scale_image_to_fit(img, self.rect.size)
+                scaled_images.append(scaled_img)
+            self.background_images = scaled_images
+            self.rebuild()
+
         new_container_dimensions = (
             self.relative_rect.width
             - (self.container_margins["left"] + self.container_margins["right"]),
@@ -246,7 +340,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
     def rebuild_from_changed_theme_data(self):
         """
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
-        button's drawable shape.
+        panel's drawable shape.
         """
         super().rebuild_from_changed_theme_data()
         has_any_changed = False
@@ -265,17 +359,20 @@ class UIPanel(UIElement, IContainerLikeInterface):
             self.border_colour = border_colour
             has_any_changed = True
 
-        background_image = None
-        try:
-            background_image = self.ui_theme.get_image(
-                "background_image", self.combined_element_ids
-            )
-        except LookupError:
-            background_image = None
-        finally:
-            if background_image != self.background_image:
-                self.background_image = background_image
-                has_any_changed = True
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
+        # Load auto_scale_images parameter BEFORE loading images so scaling can be applied
+        if self._check_misc_theme_data_changed(
+            attribute_name="auto_scale_images",
+            default_value=False,
+            casting_func=parse_to_bool,
+        ):
+            has_any_changed = True
+
+        # Use the enhanced image loading system
+        if self._set_any_images_from_theme():
+            has_any_changed = True
 
         # misc
         if self._check_misc_theme_data_changed(
@@ -306,13 +403,13 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
     def rebuild(self):
         """
-        A complete rebuild of the drawable shape used by this button.
+        A complete rebuild of the drawable shape used by this panel.
 
         """
         theming_parameters = {
             "normal_bg": self.background_colour,
             "normal_border": self.border_colour,
-            "normal_image": self.background_image,
+            "normal_images": self.background_images,
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "shape_corner_radius": self.shape_corner_radius,
@@ -412,3 +509,119 @@ class UIPanel(UIElement, IContainerLikeInterface):
         super().set_anchors(anchors)
         if self.panel_container is not None:
             self.panel_container.set_anchors(anchors)
+
+    def get_current_images(self) -> List[pygame.Surface]:
+        """
+        Get the current background images for the panel.
+        Returns a list of surfaces.
+
+        :return: List of pygame.Surface objects for the panel background
+        """
+        return self.background_images
+
+    def is_multi_image_mode(self) -> bool:
+        """
+        Check if the panel is currently using multi-image mode.
+
+        :return: True if using multiple background images, False if using single image
+        """
+        return len(self.background_images) > 1
+
+    def get_image_count(self) -> int:
+        """
+        Get the number of background images.
+
+        :return: Number of background images for the panel
+        """
+        return len(self.background_images)
+
+    def set_background_images(self, images: List[pygame.Surface]):
+        """
+        Set the background images for the panel.
+
+        :param images: List of pygame.Surface objects to use as background images
+        """
+        if images != self.background_images:
+            self.background_images = images.copy() if images else []
+
+            # Apply auto-scaling if enabled
+            if self.background_images and self.auto_scale_images:
+                scaled_images = []
+                for img in self.background_images:
+                    scaled_img = self._scale_image_to_fit(img, self.rect.size)
+                    scaled_images.append(scaled_img)
+                self.background_images = scaled_images
+
+            self.rebuild()
+
+    def add_background_image(self, image: pygame.Surface):
+        """
+        Add a background image to the panel's image list.
+
+        :param image: pygame.Surface object to add to the background images
+        """
+        if image is not None:
+            # Apply auto-scaling if enabled
+            if self.auto_scale_images:
+                image = self._scale_image_to_fit(image, self.rect.size)
+
+            self.background_images.append(image)
+            self.rebuild()
+
+    def remove_background_image(self, index: int) -> bool:
+        """
+        Remove a background image at the specified index.
+
+        :param index: Index of the image to remove
+        :return: True if image was removed, False if index was invalid
+        """
+        if 0 <= index < len(self.background_images):
+            self.background_images.pop(index)
+            self.rebuild()
+            return True
+        return False
+
+    def clear_background_images(self):
+        """
+        Remove all background images from the panel.
+        """
+        if self.background_images:
+            self.background_images.clear()
+            self.rebuild()
+
+    def get_background_image_at_index(self, index: int) -> Optional[pygame.Surface]:
+        """
+        Get a specific background image by index.
+
+        :param index: Index of the image to retrieve
+        :return: pygame.Surface object at the specified index, or None if index is invalid
+        """
+        if 0 <= index < len(self.background_images):
+            return self.background_images[index]
+        return None
+
+    def set_auto_scale_images(self, auto_scale: bool):
+        """
+        Enable or disable automatic scaling of background images to fit the panel size.
+
+        :param auto_scale: True to enable auto-scaling, False to disable
+        """
+        if auto_scale != self.auto_scale_images:
+            self.auto_scale_images = auto_scale
+
+            # If enabling auto-scale, rescale existing images
+            if auto_scale and self.background_images:
+                scaled_images = []
+                for img in self.background_images:
+                    scaled_img = self._scale_image_to_fit(img, self.rect.size)
+                    scaled_images.append(scaled_img)
+                self.background_images = scaled_images
+                self.rebuild()
+
+    def get_auto_scale_images(self) -> bool:
+        """
+        Get the current auto-scale images setting.
+
+        :return: True if auto-scaling is enabled, False otherwise
+        """
+        return self.auto_scale_images

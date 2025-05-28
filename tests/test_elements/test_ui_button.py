@@ -60,7 +60,7 @@ class TestUIButton:
                           text="Test Button",
                           tool_tip_text="This is a test of the button's tool tip functionality.",
                           manager=manager)
-        assert button.normal_image is not None and button.image is not None
+        assert button.normal_images[0] is not None and button.image is not None
 
     def test_kill(self, _init_pygame, default_ui_manager,
                   _display_surface_return_none):
@@ -817,7 +817,7 @@ class TestUIButton:
 
     def test_rebuild_from_changed_theme_data_bad_values_2(self, _init_pygame,
                                                           _display_surface_return_none):
-        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 4 errors"):
             with pytest.warns(UserWarning, match="Image data validation errors"):
                 with pytest.warns(UserWarning, match="Unable to find image with id"):
                     manager = UIManager((800, 600),
@@ -1193,8 +1193,8 @@ class TestUIButton:
             assert large_button.auto_scale_images is True
             
             # Images should be loaded and potentially scaled
-            assert small_button.normal_image is not None
-            assert large_button.normal_image is not None
+            assert small_button.normal_images[0] is not None
+            assert large_button.normal_images[0] is not None
             
         finally:
             os.unlink(theme_file)
@@ -1276,6 +1276,620 @@ class TestUIButton:
         
         # Should complete 100 scaling operations in reasonable time (less than 1 second)
         assert duration < 1.0, f"Scaling took too long: {duration} seconds"
+
+    def test_multi_image_mode_detection(self, _init_pygame, _display_surface_return_none):
+        """Test that multi-image mode is correctly detected from theme data."""
+        import tempfile
+        import json
+        import os
+        
+        # Test single image theme (should not trigger multi-image mode)
+        single_image_theme = {
+            "button": {
+                "images": {
+                    "normal_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(single_image_theme, f)
+            single_theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), single_theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Single Image",
+                            manager=manager)
+            
+            # Should be in multi-image mode (since we have only one image, it's not multi-image)
+            # Actually, with only one image, it should NOT be multi-image mode
+            assert button.is_multi_image_mode() is False
+            assert len(button.normal_images) == 1
+
+            # Other states should fall back to normal_images
+            assert len(button.hovered_images) == 1  # Falls back to normal
+            assert len(button.selected_images) == 1  # Falls back to normal
+            assert len(button.disabled_images) == 1  # Falls back to normal
+
+            # Test current image access
+            current_images = button.get_current_images()
+            assert len(current_images) == 1
+
+            # Test state transitions
+            button.hovered = True
+            hovered_images = button.get_current_images()
+            assert len(hovered_images) == 1  # Should fall back to normal_images
+            
+        finally:
+            os.unlink(single_theme_file)
+        
+        # Test multi-image theme (should trigger multi-image mode)
+        multi_image_theme = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "icon", "path": "tests/data/images/splat.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(multi_image_theme, f)
+            multi_theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), multi_theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Multi Image",
+                            manager=manager)
+            
+            assert button.is_multi_image_mode() is True
+            assert len(button.normal_images) == 2  # Should have two images
+            assert len(button.hovered_images) == 2  # Should fall back to normal
+            assert len(button.selected_images) == 2  # Should fall back to normal
+            assert len(button.disabled_images) == 2  # Should fall back to normal
+            
+        finally:
+            os.unlink(multi_theme_file)
+
+    def test_multi_image_loading_and_access(self, _init_pygame, _display_surface_return_none):
+        """Test loading and accessing multi-image data."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "background", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "overlay", "path": "tests/data/images/splat.png", "layer": 1}
+                    ],
+                    "hovered_images": [
+                        {"id": "background", "path": "tests/data/images/splat.png", "layer": 0}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Multi Image Test",
+                            manager=manager)
+            
+            # Should be in multi-image mode
+            assert button.is_multi_image_mode() is True
+            
+            # Check normal state images
+            normal_images = button.get_images_by_state('normal')
+            assert len(normal_images) == 2
+            assert all(img is not None for img in normal_images)
+            
+            # Check hovered state images
+            hovered_images = button.get_images_by_state('hovered')
+            assert len(hovered_images) == 1
+            assert hovered_images[0] is not None
+            
+            # Check fallback for missing states (should fall back to normal_images)
+            selected_images = button.get_images_by_state('selected')
+            assert len(selected_images) == 2  # Falls back to normal_images
+            
+            disabled_images = button.get_images_by_state('disabled')
+            assert len(disabled_images) == 2  # Falls back to normal_images
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_current_state_access(self, _init_pygame, _display_surface_return_none):
+        """Test accessing images for the current button state."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0}
+                    ],
+                    "hovered_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "highlight", "path": "tests/data/images/splat.png", "layer": 1}
+                    ],
+                    "disabled_images": [
+                        {"id": "bg_disabled", "path": "tests/data/images/splat.png", "layer": 0}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="State Test",
+                            manager=manager)
+            
+            # Test normal state
+            current_images = button.get_current_images()
+            assert len(current_images) == 1
+            assert button.get_image_count() == 1
+            
+            # Test hovered state
+            button.hovered = True
+            current_images = button.get_current_images()
+            assert len(current_images) == 2
+            assert button.get_image_count() == 2
+            
+            # Test disabled state
+            button.hovered = False
+            button.disable()
+            current_images = button.get_current_images()
+            assert len(current_images) == 1
+            assert button.get_image_count() == 1
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_with_auto_scaling(self, _init_pygame, _display_surface_return_none):
+        """Test multi-image functionality with auto-scaling enabled."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "misc": {
+                    "auto_scale_images": "1"
+                },
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "icon", "path": "tests/data/images/splat.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            
+            # Create buttons of different sizes
+            small_button = UIButton(relative_rect=pygame.Rect(100, 100, 50, 50),
+                                  text="Small",
+                                  manager=manager)
+            
+            large_button = UIButton(relative_rect=pygame.Rect(200, 100, 200, 150),
+                                  text="Large",
+                                  manager=manager)
+            
+            # Both should be in multi-image mode with auto-scaling
+            assert small_button.is_multi_image_mode() is True
+            assert large_button.is_multi_image_mode() is True
+            assert small_button.auto_scale_images is True
+            assert large_button.auto_scale_images is True
+            
+            # Both should have 2 images loaded
+            assert len(small_button.normal_images) == 2
+            assert len(large_button.normal_images) == 2
+            
+            # Images should be different sizes due to auto-scaling
+            small_images = small_button.get_current_images()
+            large_images = large_button.get_current_images()
+            
+            assert len(small_images) == 2
+            assert len(large_images) == 2
+            
+            # All images should be loaded and valid
+            for img in small_images + large_images:
+                assert img is not None
+                assert img.get_size()[0] > 0
+                assert img.get_size()[1] > 0
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_backward_compatibility(self, _init_pygame, _display_surface_return_none):
+        """Test that single-image themes still work correctly."""
+        import tempfile
+        import json
+        import os
+        
+        # Traditional single-image theme
+        single_theme = {
+            "button": {
+                "images": {
+                    "normal_image": {"path": "tests/data/images/splat.png"},
+                    "hovered_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(single_theme, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Backward Compat",
+                            manager=manager)
+            
+            # Should NOT be in multi-image mode
+            assert button.is_multi_image_mode() is False
+            
+            # Image lists should be populated with single images
+            assert len(button.normal_images) == 1
+            assert len(button.hovered_images) == 1
+            assert len(button.selected_images) == 1  # Should fall back to normal
+            assert len(button.disabled_images) == 1  # Should fall back to normal
+            
+            # Should have exactly one image per state
+            assert button.get_image_count() == 1
+            
+            # Test state-specific access
+            normal_images = button.get_images_by_state("normal")
+            assert len(normal_images) == 1
+            
+            hovered_images = button.get_images_by_state("hovered")
+            assert len(hovered_images) == 1
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_state_transitions(self, _init_pygame, _display_surface_return_none):
+        """Test that multi-image mode works correctly during state transitions."""
+        import tempfile
+        import json
+        import os
+        
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0}
+                    ],
+                    "hovered_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "glow", "path": "tests/data/images/splat.png", "layer": 1}
+                    ],
+                    "selected_images": [
+                        {"id": "bg_selected", "path": "tests/data/images/splat.png", "layer": 0}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="State Transitions",
+                            manager=manager)
+            
+            # Start in normal state
+            assert button.get_image_count() == 1
+            
+            # Transition to hovered
+            button.hovered = True
+            assert button.get_image_count() == 2
+            
+            # Transition to selected (while hovered)
+            button.is_selected = True
+            assert button.get_image_count() == 1  # selected_images takes priority
+            
+            # Back to normal
+            button.hovered = False
+            button.is_selected = False
+            assert button.get_image_count() == 1
+            
+            # Test disabled state (should fall back to normal_images)
+            button.disable()
+            assert button.get_image_count() == 1
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_empty_states(self, _init_pygame, _display_surface_return_none):
+        """Test behavior when some multi-image states are missing or empty."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with multiple images in normal_images to trigger multi-image mode
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "icon", "path": "tests/data/images/splat.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Empty States",
+                            manager=manager)
+            
+            # Should be in multi-image mode
+            assert button.is_multi_image_mode() is True
+            
+            # Normal state should have images
+            assert len(button.get_images_by_state('normal')) == 2
+            
+            # Other states should fall back to normal_images
+            assert len(button.get_images_by_state('hovered')) == 2
+            assert len(button.get_images_by_state('selected')) == 2
+            assert len(button.get_images_by_state('disabled')) == 2
+            
+            # All fallback images should be the same as normal
+            normal_images = button.get_images_by_state('normal')
+            hovered_images = button.get_images_by_state('hovered')
+            assert normal_images == hovered_images
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_multi_image_api_methods(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+        """Test the new API methods for multi-image functionality."""
+        button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                         text="API Test",
+                         manager=default_ui_manager)
+        
+        # Default button should be in single-image mode
+        assert button.is_multi_image_mode() is False
+        assert button.get_image_count() == 0  # No images loaded by default
+        
+        # get_current_images should return empty list
+        current_images = button.get_current_images()
+        assert isinstance(current_images, list)
+        assert len(current_images) == 0
+        
+        # get_images_by_state should return empty list for all states
+        for state in ['normal', 'hovered', 'selected', 'disabled']:
+            state_images = button.get_images_by_state(state)
+            assert isinstance(state_images, list)
+            assert len(state_images) == 0
+
+    def test_multi_image_mode_switching(self, _init_pygame, _display_surface_return_none):
+        """Test switching between single and multi-image modes."""
+        import tempfile
+        import json
+        import os
+        
+        # Start with single-image theme
+        single_theme = {
+            "button": {
+                "images": {
+                    "normal_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(single_theme, f)
+            single_theme_file = f.name
+        
+        # Create multi-image theme with multiple images
+        multi_theme = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "icon", "path": "tests/data/images/splat.png", "layer": 1}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(multi_theme, f)
+            multi_theme_file = f.name
+        
+        try:
+            # Start with single-image mode
+            manager = UIManager((800, 600), single_theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Mode Switch",
+                            manager=manager)
+            
+            # Verify initial single-image state
+            assert button.is_multi_image_mode() is False
+            assert len(button.normal_images) == 1  # Single image converted to list
+            assert len(button.hovered_images) == 1  # Single image converted to list
+
+            # Switch to multi-image theme
+            manager.ui_theme.load_theme(multi_theme_file)
+            button.rebuild_from_changed_theme_data()
+
+            # Verify switch to multi-image mode
+            assert button.is_multi_image_mode() is True
+            assert len(button.normal_images) == 2  # Two images in normal_images
+            assert len(button.hovered_images) == 2  # One image in hovered_images
+
+            # Test state-specific image access
+            normal_images = button.get_current_images()
+            assert len(normal_images) == 2
+
+            button.hovered = True
+            hovered_images = button.get_current_images()
+            assert len(hovered_images) == 2  # Falls back to normal_images
+            button.hovered = False
+
+            # Switch back to single-image theme
+            manager.ui_theme.load_theme(single_theme_file)
+            button.rebuild_from_changed_theme_data()
+
+            # Verify switch back to single-image mode
+            assert button.is_multi_image_mode() is False
+            assert len(button.normal_images) == 1  # Back to single image
+            assert len(button.hovered_images) == 1  # Falls back to normal
+
+            # Test that single-image mode works correctly after switch
+            current_images = button.get_current_images()
+            assert len(current_images) == 1
+
+            button.hovered = True
+            hovered_images = button.get_current_images()
+            assert len(hovered_images) == 1
+            
+        finally:
+            os.unlink(single_theme_file)
+            os.unlink(multi_theme_file)
+
+    def test_multi_image_layer_ordering(self, _init_pygame, _display_surface_return_none):
+        """Test that multi-image layers are properly ordered."""
+        import tempfile
+        import json
+        import os
+        
+        # Theme with images in non-sequential layer order
+        theme_data = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "top", "path": "tests/data/images/splat.png", "layer": 10},
+                        {"id": "bottom", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "middle", "path": "tests/data/images/splat.png", "layer": 5}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(theme_data, f)
+            theme_file = f.name
+        
+        try:
+            manager = UIManager((800, 600), theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Layer Test",
+                            manager=manager)
+            
+            
+            # Should have 3 images
+            assert len(button.normal_images) == 3
+            
+            # Images should be ordered by layer (bottom to top)
+            # The theme loading should sort them by layer value
+            images = button.get_current_images()
+            assert len(images) == 3
+            
+            # All images should be loaded
+            for img in images:
+                assert img is not None
+            
+        finally:
+            os.unlink(theme_file)
+
+    def test_theme_switching_cache_clearing(self, _init_pygame, _display_surface_return_none):
+        """Test that cached image data is properly cleared when switching between theme formats."""
+        import tempfile
+        import json
+        import os
+        
+        # Start with single-image theme
+        single_theme = {
+            "button": {
+                "images": {
+                    "normal_image": {"path": "tests/data/images/splat.png"},
+                    "hovered_image": {"path": "tests/data/images/splat.png"}
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(single_theme, f)
+            single_theme_file = f.name
+        
+        # Create multi-image theme
+        multi_theme = {
+            "button": {
+                "images": {
+                    "normal_images": [
+                        {"id": "bg", "path": "tests/data/images/splat.png", "layer": 0},
+                        {"id": "overlay", "path": "tests/data/images/splat.png", "layer": 1}
+                    ],
+                    "hovered_images": [
+                        {"id": "bg_hover", "path": "tests/data/images/splat.png", "layer": 0}
+                    ]
+                }
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(multi_theme, f)
+            multi_theme_file = f.name
+        
+        try:
+            # Start with single-image mode
+            manager = UIManager((800, 600), single_theme_file)
+            button = UIButton(relative_rect=pygame.Rect(100, 100, 150, 30),
+                            text="Cache Test",
+                            manager=manager)
+            
+            # Verify initial single-image state
+            assert button.is_multi_image_mode() is False
+            assert len(button.normal_images) == 1  # Single image converted to list
+            assert len(button.hovered_images) == 1  # Single image converted to list
+            
+            # Switch to multi-image theme
+            manager.ui_theme.load_theme(multi_theme_file)
+            button.rebuild_from_changed_theme_data()
+            
+            # Verify switch to multi-image mode
+            assert button.is_multi_image_mode() is True
+            assert len(button.normal_images) == 2  # Two images in normal_images
+            assert len(button.hovered_images) == 1  # One image in hovered_images
+            
+        finally:
+            os.unlink(single_theme_file)
+            os.unlink(multi_theme_file)
 
 
 if __name__ == '__main__':

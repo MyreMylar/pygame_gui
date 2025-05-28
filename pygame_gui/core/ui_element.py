@@ -1532,11 +1532,14 @@ class UIElement(GUISprite, IUIElementInterface):
                     temp_corner_radius[1] = int(corner_radii_list[0])
                     temp_corner_radius[2] = int(corner_radii_list[0])
                     temp_corner_radius[3] = int(corner_radii_list[0])
-        except (LookupError, ValueError):
-            self.shape_corner_radius = defaults["shape_corner_radius"]
-        finally:
+            # If we successfully parsed the theme data, use it
             if temp_corner_radius != self.shape_corner_radius:
                 self.shape_corner_radius = temp_corner_radius
+                has_any_changed = True
+        except (LookupError, ValueError):
+            # If no theme data found or parsing failed, use default
+            if defaults["shape_corner_radius"] != self.shape_corner_radius:
+                self.shape_corner_radius = defaults["shape_corner_radius"]
                 has_any_changed = True
 
         return has_any_changed

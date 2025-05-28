@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Dict, Iterable, Callable, Optional, Any
+from typing import Union, Tuple, Dict, Iterable, Callable, Optional, Any, List
 from inspect import signature
 
 import pygame
@@ -139,10 +139,12 @@ class UIButton(UIElement):
 
         self.font: Optional[IGUIFontInterface] = None
 
-        self.normal_image: Optional[pygame.Surface] = None
-        self.hovered_image: Optional[pygame.Surface] = None
-        self.selected_image: Optional[pygame.Surface] = None
-        self.disabled_image: Optional[pygame.Surface] = None
+        # Image support - always use lists internally for consistency
+        # This simplifies the code while maintaining backward compatibility in JSON
+        self.normal_images: List[pygame.Surface] = []
+        self.hovered_images: List[pygame.Surface] = []
+        self.selected_images: List[pygame.Surface] = []
+        self.disabled_images: List[pygame.Surface] = []
 
         self.text_horiz_alignment = "center"
         self.text_vert_alignment = "center"
@@ -210,81 +212,59 @@ class UIButton(UIElement):
     def _set_any_images_from_theme(self) -> bool:
         """
         Grabs images for this button from the UI theme if any are set.
+        Supports both single image format and multi-image format from JSON,
+        but internally always uses lists for consistency.
 
         :return: True if any of the images have changed since last time they were set.
-
         """
-
         changed = False
-        normal_image = None
-        try:
-            normal_image = self.ui_theme.get_image(
-                "normal_image", self.combined_element_ids
-            )
-        except LookupError:
-            normal_image = None
-        finally:
-            # Scale image if auto_scale_images is enabled
-            if normal_image is not None and self.auto_scale_images:
-                normal_image = self._scale_image_to_fit(normal_image, self.rect.size)
 
-            if normal_image != self.normal_image:
-                self.normal_image = normal_image
-                self.hovered_image = normal_image
-                self.selected_image = normal_image
-                self.disabled_image = normal_image
-                changed = True
+        # State mappings for loading images
+        state_mappings = [
+            ("normal", "normal_images"),
+            ("hovered", "hovered_images"),
+            ("selected", "selected_images"),
+            ("disabled", "disabled_images"),
+        ]
 
-        hovered_image = None
-        try:
-            hovered_image = self.ui_theme.get_image(
-                "hovered_image", self.combined_element_ids
-            )
-        except LookupError:
-            hovered_image = self.normal_image
-        finally:
-            # Scale image if auto_scale_images is enabled
-            if hovered_image is not None and self.auto_scale_images:
-                hovered_image = self._scale_image_to_fit(hovered_image, self.rect.size)
+        for state_name, attr_name in state_mappings:
+            new_images = []
 
-            if hovered_image != self.hovered_image:
-                self.hovered_image = hovered_image
-                changed = True
-
-        selected_image = None
-        try:
-            selected_image = self.ui_theme.get_image(
-                "selected_image", self.combined_element_ids
-            )
-        except LookupError:
-            selected_image = self.normal_image
-        finally:
-            # Scale image if auto_scale_images is enabled
-            if selected_image is not None and self.auto_scale_images:
-                selected_image = self._scale_image_to_fit(
-                    selected_image, self.rect.size
+            # First try to load multi-image format (e.g., "normal_images")
+            try:
+                multi_images = self.ui_theme.get_images(
+                    f"{state_name}_images", self.combined_element_ids
                 )
+                new_images = multi_images
+            except LookupError:
+                # Fall back to single image format (e.g., "normal_image")
+                try:
+                    single_image = self.ui_theme.get_image(
+                        f"{state_name}_image", self.combined_element_ids
+                    )
+                    if single_image is not None:
+                        new_images = [single_image]  # Convert to list
+                except LookupError:
+                    # No image found for this state
+                    pass
 
-            if selected_image != self.selected_image:
-                self.selected_image = selected_image
-                changed = True
+            # Apply auto-scaling if enabled
+            if new_images and self.auto_scale_images:
+                scaled_images = []
+                for img in new_images:
+                    scaled_img = self._scale_image_to_fit(img, self.rect.size)
+                    scaled_images.append(scaled_img)
+                new_images = scaled_images
 
-        disabled_image = None
-        try:
-            disabled_image = self.ui_theme.get_image(
-                "disabled_image", self.combined_element_ids
-            )
-        except LookupError:
-            disabled_image = self.normal_image
-        finally:
-            # Scale image if auto_scale_images is enabled
-            if disabled_image is not None and self.auto_scale_images:
-                disabled_image = self._scale_image_to_fit(
-                    disabled_image, self.rect.size
-                )
+            # Handle fallbacks for non-normal states
+            if not new_images and state_name != "normal":
+                # Fall back to normal_images
+                new_images = self.normal_images.copy()
 
-            if disabled_image != self.disabled_image:
-                self.disabled_image = disabled_image
+            # Check if images have changed
+            current_images = getattr(self, attr_name)
+            if new_images != current_images:
+                setattr(self, attr_name, new_images)
                 changed = True
 
         return changed
@@ -878,27 +858,28 @@ class UIButton(UIElement):
             "normal_text": self.colours["normal_text"],
             "normal_text_shadow": self.colours["normal_text_shadow"],
             "normal_border": self.colours["normal_border"],
-            "normal_image": self.normal_image,
             "hovered_bg": self.colours["hovered_bg"],
             "hovered_text": self.colours["hovered_text"],
             "hovered_text_shadow": self.colours["hovered_text_shadow"],
             "hovered_border": self.colours["hovered_border"],
-            "hovered_image": self.hovered_image,
             "disabled_bg": self.colours["disabled_bg"],
             "disabled_text": self.colours["disabled_text"],
             "disabled_text_shadow": self.colours["disabled_text_shadow"],
             "disabled_border": self.colours["disabled_border"],
-            "disabled_image": self.disabled_image,
             "selected_bg": self.colours["selected_bg"],
             "selected_text": self.colours["selected_text"],
             "selected_text_shadow": self.colours["selected_text_shadow"],
             "selected_border": self.colours["selected_border"],
-            "selected_image": self.selected_image,
             "active_bg": self.colours["active_bg"],
             "active_border": self.colours["active_border"],
             "active_text": self.colours["active_text"],
             "active_text_shadow": self.colours["active_text_shadow"],
-            "active_image": self.selected_image,
+            # Image support - always use lists internally
+            "normal_images": self.normal_images,
+            "hovered_images": self.hovered_images,
+            "disabled_images": self.disabled_images,
+            "selected_images": self.selected_images,
+            "active_images": self.selected_images,
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "font": self.font,
@@ -1005,3 +986,56 @@ class UIButton(UIElement):
             self.rebuild()
         elif self.drawable_shape is not None:
             self.drawable_shape.set_text(translate(self.text, **self.text_kwargs))
+
+    def get_current_images(self) -> List[pygame.Surface]:
+        """
+        Get the current images for the button's current state.
+        Returns a list of surfaces.
+
+        :return: List of pygame.Surface objects for the current state
+        """
+        if not self.is_enabled:
+            return self.disabled_images
+        elif self.is_selected:
+            return self.selected_images
+        elif self.hovered:
+            return self.hovered_images
+        else:
+            return self.normal_images
+
+    def is_multi_image_mode(self) -> bool:
+        """
+        Check if the button is currently using multi-image mode.
+
+        :return: True if using multiple images per state, False if using single images
+        """
+        # Check if any state has more than one image
+        return (
+            len(self.normal_images) > 1
+            or len(self.hovered_images) > 1
+            or len(self.selected_images) > 1
+            or len(self.disabled_images) > 1
+        )
+
+    def get_image_count(self) -> int:
+        """
+        Get the number of images in the current state.
+
+        :return: Number of images for the current button state
+        """
+        return len(self.get_current_images())
+
+    def get_images_by_state(self, state: str) -> List[pygame.Surface]:
+        """
+        Get images for a specific button state.
+
+        :param state: The state to get images for ('normal', 'hovered', 'selected', 'disabled')
+        :return: List of pygame.Surface objects for the specified state
+        """
+        state_mapping = {
+            "normal": self.normal_images,
+            "hovered": self.hovered_images,
+            "selected": self.selected_images,
+            "disabled": self.disabled_images,
+        }
+        return state_mapping.get(state, [])

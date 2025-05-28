@@ -130,6 +130,38 @@ class IUIAppearanceThemeInterface(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_images(
+        self, image_id: str, combined_element_ids: List[str]
+    ) -> List[pygame.surface.Surface]:
+        """
+        Get multiple images for a given image_id. Returns a list of surfaces sorted by layer.
+        For single images, returns a list with one surface.
+        Will raise an exception if no image with the ids specified is found.
+
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
+        :param image_id: The id identifying the particular image spot in the UI we are looking for
+                         images to add to.
+
+        :return: A list of pygame.surface.Surface objects sorted by layer
+        """
+
+    @abstractmethod
+    def get_image_details(
+        self, image_id: str, combined_element_ids: List[str]
+    ) -> List[Dict]:
+        """
+        Get detailed information about images including their IDs, layers, and surfaces.
+        Returns a list of dictionaries with image details sorted by layer.
+
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
+        :param image_id: The id identifying the particular image spot in the UI we are looking for.
+
+        :return: A list of dictionaries containing image details
+        """
+
+    @abstractmethod
     def get_font_info(self, combined_element_ids: List[str]) -> FontThemeInfo:
         """
         Uses some data about a UIElement to get font data as dictionary

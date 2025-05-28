@@ -84,8 +84,11 @@ You only need to specify locations if this is the first use of this font name in
 Images
 -------
 
-:class:`UIButton <pygame_gui.elements.UIButton>` accepts images specified in the theme via an 'images' block. An
-'images' block has these parameters:
+:class:`UIButton <pygame_gui.elements.UIButton>` accepts images specified in the theme via an 'images' block. The button supports both single-image and multi-image modes for enhanced visual effects.
+
+**Single Image Mode (Legacy)**
+
+For simple buttons with one image per state, use these parameters:
 
  - "**normal_image**" - The image displayed in the buttons default state. It has the following block of sub-parameters:
 
@@ -119,6 +122,33 @@ Images
     - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified. This allows us to create many image surfaces from one image file.
     - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
 
+**Multi-Image Mode (New)**
+
+For advanced buttons with layered visual effects, use these parameters to specify multiple images per state:
+
+ - "**normal_images**" - A list of images displayed in the button's default state, rendered in layer order. Each image in the list has these sub-parameters:
+
+    - "**id**" - A unique identifier for this image layer (e.g., "background", "icon", "border").
+    - "**layer**" - The rendering layer order (lower numbers render first/behind, higher numbers render last/on top).
+    - "**path**" - The string path to the image to be displayed. OR
+    - "**package** - The name of the python package containing this resource - e.g. 'data.images'
+    - "**resource** - The file name of the resource in the python package - e.g. 'splat.png' - Use a 'package' and 'resource' or a 'path' not both.
+    - "**sub_surface_rect**" - An optional rectangle (described like "x,y,width,height") that will be used to grab a smaller portion of the image specified.
+    - "**premultiplied**" - Optional parameter to declare that a loaded image already contains premultiplied alpha and does not need premultiplying. Set to "1" to enable, "0" to disable (default).
+
+ - "**hovered_images**" - A list of images displayed in the button's hovered state. Uses the same sub-parameters as normal_images.
+
+ - "**selected_images**" - A list of images displayed in the button's selected state. Uses the same sub-parameters as normal_images.
+
+ - "**disabled_images**" - A list of images displayed in the button's disabled state. Uses the same sub-parameters as normal_images.
+
+**Image Mode Notes:**
+
+- The button automatically detects whether to use single-image or multi-image mode based on the parameters provided.
+- Multi-image mode allows for complex visual effects like layered backgrounds, icons, glows, and overlays.
+- Images are rendered in layer order (lowest layer number first), allowing precise control over visual composition.
+- If a state doesn't specify images, it will fall back to the normal state images.
+- Both modes are fully compatible with the "auto_scale_images" parameter for automatic image scaling.
 
 Misc
 ----
@@ -144,10 +174,12 @@ Misc
 Example
 -------
 
-Here is an example of a button block in a JSON theme file using all the parameters described above.
+Here are examples of button blocks in JSON theme files using the parameters described above.
+
+**Single Image Mode Example:**
 
 .. code-block:: json
-   :caption: button.json
+   :caption: button_single_image.json
    :linenos:
 
     {
@@ -241,6 +273,85 @@ Here is an example of a button block in a JSON theme file using all the paramete
                 {
                     "normal_hovered": "0.5",
                     "hovered_normal": "0.5"
+                }
+            }
+        }
+    }
+
+**Multi-Image Mode Example:**
+
+.. code-block:: json
+   :caption: button_multi_image.json
+   :linenos:
+
+    {
+        "button":
+        {
+            "colours":
+            {
+                "normal_text": "#FFFFFF",
+                "hovered_text": "#FFFF00",
+                "selected_text": "#00FF00",
+                "disabled_text": "#808080"
+            },
+            "images":
+            {
+                "normal_images": [
+                    {
+                        "id": "background",
+                        "path": "images/button_bg.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "icon",
+                        "path": "images/button_icon.png",
+                        "layer": 1
+                    }
+                ],
+                "hovered_images": [
+                    {
+                        "id": "background",
+                        "path": "images/button_bg.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "icon",
+                        "path": "images/button_icon.png",
+                        "layer": 1
+                    },
+                    {
+                        "id": "glow_effect",
+                        "path": "images/button_glow.png",
+                        "layer": 2
+                    }
+                ],
+                "selected_images": [
+                    {
+                        "id": "background_selected",
+                        "path": "images/button_bg_selected.png",
+                        "layer": 0
+                    },
+                    {
+                        "id": "icon",
+                        "path": "images/button_icon.png",
+                        "layer": 1
+                    }
+                ],
+                "disabled_images": [
+                    {
+                        "id": "background_disabled",
+                        "path": "images/button_bg_disabled.png",
+                        "layer": 0
+                    }
+                ]
+            },
+            "misc":
+            {
+                "auto_scale_images": "0",
+                "state_transitions":
+                {
+                    "normal_hovered": "0.3",
+                    "hovered_normal": "0.3"
                 }
             }
         }

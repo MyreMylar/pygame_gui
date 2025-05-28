@@ -52,13 +52,13 @@ class TestUIAppearanceTheme:
 
     def test_load_theme_invalid_colour_gradients(self, _init_pygame, _display_surface_return_none):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Invalid gradient"):
                 theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
 
     def test_get_colour_from_gradient_objects(self, _init_pygame, _display_surface_return_none):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Invalid gradient"):
                 theme.load_theme(os.path.join("tests", "data", "themes", "appearance_theme_test.json"))
         colour = theme.get_colour(colour_id='dark_bg', combined_element_ids=['#test_parent'])
@@ -66,7 +66,7 @@ class TestUIAppearanceTheme:
 
     def test_load_theme_bad_font_data(self, _init_pygame, _display_surface_return_none):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 4 errors"):
             with pytest.warns(UserWarning, match="Font data validation errors"):
                 with pytest.warns(UserWarning, match="Image data validation errors"):
                     with pytest.warns(UserWarning, match="Unable to create subsurface rectangle"):
@@ -75,7 +75,7 @@ class TestUIAppearanceTheme:
 
     def test_load_theme_twice(self, _init_pygame, _display_surface_return_none):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
-        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 4 errors"):
             with pytest.warns(UserWarning, match="Font data validation errors"):
                 with pytest.warns(UserWarning, match="Image data validation errors"):
                     with pytest.warns(UserWarning, match="Unable to create subsurface rectangle"):
@@ -440,7 +440,7 @@ class TestUIAppearanceTheme:
             }
         }
         
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Invalid Theme Colour"):
                 with pytest.warns(UserWarning, match="Misc data validation errors"):
                     theme.update_theming(invalid_theme)
@@ -457,7 +457,7 @@ class TestUIAppearanceTheme:
                 }
             }
         }
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Misc data validation errors"):
                 theme.update_theming(invalid_theme)
 
@@ -473,7 +473,7 @@ class TestUIAppearanceTheme:
                 }
             }
         }
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Font data validation errors"):
                 with pytest.warns(UserWarning, match="Font size less than or equal to 0"):
                     with pytest.warns(UserWarning, match="Trying to pre-load font id:_regular_aa_14 with no paths set & its not a system font"):
@@ -492,7 +492,7 @@ class TestUIAppearanceTheme:
                 }
             }
         }
-        with pytest.warns(UserWarning, match="Theme validation found 2 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Image data validation errors"):
                 with pytest.warns(UserWarning, match="Unable to find image with id: background"):
                     theme.update_theming(invalid_theme)

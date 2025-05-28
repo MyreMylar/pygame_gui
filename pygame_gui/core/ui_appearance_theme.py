@@ -5,7 +5,7 @@ import warnings
 
 from contextlib import contextmanager
 from importlib.resources import files, as_file
-from typing import Union, List, Dict, Any, Optional
+from typing import Union, List, Dict, Any, Optional, cast
 
 import pygame
 
@@ -411,78 +411,203 @@ class UIThemeValidator:
         errors = []
 
         for image_name, image_data in images.items():
-            if not isinstance(image_data, dict):
-                errors.append(
-                    f"{element_type}.images.{image_name}: "
-                    f"Must be a dictionary, got {type(image_data).__name__}"
+            # Handle multi-image format (array of image objects)
+            if isinstance(image_data, list):
+                if not image_name.endswith("_images"):
+                    errors.append(
+                        f"{element_type}.images.{image_name}: "
+                        f"Array format should use '_images' suffix (e.g., 'normal_images')"
+                    )
+
+                for i, img_item in enumerate(image_data):
+                    if not isinstance(img_item, dict):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}]: "
+                            f"Must be a dictionary, got {type(img_item).__name__}"
+                        )
+                        continue
+
+                    # Validate required fields for multi-image items
+                    if "id" not in img_item:
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}]: "
+                            f"Missing required 'id' field"
+                        )
+                    elif not isinstance(img_item["id"], str):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}].id: "
+                            f"Must be a string, got {type(img_item['id']).__name__}"
+                        )
+
+                    # Validate layer field (optional, defaults to 0)
+                    if "layer" in img_item:
+                        try:
+                            layer_val = int(img_item["layer"])
+                            if layer_val < 0:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].layer: "
+                                    f"Layer must be non-negative, got {layer_val}"
+                                )
+                        except (ValueError, TypeError):
+                            errors.append(
+                                f"{element_type}.images.{image_name}[{i}].layer: "
+                                f"Must be an integer, got {type(img_item['layer']).__name__}"
+                            )
+
+                    # Validate image source (same as single image validation)
+                    has_path = "path" in img_item
+                    has_package_resource = (
+                        "package" in img_item and "resource" in img_item
+                    )
+
+                    if not (has_path or has_package_resource):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}]: "
+                            f"Must have either 'path' or both 'package' and 'resource'"
+                        )
+
+                    # Validate path if present
+                    if has_path and not isinstance(img_item["path"], str):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}].path: "
+                            f"Must be a string, got {type(img_item['path']).__name__}"
+                        )
+
+                    # Validate package/resource if present
+                    if "package" in img_item and not isinstance(
+                        img_item["package"], str
+                    ):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}].package: "
+                            f"Must be a string, got {type(img_item['package']).__name__}"
+                        )
+
+                    if "resource" in img_item and not isinstance(
+                        img_item["resource"], str
+                    ):
+                        errors.append(
+                            f"{element_type}.images.{image_name}[{i}].resource: "
+                            f"Must be a string, got {type(img_item['resource']).__name__}"
+                        )
+
+                    # Validate sub_surface_rect if present (same validation as single image)
+                    if "sub_surface_rect" in img_item:
+                        rect_data = img_item["sub_surface_rect"]
+                        if isinstance(rect_data, str):
+                            try:
+                                rect_parts = rect_data.strip().split(",")
+                                if len(rect_parts) != 4:
+                                    errors.append(
+                                        f"{element_type}.images.{image_name}[{i}].sub_surface_rect: "
+                                        f"Must have 4 comma-separated values, got {len(rect_parts)}"
+                                    )
+                                else:
+                                    for part in rect_parts:
+                                        int(
+                                            part.strip()
+                                        )  # Test if it's a valid integer
+                            except ValueError:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].sub_surface_rect: "
+                                    f"All values must be integers: '{rect_data}'"
+                                )
+                        elif isinstance(rect_data, (list, tuple)):
+                            if len(rect_data) != 4:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].sub_surface_rect: "
+                                    f"Must have 4 values, got {len(rect_data)}"
+                                )
+                            elif not all(
+                                isinstance(x, (int, float)) for x in rect_data
+                            ):
+                                errors.append(
+                                    f"{element_type}.images.{image_name}[{i}].sub_surface_rect: "
+                                    f"All values must be numbers"
+                                )
+                        else:
+                            errors.append(
+                                f"{element_type}.images.{image_name}[{i}].sub_surface_rect: "
+                                f"Must be string or list/tuple, got {type(rect_data).__name__}"
+                            )
+
+            # Handle single image format (existing validation)
+            elif isinstance(image_data, dict):
+                # Check for required path or package/resource
+                has_path = "path" in image_data
+                has_package_resource = (
+                    "package" in image_data and "resource" in image_data
                 )
-                continue
 
-            # Check for required path or package/resource
-            has_path = "path" in image_data
-            has_package_resource = "package" in image_data and "resource" in image_data
+                if not (has_path or has_package_resource):
+                    errors.append(
+                        f"{element_type}.images.{image_name}: "
+                        f"Must have either 'path' or both 'package' and 'resource'"
+                    )
 
-            if not (has_path or has_package_resource):
-                errors.append(
-                    f"{element_type}.images.{image_name}: "
-                    f"Must have either 'path' or both 'package' and 'resource'"
-                )
+                # Validate path if present
+                if has_path and not isinstance(image_data["path"], str):
+                    errors.append(
+                        f"{element_type}.images.{image_name}.path: "
+                        f"Must be a string, got {type(image_data['path']).__name__}"
+                    )
 
-            # Validate path if present
-            if has_path and not isinstance(image_data["path"], str):
-                errors.append(
-                    f"{element_type}.images.{image_name}.path: "
-                    f"Must be a string, got {type(image_data['path']).__name__}"
-                )
+                # Validate package/resource if present
+                if "package" in image_data and not isinstance(
+                    image_data["package"], str
+                ):
+                    errors.append(
+                        f"{element_type}.images.{image_name}.package: "
+                        f"Must be a string, got {type(image_data['package']).__name__}"
+                    )
 
-            # Validate package/resource if present
-            if "package" in image_data and not isinstance(image_data["package"], str):
-                errors.append(
-                    f"{element_type}.images.{image_name}.package: "
-                    f"Must be a string, got {type(image_data['package']).__name__}"
-                )
+                if "resource" in image_data and not isinstance(
+                    image_data["resource"], str
+                ):
+                    errors.append(
+                        f"{element_type}.images.{image_name}.resource: "
+                        f"Must be a string, got {type(image_data['resource']).__name__}"
+                    )
 
-            if "resource" in image_data and not isinstance(image_data["resource"], str):
-                errors.append(
-                    f"{element_type}.images.{image_name}.resource: "
-                    f"Must be a string, got {type(image_data['resource']).__name__}"
-                )
-
-            # Validate sub_surface_rect if present
-            if "sub_surface_rect" in image_data:
-                rect_data = image_data["sub_surface_rect"]
-                if isinstance(rect_data, str):
-                    try:
-                        rect_parts = rect_data.strip().split(",")
-                        if len(rect_parts) != 4:
+                # Validate sub_surface_rect if present
+                if "sub_surface_rect" in image_data:
+                    rect_data = image_data["sub_surface_rect"]
+                    if isinstance(rect_data, str):
+                        try:
+                            rect_parts = rect_data.strip().split(",")
+                            if len(rect_parts) != 4:
+                                errors.append(
+                                    f"{element_type}.images.{image_name}.sub_surface_rect: "
+                                    f"Must have 4 comma-separated values, got {len(rect_parts)}"
+                                )
+                            else:
+                                for part in rect_parts:
+                                    int(part.strip())  # Test if it's a valid integer
+                        except ValueError:
                             errors.append(
                                 f"{element_type}.images.{image_name}.sub_surface_rect: "
-                                f"Must have 4 comma-separated values, got {len(rect_parts)}"
+                                f"All values must be integers: '{rect_data}'"
                             )
-                        else:
-                            for part in rect_parts:
-                                int(part.strip())  # Test if it's a valid integer
-                    except ValueError:
+                    elif isinstance(rect_data, (list, tuple)):
+                        if len(rect_data) != 4:
+                            errors.append(
+                                f"{element_type}.images.{image_name}.sub_surface_rect: "
+                                f"Must have 4 values, got {len(rect_data)}"
+                            )
+                        elif not all(isinstance(x, (int, float)) for x in rect_data):
+                            errors.append(
+                                f"{element_type}.images.{image_name}.sub_surface_rect: "
+                                f"All values must be numbers"
+                            )
+                    else:
                         errors.append(
                             f"{element_type}.images.{image_name}.sub_surface_rect: "
-                            f"All values must be integers: '{rect_data}'"
+                            f"Must be string or list/tuple, got {type(rect_data).__name__}"
                         )
-                elif isinstance(rect_data, (list, tuple)):
-                    if len(rect_data) != 4:
-                        errors.append(
-                            f"{element_type}.images.{image_name}.sub_surface_rect: "
-                            f"Must have 4 values, got {len(rect_data)}"
-                        )
-                    elif not all(isinstance(x, (int, float)) for x in rect_data):
-                        errors.append(
-                            f"{element_type}.images.{image_name}.sub_surface_rect: "
-                            f"All values must be numbers"
-                        )
-                else:
-                    errors.append(
-                        f"{element_type}.images.{image_name}.sub_surface_rect: "
-                        f"Must be string or list/tuple, got {type(rect_data).__name__}"
-                    )
+            else:
+                errors.append(
+                    f"{element_type}.images.{image_name}: "
+                    f"Must be a dictionary or list, got {type(image_data).__name__}"
+                )
 
         return errors
 
@@ -662,7 +787,9 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             str, Dict[str, Dict[str, str | bool | pygame.Rect]]
         ] = {}
         self.ele_font_res: Dict[str, Dict[str, FontResource]] = {}
-        self.ui_element_image_surfaces: Dict[str, Dict[str, SurfaceResource]] = {}
+        self.ui_element_image_surfaces: Dict[
+            str, Dict[str, Union[SurfaceResource, Dict[str, Any]]]
+        ] = {}
         self.ui_element_misc_data: Dict[str, Dict[str, Any]] = {}
         self.image_resources: Dict[str, ImageResource] = {}
         self.surface_resources: Dict[str, SurfaceResource] = {}
@@ -705,8 +832,10 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         return False
 
     @staticmethod
-    def _json_to_dict(json_data):
-        return json_data if isinstance(json_data, dict) else json.loads(json_data)
+    def _json_to_dict(json_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
+        if isinstance(json_data, str):
+            return json.loads(json_data)
+        return json_data
 
     def update_theming(
         self, new_theming_data: Union[str, dict], rebuild_all: bool = True
@@ -878,7 +1007,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                     )
                 )
 
-    def _load_images(self):
+    def _load_images(self) -> None:
         """
         Loads all images in our loaded theme.
         """
@@ -887,69 +1016,184 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 self.ui_element_image_surfaces[element_key] = {}
             for image_id in image_ids_dict:
                 image_resource_data = image_ids_dict[image_id]
-                if image_resource_data["changed"]:
-                    image_resource = None
-                    if (
-                        "package" in image_resource_data
-                        and "resource" in image_resource_data
-                    ):
-                        image_resource = self._load_image_resource(image_resource_data)
-                    elif "path" in image_resource_data:
-                        image_resource = self._load_image_from_path(image_resource_data)
-                    else:
-                        warnings.warn(f"Unable to find image with id: {str(image_id)}")
 
-                    if image_resource is not None:
-                        if "sub_surface_rect" in image_resource_data:
-                            surface_id = image_resource.image_id + str(
-                                image_resource_data["sub_surface_rect"]
-                            )
-                            if surface_id in self.surface_resources:
-                                surf_resource = self.surface_resources[surface_id]
-                            else:
-                                if isinstance(
-                                    image_resource_data["sub_surface_rect"], pygame.Rect
-                                ):
-                                    surf_resource = SurfaceResource(
-                                        image_resource=image_resource,
-                                        sub_surface_rect=image_resource_data[
-                                            "sub_surface_rect"
-                                        ],
+                # Handle multi-image format
+                if (
+                    isinstance(image_resource_data, dict)
+                    and image_resource_data.get("type") == "multi"
+                ):
+                    multi_image_data = cast(Dict[str, Any], image_resource_data)
+                    if multi_image_data["changed"]:
+                        # Create a list to store multiple surface resources
+                        multi_surfaces = []
+
+                        images_list = cast(
+                            List[Dict[str, Any]], multi_image_data["images"]
+                        )
+                        for img_data in images_list:
+                            if img_data["changed"]:
+                                image_resource = None
+                                if "package" in img_data and "resource" in img_data:
+                                    image_resource = self._load_image_resource(img_data)
+                                elif "path" in img_data:
+                                    image_resource = self._load_image_from_path(
+                                        img_data
                                     )
                                 else:
-                                    surf_resource = SurfaceResource(
-                                        image_resource=image_resource,
-                                        sub_surface_rect=None,
-                                    )
-                                self.surface_resources[surface_id] = surf_resource
-                                if self._resource_loader.started():
-                                    error = surf_resource.load()
-                                    if error is not None:
-                                        warnings.warn(str(error))
-                                else:
-                                    self._resource_loader.add_resource(surf_resource)
-                        else:
-                            surface_id = image_resource.image_id
-                            if surface_id in self.surface_resources:
-                                surf_resource = self.surface_resources[surface_id]
-                            else:
-                                surf_resource = SurfaceResource(
-                                    image_resource=image_resource
-                                )
-                                self.surface_resources[surface_id] = surf_resource
-                                if (
-                                    surf_resource.image_resource.loaded_surface
-                                    is not None
-                                ):
-                                    surf_resource.surface = (
-                                        surf_resource.image_resource.loaded_surface
+                                    warnings.warn(
+                                        f"Unable to find image with id: {img_data.get('id', 'unnamed')}"
                                     )
 
+                                if image_resource is not None:
+                                    if "sub_surface_rect" in img_data:
+                                        surface_id = (
+                                            image_resource.image_id
+                                            + str(img_data["sub_surface_rect"])
+                                            + f"_layer_{img_data['layer']}"
+                                        )
+                                        if surface_id in self.surface_resources:
+                                            surf_resource = self.surface_resources[
+                                                surface_id
+                                            ]
+                                        else:
+                                            if isinstance(
+                                                img_data["sub_surface_rect"],
+                                                pygame.Rect,
+                                            ):
+                                                surf_resource = SurfaceResource(
+                                                    image_resource=image_resource,
+                                                    sub_surface_rect=img_data[
+                                                        "sub_surface_rect"
+                                                    ],
+                                                )
+                                            else:
+                                                surf_resource = SurfaceResource(
+                                                    image_resource=image_resource,
+                                                    sub_surface_rect=None,
+                                                )
+                                            self.surface_resources[surface_id] = (
+                                                surf_resource
+                                            )
+                                            if self._resource_loader.started():
+                                                error = surf_resource.load()
+                                                if error is not None:
+                                                    warnings.warn(str(error))
+                                            else:
+                                                self._resource_loader.add_resource(
+                                                    surf_resource
+                                                )
+                                    else:
+                                        surface_id = (
+                                            image_resource.image_id
+                                            + f"_layer_{img_data['layer']}"
+                                        )
+                                        if surface_id in self.surface_resources:
+                                            surf_resource = self.surface_resources[
+                                                surface_id
+                                            ]
+                                        else:
+                                            surf_resource = SurfaceResource(
+                                                image_resource=image_resource
+                                            )
+                                            self.surface_resources[surface_id] = (
+                                                surf_resource
+                                            )
+                                            if (
+                                                surf_resource.image_resource.loaded_surface
+                                                is not None
+                                            ):
+                                                surf_resource.surface = surf_resource.image_resource.loaded_surface
+
+                                    # Add layer and id information to the surface resource
+                                    # Note: These attributes may need to be added to SurfaceResource class
+                                    setattr(surf_resource, "layer", img_data["layer"])
+                                    setattr(surf_resource, "image_id", img_data["id"])
+                                    multi_surfaces.append(surf_resource)
+
+                        # Store the list of surface resources
+                        multi_image_surface_dict: Dict[str, Any] = {
+                            "type": "multi",
+                            "surfaces": multi_surfaces,
+                        }
                         self.ui_element_image_surfaces[element_key][image_id] = (
-                            surf_resource
+                            multi_image_surface_dict
                         )
 
-    def _load_image_from_path(self, res_data):
+                # Handle single image format (existing logic)
+                else:
+                    single_image_data = cast(Dict[str, Any], image_resource_data)
+                    if single_image_data["changed"]:
+                        image_resource = None
+                        if (
+                            "package" in single_image_data
+                            and "resource" in single_image_data
+                        ):
+                            image_resource = self._load_image_resource(
+                                single_image_data
+                            )
+                        elif "path" in single_image_data:
+                            image_resource = self._load_image_from_path(
+                                single_image_data
+                            )
+                        else:
+                            warnings.warn(
+                                f"Unable to find image with id: {str(image_id)}"
+                            )
+
+                        if image_resource is not None:
+                            if "sub_surface_rect" in single_image_data:
+                                surface_id = image_resource.image_id + str(
+                                    single_image_data["sub_surface_rect"]
+                                )
+                                if surface_id in self.surface_resources:
+                                    surf_resource = self.surface_resources[surface_id]
+                                else:
+                                    if isinstance(
+                                        single_image_data["sub_surface_rect"],
+                                        pygame.Rect,
+                                    ):
+                                        surf_resource = SurfaceResource(
+                                            image_resource=image_resource,
+                                            sub_surface_rect=single_image_data[
+                                                "sub_surface_rect"
+                                            ],
+                                        )
+                                    else:
+                                        surf_resource = SurfaceResource(
+                                            image_resource=image_resource,
+                                            sub_surface_rect=None,
+                                        )
+                                    self.surface_resources[surface_id] = surf_resource
+                                    if self._resource_loader.started():
+                                        error = surf_resource.load()
+                                        if error is not None:
+                                            warnings.warn(str(error))
+                                    else:
+                                        self._resource_loader.add_resource(
+                                            surf_resource
+                                        )
+                            else:
+                                surface_id = image_resource.image_id
+                                if surface_id in self.surface_resources:
+                                    surf_resource = self.surface_resources[surface_id]
+                                else:
+                                    surf_resource = SurfaceResource(
+                                        image_resource=image_resource
+                                    )
+                                    self.surface_resources[surface_id] = surf_resource
+                                    if (
+                                        surf_resource.image_resource.loaded_surface
+                                        is not None
+                                    ):
+                                        surf_resource.surface = (
+                                            surf_resource.image_resource.loaded_surface
+                                        )
+
+                            self.ui_element_image_surfaces[element_key][image_id] = (
+                                surf_resource
+                            )
+
+    def _load_image_from_path(self, res_data: Dict[str, Any]) -> ImageResource:
         resource_id = res_data["path"]
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
@@ -970,7 +1214,7 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             self.image_resources[resource_id] = image_resource
         return image_resource
 
-    def _load_image_resource(self, res_data):
+    def _load_image_resource(self, res_data: Dict[str, Any]) -> ImageResource:
         resource_id = str(res_data["package"]) + "/" + str(res_data["resource"])
         if resource_id in self.image_resources:
             image_resource = self.image_resources[resource_id]
@@ -1297,12 +1541,117 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 combined_element_id in self.ui_element_image_surfaces
                 and image_id in self.ui_element_image_surfaces[combined_element_id]
             ):
-                return self.ui_element_image_surfaces[combined_element_id][
+                image_data = self.ui_element_image_surfaces[combined_element_id][
                     image_id
-                ].surface
+                ]
+
+                # Handle multi-image format - return the first image for backward compatibility
+                if isinstance(image_data, dict) and image_data.get("type") == "multi":
+                    surfaces = image_data.get("surfaces", [])
+                    if surfaces:
+                        return surfaces[0].surface
+                    else:
+                        raise LookupError(
+                            f"Multi-image {image_id} "
+                            f"found but no surfaces loaded for combined_element_ids: {combined_element_ids}"
+                        )
+                # Handle single image format
+                else:
+                    # Type guard to ensure we have a SurfaceResource
+                    surface_resource = cast(SurfaceResource, image_data)
+                    return surface_resource.surface
 
         raise LookupError(
             f"Unable to find any image with id: {image_id} with combined_element_ids: {combined_element_ids}"
+        )
+
+    def get_images(
+        self, image_id: str, combined_element_ids: List[str]
+    ) -> List[pygame.surface.Surface]:
+        """
+        Get multiple images for a given image_id. Returns a list of surfaces sorted by layer.
+        For single images, returns a list with one surface.
+        Will raise an exception if no image with the ids specified is found.
+
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
+        :param image_id: The id identifying the particular image spot in the UI we are looking for
+                         images to add to.
+
+        :return: A list of pygame.surface.Surface objects sorted by layer
+        """
+
+        for combined_element_id in combined_element_ids:
+            if (
+                combined_element_id in self.ui_element_image_surfaces
+                and image_id in self.ui_element_image_surfaces[combined_element_id]
+            ):
+                image_data = self.ui_element_image_surfaces[combined_element_id][
+                    image_id
+                ]
+
+                # Handle multi-image format
+                if isinstance(image_data, dict) and image_data.get("type") == "multi":
+                    surfaces = image_data.get("surfaces", [])
+                    return [surf.surface for surf in surfaces]
+                # Handle single image format
+                else:
+                    # Type guard to ensure we have a SurfaceResource
+                    surface_resource = cast(SurfaceResource, image_data)
+                    return [surface_resource.surface]
+
+        raise LookupError(
+            f"Unable to find any images with id: {image_id} with combined_element_ids: {combined_element_ids}"
+        )
+
+    def get_image_details(
+        self, image_id: str, combined_element_ids: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Get detailed information about images including their IDs, layers, and surfaces.
+        Returns a list of dictionaries with image details sorted by layer.
+
+        :param combined_element_ids: A list of IDs representing an element's location in a
+                                     hierarchy of elements.
+        :param image_id: The id identifying the particular image spot in the UI we are looking for.
+
+        :return: A list of dictionaries containing image details
+        """
+
+        for combined_element_id in combined_element_ids:
+            if (
+                combined_element_id in self.ui_element_image_surfaces
+                and image_id in self.ui_element_image_surfaces[combined_element_id]
+            ):
+                image_data = self.ui_element_image_surfaces[combined_element_id][
+                    image_id
+                ]
+
+                # Handle multi-image format
+                if isinstance(image_data, dict) and image_data.get("type") == "multi":
+                    surfaces = image_data.get("surfaces", [])
+                    return [
+                        {
+                            "id": getattr(surf, "image_id", "unnamed"),
+                            "layer": getattr(surf, "layer", 0),
+                            "surface": surf.surface,
+                        }
+                        for surf in surfaces
+                    ]
+                # Handle single image format
+                else:
+                    # Type guard to ensure we have a SurfaceResource
+                    surface_resource = cast(SurfaceResource, image_data)
+                    return [
+                        {
+                            "id": "single",
+                            "layer": 0,
+                            "surface": surface_resource.surface,
+                        }
+                    ]
+
+        raise LookupError(
+            f"Unable to find any image details with id: {image_id} with combined_element_ids: {combined_element_ids}"
         )
 
     def get_font_info(self, combined_element_ids: List[str]) -> FontThemeInfo:
@@ -1429,7 +1778,11 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         # if all else fails find a colour with the most similar id words
         colour_parts = colour_id.split("_")
         best_fit_key_count = 0
-        best_fit_colour = self.base_colours["normal_bg"]
+        best_fit_colour: Union[pygame.Color, IColourGradientInterface] = pygame.Color(
+            0, 0, 0
+        )
+        if "normal_bg" in self.base_colours:
+            best_fit_colour = self.base_colours["normal_bg"]
         for key, colour in self.base_colours.items():
             key_words = key.split("_")
             count = sum(el in colour_parts for el in key_words)
@@ -1534,40 +1887,43 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
 
         return None
 
-    def _parse_theme_data_from_json_dict(self, theme_dict):
+    def _parse_theme_data_from_json_dict(self, theme_dict: Dict[str, Any]) -> None:
         # Validate theme data before processing
-        validation_errors = UIThemeValidator.validate_theme_file(theme_dict)
-
+        validation_errors = self.validate_theme_data(theme_dict)
         if validation_errors:
-            # Log all validation errors as warnings
             warnings.warn(
-                f"Theme validation found {len(validation_errors)} error(s):\n"
+                f"Theme validation found {len(validation_errors)} errors:\n"
                 + "\n".join(f"  - {error}" for error in validation_errors),
                 UserWarning,
             )
 
-            # Optionally, you could raise an exception instead:
-            # raise UIThemeValidationError(
-            #     f"Theme validation failed with {len(validation_errors)} error(s):\n" +
-            #     "\n".join(f"  - {error}" for error in validation_errors)
-            # )
+        # Load default colors first if they exist
+        if "defaults" in theme_dict:
+            self._load_colour_defaults_from_theme(theme_dict)
 
-        for element_name in theme_dict.keys():
-            if element_name == "defaults":
-                self._load_colour_defaults_from_theme(theme_dict)
-            else:
-                self._load_prototype(element_name, theme_dict)
-                element_theming = theme_dict[element_name]
-                self._parse_single_element_data(element_name, element_theming)
+        for element_name in theme_dict:
+            self._load_prototype(element_name, theme_dict)
+            element_theming = theme_dict[element_name]
+            self._parse_single_element_data(element_name, element_theming)
 
         self._load_fonts_images_and_shadow_edges()
 
-    def _load_fonts_images_and_shadow_edges(self):
+    def _load_fonts_images_and_shadow_edges(self) -> None:
         self._load_fonts()
         self._load_images()
         self._preload_shadow_edges()
 
-    def _parse_single_element_data(self, element_name, element_theming):
+    def _parse_single_element_data(
+        self, element_name: str, element_theming: Dict[str, Any]
+    ) -> None:
+        # Clear image data if no images block is present in the new theme
+        # This ensures proper cleanup when switching to themes without images
+        if "images" not in element_theming:
+            if element_name in self.ui_element_image_locs:
+                self.ui_element_image_locs[element_name].clear()
+            if element_name in self.ui_element_image_surfaces:
+                self.ui_element_image_surfaces[element_name].clear()
+
         for data_type in element_theming:
             if data_type == "font":
                 file_dict = element_theming[data_type]
@@ -1796,8 +2152,17 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
         :param element_name: The theming element ID that this data belongs to.
         :param element_theming: The data dictionary from the theming file to load data from.
         """
+        # Clear existing image data for this element to ensure clean loading
         if element_name not in self.ui_element_image_locs:
             self.ui_element_image_locs[element_name] = {}
+        else:
+            # Clear existing image data to prevent old data from persisting
+            self.ui_element_image_locs[element_name].clear()
+
+        # Also clear the cached image surfaces to prevent old data from persisting
+        if element_name in self.ui_element_image_surfaces:
+            self.ui_element_image_surfaces[element_name].clear()
+
         loaded_img_dict = element_theming[data_type]
 
         # Validate image data for this specific element
@@ -1809,58 +2174,169 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
                 + "\n".join(f"  - {error}" for error in image_errors),
                 UserWarning,
             )
+
         for image_key in loaded_img_dict:
-            if image_key not in self.ui_element_image_locs[element_name]:
-                self.ui_element_image_locs[element_name][image_key] = {"changed": True}
-            else:
-                self.ui_element_image_locs[element_name][image_key]["changed"] = False
+            image_data = loaded_img_dict[image_key]
 
-            img_res_dict = self.ui_element_image_locs[element_name][image_key]
-            if (
-                "package" in loaded_img_dict[image_key]
-                and "resource" in loaded_img_dict[image_key]
-            ):
-                package = str(loaded_img_dict[image_key]["package"])
-                resource = str(loaded_img_dict[image_key]["resource"])
-                if "package" in img_res_dict and package != img_res_dict["package"]:
-                    img_res_dict["changed"] = True
-                if "resource" in img_res_dict and resource != img_res_dict["resource"]:
-                    img_res_dict["changed"] = True
-                img_res_dict["package"] = package
-                img_res_dict["resource"] = resource
-            elif "path" in loaded_img_dict[image_key]:
-                image_path = str(loaded_img_dict[image_key]["path"])
-                if "path" in img_res_dict and image_path != img_res_dict["path"]:
-                    img_res_dict["changed"] = True
-                img_res_dict["path"] = image_path
-            if "sub_surface_rect" in loaded_img_dict[image_key]:
-                rect_list = (
-                    str(loaded_img_dict[image_key]["sub_surface_rect"])
-                    .strip()
-                    .split(",")
-                )
-                if len(rect_list) == 4:
-                    try:
-                        top_left = (
-                            int(rect_list[0].strip()),
-                            int(rect_list[1].strip()),
-                        )
-                        size = (int(rect_list[2].strip()), int(rect_list[3].strip()))
-                    except (ValueError, TypeError):
-                        rect = pygame.Rect((0, 0), (10, 10))
-                        warnings.warn(
-                            "Unable to create subsurface rectangle from string: "
-                            "" + loaded_img_dict[image_key]["sub_surface_rect"]
-                        )
+            # Handle multi-image format (array of image objects)
+            if isinstance(image_data, list):
+                # Store multi-image data with special structure
+                if image_key not in self.ui_element_image_locs[element_name]:
+                    multi_image_dict: Dict[str, Any] = {
+                        "type": "multi",
+                        "images": [],
+                        "changed": True,
+                    }
+                    self.ui_element_image_locs[element_name][image_key] = (
+                        multi_image_dict
+                    )
+                else:
+                    self.ui_element_image_locs[element_name][image_key]["changed"] = (
+                        False
+                    )
+
+                multi_img_data = self.ui_element_image_locs[element_name][image_key]
+
+                # Process each image in the array
+                for img_item in image_data:
+                    img_id = img_item.get("id", "unnamed")
+                    layer = img_item.get("layer", 0)
+
+                    # Create image resource data structure
+                    img_resource_data: Dict[str, Any] = {
+                        "changed": True,
+                        "id": img_id,
+                        "layer": layer,
+                    }
+
+                    # Check if this image already exists and if it has changed
+                    existing_img = None
+                    images_list = cast(List[Dict[str, Any]], multi_img_data["images"])
+                    for existing in images_list:
+                        if existing.get("id") == img_id:
+                            existing_img = existing
+                            break
+
+                    if existing_img:
+                        img_resource_data["changed"] = False
+                        # Check if any properties changed
+                        if existing_img.get("layer") != layer:
+                            img_resource_data["changed"] = True
+
+                    # Handle image source (path or package/resource)
+                    if "package" in img_item and "resource" in img_item:
+                        package = str(img_item["package"])
+                        resource = str(img_item["resource"])
+                        if existing_img:
+                            if (
+                                existing_img.get("package") != package
+                                or existing_img.get("resource") != resource
+                            ):
+                                img_resource_data["changed"] = True
+                        img_resource_data["package"] = package
+                        img_resource_data["resource"] = resource
+                    elif "path" in img_item:
+                        image_path = str(img_item["path"])
+                        if existing_img and existing_img.get("path") != image_path:
+                            img_resource_data["changed"] = True
+                        img_resource_data["path"] = image_path
+
+                    # Handle sub_surface_rect if present
+                    if "sub_surface_rect" in img_item:
+                        rect_list = str(img_item["sub_surface_rect"]).strip().split(",")
+                        if len(rect_list) == 4:
+                            try:
+                                top_left = (
+                                    int(rect_list[0].strip()),
+                                    int(rect_list[1].strip()),
+                                )
+                                size = (
+                                    int(rect_list[2].strip()),
+                                    int(rect_list[3].strip()),
+                                )
+                            except (ValueError, TypeError):
+                                rect = pygame.Rect((0, 0), (10, 10))
+                                warnings.warn(
+                                    "Unable to create subsurface rectangle from string: "
+                                    "" + img_item["sub_surface_rect"]
+                                )
+                            else:
+                                rect = pygame.Rect(top_left, size)
+
+                            if (
+                                existing_img
+                                and existing_img.get("sub_surface_rect") != rect
+                            ):
+                                img_resource_data["changed"] = True
+                            img_resource_data["sub_surface_rect"] = rect
+
+                    # Update or add the image to the multi-image list
+                    if existing_img:
+                        existing_img.update(img_resource_data)
                     else:
-                        rect = pygame.Rect(top_left, size)
+                        images_list.append(img_resource_data)
+                        multi_img_data["changed"] = True
 
+                # Sort images by layer for proper rendering order
+                images_list = cast(List[Dict[str, Any]], multi_img_data["images"])
+                images_list.sort(key=lambda x: x.get("layer", 0))
+
+            # Handle single image format (existing logic)
+            else:
+                if image_key not in self.ui_element_image_locs[element_name]:
+                    self.ui_element_image_locs[element_name][image_key] = {
+                        "changed": True
+                    }
+                else:
+                    self.ui_element_image_locs[element_name][image_key]["changed"] = (
+                        False
+                    )
+
+                img_res_dict = self.ui_element_image_locs[element_name][image_key]
+                if "package" in image_data and "resource" in image_data:
+                    package = str(image_data["package"])
+                    resource = str(image_data["resource"])
+                    if "package" in img_res_dict and package != img_res_dict["package"]:
+                        img_res_dict["changed"] = True
                     if (
-                        "sub_surface_rect" in img_res_dict
-                        and rect != img_res_dict["sub_surface_rect"]
+                        "resource" in img_res_dict
+                        and resource != img_res_dict["resource"]
                     ):
                         img_res_dict["changed"] = True
-                    img_res_dict["sub_surface_rect"] = rect
+                    img_res_dict["package"] = package
+                    img_res_dict["resource"] = resource
+                elif "path" in image_data:
+                    image_path = str(image_data["path"])
+                    if "path" in img_res_dict and image_path != img_res_dict["path"]:
+                        img_res_dict["changed"] = True
+                    img_res_dict["path"] = image_path
+                if "sub_surface_rect" in image_data:
+                    rect_list = str(image_data["sub_surface_rect"]).strip().split(",")
+                    if len(rect_list) == 4:
+                        try:
+                            top_left = (
+                                int(rect_list[0].strip()),
+                                int(rect_list[1].strip()),
+                            )
+                            size = (
+                                int(rect_list[2].strip()),
+                                int(rect_list[3].strip()),
+                            )
+                        except (ValueError, TypeError):
+                            rect = pygame.Rect((0, 0), (10, 10))
+                            warnings.warn(
+                                "Unable to create subsurface rectangle from string: "
+                                "" + image_data["sub_surface_rect"]
+                            )
+                        else:
+                            rect = pygame.Rect(top_left, size)
+
+                        if (
+                            "sub_surface_rect" in img_res_dict
+                            and rect != img_res_dict["sub_surface_rect"]
+                        ):
+                            img_res_dict["changed"] = True
+                        img_res_dict["sub_surface_rect"] = rect
 
     def _load_element_colour_data_from_theme(
         self, data_type: str, element_name: str, element_theming: Dict[str, Any]

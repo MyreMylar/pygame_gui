@@ -556,27 +556,27 @@ class DrawableShape:
         :param add_text:
         :param image_state_str: image ID of the state we are going to be adding images and text to.
         :param state_str: normal ID of the state we are going to be adding images and text to.
-        :param text_colour_state_str: text ID of the state we are going to be adding images and
-                                      text to.
-        :param text_shadow_colour_state_str: text shadow ID of the state we are going to be adding
-                                             images and text to.
+        :param text_colour_state_str: text colour ID of the state we are going to be adding
+                                      images and text to.
+        :param text_shadow_colour_state_str: text shadow colour ID of the state we are going to
+                                             be adding images and text to.
 
         """
-        # Draw any themed images
-        if (
-            image_state_str in self.theming
-            and self.theming[image_state_str] is not None
-        ):
-            image_rect = self.theming[image_state_str].get_rect()
-            image_rect.center = (
-                int(self.containing_rect.width / 2),
-                int(self.containing_rect.height / 2),
-            )
-            basic_blit(
-                self.states[state_str].surface,
-                self.theming[image_state_str],
-                image_rect,
-            )
+        # Handle images - always look for list-based image parameters
+        images_key = image_state_str
+        if images_key in self.theming:
+            images = self.theming[images_key]
+            if images:  # Only process if there are actually images
+                state_surface = self.states[state_str].surface
+                # Draw each image in layer order (they should already be sorted by layer)
+                for image in images:
+                    if image is not None:
+                        # Center the image on the surface
+                        image_rect = image.get_rect()
+                        image_rect.center = state_surface.get_rect().center
+                        state_surface.blit(image, image_rect)
+
+        # Handle text
         if add_text:
             self.finalise_text(
                 state_str, text_colour_state_str, text_shadow_colour_state_str

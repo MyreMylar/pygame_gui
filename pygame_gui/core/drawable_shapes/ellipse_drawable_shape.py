@@ -344,7 +344,7 @@ class EllipseDrawableShape(DrawableShape):
                     )
 
             self.finalise_images_and_text(
-                f"{state_str}_image",
+                f"{state_str}_images",
                 state_str,
                 f"{state_str}_text",
                 f"{state_str}_text_shadow",

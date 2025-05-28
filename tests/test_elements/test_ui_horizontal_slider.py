@@ -178,7 +178,7 @@ class TestUIHorizontalSlider:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
                                                 _display_surface_return_none):
-        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+        with pytest.warns(UserWarning, match="Theme validation found 4 errors"):
             manager = UIManager((800, 600), os.path.join("tests",
                                                          "data",
                                                          "themes",
