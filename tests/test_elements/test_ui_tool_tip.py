@@ -122,6 +122,10 @@ class TestUIToolTip:
         assert tool_tip.text_block.image is not None
 
     @pytest.mark.filterwarnings("ignore:Invalid value")
+    @pytest.mark.filterwarnings("ignore:Theme validation found")
+    @pytest.mark.filterwarnings("ignore:Misc data validation")
+    @pytest.mark.filterwarnings("ignore:Font data validation")
+    @pytest.mark.filterwarnings("ignore:Image data validation")
     def test_bad_values_theme_build(self, _init_pygame,
                                     _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_tool_tip_bad_values.json"))

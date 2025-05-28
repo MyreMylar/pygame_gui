@@ -479,6 +479,10 @@ class TestUIButton:
         button.update(0.01)
         assert button_clicked
 
+    @pytest.mark.filterwarnings("ignore:Theme validation found")
+    @pytest.mark.filterwarnings("ignore:Misc data validation")
+    @pytest.mark.filterwarnings("ignore:Font data validation")
+    @pytest.mark.filterwarnings("ignore:Image data validation")
     def test_command_bad_value(self, _init_pygame: None, default_ui_manager: UIManager,
                                _display_surface_return_none):
         with pytest.raises(TypeError, match="Command function must be callable"):
@@ -796,6 +800,10 @@ class TestUIButton:
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid gradient")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
+    @pytest.mark.filterwarnings("ignore:Theme validation found")
+    @pytest.mark.filterwarnings("ignore:Misc data validation")
+    @pytest.mark.filterwarnings("ignore:Font data validation")
+    @pytest.mark.filterwarnings("ignore:Image data validation")
     def test_rebuild_from_changed_theme_data_bad_values(self, _init_pygame,
                                                         _display_surface_return_none):
         manager = UIManager((800, 600),
@@ -809,9 +817,11 @@ class TestUIButton:
 
     def test_rebuild_from_changed_theme_data_bad_values_2(self, _init_pygame,
                                                           _display_surface_return_none):
-        with pytest.warns(UserWarning, match="Unable to find image with id"):
-            manager = UIManager((800, 600),
-                                os.path.join("tests", "data", "themes", "ui_button_bad_values_2.json"))
+        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+            with pytest.warns(UserWarning, match="Image data validation errors"):
+                with pytest.warns(UserWarning, match="Unable to find image with id"):
+                    manager = UIManager((800, 600),
+                                        os.path.join("tests", "data", "themes", "ui_button_bad_values_2.json"))
 
         button = UIButton(relative_rect=pygame.Rect(10, 10, 150, 30),
                           text="Test Button",

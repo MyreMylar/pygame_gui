@@ -173,15 +173,16 @@ class TestUIHorizontalSlider:
         assert slider.right_button is None
         assert slider.image is not None
 
-    @pytest.mark.filterwarnings("ignore:Invalid value")
-    @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
+    @pytest.mark.filterwarnings("ignore:Misc data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid value")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
                                                 _display_surface_return_none):
-        manager = UIManager((800, 600), os.path.join("tests",
-                                                     "data",
-                                                     "themes",
-                                                     "ui_horizontal_slider_bad_values.json"))
+        with pytest.warns(UserWarning, match="Theme validation found 4 error\\(s\\)"):
+            manager = UIManager((800, 600), os.path.join("tests",
+                                                         "data",
+                                                         "themes",
+                                                         "ui_horizontal_slider_bad_values.json"))
 
         slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
                                     start_value=51,
