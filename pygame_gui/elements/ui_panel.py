@@ -103,8 +103,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
             0, 0, 0, 0
         )
 
-        # Enhanced multi-image support - always use lists internally for consistency
+        # Image support - always use lists internally for consistency
         self.background_images: List[pygame.Surface] = []
+
+        # Position support for images - tuples of (x, y) where 0.0-1.0 represents relative position
+        self.background_image_positions: List[Tuple[float, float]] = []
 
         self.border_width = 1
         self.shadow_width = 2
@@ -182,21 +185,28 @@ class UIPanel(UIElement, IContainerLikeInterface):
         """
         changed = False
         new_images = []
+        new_positions = []
 
         # First try to load multi-image format (background_images)
         try:
-            multi_images = self.ui_theme.get_images(
+            image_details = self.ui_theme.get_image_details(
                 "background_images", self.combined_element_ids
             )
-            new_images = multi_images
+            new_images = [detail["surface"] for detail in image_details]
+            new_positions = [
+                detail.get("position", (0.5, 0.5)) for detail in image_details
+            ]
         except LookupError:
             # Fall back to single image format (background_image)
             try:
-                single_image = self.ui_theme.get_image(
+                image_details = self.ui_theme.get_image_details(
                     "background_image", self.combined_element_ids
                 )
-                if single_image is not None:
-                    new_images = [single_image]  # Convert to list
+                if image_details:
+                    new_images = [detail["surface"] for detail in image_details]
+                    new_positions = [
+                        detail.get("position", (0.5, 0.5)) for detail in image_details
+                    ]
             except LookupError:
                 # No image found for this state
                 pass
@@ -209,9 +219,17 @@ class UIPanel(UIElement, IContainerLikeInterface):
                 scaled_images.append(scaled_img)
             new_images = scaled_images
 
-        # Check if images have changed
-        if new_images != self.background_images:
+        # Ensure we have positions for all images (default to center if missing)
+        while len(new_positions) < len(new_images):
+            new_positions.append((0.5, 0.5))
+
+        # Check if images or positions have changed
+        if (
+            new_images != self.background_images
+            or new_positions != self.background_image_positions
+        ):
             self.background_images = new_images
+            self.background_image_positions = new_positions
             changed = True
 
         return changed
@@ -404,12 +422,12 @@ class UIPanel(UIElement, IContainerLikeInterface):
     def rebuild(self):
         """
         A complete rebuild of the drawable shape used by this panel.
-
         """
         theming_parameters = {
             "normal_bg": self.background_colour,
             "normal_border": self.border_colour,
             "normal_images": self.background_images,
+            "normal_image_positions": self.background_image_positions,  # Add positions
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "shape_corner_radius": self.shape_corner_radius,
@@ -625,3 +643,44 @@ class UIPanel(UIElement, IContainerLikeInterface):
         :return: True if auto-scaling is enabled, False otherwise
         """
         return self.auto_scale_images
+
+    def get_current_image_positions(self) -> List[Tuple[float, float]]:
+        """
+        Get the current image positions for the panel.
+        Returns a list of position tuples.
+
+        :return: List of (x, y) position tuples for the background images
+        """
+        return self.background_image_positions
+
+    def set_image_positions(self, positions: List[Tuple[float, float]]):
+        """
+        Set the positions for all background images.
+
+        :param positions: List of (x, y) tuples where x and y are between 0.0 and 1.0
+        """
+        # Only keep positions up to the number of images we have
+        if len(positions) > len(self.background_images):
+            positions = positions[: len(self.background_images)]
+
+        self.background_image_positions = positions.copy()
+        # Ensure we have positions for all images
+        while len(self.background_image_positions) < len(self.background_images):
+            self.background_image_positions.append((0.5, 0.5))
+        self.rebuild()
+
+    def set_image_position(self, index: int, position: Tuple[float, float]) -> bool:
+        """
+        Set the position of a specific background image.
+
+        :param index: Index of the image to position
+        :param position: (x, y) tuple where x and y are between 0.0 and 1.0
+        :return: True if position was set, False if index was invalid
+        """
+        if 0 <= index < len(self.background_images):
+            while len(self.background_image_positions) <= index:
+                self.background_image_positions.append((0.5, 0.5))
+            self.background_image_positions[index] = position
+            self.rebuild()
+            return True
+        return False
