@@ -1,4 +1,3 @@
-
 .. _theme-guide:
 
 Theme Guide
@@ -55,6 +54,23 @@ within the colours block you can start to set individual colours by their IDs. I
                 "active_border": "#8080B0",
                 "filled_bar":"#f4251b",
                 "unfilled_bar":"#CCCCCC"
+            },
+            "misc":
+            {
+                "shape": "rectangle",
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
+                "shadow_width": 2,
+                "shape_corner_radius": 2,
+                "border_overlap": 1,
+                "enable_title_bar": "1",
+                "text_horiz_alignment": "left",
+                "text_vert_alignment": "center",
+                "text_horiz_alignment_padding": 4,
+                "text_vert_alignment_padding": 4,
+                "text_shadow_size": 1,
+                "text_shadow_offset": [1, 1],
+                "tool_tip_delay": 1.0,
+                "title_bar_height": 28
             }
         }
     }

@@ -98,22 +98,31 @@ class RoundedRectangleShape(DrawableShape):
             self.shadow_width = 0
             warnings.warn(f"Clamping shadow_width of: {str(old_width)}, to: 0")
 
-        if self.border_width > min(
+        # At the minute all rounded rect border widths should be the same so set border_width to left
+        border_width = self.border_widths["left"]
+
+        if border_width > min(
             math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
             math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
         ):
-            old_width = self.border_width
-            self.border_width = min(
+            old_width = border_width
+            border_width = min(
                 math.floor((self.containing_rect.width - (self.shadow_width * 2)) / 2),
                 math.floor((self.containing_rect.height - (self.shadow_width * 2)) / 2),
             )
             warnings.warn(
-                f"Clamping border_width of: {str(old_width)}, to: {str(self.border_width)}"
+                f"Clamping border_width of: {str(old_width)}, to: {str(border_width)}"
             )
-        if self.border_width < 0:
-            old_width = self.border_width
-            self.border_width = 0
+        if border_width < 0:
+            old_width = border_width
+            border_width = 0
             warnings.warn(f"Clamping border_width of: {str(old_width)}, to: 0")
+
+        # set all border widths back to our clamped version
+        self.border_widths["left"] = border_width
+        self.border_widths["right"] = border_width
+        self.border_widths["top"] = border_width
+        self.border_widths["bottom"] = border_width
 
         corner_radii = self.theming["shape_corner_radius"]
         if self.shadow_width > 0:
@@ -191,12 +200,14 @@ class RoundedRectangleShape(DrawableShape):
 
         self.background_rect = pygame.Rect(
             (
-                self.border_width + self.shadow_width,
-                self.border_width + self.shadow_width,
+                self.border_widths["left"] + self.shadow_width,
+                self.border_widths["top"] + self.shadow_width,
             ),
             (
-                self.click_area_shape.width - (2 * self.border_width),
-                self.click_area_shape.height - (2 * self.border_width),
+                self.click_area_shape.width
+                - (self.border_widths["left"] + self.border_widths["right"]),
+                self.click_area_shape.height
+                - (self.border_widths["top"] + self.border_widths["bottom"]),
             ),
         )
         if "disabled" in self.states and self.active_state == self.states["disabled"]:
@@ -419,7 +430,7 @@ class RoundedRectangleShape(DrawableShape):
                     "rounded_rectangle",
                     self.containing_rect.size,
                     self.shadow_width,
-                    self.border_width,
+                    self.border_widths,
                     border_col,
                     bg_col,
                     self.shape_corner_radius,
@@ -444,12 +455,20 @@ class RoundedRectangleShape(DrawableShape):
 
                 self.background_rect = pygame.Rect(
                     (
-                        (self.border_width + self.shadow_width) * aa_amount,
-                        (self.border_width + self.shadow_width) * aa_amount,
+                        (self.border_widths["left"] + self.shadow_width) * aa_amount,
+                        (self.border_widths["top"] + self.shadow_width) * aa_amount,
                     ),
                     (
-                        self.border_rect.width - (2 * self.border_width * aa_amount),
-                        self.border_rect.height - (2 * self.border_width * aa_amount),
+                        self.border_rect.width
+                        - (
+                            (self.border_widths["left"] + self.border_widths["right"])
+                            * aa_amount
+                        ),
+                        self.border_rect.height
+                        - (
+                            (self.border_widths["top"] + self.border_widths["bottom"])
+                            * aa_amount
+                        ),
                     ),
                 )
 
@@ -470,7 +489,7 @@ class RoundedRectangleShape(DrawableShape):
                     depth=32,
                 )
                 bab_surface.fill(pygame.Color("#00000000"))
-                if self.border_width > 0:
+                if self.border_widths["left"] > 0:
                     shape_surface = self.clear_and_create_shape_surface(
                         bab_surface,
                         self.border_rect,

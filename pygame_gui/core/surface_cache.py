@@ -390,7 +390,7 @@ class SurfaceCache:
         shape: str,
         size: Tuple[int, int],
         shadow_width: int,
-        border_width: int,
+        border_widths: Dict[str, int],
         border_colour: pygame.Color,
         bg_colour: pygame.Color,
         corner_radius: Optional[List[int]] = None,
@@ -403,7 +403,8 @@ class SurfaceCache:
          rectangle, etc.).
         :param size: The dimensions of the surface.
         :param shadow_width: The thickness of the shadow around the shape.
-        :param border_width: The thickness of the border around the shape.
+        :param border_widths: The thickness of the borders around the shape, a dictionary
+         with per-side widths.
         :param border_colour: The colour of the border.
         :param bg_colour: The background, or main colour of the surface.
         :param corner_radius: Optional corner radius parameter, only used for rounded rectangles.
@@ -412,7 +413,12 @@ class SurfaceCache:
 
         """
 
-        id_string = f"{shape}_{size[0]}_{size[1]}_{shadow_width}_{border_width}"
+        id_string = f"{shape}_{size[0]}_{size[1]}_{shadow_width}"
+
+        id_string += (
+            f"_{border_widths['left']}_{border_widths['right']}"
+            f"_{border_widths['top']}_{border_widths['bottom']}"
+        )
 
         if corner_radius is not None:
             for radius in corner_radius:

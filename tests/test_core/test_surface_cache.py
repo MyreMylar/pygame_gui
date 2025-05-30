@@ -110,12 +110,12 @@ class TestSurfaceCache:
         cache_id = SurfaceCache.build_cache_id(shape='rectangle',
                                                size=(64, 64),
                                                shadow_width=1,
-                                               border_width=1,
+                                               border_widths={"left": 1, "right": 1, "top": 1, "bottom": 1},
                                                border_colour=pygame.Color(255, 0, 0, 255),
                                                bg_colour=pygame.Color(100, 200, 100, 180),
                                                corner_radius=[5, 5, 5, 5])
 
-        assert cache_id == 'rectangle_64_64_1_1_5_5_5_5_255_0_0_255_100_200_100_180'
+        assert cache_id == 'rectangle_64_64_1_1_1_1_1_5_5_5_5_255_0_0_255_100_200_100_180'
 
     def test_expand_lt_cache(self, _init_pygame, _display_surface_return_none):
         cache = SurfaceCache()

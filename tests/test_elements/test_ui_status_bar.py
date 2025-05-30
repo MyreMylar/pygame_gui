@@ -56,6 +56,7 @@ class TestUIStatusBar:
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Font data validation")
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data", "themes", "ui_status_bar_bad_values.json"))
         healthy_sprite = HealthySprite()

@@ -102,9 +102,9 @@ class UICheckBox(UIElement):
 
         # Initialize theme attributes
         self.shape = "rectangle"
-        self.border_width = 1
+        self.background_image = None
+        self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
         self.shadow_width = 2
-        self.border_overlap = 1
         self.shape_corner_radius = [2, 2, 2, 2]
         self.colours: Dict[str, Union[pygame.Color, IColourGradientInterface]] = {}
 
@@ -189,7 +189,7 @@ class UICheckBox(UIElement):
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "shape_corner_radius": self.shape_corner_radius,
-            "border_overlap": self.border_overlap,
+            "border_overlap": 1,
             "font": self.font,
             "text": self._get_display_symbol(),
             "text_horiz_alignment": "center",
@@ -306,13 +306,28 @@ class UICheckBox(UIElement):
             border_width_data = self.ui_theme.get_misc_data(
                 "border_width", self.combined_element_ids
             )
-            self.border_width = (
-                int(border_width_data)
-                if isinstance(border_width_data, (str, int))
-                else 1
-            )
+            if isinstance(border_width_data, dict):
+                self.border_width = {
+                    "left": int(border_width_data.get("left", 1)),
+                    "right": int(border_width_data.get("right", 1)),
+                    "top": int(border_width_data.get("top", 1)),
+                    "bottom": int(border_width_data.get("bottom", 1)),
+                }
+            else:
+                # Handle legacy single integer format
+                width = (
+                    int(border_width_data)
+                    if isinstance(border_width_data, (str, int))
+                    else 1
+                )
+                self.border_width = {
+                    "left": width,
+                    "right": width,
+                    "top": width,
+                    "bottom": width,
+                }
         except (LookupError, ValueError):
-            self.border_width = 1
+            self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
 
         try:
             shadow_width_data = self.ui_theme.get_misc_data(
@@ -808,7 +823,7 @@ class UICheckBox(UIElement):
         # Check for shape theming changes
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],

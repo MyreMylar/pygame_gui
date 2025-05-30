@@ -111,16 +111,22 @@ class UISelectionList(UIElement):
             0, 0, 0
         )
         self.background_image: Optional[pygame.Surface] = None
-        self.border_width = 1
-        self.shadow_width = 2
-        self.shape = "rectangle"
+        self.border_width: Dict[str, int] = {
+            "left": 1,
+            "right": 1,
+            "top": 1,
+            "bottom": 1,
+        }
+        self.shadow_width: int = 2
+        self.shape: str = "rectangle"
+        self.shape_corner_radius: List[int] = [2, 2, 2, 2]
 
         self.scroll_bar: Optional[UIVerticalScrollBar] = None
-        self.lowest_list_pos = 0
-        self.total_height_of_list = 0
-        self.list_item_height = 20
-        self.scroll_bar_width = 20
-        self.current_scroll_bar_width = 0
+        self.lowest_list_pos: int = 0
+        self.total_height_of_list: int = 0
+        self.list_item_height: int = 20
+        self.scroll_bar_width: int = 20
+        self.current_scroll_bar_width: int = 0
 
         self.rebuild_from_changed_theme_data()
 
@@ -209,14 +215,11 @@ class UISelectionList(UIElement):
         else:
             raise RuntimeError("Requesting multi selection, from single-selection list")
 
-    def update(self, time_delta: float):
+    def update(self, time_delta: float) -> None:
         """
-        A method called every update cycle of our application. Designed to be overridden by
-        derived classes but also has a little functionality to make sure the panel's layer
-        'thickness' is accurate and to handle window resizing.
+        Updates the scrollbar if we have one, also updates the visibility of items to match the scroll bar position.
 
-        :param time_delta: time passed in seconds between one call to this method and the next.
-
+        :param time_delta: The time passed between frames, measured in seconds.
         """
         super().update(time_delta)
 
@@ -274,9 +277,11 @@ class UISelectionList(UIElement):
                     item["button_element"].kill()
                     item["button_element"] = None
 
-    def get_single_selection_start_percentage(self):
+    def get_single_selection_start_percentage(self) -> float:
         """
-        The percentage through the height of the list where the top of the first selected option is.
+        Get the start percentage down the list of the first selected item.
+
+        :return: percentage between 0.0 and 1.0
         """
         if selected_item_heights := [
             item["height"] for item in self.item_list if item["selected"]
@@ -284,20 +289,11 @@ class UISelectionList(UIElement):
             return float(selected_item_heights[0] / self.total_height_of_list)
         return 0.0
 
-    def set_item_list(self, new_item_list: List[str | Tuple[str, str]]):
+    def set_item_list(self, new_item_list: List[str | Tuple[str, str]]) -> None:
         """
-        Set a new string list (or tuple of strings & ids list) as the item list for this selection
-        list. This will change what is displayed in the list.
+        Set a new item list and create all the button elements.
 
-        Tuples should be arranged like so:
-
-         (list_text, object_ID)
-
-         - list_text: displayed in the UI
-         - object_ID: used for theming and events
-
-        :param new_item_list: The new list to switch to. Can be a list of strings or tuples.
-
+        :param new_item_list: The new list to switch to.
         """
         self._raw_item_list = new_item_list
         self.item_list[:] = []
@@ -438,29 +434,9 @@ class UISelectionList(UIElement):
                 else:
                     break
 
-    def _set_default_selection(self):
+    def _set_default_selection(self) -> None:
         """
-        Set the default selection of the list. The default selection type must be a string or (str,
-        str) tuple for single selection lists. For multi-selection lists, they can be a single
-        string, a (str, str) tuple, a list of strings, or a list of (str, str) tuples.
-
-        For ease of use, a single-item list MAY be used to specify the default value for a
-        single-selection list.
-
-        Tuples should be arranged like so:
-
-         (list_text, object_ID)
-
-         - list_text: displayed in the UI
-         - object_ID: used for theming and events
-
-        :raise ValueError: Throw an exception if a list is used for the default for a
-                           single-selection list, or if the default value(s) requested is/are not
-                           present in the options list.
-
-        :raise TypeError: Throw an exception if anything other than a string or a (str, str) tuple
-                          is encountered in the requested defaults.
-
+        Set the default selection for the list.
         """
         default = self._default_selection
         if default is None:
@@ -638,23 +614,28 @@ class UISelectionList(UIElement):
 
         return False  # Don't consume any events
 
-    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
+    def set_dimensions(
+        self, dimensions: Coordinate, clamp_to_container: bool = False
+    ) -> None:
         """
         Set the size of this panel and then resizes and shifts the contents of the panel container
         to fit the new size.
 
-
         :param dimensions: The new dimensions to set.
         :param clamp_to_container: clamp these dimensions to the size of the element's container.
-
         """
         # Don't use a basic gate on this set dimensions method because the container may be a
         # different size to the window
         super().set_dimensions(dimensions)
 
-        border_and_shadow = self.border_width + self.shadow_width
-        container_width = self.relative_rect.width - (2 * border_and_shadow)
-        container_height = self.relative_rect.height - (2 * border_and_shadow)
+        border_and_shadow_horiz = (
+            self.border_width["left"] + self.border_width["right"]
+        ) + (2 * self.shadow_width)
+        border_and_shadow_vert = (
+            self.border_width["top"] + self.border_width["bottom"]
+        ) + (2 * self.shadow_width)
+        container_width = self.relative_rect.width - border_and_shadow_horiz
+        container_height = self.relative_rect.height - border_and_shadow_vert
         inner_visible_area_height = 0
         if self.list_and_scroll_bar_container is not None:
             self.list_and_scroll_bar_container.set_dimensions(
@@ -705,7 +686,7 @@ class UISelectionList(UIElement):
             self.scroll_bar.has_moved_recently = True
             self.update(0.0)
 
-    def set_relative_position(self, position: Coordinate):
+    def set_relative_position(self, position: Coordinate) -> None:
         """
         Method to directly set the relative rect position of an element.
 
@@ -713,15 +694,16 @@ class UISelectionList(UIElement):
 
         """
         super().set_relative_position(position)
-        border_and_shadow = self.border_width + self.shadow_width
-        container_left = self.relative_rect.left + border_and_shadow
-        container_top = self.relative_rect.top + border_and_shadow
+        border_and_shadow_left = self.border_width["left"] + self.shadow_width
+        border_and_shadow_top = self.border_width["top"] + self.shadow_width
+        container_left = self.relative_rect.left + border_and_shadow_left
+        container_top = self.relative_rect.top + border_and_shadow_top
         if self.list_and_scroll_bar_container is not None:
             self.list_and_scroll_bar_container.set_relative_position(
                 (container_left, container_top)
             )
 
-    def set_position(self, position: Coordinate):
+    def set_position(self, position: Coordinate) -> None:
         """
         Sets the absolute screen position of this slider, updating all subordinate button
         elements at the same time.
@@ -730,15 +712,16 @@ class UISelectionList(UIElement):
 
         """
         super().set_position(position)
-        border_and_shadow = self.border_width + self.shadow_width
-        container_left = self.relative_rect.left + border_and_shadow
-        container_top = self.relative_rect.top + border_and_shadow
+        border_and_shadow_left = self.border_width["left"] + self.shadow_width
+        border_and_shadow_top = self.border_width["top"] + self.shadow_width
+        container_left = self.relative_rect.left + border_and_shadow_left
+        container_top = self.relative_rect.top + border_and_shadow_top
         if self.list_and_scroll_bar_container is not None:
             self.list_and_scroll_bar_container.set_relative_position(
                 (container_left, container_top)
             )
 
-    def kill(self):
+    def kill(self) -> None:
         """
         Overrides the basic kill() method of a pygame sprite so that we also kill all the UI
         elements in this panel.
@@ -748,7 +731,7 @@ class UISelectionList(UIElement):
             self.list_and_scroll_bar_container.kill()
         super().kill()
 
-    def rebuild_from_changed_theme_data(self):
+    def rebuild_from_changed_theme_data(self) -> None:
         """
         Checks if any theming parameters have changed, and if so triggers a full rebuild of the
         button's drawable shape
@@ -781,7 +764,7 @@ class UISelectionList(UIElement):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],
@@ -802,7 +785,7 @@ class UISelectionList(UIElement):
         if has_any_changed:
             self.rebuild()
 
-    def rebuild(self):
+    def rebuild(self) -> None:
         """
         A complete rebuild of the drawable shape used by this element.
 
@@ -831,14 +814,18 @@ class UISelectionList(UIElement):
         if self.list_and_scroll_bar_container is None:
             self.list_and_scroll_bar_container = UIContainer(
                 pygame.Rect(
-                    self.relative_rect.left + self.shadow_width + self.border_width,
-                    self.relative_rect.top + self.shadow_width + self.border_width,
+                    self.relative_rect.left
+                    + self.shadow_width
+                    + self.border_width["left"],
+                    self.relative_rect.top
+                    + self.shadow_width
+                    + self.border_width["top"],
                     self.relative_rect.width
                     - (2 * self.shadow_width)
-                    - (2 * self.border_width),
+                    - (self.border_width["left"] + self.border_width["right"]),
                     self.relative_rect.height
                     - (2 * self.shadow_width)
-                    - (2 * self.border_width),
+                    - (self.border_width["top"] + self.border_width["bottom"]),
                 ),
                 manager=self.ui_manager,
                 starting_height=self.starting_height,
@@ -854,22 +841,26 @@ class UISelectionList(UIElement):
                 (
                     self.relative_rect.width
                     - (2 * self.shadow_width)
-                    - (2 * self.border_width),
+                    - (self.border_width["left"] + self.border_width["right"]),
                     self.relative_rect.height
                     - (2 * self.shadow_width)
-                    - (2 * self.border_width),
+                    - (self.border_width["top"] + self.border_width["bottom"]),
                 )
             )
             self.list_and_scroll_bar_container.set_relative_position(
                 (
-                    self.relative_rect.left + self.shadow_width + self.border_width,
-                    self.relative_rect.top + self.shadow_width + self.border_width,
+                    self.relative_rect.left
+                    + self.shadow_width
+                    + self.border_width["left"],
+                    self.relative_rect.top
+                    + self.shadow_width
+                    + self.border_width["top"],
                 )
             )
 
         self.set_item_list(self._raw_item_list)
 
-    def disable(self):
+    def disable(self) -> None:
         """
         Disables all elements in the selection list, so they are no longer interactive.
         """
@@ -883,7 +874,7 @@ class UISelectionList(UIElement):
                 for item in self.item_list:
                     item["selected"] = False
 
-    def enable(self):
+    def enable(self) -> None:
         """
         Enables all elements in the selection list, so they are interactive again.
         """
@@ -892,7 +883,7 @@ class UISelectionList(UIElement):
             if self.list_and_scroll_bar_container is not None:
                 self.list_and_scroll_bar_container.enable()
 
-    def show(self):
+    def show(self) -> None:
         """
         In addition to the base UIElement.show() - call show() of owned container -
         list_and_scroll_bar_container. All other sub-elements (item_list_container, scrollbar) are
@@ -903,7 +894,7 @@ class UISelectionList(UIElement):
         if self.list_and_scroll_bar_container is not None:
             self.list_and_scroll_bar_container.show()
 
-    def hide(self):
+    def hide(self) -> None:
         """
         In addition to the base UIElement.hide() - call hide() of owned container -
         list_and_scroll_bar_container. All other sub-elements (item_list_container, scrollbar) are

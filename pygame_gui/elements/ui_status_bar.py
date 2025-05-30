@@ -163,15 +163,19 @@ class UIStatusBar(UIElement):
         )
 
         self.capacity_width = (
-            self.rect.width - (self.shadow_width * 2) - (self.border_width * 2)
+            self.rect.width
+            - (self.shadow_width * 2)
+            - (self.border_width["left"] + self.border_width["right"])
         )
         self.capacity_height = (
-            self.rect.height - (self.shadow_width * 2) - (self.border_width * 2)
+            self.rect.height
+            - (self.shadow_width * 2)
+            - (self.border_width["top"] + self.border_width["bottom"])
         )
         self.capacity_rect = pygame.Rect(
             (
-                self.border_width + self.shadow_width,
-                self.border_width + self.shadow_width,
+                self.border_width["left"] + self.shadow_width,
+                self.border_width["top"] + self.shadow_width,
             ),
             (self.capacity_width, self.capacity_height),
         )
@@ -272,7 +276,7 @@ class UIStatusBar(UIElement):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],

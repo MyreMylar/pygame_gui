@@ -670,11 +670,17 @@ class TextBoxLayout:
             "left",
             "right",
         ]:
+            if len(self.layout_rows) == 1:
+                self.layout_rect.centerx = self.view_rect.centerx
             row.horiz_center_row(self.floating_rects, self.horiz_alignment_method)
         elif self.horiz_alignment == "left":
+            if len(self.layout_rows) == 1:
+                self.layout_rect.left = self.view_rect.left
             start_left = self.layout_rect.left + x_padding
             row.align_left_row(start_left, self.floating_rects)
         else:
+            if len(self.layout_rows) == 1:
+                self.layout_rect.right = self.view_rect.right
             start_right = self.layout_rect.width - x_padding
             row.align_right_row(start_right, self.floating_rects)
 
@@ -689,6 +695,8 @@ class TextBoxLayout:
                        this will be the default 'rect' style basic centering. However, if you are
                        trying to center an arrow you might try 'right_triangle' or 'left_triangle'
         """
+        if self.layout_rect.centerx != self.view_rect.centerx:
+            self.layout_rect.centerx = self.view_rect.centerx
         for row in self.layout_rows:
             row.horiz_center_row(self.floating_rects, method)
 
@@ -699,6 +707,8 @@ class TextBoxLayout:
         :param x_padding: the amount of padding to insert to on the left
                           before the text starts.
         """
+        if self.layout_rect.left != self.view_rect.left:
+            self.layout_rect.left = self.view_rect.left
         start_left = self.layout_rect.left + x_padding
         for row in self.layout_rows:
             row.align_left_row(start_left, self.floating_rects)
@@ -710,6 +720,8 @@ class TextBoxLayout:
         :param x_padding: the amount of padding to insert to on the right
                           before the text starts.
         """
+        if self.layout_rect.right != self.view_rect.right:
+            self.layout_rect.right = self.view_rect.right
         start_right = self.layout_rect.width - x_padding
         for row in self.layout_rows:
             row.align_right_row(start_right, self.floating_rects)
@@ -1421,7 +1433,7 @@ class TextBoxLayout:
             self._setup_and_add_empty_chunk(current_row_starting_chunk, current_row)
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
-                row.recalculate_width()
+                row.clear_and_recalculate_width()
                 self.align_row(row)
                 row.finalise(self.finalised_surface)
 
@@ -1486,7 +1498,7 @@ class TextBoxLayout:
                 if isinstance(chunk, TextLineChunkFTFont):
                     chunk.delete_letter_at_index(0)
 
-        current_row.recalculate_width()
+        current_row.clear_and_recalculate_width()
 
         row_to_process_from = current_row
         row_to_process_from_index = current_row.row_index
@@ -1536,7 +1548,7 @@ class TextBoxLayout:
         if chunk_to_remove is not None:
             current_row.items.remove(chunk_to_remove)
         current_row.set_cursor_position(cursor_pos - 1)
-        current_row.recalculate_width()
+        current_row.clear_and_recalculate_width()
 
         row_to_process_from = current_row
         row_to_process_from_index = current_row.row_index

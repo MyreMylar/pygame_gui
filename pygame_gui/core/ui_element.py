@@ -89,7 +89,12 @@ class UIElement(GUISprite, IUIElementInterface):
 
         # Themed parameters
         self.shadow_width: int = 2
-        self.border_width: int = 1
+        self.border_width: Dict[str, int] = {
+            "left": 1,
+            "right": 1,
+            "top": 1,
+            "bottom": 1,
+        }
         self.border_overlap: Optional[int] = None
         self.shape_corner_radius: List[int] = [0, 0, 0, 0]
 
@@ -136,7 +141,7 @@ class UIElement(GUISprite, IUIElementInterface):
             # need to expand our rect by the shadow size and adjust position by it as well.
             self._check_shape_theming_changed(
                 defaults={
-                    "border_width": 1,
+                    "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                     "shadow_width": 2,
                     "border_overlap": 1,
                     "shape_corner_radius": [2, 2, 2, 2],
@@ -1499,9 +1504,36 @@ class UIElement(GUISprite, IUIElementInterface):
         """
         has_any_changed = False
 
-        if self._check_misc_theme_data_changed(
-            "border_width", defaults["border_width"], int
-        ):
+        # Handle border_width specially since it can be either an int or a dict
+        try:
+            raw_value = self.ui_theme.get_misc_data(
+                "border_width", self.combined_element_ids
+            )
+            if isinstance(raw_value, dict):
+                # For dictionary values, we need to ensure all required keys exist
+                border_width = {
+                    "left": int(raw_value.get("left", 0)),
+                    "right": int(raw_value.get("right", 0)),
+                    "top": int(raw_value.get("top", 0)),
+                    "bottom": int(raw_value.get("bottom", 0)),
+                }
+            else:
+                # Convert integer to dictionary format
+                try:
+                    width = int(raw_value)
+                    border_width = {
+                        "left": width,
+                        "right": width,
+                        "top": width,
+                        "bottom": width,
+                    }
+                except (ValueError, TypeError):
+                    border_width = defaults["border_width"]
+        except LookupError:
+            border_width = defaults["border_width"]
+
+        if border_width != getattr(self, "border_width", defaults["border_width"]):
+            self.border_width = border_width
             has_any_changed = True
 
         if self._check_misc_theme_data_changed(
@@ -1558,6 +1590,7 @@ class UIElement(GUISprite, IUIElementInterface):
         :param attribute_name: The name of the attribute.
         :param default_value: The default value for the attribute.
         :param casting_func: The function to cast to the type of the data.
+        :param allowed_values: A list of allowed values for this attribute.
 
         :return: True if the attribute has changed.
 
@@ -1565,9 +1598,14 @@ class UIElement(GUISprite, IUIElementInterface):
         has_changed = False
         attribute_value = default_value
         try:
-            attribute_value = casting_func(
-                self.ui_theme.get_misc_data(attribute_name, self.combined_element_ids)
+            raw_value = self.ui_theme.get_misc_data(
+                attribute_name, self.combined_element_ids
             )
+            if isinstance(raw_value, dict):
+                # For dictionary values, we don't use the casting function
+                attribute_value = raw_value
+            else:
+                attribute_value = casting_func(raw_value)
         except (LookupError, ValueError):
             attribute_value = default_value
         finally:

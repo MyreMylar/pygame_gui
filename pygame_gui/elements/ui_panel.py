@@ -109,9 +109,11 @@ class UIPanel(UIElement, IContainerLikeInterface):
         # Position support for images - tuples of (x, y) where 0.0-1.0 represents relative position
         self.background_image_positions: List[Tuple[float, float]] = []
 
-        self.border_width = 1
+        self.background_image = None
+        self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
         self.shadow_width = 2
         self.shape = "rectangle"
+        self.shape_corner_radius = [2, 2, 2, 2]
 
         # Auto-scale images theming parameter
         self.auto_scale_images = False
@@ -120,10 +122,10 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         if margins is None:
             self.container_margins = {
-                "left": self.shadow_width + self.border_width,
-                "right": self.shadow_width + self.border_width,
-                "top": self.shadow_width + self.border_width,
-                "bottom": self.shadow_width + self.border_width,
+                "left": self.shadow_width + self.border_width["left"],
+                "right": self.shadow_width + self.border_width["right"],
+                "top": self.shadow_width + self.border_width["top"],
+                "bottom": self.shadow_width + self.border_width["bottom"],
             }
         else:
             self.container_margins = margins
@@ -408,7 +410,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],

@@ -268,7 +268,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.rebuild_from_changed_theme_data()
 
     @property
-    def select_range(self):
+    def select_range(self) -> List[int]:
         """
         The selected range for this text. A tuple containing the start
         and end indexes of the current selection.
@@ -279,16 +279,17 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self._select_range
 
     @select_range.setter
-    def select_range(self, value):
+    def select_range(self, value: List[int]) -> None:
         self._select_range = value
-        start_select = min(self._select_range[0], self._select_range[1])
-        end_select = max(self._select_range[0], self._select_range[1])
+        if value is not None:
+            start_select = min(value[0], value[1])
+            end_select = max(value[0], value[1])
 
-        if self.text_box_layout is not None:
-            self.text_box_layout.set_text_selection(start_select, end_select)
-        self.redraw_from_text_block()
+            if self.text_box_layout is not None:
+                self.text_box_layout.set_text_selection(start_select, end_select)
+                self.redraw_from_text_block()
 
-    def kill(self):
+    def kill(self) -> None:
         """
         Overrides the standard sprite kill method to also kill any scroll bars belonging to this
         text box.
@@ -297,10 +298,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.scroll_bar.kill()
         super().kill()
 
-    def rebuild(self):
+    def rebuild(self) -> None:
         """
         Rebuild whatever needs building.
-
         """
         if self.scroll_bar is not None:
             self.scroll_bar.kill()
@@ -345,14 +345,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             (
                 self.rect[0]
                 + self.padding[0]
-                + self.border_width
+                + self.border_width["left"]
                 + self.shadow_width
                 + self.rounded_corner_width_offsets[0]
             ),
             (
                 self.rect[1]
                 + self.padding[1]
-                + self.border_width
+                + self.border_width["top"]
                 + self.shadow_width
                 + self.rounded_corner_height_offsets[0]
             ),
@@ -361,7 +361,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 (
                     self.rect[2]
                     - (self.padding[0] * 2)
-                    - (self.border_width * 2)
+                    - (self.border_width["left"] + self.border_width["right"])
                     - (self.shadow_width * 2)
                     - total_corner_width_offsets
                 ),
@@ -371,7 +371,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 (
                     self.rect[3]
                     - (self.padding[1] * 2)
-                    - (self.border_width * 2)
+                    - (self.border_width["top"] + self.border_width["bottom"])
                     - (self.shadow_width * 2)
                     - total_corner_height_offsets
                 ),
@@ -393,14 +393,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     (
                         final_text_area_size[0]
                         + (self.padding[0] * 2)
-                        + (self.border_width * 2)
+                        + (self.border_width["left"] + self.border_width["right"])
                         + (self.shadow_width * 2)
                         + total_corner_width_offsets
                     ),
                     (
                         final_text_area_size[1]
                         + (self.padding[1] * 2)
-                        + (self.border_width * 2)
+                        + (self.border_width["top"] + self.border_width["bottom"])
                         + (self.shadow_width * 2)
                         + total_corner_height_offsets
                     ),
@@ -414,7 +414,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                         (
                             self.rect[2]
                             - (self.padding[0] * 2)
-                            - (self.border_width * 2)
+                            - (self.border_width["left"] + self.border_width["right"])
                             - (self.shadow_width * 2)
                             - total_corner_width_offsets
                         ),
@@ -424,7 +424,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                         (
                             self.rect[3]
                             - (self.padding[1] * 2)
-                            - (self.border_width * 2)
+                            - (self.border_width["top"] + self.border_width["bottom"])
                             - (self.shadow_width * 2)
                             - total_corner_height_offsets
                         ),
@@ -486,14 +486,20 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
     def _build_scrollbar_for_oversized_text(
-        self, total_corner_width_offsets, total_corner_height_offsets
-    ):
+        self, total_corner_width_offsets: int, total_corner_height_offsets: int
+    ) -> None:
+        """
+        Creates a scroll bar for text that is too big for the text box.
+
+        :param total_corner_width_offsets: The total width taken up by the corners.
+        :param total_corner_height_offsets: The total height taken up by the corners.
+        """
         # We need a scrollbar because our text is longer than the space we
         # have to display it. This also means we need to parse the text again.
         text_rect_width = (
             self.rect[2]
             - (self.padding[0] * 2)
-            - (self.border_width * 2)
+            - (self.border_width["left"] + self.border_width["right"])
             - (self.shadow_width * 2)
             - total_corner_width_offsets
             - self.scroll_bar_width
@@ -502,14 +508,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             (
                 self.rect[0]
                 + self.padding[0]
-                + self.border_width
+                + self.border_width["left"]
                 + self.shadow_width
                 + self.rounded_corner_width_offsets[0]
             ),
             (
                 self.rect[1]
                 + self.padding[1]
-                + self.border_width
+                + self.border_width["top"]
                 + self.shadow_width
                 + self.rounded_corner_height_offsets[0]
             ),
@@ -519,7 +525,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 (
                     self.rect[3]
                     - (self.padding[1] * 2)
-                    - (self.border_width * 2)
+                    - (self.border_width["top"] + self.border_width["bottom"])
                     - (self.shadow_width * 2)
                     - total_corner_height_offsets
                 ),
@@ -533,17 +539,19 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             )
         scroll_bar_position = (
             self.relative_rect.right
-            - self.border_width
+            - self.border_width["right"]
             - self.shadow_width
             - self.scroll_bar_width,
-            self.relative_rect.top + self.border_width + self.shadow_width,
+            self.relative_rect.top + self.border_width["top"] + self.shadow_width,
         )
 
         scroll_bar_rect = pygame.Rect(
             scroll_bar_position,
             (
                 self.scroll_bar_width,
-                self.rect.height - (2 * self.border_width) - (2 * self.shadow_width),
+                self.rect.height
+                - (self.border_width["left"] + self.border_width["right"])
+                - (2 * self.shadow_width),
             ),
         )
         self.scroll_bar = UIVerticalScrollBar(
@@ -559,28 +567,26 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def get_text_layout_top_left(self) -> Tuple[int, int]:
         """
-        Get the top left of where the text layout should begin. Allows us to position the text as a block taking
-        into account the position of the element, its borders, shadows, padding and any rounded corners.
+        Gets the top left position of where we start displaying text in the text box.
 
-        :return: a tuple of the top left position where we should start the text layout.
+        :return: A tuple containing the top left position of where we start displaying text.
         """
         return (
             self.rect.left
             + self.padding[0]
-            + self.border_width
+            + self.border_width["left"]
             + self.shadow_width
             + self.rounded_corner_width_offsets[0],
             self.rect.top
             + self.padding[1]
-            + self.border_width
+            + self.border_width["top"]
             + self.shadow_width
             + self.rounded_corner_height_offsets[0],
         )
 
-    def _align_all_text_rows(self):
+    def _align_all_text_rows(self) -> None:
         """
         Aligns the text drawing position correctly according to our theming options.
-
         """
         if self.text_box_layout is None:
             return
@@ -602,6 +608,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.text_box_layout.align_left_all_rows(self.text_horiz_alignment_padding)
         else:
             self.text_box_layout.align_right_all_rows(self.text_horiz_alignment_padding)
+
         # Vertical alignment
         if self.text_vert_alignment != "default":
             if self.text_vert_alignment == "center":
@@ -615,14 +622,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                     self.text_vert_alignment_padding
                 )
 
-    def update(self, time_delta: float):
+    def update(self, time_delta: float) -> None:
         """
         Called once every update loop of the UI Manager. Used to react to scroll bar movement
         (if there is one), update the text effect (if there is one) and check if we are hovering
         over any text links (if there are any).
 
-        :param time_delta: The time in seconds between calls to update. Useful for timing things.
-
+        :param time_delta: The time in seconds between calls to update.
         """
         super().update(time_delta)
         if not self.alive() or self.text_box_layout is None:
@@ -674,14 +680,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             base_x = int(
                 self.rect[0]
                 + self.padding[0]
-                + self.border_width
+                + self.border_width["left"]
                 + self.shadow_width
                 + self.rounded_corner_width_offsets[0]
             )
             base_y = int(
                 self.rect[1]
                 + self.padding[1]
-                + self.border_width
+                + self.border_width["top"]
                 + self.shadow_width
                 + self.rounded_corner_height_offsets[0]
                 - height_adjustment
@@ -732,7 +738,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         if self.full_rebuild_countdown > 0.0:
             self.full_rebuild_countdown -= time_delta
 
-    def _update_after_edit_cursor_move(self):
+    def _update_after_edit_cursor_move(self) -> None:
+        """
+        Called after we move the edit cursor to update the scroll bar position if necessary.
+        """
         if self.text_box_layout is None:
             return
 
@@ -777,63 +786,60 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         # do nothing in text box - this is for the text entry box
         pass
 
-    def on_fresh_drawable_shape_ready(self):
+    def on_fresh_drawable_shape_ready(self) -> None:
         """
-        Called by an element's drawable shape when it has a new image surface ready for use,
-        normally after a rebuilding/redrawing of some kind.
+        Called by the drawable shape when it is ready to be redrawn.
         """
         if self.drawable_shape is not None:
             self.background_surf = self.drawable_shape.get_fresh_surface()
         self.redraw_from_text_block()
 
-    def set_relative_position(self, position: Coordinate):
+    def set_relative_position(self, position: Coordinate) -> None:
         """
-        Sets the relative screen position of this text box, updating its subordinate scroll bar at
-        the same time.
+        Sets the relative position of this text box and updates the positions of its scroll bar
+        if it has one.
 
-        :param position: The relative screen position to set.
-
+        :param position: The new relative position to set.
         """
         super().set_relative_position(position)
 
         if self.scroll_bar is not None:
             scroll_bar_position = (
                 self.relative_rect.right
-                - self.border_width
+                - self.border_width["right"]
                 - self.shadow_width
                 - self.scroll_bar_width,
-                self.relative_rect.top + self.border_width + self.shadow_width,
+                self.relative_rect.top + self.border_width["top"] + self.shadow_width,
             )
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
-    def set_position(self, position: Coordinate):
+    def set_position(self, position: Coordinate) -> None:
         """
-        Sets the absolute screen position of this text box, updating its subordinate scroll bar
-        at the same time.
+        Sets the absolute screen position of this text box and updates the position of its
+        scroll bar if it has one.
 
         :param position: The absolute screen position to set.
-
         """
         super().set_position(position)
 
         if self.scroll_bar is not None:
             scroll_bar_position = (
                 self.relative_rect.right
-                - self.border_width
+                - self.border_width["right"]
                 - self.shadow_width
                 - self.scroll_bar_width,
-                self.relative_rect.top + self.border_width + self.shadow_width,
+                self.relative_rect.top + self.border_width["top"] + self.shadow_width,
             )
             self.scroll_bar.set_relative_position(scroll_bar_position)
 
-    def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
+    def set_dimensions(
+        self, dimensions: Coordinate, clamp_to_container: bool = False
+    ) -> None:
         """
-        Method to directly set the dimensions of a text box.
+        Sets the dimensions of this text box and updates the dimensions of its scroll bar if it has one.
 
         :param dimensions: The new dimensions to set.
-        :param clamp_to_container: Whether we should clamp the dimensions to the
-                                   dimensions of the container or not.
-
+        :param clamp_to_container: Whether to clamp the dimensions to the container's dimensions.
         """
         self.relative_rect.width = int(dimensions[0])
         self.relative_rect.height = int(dimensions[1])
@@ -871,29 +877,31 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                             (
                                 self.scroll_bar.relative_rect.width,
                                 self.relative_rect.height
-                                - (2 * self.border_width)
+                                - (
+                                    self.border_width["top"]
+                                    + self.border_width["bottom"]
+                                )
                                 - (2 * self.shadow_width),
                             )
                         )
                         scroll_bar_position = (
                             self.relative_rect.right
-                            - self.border_width
+                            - self.border_width["right"]
                             - self.shadow_width
                             - self.scroll_bar_width,
                             self.relative_rect.top
-                            + self.border_width
+                            + self.border_width["top"]
                             + self.shadow_width,
                         )
                         self.scroll_bar.set_relative_position(scroll_bar_position)
 
-                self.should_trigger_full_rebuild = True
-                self.full_rebuild_countdown = (
-                    self.time_until_full_rebuild_after_changing_size
-                )
+        self.should_trigger_full_rebuild = True
+        self.full_rebuild_countdown = self.time_until_full_rebuild_after_changing_size
 
-    def parse_html_into_style_data(self):
+    def parse_html_into_style_data(self) -> None:
         """
-        Parses HTML styled string text into a format more useful for styling rendered text.
+        Parses HTML styled text into a format we can more easily use to display text with
+        styling.
         """
         if (
             len(self.html_text) == 0
@@ -949,7 +957,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self._align_all_text_rows()
         self.text_box_layout.finalise_to_new()
 
-    def redraw_from_text_block(self):
+    def redraw_from_text_block(self) -> None:
         """
         Redraws the final parts of the text box element that don't include redrawing the actual
         text. Useful if we've just moved the position of the text (say, with a scroll bar)
@@ -1003,11 +1011,15 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.text_box_layout.finalised_surface,
                 (
                     (
-                        (self.padding[0] + self.border_width + self.shadow_width)
+                        (
+                            self.padding[0]
+                            + self.border_width["left"]
+                            + self.shadow_width
+                        )
                         + self.rounded_corner_width_offsets[0]
                     ),
                     (
-                        (self.padding[1] + self.border_width + self.shadow_width)
+                        (self.padding[1] + self.border_width["top"] + self.shadow_width)
                         + self.rounded_corner_height_offsets[0]
                     ),
                 ),
@@ -1028,7 +1040,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 1,
                 (
                     (
-                        ((self.rect[2] - self.padding[0] * 2) - self.border_width * 2)
+                        (
+                            (self.rect[2] - self.padding[0] * 2)
+                            - (self.border_width["left"] + self.border_width["right"])
+                        )
                         - self.shadow_width * 2
                     )
                     - total_corner_width_offsets
@@ -1038,7 +1053,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 1,
                 (
                     (
-                        ((self.rect[3] - self.padding[1] * 2) - self.border_width * 2)
+                        (
+                            (self.rect[3] - self.padding[1] * 2)
+                            - (self.border_width["top"] + self.border_width["bottom"])
+                        )
                         - self.shadow_width * 2
                     )
                     - total_corner_height_offsets
@@ -1140,6 +1158,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def _handle_mouse_click_on_normal_text(self, scaled_mouse_pos):
         if self.text_box_layout is None:
             return
+
         text_layout_space_pos = self._calculate_text_space_pos(scaled_mouse_pos)
         self.text_box_layout.set_cursor_from_click_pos(text_layout_space_pos)
         self.edit_position = self.text_box_layout.get_cursor_index()
@@ -1160,7 +1179,14 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.double_click_timer = 0.0
 
     def process_event(self, event: Event) -> bool:
+        """
+        Handles various interactions with the text box.
+
+        :param event: The event to process.
+        :return: True if the event was consumed by this method.
+        """
         consumed_event = False
+
         if self._process_mouse_button_event(event):
             consumed_event = True
         if self.is_enabled and self.is_focused and event.type == KEYDOWN:
@@ -1213,12 +1239,10 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
     def _process_copy_event(self, event: Event) -> bool:
         """
-        Process a copy shortcut event. (CTRL+ C)
+        Process a copy shortcut event (Ctrl+C).
 
         :param event: The event to process.
-
         :return: True if the event is consumed.
-
         """
         consumed_event = False
         if (
@@ -1231,6 +1255,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return consumed_event
 
     def _do_copy(self):
+        """
+        Copy selected text to clipboard if text selection is enabled.
+        """
         if (
             self.text_box_layout is not None
             and abs(self.select_range[0] - self.select_range[1]) > 0
@@ -1243,7 +1270,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def _calculate_double_click_word_selection(self):
         """
         If we double-clicked on a word in the text, select that word.
-
         """
         if self.edit_position != self.select_range[0] or self.text_box_layout is None:
             return False
@@ -1251,6 +1277,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return self._select_nearest_word_from_index(index) if index >= 0 else False
 
     def _select_nearest_word_from_index(self, index):
+        """
+        Select the nearest word from the given index position.
+
+        :param index: The index to start searching from.
+        :return: True if a word was selected.
+        """
         if self.text_box_layout is None:
             return False
         char = self.text_box_layout.plain_text[index]
@@ -1284,6 +1316,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return True
 
     def _calculate_text_space_pos(self, scaled_mouse_pos):
+        """
+        Calculate the position in text space from mouse position.
+
+        :param scaled_mouse_pos: The scaled mouse position.
+        :return: The position in text space.
+        """
         height_adjustment = 0
         if self.scroll_bar is not None and self.text_box_layout is not None:
             height_adjustment = (
@@ -1298,6 +1336,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         )
 
     def _calculate_hyperlinks_offsets(self):
+        """
+        Calculate the offsets for hyperlinks.
+
+        :return: The base x and y offsets.
+        """
         height_adjustment = 0
         if self.scroll_bar is not None and self.text_box_layout is not None:
             height_adjustment = (
@@ -1314,6 +1357,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def _handle_hyper_link_mouse_button_down(
         self, scaled_mouse_pos: Tuple[int, int]
     ) -> bool:
+        """
+        Handle mouse button down event on hyperlinks.
+
+        :param scaled_mouse_pos: The scaled mouse position.
+        :return: True if redraw is needed.
+        """
         should_redraw_from_layout = False
         base_x, base_y = self._calculate_hyperlinks_offsets()
         for chunk in self.link_hover_chunks:
@@ -1329,6 +1378,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def _handle_hyper_link_mouse_button_up(
         self, scaled_mouse_pos: Tuple[int, int]
     ) -> bool:
+        """
+        Handle mouse button up event on hyperlinks.
+
+        :param scaled_mouse_pos: The scaled mouse position.
+        :return: True if redraw is needed.
+        """
         should_redraw_from_layout = False
         base_x, base_y = self._calculate_hyperlinks_offsets()
 
@@ -1380,7 +1435,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],
@@ -1451,6 +1506,9 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self._reparse_and_rebuild()
 
     def _reparse_and_rebuild(self):
+        """
+        Reparse the HTML text and rebuild the text box layout.
+        """
         self.parser = HTMLParser(
             self.ui_theme,
             self.combined_element_ids,
@@ -1465,7 +1523,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Checks for any changes in the theming data related to text alignment.
 
         :return: True if changes found.
-
         """
         has_any_changed = False
 
@@ -1502,7 +1559,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Checks for any changes in hyperlink related styling in the theme data.
 
         :return: True if changes detected.
-
         """
         has_any_changed = False
 
@@ -1636,12 +1692,18 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self._redraw_from_text_block_and_finalise_hyperlinks()
 
     def _redraw_from_text_block_and_finalise_hyperlinks(self):
+        """
+        Redraw the text block and finalize hyperlinks.
+        """
         self.redraw_from_text_block()
         self.link_hover_chunks = []
         if self.text_box_layout is not None:
             self.text_box_layout.add_chunks_to_hover_group(self.link_hover_chunks)
 
     def on_locale_changed(self):
+        """
+        Called when the locale is changed.
+        """
         self._reparse_and_rebuild()
 
     # -------------------------------------------------
@@ -1650,6 +1712,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def set_text_alpha(
         self, alpha: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        """
+        Set the alpha value for the text.
+
+        :param alpha: The alpha value to set.
+        :param sub_chunk: Optional specific chunk to set alpha for.
+        """
         if self.text_box_layout is None:
             return
         if sub_chunk is None:
@@ -1660,22 +1728,45 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def set_text_offset_pos(
         self, offset: Tuple[int, int], sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        """
+        Set the offset position for the text.
+
+        :param offset: The offset position to set.
+        :param sub_chunk: Optional specific chunk to set offset for.
+        """
         if sub_chunk is not None:
             sub_chunk.set_offset_pos(offset)
 
     def set_text_rotation(
         self, rotation: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        """
+        Set the rotation for the text.
+
+        :param rotation: The rotation value to set.
+        :param sub_chunk: Optional specific chunk to set rotation for.
+        """
         if sub_chunk is not None:
             sub_chunk.set_rotation(rotation)
 
     def set_text_scale(
         self, scale: float, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        """
+        Set the scale for the text.
+
+        :param scale: The scale value to set.
+        :param sub_chunk: Optional specific chunk to set scale for.
+        """
         if sub_chunk is not None:
             sub_chunk.set_scale(scale)
 
     def clear_text_surface(self, sub_chunk: Optional[TextLineChunkFTFont] = None):
+        """
+        Clear the text surface.
+
+        :param sub_chunk: Optional specific chunk to clear.
+        """
         if self.text_box_layout is None:
             return
         if sub_chunk is None:
@@ -1686,6 +1777,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def get_text_letter_count(
         self, sub_chunk: Optional[TextLineChunkFTFont] = None
     ) -> int:
+        """
+        Get the letter count of the text.
+
+        :param sub_chunk: Optional specific chunk to get letter count from.
+        :return: The letter count.
+        """
         if self.text_box_layout is None:
             return 0
         if sub_chunk is None:
@@ -1696,6 +1793,12 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def update_text_end_position(
         self, end_pos: int, sub_chunk: Optional[TextLineChunkFTFont] = None
     ):
+        """
+        Update the end position of the text.
+
+        :param end_pos: The new end position.
+        :param sub_chunk: Optional specific chunk to update.
+        """
         if self.text_box_layout is None:
             return
 
@@ -1711,6 +1814,13 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         params: Optional[Dict[str, Any]] = None,
         effect_tag: Optional[str] = None,
     ):
+        """
+        Set an active text effect.
+
+        :param effect_type: The type of effect to set.
+        :param params: Optional parameters for the effect.
+        :param effect_tag: Optional tag to apply effect to specific text chunks.
+        """
         if effect_tag is not None and self.text_box_layout is not None:
             redrew_all_chunks = False
             if self.active_text_effect is not None:
@@ -1794,12 +1904,22 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def stop_finished_effect(
         self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
     ):
+        """
+        Stop a finished text effect.
+
+        :param sub_chunks: Optional list of specific chunks to stop effect for.
+        """
         if sub_chunks is None:
             self.active_text_effect = None
         else:
             self._remove_chunks_from_active_effects(sub_chunks)
 
     def _remove_chunks_from_active_effects(self, sub_chunks):
+        """
+        Remove chunks from active effects.
+
+        :param sub_chunks: The chunks to remove.
+        """
         self.active_text_chunk_effects = [
             effect_chunk
             for effect_chunk in self.active_text_chunk_effects
@@ -1809,6 +1929,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def clear_all_active_effects(
         self, sub_chunks: Optional[List[TextLineChunkFTFont]] = None
     ):
+        """
+        Clear all active text effects.
+
+        :param sub_chunks: Optional list of specific chunks to clear effects for.
+        """
         if self.text_box_layout is None:
             return
         if sub_chunks is None:
@@ -1838,6 +1963,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 sub_chunk.redraw()
 
     def update_text_effect(self, time_delta: float):
+        """
+        Update any active text effects.
+
+        :param time_delta: The time passed between frames.
+        """
         if self.active_text_effect is not None:
             self.active_text_effect.update(time_delta)
         # update can set effect to None
@@ -1877,6 +2007,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
                 self.redraw_from_text_block()
 
     def get_object_id(self) -> str:
+        """
+        Get the object ID of this element.
+
+        :return: The most specific combined ID.
+        """
         return self.most_specific_combined_id
 
     def set_text(self, html_text: str, *, text_kwargs: Optional[Dict[str, str]] = None):
@@ -1897,7 +2032,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
     def clear(self):
         """
         Clears all the text in the box.
-
         """
         self.set_text("")
 
@@ -1906,7 +2040,6 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Some optional automatic pre-parsing/clean-up on input text before parsing it onto the html parser.
 
         :param input_text: the text to pre parse
-
         :return: a string with the cleaned up text.
         """
         pre_parsed_text = input_text
@@ -1940,9 +2073,7 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         Process an action key that is moving the cursor edit position.
 
         :param event: The event to process.
-
         :return: True if event is consumed.
-
         """
         consumed_event = False
         # 4 left/right cases:
@@ -1999,6 +2130,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         return consumed_event
 
     def _jump_edit_pos_one_character_right(self, should_select=False):
+        """
+        Move the edit position one character to the right.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         if should_select:
@@ -2036,6 +2172,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_one_character_left(self, should_select=False):
+        """
+        Move the edit position one character to the left.
+
+        :param should_select: Whether to select text while moving.
+        """
         if should_select:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 # existing selection, so edit_position should correspond to one
@@ -2066,6 +2207,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_one_row_down(self, should_select=False):
+        """
+        Move the edit position one row down.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         if should_select:
@@ -2111,6 +2257,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.vertical_cursor_movement = True
 
     def _jump_edit_pos_one_row_up(self, should_select=False):
+        """
+        Move the edit position one row up.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
 
@@ -2150,6 +2301,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
             self.vertical_cursor_movement = True
 
     def _jump_edit_pos_to_start_of_word(self, should_select=False):
+        """
+        Move the edit position to the start of the current word.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         try:
@@ -2183,6 +2339,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_end_of_word(self, should_select=False):
+        """
+        Move the edit position to the end of the current word.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         try:
@@ -2214,6 +2375,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_start_of_line(self, should_select=False):
+        """
+        Move the edit position to the start of the current line.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         try:
@@ -2236,6 +2402,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_end_of_line(self, should_select=False):
+        """
+        Move the edit position to the end of the current line.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         try:
@@ -2258,6 +2429,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_start_of_all_text(self, should_select=False):
+        """
+        Move the edit position to the start of all text.
+
+        :param should_select: Whether to select text while moving.
+        """
         if should_select:
             if abs(self.select_range[0] - self.select_range[1]) > 0:
                 self.select_range = (
@@ -2273,6 +2449,11 @@ class UITextBox(UIElement, IUITextOwnerInterface):
         self.cursor_has_moved_recently = True
 
     def _jump_edit_pos_to_end_of_all_text(self, should_select=False):
+        """
+        Move the edit position to the end of all text.
+
+        :param should_select: Whether to select text while moving.
+        """
         if self.text_box_layout is None:
             return
         end_of_all_pos = len(self.text_box_layout.plain_text)

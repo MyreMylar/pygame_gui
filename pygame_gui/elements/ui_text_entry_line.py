@@ -328,7 +328,7 @@ class UITextEntryLine(UIElement):
 
         total_text_buffer = (
             (self.shadow_width * 2)
-            + (self.border_width * 2)
+            + (self.border_width["left"] + self.border_width["right"])
             + rounded_corner_width_offsets[0]
             + rounded_corner_width_offsets[1]
         )
@@ -1437,7 +1437,7 @@ class UITextEntryLine(UIElement):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],

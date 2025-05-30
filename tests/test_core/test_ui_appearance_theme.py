@@ -150,7 +150,7 @@ class TestUIAppearanceTheme:
                                            combined_element_ids=['#test_object_2',
                                                                  '@test_class',
                                                                  'button'])
-        assert border_width == '3'
+        assert border_width == { "bottom": 3, "left": 3, "right": 3, "top": 3}
 
     def test_use_class_id_generated(self, _init_pygame, _display_surface_return_none: None):
         theme = UIAppearanceTheme(BlockingThreadedResourceLoader(), locale='en')
@@ -169,7 +169,7 @@ class TestUIAppearanceTheme:
         shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
                                            combined_element_ids=combined_ids)
         assert shadow_width == '0'
-        assert border_width == '3'
+        assert border_width == {'bottom': 3, 'left': 3, 'right': 3, 'top': 3}
 
         combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
                                                     element_ids=['button'],
@@ -183,7 +183,7 @@ class TestUIAppearanceTheme:
 
         shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
                                            combined_element_ids=combined_ids)
-        assert border_width == '1'
+        assert border_width == {'bottom': 1, 'left': 1, 'right': 1, 'top': 1}
         assert shadow_width == '3'
 
         combined_ids = theme.build_all_combined_ids(element_base_ids=[None],
@@ -197,7 +197,7 @@ class TestUIAppearanceTheme:
 
         shadow_width = theme.get_misc_data(misc_data_id='shadow_width',
                                            combined_element_ids=combined_ids)
-        assert border_width == '2'
+        assert border_width == {'bottom': 2, 'left': 2, 'right': 2, 'top': 2}
         assert shadow_width == '0'
 
     def test_get_font(self, _init_pygame, _display_surface_return_none: None):
@@ -443,7 +443,8 @@ class TestUIAppearanceTheme:
         with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Invalid Theme Colour"):
                 with pytest.warns(UserWarning, match="Misc data validation errors"):
-                    theme.update_theming(invalid_theme)
+                    with pytest.warns(UserWarning, match="Invalid border_width value"):
+                        theme.update_theming(invalid_theme)
 
     def test_appearance_theme_validation_warnings_for_misc_data(self, _init_pygame, _display_surface_return_none):
         """Test that misc data validation generates warnings during loading."""
@@ -459,7 +460,8 @@ class TestUIAppearanceTheme:
         }
         with pytest.warns(UserWarning, match="Theme validation found 2 errors"):
             with pytest.warns(UserWarning, match="Misc data validation errors"):
-                theme.update_theming(invalid_theme)
+                with pytest.warns(UserWarning, match="Invalid border_width value"):
+                    theme.update_theming(invalid_theme)
 
     def test_appearance_theme_validation_warnings_for_font_data(self, _init_pygame, _display_surface_return_none):
         """Test that font data validation generates warnings during loading."""

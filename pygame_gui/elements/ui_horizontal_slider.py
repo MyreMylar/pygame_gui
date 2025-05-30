@@ -157,15 +157,25 @@ class UIHorizontalSlider(UIElement):
         Rebuild anything that might need rebuilding.
 
         """
-        border_and_shadow = self.border_width + self.shadow_width
+        total_horiz_space = (
+            self.border_width["left"]
+            + self.border_width["right"]
+            + (2 * self.shadow_width)
+        )
+        total_vert_space = (
+            self.border_width["top"]
+            + self.border_width["bottom"]
+            + (2 * self.shadow_width)
+        )
+
         self.background_rect = pygame.Rect(
             (
-                border_and_shadow + self.relative_rect.x,
-                border_and_shadow + self.relative_rect.y,
+                self.border_width["left"] + self.shadow_width + self.relative_rect.x,
+                self.border_width["top"] + self.shadow_width + self.relative_rect.y,
             ),
             (
-                self.relative_rect.width - (2 * border_and_shadow),
-                self.relative_rect.height - (2 * border_and_shadow),
+                self.relative_rect.width - total_horiz_space,
+                self.relative_rect.height - total_vert_space,
             ),
         )
 
@@ -499,7 +509,7 @@ class UIHorizontalSlider(UIElement):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],
@@ -570,9 +580,12 @@ class UIHorizontalSlider(UIElement):
         """
         super().set_position(position)
 
-        border_and_shadow = int(self.border_width + self.shadow_width)
-        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
-        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
+        self.background_rect.x = int(
+            self.border_width["left"] + self.shadow_width + self.relative_rect.x
+        )
+        self.background_rect.y = int(
+            self.border_width["top"] + self.shadow_width + self.relative_rect.y
+        )
 
         if self.button_container is not None:
             self.button_container.set_relative_position(self.background_rect.topleft)
@@ -587,9 +600,12 @@ class UIHorizontalSlider(UIElement):
         """
         super().set_relative_position(position)
 
-        border_and_shadow = int(self.border_width + self.shadow_width)
-        self.background_rect.x = int(border_and_shadow + self.relative_rect.x)
-        self.background_rect.y = int(border_and_shadow + self.relative_rect.y)
+        self.background_rect.x = int(
+            self.border_width["left"] + self.shadow_width + self.relative_rect.x
+        )
+        self.background_rect.y = int(
+            self.border_width["top"] + self.shadow_width + self.relative_rect.y
+        )
 
         if self.button_container is not None:
             self.button_container.set_relative_position(self.background_rect.topleft)
@@ -605,12 +621,21 @@ class UIHorizontalSlider(UIElement):
         """
         super().set_dimensions(dimensions)
 
-        border_and_shadow = self.border_width + self.shadow_width
         self.background_rect.width = int(
-            self.relative_rect.width - (2 * border_and_shadow)
+            self.relative_rect.width
+            - (
+                (2 * self.shadow_width)
+                + self.border_width["left"]
+                + self.border_width["right"]
+            )
         )
         self.background_rect.height = int(
-            self.relative_rect.height - (2 * border_and_shadow)
+            self.relative_rect.height
+            - (
+                (2 * self.shadow_width)
+                + self.border_width["top"]
+                + self.border_width["bottom"]
+            )
         )
 
         if self.button_container is not None:

@@ -171,10 +171,11 @@ class TextBoxLayoutRow(pygame.Rect):
 
         self.letter_count += new_item.letter_count
 
-    def recalculate_width(self):
+    def clear_and_recalculate_width(self):
         """
         Recalculate the width of the row.
         """
+        self.clear()
         width = 0
         for item in self.items:
             width += item.width
