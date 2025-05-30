@@ -513,6 +513,7 @@ Theme Options Per Element
 -------------------------
 .. toctree::
     theme_reference/theme_button
+    theme_reference/theme_check_box
     theme_reference/theme_drop_down_menu
     theme_reference/theme_horizontal_scroll_bar
     theme_reference/theme_horizontal_slider
