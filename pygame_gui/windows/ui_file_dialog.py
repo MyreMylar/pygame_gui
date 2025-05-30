@@ -254,7 +254,10 @@ class UIFileDialog(UIWindow):
             - (self.file_path_text_line.padding[0] * 2)
             - left_max_corner_radius
             - right_max_corner_radius
-            - (self.file_path_text_line.border_width * 2)
+            - (
+                self.file_path_text_line.border_width["left"]
+                + self.file_path_text_line.border_width["right"]
+            )
             - (self.file_path_text_line.shadow_width * 2)
         )
 

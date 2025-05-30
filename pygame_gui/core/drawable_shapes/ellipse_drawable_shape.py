@@ -67,12 +67,20 @@ class EllipseDrawableShape(DrawableShape):
         )
         self.shadow_width = max(self.shadow_width, 0)
 
-        self.border_width = min(
-            self.border_width,
+        # all border widths should be the same for an ellipse so pick the left one
+        border_width = self.border_widths["left"]
+        border_width = min(
+            border_width,
             math.floor((self.containing_rect.width - self.shadow_width * 2) / 2),
             math.floor((self.containing_rect.height - self.shadow_width * 2) / 2),
         )
-        self.border_width = max(self.border_width, 0)
+        border_width = max(border_width, 0)
+
+        # set all border widths back to our clamped version
+        self.border_widths["left"] = border_width
+        self.border_widths["right"] = border_width
+        self.border_widths["top"] = border_width
+        self.border_widths["bottom"] = border_width
 
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect(
@@ -102,12 +110,12 @@ class EllipseDrawableShape(DrawableShape):
 
         self.background_rect = pygame.Rect(
             (
-                self.border_width + self.shadow_width,
-                self.border_width + self.shadow_width,
+                border_width + self.shadow_width,
+                border_width + self.shadow_width,
             ),
             (
-                self.click_area_shape.width - (2 * self.border_width),
-                self.click_area_shape.height - (2 * self.border_width),
+                self.click_area_shape.width - (2 * border_width),
+                self.click_area_shape.height - (2 * border_width),
             ),
         )
         if "disabled" in self.states and self.active_state == self.states["disabled"]:
@@ -208,7 +216,7 @@ class EllipseDrawableShape(DrawableShape):
                     "ellipse",
                     self.containing_rect.size,
                     self.shadow_width,
-                    self.border_width,
+                    self.border_widths,
                     self.theming[border_colour_state_str],
                     self.theming[bg_colour_state_str],
                 )
@@ -232,12 +240,20 @@ class EllipseDrawableShape(DrawableShape):
 
                 self.background_rect = pygame.Rect(
                     (
-                        (self.border_width + self.shadow_width) * aa_amount,
-                        (self.border_width + self.shadow_width) * aa_amount,
+                        (self.border_widths["left"] + self.shadow_width) * aa_amount,
+                        (self.border_widths["top"] + self.shadow_width) * aa_amount,
                     ),
                     (
-                        self.border_rect.width - (2 * self.border_width * aa_amount),
-                        self.border_rect.height - (2 * self.border_width * aa_amount),
+                        self.border_rect.width
+                        - (
+                            (self.border_widths["left"] + self.border_widths["right"])
+                            * aa_amount
+                        ),
+                        self.border_rect.height
+                        - (
+                            (self.border_widths["top"] + self.border_widths["bottom"])
+                            * aa_amount
+                        ),
                     ),
                 )
 
@@ -250,7 +266,7 @@ class EllipseDrawableShape(DrawableShape):
                     depth=32,
                 )
                 bab_surface.fill(pygame.Color("#00000000"))
-                if self.border_width > 0:
+                if self.border_widths["left"] > 0:
                     if isinstance(
                         self.theming[border_colour_state_str], ColourGradient
                     ):

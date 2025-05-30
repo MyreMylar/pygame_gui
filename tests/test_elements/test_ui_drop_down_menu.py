@@ -253,6 +253,7 @@ class TestUIDropDownMenu:
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Font data validation")
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
                                                 _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
@@ -271,6 +272,7 @@ class TestUIDropDownMenu:
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Font data validation")
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_rebuild_from_theme_data_bad_values_live(self, _init_pygame,
                                                      _display_surface_return_none):
         manager = UIManager((800, 600))
@@ -359,10 +361,10 @@ class TestUIDropDownMenu:
         menu.set_dimensions((300, 50))
 
         assert (menu.current_state.open_button.relative_rect.right ==
-                300 - (menu.border_width + menu.shadow_width))
+                300 - (menu.border_width["right"] + menu.shadow_width))
 
         assert (menu.current_state.open_button.relative_rect.bottom ==
-                50 - (menu.border_width + menu.shadow_width))
+                50 - (menu.border_width["bottom"] + menu.shadow_width))
 
         # try to click on the menu
         default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
@@ -394,10 +396,10 @@ class TestUIDropDownMenu:
         non_default_menu.set_dimensions((300, 50))
 
         assert (non_default_menu.current_state.open_button.relative_rect.right ==
-                300 - (non_default_menu.border_width + non_default_menu.shadow_width))
+                300 - (non_default_menu.border_width['right'] + non_default_menu.shadow_width))
 
         assert (non_default_menu.current_state.open_button.relative_rect.bottom ==
-                50 - (non_default_menu.border_width + non_default_menu.shadow_width))
+                50 - (non_default_menu.border_width['bottom'] + non_default_menu.shadow_width))
 
         # try to click on the menu
         manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,

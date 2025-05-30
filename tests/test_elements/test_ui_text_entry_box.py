@@ -583,6 +583,7 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Font data validation")
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
                                                 _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
@@ -824,18 +825,11 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-
-
     @pytest.mark.filterwarnings("ignore:Theme validation found")
-
-
     @pytest.mark.filterwarnings("ignore:Misc data validation")
-
-
     @pytest.mark.filterwarnings("ignore:Font data validation")
-
-
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_set_text_rebuild_select_area_4(self, _init_pygame,
                                             _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
@@ -1653,18 +1647,11 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
-
-
     @pytest.mark.filterwarnings("ignore:Theme validation found")
-
-
     @pytest.mark.filterwarnings("ignore:Misc data validation")
-
-
     @pytest.mark.filterwarnings("ignore:Font data validation")
-
-
     @pytest.mark.filterwarnings("ignore:Image data validation")
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
     def test_redraw_selected_text(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
@@ -1781,7 +1768,8 @@ class TestUITextEntryBox:
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Font data validation")
     @pytest.mark.filterwarnings("ignore:Image data validation")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame, _display_surface_return_none):
+    @pytest.mark.filterwarnings("ignore:Invalid border_width value")
+    def test_rebuild_from_theme_data_bad_values_again(self, _init_pygame, _display_surface_return_none):
         manager = UIManager((800, 600), os.path.join("tests", "data",
                                                      "themes",
                                                      "ui_text_entry_line_bad_values.json"))

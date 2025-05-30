@@ -465,8 +465,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_horiz_alignment": "left",
-            "text_horiz_alignment_padding": "3"
+            "text_horiz_alignment": "center"
         }
     },
     "file_dialog.#delete_icon_button":
@@ -474,9 +473,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_horiz_alignment": "left",
-            "text_vert_alignment_padding": "1",
-            "text_horiz_alignment_padding": "4"
+            "text_vert_alignment_padding": "1"
         }
     },
     "file_dialog.#parent_icon_button":
@@ -484,9 +481,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_horiz_alignment": "left",
-            "text_vert_alignment_padding": "1",
-            "text_horiz_alignment_padding": "5"
+            "text_vert_alignment_padding": "1"
         }
     },
     "file_dialog.#refresh_icon_button":
@@ -494,9 +489,7 @@
         "prototype": "#file_dialog_icon_buttons",
         "misc":
         {
-            "text_horiz_alignment": "left",
-            "text_vert_alignment_padding": "2",
-            "text_horiz_alignment_padding": "6"
+            "text_vert_alignment_padding": "2"
         }
     },
     "message_window.text_box":
@@ -514,7 +507,8 @@
         "prototype": "#default_shape_style",
         "misc":
         {
-            "padding": "2,2"
+            "padding": "2,2",
+            "text_horiz_alignment": "center"
         }
     },
     "colour_picker_dialog.colour_channel_editor.label":

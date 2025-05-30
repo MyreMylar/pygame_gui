@@ -1035,7 +1035,7 @@ class TestUIButton:
 
         assert button.shape == "rounded_rectangle"
         assert button.shape_corner_radius == [10, 10, 10, 10]
-        assert button.border_width == 4
+        assert button.border_width == {'bottom': 4, 'left': 4, 'right': 4, 'top': 4}
         assert button.shadow_width == 4
         assert button.tool_tip_delay == 6.0
 

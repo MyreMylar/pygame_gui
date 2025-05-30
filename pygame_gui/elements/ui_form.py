@@ -114,7 +114,7 @@ class UISection(UIAutoResizingContainer):
             0, 0, 0, 0
         )
         self.background_image: pygame.Surface | None = None
-        self.border_width = 1
+        self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
         self.shadow_width = 2
         self.padding = (5, 5)
 
@@ -264,10 +264,10 @@ class UISection(UIAutoResizingContainer):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
-                "shape_corner_radius": 2,
+                "shape_corner_radius": [2, 2, 2, 2],
             }
         ):
             has_any_changed = True
@@ -531,7 +531,7 @@ class UIForm(UIScrollingContainer):
             0, 0, 0, 0
         )
         self.background_image: pygame.Surface | None = None
-        self.border_width = 1
+        self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
         self.shadow_width = 2
         self.padding = (5, 5)  # TODO: Implement vertical padding from the bottom
 
@@ -847,9 +847,10 @@ class UIForm(UIScrollingContainer):
                 if isinstance(value, UISelectionList):
                     rect.height = selection_list_height
                     if selection_list_height == -1:
-                        rect.height = (
-                            value.total_height_of_list
-                            + (value.border_width + value.shadow_width) * 2
+                        rect.height = value.total_height_of_list + (
+                            value.border_width["top"]
+                            + value.border_width["bottom"]
+                            + value.shadow_width * 2
                         )
 
                     value.set_dimensions((rect.width, rect.height))
@@ -943,10 +944,10 @@ class UIForm(UIScrollingContainer):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
                 "shadow_width": 2,
                 "border_overlap": 1,
-                "shape_corner_radius": 2,
+                "shape_corner_radius": [2, 2, 2, 2],
             }
         ):
             has_any_changed = True
@@ -1133,9 +1134,10 @@ class UIForm(UIScrollingContainer):
                 if isinstance(value, UISelectionList):
                     rel_rect.height = selection_list_height
                     if selection_list_height == -1:
-                        rel_rect.height = (
-                            value.total_height_of_list
-                            + (value.border_width + value.shadow_width) * 2
+                        rel_rect.height = value.total_height_of_list + (
+                            value.border_width["top"]
+                            + value.border_width["bottom"]
+                            + value.shadow_width * 2
                         )
                     value.set_dimensions((rel_rect.width, rel_rect.height))
 
@@ -1190,14 +1192,14 @@ class UIForm(UIScrollingContainer):
         super().rebuild()
 
         root_rect = pygame.Rect(
-            self.relative_rect.x + self.shadow_width + self.border_width,
-            self.relative_rect.y + self.shadow_width + self.border_width,
+            self.relative_rect.x + self.shadow_width + self.border_width["left"],
+            self.relative_rect.y + self.shadow_width + self.border_width["top"],
             self.relative_rect.width
             - (2 * self.shadow_width)
-            - (2 * self.border_width),
+            - (2 * self.border_width["right"]),
             self.relative_rect.height
             - (2 * self.shadow_width)
-            - (2 * self.border_width),
+            - (2 * self.border_width["bottom"]),
         )
 
         if (

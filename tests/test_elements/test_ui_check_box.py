@@ -848,7 +848,10 @@ class TestUICheckBox:
                               manager=default_ui_manager)
         
         # Check that default values are set
-        assert check_box.border_width >= 0
+        assert check_box.border_width["left"] >= 0
+        assert check_box.border_width["right"] >= 0
+        assert check_box.border_width["top"] >= 0
+        assert check_box.border_width["bottom"] >= 0
         assert check_box.shadow_width >= 0
         assert check_box.border_overlap >= 0
         assert isinstance(check_box.shape_corner_radius, list)

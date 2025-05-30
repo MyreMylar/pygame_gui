@@ -146,12 +146,57 @@ class UIThemeValidator:
 
         # Validate numeric values
         numeric_fields = {
-            "border_width": (0, 100),
             "shadow_width": (0, 50),
             "tool_tip_delay": (0.0, 10.0),
             "text_shadow_size": (0, 10),
             "border_radius": (0, 100),
         }
+
+        # Handle border_width separately since it can be a number or a dict
+        if "border_width" in misc:
+            border_width = misc["border_width"]
+            if isinstance(border_width, (str, int, float)):
+                try:
+                    value = float(border_width)
+                    if not 0 <= value <= 100:
+                        errors.append(
+                            f"{element_type}.misc.border_width: "
+                            f"Value {value} must be between 0 and 100"
+                        )
+                except (ValueError, TypeError):
+                    errors.append(
+                        f"{element_type}.misc.border_width: "
+                        f"Must be a number, got {type(border_width).__name__}"
+                    )
+            elif isinstance(border_width, dict):
+                required_keys = {"left", "right", "top", "bottom"}
+                if set(border_width.keys()) != required_keys:
+                    errors.append(
+                        f"{element_type}.misc.border_width: "
+                        f"Dictionary must contain exactly these keys: {required_keys}"
+                    )
+                else:
+                    for side, value in border_width.items():
+                        try:
+                            if isinstance(value, str):
+                                num_value = float(value)
+                            else:
+                                num_value = float(value)
+                            if not 0 <= num_value <= 100:
+                                errors.append(
+                                    f"{element_type}.misc.border_width.{side}: "
+                                    f"Value {num_value} must be between 0 and 100"
+                                )
+                        except (ValueError, TypeError):
+                            errors.append(
+                                f"{element_type}.misc.border_width.{side}: "
+                                f"Must be a number, got {type(value).__name__}"
+                            )
+            else:
+                errors.append(
+                    f"{element_type}.misc.border_width: "
+                    f"Must be a number or a dictionary with left/right/top/bottom values"
+                )
 
         for field, (min_val, max_val) in numeric_fields.items():
             if field in misc:
@@ -2243,10 +2288,52 @@ class UIAppearanceTheme(IUIAppearanceThemeInterface):
             )
 
         for misc_data_key in misc_dict:
-            if isinstance(misc_dict[misc_data_key], (dict, str, int, float, bool)):
-                self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[
-                    misc_data_key
-                ]
+            if isinstance(
+                misc_dict[misc_data_key], (list, dict, str, int, float, bool)
+            ):
+                # Special handling for border_width to ensure it's always a dictionary
+                if misc_data_key == "border_width":
+                    border_width = misc_dict[misc_data_key]
+                    if isinstance(border_width, dict):
+                        # Ensure all required keys exist with proper values
+                        border_dict = {
+                            "left": int(border_width.get("left", 0)),
+                            "right": int(border_width.get("right", 0)),
+                            "top": int(border_width.get("top", 0)),
+                            "bottom": int(border_width.get("bottom", 0)),
+                        }
+                        self.ui_element_misc_data[element_name][misc_data_key] = (
+                            border_dict
+                        )
+                    else:
+                        try:
+                            # Convert numeric or string value to integer
+                            if isinstance(border_width, str):
+                                border_width = int(float(border_width))
+                            else:
+                                border_width = int(border_width)
+                            # Create dictionary with same value for all sides
+                            self.ui_element_misc_data[element_name][misc_data_key] = {
+                                "left": border_width,
+                                "right": border_width,
+                                "top": border_width,
+                                "bottom": border_width,
+                            }
+                        except (ValueError, TypeError):
+                            # If conversion fails, default to 0 border width
+                            self.ui_element_misc_data[element_name][misc_data_key] = {
+                                "left": 0,
+                                "right": 0,
+                                "top": 0,
+                                "bottom": 0,
+                            }
+                            warnings.warn(
+                                f"Invalid border_width value: {border_width}. Defaulting to 0."
+                            )
+                else:
+                    self.ui_element_misc_data[element_name][misc_data_key] = misc_dict[
+                        misc_data_key
+                    ]
             else:
                 warnings.warn(
                     f"Unsupported misc data type for {element_name}.{misc_data_key}: "

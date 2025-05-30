@@ -233,9 +233,9 @@ class TestUIHorizontalSlider:
                                                               'pos': (195, 50)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.bottom == 60 - (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.right == 200 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
+        assert slider.right_button.rect.bottom == 60 - (slider.shadow_width + slider.border_width["bottom"])
+        assert slider.right_button.rect.right == 200 - (slider.shadow_width + slider.border_width["right"])
 
         slider.set_dimensions((100, 30))
 
@@ -245,9 +245,9 @@ class TestUIHorizontalSlider:
                                                               'pos': (95, 15)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.bottom == 30 - (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.right == 100 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
+        assert slider.right_button.rect.bottom == 30 - (slider.shadow_width + slider.border_width["bottom"])
+        assert slider.right_button.rect.right == 100 - (slider.shadow_width + slider.border_width["right"])
 
         slider.set_dimensions((150, 45))
 
@@ -257,9 +257,9 @@ class TestUIHorizontalSlider:
                                                               'pos': (145, 22)}))
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.bottom == 45 - (slider.shadow_width + slider.border_width)
-        assert slider.right_button.rect.right == 150 - (slider.shadow_width + slider.border_width)
+        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
+        assert slider.right_button.rect.bottom == 45 - (slider.shadow_width + slider.border_width["bottom"])
+        assert slider.right_button.rect.right == 150 - (slider.shadow_width + slider.border_width["right"])
 
     def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
                      _display_surface_return_none: None):

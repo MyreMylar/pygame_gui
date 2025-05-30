@@ -597,15 +597,15 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
             )
         if self.window_element_container is None:
             window_container_rect = pygame.Rect(
-                self.border_width,
+                self.border_width["left"],
                 self.title_bar_height,
                 (
                     self._window_root_container.relative_rect.width
-                    - (2 * self.border_width)
+                    - (self.border_width["left"] + self.border_width["right"])
                 ),
                 (
                     self._window_root_container.relative_rect.height
-                    - (self.title_bar_height + self.border_width)
+                    - (self.title_bar_height + self.border_width["bottom"])
                 ),
             )
             self.window_element_container = UIContainer(
@@ -649,17 +649,17 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
         if self.window_element_container is not None:
             element_container_width = (
                 self._window_root_container.relative_rect.width
-                - (2 * self.border_width)
+                - (self.border_width["left"] + self.border_width["right"])
             )
             element_container_height = (
                 self._window_root_container.relative_rect.height
-                - (self.title_bar_height + self.border_width)
+                - (self.title_bar_height + self.border_width["bottom"])
             )
             self.window_element_container.set_dimensions(
                 (element_container_width, element_container_height)
             )
             self.window_element_container.set_relative_position(
-                (self.border_width, self.title_bar_height)
+                (self.border_width["left"], self.title_bar_height)
             )
 
             if self.enable_title_bar:
@@ -756,8 +756,8 @@ class UIWindow(UIElement, IContainerLikeInterface, IWindowInterface):
 
         if self._check_shape_theming_changed(
             defaults={
-                "border_width": 1,
-                "shadow_width": 15,
+                "border_width": {"left": 1, "right": 1, "top": 1, "bottom": 1},
+                "shadow_width": 2,
                 "border_overlap": 1,
                 "shape_corner_radius": [2, 2, 2, 2],
             }

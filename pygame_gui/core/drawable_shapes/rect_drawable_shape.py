@@ -49,6 +49,16 @@ class RectDrawableShape(DrawableShape):
             editable_text=editable_text,
         )
 
+        self.border_rects: Dict[str, pygame.Rect] = {
+            "left": pygame.Rect(0, 0, 0, 0),
+            "right": pygame.Rect(0, 0, 0, 0),
+            "top": pygame.Rect(0, 0, 0, 0),
+            "bottom": pygame.Rect(0, 0, 0, 0),
+        }
+        self.simple_border_rect = pygame.Rect(0, 0, 0, 0)
+
+        self.use_simple_border_rect = False
+
         self.has_been_resized = False
 
         self.full_rebuild_on_size_change()
@@ -56,9 +66,7 @@ class RectDrawableShape(DrawableShape):
     def full_rebuild_on_size_change(self):
         """
         Completely rebuilds the rectangle shape from its dimensions and parameters.
-
         Everything needs rebuilding if we change the size of the containing rectangle.
-
         """
         # clamping border and shadow widths, so we can't form impossible negative sized surfaces
         super().full_rebuild_on_size_change()
@@ -72,12 +80,19 @@ class RectDrawableShape(DrawableShape):
         )
         self.shadow_width = max(self.shadow_width, 0)
 
-        self.border_width = min(
-            self.border_width,
-            math.floor((self.containing_rect.width - self.shadow_width * 2) / 2),
-            math.floor((self.containing_rect.height - self.shadow_width * 2) / 2),
+        # Clamp each border width individually
+        max_width = math.floor((self.containing_rect.width - self.shadow_width * 2) / 2)
+        max_height = math.floor(
+            (self.containing_rect.height - self.shadow_width * 2) / 2
         )
-        self.border_width = max(self.border_width, 0)
+
+        for side in ["left", "right"]:
+            self.border_widths[side] = min(self.border_widths[side], max_width)
+            self.border_widths[side] = max(self.border_widths[side], 0)
+
+        for side in ["top", "bottom"]:
+            self.border_widths[side] = min(self.border_widths[side], max_height)
+            self.border_widths[side] = max(self.border_widths[side], 0)
 
         if self.shadow_width > 0:
             self.click_area_shape = pygame.Rect(
@@ -102,7 +117,6 @@ class RectDrawableShape(DrawableShape):
             )
             if shadow is not None:
                 self.base_surface = shadow
-
         else:
             self.click_area_shape = self.containing_rect.copy()
 
@@ -111,21 +125,92 @@ class RectDrawableShape(DrawableShape):
                 self.containing_rect.size, flags=pygame.SRCALPHA, depth=32
             )
 
-        self.border_rect = pygame.Rect(
-            (self.shadow_width, self.shadow_width),
-            (self.click_area_shape.width, self.click_area_shape.height),
-        )
+        # if all border widths are identical, create a simple border rect and use that for drawing instead
+        all_borders_equal = len(set(self.border_widths.values())) == 1
+        if all_borders_equal:
+            self.use_simple_border_rect = True
 
-        self.background_rect = pygame.Rect(
-            (
-                self.border_width + self.shadow_width,
-                self.border_width + self.shadow_width,
-            ),
-            (
-                self.click_area_shape.width - (2 * self.border_width),
-                self.click_area_shape.height - (2 * self.border_width),
-            ),
-        )
+            self.simple_border_rect = pygame.Rect(
+                (self.shadow_width, self.shadow_width),
+                (self.click_area_shape.width, self.click_area_shape.height),
+            )
+
+            self.background_rect = pygame.Rect(
+                (
+                    self.border_widths["left"] + self.shadow_width,
+                    self.border_widths["top"] + self.shadow_width,
+                ),
+                (
+                    self.click_area_shape.width
+                    - (self.border_widths["left"] + self.border_widths["right"]),
+                    self.click_area_shape.height
+                    - (self.border_widths["top"] + self.border_widths["bottom"]),
+                ),
+            )
+
+        else:
+            # Calculate border rects for each side
+            if any(width > 0 for width in self.border_widths.values()):
+                # Top border
+                if self.border_widths["top"] > 0:
+                    self.border_rects["top"] = pygame.Rect(
+                        self.shadow_width,
+                        self.shadow_width,
+                        self.click_area_shape.width,
+                        self.border_widths["top"],
+                    )
+
+                # Right border
+                if self.border_widths["right"] > 0:
+                    self.border_rects["right"] = pygame.Rect(
+                        self.shadow_width
+                        + self.click_area_shape.width
+                        - self.border_widths["right"],
+                        self.shadow_width + self.border_widths["top"],
+                        self.border_widths["right"],
+                        self.shadow_width
+                        + self.click_area_shape.height
+                        - (self.border_widths["top"] + self.border_widths["bottom"]),
+                    )
+
+                # Bottom border
+                if self.border_widths["bottom"] > 0:
+                    self.border_rects["bottom"] = pygame.Rect(
+                        self.shadow_width,
+                        self.shadow_width
+                        + self.click_area_shape.height
+                        - self.border_widths["bottom"],
+                        self.click_area_shape.width,
+                        self.border_widths["bottom"],
+                    )
+
+                # Left border
+                if self.border_widths["left"] > 0:
+                    self.border_rects["left"] = pygame.Rect(
+                        self.shadow_width,
+                        self.shadow_width + self.border_widths["top"],
+                        self.border_widths["left"],
+                        self.click_area_shape.height
+                        - (self.border_widths["top"] + self.border_widths["bottom"]),
+                    )
+
+                # Calculate background rect (inside borders)
+                self.background_rect = pygame.Rect(
+                    self.shadow_width + self.border_widths["left"],
+                    self.shadow_width + self.border_widths["top"],
+                    self.click_area_shape.width
+                    - (self.border_widths["left"] + self.border_widths["right"]),
+                    self.click_area_shape.height
+                    - (self.border_widths["top"] + self.border_widths["bottom"]),
+                )
+            else:
+                self.background_rect = pygame.Rect(
+                    self.shadow_width,
+                    self.shadow_width,
+                    self.click_area_shape.width,
+                    self.click_area_shape.height,
+                )
+
         if "disabled" in self.states and self.active_state == self.states["disabled"]:
             self.redraw_all_states(force_full_redraw=True)
         else:
@@ -188,9 +273,8 @@ class RectDrawableShape(DrawableShape):
         """
         Redraws the shape's surface for a given UI state.
 
-        :param add_text:
+        :param add_text: Whether to add text to the shape in this redraw.
         :param state_str: The ID string of the state to rebuild.
-
         """
         if self.containing_rect.width <= 0 or self.containing_rect.height <= 0:
             self.states[
@@ -213,44 +297,90 @@ class RectDrawableShape(DrawableShape):
                     "rectangle",
                     self.containing_rect.size,
                     self.shadow_width,
-                    self.border_width,
+                    self.border_widths,  # Pass all border widths for caching
                     self.theming[border_colour_state_str],
                     self.theming[bg_colour_state_str],
                 )
 
                 found_shape = self.shape_cache.find_surface_in_cache(shape_id)
+
             if found_shape is not None:
                 self.states[state_str].surface = found_shape.copy()
             else:
                 if self.base_surface is not None:
                     self.states[state_str].surface = self.base_surface.copy()
+                else:
+                    self.states[state_str].surface = pygame.Surface(
+                        self.containing_rect.size, flags=pygame.SRCALPHA, depth=32
+                    )
 
-                if self.border_width > 0:
-                    if isinstance(
-                        self.theming[border_colour_state_str], ColourGradient
-                    ):
-                        border_shape_surface = pygame.surface.Surface(
-                            self.border_rect.size, flags=pygame.SRCALPHA, depth=32
-                        )
-                        border_shape_surface.fill(pygame.Color("#FFFFFFFF"))
-                        self.states[state_str].surface.blit(
-                            border_shape_surface,
-                            self.border_rect,
-                            special_flags=pygame.BLEND_RGBA_SUB,
-                        )
-                        self.theming[border_colour_state_str].apply_gradient_to_surface(
-                            border_shape_surface
-                        )
-                        basic_blit(
-                            self.states[state_str].surface,
-                            border_shape_surface,
-                            self.border_rect,
-                        )
+                # Draw borders first
+                if any(width > 0 for width in self.border_widths.values()):
+                    if self.use_simple_border_rect:
+                        # simpler drawing if border is the same all the way around
+                        if isinstance(
+                            self.theming[border_colour_state_str], ColourGradient
+                        ):
+                            border_shape_surface = pygame.surface.Surface(
+                                self.simple_border_rect.size,
+                                flags=pygame.SRCALPHA,
+                                depth=32,
+                            )
+                            border_shape_surface.fill(pygame.Color("#FFFFFFFF"))
+                            self.states[state_str].surface.blit(
+                                border_shape_surface,
+                                self.simple_border_rect,
+                                special_flags=pygame.BLEND_RGBA_SUB,
+                            )
+                            self.theming[
+                                border_colour_state_str
+                            ].apply_gradient_to_surface(border_shape_surface)
+                            basic_blit(
+                                self.states[state_str].surface,
+                                border_shape_surface,
+                                self.simple_border_rect,
+                            )
+                        else:
+                            self.states[state_str].surface.fill(
+                                self.theming[border_colour_state_str],
+                                self.simple_border_rect,
+                            )
                     else:
-                        self.states[state_str].surface.fill(
-                            self.theming[border_colour_state_str], self.border_rect
-                        )
+                        # more complicated drawing if we have differently sized borders on some of the four sides
+                        if isinstance(
+                            self.theming[border_colour_state_str], ColourGradient
+                        ):
+                            # Draw each border side with gradient
+                            for side, rect in self.border_rects.items():
+                                if rect is not None and self.border_widths[side] > 0:
+                                    border_shape_surface = pygame.surface.Surface(
+                                        rect.size, flags=pygame.SRCALPHA, depth=32
+                                    )
+                                    border_shape_surface.fill(pygame.Color("#FFFFFFFF"))
+                                    self.states[state_str].surface.blit(
+                                        border_shape_surface,
+                                        rect,
+                                        special_flags=pygame.BLEND_RGBA_SUB,
+                                    )
+                                    self.theming[
+                                        border_colour_state_str
+                                    ].apply_gradient_to_surface(border_shape_surface)
+                                    basic_blit(
+                                        self.states[state_str].surface,
+                                        border_shape_surface,
+                                        rect,
+                                    )
+                        else:
+                            # Draw each border side with solid color
+                            for side, rect in self.border_rects.items():
+                                if rect is not None and self.border_widths[side] > 0:
+                                    pygame.draw.rect(
+                                        self.states[state_str].surface,
+                                        self.theming[border_colour_state_str],
+                                        rect,
+                                    )
 
+                # Draw background after borders
                 if isinstance(self.theming[bg_colour_state_str], ColourGradient):
                     background_shape_surface = pygame.surface.Surface(
                         self.background_rect.size, flags=pygame.SRCALPHA, depth=32
