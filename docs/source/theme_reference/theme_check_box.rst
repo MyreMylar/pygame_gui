@@ -93,10 +93,11 @@ Miscellaneous
 
 :class:`UICheckBox <pygame_gui.elements.UICheckBox>` accepts the following miscellaneous parameters in a 'misc' block:
 
- - "**shape**" - Can be one of 'rectangle' or 'rounded_rectangle'. Different shapes for this UI element.
+ - "**shape**" - Can be one of 'rectangle', 'rounded_rectangle', or 'ellipse'. Different shapes for this UI element.
  - "**shape_corner_radius**" - Only used if our shape is 'rounded_rectangle'. It sets the radius, or radii, used for the rounded corners. Use a single integer to set all corners to the same radius, or four integers separated by commas to set each corner individually.
  - "**border_width**" - The width in pixels of the border around the checkbox. Defaults to 1.
  - "**shadow_width**" - The width in pixels of the shadow behind the checkbox. Defaults to 2.
+ - "**border_overlap**" - The amount of overlap between the border and the background. Defaults to 1.
  - "**check_symbol**" - The symbol to display when the checkbox is checked. Defaults to "✓".
  - "**indeterminate_symbol**" - The symbol to display when the checkbox is in indeterminate state. Defaults to "−".
  - "**text_offset**" - The distance in pixels between the checkbox and its text label. Defaults to 5.
@@ -174,10 +175,11 @@ Here are examples of checkbox blocks in JSON theme files using the parameters de
             },
             "misc":
             {
-                "shape": "rounded_rectangle",
+                "shape": "ellipse",
                 "shape_corner_radius": "3",
                 "border_width": "2",
                 "shadow_width": "2",
+                "border_overlap": "1",
                 "check_symbol": "✓",
                 "indeterminate_symbol": "−",
                 "text_offset": "8",
