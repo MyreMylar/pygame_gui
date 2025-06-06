@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Set, Any, List, Tuple
+from typing import Optional, Union, Dict, Set, Any, List, Tuple, Callable
 
 import pygame
 
@@ -12,7 +12,7 @@ from pygame_gui.core.interfaces import (
     IGUIFontInterface,
 )
 from pygame_gui.core import UIElement
-from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
+from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape
 from pygame_gui.elements.ui_label import UILabel
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
@@ -96,6 +96,7 @@ class UICheckBox(UIElement):
         self.is_indeterminate = False  # New indeterminate state
         self.is_focused = False
         self.hovered = False
+        self.text_label = None  # Initialize to None
 
         # Set up tooltip support
         self.set_tooltip(tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs)
@@ -139,22 +140,27 @@ class UICheckBox(UIElement):
             pass
 
         # Create the text label positioned to the right of the checkbox
-        label_rect = pygame.Rect(
-            self.rect.right + self.text_offset, self.rect.top, -1, self.rect.height
-        )
-        self.text_label = UILabel(
-            label_rect,
-            text=self.text,
-            manager=self.ui_manager,
-            container=self.ui_container,
-            parent_element=self,
-        )
-
-        # Set the same tooltip on the text label as the checkbox
-        if tool_tip_text is not None:
-            self.text_label.set_tooltip(
-                tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs
+        try:
+            label_rect = pygame.Rect(
+                self.rect.right + self.text_offset, self.rect.top, -1, self.rect.height
             )
+            self.text_label = UILabel(
+                label_rect,
+                text=self.text,
+                manager=self.ui_manager,
+                container=self.ui_container,
+                parent_element=self,
+            )
+
+            # Set the same tooltip on the text label as the checkbox
+            if tool_tip_text is not None:
+                self.text_label.set_tooltip(
+                    tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs
+                )
+        except Exception as e:
+            # Log the error but don't crash
+            print(f"Failed to create text label for checkbox: {e}")
+            self.text_label = None
 
         # Set initial visibility to match parent
         if not visible:
@@ -189,7 +195,7 @@ class UICheckBox(UIElement):
             "border_width": self.border_width,
             "shadow_width": self.shadow_width,
             "shape_corner_radius": self.shape_corner_radius,
-            "border_overlap": 1,
+            "border_overlap": self.border_overlap,
             "font": self.font,
             "text": self._get_display_symbol(),
             "text_horiz_alignment": "center",
@@ -201,12 +207,27 @@ class UICheckBox(UIElement):
             "disabled_image_positions": self.disabled_image_positions,
         }
 
-        self.drawable_shape = RectDrawableShape(
-            self.rect,
-            theming_parameters,
-            ["normal", "disabled", "selected", "hovered"],
-            self.ui_manager,
-        )
+        if self.shape == "rectangle":
+            self.drawable_shape = RectDrawableShape(
+                self.rect,
+                theming_parameters,
+                ["normal", "hovered", "disabled", "selected"],
+                self.ui_manager,
+            )
+        elif self.shape == "ellipse":
+            self.drawable_shape = EllipseDrawableShape(
+                self.rect,
+                theming_parameters,
+                ["normal", "hovered", "disabled", "selected"],
+                self.ui_manager,
+            )
+        elif self.shape == "rounded_rectangle":
+            self.drawable_shape = RoundedRectangleShape(
+                self.rect,
+                theming_parameters,
+                ["normal", "hovered", "disabled", "selected"],
+                self.ui_manager,
+            )
 
         # Set initial state
         self._update_visual_state()
@@ -248,153 +269,150 @@ class UICheckBox(UIElement):
             else:
                 self.drawable_shape.set_active_state("normal")
 
+    def _load_theme_colour(self, colour_name: str, default_colour: Optional[pygame.Color] = None) -> Union[pygame.Color, IColourGradientInterface]:
+        """Helper method to load a colour from theme data.
+
+        :param colour_name: The name of the colour to load
+        :param default_colour: Default colour to return if not found in theme
+        :return: The loaded colour or gradient
+        """
+        try:
+            return self.ui_theme.get_colour_or_gradient(
+                colour_name, self.combined_element_ids
+            )
+        except LookupError:
+            return default_colour
+
+    def _load_theme_misc_data(self, data_name: str, default_value: Any, casting_func: Optional[Callable] = None) -> Any:
+        """Helper method to load miscellaneous theme data.
+
+        :param data_name: The name of the data to load
+        :param default_value: Default value to return if not found in theme
+        :param casting_func: Optional function to cast the loaded value
+        :return: The loaded and optionally cast value
+        """
+        try:
+            value = self.ui_theme.get_misc_data(data_name, self.combined_element_ids)
+            if casting_func and value is not None:
+                return casting_func(value)
+            return value
+        except (LookupError, ValueError):
+            return default_value
+
     def _load_theme_data(self):
         """
         Loads theming data from the UI theme.
         """
         # Load colours
         self.colours = {
-            "normal_bg": self.ui_theme.get_colour_or_gradient(
-                "normal_bg", self.combined_element_ids
-            ),
-            "normal_border": self.ui_theme.get_colour_or_gradient(
-                "normal_border", self.combined_element_ids
-            ),
-            "hovered_bg": self.ui_theme.get_colour_or_gradient(
-                "hovered_bg", self.combined_element_ids
-            ),
-            "hovered_border": self.ui_theme.get_colour_or_gradient(
-                "hovered_border", self.combined_element_ids
-            ),
-            "disabled_bg": self.ui_theme.get_colour_or_gradient(
-                "disabled_bg", self.combined_element_ids
-            ),
-            "disabled_border": self.ui_theme.get_colour_or_gradient(
-                "disabled_border", self.combined_element_ids
-            ),
-            "selected_bg": self.ui_theme.get_colour_or_gradient(
-                "selected_bg", self.combined_element_ids
-            ),
-            "selected_border": self.ui_theme.get_colour_or_gradient(
-                "selected_border", self.combined_element_ids
-            ),
-            "normal_text": self.ui_theme.get_colour_or_gradient(
-                "normal_text", self.combined_element_ids
-            ),
-            "hovered_text": self.ui_theme.get_colour_or_gradient(
-                "hovered_text", self.combined_element_ids
-            ),
-            "disabled_text": self.ui_theme.get_colour_or_gradient(
-                "disabled_text", self.combined_element_ids
-            ),
-            "selected_text": self.ui_theme.get_colour_or_gradient(
-                "selected_text", self.combined_element_ids
-            ),
+            "normal_bg": self._load_theme_colour("normal_bg"),
+            "normal_border": self._load_theme_colour("normal_border"),
+            "hovered_bg": self._load_theme_colour("hovered_bg"),
+            "hovered_border": self._load_theme_colour("hovered_border"),
+            "disabled_bg": self._load_theme_colour("disabled_bg"),
+            "disabled_border": self._load_theme_colour("disabled_border"),
+            "selected_bg": self._load_theme_colour("selected_bg"),
+            "selected_border": self._load_theme_colour("selected_border"),
+            "normal_text": self._load_theme_colour("normal_text"),
+            "hovered_text": self._load_theme_colour("hovered_text"),
+            "disabled_text": self._load_theme_colour("disabled_text"),
+            "selected_text": self._load_theme_colour("selected_text"),
         }
 
         # Load shape parameters
-        try:
-            self.shape = str(
-                self.ui_theme.get_misc_data("shape", self.combined_element_ids)
-            )
-            if self.shape not in ["rectangle", "rounded_rectangle"]:
-                self.shape = "rectangle"
-        except LookupError:
+        self.shape = self._load_theme_misc_data("shape", "rectangle", str)
+        if self.shape not in ["rectangle", "rounded_rectangle", "ellipse"]:
             self.shape = "rectangle"
 
-        try:
-            border_width_data = self.ui_theme.get_misc_data(
-                "border_width", self.combined_element_ids
-            )
-            if isinstance(border_width_data, dict):
-                self.border_width = {
-                    "left": int(border_width_data.get("left", 1)),
-                    "right": int(border_width_data.get("right", 1)),
-                    "top": int(border_width_data.get("top", 1)),
-                    "bottom": int(border_width_data.get("bottom", 1)),
-                }
-            else:
-                # Handle legacy single integer format
-                width = (
-                    int(border_width_data)
-                    if isinstance(border_width_data, (str, int))
-                    else 1
-                )
-                self.border_width = {
-                    "left": width,
-                    "right": width,
-                    "top": width,
-                    "bottom": width,
-                }
-        except (LookupError, ValueError):
-            self.border_width = {"left": 1, "right": 1, "top": 1, "bottom": 1}
+        # Load border parameters
+        border_width_data = self._load_theme_misc_data("border_width", 1)
+        if isinstance(border_width_data, dict):
+            self.border_width = {
+                "left": int(border_width_data.get("left", 1)),
+                "right": int(border_width_data.get("right", 1)),
+                "top": int(border_width_data.get("top", 1)),
+                "bottom": int(border_width_data.get("bottom", 1)),
+            }
+        else:
+            # Handle legacy single integer format
+            width = int(border_width_data) if isinstance(border_width_data, (str, int)) else 1
+            self.border_width = {
+                "left": width,
+                "right": width,
+                "top": width,
+                "bottom": width,
+            }
 
-        try:
-            shadow_width_data = self.ui_theme.get_misc_data(
-                "shadow_width", self.combined_element_ids
-            )
-            self.shadow_width = (
-                int(shadow_width_data)
-                if isinstance(shadow_width_data, (str, int))
-                else 2
-            )
-        except (LookupError, ValueError):
-            self.shadow_width = 2
+        self.shadow_width = self._load_theme_misc_data("shadow_width", 2, int)
+        self.border_overlap = self._load_theme_misc_data("border_overlap", 1, int)
 
-        try:
-            border_overlap_data = self.ui_theme.get_misc_data(
-                "border_overlap", self.combined_element_ids
-            )
-            self.border_overlap = (
-                int(border_overlap_data)
-                if isinstance(border_overlap_data, (str, int))
-                else 1
-            )
-        except (LookupError, ValueError):
-            self.border_overlap = 1
-
-        try:
-            corner_radius = self.ui_theme.get_misc_data(
-                "shape_corner_radius", self.combined_element_ids
-            )
-            if isinstance(corner_radius, list):
-                # Ensure all items in the list are integers
-                self.shape_corner_radius = [
-                    int(x) if isinstance(x, (str, int)) else 2 for x in corner_radius
-                ]
-            elif isinstance(corner_radius, (str, int)):
-                radius_val = int(corner_radius)
-                self.shape_corner_radius = [
-                    radius_val,
-                    radius_val,
-                    radius_val,
-                    radius_val,
-                ]
-            else:
-                self.shape_corner_radius = [2, 2, 2, 2]
-        except (LookupError, ValueError):
+        # Load corner radius
+        corner_radius = self._load_theme_misc_data("shape_corner_radius", [2, 2, 2, 2])
+        if isinstance(corner_radius, list):
+            self.shape_corner_radius = [int(x) if isinstance(x, (str, int)) else 2 for x in corner_radius]
+        elif isinstance(corner_radius, (str, int)):
+            radius_val = int(corner_radius)
+            self.shape_corner_radius = [radius_val] * 4
+        else:
             self.shape_corner_radius = [2, 2, 2, 2]
 
-        # Load checkbox symbol
-        try:
-            self.check_symbol = str(
-                self.ui_theme.get_misc_data("check_symbol", self.combined_element_ids)
-            )
-        except LookupError:
-            self.check_symbol = "✓"
+        # Load checkbox symbols
+        self.check_symbol = self._load_theme_misc_data("check_symbol", "✓", str)
+        self.indeterminate_symbol = self._load_theme_misc_data("indeterminate_symbol", "−", str)
+
+        # Load text offset
+        self.text_offset = self._load_theme_misc_data("text_offset", 5, int)
 
         # Load font
         try:
             self.font = self.ui_theme.get_font(self.combined_element_ids)
             if self.font == self.ui_theme.get_font_dictionary().get_default_font():
-                self.font = (
-                    self.ui_theme.get_font_dictionary().get_default_symbol_font()
-                )
+                self.font = self.ui_theme.get_font_dictionary().get_default_symbol_font()
         except LookupError:
             self.font = self.ui_theme.get_font_dictionary().get_default_symbol_font()
 
         # Load images
         self._load_images_from_theme()
+
+    def _process_state_images(self, state_name: str, normal_images: List[pygame.Surface], normal_positions: List[Tuple[float, float]]) -> Tuple[List[pygame.Surface], List[Tuple[float, float]]]:
+        """Helper method to process images and positions for a given state.
+        
+        :param state_name: The name of the state to process images for (e.g. 'normal', 'hovered')
+        :param normal_images: List of images from the normal state to use as fallback
+        :param normal_positions: List of positions from the normal state to use as fallback
+        :return: Tuple of (list of images, list of positions) for the state
+        """
+        new_images = []
+        new_positions = []
+        
+        # Try multi-image format first
+        try:
+            image_details = self.ui_theme.get_image_details(
+                f"{state_name}_images", self.combined_element_ids
+            )
+            new_images = [detail["surface"] for detail in image_details]
+            new_positions = [detail["position"] for detail in image_details]
+        except LookupError:
+            # Fall back to single image format
+            try:
+                image_details = self.ui_theme.get_image_details(
+                    f"{state_name}_image", self.combined_element_ids
+                )
+                if image_details:
+                    new_images = [detail["surface"] for detail in image_details]
+                    new_positions = [detail["position"] for detail in image_details]
+            except LookupError:
+                pass
+        
+        # Handle fallbacks and position defaults
+        if not new_images:
+            new_images = normal_images.copy()
+            new_positions = normal_positions.copy()
+        
+        while len(new_positions) < len(new_images):
+            new_positions.append((0.5, 0.5))
+        
+        return new_images, new_positions
 
     def _load_images_from_theme(self) -> bool:
         """
@@ -427,7 +445,6 @@ class UICheckBox(UIElement):
                     normal_images = [detail["surface"] for detail in image_details]
                     normal_positions = [detail["position"] for detail in image_details]
             except LookupError:
-                # No normal image found
                 pass
 
         # Ensure we have positions for all normal images (default to center if missing)
@@ -443,53 +460,24 @@ class UICheckBox(UIElement):
             self.normal_image_positions = normal_positions
             changed = True
 
-        # Now process other states with fallback to normal
-        other_state_mappings = [
+        # Process other states with fallback to normal
+        other_states = [
             ("hovered", "hovered_images", "hovered_image_positions"),
             ("selected", "selected_images", "selected_image_positions"),
             ("disabled", "disabled_images", "disabled_image_positions"),
         ]
 
-        for state_name, attr_name, position_attr_name in other_state_mappings:
-            new_images = []
-            new_positions = []
-
-            # First try to load multi-image format (e.g., "hovered_images")
-            try:
-                image_details = self.ui_theme.get_image_details(
-                    f"{state_name}_images", self.combined_element_ids
-                )
-                new_images = [detail["surface"] for detail in image_details]
-                new_positions = [detail["position"] for detail in image_details]
-            except LookupError:
-                # Fall back to single image format (e.g., "hovered_image")
-                try:
-                    image_details = self.ui_theme.get_image_details(
-                        f"{state_name}_image", self.combined_element_ids
-                    )
-                    if image_details:
-                        new_images = [detail["surface"] for detail in image_details]
-                        new_positions = [detail["position"] for detail in image_details]
-                except LookupError:
-                    # No image found for this state
-                    pass
-
-            # Handle fallbacks to normal state
-            if not new_images:
-                # Fall back to normal_images and normal_image_positions
-                new_images = normal_images.copy()
-                new_positions = normal_positions.copy()
-
-            # Ensure we have positions for all images (default to center if missing)
-            while len(new_positions) < len(new_images):
-                new_positions.append((0.5, 0.5))
+        for state_name, images_attr_name, positions_attr_name in other_states:
+            new_images, new_positions = self._process_state_images(
+                state_name, normal_images, normal_positions
+            )
 
             # Check if images have changed
-            current_images = getattr(self, attr_name)
-            current_positions = getattr(self, position_attr_name, [])
+            current_images = getattr(self, images_attr_name)
+            current_positions = getattr(self, positions_attr_name, [])
             if new_images != current_images or new_positions != current_positions:
-                setattr(self, attr_name, new_images)
-                setattr(self, position_attr_name, new_positions)
+                setattr(self, images_attr_name, new_images)
+                setattr(self, positions_attr_name, new_positions)
                 changed = True
 
         return changed
@@ -637,7 +625,8 @@ class UICheckBox(UIElement):
             raise ValueError("Checkbox text must be a string")
 
         self.text = text
-        self.text_label.set_text(text)
+        if self.text_label is not None:
+            self.text_label.set_text(text)
 
     def set_check_symbol(self, symbol: str) -> None:
         """
@@ -684,7 +673,7 @@ class UICheckBox(UIElement):
         super().set_tooltip(text, object_id, text_kwargs, delay, wrap_width)
 
         # Also set the same tooltip on the text label
-        if hasattr(self, "text_label") and self.text_label is not None:
+        if self.text_label is not None:
             self.text_label.set_tooltip(text, object_id, text_kwargs, delay, wrap_width)
 
     def show(self):
@@ -692,14 +681,16 @@ class UICheckBox(UIElement):
         Shows the checkbox and its text label if they were hidden.
         """
         super().show()
-        self.text_label.show()
+        if self.text_label is not None:
+            self.text_label.show()
 
     def hide(self):
         """
         Hides the checkbox and its text label.
         """
         super().hide()
-        self.text_label.hide()
+        if self.text_label is not None:
+            self.text_label.hide()
 
     def disable(self):
         """
@@ -708,7 +699,8 @@ class UICheckBox(UIElement):
         if self.is_enabled and self.drawable_shape is not None:
             self.drawable_shape.set_active_state("disabled")
         super().disable()
-        self.text_label.disable()
+        if self.text_label is not None:
+            self.text_label.disable()
 
     def enable(self):
         """
@@ -720,7 +712,8 @@ class UICheckBox(UIElement):
             else:
                 self.drawable_shape.set_active_state("normal")
         super().enable()
-        self.text_label.enable()
+        if self.text_label is not None:
+            self.text_label.enable()
 
     def on_hovered(self):
         """
@@ -947,7 +940,7 @@ class UICheckBox(UIElement):
         """
         Updates the text label position based on the current checkbox position and text offset.
         """
-        if hasattr(self, "text_label") and self.text_label is not None:
+        if self.text_label is not None:
             # Position the label to the right of the checkbox
             label_x = self.rect.right + self.text_offset
             label_y = self.rect.top
@@ -958,6 +951,32 @@ class UICheckBox(UIElement):
                 label_y -= self.ui_container.rect.top
 
             self.text_label.set_relative_position((label_x, label_y))
+
+    def _create_drawable_shape(self, shape_type: str, rect: pygame.Rect, theming_parameters: Dict) -> Union[RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape]:
+        """
+        Factory method to create the appropriate drawable shape based on shape type.
+
+        :param shape_type: The type of shape to create ('rectangle', 'ellipse', or 'rounded_rectangle')
+        :param rect: The rectangle defining the shape's dimensions
+        :param theming_parameters: Dictionary of theming parameters for the shape
+        :return: The created drawable shape
+        """
+        shape_classes = {
+            "rectangle": RectDrawableShape,
+            "ellipse": EllipseDrawableShape,
+            "rounded_rectangle": RoundedRectangleShape
+        }
+        
+        shape_class = shape_classes.get(shape_type)
+        if shape_class is None:
+            shape_class = RectDrawableShape  # Default fallback
+            
+        return shape_class(
+            rect,
+            theming_parameters,
+            ["normal", "hovered", "disabled", "selected"],
+            self.ui_manager
+        )
 
     def rebuild(self):
         """
@@ -1081,24 +1100,8 @@ class UICheckBox(UIElement):
             "text_vert_alignment": "center",
         }
 
-        # Get shape type
-        shape = getattr(self, "shape", "rectangle")
-
-        # Create appropriate drawable shape
-        if shape == "rectangle":
-            self.drawable_shape = RectDrawableShape(
-                self.rect,
-                theming_parameters,
-                ["normal", "disabled", "selected", "hovered"],
-                self.ui_manager,
-            )
-        elif shape == "rounded_rectangle":
-            self.drawable_shape = RoundedRectangleShape(
-                self.rect,
-                theming_parameters,
-                ["normal", "disabled", "selected", "hovered"],
-                self.ui_manager,
-            )
+        # Create appropriate drawable shape using factory method
+        self.drawable_shape = self._create_drawable_shape(self.shape, self.rect, theming_parameters)
 
         # Set initial state
         self._update_visual_state()
