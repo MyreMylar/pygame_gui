@@ -3,6 +3,7 @@ import pytest
 import importlib
 
 from pygame_gui.__pyinstaller import get_hook_dirs
+
 importlib.import_module("pygame_gui.__pyinstaller.hook-pygame_gui")
 
 

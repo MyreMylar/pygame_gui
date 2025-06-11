@@ -8,7 +8,9 @@ from pygame_gui.core.layered_gui_group import GUISprite, LayeredGUIGroup
 
 
 class MyProperSprite(GUISprite):
-    def __init__(self, groups: Optional[Union[Iterable[LayeredGUIGroup], LayeredGUIGroup]] = None):
+    def __init__(
+        self, groups: Optional[Union[Iterable[LayeredGUIGroup], LayeredGUIGroup]] = None
+    ):
         super().__init__(groups)
         self.blendmode = 0
         self.visible = True
@@ -28,7 +30,7 @@ class MyDodgySprite1:
     def add(self, *groups):
         has = self.__g.__contains__
         for group in groups:
-            if hasattr(group, '_spritegroup'):
+            if hasattr(group, "_spritegroup"):
                 if not has(group):
                     group._add_internal(self)
             else:
@@ -49,7 +51,7 @@ class MyDodgySprite2:
     def add(self, *groups):
         has = self.__g.__contains__
         for group in groups:
-            if hasattr(group, '_spritegroup'):
+            if hasattr(group, "_spritegroup"):
                 if not has(group):
                     group._add_internal(self)
             else:
@@ -67,8 +69,9 @@ class MyDodgySprite3(pygame.sprite.Sprite):
 
 
 class TestUIElement:
-    def test_remove_sprite_from_group(self, _init_pygame, _display_surface_return_none, default_ui_manager):
-
+    def test_remove_sprite_from_group(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
         group = LayeredGUIGroup()
         group_2 = LayeredGUIGroup()
 
@@ -85,7 +88,9 @@ class TestUIElement:
         assert len(group.sprites()) == 0
         assert len(group_2.sprites()) == 0
 
-    def test_add_dodgy_sprites(self, _init_pygame, _display_surface_return_none, default_ui_manager):
+    def test_add_dodgy_sprites(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
         group = LayeredGUIGroup()
 
         with pytest.raises(AttributeError):
@@ -97,7 +102,9 @@ class TestUIElement:
         with pytest.raises(TypeError):
             MyDodgySprite3(group)
 
-    def test_sprite_set_layer_before_add(self, _init_pygame, _display_surface_return_none, default_ui_manager):
+    def test_sprite_set_layer_before_add(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
         group = LayeredGUIGroup()
 
         sprite1 = MyProperSprite()
@@ -115,7 +122,9 @@ class TestUIElement:
 
         assert len(group.layers()) == 3 and group.layers() == [0, 1, 2]
 
-    def test_print_sprite(self, _init_pygame, _display_surface_return_none, default_ui_manager):
+    def test_print_sprite(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
         group = LayeredGUIGroup()
 
         sprite1 = MyProperSprite()
@@ -123,5 +132,5 @@ class TestUIElement:
         print(sprite1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.console_main()

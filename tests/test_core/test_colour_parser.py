@@ -1,11 +1,21 @@
 import pytest
 import pygame
-from pygame_gui.core.colour_parser import parse_degree_string, is_u8_string, is_degree_string, is_percentage_string, parse_colour_or_gradient_string, is_valid_colour_string, is_valid_gradient_string
+from pygame_gui.core.colour_parser import (
+    parse_degree_string,
+    is_u8_string,
+    is_degree_string,
+    is_percentage_string,
+    parse_colour_or_gradient_string,
+    is_valid_colour_string,
+    is_valid_gradient_string,
+)
 
 
 class TestColourParsing:
     def test_rgb(self, _init_pygame):
-        assert parse_colour_or_gradient_string("rgb(20, 30, 50)") == pygame.Color(20, 30, 50)
+        assert parse_colour_or_gradient_string("rgb(20, 30, 50)") == pygame.Color(
+            20, 30, 50
+        )
 
     def test_rgb_out_of_range(self, _init_pygame):
         assert is_valid_colour_string("rgb(-20, 30, 50") is False
@@ -65,10 +75,20 @@ class TestColourParsing:
         assert is_valid_colour_string("cmy(.30, .40, .100)") is True
 
     def test_triple_gradient(self, _init_pygame):
-        assert is_valid_gradient_string("rgb(20, 30, 40),cmy(0.2, 0.5, 0.7),hsl(40deg, 50%, 70%),30deg") is True
+        assert (
+            is_valid_gradient_string(
+                "rgb(20, 30, 40),cmy(0.2, 0.5, 0.7),hsl(40deg, 50%, 70%),30deg"
+            )
+            is True
+        )
 
     def test_quadruple_gradient(self, _init_pygame):
-        assert is_valid_gradient_string("rgb(20, 30, 40),cmy(0.2, 0.5, 0.7),hsl(40deg, 50%, 70%),#32FC95,30deg") is False
+        assert (
+            is_valid_gradient_string(
+                "rgb(20, 30, 40),cmy(0.2, 0.5, 0.7),hsl(40deg, 50%, 70%),#32FC95,30deg"
+            )
+            is False
+        )
 
     def test_no_colour_gradient(self, _init_pygame):
         assert is_valid_gradient_string(",30deg") is False
@@ -95,10 +115,14 @@ class TestColourParsing:
         assert is_valid_colour_string("#222,#ccc,45deg,") is False
 
     def test_hex_shorthand_alpha_parsing(self, _init_pygame):
-        assert (parse_colour_or_gradient_string("#ffff") == pygame.Color(255, 255, 255, 255)) is True
+        assert (
+            parse_colour_or_gradient_string("#ffff") == pygame.Color(255, 255, 255, 255)
+        ) is True
 
     def test_hex_shorthand_parsing(self, _init_pygame):
-        assert (parse_colour_or_gradient_string("#fff") == pygame.Color(255, 255, 255)) is True
+        assert (
+            parse_colour_or_gradient_string("#fff") == pygame.Color(255, 255, 255)
+        ) is True
 
     def test_rgba_validity(self, _init_pygame):
         assert is_valid_colour_string("rgba(0, 20, 40, 30)") is True
@@ -152,20 +176,30 @@ class TestColourParsing:
         assert is_u8_string("-2") is False
 
     def test_is_u8_on_bounds(self, _init_pygame):
-        assert is_u8_string("0") is True and is_u8_string("255") is True and is_u8_string("-1") is False and is_u8_string("257") is False
+        assert (
+            is_u8_string("0") is True
+            and is_u8_string("255") is True
+            and is_u8_string("-1") is False
+            and is_u8_string("257") is False
+        )
 
     def test_u8_float(self, _init_pygame):
         assert is_u8_string("4.3") is False
 
     def test_degree_on_bounds(self, _init_pygame):
-        assert is_degree_string("0") is True and is_degree_string("360") is True and is_degree_string("-361") is False and is_degree_string("361") is False
+        assert (
+            is_degree_string("0") is True
+            and is_degree_string("360") is True
+            and is_degree_string("-361") is False
+            and is_degree_string("361") is False
+        )
 
     def test_degree_unit(self, _init_pygame):
         assert is_degree_string("40deg") is True
-    
+
     def test_degree_only_unit(self, _init_pygame):
         assert is_degree_string("deg") is False
-    
+
     def test_percentage_only_sign(self, _init_pygame):
         assert is_percentage_string("%") is False
 

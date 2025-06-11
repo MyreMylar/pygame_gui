@@ -8,14 +8,22 @@ from pygame_gui.core.gui_font_pygame import GUIFontPygame
 
 class TestFontEquivalence:
     def test_creation(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         assert ftfont_font.point_size == pygame_font.point_size
 
     def test_underline(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         ftfont_font.underline = True
         pygame_font.underline = True
@@ -26,8 +34,12 @@ class TestFontEquivalence:
         assert ftfont_font.underline == pygame_font.underline
 
     def test_underline_adjustment(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         ftfont_font.underline_adjustment = 0.5
         pygame_font.underline_adjustment = 0.5
@@ -38,14 +50,22 @@ class TestFontEquivalence:
         assert ftfont_font.underline_adjustment == pygame_font.underline_adjustment
 
     def test_get_point_size(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         assert ftfont_font.get_point_size() == pygame_font.get_point_size()
 
     def test_get_padding_height(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         assert ftfont_font.get_padding_height() == pygame_font.get_padding_height()
 
@@ -58,19 +78,27 @@ class TestFontEquivalence:
         :param _init_pygame:
         :return:
         """
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         ftfont_rect = ftfont_font.get_rect("Hello World")
         pgfont_rect = pygame_font.get_rect("Hello World")
-        assert ftfont_rect.width == pytest.approx(pgfont_rect.width,  rel=1)
+        assert ftfont_rect.width == pytest.approx(pgfont_rect.width, rel=1)
         assert ftfont_rect.height == pytest.approx(pgfont_rect.height, rel=2)
         assert ftfont_rect.top == pgfont_rect.top
         assert ftfont_rect.left == pgfont_rect.left
 
     def test_metrics(self, _init_pygame):
-        ftfont_font = GUIFontFreetype("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
-        pygame_font = GUIFontPygame("tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None)
+        ftfont_font = GUIFontFreetype(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
+        pygame_font = GUIFontPygame(
+            "tests/data/Roboto-Regular.ttf", 20, force_style=False, style=None
+        )
 
         ftfont_metrics = ftfont_font.get_metrics("Hello World")
         pgfont_metrics = pygame_font.get_metrics("Hello World")
@@ -82,10 +110,11 @@ class TestFontEquivalence:
             assert ftfont_metrics[index][1] == pgfont_metrics[index][1]  # max x
             assert ftfont_metrics[index][2] == pgfont_metrics[index][2]  # min y
             assert ftfont_metrics[index][3] == pgfont_metrics[index][3]  # max y
-            assert ftfont_metrics[index][4] == pgfont_metrics[index][4]  # horizontal_advance_x
+            assert (
+                ftfont_metrics[index][4] == pgfont_metrics[index][4]
+            )  # horizontal_advance_x
             # pg font does nto have vertical advance in the metrics (do we use it?)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.console_main()
-
