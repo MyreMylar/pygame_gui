@@ -245,7 +245,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         pos = self.relative_rect.left - width_increase, self.relative_rect.top
         self.set_relative_position(pos)
 
-        # Moving the elements anchored to the top to make it seem like the container just increased its top edge
+        # Moving the elements anchored to the left to make it seem like the container just increased its left edge
         for element in self.elements:
             anchors = element.get_anchors()
             if (
@@ -414,7 +414,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         Update the positioning of the contained elements of this container. To be called when one of the contained
         elements may have moved, been resized or changed its anchors.
 
-        :param target: the UI element that has been benn moved resized or changed its anchors.
+        :param target: the UI element that has been moved resized or changed its anchors.
         """
         for element in self.elements:
             if target in element.get_anchor_targets():
