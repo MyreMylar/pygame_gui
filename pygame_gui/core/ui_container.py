@@ -227,25 +227,25 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         super().set_dimensions(dimensions)
         self.update_containing_rect_position()
 
-    def expand_left(self, width_increase: int) -> None:
+    def width_change_left(self, width_change: int) -> None:
         """
-        Increases the width of the container, but instead of expanding the right edge, it expands the left edge.
+        Changes the width of the container, but instead of expanding the right edge, it expands the left edge.
         This is achieved by setting the new dimensions and updating the anchors of all the elements anchored
         to the left of the container.
 
-        :param width_increase: The width to increase by. Pass in negative values to decrease the size
+        :param width_change: The width to change by. Pass in negative values to decrease the size
         :return: None
         """
 
         # Increase width
-        dim = self.rect.width + width_increase, self.rect.height
+        dim = self.rect.width + width_change, self.rect.height
         self.set_dimensions(dim)
 
         # Reposition so that the right edge is back to where it was
-        pos = self.relative_rect.left - width_increase, self.relative_rect.top
+        pos = self.relative_rect.left - width_change, self.relative_rect.top
         self.set_relative_position(pos)
 
-        # Moving the elements anchored to the top to make it seem like the container just increased its top edge
+        # Moving the elements anchored to the left to make it seem like the container just increased its left edge
         for element in self.elements:
             anchors = element.get_anchors()
             if (
@@ -255,25 +255,25 @@ class UIContainer(UIElement, IContainerAndContainerLike):
             ):
                 element.set_relative_position(
                     pygame.Vector2(element.get_relative_rect().topleft)
-                    + pygame.Vector2(width_increase, 0)
+                    + pygame.Vector2(width_change, 0)
                 )
 
-    def expand_top(self, height_increase: int) -> None:
+    def height_change_top(self, height_change: int) -> None:
         """
-        Increases the height of the container, but instead of expanding the bottom edge, it expands the top edge.
+        Changes the height of the container, but instead of expanding the bottom edge, it expands the top edge.
         This is achieved by setting the new dimensions and updating the anchors of all the elements anchored
         to the top of the container.
 
-        :param height_increase: The height to increase by. Pass in negative values to decrease the size
+        :param height_change: The height to change by. Pass in negative values to decrease the size
         :return: None
         """
 
         # Increase height
-        dim = self.rect.width, self.rect.height + height_increase
+        dim = self.rect.width, self.rect.height + height_change
         self.set_dimensions(dim)
 
         # Reposition so that the bottom edge is back to where it was
-        pos = self.relative_rect.left, self.relative_rect.top - height_increase
+        pos = self.relative_rect.left, self.relative_rect.top - height_change
         self.set_relative_position(pos)
 
         # Moving the elements anchored to the top to make it seem like the container just increased its top edge
@@ -286,7 +286,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
             ):
                 element.set_relative_position(
                     pygame.Vector2(element.get_relative_rect().topleft)
-                    + pygame.Vector2(0, height_increase)
+                    + pygame.Vector2(0, height_change)
                 )
 
     def get_top_layer(self) -> int:
@@ -414,7 +414,7 @@ class UIContainer(UIElement, IContainerAndContainerLike):
         Update the positioning of the contained elements of this container. To be called when one of the contained
         elements may have moved, been resized or changed its anchors.
 
-        :param target: the UI element that has been benn moved resized or changed its anchors.
+        :param target: the UI element that has been moved resized or changed its anchors.
         """
         for element in self.elements:
             if target in element.get_anchor_targets():

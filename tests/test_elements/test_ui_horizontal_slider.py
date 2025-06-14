@@ -12,21 +12,32 @@ from pygame_gui import UI_BUTTON_PRESSED
 
 
 class TestUIHorizontalSlider:
-
-    def test_creation(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                      _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_creation(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
         assert slider.image is not None
 
-    def test_rebuild(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                     _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_rebuild(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
         slider.rebuild()
 
         assert slider.image is not None
@@ -37,44 +48,60 @@ class TestUIHorizontalSlider:
 
         assert slider.left_button is None and slider.right_button is None
 
-    def test_kill(self, _init_pygame, default_ui_manager: IUIManagerInterface,
-                  _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_kill(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         assert len(default_ui_manager.get_root_container().elements) == 2
         assert len(default_ui_manager.get_sprite_group().sprites()) == 6
-        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container(),
-                                                                   slider,
-                                                                   slider.button_container,
-                                                                   slider.left_button,
-                                                                   slider.right_button,
-                                                                   slider.sliding_button]
+        assert default_ui_manager.get_sprite_group().sprites() == [
+            default_ui_manager.get_root_container(),
+            slider,
+            slider.button_container,
+            slider.left_button,
+            slider.right_button,
+            slider.sliding_button,
+        ]
         slider.kill()
         assert len(default_ui_manager.get_root_container().elements) == 0
         assert len(default_ui_manager.get_sprite_group().sprites()) == 1
-        assert default_ui_manager.get_sprite_group().sprites() == [default_ui_manager.get_root_container()]
+        assert default_ui_manager.get_sprite_group().sprites() == [
+            default_ui_manager.get_root_container()
+        ]
 
-    def test_check_has_moved_recently(self, _init_pygame, default_ui_manager,
-                                      _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_check_has_moved_recently(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         # move the scroll bar a bit
         slider.left_button.held = True
         slider.update(0.2)
         assert slider.has_moved_recently is True
 
-    def test_check_update_buttons(self, _init_pygame, default_ui_manager,
-                                  _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_check_update_buttons(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         # scroll down a bit then up again to exercise update
         slider.get_current_value()  # Clear has moved this turn
@@ -93,12 +120,15 @@ class TestUIHorizontalSlider:
 
         assert slider.has_moved_recently is True
 
-    def test_check_update_sliding_bar(self, _init_pygame, default_ui_manager,
-                                      _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_check_update_sliding_bar(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         # scroll down a bit then up again to exercise update
         default_ui_manager.mouse_position = (100, 15)
@@ -112,62 +142,82 @@ class TestUIHorizontalSlider:
 
         assert slider.grabbed_slider is False
 
-    def test_get_current_value(self, _init_pygame, default_ui_manager,
-                               _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_get_current_value(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         assert slider.get_current_value() == 50
 
-    def test_set_current_value_in_range(self, _init_pygame, default_ui_manager,
-                                        _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_set_current_value_in_range(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
         slider.set_current_value(75)
         assert slider.get_current_value() == 75
 
-    def test_set_current_value_out_of_range(self, _init_pygame, default_ui_manager,
-                                            _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=default_ui_manager)
+    def test_set_current_value_out_of_range(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=default_ui_manager,
+        )
 
-        with pytest.warns(UserWarning, match='value not in range'):
+        with pytest.warns(UserWarning, match="value not in range"):
             slider.set_current_value(200)
 
         slider.set_current_value(200, warn=False)
 
         assert slider.current_value == 100
 
-    def test_rebuild_from_theme_data_non_default(self, _init_pygame,
-                                                 _display_surface_return_none):
-        manager = UIManager((800, 600), os.path.join("tests", "data",
-                                                     "themes",
-                                                     "ui_horizontal_slider_non_default.json"))
+    def test_rebuild_from_theme_data_non_default(
+        self, _init_pygame, _display_surface_return_none
+    ):
+        manager = UIManager(
+            (800, 600),
+            os.path.join(
+                "tests", "data", "themes", "ui_horizontal_slider_non_default.json"
+            ),
+        )
 
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=manager)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=manager,
+        )
         assert slider.image is not None
 
-    def test_rebuild_from_theme_data_no_arrow_buttons(self, _init_pygame,
-                                                      _display_surface_return_none):
-        manager = UIManager((800, 600), os.path.join("tests",
-                                                     "data",
-                                                     "themes",
-                                                     "ui_horizontal_slider_no_arrows.json"))
+    def test_rebuild_from_theme_data_no_arrow_buttons(
+        self, _init_pygame, _display_surface_return_none
+    ):
+        manager = UIManager(
+            (800, 600),
+            os.path.join(
+                "tests", "data", "themes", "ui_horizontal_slider_no_arrows.json"
+            ),
+        )
 
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=50,
-                                    value_range=(0, 100),
-                                    manager=manager)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=50,
+            value_range=(0, 100),
+            manager=manager,
+        )
 
         assert slider.left_button is None
         assert slider.right_button is None
@@ -176,119 +226,185 @@ class TestUIHorizontalSlider:
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
     @pytest.mark.filterwarnings("ignore:Misc data validation")
     @pytest.mark.filterwarnings("ignore:Invalid value")
-    def test_rebuild_from_theme_data_bad_values(self, _init_pygame,
-                                                _display_surface_return_none):
+    def test_rebuild_from_theme_data_bad_values(
+        self, _init_pygame, _display_surface_return_none
+    ):
         with pytest.warns(UserWarning, match="Theme validation found 4 errors"):
-            manager = UIManager((800, 600), os.path.join("tests",
-                                                         "data",
-                                                         "themes",
-                                                         "ui_horizontal_slider_bad_values.json"))
+            manager = UIManager(
+                (800, 600),
+                os.path.join(
+                    "tests", "data", "themes", "ui_horizontal_slider_bad_values.json"
+                ),
+            )
 
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(100, 100, 200, 30),
-                                    start_value=51,
-                                    value_range=(0, 100),
-                                    manager=manager)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            start_value=51,
+            value_range=(0, 100),
+            manager=manager,
+        )
         assert slider.image is not None
 
-    def test_set_position(self, _init_pygame, default_ui_manager, _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(300, 400, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_set_position(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(300, 400, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         slider.set_position((200, 200))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
-                                                              'pos': (205, 205)}))
+        default_ui_manager.process_events(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (205, 205)})
+        )
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.left_button.held is True
 
-    def test_set_relative_position(self, _init_pygame, default_ui_manager,
-                                   _display_surface_return_none):
-        test_container = UIContainer(relative_rect=pygame.Rect(100, 100, 300, 60),
-                                     manager=default_ui_manager)
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(300, 400, 150, 40),
-                                    start_value=50,
-                                    container=test_container,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_set_relative_position(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        test_container = UIContainer(
+            relative_rect=pygame.Rect(100, 100, 300, 60), manager=default_ui_manager
+        )
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(300, 400, 150, 40),
+            start_value=50,
+            container=test_container,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         slider.set_relative_position((150.0, 30.0))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
-                                                              'pos': (260, 150)}))
+        default_ui_manager.process_events(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (260, 150)})
+        )
 
         assert slider.rect.topleft == (250, 130) and slider.left_button.held is True
 
-    def test_set_dimensions(self, _init_pygame, default_ui_manager, _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_set_dimensions(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         slider.set_dimensions((200, 60))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
-                                                              'pos': (195, 50)}))
+        default_ui_manager.process_events(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (195, 50)})
+        )
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
-        assert slider.right_button.rect.bottom == 60 - (slider.shadow_width + slider.border_width["bottom"])
-        assert slider.right_button.rect.right == 200 - (slider.shadow_width + slider.border_width["right"])
+        assert slider.right_button.rect.top == (
+            slider.shadow_width + slider.border_width["top"]
+        )
+        assert slider.right_button.rect.bottom == 60 - (
+            slider.shadow_width + slider.border_width["bottom"]
+        )
+        assert slider.right_button.rect.right == 200 - (
+            slider.shadow_width + slider.border_width["right"]
+        )
 
         slider.set_dimensions((100, 30))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
-                                                              'pos': (95, 15)}))
+        default_ui_manager.process_events(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (95, 15)})
+        )
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
-        assert slider.right_button.rect.bottom == 30 - (slider.shadow_width + slider.border_width["bottom"])
-        assert slider.right_button.rect.right == 100 - (slider.shadow_width + slider.border_width["right"])
+        assert slider.right_button.rect.top == (
+            slider.shadow_width + slider.border_width["top"]
+        )
+        assert slider.right_button.rect.bottom == 30 - (
+            slider.shadow_width + slider.border_width["bottom"]
+        )
+        assert slider.right_button.rect.right == 100 - (
+            slider.shadow_width + slider.border_width["right"]
+        )
 
         slider.set_dimensions((150, 45))
 
         # try to click on the slider
-        default_ui_manager.process_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN,
-                                                             {'button': 1,
-                                                              'pos': (145, 22)}))
+        default_ui_manager.process_events(
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (145, 22)})
+        )
         # if we successfully clicked on the moved slider then this button should be True
         assert slider.right_button.held is True
-        assert slider.right_button.rect.top == (slider.shadow_width + slider.border_width["top"])
-        assert slider.right_button.rect.bottom == 45 - (slider.shadow_width + slider.border_width["bottom"])
-        assert slider.right_button.rect.right == 150 - (slider.shadow_width + slider.border_width["right"])
+        assert slider.right_button.rect.top == (
+            slider.shadow_width + slider.border_width["top"]
+        )
+        assert slider.right_button.rect.bottom == 45 - (
+            slider.shadow_width + slider.border_width["bottom"]
+        )
+        assert slider.right_button.rect.right == 150 - (
+            slider.shadow_width + slider.border_width["right"]
+        )
 
-    def test_disable(self, _init_pygame: None, default_ui_manager: UIManager,
-                     _display_surface_return_none: None):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_disable(
+        self,
+        _init_pygame: None,
+        default_ui_manager: UIManager,
+        _display_surface_return_none: None,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
-        assert slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': slider.left_button}))
-        assert not slider.process_event(pygame.event.Event(UI_BUTTON_PRESSED, {'ui_element': None}))
+        assert slider.process_event(
+            pygame.event.Event(UI_BUTTON_PRESSED, {"ui_element": slider.left_button})
+        )
+        assert not slider.process_event(
+            pygame.event.Event(UI_BUTTON_PRESSED, {"ui_element": None})
+        )
 
         slider.disable()
 
         # process a mouse button down event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
-                                                        'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONDOWN,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         slider.update(0.1)
 
         # process a mouse button up event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
-                                                      'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONUP,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         assert slider.get_current_value() == 49 and slider.is_enabled is False
 
-    def test_enable(self, _init_pygame: None, default_ui_manager: UIManager,
-                    _display_surface_return_none: None):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_enable(
+        self,
+        _init_pygame: None,
+        default_ui_manager: UIManager,
+        _display_surface_return_none: None,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         slider.disable()
 
@@ -296,62 +412,101 @@ class TestUIHorizontalSlider:
 
         # process a mouse button down event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
-                                                        'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONDOWN,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         slider.update(0.5)
         slider.update(0.5)
 
         # process a mouse button up event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
-                                                      'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONUP,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         assert slider.get_current_value() != 50 and slider.is_enabled is True
 
-    def test_ints_in_ints_out(self, _init_pygame: None, default_ui_manager: UIManager,
-                              _display_surface_return_none: None):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+    def test_ints_in_ints_out(
+        self,
+        _init_pygame: None,
+        default_ui_manager: UIManager,
+        _display_surface_return_none: None,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         assert isinstance(slider.get_current_value(), int)
         # process a mouse button down event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
-                                                        'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONDOWN,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         slider.update(0.1)
 
         # process a mouse button up event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
-                                                      'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONUP,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         assert isinstance(slider.get_current_value(), int)
 
-    def test_floats_in_floats_out(self, _init_pygame: None, default_ui_manager: UIManager,
-                                  _display_surface_return_none: None):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=25.0,
-                                    value_range=(0.0, 200.0), manager=default_ui_manager)
+    def test_floats_in_floats_out(
+        self,
+        _init_pygame: None,
+        default_ui_manager: UIManager,
+        _display_surface_return_none: None,
+    ):
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=25.0,
+            value_range=(0.0, 200.0),
+            manager=default_ui_manager,
+        )
 
         assert isinstance(slider.get_current_value(), float)
         # process a mouse button down event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'button': 1,
-                                                        'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONDOWN,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         slider.update(0.1)
 
         # process a mouse button up event
         slider.left_button.process_event(
-            pygame.event.Event(pygame.MOUSEBUTTONUP, {'button': 1,
-                                                      'pos': slider.left_button.rect.center}))
+            pygame.event.Event(
+                pygame.MOUSEBUTTONUP,
+                {"button": 1, "pos": slider.left_button.rect.center},
+            )
+        )
 
         assert isinstance(slider.get_current_value(), float)
 
     def test_show(self, _init_pygame, default_ui_manager, _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager, visible=0)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+            visible=0,
+        )
 
         assert slider.visible == 0
 
@@ -370,8 +525,12 @@ class TestUIHorizontalSlider:
         assert slider.right_button.visible == 1
 
     def test_hide(self, _init_pygame, default_ui_manager, _display_surface_return_none):
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(0, 0, 150, 40), start_value=50,
-                                    value_range=(0, 200), manager=default_ui_manager)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(0, 0, 150, 40),
+            start_value=50,
+            value_range=(0, 200),
+            manager=default_ui_manager,
+        )
 
         assert slider.visible == 1
 
@@ -389,15 +548,22 @@ class TestUIHorizontalSlider:
         assert slider.left_button.visible == 0
         assert slider.right_button.visible == 0
 
-    def test_show_hide_rendering(self, _init_pygame, default_ui_manager, _display_surface_return_none):
+    def test_show_hide_rendering(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
         resolution = (400, 400)
         empty_surface = pygame.Surface(resolution)
         empty_surface.fill(pygame.Color(0, 0, 0))
 
         surface = empty_surface.copy()
         manager = UIManager(resolution)
-        slider = UIHorizontalSlider(relative_rect=pygame.Rect(25, 25, 375, 150), start_value=50,
-                                    value_range=(0, 200), manager=manager, visible=0)
+        slider = UIHorizontalSlider(
+            relative_rect=pygame.Rect(25, 25, 375, 150),
+            start_value=50,
+            value_range=(0, 200),
+            manager=manager,
+            visible=0,
+        )
         manager.update(0.01)
         manager.draw_ui(surface)
         assert compare_surfaces(empty_surface, surface)
@@ -415,5 +581,5 @@ class TestUIHorizontalSlider:
         assert compare_surfaces(empty_surface, surface)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.console_main()

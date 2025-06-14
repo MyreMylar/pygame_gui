@@ -223,7 +223,7 @@ class UISection(UIAutoResizingContainer):
                 # Show the container. It will resize automatically when its update gets called.
                 container.show()
                 container.resize_bottom = True
-                container.should_update_dimensions = True
+                container.should_update_rect_edges = True
 
             self.should_transition = False
 
@@ -1236,11 +1236,6 @@ class UIForm(UIScrollingContainer):
             )
 
         self.on_fresh_drawable_shape_ready()
-
-        # TODO: Remove when resizing bugs are fixed
-        if isinstance(self.scrollable_container, UIAutoResizingContainer):
-            min_edges_rect = pygame.Rect(self.scrollable_container.relative_rect)
-            self.scrollable_container.update_min_edges_rect(min_edges_rect)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

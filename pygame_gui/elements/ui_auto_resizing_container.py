@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, List
+from typing import Optional, Union, Dict, List, Tuple
 
 import pygame
 
@@ -16,10 +16,8 @@ class UIAutoResizingContainer(UIContainer):
     A container like UI element that updates its size as elements within it change size, or new elements are added
 
     :param relative_rect: The starting size and relative position of the container.
-    :param min_edges_rect: The Rect which defines the maximum values for the left and top,
-     and the minimum values for the right and bottom edges of the container. Defaults to the None (current rect)
-    :param max_edges_rect: The Rect which defines the minimum values for the left and top,
-     and the maximum values for the right and bottom edges of the container. Defaults to the None (unbounded)
+    :param min_dimensions: The values which define the minimum dimensions for the container. Defaults to the None (current rect)
+    :param max_dimensions: The values which define the maximum dimensions for the container Defaults to the None (unbounded)
     :param resize_left: Should the left side be resized?
     :param resize_right: Should the right side be resized?
     :param resize_top: Should the top side be resized?
@@ -41,8 +39,8 @@ class UIAutoResizingContainer(UIContainer):
     def __init__(
         self,
         relative_rect: RectLike,
-        min_edges_rect: Optional[pygame.Rect] = None,
-        max_edges_rect: Optional[pygame.Rect] = None,
+        min_dimensions: Optional[Union[pygame.Rect, Tuple[int, int]]] = None,
+        max_dimensions: Optional[Union[pygame.Rect, Tuple[int, int]]] = None,
         resize_left: bool = True,
         resize_right: bool = True,
         resize_top: bool = True,
@@ -55,6 +53,7 @@ class UIAutoResizingContainer(UIContainer):
         object_id: Optional[Union[ObjectID, str]] = None,
         anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
         visible: int = 1,
+        include_min_dimension_sized_root_pos_element: bool = True,
     ):
         super().__init__(
             relative_rect,
@@ -68,19 +67,19 @@ class UIAutoResizingContainer(UIContainer):
             element_id=["auto_resizing_container"],
         )
 
-        # TODO: Add validation for min and max edges rect
-        if min_edges_rect is None:
-            self.min_edges_rect: pygame.Rect = pygame.Rect(
-                self.get_relative_rect().copy()
-            )
+        if min_dimensions is None:
+            self.min_dimensions: Tuple[int, int] = self.get_relative_rect().size
+
         else:
-            self.min_edges_rect = min_edges_rect
+            if isinstance(min_dimensions, pygame.Rect):
+                self.min_dimensions = min_dimensions.size
+            else:
+                self.min_dimensions = min_dimensions
 
-        self.max_edges_rect: pygame.Rect | None = max_edges_rect
-
-        self.abs_min_edges_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
-        self.abs_max_edges_rect: Optional[pygame.Rect] = None
-        self.recalculate_abs_edges_rect()
+        if isinstance(max_dimensions, pygame.Rect):
+            self.max_dimensions: Optional[Tuple[int, int]] = max_dimensions.size
+        else:
+            self.max_dimensions = max_dimensions
 
         self.resize_left = resize_left
         self.resize_right = resize_right
@@ -100,9 +99,18 @@ class UIAutoResizingContainer(UIContainer):
         self.bottom_to_top_elements: List[IUIElementInterface] = []
 
         self.should_update_sorting = False
-        self.should_update_dimensions = False
-
+        self.should_update_rect_edges = False
         self.has_recently_updated_dimensions = False
+
+        self._container_root_element: Optional[UIElement] = None
+        if include_min_dimension_sized_root_pos_element:
+            self._container_root_element = UIElement(
+                pygame.Rect((0, 0), self.min_dimensions),
+                manager,
+                self,
+                starting_height=starting_height,
+                layer_thickness=0,
+            )
 
     def add_element(self, element: IUIElementInterface) -> None:
         """
@@ -112,20 +120,30 @@ class UIAutoResizingContainer(UIContainer):
         :param element: A UIElement to add to this container.
         :return: None
         """
+        # Store current rect before adding element
+        old_rect = self.get_relative_rect().copy()
+
+        # Add the element
         super().add_element(element)
 
-        self.should_update_sorting = True  # Currently, the rect is just a copy of relative rect so cannot do sorting
-        self.should_update_dimensions = True
+        # Update sorting and dimensions
+        self.should_update_sorting = True
+        self.should_update_rect_edges = True
 
     def remove_element(self, element: IUIElementInterface) -> None:
         """
-        Remove a UIElement from this container.
+        Remove a UIElement from this container. Overridden to handle auto-resizing.
 
         :param element: A UIElement to remove from this container.
         :return: None
         """
-        super().remove_element(element)
+        # Store the current rect before removal
+        old_rect = self.get_relative_rect().copy()
 
+        # Store element's rect for later comparison
+        element_rect = element.get_abs_rect()
+
+        # Remove the element from all tracking lists
         if element in self.left_to_right_elements:
             self.left_to_right_elements.remove(element)
 
@@ -138,26 +156,57 @@ class UIAutoResizingContainer(UIContainer):
         if element in self.bottom_to_top_elements:
             self.bottom_to_top_elements.remove(element)
 
+        # Update extreme elements before calling super's remove_element
         if element in (
             self.left_element,
             self.right_element,
             self.top_element,
             self.bottom_element,
         ):
+            # Remove the element from extreme elements
+            if element == self.left_element:
+                self.left_element = None
+            if element == self.right_element:
+                self.right_element = None
+            if element == self.top_element:
+                self.top_element = None
+            if element == self.bottom_element:
+                self.bottom_element = None
+
+            # Update extreme elements after removal
             self._update_extreme_elements()
 
-        self.should_update_dimensions = True
+        # Call super's remove_element
+        super().remove_element(element)
+
+        # Update dimensions to handle auto-resizing
+        self.should_update_rect_edges = True
+
+        # Update dimensions immediately if element was at the edges
+        if element_rect is not None:
+            container_rect = self.get_abs_rect()
+            if (
+                element_rect.left <= container_rect.left
+                or element_rect.right >= container_rect.right
+                or element_rect.top <= container_rect.top
+                or element_rect.bottom >= container_rect.bottom
+            ):
+                self._update_sorting()
+                self._update_rect_edges()
 
     def _get_left_most_point(self) -> int:
         """
-        Gets the minimum x value any element has clamped to the min_edges_rect and max_edges_rect
+        Gets the minimum x value any element has.
+
         :return: An integer
         """
-        left = self.abs_min_edges_rect.left
+        # Start with current left edge
+        left = self.get_abs_rect().left
+
+        # Check elements
         if self.left_element:
-            left = min(left, int(self.left_element.get_abs_rect().left))
-        if self.abs_max_edges_rect is not None:
-            left = max(left, int(self.abs_max_edges_rect.left))
+            left = int(self.left_element.get_abs_rect().left)
+
         return left
 
     def _get_right_most_point(self) -> int:
@@ -165,11 +214,13 @@ class UIAutoResizingContainer(UIContainer):
         Gets the maximum x value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        right = self.abs_min_edges_rect.right
+        # Start with current rect's right edge
+        right = self.get_abs_rect().right
+
+        # Check elements
         if self.right_element:
-            right = max(right, int(self.right_element.get_abs_rect().right))
-        if self.abs_max_edges_rect is not None:
-            right = min(right, int(self.abs_max_edges_rect.right))
+            right = int(self.right_element.get_abs_rect().right)
+
         return right
 
     def _get_top_most_point(self) -> int:
@@ -177,11 +228,11 @@ class UIAutoResizingContainer(UIContainer):
         Gets the minimum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        top = self.abs_min_edges_rect.top
+        top = self.get_abs_rect().top
+
         if self.top_element:
-            top = min(top, int(self.top_element.get_abs_rect().top))
-        if self.abs_max_edges_rect is not None:
-            top = max(top, int(self.abs_max_edges_rect.top))
+            top = int(self.top_element.get_abs_rect().top)
+
         return top
 
     def _get_bottom_most_point(self) -> int:
@@ -189,42 +240,14 @@ class UIAutoResizingContainer(UIContainer):
         Gets the maximum y value any element has clamped to the min_edges_rect and max_edges_rect
         :return: An integer
         """
-        bottom = self.abs_min_edges_rect.bottom
+        # Start with current rect's bottom edge
+        bottom = self.get_abs_rect().bottom
+
+        # Check elements
         if self.bottom_element:
-            bottom = max(bottom, int(self.bottom_element.get_abs_rect().bottom))
-        if self.abs_max_edges_rect is not None:
-            bottom = min(bottom, int(self.abs_max_edges_rect.bottom))
+            bottom = int(self.bottom_element.get_abs_rect().bottom)
+
         return bottom
-
-    def recalculate_abs_edges_rect(self) -> None:
-        """
-        Used to recalculate the absolute rects from the min and max edges rect which control the minimum and maximum
-        sizes of the container. Usually called when the container of this container has moved, or the minimum or
-        maximum rects have changed.
-
-        :return: None
-        """
-        if self.ui_container is not None and self.anchors is not None:
-            old_abs_min_edge_rect = self.abs_min_edges_rect
-            old_abs_max_edges_rect = self.abs_max_edges_rect
-            self.abs_min_edges_rect = self._calc_abs_rect_pos_from_rel_rect(
-                relative_rect=self.min_edges_rect,
-                container=self.ui_container,
-                anchors=self.anchors,
-            )[0]
-
-            if self.max_edges_rect is not None:
-                self.abs_max_edges_rect = self._calc_abs_rect_pos_from_rel_rect(
-                    relative_rect=self.max_edges_rect,
-                    container=self.ui_container,
-                    anchors=self.anchors,
-                )[0]
-
-            if (
-                old_abs_min_edge_rect != self.abs_min_edges_rect
-                or old_abs_max_edges_rect != self.abs_max_edges_rect
-            ):
-                self.should_update_dimensions = True
 
     def update_containing_rect_position(self) -> None:
         """
@@ -233,50 +256,19 @@ class UIAutoResizingContainer(UIContainer):
         :return: None
         """
         super().update_containing_rect_position()
-        self.recalculate_abs_edges_rect()
-
-    def update_min_edges_rect(self, new_rect: pygame.Rect) -> None:
-        """
-        Updates the container's maximum values for the left and top, and the minimum value for
-        the right and bottom edges based upon the edges of the new rect.
-
-        Call the update function if you want to update the elements contained in the same frame,
-        otherwise the elements contained within will update in the next frame.
-
-        :param new_rect: Rect to update the min_edges_rect with
-        :return: None
-        """
-        if not isinstance(new_rect, pygame.Rect):
-            raise ValueError("Argument passed is not a pygame.Rect object")
-        if new_rect != self.min_edges_rect:
-            self.min_edges_rect = new_rect
-            self.recalculate_abs_edges_rect()
-
-    def update_max_edges_rect(self, new_rect: pygame.Rect) -> None:
-        """
-        Updates the container's minimum values for the left and top, and the maximum value for
-        the right and bottom edges based upon the edges of the new rect.
-
-        Call the update function if you want to update the elements contained in the same frame,
-        otherwise the elements contained within will update in the next frame.
-
-        :param new_rect: Rect to update the max_edges_rect with
-        :return: None
-        """
-        if not isinstance(new_rect, pygame.Rect):
-            raise ValueError("Argument passed is not a pygame.Rect object")
-        if new_rect != self.max_edges_rect:
-            self.max_edges_rect = new_rect
-            self.recalculate_abs_edges_rect()
 
     def _update_sorting(self) -> None:
         """
-        Updates the sorting of the elements from left to right, top to bottom etc.
+        Updates the sorting of elements by their positions.
 
         :return: None
         """
-        elements = self.elements
+        # Only sort elements that have been fully initialized
+        elements = [
+            element for element in self.elements if element.get_abs_rect() is not None
+        ]
 
+        # Sort elements by their positions
         self.left_to_right_elements = sorted(
             elements, key=(lambda element: element.get_abs_rect().left)
         )
@@ -290,13 +282,22 @@ class UIAutoResizingContainer(UIContainer):
             elements, key=(lambda element: element.get_abs_rect().bottom), reverse=True
         )
 
+        # Update extreme elements
+        self._update_extreme_elements()
+
     def _update_extreme_elements(self) -> None:
         """
         Updates which elements are currently responsible for preventing the container from collapsing on each side
 
         :return: None
         """
+        # Store old extreme elements
+        old_left = self.left_element
+        old_right = self.right_element
+        old_top = self.top_element
+        old_bottom = self.bottom_element
 
+        # Update extreme elements
         self.left_element = (
             self.left_to_right_elements[0] if self.left_to_right_elements else None
         )
@@ -310,7 +311,16 @@ class UIAutoResizingContainer(UIContainer):
             self.bottom_to_top_elements[0] if self.bottom_to_top_elements else None
         )
 
-    def _update_dimensions(self) -> None:
+        # If any extreme elements changed, trigger a dimension update
+        if (
+            old_left != self.left_element
+            or old_right != self.right_element
+            or old_top != self.top_element
+            or old_bottom != self.bottom_element
+        ):
+            self.should_update_rect_edges = True
+
+    def _update_rect_edges(self) -> None:
         """
         Updates the sizes of the container
 
@@ -318,6 +328,7 @@ class UIAutoResizingContainer(UIContainer):
         """
         rect = self.get_abs_rect()
 
+        # Calculate extensions needed
         left_ext: int = (
             int(rect.left - self._get_left_most_point()) if self.resize_left else 0
         )
@@ -331,14 +342,28 @@ class UIAutoResizingContainer(UIContainer):
             self._get_bottom_most_point() - rect.bottom if self.resize_bottom else 0
         )
 
-        if left_ext:
-            self.expand_left(left_ext)
-        if top_ext:
-            self.expand_top(top_ext)
+        # Calculate total width/height needed
+        width = rect.width + right_ext + left_ext
+        height = rect.height + bottom_ext + top_ext
 
-        if right_ext or bottom_ext:
-            width = rect.width + right_ext
-            height = rect.height + bottom_ext
+        # Handle left and top expansion first
+        if left_ext != 0:  # Only expand if we need to move left
+            self.width_change_left(left_ext)
+
+        if top_ext != 0:  # Only expand if we need to move up
+            self.height_change_top(top_ext)
+
+        # Apply min/max constraints
+        if self.min_dimensions is not None:
+            width = max(width, self.min_dimensions[0])
+            height = max(height, self.min_dimensions[1])
+
+        if self.max_dimensions is not None:
+            width = min(width, self.max_dimensions[0])
+            height = min(height, self.max_dimensions[1])
+
+        # Only set dimensions if they've changed
+        if (width, height) != rect.size:
             self.set_dimensions((width, height))
 
     def on_contained_elements_changed(self, target: IUIElementInterface) -> None:
@@ -354,7 +379,7 @@ class UIAutoResizingContainer(UIContainer):
         self._update_sorting()
         self._update_extreme_elements()
 
-        self.should_update_dimensions = True
+        self.should_update_rect_edges = True
 
     def update(self, time_delta: float) -> None:
         """
@@ -368,15 +393,30 @@ class UIAutoResizingContainer(UIContainer):
         """
         super().update(time_delta)
 
-        if self.has_recently_updated_dimensions:
-            self.has_recently_updated_dimensions = False
-
         if self.should_update_sorting:  # Only used when adding elements as their rects aren't accurate during creation
             self._update_sorting()
             self._update_extreme_elements()
             self.should_update_sorting = False
 
-        if self.should_update_dimensions:
-            self._update_dimensions()
-            self.should_update_dimensions = False
-            self.has_recently_updated_dimensions = True
+        if self.should_update_rect_edges:
+            self._update_rect_edges()
+            self.should_update_rect_edges = False
+
+    def set_dimensions(
+        self, dimensions: Tuple[int, int], clamp_to_container: bool = False
+    ):
+        """
+        Sets the dimensions of the container, clamped to min_edges_rect and max_edges_rect constraints
+        if they are set and different from the current rect.
+
+        :param dimensions: The new dimensions to set.
+        :param clamp_to_container: Whether to clamp the dimensions to the container.
+        """
+        width, height = dimensions
+
+        # Call super's set_dimensions with the constrained dimensions
+        super().set_dimensions((width, height), clamp_to_container)
+
+        # Mark that rect edges need updating, but don't update immediately to avoid recursion
+        self.should_update_rect_edges = True
+        self.has_recently_updated_dimensions = True

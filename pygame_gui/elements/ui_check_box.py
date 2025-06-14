@@ -12,7 +12,11 @@ from pygame_gui.core.interfaces import (
     IGUIFontInterface,
 )
 from pygame_gui.core import UIElement
-from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape
+from pygame_gui.core.drawable_shapes import (
+    RectDrawableShape,
+    RoundedRectangleShape,
+    EllipseDrawableShape,
+)
 from pygame_gui.elements.ui_label import UILabel
 from pygame_gui.core.gui_type_hints import Coordinate, RectLike
 
@@ -269,7 +273,9 @@ class UICheckBox(UIElement):
             else:
                 self.drawable_shape.set_active_state("normal")
 
-    def _load_theme_colour(self, colour_name: str, default_colour: Optional[pygame.Color] = None) -> Union[pygame.Color, IColourGradientInterface]:
+    def _load_theme_colour(
+        self, colour_name: str, default_colour: Optional[pygame.Color] = None
+    ) -> Union[pygame.Color, IColourGradientInterface]:
         """Helper method to load a colour from theme data.
 
         :param colour_name: The name of the colour to load
@@ -283,7 +289,12 @@ class UICheckBox(UIElement):
         except LookupError:
             return default_colour
 
-    def _load_theme_misc_data(self, data_name: str, default_value: Any, casting_func: Optional[Callable] = None) -> Any:
+    def _load_theme_misc_data(
+        self,
+        data_name: str,
+        default_value: Any,
+        casting_func: Optional[Callable] = None,
+    ) -> Any:
         """Helper method to load miscellaneous theme data.
 
         :param data_name: The name of the data to load
@@ -335,7 +346,11 @@ class UICheckBox(UIElement):
             }
         else:
             # Handle legacy single integer format
-            width = int(border_width_data) if isinstance(border_width_data, (str, int)) else 1
+            width = (
+                int(border_width_data)
+                if isinstance(border_width_data, (str, int))
+                else 1
+            )
             self.border_width = {
                 "left": width,
                 "right": width,
@@ -349,7 +364,9 @@ class UICheckBox(UIElement):
         # Load corner radius
         corner_radius = self._load_theme_misc_data("shape_corner_radius", [2, 2, 2, 2])
         if isinstance(corner_radius, list):
-            self.shape_corner_radius = [int(x) if isinstance(x, (str, int)) else 2 for x in corner_radius]
+            self.shape_corner_radius = [
+                int(x) if isinstance(x, (str, int)) else 2 for x in corner_radius
+            ]
         elif isinstance(corner_radius, (str, int)):
             radius_val = int(corner_radius)
             self.shape_corner_radius = [radius_val] * 4
@@ -358,7 +375,9 @@ class UICheckBox(UIElement):
 
         # Load checkbox symbols
         self.check_symbol = self._load_theme_misc_data("check_symbol", "✓", str)
-        self.indeterminate_symbol = self._load_theme_misc_data("indeterminate_symbol", "−", str)
+        self.indeterminate_symbol = self._load_theme_misc_data(
+            "indeterminate_symbol", "−", str
+        )
 
         # Load text offset
         self.text_offset = self._load_theme_misc_data("text_offset", 5, int)
@@ -367,16 +386,23 @@ class UICheckBox(UIElement):
         try:
             self.font = self.ui_theme.get_font(self.combined_element_ids)
             if self.font == self.ui_theme.get_font_dictionary().get_default_font():
-                self.font = self.ui_theme.get_font_dictionary().get_default_symbol_font()
+                self.font = (
+                    self.ui_theme.get_font_dictionary().get_default_symbol_font()
+                )
         except LookupError:
             self.font = self.ui_theme.get_font_dictionary().get_default_symbol_font()
 
         # Load images
         self._load_images_from_theme()
 
-    def _process_state_images(self, state_name: str, normal_images: List[pygame.Surface], normal_positions: List[Tuple[float, float]]) -> Tuple[List[pygame.Surface], List[Tuple[float, float]]]:
+    def _process_state_images(
+        self,
+        state_name: str,
+        normal_images: List[pygame.Surface],
+        normal_positions: List[Tuple[float, float]],
+    ) -> Tuple[List[pygame.Surface], List[Tuple[float, float]]]:
         """Helper method to process images and positions for a given state.
-        
+
         :param state_name: The name of the state to process images for (e.g. 'normal', 'hovered')
         :param normal_images: List of images from the normal state to use as fallback
         :param normal_positions: List of positions from the normal state to use as fallback
@@ -384,7 +410,7 @@ class UICheckBox(UIElement):
         """
         new_images = []
         new_positions = []
-        
+
         # Try multi-image format first
         try:
             image_details = self.ui_theme.get_image_details(
@@ -403,15 +429,15 @@ class UICheckBox(UIElement):
                     new_positions = [detail["position"] for detail in image_details]
             except LookupError:
                 pass
-        
+
         # Handle fallbacks and position defaults
         if not new_images:
             new_images = normal_images.copy()
             new_positions = normal_positions.copy()
-        
+
         while len(new_positions) < len(new_images):
             new_positions.append((0.5, 0.5))
-        
+
         return new_images, new_positions
 
     def _load_images_from_theme(self) -> bool:
@@ -952,7 +978,9 @@ class UICheckBox(UIElement):
 
             self.text_label.set_relative_position((label_x, label_y))
 
-    def _create_drawable_shape(self, shape_type: str, rect: pygame.Rect, theming_parameters: Dict) -> Union[RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape]:
+    def _create_drawable_shape(
+        self, shape_type: str, rect: pygame.Rect, theming_parameters: Dict
+    ) -> Union[RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape]:
         """
         Factory method to create the appropriate drawable shape based on shape type.
 
@@ -964,18 +992,18 @@ class UICheckBox(UIElement):
         shape_classes = {
             "rectangle": RectDrawableShape,
             "ellipse": EllipseDrawableShape,
-            "rounded_rectangle": RoundedRectangleShape
+            "rounded_rectangle": RoundedRectangleShape,
         }
-        
+
         shape_class = shape_classes.get(shape_type)
         if shape_class is None:
             shape_class = RectDrawableShape  # Default fallback
-            
+
         return shape_class(
             rect,
             theming_parameters,
             ["normal", "hovered", "disabled", "selected"],
-            self.ui_manager
+            self.ui_manager,
         )
 
     def rebuild(self):
@@ -1101,7 +1129,9 @@ class UICheckBox(UIElement):
         }
 
         # Create appropriate drawable shape using factory method
-        self.drawable_shape = self._create_drawable_shape(self.shape, self.rect, theming_parameters)
+        self.drawable_shape = self._create_drawable_shape(
+            self.shape, self.rect, theming_parameters
+        )
 
         # Set initial state
         self._update_visual_state()
