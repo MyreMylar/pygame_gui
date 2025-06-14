@@ -88,15 +88,15 @@ class TestUIForm:
             questionnaire=get_questionnaire(),
             manager=default_ui_manager,
         )
-        assert len(container.get_container().elements) == 16
-        assert len(container.parsed_questionnaire["Section Test:"].elements) == 2
+        assert len(container.get_container().elements) == 17
+        assert len(container.parsed_questionnaire["Section Test:"].elements) == 3
         assert (
             len(
                 container.parsed_questionnaire[
                     "Section Test:"
                 ].section_container.elements
             )
-            == 7
+            == 8
         )
 
         button = UIButton(
@@ -104,7 +104,7 @@ class TestUIForm:
         )
         default_ui_manager.get_root_container().remove_element(button)
         container.get_container().add_element(button)
-        assert len(container.get_container().elements) == 17
+        assert len(container.get_container().elements) == 18
 
         button = UIButton(
             relative_rect=pygame.Rect(0, 0, 50, 250),
@@ -115,7 +115,7 @@ class TestUIForm:
         container.get_container().add_element(button)
         container.scrollable_container.update(0.4)
         container.update(0.4)
-        assert len(container.get_container().elements) == 18
+        assert len(container.get_container().elements) == 19
 
     def test_remove_element(
         self,
@@ -128,7 +128,7 @@ class TestUIForm:
             questionnaire=get_questionnaire(),
             manager=default_ui_manager,
         )
-        assert len(container.get_container().elements) == 16
+        assert len(container.get_container().elements) == 17
 
         button = UIButton(
             relative_rect=pygame.Rect(0, 0, 50, 50),
@@ -138,7 +138,7 @@ class TestUIForm:
         )
 
         container.get_container().remove_element(button)
-        assert len(container.get_container().elements) == 16
+        assert len(container.get_container().elements) == 17
 
     def test_set_position(
         self, _init_pygame, default_ui_manager, _display_surface_return_none

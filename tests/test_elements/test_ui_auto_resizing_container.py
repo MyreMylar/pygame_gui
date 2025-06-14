@@ -33,7 +33,9 @@ class TestUIAutoResizingContainer:
         _display_surface_return_none,
     ):
         container = UIAutoResizingContainer(
-            pygame.Rect(100, 100, 200, 200), manager=default_ui_manager
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+            include_min_dimension_sized_root_pos_element=False,
         )
 
         button = UIButton(
@@ -91,7 +93,9 @@ class TestUIAutoResizingContainer:
         _display_surface_return_none,
     ):
         container = UIAutoResizingContainer(
-            pygame.Rect(100, 100, 200, 200), manager=default_ui_manager
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+            include_min_dimension_sized_root_pos_element=False,
         )
 
         button = UIButton(
@@ -463,7 +467,7 @@ class TestUIAutoResizingContainer:
     ):
         """Test that the container properly resizes when elements are added at different positions."""
         container = UIAutoResizingContainer(
-            pygame.Rect(100, 100, 100, 100), manager=default_ui_manager
+            pygame.Rect(0, 0, 100, 100), manager=default_ui_manager
         )
         initial_rect = container.get_abs_rect().copy()
 
@@ -604,24 +608,24 @@ class TestUIAutoResizingContainer:
             final_rect.bottom == bottom_removed_rect.bottom
         )  # Bottom edge should not move
 
-    def test_min_max_edges_constraints(
+    def test_max_dimensions_constraints(
         self,
         _init_pygame,
         default_ui_manager: IUIManagerInterface,
         _display_surface_return_none,
     ):
-        """Test that the container respects min_edges_rect and max_edges_rect constraints during auto-resizing."""
+        """Test that the container respects min_dimensions and max_dimensions constraints during auto-resizing."""
         min_rect = pygame.Rect(100, 100, 100, 100)
         max_rect = pygame.Rect(50, 50, 200, 200)
         container = UIAutoResizingContainer(
             relative_rect=min_rect.copy(),
-            min_edges_rect=min_rect,
-            max_edges_rect=max_rect,
+            min_dimensions=min_rect,
+            max_dimensions=max_rect,
             manager=default_ui_manager,
         )
 
         # Test auto-resizing respects constraints
-        # Add element that would push beyond max_edges_rect
+        # Add element that would push beyond max_dimensions
         far_right_button = UIButton(
             relative_rect=pygame.Rect(220, 20, 50, 50),
             text="",
@@ -632,35 +636,6 @@ class TestUIAutoResizingContainer:
         assert (
             container.get_abs_rect().width == 200
         )  # Should be capped at maximum width
-
-        # Add element that would push beyond min_edges_rect
-        far_left_button = UIButton(
-            relative_rect=pygame.Rect(-70, 20, 50, 50),
-            text="",
-            manager=default_ui_manager,
-            container=container,
-        )
-        container.update(0.1)
-        assert (
-            container.get_abs_rect().left == min_rect.left
-        )  # Should not move left beyond minimum
-
-        # Test updating min/max edges rect
-        new_min_rect = pygame.Rect(120, 120, 150, 150)
-        container.update_min_edges_rect(new_min_rect)
-        container.update(0.1)
-        assert container.get_abs_rect().size >= (
-            150,
-            150,
-        )  # Should expand to new minimum size
-
-        new_max_rect = pygame.Rect(100, 100, 175, 175)
-        container.update_max_edges_rect(new_max_rect)
-        container.update(0.1)
-        assert container.get_abs_rect().size <= (
-            175,
-            175,
-        )  # Should contract to new maximum size
 
     def test_manual_dimension_constraints(
         self,
@@ -673,8 +648,8 @@ class TestUIAutoResizingContainer:
         max_rect = pygame.Rect(50, 50, 200, 200)
         container = UIAutoResizingContainer(
             relative_rect=min_rect.copy(),
-            min_edges_rect=min_rect,
-            max_edges_rect=max_rect,
+            min_dimensions=min_rect,
+            max_dimensions=max_rect,
             manager=default_ui_manager,
         )
 

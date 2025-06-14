@@ -383,7 +383,7 @@ class TestUIContainer:
         assert container.visible == 0
         assert button.visible == 1
 
-    def test_expand_left(
+    def test_width_change_left(
         self,
         _init_pygame,
         default_ui_manager: IUIManagerInterface,
@@ -403,13 +403,13 @@ class TestUIContainer:
         assert button.get_relative_rect() == pygame.Rect(50, 50, 50, 50)
         assert container.get_relative_rect() == pygame.Rect(100, 100, 200, 200)
 
-        container.expand_left(50)
+        container.width_change_left(50)
 
         assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
         assert button.get_relative_rect() == pygame.Rect(100, 50, 50, 50)
         assert container.get_relative_rect() == pygame.Rect(50, 100, 250, 200)
 
-    def test_expand_top(
+    def test_height_change_top(
         self,
         _init_pygame,
         default_ui_manager: IUIManagerInterface,
@@ -429,7 +429,7 @@ class TestUIContainer:
         assert button.get_relative_rect() == pygame.Rect(50, 50, 50, 50)
         assert container.get_relative_rect() == pygame.Rect(100, 100, 200, 200)
 
-        container.expand_top(50)
+        container.height_change_top(50)
 
         assert button.get_abs_rect() == pygame.Rect(150, 150, 50, 50)
         assert button.get_relative_rect() == pygame.Rect(50, 100, 50, 50)
