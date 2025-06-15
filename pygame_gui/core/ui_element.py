@@ -26,23 +26,79 @@ if TYPE_CHECKING:
 
 class UIElement(GUISprite, IUIElementInterface):
     """
-    A base class for UI elements. You shouldn't create UI Element objects, instead all UI Element
-    classes should derive from this class. Inherits from pygame.sprite.Sprite.
+    The base class for all UI elements in pygame_gui. UIElement provides core functionality for
+    positioning, sizing, event handling, and visual representation of UI components.
 
-    :param relative_rect: A rectangle shape of the UI element, the position is relative to the
-                          element's container.
-    :param manager: The UIManager that manages this UIElement.
-    :param container: A container that this element is contained in.
-    :param starting_height: Used to record how many layers above its container this element
-                            should be. Normally 1.
-    :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param anchors: A dictionary describing what this element's relative_rect is relative to.
-    :param visible: Whether the element is visible by default. Warning - container visibility may
-                    override this.
-    :param parent_element: Element that this element 'belongs to' in theming. Elements inherit
-                    colours from parents.
-    :param object_id: An optional set of IDs to help distinguish this element from other elements.
-    :param element_id: A list of string ID representing this element's class.
+    Key Responsibilities:
+    - Manages element positioning and sizing
+    - Handles user interaction events
+    - Manages visual state (hover, focus, etc.)
+    - Coordinates with containers and the UI manager
+    - Handles theming and styling
+    - Manages element visibility and layering
+
+    Element Hierarchy:
+    ```
+    UIElement (Base)
+        │
+        ├── UIContainer (Container elements)
+        │   └── UIWindow (Window elements)
+        │
+        ├── UIButton (Interactive elements)
+        ├── UITextBox (Text elements)
+        ├── UIEntryLine (Input elements)
+        └── ... (Other specialized elements)
+    ```
+
+    Positioning System:
+    ```
+    +------------------+
+    |     Container    |
+    |  +------------+  |
+    |  |   Element  |  |
+    |  |            |  |
+    |  +------------+  |
+    |                  |
+    +------------------+
+
+    Anchors:
+    - left, right: Horizontal positioning
+    - top, bottom: Vertical positioning
+    - centerx, centery: Center alignment
+    ```
+
+    Common Use Cases:
+    1. Creating custom UI elements by subclassing
+    2. Managing element positioning and sizing
+    3. Handling user interaction events
+    4. Coordinating with containers and other elements
+    5. Managing element state and appearance
+
+    Best Practices:
+    1. Always call super().__init__() in subclasses
+    2. Implement required interface methods
+    3. Use proper anchoring for responsive layouts
+    4. Handle element state changes appropriately
+    5. Clean up resources in kill() method
+
+    Performance Considerations:
+    1. Minimize unnecessary rebuilds
+    2. Use appropriate layer management
+    3. Optimize event handling
+    4. Cache frequently used values
+    5. Use containers for grouping elements
+
+    :param relative_rect: The rectangle that defines the size and position of the element relative to its container.
+    :param manager: The UI manager that handles this element.
+    :param container: The container that this element is inside.
+    :param starting_height: The starting height of this element in the UI layer stack.
+    :param layer_thickness: The thickness of this element's layer in the UI layer stack.
+    :param anchors: A dictionary of anchor points for positioning the element.
+    :param visible: Whether the element is visible by default.
+    :param parent_element: The element this element 'belongs to'.
+    :param object_id: The ID for this element, used for theming and events.
+    :param element_id: The element ID for this element.
+    :param ignore_shadow_for_initial_size_and_pos: Whether to ignore the shadow when calculating initial size and position.
     """
 
     def __init__(
@@ -1061,33 +1117,46 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
-        Method to directly set the dimensions of an element. And set whether the elements are dynamic.
+        Set the dimensions of the element, optionally clamping to container bounds.
 
-        NOTE: Using this on elements inside containers with non-default anchoring arrangements
-        may make a mess of them.
+        This method handles:
+        1. Updating the element's size
+        2. Clamping to minimum dimensions
+        3. Adjusting for container constraints
+        4. Updating related properties
+        5. Triggering necessary rebuilds
 
-        :param dimensions: The new dimensions to set. If it is a negative value, the element will become
-                            dynamically sized, otherwise it will become statically sized.
-        :param clamp_to_container: Whether we should clamp the dimensions to the
-                                   dimensions of the container or not.
+        Dimension Setting Process:
+        ```
+        Set Dimensions
+            │
+            ▼
+        Validate Dimensions
+            │
+            ▼
+        Apply Minimum Size
+            │
+            ▼
+        Clamp to Container
+            │
+            ▼
+        Update Element
+        ```
+
+        Example:
+        ```python
+        # Set element to 100x100 pixels
+        element.set_dimensions((100, 100))
+
+        # Set element to 100x100 pixels, clamped to container
+        element.set_dimensions((100, 100), clamp_to_container=True)
+        ```
+
+        :param dimensions: The new dimensions (width, height) for the element
+        :param clamp_to_container: Whether to clamp the dimensions to the container's bounds
+        :raises: ValueError if dimensions are invalid
         """
-        is_dynamic = False
-        if dimensions[0] < 0:
-            self._set_dynamic_width()
-            is_dynamic = True
-        else:
-            self._set_dynamic_width(False)
-
-        if dimensions[1] < 0:
-            self._set_dynamic_height()
-            is_dynamic = True
-        else:
-            self._set_dynamic_height(False)
-
-        if is_dynamic:
-            self.rebuild()
-        else:
-            self._set_dimensions(dimensions, clamp_to_container)
+        self._set_dimensions(dimensions, clamp_to_container)
 
     def _set_dimensions(self, dimensions: Coordinate, clamp_to_container: bool = False):
         """
@@ -1119,10 +1188,11 @@ class UIElement(GUISprite, IUIElementInterface):
 
     def update(self, time_delta: float):
         """
+        Update the element's state based on the time elapsed since the last update.
         Updates this element's drawable shape, if it has one.
 
-        :param time_delta: The time passed between frames, measured in seconds.
 
+        :param time_delta: Time in seconds since the last update call
         """
         self._recent_anchor_driven_dimension_changes = 0
         if self.alive() and self.drawable_shape is not None:
@@ -1283,29 +1353,259 @@ class UIElement(GUISprite, IUIElementInterface):
             container_clip_rect.collidepoint(hover_x, hover_y)
         )
 
-    # pylint: disable=unused-argument
     def process_event(self, event: pygame.event.Event) -> bool:
         """
-        A stub to override. Gives UI Elements access to pygame events.
+        Process a pygame event and determine if it should be consumed by this element.
 
-        :param event: The event to process.
+        This method is called by the UI manager for each event. Elements should override this
+        method to handle specific events they care about. The method should return True if
+        the event was consumed (handled) by this element, preventing it from being passed to
+        other elements.
 
-        :return: Should return True if this element makes use of this event.
+        Event Processing Flow:
+        ```
+        Event Received
+            │
+            ▼
+        Check if Element is Visible/Enabled
+            │
+            ▼
+        Check if Event is Relevant
+            │
+            ▼
+        Process Event
+            │
+            ▼
+        Return True if Consumed
+        ```
 
+        Common Events to Handle:
+        - MOUSEBUTTONDOWN: Mouse click events
+        - MOUSEBUTTONUP: Mouse release events
+        - MOUSEMOTION: Mouse movement events
+        - KEYDOWN: Keyboard press events
+        - KEYUP: Keyboard release events
+
+        Example:
+        ```python
+        def process_event(self, event: pygame.event.Event) -> bool:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.hover_point(event.pos[0], event.pos[1]):
+                    # Handle click
+                    return True
+            return False
+        ```
+
+        :param event: The pygame event to process
+        :return: True if the event was consumed, False otherwise
         """
         return False
 
     def focus(self):
         """
-        A stub to override. Called when we focus this UI element.
+        Set this element as the focused element in the UI.
+
+        When an element receives focus:
+        1. Previous focus is cleared
+        2. This element becomes focused
+        3. Focus-related events are triggered
+        4. Visual focus indicators are updated
+
+        Focus Management:
+        ```
+        Focus Set
+            │
+            ▼
+        Clear Previous Focus
+            │
+            ▼
+        Update Focus State
+            │
+            ▼
+        Trigger Focus Events
+            │
+            ▼
+        Update Visual State
+        ```
+        Note: Focus is managed by the UI manager and should typically be set through
+        the manager's set_focus_set() method rather than calling this directly.
         """
-        self._is_focused = True
+        self.is_focused = True
 
     def unfocus(self):
         """
-        A stub to override. Called when we stop focusing this UI element.
+        Remove focus from this element.
+
+        When an element loses focus:
+        1. Focus state is cleared
+        2. Unfocus events are triggered
+        3. Visual focus indicators are removed
+        4. Focus is transferred to another element if applicable
+
+        Unfocus Process:
+        ```
+        Unfocus Called
+            │
+            ▼
+        Clear Focus State
+            │
+            ▼
+        Trigger Unfocus Events
+            │
+            ▼
+        Update Visual State
+            │
+            ▼
+        Transfer Focus (if needed)
+        ```
+        Note: Focus is managed by the UI manager and should typically be cleared through
+        the manager's set_focus_set() method rather than calling this directly.
         """
-        self._is_focused = False
+        self.is_focused = False
+
+    def show(self):
+        """
+        Make this element visible.
+
+        When an element is shown:
+        1. Visibility state is updated
+        2. Parent container is notified
+        3. Visual state is updated
+        4. Show events are triggered
+
+        Show Process:
+        ```
+        Show Called
+            │
+            ▼
+        Update Visibility
+            │
+            ▼
+        Notify Container
+            │
+            ▼
+        Update Visual State
+            │
+            ▼
+        Trigger Show Events
+        ```
+        Note: Element visibility may be affected by container visibility.
+        """
+        self.visible = True
+
+    def hide(self):
+        """
+        Make this element invisible.
+
+        When an element is hidden:
+        1. Visibility state is updated
+        2. Parent container is notified
+        3. Visual state is updated
+        4. Hide events are triggered
+
+        Hide Process:
+        ```
+        Hide Called
+            │
+            ▼
+        Update Visibility
+            │
+            ▼
+        Notify Container
+            │
+            ▼
+        Update Visual State
+            │
+            ▼
+        Trigger Hide Events
+        ```
+        Note: Element visibility may be affected by container visibility.
+        """
+        self.visible = False
+
+        self.hovered = False
+        self.hover_time = 0.0
+
+    def _get_appropriate_state_name(self):
+        """
+        Returns a string representing the appropriate state for the widgets DrawableShapes.
+        Currently only returns either 'normal' or 'disabled' based on is_enabled.
+        """
+
+        return "normal" if self.is_enabled else "disabled"
+
+    def on_locale_changed(self):
+        pass
+
+    def get_anchor_targets(self) -> list:
+        targets = []
+        if self.anchors is not None:
+            if "left_target" in self.anchors:
+                targets.append(self.anchors["left_target"])
+            if "right_target" in self.anchors:
+                targets.append(self.anchors["right_target"])
+            if "top_target" in self.anchors:
+                targets.append(self.anchors["top_target"])
+            if "bottom_target" in self.anchors:
+                targets.append(self.anchors["bottom_target"])
+
+        return targets
+
+    @staticmethod
+    def tuple_extract(str_data: str) -> Tuple[int, int]:
+        """
+        Used for parsing pairs of coordinates in themes from string data into numerical tuples.
+        e.g. 5,10
+
+        :param str_data: the comma separated string of two numbers to parse.
+
+        :return: a tuple of two ints
+        """
+        x, y = str_data.split(",")
+        return int(x), int(y)
+
+    def update_theming(self, new_theming_data: str):
+        """
+        Update the theming for this element using the most specific ID assigned to it.
+
+        If you have not given this element a unique ID, this function will also update the theming of other elements
+        of this theming class or of this element type.
+
+        :param new_theming_data: the new theming data in a json string
+        """
+        self.ui_theme.update_single_element_theming(
+            self.most_specific_combined_id, new_theming_data
+        )
+        self.rebuild_from_changed_theme_data()
+
+    def set_tooltip(
+        self,
+        text: Optional[str] = None,
+        object_id: Optional[ObjectID] = None,
+        text_kwargs: Optional[Dict[str, str]] = None,
+        delay: Optional[float] = None,
+        wrap_width: Optional[int] = None,
+    ):
+        """
+        Setup floating tool tip data for this UI element.
+
+        :param text: the text for the tool tip.
+        :param object_id: an object ID for the tooltip - useful for theming
+        :param text_kwargs: key word arguments for the tool tip text
+        :param delay: how long it takes the tooltip to appear when statically hovering the UI element
+        :param wrap_width: how wide the tooltip will grow before wrapping.
+        :return:
+        """
+        self.tool_tip_text = text
+        self.tool_tip_text_kwargs = {}
+        if text_kwargs is not None:
+            self.tool_tip_text_kwargs = text_kwargs
+        self.tool_tip_object_id = object_id
+
+        if delay is not None:
+            self.tool_tip_delay = delay
+
+        self.tool_tip_wrap_width = wrap_width
 
     def rebuild_from_changed_theme_data(self):
         """
@@ -1640,100 +1940,3 @@ class UIElement(GUISprite, IUIElementInterface):
         Elements should handle their own enabling and disabling.
         """
         self.is_enabled = True
-
-    def show(self):
-        """
-        Shows the widget, which means the widget will get drawn and will process events.
-        """
-        self.visible = True
-
-    def hide(self):
-        """
-        Hides the widget, which means the widget will not get drawn and will not process events.
-        Clear hovered state.
-        """
-        self.visible = False
-
-        self.hovered = False
-        self.hover_time = 0.0
-
-    def _get_appropriate_state_name(self):
-        """
-        Returns a string representing the appropriate state for the widgets DrawableShapes.
-        Currently only returns either 'normal' or 'disabled' based on is_enabled.
-        """
-
-        return "normal" if self.is_enabled else "disabled"
-
-    def on_locale_changed(self):
-        pass
-
-    def get_anchor_targets(self) -> list:
-        targets = []
-        if self.anchors is not None:
-            if "left_target" in self.anchors:
-                targets.append(self.anchors["left_target"])
-            if "right_target" in self.anchors:
-                targets.append(self.anchors["right_target"])
-            if "top_target" in self.anchors:
-                targets.append(self.anchors["top_target"])
-            if "bottom_target" in self.anchors:
-                targets.append(self.anchors["bottom_target"])
-
-        return targets
-
-    @staticmethod
-    def tuple_extract(str_data: str) -> Tuple[int, int]:
-        """
-        Used for parsing pairs of coordinates in themes from string data into numerical tuples.
-        e.g. 5,10
-
-        :param str_data: the comma separated string of two numbers to parse.
-
-        :return: a tuple of two ints
-        """
-        x, y = str_data.split(",")
-        return int(x), int(y)
-
-    def update_theming(self, new_theming_data: str):
-        """
-        Update the theming for this element using the most specific ID assigned to it.
-
-        If you have not given this element a unique ID, this function will also update the theming of other elements
-        of this theming class or of this element type.
-
-        :param new_theming_data: the new theming data in a json string
-        """
-        self.ui_theme.update_single_element_theming(
-            self.most_specific_combined_id, new_theming_data
-        )
-        self.rebuild_from_changed_theme_data()
-
-    def set_tooltip(
-        self,
-        text: Optional[str] = None,
-        object_id: Optional[ObjectID] = None,
-        text_kwargs: Optional[Dict[str, str]] = None,
-        delay: Optional[float] = None,
-        wrap_width: Optional[int] = None,
-    ):
-        """
-        Setup floating tool tip data for this UI element.
-
-        :param text: the text for the tool tip.
-        :param object_id: an object ID for the tooltip - useful for theming
-        :param text_kwargs: key word arguments for the tool tip text
-        :param delay: how long it takes the tooltip to appear when statically hovering the UI element
-        :param wrap_width: how wide the tooltip will grow before wrapping.
-        :return:
-        """
-        self.tool_tip_text = text
-        self.tool_tip_text_kwargs = {}
-        if text_kwargs is not None:
-            self.tool_tip_text_kwargs = text_kwargs
-        self.tool_tip_object_id = object_id
-
-        if delay is not None:
-            self.tool_tip_delay = delay
-
-        self.tool_tip_wrap_width = wrap_width

@@ -38,14 +38,116 @@ from pygame_gui.elements import UITooltip
 
 class UIManager(IUIManagerInterface):
     """
-    The UI Manager class helps keep track of all the moving parts in the pygame_gui system.
+    The UIManager is the central coordinator for all UI elements in pygame_gui. It manages the lifecycle,
+    rendering, and event handling of UI components while maintaining proper layering and focus management.
 
-    Before doing anything else with pygame_gui create a UIManager and remember to update it every
-    frame.
+    Key Responsibilities:
+    - Manages UI element creation, updates, and rendering
+    - Handles event processing and focus management
+    - Maintains UI element layering and window stacking
+    - Manages themes and visual styling
+    - Coordinates mouse interactions and cursor changes
 
-    :param window_resolution: window resolution.
-    :param theme_path: relative file path to theme or theme dictionary.
-    :param enable_live_theme_updates: Lets the theme update in-game after we edit the theme file
+    Role in pygame_gui Ecosystem:
+    The UIManager acts as the bridge between pygame's core functionality and pygame_gui's UI elements.
+    It ensures proper coordination between different UI components and maintains the visual hierarchy.
+
+    UI Element Layering:
+    ```
+    +------------------+
+    |    Window 3      |  Layer 3 (Top)
+    +------------------+
+    |    Window 2      |  Layer 2
+    +------------------+
+    |    Window 1      |  Layer 1
+    +------------------+
+    |  Root Container  |  Layer 0 (Bottom)
+    +------------------+
+    ```
+
+    Event Processing Flow:
+    ```
+    pygame Event
+        │
+        ▼
+    UIManager.process_events()
+        │
+        ▼
+    Top Layer Elements
+        │
+        ▼
+    Middle Layer Elements
+        │
+        ▼
+    Bottom Layer Elements
+        │
+        ▼
+    Event Consumed? ──Yes──► Stop Processing
+        │ No
+        ▼
+    Continue to Game Logic
+    ```
+
+    Quick Start Example:
+    ```python
+    import pygame
+    import pygame_gui
+
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    ui_manager = pygame_gui.UIManager((800, 600))
+
+    # Create UI elements
+    button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((350, 275), (100, 50)),
+        text='Hello',
+        manager=ui_manager
+    )
+
+    # Main game loop
+    while True:
+        time_delta = clock.tick(60)/1000.0
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            ui_manager.process_events(event)
+
+        ui_manager.update(time_delta)
+        screen.fill((0, 0, 0))
+        ui_manager.draw_ui(screen)
+        pygame.display.update()
+    ```
+
+    Common Use Cases:
+    1. Creating and managing UI windows and dialogs
+    2. Handling user input and events
+    3. Managing UI element focus and layering
+    4. Applying and updating themes
+    5. Coordinating mouse interactions
+
+    Best Practices:
+    1. Create only one UIManager instance per application
+    2. Call update() and draw_ui() every frame
+    3. Process events through the manager before handling game events
+    4. Use containers to group related UI elements
+    5. Preload fonts to avoid runtime loading delays
+
+    Performance Considerations:
+    1. Limit the number of UI elements to prevent performance degradation
+    2. Use containers to group elements and improve event processing
+    3. Preload fonts during initialization
+    4. Disable live theme updates in production
+    5. Use appropriate layer management for complex UIs
+
+    :param window_resolution: The resolution of the window/screen the UI will be displayed on.
+    :param theme_path: Optional path to a theme file or theme dictionary. If None, uses default theme.
+    :param enable_live_theme_updates: Whether to enable live theme file updates during runtime.
+    :param resource_loader: Optional custom resource loader. If None, uses default BlockingThreadedResourceLoader.
+    :param starting_language: The initial language code for UI text (default: "en").
+    :param translation_directory_paths: Optional list of paths to translation files.
     """
 
     def __init__(
@@ -273,16 +375,36 @@ class UIManager(IUIManagerInterface):
 
     def process_events(self, event: pygame.event.Event):
         """
-        This is the top level method through which all input to UI elements is processed and
-        reacted to.
+        Process pygame events and distribute them to appropriate UI elements. This is the main entry point
+        for handling user input in the UI system.
 
-        One of the key things it controls is the currently 'focused' element of which there
-        can be only one at a time. It also manages 'consumed events' these events will not be
-        passed on to elements below them in the GUI hierarchy and helps us stop buttons underneath
-        windows from receiving input.
+        The method processes events in order from top-most to bottom-most UI elements, ensuring that
+        elements higher in the visual stack receive events first. Events are considered "consumed" when
+        a UI element handles them, preventing them from being passed to elements below.
 
-        :param event:  pygame.event.Event - the event to process.
-        :return: A boolean indicating whether the event was consumed.
+        Side Effects:
+        - May change the focused element
+        - May trigger UI element state changes
+        - May generate UI events (e.g., button clicks)
+
+        Example:
+        ```python
+        # In your game loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            # Process UI events first
+            ui_manager.process_events(event)
+
+            # Then handle game events
+            if not ui_manager.get_hovering_any_element():
+                handle_game_events(event)
+        ```
+
+        :param event: The pygame event to process. Must be a valid pygame.event.Event object.
+        :return: True if the event was consumed by a UI element, False otherwise.
         """
         consumed_event = False
         sorting_consumed_event = False
@@ -360,17 +482,36 @@ class UIManager(IUIManagerInterface):
 
     def update(self, time_delta: float):
         """
-        From here all our UI elements are updated and which element is currently 'hovered' is
-        checked; which means the mouse pointer is overlapping them. This is managed centrally, so
-        we aren't ever overlapping two elements at once.
+        Update the state of all UI elements and handle hover effects. This method should be called
+        every frame to ensure proper UI element behavior.
 
-        It also updates the shape cache to continue storing already created elements shapes in the
-        long term cache, in case we need them later.
+        The update process includes:
+        1. Checking for theme file changes (if live updates enabled)
+        2. Updating mouse position and hover states
+        3. Updating all UI elements
+        4. Managing cursor changes based on hover state
 
-        Finally, if live theme updates are enabled, it checks to see if the theme file has been
-        modified and triggers all the UI elements to rebuild if it has.
+        Side Effects:
+        - Updates element hover states
+        - May change the cursor appearance
+        - May trigger theme reloads
+        - Updates element animations and timers
 
-        :param time_delta: The time passed since the last call to update, in seconds.
+        Example:
+        ```python
+        # In your game loop
+        clock = pygame.time.Clock()
+        while True:
+            time_delta = clock.tick(60)/1000.0  # Time in seconds since last frame
+
+            # Update UI
+            ui_manager.update(time_delta)
+
+            # Update game state
+            update_game_state(time_delta)
+        ```
+
+        :param time_delta: Time in seconds since the last update call. Used for animations and timing.
         """
 
         if self.live_theme_updates:
@@ -452,20 +593,43 @@ class UIManager(IUIManagerInterface):
 
     def draw_ui(self, window_surface: pygame.surface.Surface):
         """
-        Draws all the UI elements on to a surface passed in, usually an opaque surface the size of the screen or window.
-        Generally you want this to be after the rest of your game sprites have been drawn.
+        Draw all UI elements onto the provided surface. This method should be called after drawing
+        the game's background but before updating the display.
 
-        If you want to do something particularly unusual with drawing you may have to write your
-        own UI manager.
+        The drawing process:
+        1. Elements are drawn in order from bottom-most to top-most
+        2. Each element is drawn according to its current state and theme
+        3. Elements outside the visible area are automatically clipped
 
-        :param window_surface: The screen or window surface on which we are going to draw all of
-         our UI Elements. As pygame_gui uses premultiplied alpha, if the surface passed in is
-         transparent or semi transparent then it should use premultiplied alpha as well and be
-         blitted afterward using the BLEND_PREMULTIPLIED special_flag.
+        Important Notes:
+        - The surface should normally be the same size as the window resolution
+        - For transparent surfaces, use premultiplied alpha blending
+        - Drawing order matters for proper layering
 
-         You can read more about premultiplied alpha in this short tutorial:
-         https://pyga.me/docs/tutorials/en/premultiplied-alpha.html
+        Example:
+        ```python
+        # In your game loop
+        while True:
+            # Draw game background
+            screen.fill((0, 0, 0))
 
+            # Draw game elements
+            draw_game_elements(screen)
+
+            # Draw UI on top
+            ui_manager.draw_ui(screen)
+
+            # Update display
+            pygame.display.update()
+        ```
+
+        :param window_surface: The surface to draw UI elements on. Should normally be the same size as the
+                             window resolution. If using transparency, the surface should use
+                             premultiplied alpha blending.
+
+        See Also:
+        - https://pyga.me/docs/tutorials/en/premultiplied-alpha.html for information about
+          premultiplied alpha blending
         """
         self.ui_group.draw(window_surface)
 
@@ -594,9 +758,34 @@ class UIManager(IUIManagerInterface):
         self, focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]
     ):
         """
-        Set a set of elements, or a single element, as the focused set.
+        Set the focus to a single UI element or a set of related UI elements.
 
-        :param focus: The set of elements, or single element, to focus on.
+        When an element or set of elements receives focus:
+        1. Previously focused elements are unfocused
+        2. The new element(s) receive focus
+        3. Focus-related events are triggered
+        4. Visual focus indicators are updated
+
+        Type Parameters:
+        - focus: Optional[Union[IUIElementInterface, Set[IUIElementInterface]]]
+          - None: Remove focus from all elements
+          - IUIElementInterface: Focus a single element
+          - Set[IUIElementInterface]: Focus multiple related elements
+
+        Example:
+        ```python
+        # Focus a single element
+        ui_manager.set_focus_set(my_button)
+
+        # Focus a set of related elements
+        ui_manager.set_focus_set({text_input, submit_button})
+
+        # Remove focus
+        ui_manager.set_focus_set(None)
+        ```
+
+        :param focus: The element or set of elements to focus on.
+        :raises: TypeError if focus parameter is of invalid type
         """
         if focus is self.focused_set:
             return
@@ -703,20 +892,33 @@ class UIManager(IUIManagerInterface):
         text_kwargs: Optional[Dict[str, str]] = None,
     ) -> IUITooltipInterface:
         """
-        Creates a tool tip ands returns it. Have hidden this away in the manager, so we can call it
-        from other UI elements and create tool tips without creating cyclical import problems.
+        Create a tooltip that appears when hovering over a UI element.
 
-        :param text: The tool tips text, can utilise the HTML subset used in all UITextBoxes.
-        :param position: The screen position to create the tool tip for.
+        The tooltip is positioned relative to the parent element and will automatically
+        adjust its position to stay within the screen bounds. The tooltip can use HTML
+        formatting for text styling.
+
+        Example:
+        ```python
+        # Create a tooltip for a button
+        tooltip = ui_manager.create_tool_tip(
+            text="Click me!",
+            position=(100, 100),
+            hover_distance=(10, 10),
+            parent_element=my_button,
+            object_id=ObjectID("#tooltip", "button_tooltip")
+        )
+        ```
+
+        :param text: The tooltip text, can utilise the HTML subset used in all UITextBoxes.
+        :param position: The screen position to create the tooltip for.
         :param hover_distance: The distance we should hover away from our target position.
-        :param parent_element: The UIElement that spawned this tool tip.
-        :param object_id: the object_id of the tooltip.
-        :param wrap_width: an optional width for the tool tip, will overwrite any value from the theme file.
-        :param text_kwargs: a dictionary of variable arguments to pass to the translated string
-                            useful when you have multiple translations that need variables inserted
-                            in the middle.
-
-        :return: A tool tip placed somewhere on the screen.
+        :param parent_element: The UIElement that spawned this tooltip.
+        :param object_id: The object_id of the tooltip for theming.
+        :param wrap_width: Optional width for the tooltip, overrides theme value.
+        :param text_kwargs: Dictionary of variables for text translation.
+        :return: A tooltip placed somewhere on the screen.
+        :raises: ValueError if position or hover_distance are invalid
         """
         tool_tip = UITooltip(
             text,
