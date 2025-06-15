@@ -162,14 +162,14 @@ class TestUIScrollingContainer:
 
         assert container.vert_scroll_bar is not None
         assert container.vert_scroll_bar.rect.width == 0
-        assert container.horiz_scroll_bar is None
+        assert not container.horiz_scroll_bar.is_enabled
         assert container.scrollable_container.rect.size == (200, 200)
 
         container.set_scrollable_area_dimensions((200, 600))
 
         assert container.vert_scroll_bar is not None
         assert container.vert_scroll_bar.rect.width != 0
-        assert container.horiz_scroll_bar is None
+        assert not container.horiz_scroll_bar.is_enabled
         assert container._view_container.rect.size == (
             200 - container.vert_scroll_bar.rect.width,
             200,
@@ -188,14 +188,14 @@ class TestUIScrollingContainer:
             allow_scroll_y=False,
         )
 
-        assert container.vert_scroll_bar is None
+        assert not container.vert_scroll_bar.is_enabled
         assert container.horiz_scroll_bar is not None
         assert container.horiz_scroll_bar.rect.height == 0
         assert container.scrollable_container.rect.size == (200, 200)
 
         container.set_scrollable_area_dimensions((600, 200))
 
-        assert container.vert_scroll_bar is None
+        assert not container.vert_scroll_bar.is_enabled
         assert container.horiz_scroll_bar is not None
         assert container.horiz_scroll_bar.rect.height != 0
         assert container._view_container.rect.size == (
@@ -221,6 +221,14 @@ class TestUIScrollingContainer:
         container.horiz_scroll_bar.update(0.02)
 
         container.update(0.02)
+
+        print(
+            "horiz_scroll_wheel_amount:", container.horiz_scroll_bar.scroll_wheel_amount
+        )
+        print(
+            "horiz_visible_percentage:", container.horiz_scroll_bar.visible_percentage
+        )
+        print("horiz_scroll_position:", container.get_container().get_relative_rect().x)
 
         assert container.get_container().get_relative_rect().x == -15
 
@@ -692,6 +700,142 @@ class TestUIScrollingContainer:
         )
         assert panel.get_anchors()["left"] == "right"
         assert panel.get_anchors()["right"] == "right"
+
+    def test_vertical_scroll_only_when_needed(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        """Test that vertical scroll bar only appears when content exceeds container height"""
+        container = UIScrollingContainer(
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+            should_grow_automatically=True,
+            allow_scroll_x=False,  # Disable horizontal scrolling
+        )
+
+        # Add content that exceeds container height but not width
+        UIButton(
+            relative_rect=pygame.Rect(10, 400, 100, 50),  # Height > container height
+            text="Test Button",
+            manager=default_ui_manager,
+            container=container,
+        )
+
+        default_ui_manager.update(0.1)
+        default_ui_manager.update(0.1)
+
+        # Check that vertical scroll bar has width but that the horizontal scroll bar has no height
+        assert container.vert_scroll_bar.rect.width == container.scroll_bar_width
+        assert container.horiz_scroll_bar.rect.height == 0
+        assert container.horiz_scroll_bar.is_enabled is False
+        assert container.scrollable_container.rect.height > container.rect.height
+
+    def test_no_unnecessary_horizontal_scroll(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        """Test that horizontal scroll bar doesn't appear when content fits width"""
+        container = UIScrollingContainer(
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+            should_grow_automatically=True,
+        )
+
+        # Add content that fits within container width
+        UIButton(
+            relative_rect=pygame.Rect(10, 400, 100, 30),  # Width < container width
+            text="Test Button",
+            manager=default_ui_manager,
+            container=container,
+        )
+
+        # Check that horizontal scroll bar doesn't exist (width should be 0)
+        assert container.horiz_scroll_bar.rect.height == 0
+        assert container.scrollable_container.rect.width <= container.rect.width
+
+    def test_scroll_container_dimensions_stable(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        """Test that container dimensions remain stable during scrolling"""
+        container = UIScrollingContainer(
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+            should_grow_automatically=True,
+        )
+
+        # Add content that exceeds container height
+        button = UIButton(
+            relative_rect=pygame.Rect(10, 10, 150, 300),
+            text="Test Button",
+            manager=default_ui_manager,
+            container=container,
+        )
+
+        initial_scrollable_height = container.scrollable_container.rect.height
+        initial_scrollable_width = container.scrollable_container.rect.width
+
+        # Simulate scrolling down
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -1.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        # Check dimensions haven't changed
+        assert container.scrollable_container.rect.height == initial_scrollable_height
+        assert container.scrollable_container.rect.width == initial_scrollable_width
+
+        # Scroll to bottom
+        container.vert_scroll_bar.start_percentage = 1.0
+        container.update(0.02)
+
+        # Check dimensions still haven't changed
+        assert container.scrollable_container.rect.height == initial_scrollable_height
+        assert container.scrollable_container.rect.width == initial_scrollable_width
+
+    def test_scroll_container_content_position(
+        self,
+        _init_pygame,
+        default_ui_manager: IUIManagerInterface,
+        _display_surface_return_none,
+    ):
+        """Test that content position is correctly maintained during scrolling"""
+        container = UIScrollingContainer(
+            pygame.Rect(100, 100, 200, 200),
+            manager=default_ui_manager,
+        )
+
+        # Add content that exceeds container height
+        button = UIButton(
+            relative_rect=pygame.Rect(10, 10, 150, 300),
+            text="Test Button",
+            manager=default_ui_manager,
+            container=container,
+        )
+
+        initial_button_pos = button.relative_rect.topleft
+
+        # Scroll down
+        container.vert_scroll_bar.scroll_wheel_moved = True
+        container.vert_scroll_bar.scroll_wheel_amount = -1.0
+        container.vert_scroll_bar.update(0.02)
+        container.update(0.02)
+
+        # Button should maintain its relative position within scrollable container
+        assert button.relative_rect.topleft == initial_button_pos
+
+        # Scroll to bottom
+        container.vert_scroll_bar.start_percentage = 1.0
+        container.update(0.02)
+
+        # Button should still maintain its relative position
+        assert button.relative_rect.topleft == initial_button_pos
 
 
 if __name__ == "__main__":

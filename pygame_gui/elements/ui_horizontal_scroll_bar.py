@@ -227,6 +227,12 @@ class UIHorizontalScrollBar(UIElement):
 
         if self.enable_arrow_buttons:
             self.arrow_button_width = self.button_width
+            if self.left_button is not None:
+                self.left_button.kill()
+                self.left_button = None
+            if self.right_button is not None:
+                self.right_button.kill()
+                self.right_button = None
 
             if self.left_button is None:
                 self.left_button = UIButton(
@@ -294,7 +300,36 @@ class UIHorizontalScrollBar(UIElement):
         self.sliding_rect_position = pygame.math.Vector2(x_pos, y_pos)
 
         if self.sliding_button is not None:
-            self._set_sliding_button_data(scroll_bar_width)
+            self.sliding_button.kill()
+            self.sliding_button = None
+
+            scroll_bar_width = max(
+                5, int(self.scrollable_width * self.visible_percentage)
+            )
+            self.sliding_button = UIButton(
+                pygame.Rect(
+                    (
+                        int(self.sliding_rect_position[0]),
+                        int(self.sliding_rect_position[1]),
+                    ),
+                    (scroll_bar_width, self.background_rect.height),
+                ),
+                "",
+                self.ui_manager,
+                container=self.button_container,
+                starting_height=1,
+                parent_element=self,
+                object_id="#sliding_button",
+                anchors={
+                    "left": "left",
+                    "right": "left",
+                    "top": "top",
+                    "bottom": "bottom",
+                },
+            )
+            self.join_focus_sets(self.sliding_button)
+
+            self.sliding_button.set_hold_range((self.background_rect.width, 100))
 
     def check_has_moved_recently(self) -> bool:
         """
@@ -515,7 +550,7 @@ class UIHorizontalScrollBar(UIElement):
                 self.right_limit - self.sliding_button.rect.width,
             )
         self.target_scroll_position = self.scroll_position
-        self.start_percentage = self.scroll_position / self.scrollable_width
+        self.start_percentage = self.scroll_position / max(self.scrollable_width, 1)
 
         x_pos = self.scroll_position + self.arrow_button_width
         y_pos = 0
@@ -699,57 +734,74 @@ class UIHorizontalScrollBar(UIElement):
                                    dimensions of the container or not.
 
         """
+        should_rebuild = False
+        if (self.rect.height == 0 and dimensions[1] != 0) or (
+            self.rect.width == 0 and dimensions[0] != 0
+        ):
+            should_rebuild = True
+
         super().set_dimensions(dimensions)
 
-        self.background_rect.width = int(
-            self.relative_rect.width
-            - (
-                (2 * self.shadow_width)
-                + self.border_width["left"]
-                + self.border_width["right"]
-            )
-        )
-        self.background_rect.height = int(
-            self.relative_rect.height
-            - (
-                (2 * self.shadow_width)
-                + self.border_width["top"]
-                + self.border_width["bottom"]
-            )
-        )
-
-        if self.button_container is not None:
-            self.button_container.set_dimensions(self.background_rect.size)
-
-        # sort out scroll bar parameters
-        self.scrollable_width = self.background_rect.width - (
-            2 * self.arrow_button_width
-        )
-        self.right_limit = self.scrollable_width
-
-        scroll_bar_width = max(5, int(self.scrollable_width * self.visible_percentage))
-        base_scroll_bar_x = self.arrow_button_width
-        max_scroll_bar_x = base_scroll_bar_x + (
-            self.scrollable_width - scroll_bar_width
-        )
-        self.sliding_rect_position.x = max(
-            base_scroll_bar_x,
-            min(
-                (
-                    base_scroll_bar_x
-                    + int(self.start_percentage * self.scrollable_width)
+        if should_rebuild:
+            self.rebuild()
+        else:
+            self.background_rect.width = max(
+                0,
+                int(
+                    self.relative_rect.width
+                    - (
+                        (2 * self.shadow_width)
+                        + self.border_width["left"]
+                        + self.border_width["right"]
+                    )
                 ),
-                max_scroll_bar_x,
-            ),
-        )
-        self.scroll_position = self.sliding_rect_position.x - base_scroll_bar_x
-        self.target_scroll_position = self.scroll_position
-
-        if self.sliding_button is not None:
-            self.sliding_button.set_dimensions(
-                (scroll_bar_width, self.background_rect.height)
             )
-            self.sliding_button.set_relative_position(self.sliding_rect_position)
+            self.background_rect.height = max(
+                0,
+                int(
+                    self.relative_rect.height
+                    - (
+                        (2 * self.shadow_width)
+                        + self.border_width["top"]
+                        + self.border_width["bottom"]
+                    )
+                ),
+            )
+
+            if self.button_container is not None:
+                self.button_container.set_dimensions(self.background_rect.size)
+
+            # sort out scroll bar parameters
+            self.scrollable_width = max(
+                0, self.background_rect.width - (2 * self.arrow_button_width)
+            )
+            self.right_limit = self.scrollable_width
+
+            scroll_bar_width = max(
+                5, int(self.scrollable_width * self.visible_percentage)
+            )
+            base_scroll_bar_x = self.arrow_button_width
+            max_scroll_bar_x = base_scroll_bar_x + (
+                self.scrollable_width - scroll_bar_width
+            )
+            self.sliding_rect_position.x = max(
+                base_scroll_bar_x,
+                min(
+                    (
+                        base_scroll_bar_x
+                        + int(self.start_percentage * self.scrollable_width)
+                    ),
+                    max_scroll_bar_x,
+                ),
+            )
+            self.scroll_position = self.sliding_rect_position.x - base_scroll_bar_x
+            self.target_scroll_position = self.scroll_position
+
+            if self.sliding_button is not None:
+                self.sliding_button.set_dimensions(
+                    (scroll_bar_width, self.background_rect.height)
+                )
+                self.sliding_button.set_relative_position(self.sliding_rect_position)
 
     def disable(self):
         """

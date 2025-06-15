@@ -79,6 +79,7 @@ class UIElement(GUISprite, IUIElementInterface):
         self._ui_theme = self.ui_manager.get_theme()
 
         self.minimum_dimensions = (-1, -1)
+        self._recent_anchor_driven_dimension_changes = 0
 
         self.object_ids: List[str | None] = []
         self.class_ids: List[str | None] = []
@@ -802,7 +803,9 @@ class UIElement(GUISprite, IUIElementInterface):
         rect = pygame.Rect(new_left, new_top, new_width, new_height)
         return rect, relative_right_margin, relative_bottom_margin
 
-    def _update_absolute_rect_position_from_anchors(self, recalculate_margins=False):
+    def _update_absolute_rect_position_from_anchors(
+        self, recalculate_margins=False, change_dimensions=True
+    ):
         """
         Called when our element's relative position has changed.
         """
@@ -833,13 +836,15 @@ class UIElement(GUISprite, IUIElementInterface):
         self.rect.left = new_left
         self.rect.top = new_top
 
-        new_width, new_height = self._get_clamped_to_minimum_dimensions(
-            (new_width, new_height)
-        )
-        if (new_height != self.relative_rect.height) or (
-            new_width != self.relative_rect.width
-        ):
-            self.set_dimensions((new_width, new_height))
+        if change_dimensions and self._recent_anchor_driven_dimension_changes <= 3:
+            new_width, new_height = self._get_clamped_to_minimum_dimensions(
+                (new_width, new_height)
+            )
+            if (new_height != self.relative_rect.height) or (
+                new_width != self.relative_rect.width
+            ):
+                self._recent_anchor_driven_dimension_changes += 1
+                self.set_dimensions((new_width, new_height))
 
     def _update_relative_rect_position_from_anchors(self, recalculate_margins=False):
         """
@@ -1119,6 +1124,7 @@ class UIElement(GUISprite, IUIElementInterface):
         :param time_delta: The time passed between frames, measured in seconds.
 
         """
+        self._recent_anchor_driven_dimension_changes = 0
         if self.alive() and self.drawable_shape is not None:
             self.drawable_shape.update(time_delta)
             if self.drawable_shape.has_fresh_surface():
