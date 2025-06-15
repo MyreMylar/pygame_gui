@@ -391,6 +391,7 @@ class UIAutoResizingContainer(UIContainer):
         :param time_delta: The time passed between frames, measured in seconds.
         :return: None
         """
+        self.has_recently_updated_dimensions = False
         super().update(time_delta)
 
         if self.should_update_sorting:  # Only used when adding elements as their rects aren't accurate during creation
