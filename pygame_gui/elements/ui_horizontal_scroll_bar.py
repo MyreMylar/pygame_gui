@@ -550,7 +550,7 @@ class UIHorizontalScrollBar(UIElement):
                 self.right_limit - self.sliding_button.rect.width,
             )
         self.target_scroll_position = self.scroll_position
-        self.start_percentage = self.scroll_position / self.scrollable_width
+        self.start_percentage = self.scroll_position / max(self.scrollable_width, 1)
 
         x_pos = self.scroll_position + self.arrow_button_width
         y_pos = 0

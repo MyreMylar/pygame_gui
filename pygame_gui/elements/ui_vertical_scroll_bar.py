@@ -558,7 +558,9 @@ class UIVerticalScrollBar(UIElement):
                 self.bottom_limit - self.sliding_button.rect.height,
             )
             self.target_scroll_position = self.scroll_position
-            self.start_percentage = self.scroll_position / self.scrollable_height
+            self.start_percentage = self.scroll_position / max(
+                self.scrollable_height, 1
+            )
 
             x_pos = 0
             y_pos = self.scroll_position + self.arrow_button_height

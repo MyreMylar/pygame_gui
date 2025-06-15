@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Set, Any, List, Tuple, Callable
+from typing import Optional, Union, Dict, Set, Any, List, Tuple, Callable, Type
 
 import pygame
 
@@ -161,7 +161,7 @@ class UICheckBox(UIElement):
                 self.text_label.set_tooltip(
                     tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs
                 )
-        except Exception as e:
+        except (LookupError, ValueError) as e:
             # Log the error but don't crash
             print(f"Failed to create text label for checkbox: {e}")
             self.text_label = None
@@ -274,7 +274,11 @@ class UICheckBox(UIElement):
                 self.drawable_shape.set_active_state("normal")
 
     def _load_theme_colour(
-        self, colour_name: str, default_colour: Optional[pygame.Color] = None
+        self,
+        colour_name: str,
+        default_colour: Union[pygame.Color, IColourGradientInterface] = pygame.Color(
+            0, 0, 0
+        ),
     ) -> Union[pygame.Color, IColourGradientInterface]:
         """Helper method to load a colour from theme data.
 
@@ -989,7 +993,10 @@ class UICheckBox(UIElement):
         :param theming_parameters: Dictionary of theming parameters for the shape
         :return: The created drawable shape
         """
-        shape_classes = {
+        shape_classes: Dict[
+            str,
+            Type[Union[RectDrawableShape, RoundedRectangleShape, EllipseDrawableShape]],
+        ] = {
             "rectangle": RectDrawableShape,
             "ellipse": EllipseDrawableShape,
             "rounded_rectangle": RoundedRectangleShape,
