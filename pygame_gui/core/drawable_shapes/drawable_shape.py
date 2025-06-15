@@ -427,9 +427,9 @@ class DrawableShape:
             and self.shape_corner_radius != self.theming["shape_corner_radius"]
         ):
             shape_params_changed = self._set_corner_params()
-        if (
-            shape_params_changed
-            or self.initial_text_layout_size != self.containing_rect.size
+        if shape_params_changed or (
+            self.text_box_layout is not None
+            and self.text_box_layout.layout_rect.size != self.containing_rect.size
         ):
             self.build_text_layout()
         self.should_trigger_full_rebuild = False
