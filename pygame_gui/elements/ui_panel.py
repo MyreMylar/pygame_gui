@@ -262,7 +262,7 @@ class UIPanel(UIElement, IContainerLikeInterface):
         consumed_event = False
         if (
             self is not None
-            and event.type == pygame.MOUSEBUTTONDOWN
+            and event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
             and event.button
             in [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT, pygame.BUTTON_MIDDLE]
         ):
