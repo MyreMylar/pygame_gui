@@ -473,12 +473,12 @@ Here's a quick example of using a simple prototype:
          }
       },
 
-      "button"
+      "button":
       {
          "prototype": "#new_shape_style"
       },
 
-      "horizontal_slider"
+      "horizontal_slider":
       {
          "prototype": "#new_shape_style",
          "misc":
