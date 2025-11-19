@@ -2,6 +2,7 @@ import contextlib
 import os
 import io
 from typing import Tuple, List, Dict, Union, Set, Optional
+from pygame_gui.core.theme_type_hints import TTheme
 
 import pygame
 import i18n  # type: ignore
@@ -154,7 +155,7 @@ class UIManager(IUIManagerInterface):
         self,
         window_resolution: Tuple[int, int],
         theme_path: Optional[
-            Union[str, os.PathLike, io.StringIO, PackageResource, dict]
+            Union[TTheme, str, os.PathLike, io.StringIO, PackageResource, dict]
         ] = None,
         enable_live_theme_updates: bool = True,
         resource_loader: Optional[IResourceLoader] = None,
