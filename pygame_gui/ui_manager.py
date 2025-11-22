@@ -162,6 +162,8 @@ class UIManager(IUIManagerInterface):
         translation_directory_paths: Optional[List[str]] = None,
     ):
         super().__init__()
+        if (not pygame.font.get_init()):
+            pygame.font.init()
         if get_default_manager() is None:
             set_default_manager(self)
         # Translation stuff

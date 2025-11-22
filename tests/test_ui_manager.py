@@ -527,6 +527,13 @@ class TestUIManager:
 
         assert manager.get_hovering_any_element()
 
+    def test_font_init_internal(self, _init_pygame, _display_surface_return_none):
+        if pygame.font.get_init():
+            pygame.font.quit()
+
+        manager = UIManager((800, 800))
+        assert pygame.font.get_init()
+
 
 if __name__ == "__main__":
     os.chdir("..")
