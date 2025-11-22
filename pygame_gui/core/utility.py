@@ -468,10 +468,13 @@ class FontResource:
                         self.force_style,
                         self.style,
                     )
-            except (pygame.error, OSError):
-                error = FileNotFoundError(
-                    f"Unable to load resource with path: {str(self.location)}"
-                )
+            except (pygame.error, OSError) as exc:
+                if (not isinstance(exc, pygame.error)):
+                    error = FileNotFoundError(
+                        f"Unable to load resource with path: {str(self.location)}"
+                    )
+                else:
+                    error = exc
 
         elif isinstance(self.location, str):
             try:
@@ -483,10 +486,13 @@ class FontResource:
                     self.loaded_font = GUIFontPygame(
                         self.location, self.size, self.force_style, self.style
                     )
-            except (pygame.error, OSError):
-                error = FileNotFoundError(
-                    f"Unable to load resource with path: {str(self.location)}"
-                )
+            except (pygame.error, OSError) as exc:
+                if (not isinstance(exc, pygame.error)):
+                    error = FileNotFoundError(
+                        f"Unable to load resource with path: {str(self.location)}"
+                    )
+                else:
+                    error = exc
 
         elif isinstance(self.location, bytes):
             try:
@@ -499,10 +505,13 @@ class FontResource:
                     self.loaded_font = GUIFontPygame(
                         file_obj, self.size, self.force_style, self.style
                     )
-            except (pygame.error, OSError):
-                error = FileNotFoundError(
-                    f"Unable to load resource with path: {str(self.location)}"
-                )
+            except (pygame.error, OSError) as exc:
+                if (not isinstance(exc, pygame.error)):
+                    error = FileNotFoundError(
+                        f"Unable to load resource with path: {str(self.location)}"
+                    )
+                else:
+                    error = exc
 
         return error
 
@@ -542,18 +551,24 @@ class ImageResource:
                     self.loaded_surface = pygame.image.load(
                         open_resource
                     ).convert_alpha()
-            except (pygame.error, OSError):
-                error = FileNotFoundError(
-                    f"Unable to load resource with path: {str(self.location)}"
-                )
+            except (pygame.error, OSError) as exc:
+                if (not isinstance(exc, pygame.error)):
+                    error = FileNotFoundError(
+                        f"Unable to load resource with path: {str(self.location)}"
+                    )
+                else:
+                    error = exc
 
         elif isinstance(self.location, str):
             try:
                 self.loaded_surface = pygame.image.load(self.location).convert_alpha()
-            except (pygame.error, OSError):
-                error = FileNotFoundError(
-                    f"Unable to load resource with path: {str(self.location)}"
-                )
+            except (pygame.error, OSError) as exc:
+                if (not isinstance(exc, pygame.error)):
+                    error = FileNotFoundError(
+                        f"Unable to load resource with path: {str(self.location)}"
+                    )
+                else:
+                    error = exc
 
         # perform pre-multiply alpha operation
         if (
