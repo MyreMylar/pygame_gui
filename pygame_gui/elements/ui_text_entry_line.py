@@ -426,7 +426,11 @@ class UITextEntryLine(UIElement):
                 self.drawable_shape is not None
                 and self.drawable_shape.text_box_layout is not None
             ):
-                self.drawable_shape.set_text(translate(self.placeholder_text))
+                self.drawable_shape.set_text(
+                    self.text
+                    if self.is_focused
+                    else translate(self.placeholder_text)
+                )
                 self.drawable_shape.text_box_layout.set_cursor_position(
                     self.edit_position
                 )
@@ -449,7 +453,7 @@ class UITextEntryLine(UIElement):
                     )
                     self.drawable_shape.set_text(
                         display_text
-                        if len(display_text) > 0
+                        if len(display_text) > 0 or self.is_focused
                         else translate(self.placeholder_text)
                     )
                     self.drawable_shape.text_box_layout.set_cursor_position(

@@ -340,6 +340,84 @@ class TestUITextEntryLine:
 
         assert text_entry.image is not None
 
+    def test_set_text_empty_string_while_focused_does_not_show_placeholder(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
+        text_entry = UITextEntryLine(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            manager=default_ui_manager,
+            placeholder_text="Time scale",
+        )
+
+        text_entry.focus()
+        text_entry.set_text("2000")
+
+        assert text_entry.drawable_shape.theming["text"] == "2000"
+
+        # clearing the text via an empty string while still focused should
+        # show empty text, not the placeholder - matching focus()'s behaviour
+        text_entry.set_text("")
+
+        assert text_entry.get_text() == ""
+        assert text_entry.drawable_shape.theming["text"] == ""
+
+        # typing afterwards should not have the placeholder baked into it
+        text_entry.set_text("124")
+
+        assert text_entry.get_text() == "124"
+        assert text_entry.drawable_shape.theming["text"] == "124"
+
+    def test_set_text_none_while_focused_does_not_show_placeholder(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
+        text_entry = UITextEntryLine(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            manager=default_ui_manager,
+            placeholder_text="Time scale",
+        )
+
+        text_entry.focus()
+        text_entry.set_text("2000")
+
+        assert text_entry.drawable_shape.theming["text"] == "2000"
+
+        # None clears the text just like "" - while still focused this
+        # should show empty text, not the placeholder
+        text_entry.set_text(None)
+
+        assert text_entry.get_text() == ""
+        assert text_entry.drawable_shape.theming["text"] == ""
+
+        text_entry.set_text("124")
+
+        assert text_entry.get_text() == "124"
+        assert text_entry.drawable_shape.theming["text"] == "124"
+
+    def test_set_text_empty_or_none_while_unfocused_shows_placeholder(
+        self, _init_pygame, _display_surface_return_none, default_ui_manager
+    ):
+        text_entry = UITextEntryLine(
+            relative_rect=pygame.Rect(100, 100, 200, 30),
+            manager=default_ui_manager,
+            placeholder_text="Time scale",
+        )
+
+        # not focused - clearing via an empty string should still fall
+        # back to showing the placeholder text
+        text_entry.set_text("2000")
+        text_entry.set_text("")
+
+        assert text_entry.get_text() == ""
+        assert text_entry.drawable_shape.theming["text"] == "Time scale"
+
+        # not focused - clearing via None should also fall back to
+        # showing the placeholder text
+        text_entry.set_text("2000")
+        text_entry.set_text(None)
+
+        assert text_entry.get_text() == ""
+        assert text_entry.drawable_shape.theming["text"] == "Time scale"
+
     def test_process_event_text_entered_success(
         self,
         _init_pygame: None,
