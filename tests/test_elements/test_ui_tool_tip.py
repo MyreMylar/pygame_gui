@@ -252,6 +252,19 @@ class TestUIToolTip:
         with pytest.warns(Warning):
             tool_tip.hide()
 
+    def test_can_hover(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        tool_tip = UITooltip(
+            html_text="A tip about tools.",
+            hover_distance=(0, 10),
+            manager=default_ui_manager,
+        )
+        assert tool_tip.can_hover() is True
+
+        tool_tip.can_detect_hover = False
+
+        assert tool_tip.can_hover() is False
 
 if __name__ == "__main__":
     pytest.console_main()

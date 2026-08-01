@@ -35,6 +35,7 @@ class UITooltip(UIElement, IUITooltipInterface):
     :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine-tuning of theming.
     :param anchors: A dictionary describing what this element's relative_rect is relative to.
+    :param can_detect_hover: A bool determining if the tooltip itself should detect hover. Default is True.
     :param text_kwargs: a dictionary of variable arguments to pass to the translated text
                         useful when you have multiple translations that need variables inserted
                         in the middle.
@@ -49,6 +50,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         parent_element: Optional[IUIElementInterface] = None,
         object_id: Optional[Union[ObjectID, str]] = None,
         anchors: Optional[Dict[str, Union[str, IUIElementInterface]]] = None,
+        can_detect_hover: Optional[bool] = True,
         *,
         wrap_width: Optional[int] = None,
         text_kwargs: Optional[Dict[str, str]] = None,
@@ -69,6 +71,7 @@ class UITooltip(UIElement, IUITooltipInterface):
         )
 
         self.text_block: Optional[UITextBox] = None
+        self.can_detect_hover = can_detect_hover
         self.rect_width: Optional[int] = None
         self.hover_distance_from_target = hover_distance
 
@@ -250,3 +253,11 @@ class UITooltip(UIElement, IUITooltipInterface):
         warnings.warn(
             "Use of show() and hide() methods of UIToolTip objects is not supported."
         )
+
+    def can_hover(self) -> bool:
+        """
+        Called to test if this method can be hovered. Abides by the tooltip's `self.can_detect_hover`.
+        """
+        is_alive = super().can_hover()
+
+        return self.can_detect_hover and is_alive
