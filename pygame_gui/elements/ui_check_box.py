@@ -76,6 +76,19 @@ class UICheckBox(UIElement):
             else pygame.Rect(relative_rect, (20, 20))  # Default 20x20 size
         )
 
+        # Validate inputs
+        if not isinstance(text, str):
+            raise ValueError("Checkbox text must be a string")
+        if not isinstance(initial_state, bool):
+            raise ValueError("Initial state must be a boolean")
+
+        self.text = text
+        self.is_checked = initial_state
+        self.is_indeterminate = False  # New indeterminate state
+        self.is_focused = False
+        self.hovered = False
+        self.text_label = None  # Initialize to None
+
         super().__init__(
             rel_rect,
             manager,
@@ -89,18 +102,6 @@ class UICheckBox(UIElement):
             element_id=["check_box"],
         )
 
-        # Validate inputs
-        if not isinstance(text, str):
-            raise ValueError("Checkbox text must be a string")
-        if not isinstance(initial_state, bool):
-            raise ValueError("Initial state must be a boolean")
-
-        self.text = text
-        self.is_checked = initial_state
-        self.is_indeterminate = False  # New indeterminate state
-        self.is_focused = False
-        self.hovered = False
-        self.text_label = None  # Initialize to None
 
         # Set up tooltip support
         self.set_tooltip(tool_tip_text, tool_tip_object_id, tool_tip_text_kwargs)
