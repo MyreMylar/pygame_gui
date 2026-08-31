@@ -87,7 +87,7 @@ class UICheckBox(UIElement):
         self.is_indeterminate = False  # New indeterminate state
         self.is_focused = False
         self.hovered = False
-        self.text_label = None  # Initialize to None
+        self.text_label: Optional[UILabel] = None  # Initialize to None
 
         super().__init__(
             rel_rect,
