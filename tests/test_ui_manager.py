@@ -1,5 +1,7 @@
 import os
 import platform
+
+import i18n
 import pygame
 import pytest
 
@@ -483,10 +485,33 @@ class TestUIManager:
             pygame.SYSTEM_CURSOR_IBEAM
         )
 
-    def test_translation_dir_path(self):
+    def test_translation_dir_path(self, _clear_translations):
         UIManager(
             (800, 600), translation_directory_paths=["pygame_gui/data/translations/"]
         )
+
+        assert i18n.get('file_format') == 'json'
+        assert i18n.t('pygame-gui.Confirm') == 'Confirm'
+
+    def test_translation_from_json(self, _clear_translations):
+        UIManager(
+            (800, 600),
+            translation_directory_paths=["pygame_gui/data/translations/"],
+            translation_file_format='json'
+        )
+
+        assert i18n.get('file_format') == 'json'
+        assert i18n.t('pygame-gui.Confirm') == 'Confirm'
+
+    def test_translation_from_yaml(self, _clear_translations):
+        UIManager(
+            (800, 600),
+            translation_directory_paths=["pygame_gui/data/translations/"],
+            translation_file_format='yaml'
+        )
+
+        assert i18n.get('file_format') == 'yaml'
+        assert i18n.t('pygame-gui.Confirm') == 'Confirm'
 
     def test_incremental_loading_something(
         self, _init_pygame, _display_surface_return_none

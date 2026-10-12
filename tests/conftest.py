@@ -1,4 +1,5 @@
 # import os
+import i18n.translations
 import pygame
 import pytest
 from pygame_gui.ui_manager import UIManager
@@ -30,3 +31,8 @@ def _display_surface_return_none():
     pygame.display.set_mode((800, 600))
     yield None
     pygame.display.quit()
+
+
+@pytest.fixture()
+def _clear_translations() -> None:
+    i18n.translations.container.clear()
