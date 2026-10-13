@@ -72,29 +72,50 @@ Providing custom translation files to the GUI
 ---------------------------------------------
 
 What if you have your own text in your application that you want to translate into a few different languages? For that
-you can supply your own json translation file directories to the UI Manager. The files should be in the same format as
-the default translation files above. Here is a quick example of one from the examples:
+you can supply your own translation file directories to the UI Manager. The files should be in the same format as
+the default translation files above. JSON is the default file format but if you have `PyYAML <https://github.com/yaml/pyyaml>`_
+installed you can also load translations from yaml files. Just keep in mind that you need to stick to one format.
+Here is a quick example of one from the examples and the yaml equivalent:
 
-.. code-block:: json
-   :caption: examples.fr.json
-   :linenos:
+.. tab:: examples.fr.json
 
-   {
-     "fr": {
-       "holmes_text_test": "<p>&nbsp;&nbsp;&nbsp;Ce matin-là, M. Sherlock Holmes qui, sauf les cas assez fréquents où il passait les nuits, se levait tard, était assis devant la table de la salle à manger. Je me tenais près de la cheminée, examinant la canne que notre visiteur de la veille avait oubliée. C’était un joli bâton, solide, terminé par une boule — ce qu’on est convenu d'appeler « une permission de minuit ». Immédiatement au-dessous de la pomme, un cercle d’or, large de deux centimètres, portait l’inscription et la date suivantes : « À M. James Mortimer, ses amis du C. C. H. — 1884 ». Cette canne, digne, grave, rassurante, ressemblait à celles dont se servent les médecins « vieux jeu ».</p>",
-       "hello_world_message_text": "Bonjour le monde"
-     }
-   }
+   .. code-block:: json
+
+      {
+        "fr": {
+          "holmes_text_test": "<p>&nbsp;&nbsp;&nbsp;Ce matin-là, M. Sherlock Holmes qui, sauf les cas assez fréquents où il passait les nuits, se levait tard, était assis devant la table de la salle à manger. Je me tenais près de la cheminée, examinant la canne que notre visiteur de la veille avait oubliée. C’était un joli bâton, solide, terminé par une boule — ce qu’on est convenu d'appeler « une permission de minuit ». Immédiatement au-dessous de la pomme, un cercle d’or, large de deux centimètres, portait l’inscription et la date suivantes : « À M. James Mortimer, ses amis du C. C. H. — 1884 ». Cette canne, digne, grave, rassurante, ressemblait à celles dont se servent les médecins « vieux jeu ».</p>",
+          "hello_world_message_text": "Bonjour le monde"
+        }
+      }
+.. tab:: examples.fr.yaml
+
+   .. code-block:: yaml
+
+      fr:
+        holmes_text_test: '<p>&nbsp;&nbsp;&nbsp;Ce matin-là, M. Sherlock Holmes qui, sauf les cas assez fréquents où il passait les nuits, se levait tard, était assis devant la table de la salle à manger. Je me tenais près de la cheminée, examinant la canne que notre visiteur de la veille avait oubliée. C’était un joli bâton, solide, terminé par une boule — ce qu’on est convenu d''appeler « une permission de minuit ». Immédiatement au-dessous de la pomme, un cercle d’or, large de deux centimètres, portait l’inscription et la date suivantes : « À M. James Mortimer, ses amis du C. C. H. — 1884 ». Cette canne, digne, grave, rassurante, ressemblait à celles dont se servent les médecins « vieux jeu ».</p>'
+        hello_world_message_text: Bonjour le monde
 
 Once you have your strings translated into the languages you want to support, you pass the directory they are in to the
 UIManager like so:
 
-.. code-block:: python
-   :linenos:
+.. tab:: Using the default file format (json)
 
-   manager = UIManager((800, 600),
-                       starting_language='en',
-                       translation_directory_paths=['data/translations'])
+   .. code-block:: python
+
+      manager = UIManager((800, 600),
+                          starting_language='en',
+                          translation_directory_paths=['data/translations'])
+.. tab:: Loading translations from yaml
+
+   .. code-block:: python
+
+      # IMPORTANT
+      # if you do NOT want to use the default file format
+      # you need to set the translation_file_format explicitly every time you create an instance of UIManager!
+      manager = UIManager((800, 600),
+                        starting_language='en',
+                        translation_directory_paths=['data/translations'],
+                        translation_file_format='yaml')
 
 Then for the strings in your GUI, you use the 'namespace' from the filenames ('examples' in the json file above),
 followed by the keys for each string separated with a full stop. Like so:
