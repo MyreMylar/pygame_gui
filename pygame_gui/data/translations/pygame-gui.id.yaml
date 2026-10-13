@@ -1,0 +1,37 @@
+id:
+  Confirm: Konfirmasi
+  OK: Oke
+  Cancel: Batalkan
+  Dismiss: Abaikan
+  Arabic: Arab
+  German: Jerman
+  English: Inggris
+  Spanish: Spanyol
+  French: Perancis
+  Georgian: Georgia
+  Hebrew: Ibrani
+  Indonesian: Indonesia
+  Italian: Italia
+  Japanese: Jepang
+  Korean: Korea
+  Polish: Polandia
+  Portuguese: Portugis
+  Russian: Rusia
+  Ukrainian: Ukraina
+  Vietnamese: Vietnam
+  Chinese: Cina
+  colour_picker_title_bar: Pemilih warna
+  Saturation_S: 'S:'
+  Value_V: 'V:'
+  Hue_H: 'H:'
+  Red_R: 'R:'
+  Green_G: 'G:'
+  Blue_B: 'B:'
+  console_title_bar: Konsol
+  message_window_title_bar: Pesan
+  file_dialog_title_bar: Dialog file
+  Home_directory: Direktori beranda
+  Delete: Hapus
+  Parent_directory: Direktori induk
+  Refresh_directory: Load ulang direktori
+  Delete_filename: Inginkah %{file_name} dihapus?

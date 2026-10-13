@@ -52,6 +52,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
+    'sphinx_inline_tabs',
     'sphinx_rtd_theme',
 ]
 

@@ -1,0 +1,37 @@
+ru:
+  Confirm: Подтвердить
+  OK: ОК
+  Cancel: Отмена
+  Dismiss: Отклонить
+  Arabic: арабский язык
+  German: Немецкий
+  English: Английский
+  Spanish: Испанский
+  French: Французский
+  Georgian: грузинский
+  Hebrew: иврит
+  Indonesian: Индонезийский
+  Italian: Итальянский
+  Japanese: Японский
+  Korean: Корейский
+  Polish: Польский
+  Portuguese: Португальский
+  Russian: Русский
+  Ukrainian: украинец
+  Vietnamese: Вьетнамский
+  Chinese: Китайский
+  colour_picker_title_bar: Палитра цветов
+  Saturation_S: 'н:'
+  Value_V: 'я:'
+  Hue_H: 'о:'
+  Red_R: 'к:'
+  Green_G: 'з:'
+  Blue_B: 'с:'
+  console_title_bar: Консоль
+  message_window_title_bar: Сообщение
+  file_dialog_title_bar: Диалог выбора файла
+  Home_directory: Домашний каталог
+  Delete: Удалить
+  Parent_directory: Родительский каталог
+  Refresh_directory: Обновить каталог
+  Delete_filename: Удалить %{file_name} ?

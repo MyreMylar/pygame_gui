@@ -2,4 +2,5 @@ pygame-ce
 python-i18n
 importlib_resources
 typing_extensions
+sphinx-inline-tabs
 sphinx-rtd-theme

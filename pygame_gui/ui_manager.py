@@ -148,6 +148,8 @@ class UIManager(IUIManagerInterface):
     :param resource_loader: Optional custom resource loader. If None, uses default BlockingThreadedResourceLoader.
     :param starting_language: The initial language code for UI text (default: "en").
     :param translation_directory_paths: Optional list of paths to translation files.
+    :param translation_file_format: file format to load translations from, should be "json" or "yaml",
+    defaults to "json", must be the same for all UIManagers (set globally by python-i18n)
     """
 
     def __init__(
@@ -160,6 +162,7 @@ class UIManager(IUIManagerInterface):
         resource_loader: Optional[IResourceLoader] = None,
         starting_language: str = "en",
         translation_directory_paths: Optional[List[str]] = None,
+        translation_file_format: Optional[str] = None,
     ):
         super().__init__()
         if get_default_manager() is None:
@@ -170,7 +173,14 @@ class UIManager(IUIManagerInterface):
         translations_path = os.path.normpath(
             os.path.join(root_path, "pygame_gui/data/translations/")
         )
-        i18n.set("file_format", "json")
+
+        if translation_file_format is None:
+            i18n.set("file_format", "json")
+        elif translation_file_format in {"yaml", "json"}:
+            i18n.set("file_format", translation_file_format)
+        else:
+            raise ValueError(f"Invalid translation_file_format '{translation_file_format}' provided!")
+
         i18n.load_path.append(translations_path)
         if translation_directory_paths is not None:
             for path in translation_directory_paths:
