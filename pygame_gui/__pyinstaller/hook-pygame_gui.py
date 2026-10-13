@@ -2,7 +2,6 @@
 import os
 import pathlib
 
-
 # Get data folder
 pygame_gui_folder = os.path.dirname(pathlib.Path(__file__).parent.absolute())
 
@@ -17,7 +16,9 @@ def _append_to_datas(file_path):
         datas.append((res_path, "pygame_gui/data"))
 
 
-def _append_translations_to_datas(file_path):
+def _append_translations_to_datas(file_path: str):
+    if file_path.endswith(".json"):
+        _append_translations_to_datas(file_path.replace(".json", ".yaml"))
     res_path = os.path.join(pygame_gui_folder, file_path)
     if os.path.exists(res_path):
         datas.append((res_path, "pygame_gui/data/translations"))

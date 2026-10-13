@@ -1,0 +1,37 @@
+vi:
+  Confirm: Xác nhận
+  OK: OK
+  Cancel: Hủy
+  Dismiss: Bỏ qua
+  Arabic: Tiếng Ả Rập
+  German: Tiếng Đức
+  English: Tiếng Anh
+  Spanish: Tiếng Tây Ban Nha
+  French: Tiếng Pháp
+  Georgian: Tiếng Gruzia
+  Hebrew: ngôn ngữ Hy bá lai
+  Indonesian: Tiếng Indonesia
+  Italian: Tiếng Ý
+  Japanese: Tiếng Nhật
+  Korean: Hàn Quốc
+  Polish: Tiếng Ba Lan
+  Portuguese: Tiếng Bồ Đào Nha
+  Russian: Tiếng Nga
+  Ukrainian: Tiếng Ukraina
+  Vietnamese: Tiếng Việt
+  Chinese: Tiếng Trung Quốc
+  colour_picker_title_bar: Trình chọn màu
+  Saturation_S: 'S:'
+  Value_V: 'V:'
+  Hue_H: 'H:'
+  Red_R: 'R:'
+  Green_G: 'G:'
+  Blue_B: 'B:'
+  console_title_bar: Console
+  message_window_title_bar: Tin nhắn
+  file_dialog_title_bar: Trình chọn tệp
+  Home_directory: Thư mục Home
+  Delete: Xóa
+  Parent_directory: Thư mục cha
+  Refresh_directory: Tải lại thư mục
+  Delete_filename: Xóa %{file_name} ?

@@ -1,0 +1,37 @@
+zh:
+  Confirm: 确认
+  OK: 确定
+  Cancel: 取消
+  Dismiss: 关闭
+  Arabic: 阿拉伯语
+  German: 德语
+  English: 英语
+  Spanish: 西班牙语
+  French: 法语
+  Georgian: 格鲁吉亚语
+  Hebrew: 希伯来语
+  Indonesian: 印尼语
+  Italian: 意大利语
+  Japanese: 日语
+  Korean: 韩语
+  Polish: 波兰语
+  Portuguese: 葡萄牙语
+  Russian: 俄语
+  Ukrainian: 乌克兰
+  Vietnamese: 越南语
+  Chinese: 中文
+  colour_picker_title_bar: 颜色选择
+  Saturation_S: '饱和度:'
+  Value_V: '明度:'
+  Hue_H: '色相:'
+  Red_R: '红:'
+  Green_G: '绿:'
+  Blue_B: '蓝:'
+  console_title_bar: 控制台
+  message_window_title_bar: 信息
+  file_dialog_title_bar: 文件选择
+  Home_directory: 主目录
+  Delete: 删除
+  Parent_directory: 上级目录
+  Refresh_directory: 刷新目录
+  Delete_filename: 删除 %{file_name} ?

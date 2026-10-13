@@ -1,0 +1,37 @@
+pl:
+  Confirm: Zatwierdź
+  OK: OK
+  Cancel: Anuluj
+  Dismiss: Zamknij
+  Arabic: arabski
+  German: niemiecki
+  English: angielski
+  Spanish: hiszpański
+  French: francuski
+  Georgian: georgiański
+  Hebrew: hebrajski
+  Indonesian: indonezyjski
+  Italian: włoski
+  Japanese: japoński
+  Korean: koreański
+  Polish: polski
+  Portuguese: portugalski
+  Russian: rosyjski
+  Ukrainian: ukraiński
+  Vietnamese: wietnamski
+  Chinese: chiński
+  colour_picker_title_bar: Wybór koloru
+  Saturation_S: 'S:'
+  Value_V: 'V:'
+  Hue_H: 'H:'
+  Red_R: 'R:'
+  Green_G: 'G:'
+  Blue_B: 'B:'
+  console_title_bar: Konsola
+  message_window_title_bar: Komunikat
+  file_dialog_title_bar: Wybór pliku
+  Home_directory: Folder domowy
+  Delete: Usuń
+  Parent_directory: Folder nadrzędny
+  Refresh_directory: Odśwież folder
+  Delete_filename: Usunąć %{file_name} ?
